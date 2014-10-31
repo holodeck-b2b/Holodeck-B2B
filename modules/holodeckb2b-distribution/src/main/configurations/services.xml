@@ -1,0 +1,15 @@
+<serviceGroup>
+<service name="msh">
+  <messageReceivers>
+    <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out"
+                     class="org.holodeckb2b.ebms3.handlers.inflow.CheckForResponse"/>
+  </messageReceivers>
+
+  <operation name="ebms">
+     <messageReceiver 
+         class="org.holodeckb2b.ebms3.handlers.inflow.CheckForResponse"/> 
+  </operation>
+
+  <module ref="holodeckb2b-core" />
+</service>
+</serviceGroup>

@@ -1,0 +1,277 @@
+<module name="holodeckb2b-core" class="org.holodeckb2b.module.HolodeckB2BCore">
+    <!--                                                                 -->             
+    <!--                   Holodeck B2B parameters                       -->             
+    <!--                                                                 -->             
+    
+    <!-- ====================================================================
+    - The name of the JPA persistency unit that should be used to access the
+    - database
+    ===================================================================== -->
+    <parameter name="PersistencyUnit">hb2b-core-derby</parameter>
+    
+    <!-- ====================================================================
+    - During the message processing a host name may be needed, for example 
+    - for generating a message id. Because the host name of the machine 
+    - Holodeck B2B runs on may be for internal use only it is possible to set
+    - an external host name using this parameter.
+    ===================================================================== -->
+    <!-- <parameter name="ExternalHostName"></parameter> -->
+    
+    <!-- ====================================================================
+    
+    ===================================================================== -->
+    <!-- <parameter name="WorkerConfig">conf/workers.xml</parameter> -->
+    
+    <!-- ====================================================================
+    - This parameter sets the directory that should be used for temporarily 
+    - storing data. If it is not set here a "temp" directory is created
+    - in the "repository" directory of the Holodeck B2B install
+    ===================================================================== -->
+    <!-- <parameter name="TempDir"/> -->
+    
+    <!-- ====================================================================
+    - This parameter the default setting whether Errors on Errors should be 
+    - reported to the sender of the faulty error. This setting can be 
+    - overriden in the P-Mode configuration. However the problem that causes 
+    - an error to be in error is often an invalid message reference. In such 
+    - cases the error can not be assigned a P-Mode, so the P-Mode can not 
+    - configure the behaviour and this default setting is used.
+    ===================================================================== -->
+    <parameter name="ReportErrorOnError">false</parameter>
+    
+    <!-- ====================================================================
+    - This parameter the default setting whether Errors on Receipts should be 
+    - reported to the sender of the receipt in error. This setting can be 
+    - overriden in the P-Mode configuration. 
+    ===================================================================== -->
+    <parameter name="ReportErrorOnReceipt">false</parameter>
+    
+    <!--                                                                 -->             
+    <!--                   Holodeck B2B Handlers                         -->             
+    <!--                                                                 -->             
+    
+    <InFlow>
+        <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
+            <order phase="ebms3InPhase" phaseFirst="true"/>      
+        </handler>
+        <handler name="ReadUserMessage" class="org.holodeckb2b.ebms3.handlers.inflow.ReadUserMessage">
+            <order phase="ebms3InPhase" after="ReportHeaderProcessed"/>      
+        </handler>
+        <handler name="FindPModeForUsrMsg" class="org.holodeckb2b.ebms3.handlers.inflow.FindPModeForUserMsg">
+            <order phase="ebms3InPhase" after="ReadUserMessage"/>      
+        </handler>
+        <handler name="AS4DeCompression" class="org.holodeckb2b.as4.compression.DecompressionHandler">
+            <order phase="ebms3InPhase" after="FindPModeForUsrMsg"/>      
+        </handler>
+        <handler name="SavePayloads" class="org.holodeckb2b.ebms3.handlers.inflow.SaveUserMsgAttachments">
+            <order phase="ebms3InPhase" after="AS4DeCompression"/>      
+        </handler>
+        <handler name="DuplicateCheck" class="org.holodeckb2b.as4.handlers.inflow.DetectDuplicateUserMessages">
+            <order phase="ebms3InPhase" after="SavePayloads"/>      
+        </handler>
+        <handler name="DeliverUserMessage" class="org.holodeckb2b.ebms3.handlers.inflow.DeliverUserMessage">
+            <order phase="ebms3InPhase" after="DuplicateCheck"/>      
+        </handler>
+        <handler name="CreateReceipt" class="org.holodeckb2b.as4.handlers.inflow.CreateReceipt">
+            <order phase="ebms3InPhase" after="DeliverUserMessage"/>      
+        </handler>
+        
+        <handler name="ReadPullRequest" class="org.holodeckb2b.ebms3.handlers.inflow.ReadPullRequest">
+            <order phase="ebms3InPhase" after="CreateReceipt"/>      
+        </handler>
+        <handler name="CheckPullRequest" class="org.holodeckb2b.ebms3.handlers.inflow.CheckAndAuthorizePullRequest">
+            <order phase="ebms3InPhase" after="ReadPullRequest"/>
+        </handler>
+        <handler name="RetrievePulledMessage" class="org.holodeckb2b.ebms3.handlers.inflow.GetMessageUnitForPulling">
+            <order phase="ebms3InPhase" after="CheckPullRequest"/>
+        </handler>
+        
+        <handler name="ReadReceipts" class="org.holodeckb2b.ebms3.handlers.inflow.ReadReceipt">
+            <order phase="ebms3InPhase" after="RetrievePulledMessage"/>
+        </handler>
+        <handler name="ProcessReceipts" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessReceipts">
+            <order phase="ebms3InPhase" after="ReadReceipts"/>
+        </handler>
+        <handler name="DeliverReceipts" class="org.holodeckb2b.ebms3.handlers.inflow.DeliverReceipts">
+            <order phase="ebms3InPhase" after="ProcessReceipts"/>
+        </handler>
+        
+        <handler name="ReadErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ReadError">
+            <order phase="ebms3InPhase" after="ProcessReceipts"/>
+        </handler>
+        <handler name="ProcessErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessErrors">
+            <order phase="ebms3InPhase" after="ReadErrors"/>
+        </handler>
+        <handler name="DeliverErrors" class="org.holodeckb2b.ebms3.handlers.inflow.DeliverErrors">
+            <order phase="ebms3InPhase" after="ProcessErrors"/>
+        </handler>
+        
+        <handler name="ProcessGeneratedErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessGeneratedErrors">
+            <order phase="ebms3InPhase" after="DeliverErrors"/>
+        </handler>
+    </InFlow>
+    
+    <InFaultFlow>
+        <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
+            <order phase="ebms3InPhase" phaseFirst="true"/>      
+        </handler>
+        <handler name="ReadUserMessage" class="org.holodeckb2b.ebms3.handlers.inflow.ReadUserMessage">
+            <order phase="ebms3InPhase" after="ReportHeaderProcessed"/>      
+        </handler>
+        <handler name="FindPModeForUsrMsg" class="org.holodeckb2b.ebms3.handlers.inflow.FindPModeForUserMsg">
+            <order phase="ebms3InPhase" after="ReadUserMessage"/>      
+        </handler>
+        <handler name="AS4DeCompression" class="org.holodeckb2b.as4.compression.DecompressionHandler">
+            <order phase="ebms3InPhase" after="FindPModeForUsrMsg"/>      
+        </handler>
+        <handler name="SavePayloads" class="org.holodeckb2b.ebms3.handlers.inflow.SaveUserMsgAttachments">
+            <order phase="ebms3InPhase" after="AS4DeCompression"/>      
+        </handler>
+        <handler name="DuplicateCheck" class="org.holodeckb2b.as4.handlers.inflow.DetectDuplicateUserMessages">
+            <order phase="ebms3InPhase" after="SavePayloads"/>      
+        </handler>
+        <handler name="DeliverUserMessage" class="org.holodeckb2b.ebms3.handlers.inflow.DeliverUserMessage">
+            <order phase="ebms3InPhase" after="DuplicateCheck"/>      
+        </handler>
+        <handler name="CreateReceipt" class="org.holodeckb2b.as4.handlers.inflow.CreateReceipt">
+            <order phase="ebms3InPhase" after="DeliverUserMessage"/>      
+        </handler>
+        
+        <handler name="ReadPullRequest" class="org.holodeckb2b.ebms3.handlers.inflow.ReadPullRequest">
+            <order phase="ebms3InPhase" after="CreateReceipt"/>      
+        </handler>
+        <handler name="CheckPullRequest" class="org.holodeckb2b.ebms3.handlers.inflow.CheckAndAuthorizePullRequest">
+            <order phase="ebms3InPhase" after="ReadPullRequest"/>
+        </handler>
+        <handler name="RetrievePulledMessage" class="org.holodeckb2b.ebms3.handlers.inflow.GetMessageUnitForPulling">
+            <order phase="ebms3InPhase" after="CheckPullRequest"/>
+        </handler>
+        
+        <handler name="ReadReceipts" class="org.holodeckb2b.ebms3.handlers.inflow.ReadReceipt">
+            <order phase="ebms3InPhase" after="RetrievePulledMessage"/>
+        </handler>
+        <handler name="ProcessReceipts" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessReceipts">
+            <order phase="ebms3InPhase" after="ReadReceipts"/>
+        </handler>
+        <handler name="DeliverReceipts" class="org.holodeckb2b.ebms3.handlers.inflow.DeliverReceipts">
+            <order phase="ebms3InPhase" after="ProcessReceipts"/>
+        </handler>
+        
+        <handler name="ReadErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ReadError">
+            <order phase="ebms3InPhase" after="ProcessReceipts"/>
+        </handler>
+        <handler name="ProcessErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessErrors">
+            <order phase="ebms3InPhase" after="ReadErrors"/>
+        </handler>
+        <handler name="DeliverErrors" class="org.holodeckb2b.ebms3.handlers.inflow.DeliverErrors">
+            <order phase="ebms3InPhase" after="ProcessErrors"/>
+        </handler>
+        
+        <handler name="ProcessGeneratedErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessGeneratedErrors">
+            <order phase="ebms3InPhase" after="DeliverErrors"/>
+        </handler>
+    </InFaultFlow>
+  
+    <OutFlow>
+        <handler name="PrepareResponseMessage" 
+           class="org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage">
+            <order phase="ebms3OutPhase" phaseFirst="true"/>
+        </handler>
+        <handler name="BundleErrorMessages" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.AddErrorSignals">
+            <order phase="ebms3OutPhase" after="PrepareResponseMessage" />
+        </handler>
+        <handler name="BundleReceiptMessages" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.AddReceiptSignals">
+            <order phase="ebms3OutPhase" after="BundleErrorMessages" />
+        </handler>
+        <handler name="CreateSOAPEnvelope" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.CreateSOAPEnvelopeHandler">
+            <order phase="ebms3OutPhase" after="BundleReceiptMessages"/>
+        </handler>
+        <handler name="AddPayloads" 
+           class="org.holodeckb2b.ebms3.handlers.outflow.AddPayloads">
+            <order phase="ebms3OutPhase" after="CreateSOAPEnvelope"/>
+        </handler>
+        <handler name="AS4Compression" class="org.holodeckb2b.as4.compression.CompressionHandler">
+            <order phase="ebms3OutPhase" after="AddPayloads"/>
+        </handler>
+        <handler name="PackageUserMessage" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.PackageUsermessageInfo">
+            <order phase="ebms3OutPhase" after="AS4Compression"/>
+        </handler>
+        <handler name="PackageErrorSignals" 
+           class="org.holodeckb2b.ebms3.handlers.outflow.PackageErrorSignals">
+            <order phase="ebms3OutPhase" after="AS4Compression"/>
+        </handler>
+        <handler name="PackageReceipt" 
+           class="org.holodeckb2b.ebms3.handlers.outflow.PackageReceiptSignal">
+            <order phase="ebms3OutPhase" after="PackageErrorSignals"/>
+        </handler>
+        <handler name="PackagePullRequest" 
+           class="org.holodeckb2b.ebms3.handlers.outflow.PackagePullRequestSignal">
+            <order phase="ebms3OutPhase" after="PackageReceipt"/>
+        </handler>
+        <handler name="ConfigureHTTP" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler">
+            <order phase="MessageOut" />
+        </handler>
+        <handler name="CheckSentResult" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.CheckSentResult">
+            <order phase="MessageOut" after="ConfigureHTTP" />
+        </handler>        
+    </OutFlow>
+    
+
+    <OutFaultFlow>
+        <handler name="PrepareResponseMessage" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage">
+            <order phase="ebms3OutPhase" phaseFirst="true"/>
+        </handler>
+        <handler name="BundleErrorMessages" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.AddErrorSignals">
+            <order phase="ebms3OutPhase" after="PrepareResponseMessage" />
+        </handler>
+        <handler name="BundleReceiptMessages" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.AddReceiptSignals">
+            <order phase="ebms3OutPhase" after="BundleErrorMessages" />
+        </handler>
+        <handler name="CreateSOAPEnvelope" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.CreateSOAPEnvelopeHandler">
+            <order phase="ebms3OutPhase" after="BundleReceiptMessages"/>
+        </handler>
+        <handler name="AddPayloads" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.AddPayloads">
+            <order phase="ebms3OutPhase" after="CreateSOAPEnvelope"/>
+        </handler>
+        <handler name="AS4Compression" class="org.holodeckb2b.as4.compression.CompressionHandler">
+            <order phase="ebms3OutPhase" after="AddPayloads"/>
+        </handler>
+        <handler name="PackageUserMessage" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.PackageUsermessageInfo">
+            <order phase="ebms3OutPhase" after="AS4Compression"/>
+        </handler>
+        <handler name="PackageErrorSignals" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.PackageErrorSignals">
+            <order phase="ebms3OutPhase" after="AS4Compression"/>
+        </handler>
+        <handler name="PackageReceipt" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.PackageReceiptSignal">
+            <order phase="ebms3OutPhase" after="PackageErrorSignals"/>
+        </handler>
+        <handler name="PackagePullRequest" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.PackagePullRequestSignal">
+            <order phase="ebms3OutPhase" after="PackageReceipt"/>
+        </handler>
+        <handler name="ConfigureHTTP" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler">
+            <order phase="MessageOut" />
+        </handler>
+        <handler name="CheckSentResult" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.CheckSentResult">
+            <order phase="MessageOut" after="ConfigureHTTP" />
+        </handler>        
+        
+    </OutFaultFlow>
+    
+</module>

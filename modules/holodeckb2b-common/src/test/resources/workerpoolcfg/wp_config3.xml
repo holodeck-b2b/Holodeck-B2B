@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workers xmlns="http://www.holodeck-b2b.org/2012/12/workers"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.holodeck-b2b.org/2012/12/workers file:/Users/safi/Development/holodeck-b2b-1.1-b/config/workers.xsd">
+    <worker name="name1" activate="false" workerClass="workerClass1">
+    </worker>
+
+</workers>

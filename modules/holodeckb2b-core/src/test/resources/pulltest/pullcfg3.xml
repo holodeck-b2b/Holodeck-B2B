@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Pull configuration for testing
+
+Invalid configuration as the specific puller does not specify P-Mode.
+-->
+<pulling xmlns="http://holodeck-b2b.org/schemas/2014/05/pullconfiguration"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2014/05/pullconfiguration file:/Users/safi/Development/NetbeansProjects/holodeck-b2b/modules/holodeck-ebms3/src/main/resources/xsd/pullingconfig.xsd">
+    <default interval="261196587"/>
+    <pull interval="1413548167">
+        <pmodes/>
+    </pull>
+
+</pulling>

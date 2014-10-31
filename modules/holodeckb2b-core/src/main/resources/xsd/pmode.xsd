@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
+    
+    This file is part of Holodeck B2B.
+
+    Holodeck B2B is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Holodeck B2B is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Holodeck B2B. If not, see <http://www.gnu.org/licenses/>.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    targetNamespace="http://holodeck-b2b.org/schemas/2014/06/pmode"
+    attributeFormDefault="unqualified" xmlns:tns="http://holodeck-b2b.org/schemas/2014/06/pmode">
+    <xs:annotation>
+        <xs:documentation>This schema defines an XML structure for the representation of a P-Mode as defined in the ebMS V3 Core Specification. It is used by the default implementation of the P-Mode set interface (org.holodeckb2b.common.pmode.IPModeSet). In this implementation the P-Mode set consists of all XML documents in a directory conforming to this schema. See org.holodeckb2b.pmode.impl.PModeWatcher for more info. </xs:documentation>
+    </xs:annotation>
+    <xs:element name="PMode" type="tns:PMode">
+        <xs:annotation>
+            <xs:documentation>The P-Mode includes both settings for how to handle a message and how to fill the message header. Holodeck B2B however does not require that all settings for the message header content are defined in the P-Mode document. It is allowed to partly specify in the P-Mode which values to use. In such case the submitting application must ensure that all remaining information items are supplied so a complete message can be constructed. It is RECOMMENDED to include at least the initiator or responder of the exchange and information about the user message. </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:complexType name="PMode">
+        <xs:sequence>
+            <xs:element name="id">
+                <xs:annotation>
+                    <xs:documentation>The REQUIRED identifier of this P-Mode. The P-Mode identifier is however defined as optional in the ebMS v3 Core Specification and including it in the message header may cause problems in the receiving MSH. Therefor the inclusion of the id in the message header is optional using the include attribute. When this attribute has value "false" the P-Mode id will not be included in the message header. The default value is "true".   
+NOTE: As the P-Mode id is included in the message as part of the agreement reference, including the P-Mode id requires the specification of an agreement reference either in the P-Mode or when the message is submitted.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="tns:non-empty-string">
+                            <xs:attribute default="true" name="include" type="xs:boolean"/>
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="mep">
+                <xs:annotation>
+                    <xs:documentation>This element describes the message exchange pattern (MEP) this P-Mode uses. These are specified in section 2.2 of the ebMS V3 Core Specification. The MEP must be specified using the URI values given in the specification, see enumeration for allowed values. </xs:documentation>
+                    <xs:documentation>NOTE: The current version of Holodeck B2B only allows One-Way MEPs so there is just one value.</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="tns:non-empty-string">
+                        <xs:enumeration
+                            value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"
+                        />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="mepBinding">
+                <xs:annotation>
+                    <xs:documentation>Describes the transport channel binding for the specified MEP as defined in section 2.2 of the ebMS V3 Core Specification. The enumeration specifies the allowed values. Based on this elements value Holodeck B2B decides how to handle a submitted user message, i.e. actively send it to the receiver (push binding) or wait for the receiver to retrieve the message (pull binding).</xs:documentation>
+                    <xs:documentation>NOTE: The current version of Holodeck B2B only allows One-Way MEPs so there is just two values for Push and Pull binding.</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="tns:non-empty-string">
+                        <xs:enumeration
+                            value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
+                        <xs:enumeration
+                            value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pull"
+                        />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="Initiator" type="tns:TradingPartner" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>This element includes the information on the initiator of the MEP, i.e. the partner that sends the first message. Note that this is not always the sender of the user message because in the pull scenario the first message (the PullRequest) is sent by the partner that will receive the user message. See website and/or chapter 2 of the ebMS V3 Core Specification for more info.
+
+When included the element must contain one or more party ids that identify the trading partner and the business role the partner is acting in. 
+
+NOTE: This element is optional in the P-Mode. When not specified the information must be specified when a user message is submitted to Holodeck B2B. Attention should be paid to the fact that the meta-data on submission is expressed in sender and receiver roles which may not be equal to initiator and responder.
+
+</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Responder" type="tns:TradingPartner" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>This element includes the information on the responder of the MEP.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="1" name="Agreement" type="tns:Agreement" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>This element contains the identification of the business level agreement between the trading partners. This agreement does not define how message should be processed and is therefor optional. 
+
+However the P-Mode id is included in the message header as part of the agreement reference and therefor the information is required when the P-Mode id should be included. 
+It is therefor RECOMMENDED to include the agreement info when the include attribute has value "true". If not included in the P-Mode the submission of a user message must contain the agreement info.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="1" name="Leg" type="tns:Leg">
+                <xs:annotation>
+                    <xs:documentation>Leg contains the configuration settings for one leg of the P-Mode, i.e. the exchange of one user message. See section 2 of the ebMS Core Specification for more information on the messaging model and concept of legs.
+
+All child elements are optional because it is not known upfront which information is needed for a specific P-Mode and which information will be provided when a message is submitted. It is however RECOMMENDED to provide the UserMessageFlow element to define which user messages can be exchanged using this P-Mode.
+</xs:documentation>
+                    <xs:documentation>NOTE: As Holodeck B2B currently only supports One-Way MEPs there can be just one Leg element.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="TradingPartner">
+        <xs:sequence>
+            <xs:element maxOccurs="unbounded" name="PartyId" type="tns:PartyId"/>
+            <xs:element minOccurs="1" name="Role" type="tns:non-empty-string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="PartyId">
+        <xs:simpleContent>
+            <xs:extension base="tns:non-empty-string">
+                <xs:attribute name="type" type="tns:non-empty-string"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="Agreement">
+        <xs:sequence>
+            <xs:element name="type" type="xs:string" minOccurs="0"/>
+            <xs:element name="name" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="Leg">
+        <xs:sequence>
+            <xs:element name="Protocol" minOccurs="0" type="tns:Protocol">
+                <xs:annotation>
+                    <xs:documentation>The Protocol element contains the configuration for the underlying transport protocol. When Holodeck B2B acts as the Initiator of the leg, i.e. sends the first message, the Address element MUST appear and contain the URL of the partner MSH. The other elements are all optional and the specified default values will be used when ommitted.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" name="Receipt" type="tns:ReceiptType">
+                <xs:annotation>
+                    <xs:documentation>This element indicates whether Receipts are used on this leg and contains the configuration for Receipt processing. The existence of the element represents P-Mode parameter PMode.Security.SendReceipt, i.e. if the element exists Holodeck B2B assumes Receipts should be sent. 
+
+The configuration depends on whether Holodeck B2B is acting in the sending or receiving role. 
+When acting as the receiver the ReplyPattern and To child elements define how a Receipt signal must be sent back to the sender of the user message. 
+When acting as the sender the NotifyReceiptToBusinessApplication and ReceiptDelivery elements define whether and how received Receipts should be notified to the producing business application. </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" name="ReceptionAwareness" type="tns:ReceptionAwareness">
+                <xs:annotation>
+                    <xs:documentation>The ReceptionAwareness element is used for configuration of the Reception Awareness Feature specified in section 3.2 of the AS4 profile. As this feature depends on the use of Receipts the Receipt element MUST also be included in the P-Mode document when this element is included.
+
+The AS4 profile defines five additional P-Mode parameters for the reception awareness feature. Holodeck B2B uses only three parameters as some of the P-Mode parameters from the spec are combined.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="DefaultDelivery" type="tns:DeliverySpecification" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>With this element the delivery of received messages is configured. This element MUST be included when Holodeck B2B is the receiver of user messages on this leg. 
+If Holodeck B2B only sends messages on this leg the element may be ommited. If however the business application should be notified on errors or receipts it may be usefull to define one default delivery method instead of specifying it for errors and receipts separately.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="PullRequestFlow" minOccurs="0" type="tns:PullRequestFlowType"
+                maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>This element configures the processing of the PullRequest and MUST be included at least once when the leg uses pulling. 
+When Holodeck B2B acts as the responder to the pull requests the element can be included multiple times to configure sub channels that can be pulled. Each instance represents one sub channel that MUST be identified by the BusinessInfo/Mpc element. There should be at most one PullRequestFlow element when Holodeck B2B is the sender of the PullRequest. 
+For more information on sub channnels see section 3.5 of the AS4 profile.
+
+When sub channelling is not used the MPC it is still RECOMMENDED to use the BusinessInfo/Mpc element to indicate the used MPC. If the MPC is not specified in the PullRequestFlow the MPC specified in UserMessageFlow is used and if that is not specified either the default MPC is used.
+
+The error handling configuration only applies to the sender of the PullRequest message and is limited to the indication whether and optionally how received errors on a PullRequest should be notified to the business application. </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="UserMessageFlow" type="tns:Flow" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>This element configures the processing of UserMessages exchanged on this leg. Again all child elements are optional as default values can be used or information can be provided when a user message is submitted. </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="label" use="optional">
+            <xs:annotation>
+                <xs:documentation>This attribute contains the label of the leg as defined in appendix D of the ebMS V3 Core Specification. Labelling legs is only usefull for a Two-Way MEP, so this element is defined as optional.</xs:documentation>
+                <xs:documentation>NOTE: As Holodeck B2B currently only supports One-Way MEPs the value for this attribute is ignored</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="REQUEST"/>
+                    <xs:enumeration value="REPLY"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:complexType>
+    <xs:complexType name="Protocol">
+        <xs:sequence>
+            <xs:element name="Address" type="xs:anyURI" minOccurs="0"/>
+            <xs:element name="SoapVersion" minOccurs="0" default="1.2">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="1.1"/>
+                        <xs:enumeration value="1.2"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="UseChunking" type="xs:boolean" minOccurs="0" default="false">
+                <xs:annotation>
+                    <xs:documentation>Indicates whether the HTTP "chunked" transfer encoding should be used. See section 3.6 of the HTTP/1.1 protocol [RFC2616] for more details.
+When using HTTP compression with the gzip content encoding chunked transfer encoding must be used. Therefor Holodeck B2B will first check whether compression content encoding must be used an ignore the "chunked" setting. </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="UseHTTPCompression" type="xs:boolean" minOccurs="0" default="false">
+                <xs:annotation>
+                    <xs:documentation>Indicates whether the HTTP "gzip" compression content encoding should be used. See section 3.5 of the HTTP/1.1 protocol [RFC2616] for more details.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="ReceiptType">
+        <xs:choice>
+            <xs:sequence>
+                <xs:element name="ReplyPattern" type="tns:ReplyPatternType">
+                    <xs:annotation>
+                        <xs:documentation>This element represents the PMode.Security.SendReceipt.ReplyPattern parameter and indicates whether the Receipt signal is to be sent as a callback (value "CALLBACK"), or synchronously in the transport back-channel response (value "RESPONSE").</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="To" type="xs:string" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>This element contains the URL where the Receipt signals should be sent to in case the reply pattern is set to "CALLBACK". It MUST be used when this leg uses push. If this leg uses pulling it MAY be omitted in which case the URL from Protocol/Address will be used as destination for the receipt.
+
+NOTE: This P-Mode parameter is not defined in the ebMS V3 Core Specification but defined in Part 2 (see issue https://tools.oasis-open.org/issues/browse/EBXMLMSG-33?jql=project%20%3D%20EBXMLMSG).</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+            </xs:sequence>
+            <xs:sequence>
+                <xs:element name="NotifyReceiptToBusinessApplication" type="xs:boolean">
+                    <xs:annotation>
+                        <xs:documentation>This element indicates whether the business application that submitted an acknowledged user message should be notified about the reception of the Receipt signal.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element minOccurs="0" name="ReceiptDelivery" type="tns:DeliverySpecification">
+                    <xs:annotation>
+                        <xs:documentation>Like the delivery of user message the notification to the business application is done by a message deliverer. With this element a specific delivery method can be configured for the notification of Receipts. If this element is absent the default delivery method of the leg will be used for the delivery of the Receipt. </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+            </xs:sequence>
+        </xs:choice>
+    </xs:complexType>
+    <xs:complexType name="DeliverySpecification">
+        <xs:sequence>
+            <xs:element name="DeliveryMethod" type="tns:non-empty-string">
+                <xs:annotation>
+                    <xs:documentation>Delivery of messages in Holodeck B2B is done by a message deliver, which is a class implementing the org.holodeckb2b.common.delivery.IMessageDeliverer interface. Because it may not be efficient to create a new instance each time a message must be delivered Holodeck B2B uses a factory class to get a deliverer (see the org.holodeckb2b.common.delivery.IMessageDelivererFactory interface). In this element the factory class must be specified.
+To correctly delivere messages to the business application probably the deliverer should be configured. This can be done by specifying the required parameters in the sibling Parameter elements.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="Parameter">
+                <xs:annotation>
+                    <xs:documentation>This element can be used to configure the message deliverer factory to create a correctly configured message deliver.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="name" type="tns:non-empty-string"/>
+                        <xs:element name="value" type="tns:non-empty-string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="Flow">
+        <xs:sequence>
+            <xs:element name="BusinessInfo" type="tns:BusinessInfo" maxOccurs="1" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Contains the business meta data to use in the ebMS header. When acting in the Sending role, the information is used to construct the header. As the information may also be supplied when the message is submitted there are no required elements in the P-Mode. When acting in the Receiving role the information provided here can be used to determine the P-Mode that defines how the message should be processed.</xs:documentation>
+                    <xs:documentation>NOTE: Current Holodeck B2B only uses the P-Mode id in the message header to determine the P-Mode.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" name="ErrorHandling" type="tns:ErrorHandling">
+                <xs:annotation>
+                    <xs:documentation>This element defines how errors related to the user message exchange should be handled.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="PayloadProfile" type="tns:PayloadProfile" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="PullRequestFlowType">
+        <xs:complexContent>
+            <xs:restriction base="tns:Flow">
+                <xs:sequence>
+                    <xs:element name="BusinessInfo" type="tns:PullBusinessInfo" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>The business meta data for a PullRequest is limited to just the MPC that is being pulled. When the sub-channel feature is used and when Holodeck B2B is acting as the responder to a PullRequest the MPCs contained in the PullRequestFlow elements must be sub channels of the same MPC, i.e. have a common base URL.</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="ErrorHandling" type="tns:PullErrorHandling">
+                        <xs:annotation>
+                            <xs:documentation>This element defines how errors related to the PullRequest should be handled. 
+
+The reply pattern is fixed to response as multiple P-Mode may apply to the same PullRequest and the receiver is therefor unable to determine which configuration should be used. As pulling is often used in cases where the puller can not receive request messages a callback would not be usefull.
+
+The NotifyErrorToBusinessApplication specifies whether an error signal received for a PullRequest should be notifed to the business application. The default value is false as in most cases the errors are not of interest to the business application because they do not signal failure of a user message exchange.
+
+When errors should be notified to the business application a specific delivery can be specified using the ErrorDelivery element. If not included in the PullRequestFlow the ErrorDelivery in the UserMessageFlow is first checked and if that is not available the default delivery for the leg is used.</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+            </xs:restriction>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="BusinessInfo">
+        <xs:sequence>
+            <xs:element name="Action" type="tns:non-empty-string" maxOccurs="1" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>This element contains the business level operation/activity requested to be executed. It is represented by the eb:Action element in the ebMS header.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Mpc" type="xs:anyURI" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>This element contains the MPC the user message is exchanged over. It is contained in the mpc attribute of the eb:UserMessage element in the ebMS header.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Service" minOccurs="0" type="tns:Service">
+                <xs:annotation>
+                    <xs:documentation>This element contains the meta-data on the business service that is [supposed] to handle the user message and consist of a service name and optionally type. The information from this element will be used in the eb:Service element in the ebMS header.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="Property" type="tns:Property">
+                <xs:annotation>
+                    <xs:documentation>This element defines a property to include in the set of MessageProperties. </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="PullBusinessInfo">
+        <xs:complexContent>
+            <xs:restriction base="tns:BusinessInfo">
+                <xs:sequence>
+                    <xs:element name="Mpc" type="xs:anyURI" minOccurs="1">
+                        <xs:annotation>
+                            <xs:documentation>The MPC on which the pull operation takes place.</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+            </xs:restriction>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="ErrorHandling">
+        <xs:sequence>
+            <xs:element default="RESPONSE" minOccurs="0" name="ReplyPattern"
+                type="tns:ReplyPatternType">
+                <xs:annotation>
+                    <xs:documentation>Defines how the error should be reported to sender of the message in error. The default is to sent the error directly as a response to the received message or when the message in error is pulled to push the error to the sender (using the URL specified in the Protocol/Address element of this leg). When the error should be reported to a specific URL the reply pattern must be set to "CALLBACK" and the URL must be supplied in the ReceiverErrorsTo element.
+
+Note that this setting is generally only used when Holodeck B2B acts as in the receiving role.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" name="ReceiverErrorsTo" type="tns:non-empty-string">
+                <xs:annotation>
+                    <xs:documentation>This element should contain the URL where generated errors for received messages should be sent to in case the reply pattern is CALLBACK. 
+
+Note that this setting is generally only used when Holodeck B2B acts as in the receiving role.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="ReportErrorOnError" type="xs:boolean" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>This element indicates whether errors that are generated for error messages should be reported back to the sender of the erroneous error message. Overwrites the global setting configured in the Holodeck B2B Core module.xml. Note that this setting can only be applied when the P-Mode can be detected for the erroneous error.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" name="ReportErrorOnReceipt" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>This element indicates whether errors that are generated for receipt messages should be reported back to the sender of the erroneous receipt message. Overwrites the global setting configured in the Holodeck B2B Core module.xml. Note that this setting can only be applied when the P-Mode can be detected for the erroneous receipt.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="NotifyErrorToBusinessApplication" type="xs:boolean" default="false"
+                minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>This element configures whether errors on user messages exchanged on this leg should be notified to the producer business application. 
+
+The notification of errors uses the same delivery mechanism as user messages with a message deliver. If the business application should be notified on errors a specific delivery can be specified in the ErrorDelivery element. </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" name="ErrorDelivery" type="tns:DeliverySpecification">
+                <xs:annotation>
+                    <xs:documentation>This element contains the configuration of the delivery mechanism to use for the notification of errors to the business application. If this element is omitted the default delivery mechanism of the leg will be used for the notification of errors.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="PullErrorHandling">
+        <xs:complexContent>
+            <xs:restriction base="tns:ErrorHandling">
+                <xs:sequence>
+                    <xs:element fixed="RESPONSE" name="ReplyPattern" type="tns:ReplyPatternType"
+                        minOccurs="0"/>
+                    <xs:element name="NotifyErrorToBusinessApplication" type="xs:boolean"
+                        default="false" minOccurs="0"/>
+                    <xs:element minOccurs="0" name="ErrorDelivery" type="tns:DeliverySpecification"
+                    />
+                </xs:sequence>
+            </xs:restriction>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="Service">
+        <xs:sequence>
+            <xs:element name="name" type="tns:non-empty-string"/>
+            <xs:element name="type" type="tns:non-empty-string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="PayloadProfile">
+        <xs:sequence>
+            <xs:element name="maxSizePayload" type="xs:positiveInteger" minOccurs="0"/>
+            <xs:element name="UseAS4Compression" type="xs:boolean" default="false" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>This element specifies whether the AS4 Compression Feature should be used. If enabled all payloads contained as attachment to the SOAP message will be compressed using gzip. The compression is not applied to paylaods contained in the SOAP body or on an external location.
+Although the specification allows implementations not to compress payloads using a file type that is already compressed Holodeck B2B will always compress all attached payloads.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="Property">
+        <xs:sequence>
+            <xs:element name="name" type="tns:non-empty-string"/>
+            <xs:element name="value" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="ReplyPatternType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="RESPONSE"/>
+            <xs:enumeration value="CALLBACK"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="non-empty-string">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="ReceptionAwareness">
+        <xs:choice>
+            <xs:sequence>
+                <xs:element name="MaxRetries" type="xs:int">
+                    <xs:annotation>
+                        <xs:documentation>This element sets the maximum of times a message should be resende if no Receipt is received. Setting this value to zero disables the retry functionality.
+
+When no Receipt is received before the last wait interval expires a MissingReceipt error is generated. This error is always logged by Holodeck B2B but whether the business application will be notified depends on the ?? setting.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="RetryInterval" type="xs:long">
+                    <xs:annotation>
+                        <xs:documentation>This element contains the time interval before a message is resend, i.e. the time to wait for a Receipt.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+            </xs:sequence>
+            <xs:element default="true" minOccurs="0" name="UseDuplicateElimination"
+                type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>Part of the reception awareness feature is duplicate detection and elimination. With this element the detection and elimination of duplicates can be enabled. If set to "true" Holodeck B2B will search all received messages in database to check if the message was received (and delivered) before and stop processing the duplicate if it is. There is no further parameterization.
+</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:choice>
+    </xs:complexType>
+</xs:schema>

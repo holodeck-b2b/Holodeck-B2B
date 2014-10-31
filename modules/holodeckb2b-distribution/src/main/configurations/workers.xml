@@ -1,0 +1,78 @@
+<workers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.holodeck-b2b.org/2012/12/workers ../../../../holodeck-common/src/main/resources/xsd/workers.xsd"
+ xmlns="http://holodeck-b2b.org/2012/12/workers"
+ poolName="holodeckb2b:workers">
+
+    <!-- ==============================================================
+    This worker is responsible for reading the P-Modes from file. It is
+    part of the default implementation for P-Mode configuration that
+    uses XML files to define the P-Modes with one file per P-Mode. For
+    more information about configuring a P-Mode see the XSD that defines 
+    the P-Mode file (<<namespace of PMode xsd here>>). 
+    
+    If you want to have a fixed set of P-Modes set the interval 
+    attribute to 0 (zero) so the P-Modes are read only when Holodeck B2B
+    is started. DO NOT de-activate this worker as it will prevent 
+    Holodeck B2B from starting correctly as P-Modes must be available 
+    to process messages!
+    =============================================================== -->
+    <worker name="pmodeWatcher" interval="20" activate="true"
+        workerClass="org.holodeckb2b.pmode.impl.PModeWatcher">
+        <parameter name="watchPath">conf/pmodes</parameter>
+    <parameter name="extension">xml</parameter>
+    </worker>
+
+    <!-- ==============================================================
+    This worker is responsible for starting the message send process.
+    De-activating this worker will stop message sending!
+    =============================================================== -->
+    <worker name="senderWorker" interval="10" activate="true"
+        workerClass="org.holodeckb2b.ebms3.workers.SenderWorker"/>
+
+    <!-- ==============================================================
+    This worker is responsible for checking whether a user message
+    must be retransmitted because there was no timely Receipt.
+    
+    De-activating this worker will stop the retransmission function
+    and therefore kill the Reception Awareness feature.
+    =============================================================== -->
+    <worker name="retransmissionWorker" interval="10" activate="true"
+        workerClass="org.holodeckb2b.as4.workers.RetransmissionWorker"/>
+
+    <!-- ==============================================================
+    This worker checks the pulling configuration and configure a
+    separate pool of workers responsible for sending the pull requests.
+    See PullWorker, PullConfiguration and PullConfigurationWatcher 
+    classes for more details.  
+    
+    The worker has one parameter that is the path to the file containing
+    the pulling configuration. It is RECOMMENDED to specify it as an 
+    absolute path. 
+    
+    De-activating this worker will disable the pulling feature, i.e.
+    the ability to send out Pull Request signals!
+    =============================================================== -->
+    <worker name="pullConfigWatcher" interval="60" activate="true"
+        workerClass="org.holodeckb2b.ebms3.pulling.PullConfigurationWatcher">
+        <parameter name="watchPath">conf/pulling_configuration.xml</parameter>
+    </worker>
+    
+    <!-- ==============================================================
+    This worker is the default method for submitting messages to 
+    Holodeck B2B. It reads all message meta data documents from the 
+    specified directory and creates the messages for sending. The
+    actual send proces is started by the sender worker defined above.
+    
+    It is RECOMMENDED to specify an absolute path to the directory to
+    watch for meta data documents.
+    
+    The worker will look for all files with ".mmd" extension. After
+    processing the extenction will be changed to ".processed". If an
+    error occurs an new file with the same name but ".error" extension
+    will be written with information about the error.
+    =============================================================== -->
+    <worker name="submitFromFileWorker" interval="10" activate="true"
+        workerClass="org.holodeckb2b.ebms3.workers.SubmitFromFile">
+        <parameter name="watchPath">data/msg_out</parameter>
+    </worker>
+</workers>

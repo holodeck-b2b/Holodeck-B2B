@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Test MMD document containing minimal info 
+NOTE: Not suitable for actual message submission to Holodeck!
+-->
+<MessageMetaData xmlns="http://holodeck-b2b.org/schemas/2014/06/mmd"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2014/06/mmd file:/Users/safi/Development/NetbeansProjects/holodeck-b2b/modules/holodeck-ebms3/src/main/resources/xsd/messagemetadata.xsd">
+    <CollaborationInfo>
+        <ConversationId>q3KuGFmr</ConversationId>
+    </CollaborationInfo>
+    <PayloadInfo>
+        <PartInfo location="http://JUsQVnjp/">
+        </PartInfo>
+        <PartInfo location="http://wNUpefyz/">
+        </PartInfo>
+    </PayloadInfo>
+</MessageMetaData>

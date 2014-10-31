@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
+    
+    This file is part of Holodeck B2B.
+    
+    Holodeck B2B is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Holodeck B2B is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with Holodeck B2B. If not, see <http://www.gnu.org/licenses/>.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    targetNamespace="http://holodeck-b2b.org/schemas/2014/05/pullconfiguration"
+    xmlns="http://holodeck-b2b.org/schemas/2014/05/pullconfiguration">
+    <xs:annotation>
+        <xs:documentation>This XML schema specifies the configuration of the Pull worker pool which contains the worker responsible for executing pull requests. The pool consist of zero or more workers that will execute pull requests for specific P-Modes and a default worker that will handle all other P-Modes requiring pulling.</xs:documentation>
+    </xs:annotation>
+    <xs:element name="pulling">
+        <xs:annotation>
+            <xs:documentation>The pulling configuration contains zero or more worker for pulling specific P-Modes and one default worker. If pulling should be disabled at all the interval of the default pull worker should be set to '0' and no other worker should be defined.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="default" type="defaultPuller">
+                    <xs:annotation>
+                        <xs:documentation>Configuration of the default pull worker. Because the default pull worker will pull for all P-Modes that do not have their own pull worker no specific P-Mode may be specified.
+If all P-Modes that need pulling have their own pull worker the default worker can be disable by specifying '0' as the interval.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="pull" type="specificPuller">
+                    <xs:annotation>
+                        <xs:documentation>Configuration of a pull worker for specific P-Modes. This pmodes element MUST contain at least one pmode child element.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType name="genericPullerType">
+        <xs:sequence minOccurs="0">
+            <xs:element ref="pmodes"/>
+        </xs:sequence>
+        <xs:attribute name="interval" type="xs:unsignedLong" use="required">
+            <xs:annotation>
+                <xs:documentation>The interval in seconds between two pull requests.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+    <xs:element name="pmodes">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" name="pmode">
+                    <xs:complexType>
+                        <xs:attribute name="id" use="required"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType name="defaultPuller">
+        <xs:complexContent>
+            <xs:restriction base="genericPullerType">
+                <xs:sequence maxOccurs="0" minOccurs="0">
+                    <xs:element ref="pmodes"/>
+                </xs:sequence>
+            </xs:restriction>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="specificPuller">
+        <xs:complexContent>
+            <xs:restriction base="genericPullerType">
+                <xs:sequence maxOccurs="1" minOccurs="1">
+                    <xs:element ref="pmodes"/>
+                </xs:sequence>
+            </xs:restriction>
+        </xs:complexContent>
+    </xs:complexType>
+</xs:schema>

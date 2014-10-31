@@ -1,0 +1,121 @@
+<!--
+  This assembly builds the Holodeck B2B all-in-one distribution package.
+  
+  The following parameters need to be defined for this assymbly to work:
+  
+  ${project.version}  (p)   The version of the Holodeck B2B. 
+  
+  ${tomcat-home}      (d)   The directory where the Tomcat base installation
+                            can be found 
+
+  ${axis-home}        (d)   The directory where the Axis 2 expanded WAR can be
+                            found
+                            
+  The properties marked (p) are defined in the pom.xml of the Holodeck parent 
+  project and the ones marked (d) are defined in the distribution module pom.xml
+-->
+<assembly>
+    <id>full</id>
+    <formats>
+        <format>zip</format>
+        <format>dir</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <fileSets>
+        <!-- 
+              (1) Copy Holodeck B2B adapted Axis2 base to target
+
+              This includes the standard Axis2 configuration files adapted for Holodeck B2B
+        -->
+        <fileSet>
+            <directory>src/main/base</directory>
+            <outputDirectory>holodeck-b2b-${project.version}</outputDirectory>
+            <includes>
+                <include>**</include>
+            </includes>
+        </fileSet>
+        
+        <!-- 
+              (2) Copy the Holodeck B2B specific configuration files
+        -->
+        <!-- Copying global configuration -->
+        <fileSet>
+            <directory>src/main/configurations</directory>
+            <outputDirectory>holodeck-b2b-${project.version}/conf</outputDirectory>
+            <includes>
+                <include>pulling_configuration.xml</include>
+                <include>workers.xml</include>
+                <include>log4j.properties</include>
+            </includes>
+        </fileSet>
+        <!-- Persistency configuration -->
+        <fileSet>
+            <directory>src/main/configurations</directory>
+            <outputDirectory>holodeck-b2b-${project.version}/conf/META-INF</outputDirectory>
+            <includes>
+                <include>persistence.xml</include>
+            </includes>
+            <filtered>true</filtered>
+        </fileSet>
+        <!-- Core module configuration -->
+        <fileSet>
+            <directory>src/main/configurations</directory>
+            <outputDirectory>holodeck-b2b-${project.version}/repository/modules/holodeckb2b-core/META-INF</outputDirectory>
+            <includes>
+                <include>module.xml</include>
+            </includes>
+        </fileSet>
+        <!-- Service configuration -->
+        <fileSet>
+            <directory>src/main/configurations</directory>
+            <outputDirectory>holodeck-b2b-${project.version}/repository/services/msh/META-INF</outputDirectory>
+            <includes>
+                <include>services.xml</include>
+            </includes>
+        </fileSet>
+
+        <!-- 
+              (3) Copy the XML schemas that define the used XML document 
+        -->
+        <!-- From common module -->
+        <fileSet>
+            <directory>../holodeckb2b-common/src/main/resources</directory>
+            <outputDirectory>holodeck-b2b-${project.version}/repository</outputDirectory>
+            <includes>
+                <include>**/*.xsd</include>
+            </includes>         
+        </fileSet>
+        <!-- From core module -->
+        <fileSet>
+            <directory>../holodeckb2b-core/src/main/resources</directory>
+            <outputDirectory>holodeck-b2b-${project.version}/repository</outputDirectory>
+            <includes>
+                <include>**/*.xsd</include>
+            </includes>         
+        </fileSet>
+
+    <!-- 
+              (7) Copy the examples 
+    -->
+        <fileSet>
+            <directory>src/main/examples/</directory>
+            <outputDirectory>holodeck-b2b-${project.version}/examples/</outputDirectory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <useDefaultExcludes>true</useDefaultExcludes>
+        </fileSet>
+    </fileSets>
+
+
+    <!-- 
+          (4) Add all required libraries to the lib directory
+    -->
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>holodeck-b2b-${project.version}/lib</outputDirectory>
+        </dependencySet>
+    </dependencySets>
+
+</assembly>
