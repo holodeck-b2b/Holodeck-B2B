@@ -16,8 +16,8 @@
  */
 package org.holodeckb2b.common.util;
 
-import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import org.holodeckb2b.common.config.Config;
 
 /**
@@ -70,9 +70,8 @@ public class MessageIdGenerator {
                 rightPart = "";
             }
                     
-
-            // Add time in milliseconds to left part
-            leftPart += "-" + String.valueOf(new Date().getTime());
+            // Add random number to left part
+            leftPart += "-" + String.valueOf(ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
             
             // And return with rightPart added again
             return leftPart + rightPart;
