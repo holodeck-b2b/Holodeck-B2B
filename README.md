@@ -1,6 +1,7 @@
 Holodeck B2B
 ============
 
-Holodeck B2B is free open-source software for B2B messaging, based on the OASIS specifications for ebXML Messaging version 3 and AS4 profile.
+Holodeck B2B is a B2B messaging solution that implements the OASIS specifications for ebMS3 and AS4 profile.
+It is Java based and runs on most platforms. 
 
 For more information visit the website at http://holodeck-b2b.org
