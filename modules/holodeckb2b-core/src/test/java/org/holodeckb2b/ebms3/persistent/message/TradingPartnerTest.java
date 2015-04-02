@@ -81,6 +81,7 @@ public class TradingPartnerTest {
      */
     @Test
     public void test1_SetRole() {
+        cleanup(); // remove left over items from database before starting test
         System.out.println("setRole");
         TradingPartner instance = new TradingPartner();
         
