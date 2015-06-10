@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:tPRF xmlns:tns="http://holodeck-b2b.org/schemas/2014/06/pmode"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2014/06/pmode file:/Users/safi/Development/NetbeansProjects/HolodeckB2B/build_b2/modules/holodeckb2b-core/src/main/resources/xsd/pmode.xsd">
+    <tns:Mpc>http://BXMBOseK/</tns:Mpc>
+    <tns:ErrorHandling>
+        <tns:ReplyPattern>RESPONSE</tns:ReplyPattern>
+        <tns:NotifyErrorToBusinessApplication>false</tns:NotifyErrorToBusinessApplication>
+        <tns:ErrorDelivery>
+            <tns:DeliveryMethod>lOd_2EAjYzZ4_1Te</tns:DeliveryMethod>
+            <tns:Parameter>
+                <tns:name>ptTb1QhmZuQjZum</tns:name>
+                <tns:value>smm7v5hAV-J9mvOX</tns:value>
+            </tns:Parameter>
+            <tns:Parameter>
+                <tns:name>Y1ZMk8fcOObptCZmAjEcs9vTXhKscw</tns:name>
+                <tns:value>Gtbc-wR0UT1GVEYBr88w3LAN-EoL-S</tns:value>
+            </tns:Parameter>
+        </tns:ErrorDelivery>
+    </tns:ErrorHandling>
+    <tns:SecurityConfiguration>
+        <tns:UsernameToken target="ebms">
+            <tns:username>fPnEq</tns:username>
+            <tns:password type="Digest">c6C_k.dJnqv._PP58V</tns:password>
+            <tns:includeNonce>true</tns:includeNonce>
+            <tns:includeCreated>true</tns:includeCreated>
+        </tns:UsernameToken>
+    </tns:SecurityConfiguration>
+</tns:tPRF>

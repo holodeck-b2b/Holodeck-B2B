@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<UsernameToken target="ebms">
+    <username>captain</username>
+    <password>1234567890</password>
+    <includeNonce>true</includeNonce>
+    <includeCreated>false</includeCreated>
+</UsernameToken>

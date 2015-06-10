@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:tSecCfg xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+>
+    <tns:Signing>
+       <KeystoreAlias password="keypwd2$%'s;:@#$:!">KeystoreAlias3</KeystoreAlias>
+       <KeyReferenceMethod>BSTReference</KeyReferenceMethod>
+       <Algorithm>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256</Algorithm>
+       <HashFunction>http://www.w3.org/2001/04/xmldsig-more#sha384</HashFunction>
+    </tns:Signing>
+    <tns:Encryption>
+       <KeystoreAlias password="ExampleC">partyc</KeystoreAlias>
+	<Algorithm>http://www.w3.org/2001/04/xmlenc#aes128-cbc</Algorithm>
+	<KeyTransport>
+	    <Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p</Algorithm>
+	    <MGFAlgorithm>http://www.w3.org/2009/xmlenc11#mgf1sha1</MGFAlgorithm>
+	    <DigestAlgorithm>http://www.w3.org/2001/04/xmlenc#sha256</DigestAlgorithm>
+	</KeyTransport>
+    </tns:Encryption>
+</tns:tSecCfg>

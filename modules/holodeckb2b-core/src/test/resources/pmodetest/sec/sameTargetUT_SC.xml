@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:tSecCfg xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+>
+    <tns:UsernameToken target="">
+        <tns:username>FBXBcTNKQugmw4HyW0.aM</tns:username>
+        <tns:password type="Digest">q2TxAH81QeG</tns:password>
+        <tns:includeNonce>true</tns:includeNonce>
+        <tns:includeCreated>true</tns:includeCreated>
+    </tns:UsernameToken>
+    <tns:UsernameToken>
+        <tns:username>DmTnJLxXFgEsuQX</tns:username>
+        <tns:password type="Text">ymjl8hCo0BdTvcRf</tns:password>
+        <tns:includeNonce>false</tns:includeNonce>
+        <tns:includeCreated>false</tns:includeCreated>
+    </tns:UsernameToken>
+</tns:tSecCfg>

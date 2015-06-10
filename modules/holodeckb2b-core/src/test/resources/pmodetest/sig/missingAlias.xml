@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SignatureConfiguration>
+   <KeyReferenceMethod>BSTReference</KeyReferenceMethod>
+   <Algorithm>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256</Algorithm>
+   <HashFunction>http://www.w3.org/2001/04/xmldsig-more#sha384</HashFunction>
+</SignatureConfiguration>

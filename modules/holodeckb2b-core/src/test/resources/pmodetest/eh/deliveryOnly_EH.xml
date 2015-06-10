@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:tError xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+>
+    <tns:ReplyPattern>RESPONSE</tns:ReplyPattern>
+    <tns:ErrorDelivery>
+        <tns:DeliveryMethod>FileSystem</tns:DeliveryMethod>
+    </tns:ErrorDelivery>
+</tns:tError>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TradingPartnerConfiguration>
+    <PartyId>org:holodeck-b2b:party-id-1</PartyId>
+    <PartyId type="hb2b-test-pid">PartyId3</PartyId>
+    <Role>Tester</Role>
+    <SecurityConfiguration>
+        <UsernameToken>
+            <username>captain</username>
+            <password>1234567890</password>
+        </UsernameToken>        
+    </SecurityConfiguration>    
+</TradingPartnerConfiguration>

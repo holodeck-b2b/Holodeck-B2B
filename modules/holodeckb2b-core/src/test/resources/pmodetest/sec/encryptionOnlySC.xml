@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:tEncCfg xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+>
+    <tns:Encryption>
+       <KeystoreAlias password="ExampleC">partyc</KeystoreAlias>
+	<KeyReferenceMethod>SomeKeyReference</KeyReferenceMethod>
+	<Algorithm>http://www.w3.org/2001/04/xmlenc#aes128-cbc</Algorithm>
+	<KeyTransport>
+	    <Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p</Algorithm>
+	    <MGFAlgorithm>http://www.w3.org/2009/xmlenc11#mgf1sha1</MGFAlgorithm>
+	    <DigestAlgorithm>http://www.w3.org/2001/04/xmlenc#sha256</DigestAlgorithm>
+	</KeyTransport>
+    </tns:Encryption>
+</tns:tEncCfg>

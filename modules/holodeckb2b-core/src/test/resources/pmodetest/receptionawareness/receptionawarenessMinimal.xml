@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:ReceptionAwarenes xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+>
+    <MaxRetries>2</MaxRetries>
+    <RetryInterval>60</RetryInterval>
+</tns:ReceptionAwarenes>
