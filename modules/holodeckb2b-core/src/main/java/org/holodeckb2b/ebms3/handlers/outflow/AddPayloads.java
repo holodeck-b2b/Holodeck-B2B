@@ -61,7 +61,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
     }
     
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) {
+    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws DatabaseException {
         
         log.debug("Check for payloads to include");
         Collection<IPayload> payloads = um.getPayloads();
@@ -95,12 +95,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
                 }
             }
 
-            try {
-                MessageUnitDAO.updatePayloadMetaData(um);
-            } catch (DatabaseException ex) {
-                log.error("An error occurred while updating the payload information in the database!" 
-                            + "Details: " + ex.getMessage());
-            }
+            MessageUnitDAO.updatePayloadMetaData(um);
             log.debug("Payloads successfully added to message");                
         }
         

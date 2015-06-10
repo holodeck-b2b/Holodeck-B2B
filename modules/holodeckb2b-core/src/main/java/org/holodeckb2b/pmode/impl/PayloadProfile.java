@@ -17,7 +17,7 @@
 package org.holodeckb2b.pmode.impl;
 
 import org.holodeckb2b.as4.compression.CompressionFeature;
-import org.holodeckb2b.common.as4.pmode.IPayloadProfileAS4;
+import org.holodeckb2b.common.as4.pmode.IAS4PayloadProfile;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
@@ -27,7 +27,7 @@ import org.simpleframework.xml.Root;
  */
 
 @Root (name="PayloadProfile", strict=false)
-public class PayloadProfile implements IPayloadProfileAS4 {
+public class PayloadProfile implements IAS4PayloadProfile {
     
     @Element (name = "maxSize", required = false)
     private int maxSize = -1;

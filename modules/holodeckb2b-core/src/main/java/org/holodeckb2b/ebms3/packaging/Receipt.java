@@ -86,8 +86,7 @@ public class Receipt {
         MessageInfo.readElement(MessageInfo.getElement(sigElement), rcptData);
         
         // Because the content of the Receipt is not predefined read and store all child elements of the Receipt element
-        //  which is the first child of the SignalMessage element
-        rcptData.setContent(sigElement.getFirstElement().getChildElements());
+        rcptData.setContent(sigElement.getFirstChildWithName(Q_ELEMENT_NAME).getChildElements());
         
         return rcptData;
     }

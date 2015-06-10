@@ -55,7 +55,8 @@ public class PModeSet implements IPModeSet {
     public String[] listPModeIds() {
                 
         List<String> result = new ArrayList<String>();
-                
+        String[] retVal =  new String[0];
+        
         try {
             
             if (!pmodeSet.isEmpty()) {
@@ -64,27 +65,26 @@ public class PModeSet implements IPModeSet {
                 for (Map.Entry<String, PMode> entry : pmodeSet.entrySet()) {
                     result.add(entry.getKey());
                 }
-            
+                
+                if ( result.size() > 0 ) {
+                    // convert List<String> to String[]
+                    retVal = result.toArray(new String[0]);
+                } else {
+                    retVal =  new String[0];
+                }
+                
             }
            
             
         } catch (Exception ex) {
             Logger.getLogger(PModeSet.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if ( result.size() > 0 ) {
-                // convert List<String> to String[]
-                return result.toArray(new String[0]);
-            } else {
-                return new String[0];
-            }
-            
-            
-            
-        }
+        }  
+        return retVal;
     }
 
     /**
      * Get the PMode based on the PMode ID
+     * 
      * @param id The PMode ID
      * @return IPMode or null if an error occurred.
      */
@@ -95,6 +95,7 @@ public class PModeSet implements IPModeSet {
 
     /**
      * Get all the PMode's contained by the PModeSet.
+     * 
      * @return Set of <code>IPMode</code> containing all the PMode's.
      */
     @Override
@@ -116,6 +117,7 @@ public class PModeSet implements IPModeSet {
 
     /**
      * Add a PMode to the PModeSet
+     * 
      * @param pmodeID The PMode ID which uniquely identifies the PMode.
      * @param pmode The PMode to add to the PModeSet.
      * @return void
@@ -127,7 +129,9 @@ public class PModeSet implements IPModeSet {
 
     /**
      * Remove PMode from the PModeSet
+     * 
      * @param pmodeID The PMode ID which uniquely identifies the PMode.
+     * @return void
      */
     void remove(String pmodeID) {
         this.pmodeSet.remove(pmodeID);

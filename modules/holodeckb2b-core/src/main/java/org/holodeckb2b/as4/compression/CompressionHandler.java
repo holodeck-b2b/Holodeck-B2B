@@ -21,11 +21,11 @@ import java.util.Collection;
 import javax.activation.DataHandler;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.as4.pmode.IPayloadProfileAS4;
+import org.holodeckb2b.common.as4.pmode.IAS4PayloadProfile;
 import org.holodeckb2b.common.general.IProperty;
 import org.holodeckb2b.common.messagemodel.IPayload;
-import org.holodeckb2b.common.pmode.IFlow;
 import org.holodeckb2b.common.pmode.IPayloadProfile;
+import org.holodeckb2b.common.pmode.IUserMessageFlow;
 import org.holodeckb2b.ebms3.persistent.general.Property;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
@@ -55,12 +55,12 @@ public class CompressionHandler extends AbstractUserMessageHandler {
     protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws AxisFault {
         
         log.debug("Check P-Mode configuration if AS4 compression must be used");
-        IFlow flow = HolodeckB2BCore.getPModeSet().get(um.getPMode()).getLegs().iterator().next().getUserMessageFlow();
+        IUserMessageFlow flow = HolodeckB2BCore.getPModeSet().get(um.getPMode())
+                                                                    .getLegs().iterator().next().getUserMessageFlow();
         IPayloadProfile plProfile = (flow != null ? flow.getPayloadProfile() : null);
         
-        if ((plProfile instanceof IPayloadProfileAS4) &&
-                CompressionFeature.COMPRESSED_CONTENT_TYPE.equalsIgnoreCase(
-                                                            ((IPayloadProfileAS4) plProfile).getCompressionType())) {
+        if ((plProfile instanceof IAS4PayloadProfile) &&
+                CompressionFeature.COMPRESSED_CONTENT_TYPE.equalsIgnoreCase(((IAS4PayloadProfile) plProfile).getCompressionType())) {
             log.debug("AS4 Compression feature is used");
             // enable compression by decorating DataHandler and setting payload properties
             for (IPayload p : um.getPayloads())
@@ -87,7 +87,7 @@ public class CompressionHandler extends AbstractUserMessageHandler {
         String cid = p.getPayloadURI();
         DataHandler source = mc.getAttachment(cid);
         mc.addAttachment(cid, new CompressionDataHandler(source));
-        log.debug("Replaced DataHandler to enable decompression");
+        log.debug("Replaced DataHandler to enable compression");
 
         // Set the part properties to indicate AS4 Compression feature was used and original MIME Type
         // First ensure that there do not exists properties with this name

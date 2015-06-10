@@ -18,8 +18,6 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
@@ -48,18 +46,28 @@ public class GetMessageUnitForPulling extends BaseHandler {
     }
     
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) {
+    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         // First check whether this flow contained a valid pull request
         log.debug("Check for authenticated pull request");
         List<IPMode> authPModes = (List<IPMode>) mc.getProperty(MessageContextProperties.PULL_AUTH_PMODES);
-        
         if (authPModes == null || authPModes.isEmpty()) {
             // Nothing to do, even if request contained a PullRequest no authorized P-modes could be found
+            return InvocationResponse.CONTINUE;
+        } 
+        
+        // The request contained a valid PullRequest, indicate start of processing
+        PullRequest pullrequest = (PullRequest) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
+        log.debug("Starting processing of received pull request");
+        pullrequest = MessageUnitDAO.startProcessingMessageUnit(pullrequest);
+
+        if (pullrequest == null) {
+            // Changing processing state failed, stop processing the pull request, but continue 
+            //  message processing as other parts may be processed succesfully
+            log.info("Failed to change processing state! Can not process PullRequest in message.");
             return InvocationResponse.CONTINUE;
         }
         
         log.debug("Get the oldest message that can be pulled for the MPC in pull request");
-        PullRequest pullrequest = (PullRequest) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
         UserMessage pulledMsg = getMUForPulling(authPModes, pullrequest.getMPC());
         
         if (pulledMsg == null) {
@@ -96,15 +104,13 @@ public class GetMessageUnitForPulling extends BaseHandler {
      * @return              The message unit to returned as result for Pull Request
      *                      or <code>null</code> if no message unit is available
      *                      for processing
+     * @throws DatabaseException When a database error occurs while retrieving the message units waiting to be pulled.
      */
-    private UserMessage getMUForPulling(List<IPMode> authPModes, String reqMPC) {
+    private UserMessage getMUForPulling(List<IPMode> authPModes, String reqMPC) throws DatabaseException {
         log.debug("Get list of messages waiting to be pulled");
         List<UserMessage> waitingMU = null;
-        try {
-            waitingMU = MessageUnitDAO.getMessageUnitsForPModesInState(UserMessage.class, authPModes, ProcessingStates.AWAITING_PULL);
-        } catch (DatabaseException ex) {
-            Logger.getLogger(GetMessageUnitForPulling.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        waitingMU = MessageUnitDAO.getMessageUnitsForPModesInState(UserMessage.class, authPModes, 
+                                                                    ProcessingStates.AWAITING_PULL);
         
         // Are there messages waiting?
         if (waitingMU == null || waitingMU.isEmpty()) {

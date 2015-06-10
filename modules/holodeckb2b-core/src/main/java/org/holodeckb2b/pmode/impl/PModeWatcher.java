@@ -24,7 +24,6 @@ import org.holodeckb2b.common.workers.DirWatcher;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
- *
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 public class PModeWatcher extends DirWatcher {
@@ -61,7 +60,8 @@ public class PModeWatcher extends DirWatcher {
     }
 
     /**
-     * Handle the PMode add event, new file describing the PMode found on file system.
+     * Handle the PMode add event.
+     * New file describing the PMode found on file system.
      *
      * @param f XML file containing the PMode definition in XML.
      */
@@ -69,15 +69,7 @@ public class PModeWatcher extends DirWatcher {
 
         try {
             PModeSet pms = null;
-        
-            // Check if we have just started and have not read any P-Mode yet
-            if (this.pModeIDToFilenameMapping.isEmpty()) {
-                pms = new PModeSet();
-            } else {
-                // get the current PModeSet from the Holodeck core. 
-                pms = (PModeSet) HolodeckB2BCore.getPModeSet();
-            }
-            
+
             // Proces new PMode xml file(s).
             log.debug("New PMode file '" + f.getName() + "' found.");
 
@@ -85,33 +77,47 @@ public class PModeWatcher extends DirWatcher {
             PMode pm = new PMode();
             pm = pm.createFromFile(f);
 
-            // check if we already know a PMode with the same ID.
-            if (this.pModeIDToFilenameMapping.containsKey(pm.getId())) {
-
-                // remove existing entry from internal mapping
-                this.pModeIDToFilenameMapping.remove(pm.getId());
-
-                // remove existing entry from PModeSet
-                pms.remove(pm.getId());
+            // Check if Holodeck B2B has just started and we do not have any P-Mode yet
+            // in the internal reference
+            if (this.pModeIDToFilenameMapping.isEmpty()) {
+                pms = new PModeSet();
+            } else {
+                // get the current PModeSet from the Holodeck core.
+                pms = (PModeSet) HolodeckB2BCore.getPModeSet();
             }
 
-            // add new entry to the internal mapping of this class
-            this.pModeIDToFilenameMapping.put(pm.getId(), f.getAbsolutePath());
+            // we have a new file which is previously unknown to the system
+            
+            // check if new PMode is currently known based on it's PMode-ID.
+            if (this.pModeIDToFilenameMapping.containsKey(pm.getId())) {
 
-            // add new entry to the PModeSet
-            pms.set(pm.getId(), pm);
+                log.debug("An error occured when processing new pmode XML file from '" + f.getAbsolutePath() + "'.");
+                log.debug("PMode already known based on the PMode-ID.");
+                log.debug("The defined PModeID ('" + pm.getId() + "') is already in use and PMode ID's must be UNIQUE.");
+                log.debug("PMode with this PMode-ID already defined in file '" + this.pModeIDToFilenameMapping.get(pm.getId()) + "'");
 
-            // pass the new PModeSet to the Holodeck core
-            HolodeckB2BCore.setPModeSet(pms);
+            } else {
+
+                // add new entry to the internal mapping of this class
+                this.pModeIDToFilenameMapping.put(pm.getId(), f.getAbsolutePath());
+
+                // add new entry to the PModeSet
+                pms.set(pm.getId(), pm);
+
+                // pass the new PModeSet to the Holodeck core
+                HolodeckB2BCore.setPModeSet(pms);
+
+            }
 
         } catch (Exception e) {
             // Something went wrong on while reading the PMode XML file.
-            log.error("An error occured when reading pmode XML file from '" + f.getName() + "'. Details: " + e.getMessage());
+            log.error("An error occured when reading pmode XML file from '" + f.getAbsolutePath() + "' when adding file'. Details: " + e.getMessage());
         }
     }
 
     /**
-     * Handle the PMode changed event.
+     * Handle the PMode changed event. 
+     * Previous existing file describing a PMode found on file system.
      *
      * @param f XML file containing the PMode definition in XML.
      */
@@ -119,39 +125,71 @@ public class PModeWatcher extends DirWatcher {
 
         try {
 
-            // get the current PModeSet from the Holodeck core.
-            PModeSet pms = (PModeSet) HolodeckB2BCore.getPModeSet();
-
             // Proces changed PMode xml file(s).
-            log.debug("Changed PMode file '" + f.getName() + "' found.");
+            log.debug("Changed PMode file '" + f.getAbsolutePath() + "' found.");
 
             // get the PMode from the file
             PMode pm = new PMode();
             pm = pm.createFromFile(f);
 
-            // check if we already know a PMode with the same ID.
-            if (this.pModeIDToFilenameMapping.containsKey(pm.getId())) {
+            // get the current PModeSet from the Holodeck core.
+            PModeSet pms = (PModeSet) HolodeckB2BCore.getPModeSet();
 
-                // remove existing entry from internal mapping
-                this.pModeIDToFilenameMapping.remove(pm.getId());
+            // check if PMode is currently known based on the location of the PMode definition file.
+            // if file is found, replace the definition by remove and add operations
+            if (this.pModeIDToFilenameMapping.containsValue(f.getAbsolutePath())) {
 
-                // remove existing entry from PModeSet
-                pms.remove(pm.getId());
+                String PModeID = "";
+                
+                // get the PMode ID corresponding to the old PMode definition file
+                PModeID = Utils.getKeyByValue(pModeIDToFilenameMapping, f.getAbsolutePath());
 
-            }
+                if ((PModeID != null) && (!PModeID.isEmpty())) {
 
-            // add new entry to the internal mapping of this class
-            this.pModeIDToFilenameMapping.put(pm.getId(), f.getAbsolutePath());
+                    // remove the old entry from the internal mapping of this class
+                    this.pModeIDToFilenameMapping.remove(PModeID);
+                    
+                    // remove existing entry from PModeSet
+                    pms.remove(PModeID);
+                } 
+                
+                // add new entry to the internal mapping of this class
+                this.pModeIDToFilenameMapping.put(pm.getId(), f.getAbsolutePath());
 
-            // add new entry to the PModeSet
-            pms.set(pm.getId(), pm);
+                // add new entry to the PModeSet
+                pms.set(pm.getId(), pm);
 
-            // pass the new PModeSet to the Holodeck core
-            HolodeckB2BCore.setPModeSet(pms);
+                // pass the new PModeSet to the Holodeck core
+                HolodeckB2BCore.setPModeSet(pms);
+
+            } else {
+
+                // we have a new file now let's check it's PMode-ID.
+                // check PMode is currently known based on the PMode-ID.
+                if (this.pModeIDToFilenameMapping.containsKey(pm.getId())) {
+
+                    log.debug("An error occured when processing new pmode XML file from '" + f.getName() + "'.");
+                    log.debug("PMode already known based on the PMode-ID.");
+                    log.debug("The defined PModeID ('" + pm.getId() + "') is already in use and PMode ID's must be UNIQUE.");
+                    log.debug("PMode with this PMode-ID already defined in file '" + this.pModeIDToFilenameMapping.get(pm.getId()) + "'");
+
+                } else {
+
+                    // add new entry to the internal mapping of this class
+                    this.pModeIDToFilenameMapping.put(pm.getId(), f.getAbsolutePath());
+
+                    // add new entry to the PModeSet
+                    pms.set(pm.getId(), pm);
+
+                    // pass the new PModeSet to the Holodeck core
+                    HolodeckB2BCore.setPModeSet(pms);
+
+                }
+            } 
 
         } catch (Exception e) {
             // Something went wrong on while reading the PMode XML file.
-            log.error("An error occured when reading pmode XML file from '" + f.getName() + "'. Details: " + e.getMessage());
+            log.error("An error occured when reading pmode XML file from '" + f.getAbsolutePath() + "' on file change'. Details: " + e.getMessage());
         }
     }
 
@@ -164,27 +202,27 @@ public class PModeWatcher extends DirWatcher {
     protected void onChangeRemove(File f) {
         try {
 
-            // get the current PModeSet from the Holodeck core.
-            PModeSet pms = (PModeSet) HolodeckB2BCore.getPModeSet();
-
             String PModeID = "";
 
             // Check which PMode file is removed
             log.debug("Removed PMode file '" + f.getName() + "' no longer exist.");
 
-                // check if we already know a PMode with the same file location.
+            // check if we already know a PMode with the same file location.
             // note that we cannot retrieve the PMode ID any longer since
             // the file is gone on disk which defined the PMode ID.
             if (this.pModeIDToFilenameMapping.containsValue(f.getAbsolutePath())) {
 
-                    // get the PModeID from the internal mapping (since the file
+                // get the PModeID from the internal mapping (since the file
                 // which contained the PModeID is removed from disk).
-                PModeID = Utils.getKeyByValue(pModeIDToFilenameMapping, f.toString());
+                PModeID = Utils.getKeyByValue(pModeIDToFilenameMapping, f.getAbsolutePath());
 
                 if ((PModeID != null) && (!PModeID.isEmpty())) {
 
                     // remove existing entry
                     this.pModeIDToFilenameMapping.remove(PModeID);
+
+                    // get the current PModeSet from the Holodeck core.
+                    PModeSet pms = (PModeSet) HolodeckB2BCore.getPModeSet();
 
                     // remove existing entry from PModeSet
                     pms.remove(PModeID);
@@ -197,7 +235,7 @@ public class PModeWatcher extends DirWatcher {
 
         } catch (Exception e) {
             // Something went wrong on while reading the PMode XML file.
-            log.error("An error occured when pmode XML file was removed from '" + f.getName() + "'. Details: " + e.getMessage());
+            log.error("An error occured when pmode XML file was removed from '" + f.getAbsolutePath() + "'. Details: " + e.getMessage());
         }
     }
 

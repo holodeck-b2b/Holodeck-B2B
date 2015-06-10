@@ -136,6 +136,10 @@ public class WorkerPool {
     public void stop(int delay) {
         log.info("Stopping worker pool");
 
+        if (pool == null)
+            // No pool to shutdown
+            return;
+                    
         pool.shutdown();
         try {
             // Wait the given delay for workers to terminate

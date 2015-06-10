@@ -29,6 +29,7 @@ import org.holodeckb2b.common.pmode.IBusinessInfo;
 import org.holodeckb2b.common.pmode.ILeg;
 import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.common.submit.MessageSubmitException;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.mmd.xml.AgreementReference;
 import org.holodeckb2b.ebms3.mmd.xml.CollaborationInfo;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
@@ -99,7 +100,7 @@ final class MMDCompleter {
         
         String pmMPC = (leg.getUserMessageFlow() != null && leg.getUserMessageFlow().getBusinessInfo() != null ? 
                             leg.getUserMessageFlow().getBusinessInfo().getMpc() : null);
-        switch (compareStrings(cd.getMPC(), pmMPC)) {
+        switch (Utils.compareStrings(cd.getMPC(), pmMPC)) {
             case -2 :
                 throw new MessageSubmitException("Different MPC values (submitted: " + cd.getMPC() + ",P-Mode: " + pmMPC 
                                               + ") specified!");
@@ -194,7 +195,7 @@ final class MMDCompleter {
                 throw new MessageSubmitException("Missing required Collaboration information");
         
         String pa = (pbi != null ? pbi.getAction() : null);
-        switch (compareStrings(sci.getAction(), pa)) {
+        switch (Utils.compareStrings(sci.getAction(), pa)) {
             case -2 :
                 throw new MessageSubmitException("Different Action values (submitted: " + sci.getAction() 
                                                     + ",P-Mode: " + pa + ") specified!");
@@ -265,7 +266,7 @@ final class MMDCompleter {
         
         // Check name and type
         String pan = (pa != null ? pa.getName() : null);        
-        switch (compareStrings(sar.getName(), pan)) {
+        switch (Utils.compareStrings(sar.getName(), pan)) {
             case -2 :
                 throw new MessageSubmitException("Different Agreement name values (submitted: " + sar.getName() 
                                                     + ",P-Mode: " + pa.getName() + ") specified!");
@@ -282,7 +283,7 @@ final class MMDCompleter {
             case 1 :
                 // Type should only be evaluated when a name is set (from P-Mode [case 2] or mmd [case 1])
                 String pat = (pa != null ? pa.getType() : null);
-                switch (compareStrings(sar.getType(), pat)) {
+                switch (Utils.compareStrings(sar.getType(), pat)) {
                     case -2 :
                         throw new MessageSubmitException("Different Agreement type values (submitted: " + sar.getType()
                                                             + ",P-Mode: " + pa.getType()+ ") specified!");
@@ -320,32 +321,6 @@ final class MMDCompleter {
         }
     }
     
-    /**
-     * Compares two strings
-     * 
-     * @param s     The first input string 
-     * @param p     The second input string
-     * @return      -2 when both strings are non-empty and their values are different,<br>
-     *              -1 when both strings are empty,<br>
-     *              0  when both strings are non-empty but equal,<br>
-     *              1  when only the first string is non-empty,<br>
-     *              2  when only the second string is non-empty
-     */
-    private int compareStrings(final String s, final String p) {
-        if (s == null || s.isEmpty()) {
-            if (p != null && !p.isEmpty())
-                return 2;
-            else 
-                return -1;
-        } else if (p != null) {
-                if (s.equals(p))
-                    return 0;
-                else 
-                    return -2;
-        } else 
-            return 1;
-        
-    }
     
     /**
      * As instances of this class are only to be used internally the constructor is private. We use an internal instance

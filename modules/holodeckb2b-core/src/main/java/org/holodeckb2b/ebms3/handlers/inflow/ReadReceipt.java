@@ -50,7 +50,7 @@ public class ReadReceipt extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) {
+    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         // First get the ebMS header block, that is the eb:Messaging element
         SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
         
@@ -90,12 +90,7 @@ public class ReadReceipt extends BaseHandler {
                         log.error("Received receipt could not read from message! Details: " + ex.getMessage());
                         // Create error and add to message context
                         createInvalidHeaderError(mc, rcptElem, ex.getMessage());
-                    } catch (DatabaseException ex) {
-                        // Ai, something went wrong when storing the receipt
-                        log.error("An error occurred when saving the Receipt to the database. Details: " 
-                                + ex.getMessage());
-                        // Although the receipt could not be stored, other processing may finish succesfully
-                    }
+                    } 
                 }
             } else
                 log.debug("ebMS message does not contain Receipt(s)");

@@ -19,6 +19,7 @@ package org.holodeckb2b.module;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisDescription;
@@ -144,15 +145,7 @@ public class HolodeckB2BCore implements Module {
         log.debug("Create list of available message delivery methods");
         msgDeliveryFactories = new HashMap<String, IMessageDelivererFactory>();
         
-        try {
-            // Wait for P-Modes to be initialized
-            pmodeSetRead.await();
-            log.info("Holodeck B2B Core module STARTED.");
-        } catch (InterruptedException ex) {
-            log.fatal("While waiting for initialization of P-Modes the Holodeck B2B module is stopped");
-            // Preserve interruption
-            Thread.currentThread().interrupt();
-        }
+        log.info("Holodeck B2B Core module STARTED.");
     }
 
     @Override
@@ -271,18 +264,20 @@ public class HolodeckB2BCore implements Module {
     }
     
     /**
-     * Gets the set of currently configured P-Modes. The P-Modes define how Holodeck B2B should process the messages.
-     * The set of P-Modes is therefor the most important configuration item in Holodeck B2B, without P-Modes it will
-     * not be possible to send and receive messages.
-     * <p>
+     * Gets the set of currently configured P-Modes.
+     * <p>The P-Modes define how Holodeck B2B should process the messages. The set of P-Modes is therefor the most 
+     * important configuration item in Holodeck B2B, without P-Modes it will not be possible to send and receive 
+     * messages.<br>
+     * If this function is called during the startup sequence we will wait for 5 seconds before we return the set. This
+     * prevents that a message is unnecessarily rejected.
      * 
      * @return  The current set of P-Modes as a {@link IPModeSet}
      * @see IPMode
      */
     public static IPModeSet getPModeSet() {
         try {
-            // We have to wait for initialization of the P-Mode set before returning
-            pmodeSetRead.await();
+            // We wait for initialization of the P-Mode set before returning
+            pmodeSetRead.await(5, TimeUnit.SECONDS);
         } catch (InterruptedException ex) {
             log.fatal("While waiting for the P-Mode set to be initialized the waiting thread was interrupted");
             // Preserve interruption
@@ -290,6 +285,9 @@ public class HolodeckB2BCore implements Module {
         }
         
         synchronized (pmodeSet) {
+            if (pmodeSet != null && pmodeSet.listPModeIds().length == 0)                
+                log.error("There are no P-Modes configured, unable to process messages!");            
+            
             return pmodeSet;
         }        
     }

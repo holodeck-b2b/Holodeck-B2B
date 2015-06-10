@@ -38,6 +38,7 @@ import org.junit.runners.MethodSorters;
 /**
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TradingPartnerTest {
@@ -209,7 +210,7 @@ public class TradingPartnerTest {
         em.persist(instance);
         em.getTransaction().commit();
         
-                em.getTransaction().begin();
+        em.getTransaction().begin();
         List<TradingPartner> tps = em.createQuery("from TradingPartner", TradingPartner.class).getResultList();
         
         assertTrue(tps.size() == 3);

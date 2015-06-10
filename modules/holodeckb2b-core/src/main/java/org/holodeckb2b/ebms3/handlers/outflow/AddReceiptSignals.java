@@ -60,7 +60,7 @@ public class AddReceiptSignals extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) {
+    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         
         log.debug("Check if this message already contains Receipt signals to send");
         Collection<Receipt> rcptSigs = null;
@@ -104,19 +104,14 @@ public class AddReceiptSignals extends BaseHandler {
         // Change the processing state of the rcpts that are included
         for(Receipt r : rcptsToAdd) {
             log.debug("Change processing state of receipt signal [" + r.getMessageId() + "] to indicate it is included");
-            try {
-                // When processing state is changed add the receipt to the list of receipts to send
-                Receipt rcpt = MessageUnitDAO.startProcessingMessageUnit(r);
-                if (rcpt != null) {
-                    log.debug("Processing state changed for receipt signal with msgId=" + r.getMessageId());
-                    MessageContextUtils.addReceiptToSend(mc, rcpt);
-                } else
-                    log.debug("Could not change processing state for receipt signal with msgId=" + r.getMessageId() 
-                                + ", skipping");                
-            } catch (DatabaseException dbe) {
-                log.error("An error occurred while changing the processing state of receipt signal [" 
-                            + r.getMessageId() + "]. Details: " + dbe.getMessage());
-            }
+            // When processing state is changed add the receipt to the list of receipts to send
+            Receipt rcpt = MessageUnitDAO.startProcessingMessageUnit(r);
+            if (rcpt != null) {
+                log.debug("Processing state changed for receipt signal with msgId=" + r.getMessageId());
+                MessageContextUtils.addReceiptToSend(mc, rcpt);
+            } else
+                log.debug("Could not change processing state for receipt signal with msgId=" + r.getMessageId() 
+                            + ", skipping");                
         }
         
         return InvocationResponse.CONTINUE;

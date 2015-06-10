@@ -228,12 +228,12 @@ Because payloads may be related to each other the business application may wish 
         </xs:attribute>
         <xs:attribute name="mimeType" type="tns:non-empty-string" use="optional">
             <xs:annotation>
-                <xs:documentation>The MIME type of payload content. This is an OPTIONAL element, when no MIME type is given Holodeck B2B will try to detect the correct MIME type based on the payload content.</xs:documentation>
+                <xs:documentation>The MIME type of payload content. This is an OPTIONAL attribute, when no MIME type is given Holodeck B2B will try to detect the correct MIME type based on the payload content.</xs:documentation>
             </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="location" type="xs:anyURI" use="required">
+        <xs:attribute name="location" type="xs:anyURI" use="optional">
             <xs:annotation>
-                <xs:documentation>The location where Holodeck B2B can retrieve the payload content.</xs:documentation>
+                <xs:documentation>The location where Holodeck B2B can retrieve the payload content. This attribute MUST be specified for payloads contained in the message, i.e. containment is body or attachment. Not used for external payloads</xs:documentation>
             </xs:annotation>
         </xs:attribute>
     </xs:complexType>

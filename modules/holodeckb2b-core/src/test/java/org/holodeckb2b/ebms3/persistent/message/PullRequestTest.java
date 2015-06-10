@@ -16,16 +16,13 @@
  */
 package org.holodeckb2b.ebms3.persistent.message;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
-import org.holodeckb2b.common.general.IAuthenticationInfo;
 import org.holodeckb2b.ebms3.util.JPAUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -40,24 +37,8 @@ import org.junit.runners.MethodSorters;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class PullRequestTest {
         
-    static class TestAuthInfo implements IAuthenticationInfo, Serializable {
-        protected String    value = "TEST";
-        public void setValue(String v) {value = v;}
-        public String getValue() {return value;}
-
-        @Override
-        public boolean equals(IAuthenticationInfo ai) {
-           boolean r = false;
-           if (ai instanceof TestAuthInfo) {
-               return ((TestAuthInfo) ai).getValue().equals(this.value);
-           } else
-               return false;
-        }
-    };
-    
     EntityManager   em;
     
-    private static final IAuthenticationInfo TEST_AUTH_INFO = new TestAuthInfo(); 
     
     private static final String T_MPC_1 = "http://holodeck-b2b.org/test/pull/mpc1";
     
@@ -115,42 +96,6 @@ public class PullRequestTest {
         assertEquals(T_MPC_1, tps.get(0).getMPC());
         
         em.getTransaction().commit();        
-    }
-
-    /**
-     * Test of setAuthenticationInfo method, of class PullRequest. Includes test of
-     * setAIObject
-     */
-    @Test
-    public void test03_SetAuthenticationInfo() {
-        em.getTransaction().begin();
-        List<PullRequest> tps = em.createQuery("from PullRequest", PullRequest.class).getResultList();
-        
-        assertTrue(tps.size() == 1);
-        
-        tps.get(0).setAuthenticationInfo(TEST_AUTH_INFO);
-        
-        em.getTransaction().commit();       
-    }
-
-    /**
-     * Test of getAuthenticationInfo method, of class PullRequest. Includes test of
-     * setAIObject
-     */
-    @Test
-    public void test04_GetAuthenticationInfo() {
-        em.getTransaction().begin();
-        List<PullRequest> tps = em.createQuery("from PullRequest", PullRequest.class).getResultList();
-        
-        assertTrue(tps.size() == 1);
-        
-        IAuthenticationInfo ai = tps.get(0).getAuthenticationInfo();
-        
-        assertNotNull(ai);
-        
-        assertTrue(ai.equals(TEST_AUTH_INFO));
-        
-        em.getTransaction().commit();          
     }
 
 

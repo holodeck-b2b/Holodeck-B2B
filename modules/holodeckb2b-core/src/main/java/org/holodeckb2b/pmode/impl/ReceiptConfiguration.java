@@ -31,10 +31,10 @@ import org.simpleframework.xml.core.Commit;
 public class ReceiptConfiguration implements IReceiptConfiguration{
   
     @Element (name = "ReplyPattern", required = false)
-    private String replyPattern = "";
+    private String replyPattern;
     
     @Element (name = "To", required = false)
-    private String to = "";
+    private String to;
     
     @Element (name = "NotifyReceiptToBusinessApplication", required = false)
     private Boolean notifyReceiptToBusinessApp = Boolean.FALSE;

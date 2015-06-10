@@ -31,10 +31,11 @@ import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.pmode.IFlow;
 import org.holodeckb2b.common.pmode.ILeg;
 import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.common.pmode.IPModeSet;
+import org.holodeckb2b.common.pmode.IPullRequestFlow;
+import org.holodeckb2b.common.pmode.IUserMessageFlow;
 import org.holodeckb2b.common.workerpool.IWorkerTask;
 import org.holodeckb2b.common.workerpool.TaskConfigurationException;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
@@ -172,14 +173,14 @@ public class PullWorker implements IWorkerTask {
                 String mpc = null;
                 ILeg leg = p.getLegs().iterator().next(); // currently only One-Way P-Modes, so only one leg
                 // First check PullRequest flow (sub-channel) and then UserMessage flow
-                List<IFlow> flows = leg.getPullRequestFlows();
+                List<IPullRequestFlow> flows = leg.getPullRequestFlows();
                 if (flows != null && !flows.isEmpty()) {
-                    mpc = flows.get(0) != null && flows.get(0).getBusinessInfo() != null 
-                                                                    ? flows.get(0).getBusinessInfo().getMpc() : null;
+                    mpc = flows.get(0) != null && flows.get(0).getMPC()!= null 
+                                                                    ? flows.get(0).getMPC() : null;
                 }
                 if (mpc == null || mpc.isEmpty()) {
                     log.debug("No MPC defined in PullRequest flow, check UserMessage flow");
-                    IFlow flow = leg.getUserMessageFlow();
+                    IUserMessageFlow flow = leg.getUserMessageFlow();
                     mpc = flow != null && flow.getBusinessInfo() != null ? flow.getBusinessInfo().getMpc() : null;
                 }    
                 

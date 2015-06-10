@@ -54,12 +54,6 @@ import org.holodeckb2b.ebms3.persistent.processing.ProcessingState;
                     "FROM MessageUnit mu " +
                     "WHERE mu.MESSAGE_ID = :msgId " +
                     "AND mu.DIRECTION = :direction"
-            ),
-        @NamedQuery(name="MessageUnit.findInState",
-            query = "SELECT mu " +
-                    "FROM MessageUnit mu JOIN mu.states s1 " +
-                    "WHERE s1.START = (SELECT MAX(s2.START) FROM mu.states s2) " +
-                    "AND s1.NAME = :state"  
             )}
 )
 public abstract class MessageUnit implements Serializable, org.holodeckb2b.common.messagemodel.IMessageUnit {

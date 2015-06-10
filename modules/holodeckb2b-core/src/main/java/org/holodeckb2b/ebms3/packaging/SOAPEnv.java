@@ -61,13 +61,23 @@ public class SOAPEnv {
         
         org.apache.axiom.soap.SOAPEnvelope envelope = omFactory.getDefaultEnvelope();
         
+        declareNamespaces(envelope);
+        
+        return envelope;
+    }
+    
+    /**
+     * Ensures that the requires namespaces are declared on the SOAP envelope element. 
+     * 
+     * @param envelope  The SOAP envelope element to add the namespace declarations to
+     */
+    public static void declareNamespaces(SOAPEnvelope envelope) {
         // Declare all namespaces that are needed by default
         envelope.declareNamespace("http://www.w3.org/1999/XMLSchema-instance/", "xsi");
         envelope.declareNamespace("http://www.w3.org/1999/XMLSchema", "xsd");
         envelope.declareNamespace(Constants.EBMS3_NS_URI, EBMS3_NS_PREFIX);
-        
-        return envelope;
     }
+
     
     /**
      * Gets an {@see OMNamespace} object for the ebMS 3 namespace for the SOAP

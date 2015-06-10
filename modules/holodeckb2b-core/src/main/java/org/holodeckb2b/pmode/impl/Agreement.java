@@ -25,7 +25,7 @@ import org.simpleframework.xml.Element;
  */
 public class Agreement implements IAgreement {
     
-    @Element (name = "name", required = false)
+    @Element (name = "name", required = true)
     private String name = "";
     
     @Element (name = "type", required = false)
@@ -33,15 +33,16 @@ public class Agreement implements IAgreement {
     
     
     /**
-     * Default constructor 
+     * Default constructor.
      */
     public Agreement() {}
     
     /**
      * Gets the agreement name.
      * 
-     * @return 
+     * @return The agreement name
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -49,24 +50,27 @@ public class Agreement implements IAgreement {
     /**
      * Gets the agreement type.
      * 
-     * @return 
+     * @return The agreement type
      */
+    @Override
     public String getType() {
         return this.type;
     }
 
     /**
-     * Set the name of the agreement
+     * Set the name of the agreement.
      * @param name The agreement name to set
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }
     
     /**
-     * Set the type of the agreement
+     * Set the type of the agreement.
      * @param type The agreement type to set
      */
+    @Override
     public void setType(String type) {
         this.type = type;
     }

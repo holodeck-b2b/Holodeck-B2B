@@ -403,21 +403,33 @@ public class MessageUnitDAO {
     }
 
     /**
-     * Retrieves all {@link MessageUnit}s in the given state.
+     * Retrieves all {@link MessageUnit}s of the specified type and that are in one of the given states. 
      * <p>
      * <b>NOTE:</b> The entity objects in the resulting list are not completely loaded! Before a message unit is going
      * to be processed it must be loaded completely.
      *
-     * @param state The name of the state the message units to retrieve should be in
-     * @return A list of {@link MessageUnit} objects representing the message units that are in the given state
-     * @throws DatabaseException If an error occurs when saving the object to the database
+     * @param type      The type of message units to retrieve specified by their Class
+     * @param states    Array of processing state [names] that the message units to retrieve should be in
+     * @return          A list of objects of class <code>type</code> representing the message units that are in one 
+     *                  of the given states
+     * @throws DatabaseException When a problem occurs during the retrieval of the message units
      */
-    public static List<MessageUnit> getMessageUnitsInState(String state) throws DatabaseException {
-        List<MessageUnit> result = null;
+    public static <T extends MessageUnit> List<T> getMessageUnitsInState(Class<T> type, String[] states) throws DatabaseException {
+        List<T> result = null;
         EntityManager em = JPAUtil.getEntityManager();
 
-        result = em.createNamedQuery("MessageUnit.findInState", MessageUnit.class)
-                .setParameter("state", state).getResultList();
+        ArrayList<String> pStates = new ArrayList<>(states.length);
+        for(String s : states)
+                pStates.add(s);
+        
+        String queryString = "SELECT mu " +
+                             "FROM " + type.getSimpleName() + " mu JOIN mu.states s1 " +
+                             "WHERE s1.START = (SELECT MAX(s2.START) FROM mu.states s2) " +
+                             "AND s1.NAME IN :states";
+                
+        result = em.createQuery(queryString, type)
+                                .setParameter("states", pStates)
+                                .getResultList();
         em.close();
 
         return result;
@@ -430,10 +442,10 @@ public class MessageUnitDAO {
      * @return The number of times the {@link UserMessage} was already sent out.
      * @throws DatabaseException If an error occurs when saving the object to the database
      */
-    public static int getNumberOfRetransmits(UserMessage um) throws DatabaseException {
+    public static int getNumberOfTransmissions(UserMessage um) throws DatabaseException {
         EntityManager em = JPAUtil.getEntityManager();
 
-        Long result = em.createNamedQuery("UserMessage.numOfRetransmits", Long.class)
+        Long result = em.createNamedQuery("UserMessage.numOfTransmits", Long.class)
                 .setParameter("msgId", um.getMessageId()).getSingleResult();
 
         em.close();
@@ -760,6 +772,17 @@ public class MessageUnitDAO {
         setProcessingState(mu, ProcessingStates.DONE);
     }
 
+    /**
+     * Changes the processing state of a message unit to {@link ProcessingStates#PROC_WITH_WARNING} to indicate that
+     * the message unit was processed but there was an Error reported with severity <i>warning</i>.
+     *
+     * @param mu The {@link MessageUnit} for which the Error was reported
+     * @throws DatabaseException
+     */
+    public static void setWarning(MessageUnit mu) throws DatabaseException {
+        setProcessingState(mu, ProcessingStates.PROC_WITH_WARNING);
+    }
+    
     /**
      * Changes the processing state of a message unit to {@link ProcessingStates#TRANSPORT_FAILURE} to indicate that
      * there was a problem sending the message unit out.

@@ -54,7 +54,7 @@ public class ReadPullRequest extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) {
+    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         // First get the ebMS header block, that is the eb:Messaging element
         SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
         
@@ -82,12 +82,7 @@ public class ReadPullRequest extends BaseHandler {
                     invalidHdrError.setMessage(ex.getMessage());
                     invalidHdrError.setErrorDetail("Source of header containing the error:" + prElement.toString());
                     MessageContextUtils.addGeneratedError(mc, invalidHdrError);                    
-                } catch (DatabaseException ex) {
-                    // Ai, something went wrong when storing the pull request
-                    log.error("An error occurred when saving the PullRequest to the database. Details: " + ex.getMessage());
-                    // Although the pull request could not be stored, other processing may finish succesfully
-                }
-                
+                }                 
             } else
                 log.debug("ebMS message does not contain PullRequest");
         } else {

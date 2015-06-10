@@ -54,7 +54,7 @@ public class DeliverReceipts extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) {
+    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         // Check if this message contains receipt signals
         Collection<Receipt> rcptSignals = (Collection<Receipt>) 
                                                     mc.getProperty(MessageContextProperties.IN_RECEIPTS);
@@ -71,13 +71,7 @@ public class DeliverReceipts extends BaseHandler {
             // change its processing state to "out for delivery"
             log.debug("Prepare message [" + rcptSig.getMessageId() + "] for delivery");
             boolean readyForDelivery = false;
-            try {
-                readyForDelivery = MessageUnitDAO.startDeliveryOfMessageUnit(rcptSig);
-            } catch (DatabaseException dbe) {
-                // Ai, the processing state could not be changed. 
-                log.error("Updating the processing state failed! Details: msgId=" + rcptSig.getMessageId() 
-                            + ", Error: " + dbe.getMessage());                
-            } 
+            readyForDelivery = MessageUnitDAO.startDeliveryOfMessageUnit(rcptSig);
                         
             if(readyForDelivery) {
                 // Errors in this signal can be delivered to business application
@@ -88,9 +82,6 @@ public class DeliverReceipts extends BaseHandler {
                     MessageUnitDAO.setDone(rcptSig);
                 } catch (MessageDeliveryException ex) {                        
                     log.warn("Could not deliver error to application! Error details: " + ex.getMessage());
-                } catch (DatabaseException dbe) {
-                    log.error("Updating the processing state failed! Details: msgId=" + rcptSig.getMessageId() 
-                                + ", Error: " + dbe.getMessage());                
                 }
             } else {
                 log.info("Receipt signal [" + rcptSig.getMessageId() + "] is already processed for delivery");
@@ -117,17 +108,17 @@ public class DeliverReceipts extends BaseHandler {
         // Get the referenced message unit. There may be more than one MU with the given id, we assume they
         // all use the same P-Mode
         String refToMsgId = receipt.getRefToMessageId();
-        Collection<MessageUnit> refdMUs = null;
+        MessageUnit refdMsgUnit = null;
         try {
-            refdMUs = MessageUnitDAO.getSentMessageUnitsWithId(refToMsgId);
+            refdMsgUnit = MessageUnitDAO.getSentMessageUnitWithId(refToMsgId);
         } catch (DatabaseException dbe) {
             log.error("A database error occurred while searching for the referenced message unit! Error details:"
                         + dbe.getMessage());
         }
 
-        if (refdMUs != null && !refdMUs.isEmpty())
+        if (refdMsgUnit != null)
             // Found referenced message unit(s), use its P-Mode to determine if and how to deliver receipt
-            deliverySpec = getReceiptDelivery(refdMUs.iterator().next());
+            deliverySpec = getReceiptDelivery(refdMsgUnit);
         else
             // No messsage units found for refToMsgId. This should not occur here as this is already checked in
             // previous handler!

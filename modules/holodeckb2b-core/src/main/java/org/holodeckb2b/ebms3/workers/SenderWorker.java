@@ -65,7 +65,8 @@ public class SenderWorker extends AbstractWorkerTask {
         try {
             log.debug("Getting list of user messages to send");
 
-            List<MessageUnit> newMsgs = MessageUnitDAO.getMessageUnitsInState(ProcessingStates.READY_TO_PUSH);
+            List<MessageUnit> newMsgs = MessageUnitDAO.getMessageUnitsInState(MessageUnit.class,
+                                                                        new String[] {ProcessingStates.READY_TO_PUSH});
 
             if (newMsgs != null && newMsgs.size() > 0) {
                 log.info("Found " + newMsgs.size() + " messages to send");
@@ -79,13 +80,15 @@ public class SenderWorker extends AbstractWorkerTask {
                         log.info("Successfully processed message [" + muInProcess.getMessageId() + "]");
                     }else {
                         // Message probably already in process
-                        log.debug("Could not start processing message [" + message.getMessageId() + "] because switching to processing state was unsuccesful");
+                        log.debug("Could not start processing message [" + message.getMessageId() 
+                                    + "] because switching to processing state was unsuccesful");
                     }
                 }
             } else
                 log.info("No messages found that are ready for sending");
         } catch (DatabaseException dbError) {
-            log.error("Could not process message because a database error occurred. Details:" + dbError.toString() + "\n");
+            log.error("Could not process message because a database error occurred. Details:" 
+                        + dbError.toString() + "\n");
         }
     }
 
@@ -135,14 +138,14 @@ public class SenderWorker extends AbstractWorkerTask {
         
         try {
             log.debug("Start the message send process");
-            oc.execute(false);
+            oc.execute(true);
             
         } catch (AxisFault af) {
             // An error occurred while sending the message, 
             
         } finally {
             try { 
-                sc.cleanupTransport();
+                sc.cleanup();
             } catch (AxisFault af) {
                 
             }

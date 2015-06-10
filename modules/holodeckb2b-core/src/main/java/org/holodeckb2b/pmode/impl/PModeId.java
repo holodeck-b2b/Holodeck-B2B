@@ -21,14 +21,20 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
 
 /**
- *
  * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 class PModeId {
     
+    /**
+     * Identifies the PMode uniquely
+     */
     @Text
     String  id;
     
+    /**
+     * Specifies if the PMode ID attribute is required
+     */
     @Attribute(required = false)
     Boolean include = true;
     

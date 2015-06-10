@@ -47,7 +47,7 @@ public class CheckSentResult extends BaseHandler {
      */
     @Override
     protected byte inFlows() {
-        return OUT_FLOW;
+        return OUT_FLOW | OUT_FAULT_FLOW;
     }
 
     /**
@@ -83,8 +83,7 @@ public class CheckSentResult extends BaseHandler {
         
         if (messaging != null) {
             log.debug("Check result of sent operation");
-            Exception fault = mc.getFailureReason(); 
-            boolean   success = (fault == null);
+            boolean   success = (mc.getFailureReason() == null);
             log.debug("The sent operation was " + (success ? "" : "not ") + "successfull");
             
             //Change processing state of all message units in the message accordingly

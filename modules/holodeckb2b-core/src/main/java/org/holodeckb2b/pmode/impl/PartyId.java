@@ -18,6 +18,7 @@ package org.holodeckb2b.pmode.impl;
 
 import org.holodeckb2b.common.general.IPartyId;
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Text;
 
 /**
@@ -25,6 +26,7 @@ import org.simpleframework.xml.Text;
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
+@Root
 public class PartyId implements IPartyId {
     
     @Text

@@ -72,9 +72,10 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      * 
      * @throws AxisFault    When the directory or a file for temporarily storing the payload contents is not available 
      *                      and can not be created
+     * @throws DatabaseException When a database problem occurs when changing the processing state of the message unit
      */
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws AxisFault {
+    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws AxisFault, DatabaseException {
         
         Collection<IPayload> payloads = um.getPayloads();
         log.debug("UserMessage contains " + payloads.size() + " payloads.");
@@ -153,20 +154,10 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
             MessageUnitDAO.setReadyForDelivery(um);
         } catch (IOException | XMLStreamException ex) {
             log.fatal("Payload(s) could not be saved to temporary file! Details:" + ex.getMessage());
-            try { 
-                MessageUnitDAO.setFailed(um);
-            } catch (DatabaseException dbe) {
-                log.error("An error occurred while change the processing state of the message!" 
-                            + "Details: " + dbe.getMessage());
-            }
+            MessageUnitDAO.setFailed(um);
             // Stop processing as content can not be saved. Send error to sender of message
             throw new AxisFault("Unable to create file for temporarily storing payload content", ex);
-        } catch (DatabaseException ex) {
-            // Oops, something went wrong saving the data
-            log.error("A error occurred when updating the meta data in the database. Details: " + ex.getMessage());
-
-            //@todo: Create an error so response can be sent 
-        }
+        } 
         
         return InvocationResponse.CONTINUE;
     }

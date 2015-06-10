@@ -17,48 +17,25 @@
 package org.holodeckb2b.common.pmode;
 
 /**
- * Contains the P-Mode parameters for the exchange of a pull request or user message and its related messages (error and
- * or receipt). As a pull request does not contain any business information other than the MPC the requested user 
- * message should be pulled from the configuration is limited to security and error handling.
+ * Is the base class defining the P-Mode parameters shared for the exchange of a pull request, user messages and 
+ * related error messages.
+ * <p>The P-Mode model as described in appendix D of the ebMS specification also suggests that the P-Mode parameters
+ * for security are defined per message (see figure 15) and therefor would be part of <code>Flow</code>. Within Holodeck
+ * B2B we however assume that trading partners involved in a message exchange will use the same settings for all 
+ * messages they sent. Therefor security settings are included with the trading partners configuration.
  * 
- * @author Bram Bakx <bram at holodeck-b2b.org>
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface IFlow {
-    
- 
-    /**
-     * Gets the business information that must included in the message. Most of this information only applies to user
-     * messages as pull request do not contain business information. Only the MPC name which is contained in the 
-     * business info is contained in the pull request.
-     * <p><b>NOTE: </b>A P-Mode does not need to include this information. If not specified the information to include
-     * must be supplied during message submit.
-     * 
-     * @return The business information to include in the message as an {@link IBusinessInfo} object if specified by the
-     *         P-Mode, or<br>
-     *         <code>null</code> when not specified.
-     */
-    public IBusinessInfo getBusinessInfo();
-    
-    /**
-     * Gets the payload profile which defines how payloads are to be included in the message. Only applies to user 
-     * messages. As the payloads contain the actual business information, the profile is about the payload meta-data 
-     * like the maximum size of payloads, the number of payloads, whether they must compressed, etc.
-     * <p><b>NOTE: </b>Profiling the payloads is optional.  
-     * 
-     * @return An {@link IPayloadProfile} object containing the payload profile, or<br>
-     *         <code>null</code> when not specified. 
-     */
-    public IPayloadProfile getPayloadProfile();
-    
+        
     /**
      * Gets the configuration for handling errors which are caused by the pull request or user message exchanged in
-     * this flow. This configuration settings (largely) correspond with the P-Mode parameter group ErrorHandling.
+     * this flow. These configuration settings (largely) correspond with the P-Mode parameter group ErrorHandling.
      * <p>For the pull request the error handling configuration is (currently) limited to indication whether errors
      * should be reported to the business application as the other settings are not useful in case of a pull request. 
      * 
      * @return An {@link IErrorHandling} object representing the error handling configuration, or<br>
      *         <code>null</code> when not specified
      */
-    public IErrorHandling getErrorHandlingConfiguration();
+    public IErrorHandling getErrorHandlingConfiguration();    
 }

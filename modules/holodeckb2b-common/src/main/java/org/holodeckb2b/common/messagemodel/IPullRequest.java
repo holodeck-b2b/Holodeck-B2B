@@ -16,21 +16,13 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
-import org.holodeckb2b.common.general.IAuthenticationInfo;
-
 /**
  * Represents the information available of the PullRequest type of signal message.
  * <p>The only information contained in a PullRequest is the <i>MPC</i> (message partition channel) the message should 
  * be pulled from. See section 3 of the ebMS Core Specification for more information on the concept of pulling.
- * <p>It is however recommended that pulling uses authorization, so the message that contains the PullRequest should 
- * also contain information about the trading partner that wants to pull the message. The ebMS specification does not 
- * require how this <i>authentication info</i> should be transfered. Therefor a generic interface is used to define
- * access to this information. Here again the decoupling is used to allow for extension the supported types of partner
- * authentication. 
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see IMessageUnit
- * @see IAuthenticationInfo
  */
 public interface IPullRequest extends ISignalMessage {
 
@@ -41,13 +33,4 @@ public interface IPullRequest extends ISignalMessage {
      * @return      The MPC from which a message should be pulled
      */
     String getMPC();
-    
-    /**
-     * Gets the information to use for authorization of the pull.  
-     * 
-     * @return      If included in the message, an {@link IAuthenticationInfo} object representing the info to be used 
-     *              for authorizing the pull request.<br>
-     *              <code>null</code> if the message does not include any info for authorizing the pull request.
-     */
-    IAuthenticationInfo  getAuthenticationInfo();
 }

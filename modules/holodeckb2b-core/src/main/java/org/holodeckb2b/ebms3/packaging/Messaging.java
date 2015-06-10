@@ -75,7 +75,9 @@ public class Messaging {
         SOAPHeaderBlock messaging = null;
         
         try {
-            messaging = (SOAPHeaderBlock) env.getHeader().getFirstChildWithName(new QName(Constants.EBMS3_NS_URI, LOCAL_NAME)); // there should only be one messaging element
+            // there should only be one messaging element so we can just get the first one
+            messaging = (SOAPHeaderBlock) env.getHeader().getFirstChildWithName(
+                                                            new QName(Constants.EBMS3_NS_URI, LOCAL_NAME)); 
         } catch (Exception ex) {
             // Returned element not a header block or no header available -> can not be the messaging element, leave null 
             messaging = null;

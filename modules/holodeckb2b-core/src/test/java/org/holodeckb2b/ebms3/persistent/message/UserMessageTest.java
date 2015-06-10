@@ -746,10 +746,10 @@ public class UserMessageTest {
         
         em.getTransaction().commit();
         
-        Long numberOfRetransmits = null;
+        Long numberOfTransmits = null;
         
         try {
-            numberOfRetransmits = em.createNamedQuery("UserMessage.numOfRetransmits",
+            numberOfTransmits = em.createNamedQuery("UserMessage.numOfTransmits",
                     Long.class)
                     .setParameter("msgId", T_MSG_ID_1)
                     .getSingleResult();
@@ -758,7 +758,7 @@ public class UserMessageTest {
             fail();
         }
         
-        assertEquals(1, numberOfRetransmits.intValue());
+        assertEquals(1, numberOfTransmits.intValue());
         
         em.getTransaction().begin();
         
@@ -774,7 +774,7 @@ public class UserMessageTest {
         em.getTransaction().commit();
         
         try {
-            numberOfRetransmits = em.createNamedQuery("UserMessage.numOfRetransmits",
+            numberOfTransmits = em.createNamedQuery("UserMessage.numOfTransmits",
                     Long.class)
                     .setParameter("msgId", T_MSG_ID_1)
                     .getSingleResult();
@@ -783,7 +783,7 @@ public class UserMessageTest {
             fail();
         }
         
-        assertEquals(3, numberOfRetransmits.intValue());
+        assertEquals(3, numberOfTransmits.intValue());
         
     }
 }

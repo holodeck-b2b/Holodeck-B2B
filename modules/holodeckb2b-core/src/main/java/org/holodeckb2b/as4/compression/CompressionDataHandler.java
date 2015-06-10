@@ -18,6 +18,7 @@
 package org.holodeckb2b.as4.compression;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -90,8 +91,9 @@ public class CompressionDataHandler extends DataHandler {
      * is equal to "application/gzip" the data from the contained DataHandler will be compressed, otherwise the data
      * will be decompressed.
      * 
-     * @returns The MIME type of the output from this DataHandler
+     * @return The MIME type of the output from this DataHandler
      */
+    @Override
     public String getContentType() {
         return resultContentType;
     }
@@ -106,7 +108,13 @@ public class CompressionDataHandler extends DataHandler {
         return "binary";
     }
 
-    
+    /**
+     * Writes the data to the given <code>OutputStream</code>. Depending on the set content type the data will be either 
+     * compressed (content type equals "application/gzip") or decompressed (all other values).
+     * 
+     * @param out           The output stream to write the data to
+     * @throws IOException  When (de)compressing of the content fails
+     */
     @Override
     public void writeTo(OutputStream out) throws IOException {
         if (CompressionFeature.COMPRESSED_CONTENT_TYPE.equalsIgnoreCase(resultContentType))
@@ -114,6 +122,22 @@ public class CompressionDataHandler extends DataHandler {
         else
             decompress(out);
     }
+    
+    /**
+     * Reads the data from the attachment. Depending on the set content type the data will be either compressed 
+     * (content type equals "application/gzip") or decompressed (all other values).
+     * 
+     * @return An input stream to read the data from the attachment
+     * @throws IOException  When (de)compressing of the content fails     
+     */
+    @Override
+    public InputStream getInputStream() throws IOException {
+        if (CompressionFeature.COMPRESSED_CONTENT_TYPE.equalsIgnoreCase(resultContentType))
+            return new GZIPCompressingInputStream(super.getInputStream());
+        else
+            return new GZIPInputStream(super.getInputStream());
+    }
+    
     
     /**
      * Writes the data GZip compressed to the given output stream.

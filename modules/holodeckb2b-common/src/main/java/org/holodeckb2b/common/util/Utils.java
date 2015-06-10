@@ -323,4 +323,33 @@ public final class Utils {
         }
         return null;
     }
+
+    /**
+     * Compares two strings
+     *
+     * @param s     The first input string
+     * @param p     The second input string
+     * @return      -2 when both strings are non-empty and their values are different,<br>
+     *              -1 when both strings are empty,<br>
+     *              0  when both strings are non-empty but equal,<br>
+     *              1  when only the first string is non-empty,<br>
+     *              2  when only the second string is non-empty
+     */
+    public static int compareStrings(final String s, final String p) {
+        if (s == null || s.isEmpty()) {
+            if (p != null && !p.isEmpty()) {
+                return 2;
+            } else {
+                return -1;
+            }
+        } else if (p != null) {
+            if (s.equals(p)) {
+                return 0;
+            } else {
+                return -2;
+            }
+        } else {
+            return 1;
+        }
+    }
 } 

@@ -34,10 +34,10 @@
     must be retransmitted because there was no timely Receipt.
     
     De-activating this worker will stop the retransmission function
-    and therefore kill the Reception Awareness feature.
+    and therefore kill the AS4 Reception Awareness feature.
     =============================================================== -->
-    <worker name="retransmissionWorker" interval="10" activate="true"
-        workerClass="org.holodeckb2b.as4.workers.RetransmissionWorker"/>
+    <worker name="retransmissionWorker" interval="30" activate="true"
+        workerClass="org.holodeckb2b.as4.receptionawareness.RetransmissionWorker"/>
 
     <!-- ==============================================================
     This worker checks the pulling configuration and configure a

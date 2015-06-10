@@ -49,48 +49,40 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, final UserMessage um) {
+    protected InvocationResponse doProcessing(MessageContext mc, final UserMessage um) throws DatabaseException {
         
         // Prepare message for delivery by checking it is still ready for delivery and then 
         // change its processing state to "out for delivery"
         log.debug("Prepare message [" + um.getMessageId() + "] for delivery");
-        boolean readyForDelivery = true;
-        
-        try {
-            if(MessageUnitDAO.startDeliveryOfMessageUnit(um)) {
-                // Message can be delivered to business application
-                log.debug("Start delivery of user message");
-                try {
-                    // Get the delivery specification from the P-Mode
-                    IPMode pmode = HolodeckB2BCore.getPModeSet().get(um.getPMode());
-                    // For now we just have one leg, so we get the delivery spec of the first leg
-                    IDeliverySpecification deliveryMethod = pmode.getLegs().iterator().next().getDefaultDelivery();
-                    IMessageDeliverer deliverer = HolodeckB2BCore.getMessageDeliverer(deliveryMethod);
-                    log.debug("Delivering the message using delivery specification: " + deliveryMethod.getId());
-                    deliverer.deliver(um);
-                    // Indicate that message is delivered so receipt can be created
-                    mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);
-                    log.info("Successfully delivered user message [msgId=" + um.getMessageId() +"]");
-                    log.debug("Set the processing state to delivered");            
-                    MessageUnitDAO.setDelivered(um);                
-                } catch (MessageDeliveryException ex) {
-                    log.error("Could not deliver the user message [msgId=" + um.getMessageId() 
-                                + "] using specified delivery method!" 
-                                + "\n\tError details: " + ex.getMessage());
-                    // Indicate failure in processing state
-                    MessageUnitDAO.setDeliveryFailure(um);
-                }
-            } else {
-                // This message is not ready for delivery now which is caused by it already been delivered by another
-                // thread. This however should not occur normaly.
-                log.warn("Usermessage [" + um.getMessageId() + "] is already being delivered!");
+        if(MessageUnitDAO.startDeliveryOfMessageUnit(um)) {
+            // Message can be delivered to business application
+            log.debug("Start delivery of user message");
+            try {
+                // Get the delivery specification from the P-Mode
+                IPMode pmode = HolodeckB2BCore.getPModeSet().get(um.getPMode());
+                // For now we just have one leg, so we get the delivery spec of the first leg
+                IDeliverySpecification deliveryMethod = pmode.getLegs().iterator().next().getDefaultDelivery();
+                IMessageDeliverer deliverer = HolodeckB2BCore.getMessageDeliverer(deliveryMethod);
+                log.debug("Delivering the message using delivery specification: " + deliveryMethod.getId());
+                deliverer.deliver(um);
+                // Indicate that message is delivered so receipt can be created
+                mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);
+                log.info("Successfully delivered user message [msgId=" + um.getMessageId() +"]");
+                log.debug("Set the processing state to delivered");            
+                MessageUnitDAO.setDelivered(um);                
+            } catch (MessageDeliveryException ex) {
+                log.error("Could not deliver the user message [msgId=" + um.getMessageId() 
+                            + "] using specified delivery method!" 
+                            + "\n\tError details: " + ex.getMessage());
+                // Indicate failure in processing state
+                MessageUnitDAO.setDeliveryFailure(um);
             }
-        } catch (DatabaseException ex) {
-            // Ai, the processing state could not be changed. 
-            log.error("Updating the processing state failed! Details: msgId=" + um.getMessageId() 
-                        + ", Error: " + ex.getMessage());
+        } else {
+            // This message is not ready for delivery now which is caused by it already been delivered by another
+            // thread. This however should not occur normaly.
+            log.warn("Usermessage [" + um.getMessageId() + "] is already being delivered!");
         }
-        
+
         return InvocationResponse.CONTINUE;
     }
 }

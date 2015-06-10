@@ -26,7 +26,6 @@ import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
-import org.holodeckb2b.ebms3.errors.OtherContentError;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
@@ -51,11 +50,11 @@ public class ReadUserMessage extends BaseHandler {
 
     @Override
     protected byte inFlows() {
-        return IN_FLOW;
+        return IN_FLOW | IN_FAULT_FLOW;
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) {
+    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         // First get the ebMS header block, that is the eb:Messaging element
         SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
         
@@ -85,25 +84,12 @@ public class ReadUserMessage extends BaseHandler {
                 }
                 
                 // Store it in both database and message context for further processing
-                try {
-                    log.debug("Saving user message meta data to database");
-                    MessageUnitDAO.storeReceivedMessageUnit(umData);
-                    // We immediately start processing the message, so change state in database
-                    umData = MessageUnitDAO.startProcessingMessageUnit(umData);
-                    log.debug("Message meta data saved to database");
-                    
-                    mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umData);
-                    log.debug("User message with msgId " + umData.getMessageId() + " succesfully read");  
-                } catch (DatabaseException ex) {
-                    // Oops, something went wrong saving the data
-                    log.error("A error occurred when saving user message to database. Details: " + ex.getMessage());
-                    // Maybe this is just a glitch and the error can still be processed
-                    OtherContentError  dbFailure = new OtherContentError();
-                    dbFailure.setErrorDetail("Internal error prevented processing of message!");
-                    dbFailure.setCategory("Internal");
-                    
-                    MessageContextUtils.addGeneratedError(mc, dbFailure);
-                }
+                log.debug("Saving user message meta data to database");
+                MessageUnitDAO.storeReceivedMessageUnit(umData);
+                log.debug("Message meta data saved to database");
+
+                mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umData);
+                log.debug("User message with msgId " + umData.getMessageId() + " succesfully read");  
             }
         }
 

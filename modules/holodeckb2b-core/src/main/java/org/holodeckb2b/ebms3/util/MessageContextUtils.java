@@ -246,50 +246,85 @@ public class MessageContextUtils {
         Collection<ErrorMessage> errors = (ArrayList<ErrorMessage>) 
                 getPropertyFromOutMsgCtx(mc, MessageContextProperties.OUT_ERROR_SIGNALS);
         if (errors != null && !errors.isEmpty())
+            reqMUs.addAll(errors);
+        return reqMUs;
+    }    
+
+    /**
+     * Retrieves all message units in the received message. 
+     * 
+     * @param mc    The in flow message context
+     * @return      {@link Collection} of {@link MessageUnit} objects for the message units in the received message. 
+     */
+    public static Collection<MessageUnit> getRcvdMessageUnits(MessageContext mc) {
+        Collection<MessageUnit>   reqMUs = new ArrayList<MessageUnit>();
+        
+        UserMessage userMsg = (UserMessage) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
+        if (userMsg != null) 
+            reqMUs.add(userMsg);
+        PullRequest pullReq = (PullRequest) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
+        if (pullReq != null)
+            reqMUs.add(pullReq);
+        Collection<Receipt> receipts = (ArrayList<Receipt>) mc.getProperty(MessageContextProperties.IN_RECEIPTS);
+        if (receipts != null && !receipts.isEmpty())
             reqMUs.addAll(receipts);
+        Collection<ErrorMessage> errors = (ArrayList<ErrorMessage>) mc.getProperty(MessageContextProperties.IN_ERRORS);
+        if (errors != null && !errors.isEmpty())
+            reqMUs.addAll(errors);
         return reqMUs;
     }    
     
     /**
-     * Gets the primary message unit in the given message context. The primary message unit determines which settings 
-     * must be used for message wide P-Mode parameters like the destination, security settings, etc.
-     * <p>The primary message unit is determined by the type of message unit, the first message unit with the highest
-     * classified type is considered to be the primary message unit:<ol>
-     * <li>User message,</li>
-     * <li>Pull request,</li>
-     * <li>Receipt,</li>
-     * <li>Error.</li></ol>
+     * Gets the primary message unit from a message. The primary message unit determines which settings must be used for 
+     * message wide P-Mode parameters, i.e. parameters that do not relate to the content of a specific message unit. 
+     * Examples are the destination URL for a message and the WS-Security settings.
+     * <p>The primary message unit is determined by the type of message unit, but differs depending on whether the 
+     * message is sent or received by Holodeck B2B. The following table lists the priority of message unit types for
+     * each direction, the first message unit with the highest classified type is considered to be the primary message 
+     * unit of the message:
+     * <table border="1">
+     * <tr><th>Prio</th><th>Received</th><th>Sent</th></tr>
+     * <tr><td>1</td><td>User message</td><td>Pull request</td></tr>
+     * <tr><td>2</td><td>Receipt</td><td>User message</td></tr>
+     * <tr><td>3</td><td>Error</td><td>Receipt</td></tr>
+     * <tr><td>4</td><td>Pull request</td><td>Error</td></tr>
+     * </table>
      * 
-     * @param mc    The current {@link MessageContext}
+     * @param mc    The {@link MessageContext} of the message
      * @return      The primary message unit if one was found or <code>null</code> if no message unit could be found 
      *              in the message context
      */
-    public static MessageUnit getPrimaryMessageUnit(MessageContext mc) {
+    public static MessageUnit getPrimaryMessageUnit(final MessageContext mc) {
+        if (mc.getFLOW() == MessageContext.IN_FLOW || mc.getFLOW() == MessageContext.IN_FAULT_FLOW)
+            return getPrimaryMessageUnitFromInFlow(mc);
+        else 
+            return getPrimaryMessageUnitFromOutFlow(mc);
+    }
+    
+    /**
+     * Gets the primary message unit from a received message.
+     * 
+     * @param mc    The {@link MessageContext} of the message
+     * @return      The primary message unit if one was found or <code>null</code> if no message unit could be found 
+     *              in the message context
+     * @see         #getPrimaryMessageUnit(org.apache.axis2.context.MessageContext)
+     */
+    protected static MessageUnit getPrimaryMessageUnitFromInFlow(final MessageContext mc) {
         //
         // Class cast exceptions are ignored, the requested message unit type is considered to not be available
-        
         MessageUnit pMU = null;
         try {
-            pMU = (MessageUnit) mc.getProperty(MessageContextProperties.OUT_USER_MESSAGE);
+            pMU = (MessageUnit) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
         } catch (ClassCastException cce) {}
         
         if (pMU != null)
             // Message contains UserMessage, so this is the primary message unit
             return pMU;
         
-        // No user message, check for PullRequest
-        try {
-            pMU = (MessageUnit) mc.getProperty(MessageContextProperties.OUT_PULL_REQUEST);
-        } catch (ClassCastException cce) {}
-        
-        if (pMU != null)
-            // Message does contains PullRequest, so this becomes the primary message unit
-            return pMU;
-
-        // No pull request message, check for Receipt
+        // No user message, check for Receipt
         try {
             Collection<SignalMessage> rcpts = (Collection<SignalMessage>) 
-                                                        mc.getProperty(MessageContextProperties.OUT_RECEIPTS);
+                                                        mc.getProperty(MessageContextProperties.IN_RECEIPTS);
             pMU = rcpts.iterator().next();
         } catch (Exception ex) {}
         
@@ -300,10 +335,69 @@ public class MessageContextUtils {
         // No receipts either, maybe errors?
         try {
             Collection<SignalMessage> errs = (Collection<SignalMessage>) 
-                                                        mc.getProperty(MessageContextProperties.OUT_ERROR_SIGNALS);
+                                                        mc.getProperty(MessageContextProperties.IN_ERRORS);
             pMU = errs.iterator().next();
         } catch (Exception ex) {}
         
+        if (pMU != null)
+            // Message does contain error, so this becomes the primary message unit
+            return pMU;
+        
+        // No errors, maybe a PullRequest
+        try {
+            pMU = (MessageUnit) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
+        } catch (ClassCastException cce) {}
+        
+        if (pMU != null)
+            // Message does contain error, so this becomes the primary message unit
+            return pMU;
+        else // no message unit in this context
+            return null;
+    }
+    
+    /**
+     * Gets the primary message unit from a message to be sent.
+     * 
+     * @param mc    The {@link MessageContext} of the message
+     * @return      The primary message unit if one was found or <code>null</code> if no message unit could be found 
+     *              in the message context
+     * @see         #getPrimaryMessageUnit(org.apache.axis2.context.MessageContext)
+     */
+    protected static MessageUnit getPrimaryMessageUnitFromOutFlow(final MessageContext mc) {
+        //
+        // Class cast exceptions are ignored, the requested message unit type is considered to not be available
+        MessageUnit pMU = null;
+        try {
+            pMU = (MessageUnit) mc.getProperty(MessageContextProperties.OUT_PULL_REQUEST);
+        } catch (ClassCastException cce) {}
+        if (pMU != null)
+            // Message contains PullRequest, so this is the primary message unit
+            return pMU;
+        
+        // No PullRequest, check for User message
+        try {
+            pMU = (MessageUnit) mc.getProperty(MessageContextProperties.OUT_USER_MESSAGE);
+        } catch (ClassCastException cce) {}
+        if (pMU != null)
+            // Message does contains User Message, so this becomes the primary message unit
+            return pMU;
+
+        // No pull request message, check for Receipt
+        try {
+            Collection<SignalMessage> rcpts = (Collection<SignalMessage>) 
+                                                        mc.getProperty(MessageContextProperties.OUT_RECEIPTS);
+            pMU = rcpts.iterator().next();
+        } catch (Exception ex) {}
+        if (pMU != null)
+            // Message does contain receipt, so this becomes the primary message unit
+            return pMU;
+        
+        // No receipts either, maybe errors?
+        try {
+            Collection<SignalMessage> errs = (Collection<SignalMessage>) 
+                                                        mc.getProperty(MessageContextProperties.OUT_ERROR_SIGNALS);
+            pMU = errs.iterator().next();
+        } catch (Exception ex) {}        
         if (pMU != null)
             // Message does contain error, so this becomes the primary message unit
             return pMU;

@@ -50,7 +50,7 @@ public class PrepareResponseMessage extends BaseHandler {
 
     @Override
     protected byte inFlows() {
-        return OUT_FLOW | RESPONDER;
+        return OUT_FLOW | OUT_FAULT_FLOW | RESPONDER;
     }
 
     @Override
@@ -79,7 +79,7 @@ public class PrepareResponseMessage extends BaseHandler {
             log.debug("Response does not contain receipt signal");
         
         // Check if there are error signal messages to be included
-        log.debug("Check for error signals to be included");
+        log.debug("Check for error signals generated during in flow to be included");
         Collection<ErrorMessage> errors = (Collection<ErrorMessage>) MessageContextUtils.getPropertyFromInMsgCtx(mc, 
                                                                       MessageContextProperties.OUT_ERROR_SIGNALS);
         if (errors == null || errors.isEmpty())
@@ -87,7 +87,7 @@ public class PrepareResponseMessage extends BaseHandler {
         else if (errors.size() > 1) {
             // The were multiple error signals generated in the in flow, check if bundling is allowed
             log.debug("Response contains multiple error signals");
-            if (Config.isBundlingFeatureEnabled()) {
+            if (Config.allowSignalBundling()) {
                 // Bundling is enabled, so include all errors
                 log.debug("Bundling allowed, add all errors to response");
                 // Copy to current context so it gets processed correctly

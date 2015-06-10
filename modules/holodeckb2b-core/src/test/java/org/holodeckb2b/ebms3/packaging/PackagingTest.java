@@ -23,23 +23,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
-import org.junit.After;
-import org.junit.Before;
+import static org.junit.Assert.fail;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -53,10 +47,16 @@ import org.xml.sax.SAXException;
  */
 public class PackagingTest {
     
-    private File    ebMSschemaFile;
+    private String    ebMSschemaFile;
+    private String    SOAP11schemaFile;
+    private String    SOAP12schemaFile;
+    
+    
     
     public PackagingTest() {
-        ebMSschemaFile = new File(this.getClass().getClassLoader().getResource("xsd/ebms-header-3_0-200704_refactored.xsd").getPath());
+        ebMSschemaFile = this.getClass().getClassLoader().getResource("xsd/ebms-header-3_0-200704_refactored.xsd").getPath();
+        SOAP11schemaFile = this.getClass().getClassLoader().getResource("xsd/soap11-envelope.xsd").getPath();
+        SOAP12schemaFile = this.getClass().getClassLoader().getResource("xsd/soap12-envelope.xsd").getPath();
     }
     
     /**
@@ -104,11 +104,13 @@ public class PackagingTest {
      */
     private void assertValidXML(String xmlFile) {
         try {        
-            Validator validator = SchemaFactory.newInstance( javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI ).newSchema(ebMSschemaFile).newValidator();  
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();  
             dbf.setNamespaceAware( true );  
-            Document xml = dbf.newDocumentBuilder().parse( new InputSource( new FileReader(xmlFile) ) );  
-            validator.validate( new DOMSource( xml ) );
+            dbf.setValidating(true);
+            dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema");
+            dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaSource", 
+                                new String[] {ebMSschemaFile, SOAP11schemaFile, SOAP12schemaFile});
+            Document xml = dbf.newDocumentBuilder().parse( new InputSource( new FileReader(xmlFile) ) );              
         } catch (SAXException ex) {
             Logger.getLogger(PackagingTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();

@@ -11,7 +11,7 @@ NOTE: Not suitable for actual message submission to Holodeck!
     <PayloadInfo>
         <PartInfo location="http://JUsQVnjp/">
         </PartInfo>
-        <PartInfo location="http://wNUpefyz/">
+        <PartInfo containment="external" uri="http://test.holodeck-b2b.org/payload">
         </PartInfo>
     </PayloadInfo>
 </MessageMetaData>

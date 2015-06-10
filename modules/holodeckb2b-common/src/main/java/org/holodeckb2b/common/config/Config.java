@@ -27,6 +27,10 @@ import org.apache.axis2.description.Parameter;
 /**
  * Contains the configuration of the Holodeck B2B Core.
  * 
+ * <p>NOTE: Current implementation does not encrypt the keystore passwords! Therefore access to the module.xml file 
+ * SHOULD be limited to the account that is used to run Holodeck B2B.
+ * @todo Encryption of keystore passwords
+ * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class Config {
@@ -58,9 +62,9 @@ public class Config {
     private String  tempDir = null;
     
     /*
-     * Indication whether more extensive bundling of message units is allowed
+     * Indication whether bundling of signals is allowed
      */
-    private boolean bundling = false;
+    private boolean allowSignalBundling = false;
     
     /*
      * Default setting whether errors on errors should be reported to sender or not
@@ -71,6 +75,26 @@ public class Config {
      * Default setting whether errors on receipts should be reported to sender or not
      */
     private boolean defaultReportErrorOnReceipt = false;
+    
+    /*
+     * Indication whether the strict error reference check from the spec should be used
+     */
+    private boolean useStrictErrorReferencesCheck = false;
+    
+    /*
+     * The password of the keystore that holds the certificates with the private keys
+     */
+    private String  privKeyStorePassword = null;
+    
+    /*
+     * The password of the keystore that holds the certificates with the public keys
+     */
+    private String  pubKeyStorePassword = null;    
+    
+    /*
+     * Default setting whether the revocation of a certificate should be checked 
+     */
+    private boolean defaultRevocationCheck = false;
     
     /*
      * The Axis2 configuration context that is used to process the messages
@@ -131,9 +155,10 @@ public class Config {
         config.tempDir = (tempDir.endsWith(FileSystems.getDefault().getSeparator()) ? tempDir 
                             : tempDir + FileSystems.getDefault().getSeparator());
         
-        // Option to enable bundling feature
-        String bundling = readModuleParameter(module, "BundlingFeature");
-        config.bundling = "on".equalsIgnoreCase(bundling) || "true".equalsIgnoreCase(bundling) || "1".equalsIgnoreCase(bundling);        
+        // Option to enable signal bundling
+        String bundling = readModuleParameter(module, "AllowSignalBundling");
+        config.allowSignalBundling = "on".equalsIgnoreCase(bundling) || "true".equalsIgnoreCase(bundling) 
+                                        || "1".equalsIgnoreCase(bundling);        
 
         // Default setting for reporting Errors on Errors
         String defErrReporting = readModuleParameter(module, "ReportErrorOnError");
@@ -145,6 +170,24 @@ public class Config {
         config.defaultReportErrorOnReceipt = "on".equalsIgnoreCase(defErrReporting) 
                                             || "true".equalsIgnoreCase(defErrReporting) 
                                             || "1".equalsIgnoreCase(defErrReporting);        
+        
+        // Option to use strict error references check 
+        String strictErrorRefCheck = readModuleParameter(module, "StrictErrorReferencesCheck");
+        config.useStrictErrorReferencesCheck = "on".equalsIgnoreCase(strictErrorRefCheck) 
+                                                || "true".equalsIgnoreCase(strictErrorRefCheck) 
+                                                || "1".equalsIgnoreCase(strictErrorRefCheck);        
+        
+        // The password for the keystore holding the private keys
+        config.privKeyStorePassword = readModuleParameter(module, "PrivateKeyStorePassword");
+        
+        // The password for the keystore holding the public keys
+        config.pubKeyStorePassword = readModuleParameter(module, "PublicKeyStorePassword");
+        
+        // Default setting for certificate revocation check
+        String certRevocationCheck = readModuleParameter(module, "CertificateRevocationCheck");
+        config.defaultRevocationCheck = "on".equalsIgnoreCase(certRevocationCheck) 
+                                                || "true".equalsIgnoreCase(certRevocationCheck) 
+                                                || "1".equalsIgnoreCase(certRevocationCheck);        
         
     }
     
@@ -219,18 +262,18 @@ public class Config {
     }
     
     /**
-     * Indicates whether more extensive bundling of message units is allowed. When enabled Holodeck B2B
-     * will add message units in one ebMS message when it detects they are for the same destination MSH.
+     * Indicates whether bundling of signal message units in a response message is allowed. When enabled Holodeck B2B
+     * can add multiple signal message units generated during the processing of the request message to the response. 
      * This however will create ebMS messages that DO NOT conform to the ebMS v3 Core Spec and AS4 profile.
-     * <p>The default setting is not to use extensive bundling to ensure Core Spec and AS4 compliant ebMS 
-     * messages. To enable the feature set the <i>BundlingFeature</i> to "on" or "true".
+     * <p>The default setting is not to allow this bundling to ensure Core Spec and AS4 compliant ebMS messages. To 
+     * enable the feature set the <i>AllowSignalBundling</i> to "on" or "true".
      * 
-     * @return Indication whether bundling feature is enabled to allow for more extensive bundling
+     * @return Indication whether bundling of signals in a response is allowed
      */    
-    public static boolean isBundlingFeatureEnabled() {
+    public static boolean allowSignalBundling() {
         assertInitialized();
         
-        return config.bundling;
+        return config.allowSignalBundling;
     }
 
     /**
@@ -259,6 +302,56 @@ public class Config {
     public static boolean shouldReportErrorOnReceipt() {
         assertInitialized();        
         return config.defaultReportErrorOnReceipt;
+    }
+    
+    /**
+     * Indicates if the references in an Error signal message unit should be checked using the strict requirements 
+     * defined in the Core Specification (all references equal) or if a bit more relaxed check can be used (signal level
+     * reference empty, but individual errors have the same reference).
+     * <p>Default the more relaxed check is used. To change this set the value of the <i>StrictErrorReferencesCheck<i>
+     * parameter to <i>"true"</i>.
+     * 
+     * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
+     *         <code>false</code> otherwise 
+     */
+    public static boolean useStrictErrorRefCheck() {
+        assertInitialized();
+        return config.useStrictErrorReferencesCheck;
+    }
+    
+    /**
+     * Gets the password for the keystore that holds the certificates with the private keys. 
+     * 
+     * @return  The password for accessing the keystore with the private keys
+     */
+    public static String getPrivateKeyStorePassword() {
+        assertInitialized();
+        return config.privKeyStorePassword;
+    }
+    
+    /**
+     * Gets the password for the keystore that holds the certificates with the public keys. 
+     * 
+     * @return  The password for accessing the keystore with the public keys
+     */
+    public static String getPublicKeyStorePassword() {
+        assertInitialized();
+        return config.pubKeyStorePassword;
+    }
+
+    /**
+     * Gets the global setting whether Holodeck B2B should check if a certificate is revoked. As an error that occurs 
+     * during the revocation check will result in rejection of the complete ebMS message the default value is <i>false
+     * </i>. If required the revocation check can be enable in the P-Mode configuration.
+     * <p>To change the default setting for the revocation check change the value of the <i>CertificateRevocationCheck
+     * </i> parameter to <i>"true"</i>.
+     * 
+     * @return <code>true</code> if the revocation of certificates should by default be checked,<br>
+     *         <code>false</code> otherwise 
+     */
+    public static boolean shouldCheckCertificateRevocation() {
+        assertInitialized();
+        return config.defaultRevocationCheck;
     }
     
     /**

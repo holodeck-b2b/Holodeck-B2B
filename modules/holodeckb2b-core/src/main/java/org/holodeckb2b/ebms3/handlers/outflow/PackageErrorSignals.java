@@ -135,7 +135,7 @@ public class PackageErrorSignals extends BaseHandler {
             
             if (um != null) {
                 log.debug("Message does contain an UserMessage for sending, SOAPFault should not be added");
-                return true;
+                return false;
             }
         } catch (Exception e) {}
         
@@ -145,7 +145,7 @@ public class PackageErrorSignals extends BaseHandler {
             
             if (pr != null) {
                 log.debug("Message does contain a PullRequest for sending, SOAPFault should not be added");
-                return true;
+                return false;
             }
         } catch (Exception e) {}
         
@@ -153,9 +153,9 @@ public class PackageErrorSignals extends BaseHandler {
         try {
             ArrayList<Receipt> rcpts = (ArrayList<Receipt>) mc.getProperty(MessageContextProperties.OUT_RECEIPTS);
             
-            if (rcpts != null || rcpts.isEmpty()) {
+            if (rcpts != null && !rcpts.isEmpty()) {
                 log.debug("Message does contain a Receipt for sending, SOAPFault should not be added");
-                return true;
+                return false;
             }
         } catch (Exception e) {}
 
@@ -164,7 +164,8 @@ public class PackageErrorSignals extends BaseHandler {
     }
 
     /**
-     * Adds a <i>SOAP Fault</i> to the message indicating that there was a problem during ebMS processing. 
+     * Adds or replaces an existing <i>SOAP Fault</i> to the message indicating that there was a problem during ebMS 
+     * processing. 
      * <p>The added fault refers to the ebMS Error signals included in the message and does not contain detailed
      * error information.
      * 
@@ -173,7 +174,10 @@ public class PackageErrorSignals extends BaseHandler {
     protected void addSOAPFault(SOAPEnvelope env) {
         SOAPFactory factory = (SOAPFactory) env.getOMFactory();
         SOAPBody    body = env.getBody();
-        SOAPFault   fault = factory.createSOAPFault(body);
+        SOAPFault   fault = body.getFault();
+        
+        if (fault == null)
+            fault = factory.createSOAPFault(body);
 
         // The content of the SOAP Fault differs between SOAP 1.1 and 1.2, so check version to use
         boolean isSoap11 = env.getVersion() instanceof SOAP11Version;
@@ -196,7 +200,5 @@ public class PackageErrorSignals extends BaseHandler {
             fReasonText.setText(reason);
             fReasonText.setLang("en");
         }
-        
-        body.addFault(fault);
     }
 }

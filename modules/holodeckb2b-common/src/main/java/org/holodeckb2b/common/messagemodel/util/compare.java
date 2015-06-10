@@ -45,8 +45,21 @@ public final class compare {
         String r1 = tp1.getRole(), r2 = tp2.getRole();
         equal = (r1 == null ? r2 == null : r1.equals(r2));
         
-        Collection<IPartyId> pids1 = tp1.getPartyIds(), pids2 = tp2.getPartyIds();
-        equal &= pids1.size() == pids2.size();
+        equal &= PartyIds(tp1.getPartyIds(), tp2.getPartyIds());        
+        
+        return equal;
+    }
+    
+    /**
+     * Checks if two <code>Collection</code>s of {@link IPartyId} are equal.
+     * 
+     * @param pids1
+     * @param pids2
+     * @return      <code>true</code> if both collection contain the same party ids,
+     *              <code>false</code> otherwise
+     */
+    public static boolean PartyIds(Collection<IPartyId> pids1, Collection<IPartyId> pids2) {
+        boolean equal = pids1.size() == pids2.size();
         
         // Check every PartyId from the first collection to exist in the second and ensure all id's from the second
         // collection have been checked

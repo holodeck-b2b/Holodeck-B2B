@@ -34,7 +34,7 @@ import org.simpleframework.xml.Transient;
  * can create the actual deliverers. As the message deliverer may need configuration the delivery specification element
  * may contain one or more <code>Parameter</code> elements. These consist of name value pairs and will be passed to the 
  * factory.
- * <p>Delivery specifications are cached by the Holodeck B2B Core and therefor need to be uniquely identified. For this
+ * <p>Delivery specifications are cached by the Holodeck B2B Core and therefore need to be uniquely identified. For this
  * identification the P-Mode id is used in combination with the delivery type (default, receipt or error). Because the
  * class does not know for which type of delivery it is used the class representing the parent element is responsible 
  * for setting the id.

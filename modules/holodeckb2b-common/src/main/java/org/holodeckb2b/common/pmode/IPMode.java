@@ -19,7 +19,6 @@ package org.holodeckb2b.common.pmode;
 import java.util.Collection;
 import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.common.general.IAgreement;
-import org.holodeckb2b.common.general.ITradingPartner;
 
 /**
  * Represents a P-Mode that governs the exchange of messages. The P-Mode concept is described in the ebMS v3 Core 
@@ -101,22 +100,22 @@ public interface IPMode {
      * that sends the first ebMS message but is not necessarily acting in the <i>Sending</i> role because in a pull 
      * binding the first message is a pull request and the initiating partner is the receiver of the user message.
      * 
-     * @return  An {@link ITradingPartner} object identifying the initiator of this message exchange, or<br>
-     *          <code>null</code> if this information is not specified by the P-Mode. In this case the trading partner
-     *          information must be supplied when the user message is submitted.
+     * @return An {@link ITradingPartnerConfiguration} object identifying the initiator of this message exchange, or<br>
+     *         <code>null</code> if this information is not specified by the P-Mode. In this case the trading partner
+     *         information must be supplied when the user message is submitted.
      */
-    public ITradingPartner getInitiator();
+    public ITradingPartnerConfiguration getInitiator();
     
     /**
      * Gets information on the trading partner that responds to the initial message. Note that this is not necessarily 
      * the partner acting in the <i>Receiving</i> role because in a pull binding it may be responding to a pull request
      * with an user message and therefore be acting as <i>Sender</i>.
      * 
-     * @return  An {@link ITradingPartner} object identifying the responder of this message exchange, or<br>
-     *          <code>null</code> if this information is not specified by the P-Mode. In this case the trading partner
-     *          information must be supplied when the user message is submitted.
+     * @return An {@link ITradingPartnerConfiguration} object identifying the responder of this message exchange, or<br>
+     *         <code>null</code> if this information is not specified by the P-Mode. In this case the trading partner
+     *         information must be supplied when the user message is submitted.
      */
-    public ITradingPartner getResponder();
+    public ITradingPartnerConfiguration getResponder();
     
     /**
      * Gets the configuration of the legs that are part of the message exchange governed by this P-Mode. A leg describes

@@ -36,6 +36,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.common.general.IProperty;
 import org.holodeckb2b.common.general.ITradingPartner;
 import org.holodeckb2b.common.messagemodel.ICollaborationInfo;
@@ -45,7 +46,7 @@ import org.holodeckb2b.ebms3.persistent.general.Property;
 import org.holodeckb2b.ebms3.persistent.general.TradingPartner;
 
 /**
- * Is a persistency class representing an ebMS User Message messaage unit that 
+ * Is a persistency class representing an ebMS User Message message unit that 
  * is processed by Holodeck B2B. 
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -61,7 +62,7 @@ import org.holodeckb2b.ebms3.persistent.general.TradingPartner;
                     + "AND s1.START = (SELECT MAX(s2.START) FROM um.states s2) " 
                     + "AND s1.NAME = '" + ProcessingStates.DELIVERED + "'"
             ),
-        @NamedQuery(name="UserMessage.numOfRetransmits",
+        @NamedQuery(name="UserMessage.numOfTransmits",
             query = "SELECT COUNT(s1.NAME) "
                     + "FROM UserMessage um JOIN um.states s1 " 
                     + "WHERE um.MESSAGE_ID = :msgId " 
@@ -91,7 +92,11 @@ public class UserMessage extends MessageUnit implements Serializable, org.holode
     }
     
     public void setMPC(String mpc) {
-        MPC = mpc;
+        // If no MPC is given automatically assign the default one
+        if (mpc == null || mpc.isEmpty())
+            MPC = Constants.DEFAULT_MPC;
+        else
+            MPC = mpc;
     }
 
     @Override
@@ -178,7 +183,10 @@ public class UserMessage extends MessageUnit implements Serializable, org.holode
      * 2) The primary key field is inherited from super class
      */
     
-    private String              MPC;
+    /**
+     * If no specific MPC is assigned to the user message the default MPC is assumed.
+     */
+    private String              MPC = Constants.DEFAULT_MPC;
     
     /*
      * A user message is always associated with two trading partners, one

@@ -46,10 +46,10 @@ public class PMode implements IPMode {
     private String mepBinding;
     
     @Element (name = "Initiator", required = false)
-    private TradingPartner initiator;
+    private TradingPartnerConfiguration initiator;
     
     @Element (name = "Responder", required = false)
-    private TradingPartner responder;
+    private TradingPartnerConfiguration responder;
     
     @Element (name = "Agreement", required = false)
     private Agreement agreement;
@@ -95,6 +95,11 @@ public class PMode implements IPMode {
         return pmodeId.id;
     }
     
+    /**
+     * Gets the P-Mode <code>id</code> include parameter.
+     * 
+     * @return The PMode <code>id</code> include parameter.
+     */
     @Override
     public Boolean includeId() {
         return pmodeId.include;
@@ -135,7 +140,7 @@ public class PMode implements IPMode {
      * @return The PMode <code>initiator</code> 
      */
     @Override
-    public TradingPartner getInitiator() {
+    public TradingPartnerConfiguration getInitiator() {
         return this.initiator;
     }
     
@@ -145,7 +150,7 @@ public class PMode implements IPMode {
      * @return The PMode <code>responder</code> 
      */
     @Override
-    public TradingPartner getResponder() {
+    public TradingPartnerConfiguration getResponder() {
         return this.responder;
     }    
     

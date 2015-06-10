@@ -20,24 +20,25 @@ package org.holodeckb2b.pmode.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.holodeckb2b.common.as4.pmode.ILegAS4;
+import org.holodeckb2b.common.as4.pmode.IAS4Leg;
 import org.holodeckb2b.common.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.common.delivery.IDeliverySpecification;
-import org.holodeckb2b.common.pmode.IFlow;
 import org.holodeckb2b.common.pmode.IProtocol;
+import org.holodeckb2b.common.pmode.IPullRequestFlow;
 import org.holodeckb2b.common.pmode.IReceiptConfiguration;
+import org.holodeckb2b.common.pmode.IUserMessageFlow;
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.core.Commit;
 
 
 /**
- *
  * @author Bram Bakx <bram at holodeck-b2b.org>
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 
-public class Leg implements ILegAS4 {
+public class Leg implements IAS4Leg {
      
     @Element (name = "Protocol", required = false)
     private Protocol protocol;
@@ -51,13 +52,13 @@ public class Leg implements ILegAS4 {
     @Element ( name = "DefaultDelivery", required = false)
     private DeliverySpecification defaultDelivery;
     
-    @ElementList (entry = "PullRequestFlow", inline = true, required = false)
-    private ArrayList<Flow> pullRequestFlows;
+    @ElementList (entry = "PullRequestFlow", type = PullRequestFlow.class, inline = true, required = false)
+    private ArrayList<IPullRequestFlow> pullRequestFlows;
     
     @Element (name = "UserMessageFlow", required = false)
-    private Flow userMessageFlow;
+    private UserMessageFlow userMessageFlow;
     
-    @Element (name = "Label", required = false)
+    @Attribute (name = "label", required = false)
     private Label label;
     
     /**
@@ -84,7 +85,7 @@ public class Leg implements ILegAS4 {
     /**
      * Returns the leg label
      * 
-     * @return The leg <code>labell</code>
+     * @return The leg <code>label</code>
      */
     @Override
     public Label getLabel() {
@@ -100,7 +101,12 @@ public class Leg implements ILegAS4 {
     public IProtocol getProtocol() {
         return this.protocol;
     }
-            
+    
+    /**
+     * Returns the leg default delivery
+     * 
+     * @return The leg <code>default delivery</code>
+     */
     @Override
     public IDeliverySpecification getDefaultDelivery() {
         return defaultDelivery;
@@ -112,7 +118,7 @@ public class Leg implements ILegAS4 {
      * @return The leg pull request <code>flow</code>
      */
     @Override
-    public List getPullRequestFlows() {
+    public List<IPullRequestFlow> getPullRequestFlows() {
         return this.pullRequestFlows;
     }
     
@@ -122,12 +128,13 @@ public class Leg implements ILegAS4 {
      * @return The leg user message <code>flow</code> 
      */
     @Override
-    public IFlow getUserMessageFlow() {
+    public IUserMessageFlow getUserMessageFlow() {
         return this.userMessageFlow;
     }
     
     /**
      * Returns the leg receipt.
+     * 
      * @return The leg <code>receipt</code> 
      */
     @Override
@@ -135,6 +142,11 @@ public class Leg implements ILegAS4 {
         return this.receipt;
     }
 
+    /**
+     * Returns the leg reception awareness.
+     * 
+     * @return  The leg <code>reception awareness</code>
+     */    
     @Override
     public IReceptionAwareness getReceptionAwareness() {
         return rcptAwareness;

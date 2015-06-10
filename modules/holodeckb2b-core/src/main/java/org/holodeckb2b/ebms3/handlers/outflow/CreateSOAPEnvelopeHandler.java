@@ -42,7 +42,7 @@ public class CreateSOAPEnvelopeHandler extends BaseHandler {
 
     @Override
     protected byte inFlows() {
-        return OUT_FLOW;
+        return OUT_FLOW | OUT_FAULT_FLOW;
     }
 
     @Override
@@ -85,6 +85,9 @@ public class CreateSOAPEnvelopeHandler extends BaseHandler {
                 throw new AxisFault("Could not add the SOAP envelope to the message!");
             }
             log.debug("Added SOAP envelope to message context");
+        } else {
+            log.debug("Check that ebMS namespace is declared on the SOAP envelope");
+            SOAPEnv.declareNamespaces(env); 
         }
         
         log.debug("Add empty eb3:Messaging element");

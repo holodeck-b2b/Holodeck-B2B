@@ -20,6 +20,8 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import java.util.Collection;
 import java.util.Iterator;
 import org.apache.axis2.context.MessageContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.delivery.IDeliverySpecification;
 import org.holodeckb2b.common.delivery.IMessageDeliverer;
 import org.holodeckb2b.common.delivery.MessageDeliveryException;
@@ -31,6 +33,7 @@ import org.holodeckb2b.common.pmode.IErrorHandling;
 import org.holodeckb2b.common.pmode.IFlow;
 import org.holodeckb2b.common.pmode.ILeg;
 import org.holodeckb2b.common.pmode.IPMode;
+import org.holodeckb2b.common.pmode.IPullRequestFlow;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
@@ -47,6 +50,8 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * <p>To prevent that errors in the error message unit are delivered twice in parallel delivery only takes place when 
  * the processing state of the unit can be successfully changed from {@link ProcessingStates#READY_FOR_DELIVERY} to 
  * {@link ProcessingStates#OUT_FOR_DELIVERY}.
+ * <p>To enable easy monitoring all received error signals will always be logged to a separate log 
+ * (<code>org.holodeckb2b.msgproc.errors.received</code>). 
  * <p>NOTE: The actual delivery to the business application is done through a {@link IMessageDeliverer} which is 
  * specified in the P-Mode for this message unit. That P-Mode is the same as the P-Mode of the referenced message or
  * if no message is referenced and this message unit is received as a response the primary message unit in the request.
@@ -54,14 +59,20 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class DeliverErrors extends BaseHandler {
-
+    
+    /**
+     * Errors will always be logged to a special error log. Using the logging configuration users can decide if this 
+     * logging should be enabled and how errors should be logged.
+     */
+    private Log     errorLog = LogFactory.getLog("org.holodeckb2b.msgproc.errors.received");
+    
     @Override
     protected byte inFlows() {
         return IN_FLOW | IN_FAULT_FLOW;
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) {
+    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         // Check if this message contains error signals
         Collection<ErrorMessage> errorSignals = (Collection<ErrorMessage>) 
                                                     mc.getProperty(MessageContextProperties.IN_ERRORS);
@@ -78,16 +89,13 @@ public class DeliverErrors extends BaseHandler {
             // change its processing state to "out for delivery"
             log.debug("Prepare message [" + errorSig.getMessageId() + "] for delivery");
             boolean readyForDelivery = false;
-            try {
-                readyForDelivery = MessageUnitDAO.startDeliveryOfMessageUnit(errorSig);
-            } catch (DatabaseException dbe) {
-                // Ai, the processing state could not be changed. 
-                log.error("Updating the processing state failed! Details: msgId=" + errorSig.getMessageId() 
-                            + ", Error: " + dbe.getMessage());                
-            } 
+            readyForDelivery = MessageUnitDAO.startDeliveryOfMessageUnit(errorSig);
                         
             if(readyForDelivery) {
                 // Errors in this signal can be delivered to business application
+                // Always log the error signal, even if it does not need to be delivered to the business application
+                log.debug("Write error signal to error log");
+                errorLog.error(errorSig);                
                 log.debug("Start delivery of Errors in signal [" + errorSig.getMessageId() + "]");
                 // We deliver each error in the signal separately because they can reference different
                 // messages and therefor have different delivery specs
@@ -99,12 +107,7 @@ public class DeliverErrors extends BaseHandler {
                     }
                 
                 // All errors in signal processed, change the processing state to done
-                try {
-                    MessageUnitDAO.setDone(errorSig);
-                } catch (DatabaseException dbe) {
-                    log.error("Updating the processing state failed! Details: msgId=" + errorSig.getMessageId() 
-                                + ", Error: " + dbe.getMessage());                
-                }
+                MessageUnitDAO.setDone(errorSig);
             } else {
                 log.info("Error signal [" + errorSig.getMessageId() + "] is already processed for delivery");
             }
@@ -142,17 +145,17 @@ public class DeliverErrors extends BaseHandler {
             log.debug("The error references message unit with msgId=" + refToMsgId);
             // Get the referenced message unit. There may be more than one MU with the given id, we assume they
             // all use the same P-Mode
-            Collection<MessageUnit> refdMUs = null;
+            MessageUnit refdMsgUnit = null;
             try {
-                refdMUs = MessageUnitDAO.getSentMessageUnitsWithId(refToMsgId);
+                refdMsgUnit = MessageUnitDAO.getSentMessageUnitWithId(refToMsgId);
             } catch (DatabaseException dbe) {
                 log.error("A database error occurred while searching for the referenced message unit! Error details:"
                             + dbe.getMessage());
             }
 
-            if (refdMUs != null && !refdMUs.isEmpty())
+            if (refdMsgUnit != null)
                 // Found referenced message unit(s), use its P-Mode to determine if and how to deliver error
-                deliverySpec = getErrorDelivery(refdMUs.iterator().next());
+                deliverySpec = getErrorDelivery(refdMsgUnit);
             else
                 // No messsage units found for refToMsgId. This should not occur here as this is already checked in
                 // previous handler!
@@ -235,12 +238,12 @@ public class DeliverErrors extends BaseHandler {
             // Check if errors for pull requests must be delivered at all and if they have their own delivery spec
             errHandling = null;
             // Check each sub channel
-            for(Iterator<IFlow> flows = leg.getPullRequestFlows().iterator(); flows.hasNext() && errHandling == null;) {
-                IFlow f = flows.next();
-                errHandling = f.getBusinessInfo() != null && pr.getMPC().equals(f.getBusinessInfo().getMpc()) ?
-                                       f.getErrorHandlingConfiguration() : null;
+            for(Iterator<IPullRequestFlow> flows = leg.getPullRequestFlows().iterator();
+                                                                            flows.hasNext() && errHandling == null;) {
+                IPullRequestFlow f = flows.next();
+                errHandling = pr.getMPC().equals(f.getMPC()) ? f.getErrorHandlingConfiguration() : null;
             }
-            if (errHandling.getErrorDelivery() != null)
+            if (errHandling != null && errHandling.getErrorDelivery() != null)
                 deliverySpec = errHandling.getErrorDelivery();
         }
         

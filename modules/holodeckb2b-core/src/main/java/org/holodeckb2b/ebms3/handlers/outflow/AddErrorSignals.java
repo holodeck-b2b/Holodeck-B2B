@@ -60,7 +60,7 @@ public class AddErrorSignals extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) {
+    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         
         log.debug("Check if this message already contains Error signals to send");
         Collection<ErrorMessage> errorSigs = null;
@@ -105,19 +105,14 @@ public class AddErrorSignals extends BaseHandler {
         // Change the processing state of the errors that are included
         for(ErrorMessage e : errsToAdd) {
             log.debug("Change processing state of error signal [" + e.getMessageId() + "] to indicate it is included");
-            try {
-                // When processing state is changed add the error to the list of errors to send
-                ErrorMessage error = MessageUnitDAO.startProcessingMessageUnit(e);
-                if (error != null) {
-                    log.debug("Processing state changed for error signal with msgId=" + error.getMessageId());
-                    MessageContextUtils.addErrorSignalToSend(mc, error);
-                } else
-                    log.debug("Could not change processing state for error signal with msgId=" + e.getMessageId() 
-                                + ", skipping");                
-            } catch (DatabaseException dbe) {
-                log.error("An error occurred while changing the processing state of error signal [" 
-                            + e.getMessageId() + "]. Details: " + dbe.getMessage());
-            }
+            // When processing state is changed add the error to the list of errors to send
+            ErrorMessage error = MessageUnitDAO.startProcessingMessageUnit(e);
+            if (error != null) {
+                log.debug("Processing state changed for error signal with msgId=" + error.getMessageId());
+                MessageContextUtils.addErrorSignalToSend(mc, error);
+            } else
+                log.debug("Could not change processing state for error signal with msgId=" + e.getMessageId() 
+                            + ", skipping");                
         }
         
         return InvocationResponse.CONTINUE;

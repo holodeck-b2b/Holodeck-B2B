@@ -46,15 +46,18 @@ public class ProcessReceipts extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) {
+    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         log.debug("Check for received receipts in message.");
         ArrayList<Receipt>  receipts = (ArrayList<Receipt>) mc.getProperty(MessageContextProperties.IN_RECEIPTS);
         
         if (receipts != null && !receipts.isEmpty()) {
             log.debug("Message contains " + receipts.size() + " Receipts signals, start processing");
             for (Receipt r : receipts)
-                if (!processReceipt(r, mc)) {
-                    log.warn("Receipt [msgId=" + r.getMessageId() + "] could not be processed succesfully!");
+                // Ignore Receipts that already failed
+                if (!ProcessingStates.FAILURE.equals(r.getCurrentProcessingState().getName())) {
+                    if (!processReceipt(r, mc)) {
+                        log.warn("Receipt [msgId=" + r.getMessageId() + "] could not be processed succesfully!");
+                    }
                 }
             log.debug("Receipts processed");
         } else
@@ -72,8 +75,9 @@ public class ProcessReceipts extends BaseHandler {
      * @param r     The {@link Receipt} to process
      * @param mc    The message context of the message containing the receipt
      * @return      <code>true</code> if the receipt signal was processed successfully, <code>false</code> otherwise
+     * @throws DatabaseException When a database error occurs while processing the Receipt Signal
      */
-    protected boolean processReceipt(final Receipt r, final MessageContext mc) {
+    protected boolean processReceipt(final Receipt r, final MessageContext mc) throws DatabaseException {
         String refToMsgId = r.getRefToMessageId();
         
         log.debug("Start processing Receipt [msgId=" + r.getMessageId() 
@@ -81,75 +85,60 @@ public class ProcessReceipts extends BaseHandler {
         
         // Change processing state to indicate we start processing the receipt. Also checks that the receipt is not
         // already being processed
-        Receipt rcpt = null;
-        try {
-            rcpt = MessageUnitDAO.startProcessingMessageUnit(r);
-        } catch (DatabaseException ex) {
-            log.error("An error occurred while changing the processing state of the receipt. Details: " + ex.getMessage());
-            rcpt = null;
-        }
-        
+        Receipt rcpt = MessageUnitDAO.startProcessingMessageUnit(r);
         if (rcpt == null) {
             log.debug("Receipt [msgId=" + r.getMessageId() + "] is already being processed, skipping");
             return false;
         } else {
-            log.debug("Get referenced message units");
-            try {
-                MessageUnit refdMsg = MessageUnitDAO.getSentMessageUnitWithId(refToMsgId);
-                if (refdMsg == null) {
-                    log.warn("Receipt [msgId=" + r.getMessageId() + "] contains unknown refToMessageId ["
-                            + refToMsgId + "]!");
-                    MessageUnitDAO.setFailed(rcpt);
-                    // Create error and add to context
-                    ValueInconsistent   viError = new ValueInconsistent();
-                    viError.setErrorDetail("Receipt contains unknown message reference [" + refToMsgId + "]");
-                    viError.setRefToMessageInError(rcpt.getMessageId());
-                    MessageContextUtils.addGeneratedError(mc, viError);  
-                    return false;
-                } else {
-                    // Check if the found message unit is waiting for a receipt and change processing state if so
-                    if (isWaitingForReceipt(refdMsg)) {
-                        log.debug("Found message unit waiting for Receipt, setting processing state to delivered");
-                        MessageUnitDAO.setDelivered(refdMsg);
-                        // Maybe the Receipt must also be delivered to the business application, so change state
-                        // to "ready for delivery"
-                        log.debug("Mark Receipt as ready for delivery to business application");
-                        MessageUnitDAO.setReadyForDelivery(rcpt);
-                    }  else {
-                        // This message is not waiting for receipt, maybe it is already acknowledged? Check P-Mode if
-                        // it uses receipts
-                        String pmodeId = refdMsg.getPMode();
-                        if (pmodeId != null) {
-                           if (HolodeckB2BCore.getPModeSet().get(pmodeId).getLegs().iterator().next()
-                                    .getReceiptConfiguration() == null) {
-                               // The P-Mode is not configured for receipts, generate error
-                                MessageUnitDAO.setFailed(rcpt);
-                                // Create error and add to context
-                                ProcessingModeMismatch   pmodeError = new ProcessingModeMismatch();
-                                pmodeError.setErrorDetail("Referenced message [" + refToMsgId 
-                                                            + "] is not configured for receipts");
-                                pmodeError.setRefToMessageInError(rcpt.getMessageId());
-                                MessageContextUtils.addGeneratedError(mc, pmodeError);  
-                                return false;
-                           }  else {
-                                // The P-Mode is configured for receipts, so message probably already acked and
-                                // receipt delivered (if needed) => nothing to do, processing done
-                               log.info("Received Receipt [" + rcpt.getMessageId() + "] for message [" +
-                                                refdMsg.getMessageId() + "] not waiting for receipt anymore");
-                               MessageUnitDAO.setDone(rcpt);
-                           }
-                        } // else 
-                            // The referenced message unit has no associated P-Mode, unable to determine whether is
-                            // was waiting for a receipt, ignore
-                    }
-                }
-            } catch (DatabaseException databaseException) {
-                // One of the database operation failed. There is not much we can do about it, except signaling 
-                log.error("A database operation failed during receipt processing! Details: " 
-                                + databaseException.getMessage());
+        log.debug("Get referenced message units");
+            MessageUnit refdMsg = MessageUnitDAO.getSentMessageUnitWithId(refToMsgId);
+            if (refdMsg == null) {
+                log.warn("Receipt [msgId=" + r.getMessageId() + "] contains unknown refToMessageId ["
+                        + refToMsgId + "]!");
+                MessageUnitDAO.setFailed(rcpt);
+                // Create error and add to context
+                ValueInconsistent   viError = new ValueInconsistent();
+                viError.setErrorDetail("Receipt contains unknown message reference [" + refToMsgId + "]");
+                viError.setRefToMessageInError(rcpt.getMessageId());
+                MessageContextUtils.addGeneratedError(mc, viError);  
                 return false;
+            } else {
+                // Check if the found message unit is waiting for a receipt and change processing state if so
+                if (isWaitingForReceipt(refdMsg)) {
+                    log.debug("Found message unit waiting for Receipt, setting processing state to delivered");
+                    MessageUnitDAO.setDelivered(refdMsg);
+                    // Maybe the Receipt must also be delivered to the business application, so change state
+                    // to "ready for delivery"
+                    log.debug("Mark Receipt as ready for delivery to business application");
+                    MessageUnitDAO.setReadyForDelivery(rcpt);
+                }  else {
+                    // This message is not waiting for receipt, maybe it is already acknowledged? Check P-Mode if
+                    // it uses receipts
+                    String pmodeId = refdMsg.getPMode();
+                    if (pmodeId != null) {
+                       if (HolodeckB2BCore.getPModeSet().get(pmodeId).getLegs().iterator().next()
+                                .getReceiptConfiguration() == null) {
+                           // The P-Mode is not configured for receipts, generate error
+                            MessageUnitDAO.setFailed(rcpt);
+                            // Create error and add to context
+                            ProcessingModeMismatch   pmodeError = new ProcessingModeMismatch();
+                            pmodeError.setErrorDetail("Referenced message [" + refToMsgId 
+                                                        + "] is not configured for receipts");
+                            pmodeError.setRefToMessageInError(rcpt.getMessageId());
+                            MessageContextUtils.addGeneratedError(mc, pmodeError);  
+                            return false;
+                       }  else {
+                            // The P-Mode is configured for receipts, so message probably already acked and
+                            // receipt delivered (if needed) => nothing to do, processing done
+                           log.info("Received Receipt [" + rcpt.getMessageId() + "] for message [" +
+                                            refdMsg.getMessageId() + "] not waiting for receipt anymore");
+                           MessageUnitDAO.setDone(rcpt);
+                       }
+                    } // else 
+                        // The referenced message unit has no associated P-Mode, unable to determine whether is
+                        // was waiting for a receipt, ignore
+                }
             }
-                    
             log.debug("Done processing Receipt");                       
             return true;
         }

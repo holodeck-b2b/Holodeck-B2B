@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<MessageMetaData xmlns="http://holodeck-b2b.org/schemas/2014/06/mmd"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://holodeck-b2b.org/schemas/2014/06/mmd file:/Users/safi/Development/NetbeansProjects/holodeck-b2b/modules/holodeck-ebms3/src/main/resources/xsd/messagemetadata.xsd">
+<MessageMetaData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2014/06/mmd file:/Users/safi/Development/NetbeansProjects/HolodeckB2B/build_b2/modules/holodeckb2b-core/src/main/resources/xsd/messagemetadata.xsd"
+ xmlns="http://holodeck-b2b.org/schemas/2014/06/mmd">
     <MessageInfo mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC">
         <Timestamp>2014-04-18T15:50:32</Timestamp>
         <MessageId>n-soaDLzuliyRmzSlBe7</MessageId>
@@ -29,7 +29,7 @@
     </MessageProperties>
     <PayloadInfo>
         <PartInfo containment="attachment" mimeType="I8ZVs6G2P" location="http://sxGTnZjm/"/>
-        <PartInfo containment="attachment" uri="http://pcVJBuTT/" mimeType="CoL9" location="http://uLfxezLH/">
+        <PartInfo containment="external" uri="http://pcVJBuTT/" mimeType="CoL9">
             <Schema location="http://KFfZaFTi/" version="uC" namespace="E9eUYc92"/>
             <Description xml:lang="en-CA">XDbQu5r2xVbSEW57D32O5lw</Description>
             <PartProperties>

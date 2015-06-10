@@ -22,7 +22,10 @@ import org.holodeckb2b.common.delivery.IDeliverySpecification;
 import org.holodeckb2b.common.general.ReplyPattern;
 import org.holodeckb2b.common.pmode.IErrorHandling;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Root;
 import org.simpleframework.xml.core.Commit;
+import org.simpleframework.xml.core.PersistenceException;
+import org.simpleframework.xml.core.Validate;
 
 /**
  * Represent the <code>ErrorHandling</code> elements from the P-Mode XML document as defined in the P-Mode XML schema 
@@ -33,6 +36,7 @@ import org.simpleframework.xml.core.Commit;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see IErrorHandling
  */
+@Root
 public class ErrorHandling implements IErrorHandling {
 
     @Element (name = "ReplyPattern", required = false)
@@ -73,12 +77,25 @@ public class ErrorHandling implements IErrorHandling {
         }
     }
     
+    /**
+     * Validates the data read from the XML document. The validation for now only checks whether an URL is specified
+     * when the response pattern is set to CALLBACK
+     * 
+     * @throws PersistenceException     When no URL is provided when the reply pattern is set to CALLBACK
+     */
+    @Validate
+    public void validate() throws PersistenceException {
+        if (getPattern() == ReplyPattern.CALLBACK && (to == null || to.isEmpty()))
+            throw new PersistenceException("You must specify the URL where to sent errors when setting"
+                                             + " reply pattern to CALLBACK", null);
+    }
+    
     @Override
     public ReplyPattern getPattern() {
         
         ReplyPattern r = null;
         
-        if (this.replyPattern != null) {
+        if (this.replyPattern != null && !this.replyPattern.isEmpty()) {
         
             r = ReplyPattern.valueOf(this.replyPattern.toUpperCase());
             

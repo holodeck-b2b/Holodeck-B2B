@@ -19,6 +19,7 @@ package org.holodeckb2b.ebms3.persistent.message;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import javax.persistence.CollectionTable;
 import javax.persistence.DiscriminatorValue;
@@ -72,6 +73,34 @@ public class ErrorMessage extends SignalMessage implements IErrorMessage {
         errors.add(e);
     }
     
+    /**
+     * Gets the message id of the referenced message unit. The referenced message id can be included in either the 
+     * <code>eb:/SignalMessage/eb:MessageInfo/eb:RefToMessageId</code> element in the ebMS header or the 
+     * <code>eb:/SignalMessage/eb:Error/@refToMessageInError</code> attribute in the signal message. 
+     * <p>The attribute can occur multiple times as there may be more than one Error included in the signal. The ebMS 
+     * specification requires that the signal can reference at most one message unit, so all refer the same messageId 
+     * or none at all. 
+     * 
+     * @return              The referenced message id in the Error signal if it is valid, or<br>
+     *                      <code>null</code> when the error does not consistently reference one message unit
+     */
+    @Override
+    public String getRefToMessageId() {
+        
+        // First get RefToMessageId from header by calling super class
+        String refToMessageId = super.getRefToMessageId();
+
+        if (refToMessageId == null || refToMessageId.isEmpty()) {
+            // Then check individual error, if the RefToMessageId element from header contained a id, all other ids 
+            // should be the same (or null)
+            Iterator<IEbmsError> it = this.getErrors().iterator();
+            while (it.hasNext() && (refToMessageId == null || refToMessageId.isEmpty()))
+                refToMessageId = it.next().getRefToMessageInError();
+        }
+        
+        return refToMessageId;
+    }
+
     /**
      * Returns a {@see String} representation of the error signal. This method can be
      * used for easily logging the error to text files, etc.

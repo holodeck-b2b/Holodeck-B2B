@@ -169,7 +169,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
                     log.fatal("Creating the Error signal in repsonse to message unit [msgId=" 
                                     + refToMsgId + "] failed! Details: " + ex.getMessage());
                     // Signal this problem using a SOAP Fault
-                    throw new AxisFault("Internal server error");
+                    throw new AxisFault(ex.getMessage());
                 }      
             }
         }

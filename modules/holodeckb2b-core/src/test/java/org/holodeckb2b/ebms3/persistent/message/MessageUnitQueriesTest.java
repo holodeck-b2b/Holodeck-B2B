@@ -24,8 +24,6 @@ import org.holodeckb2b.ebms3.util.JPAUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -152,49 +150,6 @@ public class MessageUnitQueriesTest {
         em.close();
     }
 
-    /**
-     * Test of findInState query
-     */
-    @Test
-    public void test01_findInStateQuery() {
-        em.getTransaction().begin();
-        
-        Collection<MessageUnit> result = em.createNamedQuery("MessageUnit.findInState",
-                                            MessageUnit.class)
-                                            .setParameter("state", T_PROCSTATE_2)
-                                            .getResultList();
-        assertFalse(result.isEmpty());
-        
-        result = em.createNamedQuery("MessageUnit.findInState",
-                                MessageUnit.class)
-                                .setParameter("state", T_PROCSTATE_2 + "NO_NO")
-                                .getResultList();
-        assertTrue(result.isEmpty());
-
-        em.getTransaction().commit();      
-    }
-  
-    /**
-     * Test of findForPModeInState query
-     */
-//    @Test
-//    public void test02_findForPModesInStateQuery() {
-//        em.getTransaction().begin();
-//        
-//        List<String>    pmodes = new ArrayList<String>();
-//        pmodes.add(T_PMODE1);
-//        pmodes.add(T_PMODE2);
-//        
-//        Collection<MessageUnit> result = em.createNamedQuery("MessageUnit.findForPModesInState",
-//                                            MessageUnit.class)
-//                                            .setParameter("state", T_PROCSTATE_1)
-//                                            .setParameter("pmodes", pmodes)
-//                                            .getResultList();
-//        
-//        assertEquals(2, result.size());
-//        
-//       em.getTransaction().commit();      
-//    }
  
     /**
      * Test of find query

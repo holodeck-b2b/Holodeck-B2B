@@ -94,7 +94,7 @@ public interface ILeg {
      *         sub-channel MPC,<br>
      *         or <code>null</code> when pulling is not used.
      */
-    public List<IFlow> getPullRequestFlows();
+    public List<IPullRequestFlow> getPullRequestFlows();
     
     /**
      * Returns the configuration of the user message processing. As target of the leg is to exchange a user message this
@@ -102,5 +102,5 @@ public interface ILeg {
      * 
      * @return An {@link IFlow} object containing the configuration of the user message
      */
-    public IFlow getUserMessageFlow();
+    public IUserMessageFlow getUserMessageFlow();
 }

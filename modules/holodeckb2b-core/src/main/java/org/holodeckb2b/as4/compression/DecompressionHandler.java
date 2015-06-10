@@ -65,7 +65,7 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
                     log.warn("No source MIME Type specified for compressed payload!");
                     // Generate error and stop processing this user messsage
                     DeCompressionFailure decompressFailure = new DeCompressionFailure();
-                    decompressFailure.setErrorDetail("Missing required MIMEType part propertye for compressed payload ["
+                    decompressFailure.setErrorDetail("Missing required MimeType part property for compressed payload ["
                             + p.getPayloadURI() + "]!");
                     decompressFailure.setRefToMessageInError(um.getMessageId());
                     MessageContextUtils.addGeneratedError(mc, decompressFailure);
@@ -78,11 +78,18 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
                     }
                 } else {
                     // Replace DataHandler to enable decompression 
-                    String cid = p.getPayloadURI();
-                    mc.addAttachment(cid, new CompressionDataHandler(mc.getAttachment(cid), mimeType));
-                    log.debug("Replaced DataHandler to enable decompression");
-                    // Remove part property specific to AS4 Compression feature
-                    removeProperty(p);
+                    try {
+                        String cid = p.getPayloadURI();
+                        mc.addAttachment(cid, new CompressionDataHandler(mc.getAttachment(cid), mimeType));
+                        log.debug("Replaced DataHandler to enable decompression");
+                        // Remove part property specific to AS4 Compression feature
+                        removeProperty(p);
+                    } catch (NullPointerException npe) {
+                        /* The NPE is probably caused by a missing attachment 
+                            => invalid ebMS but this will be detected in the SaveUserMsgAttachment handler.
+                               For now we just skip replacing the datahandler
+                        */
+                    }
                 }
             }
         }

@@ -183,10 +183,10 @@ public abstract class BaseHandler extends AbstractHandler {
      * @return              How to continue processing of the message. If message processing should not continue, it is
      *                      RECOMMENDED to throw an AxisFault instead of returning <code>InvocationResponse.ABORT</code>
      *                      because this enables sending a response.
-     * @throws AxisFault    If an error occurs during the processing of the message that should prevent further 
+     * @throws Exception    If an error occurs during the processing of the message that should prevent further 
      *                      processing. Note that this will stop processing of the complete flow and may leave message
      *                      units in an undefined state! Also ensure that all information needed for a response is set
      *                      in the message context to make it available for handlers in the fault flow!
      */
-    protected abstract InvocationResponse doProcessing(MessageContext mc) throws AxisFault;
+    protected abstract InvocationResponse doProcessing(MessageContext mc) throws Exception;
 }
