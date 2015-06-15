@@ -39,8 +39,7 @@ import javax.persistence.TemporalType;
 import org.holodeckb2b.ebms3.persistent.processing.ProcessingState;
 
 /**
- * Is a persistency class representing an ebMS messaage unit that is processed 
- * by Holodeck B2B. 
+ * Is a persistency class representing an ebMS message unit that is processed by Holodeck B2B. 
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -173,8 +172,13 @@ public abstract class MessageUnit implements Serializable, org.holodeckb2b.commo
         return DIRECTION;
     }
     
+    public boolean usesMultiHop() {
+        return USES_MULTI_HOP;
+    }
     
-    
+    public void setMultiHop(boolean usesMultiHop) {
+        this.USES_MULTI_HOP = usesMultiHop;
+    }
     
     /**
      * Default constructor creates an empty object
@@ -216,6 +220,8 @@ public abstract class MessageUnit implements Serializable, org.holodeckb2b.commo
     private String  PMODE_ID;
 
     private Direction   DIRECTION;
+    
+    private boolean     USES_MULTI_HOP = false;
     
     /*
      * Because timestamp is a reserved SQL-99 word it is prefixed

@@ -111,13 +111,18 @@
         <handler name="ReadErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ReadError">
             <order phase="ebms3InPhase" after="ReadReceipts"/>
         </handler>
+        <!-- Check whether the message was received through I-Cloud, i.e. uses multi-hop feature -->
+        <handler name="CheckForMultiHop" class="org.holodeckb2b.multihop.CheckFromICloud">
+            <order phase="ebms3InPhase" after="ReadErrors"/>      
+        </handler>
+        
         <!--
             Find the P-Modes for the read message units except the PullRequests because 
             their P-Mode can only be determined based on the provided authentication info
             in the WS-Security header
         -->
         <handler name="FindPModes" class="org.holodeckb2b.ebms3.handlers.inflow.FindPModes">
-            <order phase="ebms3InPhase" after="ReadErrors"/>      
+            <order phase="ebms3InPhase" after="CheckForMultiHop"/>      
         </handler>
         
         <!--
@@ -220,13 +225,18 @@
         <handler name="ReadErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ReadError">
             <order phase="ebms3InPhase" after="ReadReceipts"/>
         </handler>
+        <!-- Check whether the message was received through I-Cloud, i.e. uses multi-hop feature -->
+        <handler name="CheckForMultiHop" class="org.holodeckb2b.multihop.CheckFromICloud">
+            <order phase="ebms3InPhase" after="ReadErrors"/>      
+        </handler>
+        
         <!--
             Find the P-Modes for the read message units except the PullRequests because 
             their P-Mode can only be determined based on the provided authentication info
             in the WS-Security header
         -->
         <handler name="FindPModes" class="org.holodeckb2b.ebms3.handlers.inflow.FindPModes">
-            <order phase="ebms3InPhase" after="ReadErrors"/>      
+            <order phase="ebms3InPhase" after="CheckForMultiHop"/>      
         </handler>
         
         <!--
@@ -344,6 +354,12 @@
            class="org.holodeckb2b.ebms3.handlers.outflow.PackagePullRequestSignal">
             <order phase="ebms3OutPhase" after="PackageReceipt"/>
         </handler>
+        <!-- Check if message is sent through I-Cloud (multi-hop) and add necessary WS-A headers -->
+        <handler name="ConfigureMultiHop" 
+           class="org.holodeckb2b.multihop.ConfigureMultihop">
+            <order phase="ebms3OutPhase" after="PackagePullRequest"/>
+        </handler>        
+        
         <handler name="ConfigureHTTP" 
             class="org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler">
             <order phase="MessageOut" />
@@ -363,7 +379,6 @@
         
     </OutFlow>
     
-
     <OutFaultFlow>
         <handler name="PrepareResponseMessage" 
             class="org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage">
@@ -394,7 +409,7 @@
         </handler>
         <handler name="PackageErrorSignals" 
             class="org.holodeckb2b.ebms3.handlers.outflow.PackageErrorSignals">
-            <order phase="ebms3OutPhase" after="AS4Compression"/>
+            <order phase="ebms3OutPhase" after="PackageUserMessage"/>
         </handler>
         <handler name="PackageReceipt" 
             class="org.holodeckb2b.ebms3.handlers.outflow.PackageReceiptSignal">
@@ -404,6 +419,12 @@
             class="org.holodeckb2b.ebms3.handlers.outflow.PackagePullRequestSignal">
             <order phase="ebms3OutPhase" after="PackageReceipt"/>
         </handler>
+        <!-- Check if message is sent through I-Cloud (multi-hop) and add necessary WS-A headers -->
+        <handler name="ConfigureMultiHop" 
+            class="org.holodeckb2b.multihop.ConfigureMultihop">
+            <order phase="ebms3OutPhase" after="PackagePullRequest"/>
+        </handler>        
+        
         <handler name="ConfigureHTTP" 
             class="org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler">
             <order phase="MessageOut" />
@@ -422,5 +443,6 @@
         </handler>
         
     </OutFaultFlow>
+    
     
 </module>

@@ -220,6 +220,8 @@ The error handling configuration only applies to the sender of the PullRequest m
     <xs:complexType name="Protocol">
         <xs:sequence>
             <xs:element name="Address" type="xs:anyURI" minOccurs="0"/>
+            <xs:element default="false" minOccurs="0" name="AddActorOrRoleAttribute"
+                type="xs:boolean"/>
             <xs:element name="SoapVersion" minOccurs="0" default="1.2">
                 <xs:simpleType>
                     <xs:restriction base="xs:string">
