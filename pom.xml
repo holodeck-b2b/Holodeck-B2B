@@ -5,11 +5,11 @@
     <groupId>org.holodeckb2b</groupId>
     <artifactId>holodeckb2b</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.beta.3.1</version>
+    <version>2.0</version>
     <name>Holodeck B2B</name>
     <url>http://www.holodeck-b2b.org/</url>
     <description>
-        A Standard Open source implementation of the AS4 profile of ebMS V3.
+        A standard open source implementation of the AS4 profile of ebMS V3.
     </description>
     <organization>
         <name>The Holodeck B2B Team</name>
