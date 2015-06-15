@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Is an <i>abstract</i> implementation of an Axis2 handler that acts as the base class for the Holodeck B2B handlers. 
- * It checks that the handler runs in the correct flow and prepares the logging. 
+ * It ensures that the handler runs only in the correct flows and prepares the logging. 
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -99,6 +99,7 @@ public abstract class BaseHandler extends AbstractHandler {
     /**
      * Prepares the handler for processing of the message. Checks if the handler is run in the correct flow and 
      * creates a correctly named {@link Log}.
+     * <p>NOTE: To prevent sub classes from overriding this method it is declared final.
      * 
      * @param mc            The Axis2 {@link MessageContext}. Will be passed onto the implementation for the actual 
      *                      processing
@@ -109,7 +110,7 @@ public abstract class BaseHandler extends AbstractHandler {
      *                      units in an undefined state!
      */
     @Override
-    public InvocationResponse invoke(MessageContext mc) throws AxisFault {
+    public final InvocationResponse invoke(MessageContext mc) throws AxisFault {
         // Determine which flow the handler currently runs is
         if (mc.isServerSide()) {
             // Running serverside means Holodeck B2B acts as responder
@@ -137,10 +138,10 @@ public abstract class BaseHandler extends AbstractHandler {
         
         // Check if running in correct flow (check has two parts, first check the for IN or OUT flow, 
         //   then check whether message is initiated by Holodeck B2B or response)
-        if (((currentFlow>>>2 & inFlows()>>>2) == 0) || (((currentFlow&0x03) & (inFlows()&0x03)) < (inFlows()&0x03))) {
+        if (!runningInCorrectFlow()) {
             // This is handler is not supposed to run in the current flow
             LogFactory.getLog(BaseHandler.class.getName())
-                        .info("Handler " + this.getClass().getName() + " runs in unsupported " + currentFlowName + "!");
+                        .debug("Handler " + this.getClass().getName() + " runs in unsupported " + currentFlowName + "!");
             return InvocationResponse.CONTINUE;
         } 
             
@@ -157,6 +158,30 @@ public abstract class BaseHandler extends AbstractHandler {
         }
     }
 
+    /**
+     * Runs when the execution of the flow is completed and if the handler is executed during that flow. Actual 
+     * processing is only needed when implementation is supposed to run in this flow.
+     * 
+     * @param mc    The current message context
+     */
+    @Override
+    public final void flowComplete(MessageContext mc) {
+        if (runningInCorrectFlow())
+            doFlowComplete(mc);
+    }
+    
+    /**
+     * Checks if the handler is running in the correct flow. The check has two parts, first check the for IN or OUT 
+     * flow, then check whether message is initiated by Holodeck B2B or is a response.
+     * 
+     * @return  <code>true</code>   When running in the correct flow, or<br>
+     *          <code>false</code>  otherwise
+     */
+    private boolean runningInCorrectFlow() {
+        return ((currentFlow>>>2 & inFlows()>>>2) > 0) 
+               && (((currentFlow&0x03) & (inFlows()&0x03)) >= (inFlows()&0x03));
+    }
+    
     /**
      * Abstract method that implementation should use to return the flows in which the handler should run. This is used 
      * to prevent the handler from running in an incorrect flow. 
@@ -189,4 +214,16 @@ public abstract class BaseHandler extends AbstractHandler {
      *                      in the message context to make it available for handlers in the fault flow!
      */
     protected abstract InvocationResponse doProcessing(MessageContext mc) throws Exception;
+    
+    /**
+     * Runs when the execution of the flow is completed and if the handler is executed during that flow. This method
+     * is always executed independent of the flow's processing result. It can be used to check the processing result
+     * and take action action.
+     * <p>NOTE: It is possible that not all handlers in the flow have been executed when this method is called, so this 
+     * method should not depend on execution of handlers later in the flow.
+     * <p>NOTE: A default no-op implementation is provided so sub classes only need to override if action is required.
+     * 
+     * @param mc    The current message context
+     */    
+    protected void doFlowComplete(MessageContext mc) {}
 }
