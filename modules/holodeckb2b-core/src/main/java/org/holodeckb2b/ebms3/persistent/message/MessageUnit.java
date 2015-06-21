@@ -52,7 +52,8 @@ import org.holodeckb2b.ebms3.persistent.processing.ProcessingState;
             query = "SELECT mu " +
                     "FROM MessageUnit mu " +
                     "WHERE mu.MESSAGE_ID = :msgId " +
-                    "AND mu.DIRECTION = :direction"
+                    "AND mu.DIRECTION = :direction " +
+                    "ORDER BY mu.MU_TIMESTAMP DESC"
             )}
 )
 public abstract class MessageUnit implements Serializable, org.holodeckb2b.common.messagemodel.IMessageUnit {

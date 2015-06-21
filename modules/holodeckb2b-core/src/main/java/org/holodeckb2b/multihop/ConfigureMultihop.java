@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.multihop;
 
+import java.util.Collection;
 import java.util.List;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.addressing.AddressingConstants;
@@ -23,12 +24,14 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.IEbmsError;
 import org.holodeckb2b.common.messagemodel.IReceipt;
 import org.holodeckb2b.common.pmode.ILeg;
 import org.holodeckb2b.ebms3.mmd.xml.CollaborationInfo;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
 import org.holodeckb2b.ebms3.persistent.message.SignalMessage;
@@ -107,7 +110,9 @@ public class ConfigureMultihop extends BaseHandler {
     }
     
     /**
-     * Gets the UserMessage that is referenced by a signal message.
+     * Gets the UserMessage that is referenced by a signal message. 
+     * <p>The reference will be retrieved from the signal message unit itself or when in case of an Error signal that
+     * does not directly reference a message the first error contained in the signal.
      * 
      * @param signal    The signal message unit to get the reference user message for
      * @return          The referenced {@link UserMessage} or <code>null</code> if no unique referenced user message
@@ -117,11 +122,17 @@ public class ConfigureMultihop extends BaseHandler {
         UserMessage refdUM = null;
         String refToMsgId = signal.getRefToMessageId();
         
+        if ((refToMsgId == null || refToMsgId.isEmpty()) && signal instanceof ErrorMessage) {
+            // For errors the reference can also be included in the Error element
+            Collection<IEbmsError> errors = ((ErrorMessage) signal).getErrors();
+            refToMsgId = errors.isEmpty() ? null : errors.iterator().next().getRefToMessageInError();
+        }
+        
         if (refToMsgId != null && !refToMsgId.isEmpty()) {
             List<MessageUnit> refdMessages = null;
             try {
                 refdMessages = MessageUnitDAO.getReceivedMessageUnitsWithId(refToMsgId);
-                if (refdMessages != null && refdMessages.size() == 1) {
+                if (refdMessages != null && refdMessages.size() >= 1) {
                     // Signal refers to one other message unit, check that it is a User Message
                     MessageUnit refdMU = refdMessages.get(0);
                     if (refdMU instanceof UserMessage)
