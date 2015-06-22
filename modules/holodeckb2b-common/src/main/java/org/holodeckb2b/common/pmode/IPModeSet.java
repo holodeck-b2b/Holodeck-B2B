@@ -19,22 +19,34 @@ package org.holodeckb2b.common.pmode;
 import java.util.Set;
 
 /**
+ * Represents a set of {@link IPMode}s that configure how Holodeck B2B should process the ebMS messages. The set of 
+ * P-Modes is therefore the most important configuration item in Holodeck B2B, without P-Modes it will not be possible 
+ * to send and receive messages! Within Holodeck B2B there is always just one <code>IPModeSet</code> instance.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface IPModeSet {
-    
+
     /**
-     * Initializes the PMode set. This method is called directly after the set is created and should be used to load the 
-     * PModes.  
+     * Gets a list of the <b>PMode.id</b>s of all P-Modes in the set.
      * 
-     * @param params The list of parameters as included in the Holodeck configuration.
+     * @return A <code>String[]</code> containing the P-Mode id's
      */
     public String[] listPModeIds();
     
+    /**
+     * Gets the P-Mode with the given <b>PMode.id</b>
+     * 
+     * @param id    The <b>PMode.id</b> as a <code>String</code> of the P-Mode to retrieve from the set
+     * @return      The {@link IPMode} with the given id if it exists in the set, or<br>
+     *              <code>null</code> when there is no P-Mode in the set with the given id.
+     */
     public IPMode get(String id);
     
+    /**
+     * Gets all the {@link IPMode}s in the set.
+     * 
+     * @return The complete {@link Set} of {@link IPMode}s
+     */
     public Set<IPMode> getAll();
-    
-    
 }
