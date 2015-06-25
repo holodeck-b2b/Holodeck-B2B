@@ -111,6 +111,12 @@ public class ErrorHandling implements IErrorHandling {
     }
 
     @Override
+    public Boolean shouldAddSOAPFault() {
+        //@todo: Implement using XML config
+        return Boolean.FALSE;
+    }
+            
+    @Override
     public Boolean shouldReportErrorOnError() {
         return reportOnError;
     }

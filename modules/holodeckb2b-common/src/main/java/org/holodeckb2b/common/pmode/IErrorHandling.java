@@ -17,6 +17,7 @@
 
 package org.holodeckb2b.common.pmode;
 
+import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.delivery.IDeliverySpecification;
 import org.holodeckb2b.common.general.ReplyPattern;
 
@@ -25,19 +26,30 @@ import org.holodeckb2b.common.general.ReplyPattern;
  * Specification and includes three options for reporting errors: using SOAP Faults, out-of-band notifications and using
  * ebMS Errors. Holodeck B2B will always log detect errors, including received error signals, enabling out-of-band 
  * notifications. Furthermore errors can be reported using ebMS errors. This interface specifies the configuration 
- * parameters for the reporting.
- * <p>The error reporting parameters are a modified version of the P-Mode parameter group ErrorHandling as defined in 
- * appendix D of the Core Specification. For reporting errors generated for received messages the parameters 
- * <i>pattern</i> and <i>receiverErrorsTo</i> define how the errors should be transmitted to the sender.<br>
- * The other parameters defined in the Core Specification have been replaced by the new boolean parameter 
- * <i>notifyErrorToBusinessApplication</i> that indicates whether the business application should be informed on errors
- * for a sent message. How the errors should be delivered to the business application can be specified in a  
- * {@link IDeliverySpecification}.<br>
- * Not specified in the ebMS V3 or AS4 specifications is whether errors generated for received error or receipts should
- * be reported back to the sender of the message in error. In most cases the problem with such errors will be that they 
- * can not be correctly related to an existing message resulting in unknown P-Mode for that error. Therefor error 
- * reporting on such errors is configured globally (see ). But it is possible to overwrite these global settings using
- * the P-Mode.
+ * parameters for the reporting and is based on the P-Mode parameter group <b>PMode[1].ErrorHandling.Report</b> defined 
+ * in appendix D of the Core Specification.
+ * 
+ * <p>This version focuses on reporting errors to the sender of the message in error. As a result there is no support 
+ * for the P-Mode parameters <b>SenderErrorsTo</b> and <b>ProcessErrorNotifyConsumer</b>. Also 
+ * <b>DeliveryFailuresNotifyProducer</b> is not supported as there is no support for WS-Reliability or WS-RM in this 
+ * version of Holodeck B2B.
+ * 
+ * <p>The parameter <b>ProcessErrorNotifyProducer</b> defined in the Core Specification is represented by the 
+ * {@link #shouldNotifyErrorToBusinessApplication()} that indicates whether the business application should be informed 
+ * on errors for a sent message. If this method returns <code>true</code> the {@link #getErrorDelivery()} must return a  
+ * {@link IDeliverySpecification} that specifies how the errors should be delivered to the business application.
+ *
+ * <p>According to the ebMS V3 Core Specification an ebMS error of severity <i>failure</i> must always be combined with
+ * a SOAP Fault. As noted in <a href="https://issues.oasis-open.org/browse/EBXMLMSG-4">issue #4 in the OASIS ebMS TC's 
+ * issue tracker</a> adding the SOAP Fault should be optional. By default Holodeck B2B will not add a SOAP Fault to 
+ * to ebMS error messages that contain an error with severity <i>failure</i>, but with {@link #shouldAddSOAPFault()} 
+ * this can be overridden in the P-Mode.
+ * 
+ * <p>Not specified in the ebMS V3 or AS4 specifications is whether errors generated for received error or receipts 
+ * should be reported back to the sender of the message in error. In most cases the problem with such errors will be 
+ * that they can not be correctly related to an existing message resulting in unknown P-Mode for that error. Therefor 
+ * error reporting on such errors is configured globally (see {@link Config#shouldReportErrorOnError()} and 
+ * {@link Config#shouldReportErrorOnReceipt()}). But it is possible to overwrite these global settings using the P-Mode.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -61,6 +73,19 @@ public interface IErrorHandling {
     public String getReceiverErrorsTo();
     
     /**
+     * Gets the indication whether a SOAP Fault should be added to error messages that contain an error with severity
+     * <i>failure</i>.
+     * <p>NOTE : Holodeck B2B by default does not add SOAP Fault, so this option should only be used to override this.
+     * <p>NOTE : Even when this method return <i>true</i> the SOAP Fault may not be added if the ebMS message contains
+     *           other message units. 
+     * 
+     * @return <i>true</i> when a SOAP Fault should be added to ebMS error messages that contain an error with
+     *          severity <i>failure</i>,<br>
+     *         <i>false</i> or <code>null</code> if no SOAP Fault should be added.
+     */
+    public Boolean shouldAddSOAPFault();
+    
+    /**
      * Gets the indication whether errors generated for received error messages should be reported back to the sender
      * of the error message in error.   
      * <p>NOTE : This setting only applies to error messages that can be related to this P-Mode! Otherwise the default
@@ -68,8 +93,8 @@ public interface IErrorHandling {
      * <p>NOTE : Enabling this option can lead to a loop of error messages if the other MSH will also report errors on 
      * errors and does not understand the reported error. 
      * 
-     * @return <code>true</code> if generated errors on errors should be reported to the sender of the error,<br>
-     *         <code>false</code> otherwise 
+     * @return <i>true</i> if generated errors on errors should be reported to the sender of the error,<br>
+     *         <i>false</i> or <code>null</code> otherwise 
      */
     public Boolean shouldReportErrorOnError();
     
@@ -79,8 +104,8 @@ public interface IErrorHandling {
      * <p>NOTE : This setting only applies to error messages that can be related to this P-Mode! Otherwise the default
      * setting will apply.
      * 
-     * @return <code>true</code> if generated errors on receipts should be reported to the sender of the receipt,<br>
-     *         <code>false</code> otherwise 
+     * @return <i>true</i> if generated errors on receipts should be reported to the sender of the receipt,<br>
+     *         <i>false</i> or <code>null</code> otherwise 
      */
     public Boolean shouldReportErrorOnReceipt();
     

@@ -374,6 +374,15 @@ Note that this setting is generally only used when Holodeck B2B acts as in the r
 Note that this setting is generally only used when Holodeck B2B acts as in the receiving role.</xs:documentation>
                 </xs:annotation>
             </xs:element>
+            <xs:element default="false" minOccurs="0" name="AddSOAPFault" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>This element indicates whether a SOAP Fault should be added to ebMS error messages that contain an error with severity FAILURE.
+
+By default Holodeck B2B will not add the SOAP Fault, therefor the default value is set to false.
+
+NOTE: Even if this element has value true the SOAP Fault may not be added to the message if it contains other message units beside the error signal.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
             <xs:element name="ReportErrorOnError" type="xs:boolean" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>This element indicates whether errors that are generated for error messages should be reported back to the sender of the erroneous error message. Overwrites the global setting configured in the Holodeck B2B Core module.xml. Note that this setting can only be applied when the P-Mode can be detected for the erroneous error.</xs:documentation>
