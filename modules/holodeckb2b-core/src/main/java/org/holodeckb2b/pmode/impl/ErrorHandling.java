@@ -45,6 +45,9 @@ public class ErrorHandling implements IErrorHandling {
     @Element (name = "ReceiverErrorsTo", required = false)
     private String to = null;
 
+    @Element (name = "AddSOAPFault", required = false)
+    private Boolean addSOAPFault = Boolean.FALSE;
+
     @Element (name = "ReportErrorOnError", required = false)
     private Boolean reportOnError = null;
     
@@ -112,8 +115,7 @@ public class ErrorHandling implements IErrorHandling {
 
     @Override
     public Boolean shouldAddSOAPFault() {
-        //@todo: Implement using XML config
-        return Boolean.FALSE;
+        return addSOAPFault;
     }
             
     @Override
