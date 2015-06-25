@@ -106,15 +106,15 @@ public class PackageErrorSignals extends BaseHandler {
             }
         }
         
-        // If SOAP Fault should be added, check if possible
-        if(addSOAPFault) {
-            log.debug("A SOAPFaults should be added to message, check if possible due to UserMessage with body payload");
-            if (isSOAPFaultAllowed(mc)) {
-                log.debug("SOAPFault can be added to message");
-                addSOAPFault(mc.getEnvelope());
-                log.debug("SOAPFault added to message");
-            }
-        }
+//        // If SOAP Fault should be added, check if possible
+//        if(addSOAPFault) {
+//            log.debug("A SOAPFaults should be added to message, check if possible due to UserMessage with body payload");
+//            if (isSOAPFaultAllowed(mc)) {
+//                log.debug("SOAPFault can be added to message");
+//                addSOAPFault(mc.getEnvelope());
+//                log.debug("SOAPFault added to message");
+//            }
+//        }
         
         return InvocationResponse.CONTINUE;
     }   
