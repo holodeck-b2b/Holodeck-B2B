@@ -62,6 +62,7 @@ public class ErrorHandlingTest {
             assertEquals("http://test.holodeck-b2b.org/errors", eh.getReceiverErrorsTo());
             assertFalse(eh.shouldReportErrorOnError());
             assertTrue(eh.shouldReportErrorOnReceipt());
+            assertTrue(eh.shouldAddSOAPFault());
             assertTrue(eh.shouldNotifyErrorToBusinessApplication());
             
             assertNotNull(eh.getErrorDelivery());
@@ -82,6 +83,7 @@ public class ErrorHandlingTest {
             assertNull(eh.getReceiverErrorsTo());
             assertNull(eh.shouldReportErrorOnError());
             assertNull(eh.shouldReportErrorOnReceipt());
+            assertFalse(eh.shouldAddSOAPFault());
             assertFalse(eh.shouldNotifyErrorToBusinessApplication());
             
             assertNull(eh.getErrorDelivery());            
@@ -111,6 +113,7 @@ public class ErrorHandlingTest {
             assertNull(eh.getReceiverErrorsTo());
             assertNull(eh.shouldReportErrorOnError());
             assertNull(eh.shouldReportErrorOnReceipt());
+            assertFalse(eh.shouldAddSOAPFault());
             assertFalse(eh.shouldNotifyErrorToBusinessApplication());
             
             assertNotNull(eh.getErrorDelivery());            

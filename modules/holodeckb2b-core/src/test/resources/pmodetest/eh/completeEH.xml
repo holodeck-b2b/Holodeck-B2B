@@ -4,6 +4,7 @@
 >
     <tns:ReplyPattern>CALLBACK</tns:ReplyPattern>
     <tns:ReceiverErrorsTo>http://test.holodeck-b2b.org/errors</tns:ReceiverErrorsTo>
+    <tns:AddSOAPFault>true</tns:AddSOAPFault>
     <tns:ReportErrorOnError>false</tns:ReportErrorOnError>
     <tns:ReportErrorOnReceipt>true</tns:ReportErrorOnReceipt>
     <tns:NotifyErrorToBusinessApplication>true</tns:NotifyErrorToBusinessApplication>
