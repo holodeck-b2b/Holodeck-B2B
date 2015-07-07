@@ -95,7 +95,8 @@ public class ProcessGeneratedErrors extends BaseHandler {
                         // Therefor we only sent out this error if there no message unit with a processing state 
                         // different than FAILURE
                         // Anyhow the error should be registered
-                        ErrorMessage errorMU = MessageUnitDAO.createOutgoingErrorMessageUnit(errForMsg, null, null, true);
+                        ErrorMessage errorMU = MessageUnitDAO.createOutgoingErrorMessageUnit(errForMsg, null, null,
+                                                                                             false, true);
                         
                         if (onlyFailedMessageUnits(mc)) {
                             log.debug("All message units failed to process successfully, anonymous error can be sent");
@@ -120,6 +121,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
                             ErrorMessage errorMU = MessageUnitDAO.createOutgoingErrorMessageUnit(errForMsg, 
                                                                                                  refToMsgId, 
                                                                                                  null, 
+                                                                                                 false,
                                                                                                  true);
                             MessageContextUtils.addErrorSignalToSend(mc, errorMU);
                             mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
@@ -136,6 +138,10 @@ public class ProcessGeneratedErrors extends BaseHandler {
                             boolean asResponse = errorHandling != null ? 
                                                             errorHandling.getPattern() == ReplyPattern.RESPONSE :
                                                             isInFlow(RESPONDER);
+                            // Should this error signal be combined with a SOAP Fault? Because SOAP Faults can confuse
+                            // the MSH that receives the error Holodeck B2B by default does not add the SOAP, it should
+                            // be configured explicitly in the P-Mode
+                            boolean addSOAPFault = errorHandling != null ?  errorHandling.shouldAddSOAPFault() : false;                            
                             // For signals error reporting is optional, so check if error is for a signal and if P-Mode
                             // is configured to report errors. Default is not to report errors for signals
                             boolean sendError = true; 
@@ -152,6 +158,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
                                 ErrorMessage errorMU = MessageUnitDAO.createOutgoingErrorMessageUnit(errForMsg, 
                                                                                                      refToMsgId, 
                                                                                                      muInError.getPMode(), 
+                                                                                                     addSOAPFault,
                                                                                                      asResponse);
                                 log.debug("Error signal stored in datase");
                                 if (sendError && asResponse) {

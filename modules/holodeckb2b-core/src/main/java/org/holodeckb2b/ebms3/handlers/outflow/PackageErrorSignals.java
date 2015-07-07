@@ -30,40 +30,42 @@ import org.apache.axiom.soap.SOAPFaultValue;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.messagemodel.IEbmsError;
+import org.holodeckb2b.common.pmode.IErrorHandling;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
 import org.holodeckb2b.ebms3.persistent.message.Receipt;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
+import org.holodeckb2b.pmode.impl.ErrorHandling;
 
 /**
- * If there are <i>Error signals </i> that must be sent, this handler adds the
- * <code>eb:SignalMessage</code> elements to the ebMS header (which is created
- * by {@link CreateSOAPEnvelopeHandler}).
- * <p>If there are error signal message units to be sent, the corresponding 
- * {@link ErrorMessage} objects MUST be included in the Axis2 <code>MessageContext</code> 
- * property {@link MessageContextProperties#SEND_ERROR_SIGNALS}.
- * <p><b>NOTE 1:</b> Section 5.2.4 of the ebMS Core specification specifies that
- * a message MUST NOT contain more than one <code>SignalMessage</code> message
- * per signal type. This handler however supports adding multiple error signals
- * to the message. It is the responsibility of the other handlers not to insert
- * more than one error signal in the {@link MessageContextProperties#SEND_ERROR_SIGNALS}
- * message context property.
- * <p><b>NOTE 2:</b> When one of the errors added to the message has severity 
- * <i>Failure</i> the ebMS specification states that the SOAP message SHOULD also
- * contains a <i>SOAPFault</i> (see section 6.6). This may cause WS-I basic profile
- * conformance problems when the message also contains another message unit, especially 
- * when the error signal is bundled with a user message with a body payload as there 
- * SHALL be at most one child element of the SOAP body.<br>
- * It is also unclear which HTTP status code should be used in such cases. The SOAP Fault
- * implies using a non 2xx range code, but the bundled message units indicate successful 
- * processing which requires a 200 HTTP status code.<br>
- * Therefor this handler will not insert a SOAP Fault when the error signal(s) is/are 
- * bundled with another message unit.
+ * If there are <i>Error signals </i> that must be sent, this handler adds the <code>eb:SignalMessage</code> elements to 
+ * the ebMS header (which is created by {@link CreateSOAPEnvelopeHandler}).
+ * <p>If there are error signal message units to be sent, the corresponding {@link ErrorMessage} objects MUST be 
+ * included in the Axis2 <code>MessageContext</code> property {@link MessageContextProperties#SEND_ERROR_SIGNALS}.<br>
+ * Section 5.2.4 of the ebMS Core specification specifies that a message MUST NOT contain more than 
+ * one <code>SignalMessage</code> message per signal type. This handler however supports adding multiple error signals
+ * to the message. It is the responsibility of the other handlers not to insert more than one error signal in 
+ * the {@link MessageContextProperties#SEND_ERROR_SIGNALS} message context property.
+ * <p>When one of the errors added to the message has severity <i>Failure</i> the ebMS specification states that the 
+ * SOAP message SHOULD also contains a <i>SOAPFault</i> (see section 6.6 of ebMS V3 Core Specification). This may cause 
+ * WS-I basic profile conformance problems when the message also contains another message unit, especially when the 
+ * error signal is bundled with a user message with a body payload as there SHALL be at most one child element of the 
+ * SOAP body.<br>
+ * It is also unclear which HTTP status code should be used in such cases. The SOAP Fault implies using a non 2xx range 
+ * code, but the bundled message units indicate successful processing which requires a 200 HTTP status code.<br>
+ * The resolution to this issue as noted in <a href="https://issues.oasis-open.org/browse/EBXMLMSG-4">issue #4</a> in 
+ * the issue tracker of the ebMS TC is that the insertion of the SOAP Fault is optional.<br>
+ * Holodeck B2B will therefor by default not add a SOAP Fault to an ebMS message containing an Error Signal with errors
+ * of severity <i>FAILURE</i>. If in a message exchange it is preferred to add the SOAP Fault it should be configured
+ * in the P-Mode using the parameter returned by {@link IErrorHandling#shouldAddSOAPFault()}. Note however that Holodeck
+ * B2B will only add the SOAP Fault when the error signal(s) is/are not bundled with another message unit to prevent
+ * interop issues mentioned above.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @see IErrorHandling
+ * @see ErrorHandling
  */
 public class PackageErrorSignals extends BaseHandler {
 
@@ -97,13 +99,8 @@ public class PackageErrorSignals extends BaseHandler {
             org.holodeckb2b.ebms3.packaging.ErrorSignal.createElement(messaging, e);
             log.debug("eb:SignalMessage element succesfully added to header");
             
-            if (!addSOAPFault) {
-                log.debug("Check if a SOAPFault should be added");
-                for(IEbmsError err : e.getErrors())
-                    addSOAPFault = err.getSeverity() == IEbmsError.Severity.FAILURE;
-                log.debug("Error signal contains " + (addSOAPFault ? " one or more " : " no ") 
-                        + " errors with severity FAILURE: " + (addSOAPFault ? "" : "no") + " SOAPFault neeeded.");
-            }
+            // Check if a SOAPFault should be added                
+            addSOAPFault |= e.shouldHaveSOAPFault();
         }
         
         // If SOAP Fault should be added, check if possible

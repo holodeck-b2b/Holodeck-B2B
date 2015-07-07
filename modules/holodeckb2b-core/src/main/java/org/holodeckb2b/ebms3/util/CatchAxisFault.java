@@ -65,7 +65,7 @@ public class CatchAxisFault extends BaseHandler {
                 log.debug("Create the Error signal message");
                 newErrorMU = MessageUnitDAO.createOutgoingErrorMessageUnit(
                                                                     Collections.singletonList((EbmsError) otherError), 
-                                                                    null, null, true);
+                                                                    null, null, true, true);
             } catch (DatabaseException dbe) {
                 // (Still) a problem with the database, create the Error signal message without storing it 
                 log.fatal("Could not store error signal message in database!");

@@ -74,6 +74,26 @@ public class ErrorMessage extends SignalMessage implements IErrorMessage {
     }
     
     /**
+     * Gets indicator whether this Error Signal should be combined with a SOAP Fault. 
+     * <p>NOTE: The SOAP Fault will only be added if the Error signal is not bundled with other message units.
+     *  
+     * @return  <code>true</code> if Error Signal should be combined with SOAP Fault,<br>
+     *          <code>false</code> when not
+     */
+    public boolean shouldHaveSOAPFault() {
+        return ADD_SOAP_FAULT;
+    }
+    
+    /**
+     * Sets the indicator whether this Error Signal should be combined with a SOAP Fault.
+     * 
+     * @param addFault boolean indicator whether SOAP Fault should be added to this Error signal
+     */
+    public void setAddSOAPFault(boolean addFault) {
+        this.ADD_SOAP_FAULT = addFault;
+    }
+    
+    /**
      * Gets the message id of the referenced message unit. The referenced message id can be included in either the 
      * <code>eb:/SignalMessage/eb:MessageInfo/eb:RefToMessageId</code> element in the ebMS header or the 
      * <code>eb:/SignalMessage/eb:Error/@refToMessageInError</code> attribute in the signal message. 
@@ -129,10 +149,15 @@ public class ErrorMessage extends SignalMessage implements IErrorMessage {
      */
 
     /**
-     * Beside the standard ebMS meta-data the Error signal only contains a list
-     * of errors
+     * The list of errors contained in this Error signal
      */
     @ElementCollection(targetClass = EbmsError.class)
     @CollectionTable(name="ERR_MU_ERRORS")
     private List<IEbmsError>       errors;
+    
+    /**
+     * Indicator whether this Error signal should be combined with a SOAP Fault.
+     * <p>NOTE: The SOAP Fault will only be added if the Error signal is not bundled with other message units.
+     */
+    private boolean     ADD_SOAP_FAULT = false;
 }

@@ -134,11 +134,16 @@ public class MessageUnitDAO {
      * message.
      * @param pmodeId The id of the PMode that defines the processing of the new Error signal. May be <code>null</code>
      * if the P-Mode is not known.
+     * @param addSOAPFault boolean indicating whether the Error signal should be combined with a SOAP Fault
      * @param asResponse The error will be reported as a response
      * @return The new Error signal message unit
      * @throws DatabaseException If an error occurs when saving the new message unit to the database
      */
-    public static ErrorMessage createOutgoingErrorMessageUnit(Collection<EbmsError> errors, String refToMsgId, String pmodeId, boolean asResponse) throws DatabaseException {
+    public static ErrorMessage createOutgoingErrorMessageUnit(Collection<EbmsError> errors, 
+                                                              String refToMsgId, 
+                                                              String pmodeId,
+                                                              boolean addSOAPFault,
+                                                              boolean asResponse) throws DatabaseException {
         EntityManager em = JPAUtil.getEntityManager();
 
         try {
@@ -166,7 +171,10 @@ public class MessageUnitDAO {
             for (EbmsError e : errors) {
                 newErrorMU.addError(e);
             }
-
+            
+            // Set indicator if SOAP Fault should be added
+            newErrorMU.setAddSOAPFault(addSOAPFault);
+            
             // Set state to CREATED
             ProcessingState procstate = new ProcessingState(ProcessingStates.CREATED);
             newErrorMU.setProcessingState(procstate);
