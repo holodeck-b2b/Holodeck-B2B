@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import org.apache.tika.Tika;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
@@ -50,12 +51,11 @@ public final class Utils {
     private static Tika    mimeTypeDetector;
     
     /** 
-     * Transform a {@see Date} object to a {@see String} formatted according to
-     * the specification of the <code>dateTime</code> datatype of XML schema.<br>
-     * See <a href="http://www.w3.org/TR/xmlschema-2/#dateTime">section 3.2.7 of the XML
-     * Specification</a> for details.
+     * Transform a {@see Date} object to a {@see String} formatted according to the specification of the 
+     * <code>dateTime</code> datatype of XML schema. The time will be expressed as UTC.<br>
+     * See <a href="http://www.w3.org/TR/xmlschema-2/#dateTime">section 3.2.7 of the XML Specification</a> for details.
      * 
-     * @param   date  The date as Calendar object to convert to String.
+     * @param   date  The date as Date object to convert to String.
      * @return  The date as an <code>xs:dateTime</code> formatted String 
      *          or <code>null</code> when date object was <code>null</code>
      */
@@ -63,9 +63,10 @@ public final class Utils {
         if (date == null)
             return null;
         
-        String formatted = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-            .format(date);
-        return formatted.substring(0, 26) + ":" + formatted.substring(26);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        
+        return sdf.format(date);
     }
 
     /** 

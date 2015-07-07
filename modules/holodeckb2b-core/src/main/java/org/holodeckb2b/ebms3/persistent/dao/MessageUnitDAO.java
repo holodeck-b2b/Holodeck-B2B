@@ -682,6 +682,22 @@ public class MessageUnitDAO {
     }
 
     /**
+     * Updates the multi-hop indicator of the {@link MessageUnit}.
+     * 
+     * @param mu        The message unit object to update
+     * @param multihop  The indicator to use
+     * @throws DatabaseException When a database error occurs
+     */
+    public static void setMultiHop(MessageUnit mu, boolean multihop) throws DatabaseException {
+        EntityManager em = JPAUtil.getEntityManager();
+        em.getTransaction().begin();
+        mu.setMultiHop(multihop);
+        em.merge(mu);
+        em.getTransaction().commit();
+        em.close();        
+    }
+    
+    /**
      * Changes the processing state of a message unit to {@link ProcessingStates#READY_TO_PUSH} to indicate the message
      * unit is ready to be pushed to the receiving MSH.
      *
@@ -779,7 +795,24 @@ public class MessageUnitDAO {
     public static void setDone(SignalMessage mu) throws DatabaseException {
         setProcessingState(mu, ProcessingStates.DONE);
     }
-
+    
+    /**
+     * Loads all the data associated with the message unit from the database.
+     * 
+     * @param mu    The {@link MessageUnit} to load completely
+     * @throws DatabaseException  When a problem occurs loading the information for the message unit
+     */
+    public static <T extends MessageUnit> T loadCompletely(T mu) throws DatabaseException {
+        EntityManager em = JPAUtil.getEntityManager();
+        em.getTransaction().begin();
+        mu = em.merge(mu);
+        refreshMU(mu, em);
+        em.getTransaction().commit();
+        em.close();
+        
+        return mu;
+    }
+    
     /**
      * Changes the processing state of a message unit to {@link ProcessingStates#PROC_WITH_WARNING} to indicate that
      * the message unit was processed but there was an Error reported with severity <i>warning</i>.

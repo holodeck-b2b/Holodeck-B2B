@@ -130,6 +130,17 @@
     <dependencySets>
         <dependencySet>
             <outputDirectory>holodeck-b2b-${project.version}/lib</outputDirectory>
+            <excludes>
+                <exclude>*:mar:*</exclude>
+            </excludes>
+            <scope>runtime</scope>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>holodeck-b2b-${project.version}/repository/modules</outputDirectory>
+            <includes>
+                <include>*:mar:*</include>
+            </includes>
+            <scope>runtime</scope>
         </dependencySet>
     </dependencySets>
 

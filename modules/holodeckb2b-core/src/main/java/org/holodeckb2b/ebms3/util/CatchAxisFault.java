@@ -47,7 +47,7 @@ public class CatchAxisFault extends BaseHandler {
     }
     
     @Override
-    public void flowComplete(MessageContext mc) {
+    public void doFlowComplete(MessageContext mc) {
         
         if (mc.getFailureReason() != null) {
             log.debug("A Fault was raised during processing. Reported cause= " + mc.getFailureReason().getMessage());
