@@ -26,7 +26,7 @@ import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.IEbmsError;
 import org.holodeckb2b.common.messagemodel.IReceipt;
-import org.holodeckb2b.common.pmode.ILeg;
+import org.holodeckb2b.common.pmode.IProtocol;
 import org.holodeckb2b.ebms3.mmd.xml.CollaborationInfo;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -80,8 +80,8 @@ public class ConfigureMultihop extends BaseHandler {
         if (primMU instanceof UserMessage) {
             // Whether the user message is sent using multi-hop is defined by P-Mode parameter 
             // PMode[1].Protocol.AddActorOrRoleAttribute
-            ILeg leg = HolodeckB2BCore.getPModeSet().get(primMU.getPMode()).getLegs().iterator().next();            
-            if (!leg.getProtocol().shouldAddActorOrRoleAttribute()) 
+            IProtocol prot = HolodeckB2BCore.getPModeSet().get(primMU.getPMode()).getLegs().iterator().next().getProtocol();            
+            if (prot == null || !prot.shouldAddActorOrRoleAttribute()) 
                 log.debug("Primary message is a non multi-hop UserMessage");
             else {
                 // This is a multi-hop message, set the multi-hop target on the eb:Messaging element
