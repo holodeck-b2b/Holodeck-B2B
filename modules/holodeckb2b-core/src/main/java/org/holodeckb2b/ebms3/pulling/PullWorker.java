@@ -20,15 +20,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.client.OperationClient;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.common.pmode.ILeg;
@@ -38,9 +31,9 @@ import org.holodeckb2b.common.pmode.IPullRequestFlow;
 import org.holodeckb2b.common.pmode.IUserMessageFlow;
 import org.holodeckb2b.common.workerpool.IWorkerTask;
 import org.holodeckb2b.common.workerpool.TaskConfigurationException;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
+import org.holodeckb2b.ebms3.util.Axis2Utils;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
@@ -194,7 +187,7 @@ public class PullWorker implements IWorkerTask {
                     PullRequest pullRequest = MessageUnitDAO.createOutgoingPullRequest(p.getId(), mpc);
                     log.debug("PullRequest created [" + pullRequest.getMessageId() + "] for P-Mode [" + p.getId() + "] and MPC=" + mpc);
                     log.debug("Start send for PullRequest [" + pullRequest.getMessageId() + "]");
-                    send(pullRequest);
+                    Axis2Utils.sendMessage(pullRequest, log);
                     log.info("Successfully sent pull request [" + pullRequest.getMessageId() + "]");
                 } catch (DatabaseException ex) {
                     log.error("Could not create PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
@@ -249,56 +242,5 @@ public class PullWorker implements IWorkerTask {
         log.info("Pulling for " + pmodesToPull.size() + " P-Modes");
         
         return pmodesToPull;
-    }
-    
-    /*
-     * Helper method to start the send process. The actual ebMS processing will take place 
-     * in the specific handlers. 
-     */
-    private void send(PullRequest message) {
-        ServiceClient sc;
-        OperationClient oc;
-
-        try {
-            log.debug("Prepare Axis2 client to send message");
-            sc = new ServiceClient(Config.getAxisConfigurationContext(), null);
-            sc.engageModule(Constants.HOLODECKB2B_CORE_MODULE);
-            oc = sc.createClient(ServiceClient.ANON_OUT_IN_OP);
-
-            log.debug("Create an empty MessageContext for message with current configuration");
-            MessageContext msgCtx = new MessageContext();
-            msgCtx.setProperty(MessageContextProperties.OUT_PULL_REQUEST, message);
-            oc.addMessageContext(msgCtx);
-
-            EndpointReference targetEPR = new EndpointReference("http://holodeck-b2b.org/transport/dummy");
-            Options options = new Options();
-            options.setTo(targetEPR);
-            oc.setOptions(options);
-
-            log.debug("Axis2 client configured for sending ebMS message");
-
-        } catch (AxisFault af) {
-            // Setting up the Axis environment failed. Return processing state to SUBMITTED so that it will be resend
-            // Signal this in the log as a fatal error
-            log.fatal("Setting up Axis2 to send message failed! Details: " + af.getReason());
-            //@todo: Message has to be resend after some delay
-
-            return;
-        }
-
-        try {
-            log.debug("Start the message send process");
-            oc.execute(false);
-        } catch (AxisFault af) {
-            // An error occurred while sending the message, 
-
-        } finally {
-            try { 
-                sc.cleanupTransport();
-            } catch (AxisFault af) {
-                
-            }
-        }
-    }
-
+    }    
 }
