@@ -63,7 +63,6 @@ public final class Axis2Utils {
             return resCtx;
         } catch (AxisFault af) {
             // Somewhere the construction of the new MessageContext failed
-            //@todo: Logging!
             return null;
         }
     }
