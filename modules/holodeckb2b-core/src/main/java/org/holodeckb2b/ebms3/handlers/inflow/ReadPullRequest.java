@@ -42,8 +42,6 @@ import org.holodeckb2b.ebms3.util.MessageContextUtils;
  * however limits the number of pull request units in the message to just one. Holodeck B2B therefor only uses the first 
  * occurrence of <code>eb:SignalMessage</code> that has a <code>eb:PullRequest</code> child and ignores others.
  * 
- * @todo: Collect authentication information that should be used to authoriza the pull
- * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class ReadPullRequest extends BaseHandler {
