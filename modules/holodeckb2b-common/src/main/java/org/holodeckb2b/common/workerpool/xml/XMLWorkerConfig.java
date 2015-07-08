@@ -93,7 +93,7 @@ public class XMLWorkerConfig implements IWorkerConfiguration {
 
     @Override
     public Interval getInterval() {
-        if (xmlInterval > 0 && interval == null) //@todo: Is this check OKAY? What if reconfigured?
+        if (xmlInterval > 0 && interval == null) 
             interval = new Interval(xmlInterval, TimeUnit.SECONDS);
         
         return interval;
@@ -117,6 +117,7 @@ public class XMLWorkerConfig implements IWorkerConfiguration {
 
     public void setXmlInterval(int xmlInterval) {
         this.xmlInterval = xmlInterval;
+        interval = new Interval(xmlInterval, TimeUnit.SECONDS);
     }
 
     public void setParameters(Map<String, String> parameters) {
