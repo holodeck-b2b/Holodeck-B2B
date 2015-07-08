@@ -70,12 +70,11 @@ public abstract class PathWatcher extends AbstractWorkerTask {
      */
     private List<FileListing> lastListing = new LinkedList<FileListing>();
         
-//    /**
-//     * Default constructor. Initializes the log.
-//     */
-//    public PathWatcher() {
-//        log = LogFactory.getLog(this.getClass());
-//    }
+    /**
+     * Is called before processing of changes in the file list starts. 
+     * <p>This method can be used by implementations to prepare for handling the changes.  
+     */
+    protected void doPreProcessing() {};    
 
     /**
      * Should handle a change in the watched path. This <b>abstract</b> method is
@@ -85,6 +84,12 @@ public abstract class PathWatcher extends AbstractWorkerTask {
      * @param  event    The event that occurred
      */
     protected abstract void onChange(File f, Event event);
+    
+    /**
+     * Is called after processing of changes in the file list starts. 
+     * <p>This method can be used by implementations to finalize the processing of changes.  
+     */
+    protected void doPostProcessing() {};    
     
     /**
      * Should return the current list of files on the given path.
@@ -123,11 +128,21 @@ public abstract class PathWatcher extends AbstractWorkerTask {
     }
 
     /**
-     * Checks if there were changes on the given path. 
-     * <p>The actual file list to compare is determined by the sub class in method {@link #getFileList()}. 
+     * Checks if there were changes on the given path. The actual file list to compare is determined by the sub class 
+     * in method <code>getFileList()</code>. 
+     * <p>For each detected change {@link #onChange(java.io.File, org.holodeckb2b.common.workers.PathWatcher.Event)} is 
+     * called. Before reporting the changes <code>doPreProcessing()</code> is called to allow a subclass to prepare for 
+     * handling changed files. And after all changes are reported <code>doPostProcessing()</code> is called to finalize 
+     * processing.
+     * 
+     * @see #getFileList() 
+     * @see #doPreProcessing()
+     * @see #doPostProcessing() 
      */
     @Override
     public void doProcessing() {
+        doPreProcessing();
+        
         log.debug("Scanning path [" + watchPath + "] for changes");
         
         // Get the current file listing
@@ -144,20 +159,23 @@ public abstract class PathWatcher extends AbstractWorkerTask {
         while ( i < O.length || j < N.length) {
             if (j == N.length || (i < O.length && O[i].path.compareTo(N[j].getAbsolutePath()) < 0)) {
                 try { onChange(new File(O[i].path), Event.REMOVED); }
-                catch (Exception e) { log.error("Unhandled exception while processing changed file. Details: " + e.getMessage()); }
+                catch (Exception e) 
+                    { log.error("Unhandled exception while processing changed file. Details: " + e.getMessage()); }
                 finally { i++; r++; }
             } 
             else if (i == O.length) {
                 C.add(new FileListing(N[j].getAbsolutePath(), N[j].lastModified()));
                 try { onChange(N[j], Event.ADDED); }
-                catch (Exception e) { log.error("Unhandled exception while processing changed file. Details: " + e.getMessage()); }
+                catch (Exception e) 
+                    { log.error("Unhandled exception while processing changed file. Details: " + e.getMessage()); }
                 finally { j++; n++; }
             }
             else if (O[i].path.equals(N[j].getAbsolutePath())) {
                 C.add(new FileListing(N[j].getAbsolutePath(), N[j].lastModified()));
                 if (O[i].lastModified < N[j].lastModified()) {
                     try { onChange(N[j], Event.CHANGED); }
-                    catch (Exception e) { log.error("Unhandled exception while processing changed file. Details: " + e.getMessage()); }
+                    catch (Exception e) 
+                        { log.error("Unhandled exception while processing changed file. Details: " + e.getMessage()); }
                     finally { c++; }
                 }
                 i++; j++;
@@ -165,13 +183,17 @@ public abstract class PathWatcher extends AbstractWorkerTask {
             else if (O[i].path.compareTo(N[j].getAbsolutePath()) > 0) {
                 C.add(new FileListing(N[j].getAbsolutePath(), N[j].lastModified()));
                 try { onChange(N[j], Event.ADDED); } 
-                catch (Exception e) { log.error("Unhandled exception while processing changed file. Details: " + e.getMessage()); }
+                catch (Exception e) 
+                    { log.error("Unhandled exception while processing changed file. Details: " + e.getMessage()); }
                 finally { j++; n++; }
             }           
         }
         
-        log.debug("Scanned " + watchPath + ", " + (r+c+n) + " changes: " + r + " files removed, " + n + " files added and " + c + " files modified.");
+        log.debug("Scanned " + watchPath + ", " + (r+c+n) + " changes: " + r + " files removed, " 
+                    + n + " files added and " + c + " files modified.");
         lastListing = C;
+        
+        doPostProcessing();
     }
     
 
