@@ -148,7 +148,6 @@ public class Config {
         String tempDir = readModuleParameter(module, "TempDir");
         if (tempDir == null || tempDir.isEmpty())
             // Not specified, use default
-            // @todo: Use system temp as default
             tempDir = configContext.getRealPath("/temp/").getAbsolutePath();
         
         // Ensure the path ends with a folder separator
