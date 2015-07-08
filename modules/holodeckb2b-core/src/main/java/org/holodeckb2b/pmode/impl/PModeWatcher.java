@@ -18,225 +18,187 @@ package org.holodeckb2b.pmode.impl;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workers.DirWatcher;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
+ *
+ *
+ * @see PMode
  * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class PModeWatcher extends DirWatcher {
 
-
     /**
-     * Internal mapping from pmodeID to filename for keeping track of changes, we need to have a reference to deleted
+     * Internal mapping from filename to P-Mode id for keeping track of changes. We need to have a reference to deleted
      * files in order to keep track of what has changed. Since if PMode definition file is gone from disk there is
      * nothing more to see or known for this file.
      */
-    protected Map<String, String> pModeIDToFilenameMapping = new HashMap<String, String>();
+    protected Map<String, String> fileToPModeMap = new HashMap<String, String>();
 
     /**
-     * On change controller, called when a PMode definition file has changed.
+     * List of new P-Mode files
+     */
+    protected List<File> newPModes = null;
+    /**
+     * List of modified P-Mode files
+     */
+    protected List<File> chgPModes = null;
+    /**
+     * List of deleted P-Mode files
+     */
+    protected List<File> delPModes = null;
+
+    /**
+     * Prepares for processing all changes in the P-Mode files. Because a P-Mode change can be done either by changing
+     * the file as well as deleting the old version and adding a new file we first collect all changes and then process
+     * them.
+     */
+    @Override
+    protected void doPreProcessing() {
+        newPModes = new LinkedList<File>();
+        chgPModes = new LinkedList<File>();
+        delPModes = new LinkedList<File>();
+    }
+
+    /**
+     * On change controller, called when a PMode definition file has changed. This method only stores the change in the
+     * correct list, the actual processing of changes is done in {@link #doPostProcessing()}
      *
      * @param f is the file which is changed.
      * @param event is the event that occurred on the file f.
      */
     @Override
     protected void onChange(File f, Event event) {
-
-        if (event == Event.ADDED) {
-            onChangeAdd(f);
+        switch (event) {
+            case ADDED :
+                newPModes.add(f); break;
+            case CHANGED : 
+                chgPModes.add(f); break;
+            case REMOVED :
+                delPModes.add(f);
         }
-
-        if (event == Event.CHANGED) {
-            onChangeChanged(f);
-        }
-
-        if (event == Event.REMOVED) {
-            onChangeRemove(f);
-        }
-
     }
 
     /**
-     * Handle the PMode add event.
-     * New file describing the PMode found on file system.
-     *
-     * @param f XML file containing the PMode definition in XML.
+     * Processes all the changes, first the removed files, then the new files and last the changed ones.
      */
-    protected void onChangeAdd(File f) {
+    @Override
+    protected void doPostProcessing() {
+        log.debug("Process removed P-Mode files");
+        for (File f : delPModes) {
+            String pmodeId = removePMode(f);
+            log.info("Removed P-Mode " + (pmodeId != null ? "[" + pmodeId + "] " : "") 
+                        + " contained in '" + f.getName()+ "'");
+        }
+        log.debug("Process new P-Mode files");
+        for (File f : newPModes) {
+            String pmodeId = addPMode(f);
+            if (pmodeId != null) 
+                log.info("Added P-Mode [" + pmodeId + "] from file '" + f.getName()+ "'");
+        }
+        log.debug("Process changed P-Mode files");
+        for (File f : chgPModes) {
+            /* When the file has changed it does not necessarily mean that the P-Mode contained in the original file has 
+              changed. It is also possible that the changed file contains a completely new P-Mode. Therefore the changed
+              file is processed by first removed the old P-Mode and then adding a new one.
+              Note that this can result in removal of a P-Mode if the new file contains a modified version with an error
+            */
+            String oldPModeId = removePMode(f);
+            String newPModeId = addPMode(f);
+            if (newPModeId == null) {
+                log.error("The P-Mode originally contained in '" + f.getName() + "' with ID [" + oldPModeId 
+                            + "] is removed, but the new P-Mode could not be loaded!");
+            } else if (newPModeId.equals(oldPModeId)) 
+                log.info("Loaded changed P-Mode [" + newPModeId + "] from file '" + f.getName()+ "'");
+            else     
+                log.info("P-Mode [" + oldPModeId + "] originally contained in '" + f.getName() + "' is replaced by" 
+                            + " new P-Mode with ID [" + newPModeId + "]");        
+        }
+    }
 
+    /**
+     * Handles a new PMode file.
+     *
+     * @param f The file containing the PMode definition in XML.
+     * @return String containing the P-Mode Id of the new P-Mode if it is successfully added to the P-Mode set,<br>
+     *         <code>null</code> if the P-Mode could not be added
+     */
+    protected String addPMode(File f) {
+        // Get the PMode from the file, based on file f
+        PMode pmode = new PMode();
         try {
-            PModeSet pms = null;
+            pmode = pmode.createFromFile(f);
+        } catch (Exception ex) {
+            // The XML contained an error and could not be tranformed into a PMode object
+            //
+            log.error("PMode from '" + f.getAbsolutePath() + " could not be read." 
+                        + " Error details: " + ex.getMessage());            
+            return null;
+        }
 
-            // Proces new PMode xml file(s).
-            log.debug("New PMode file '" + f.getName() + "' found.");
+        // Get the current set of P-Modes. 
+        // Check if Holodeck B2B has just started and we do not have any P-Mode yet in the internal reference. In that
+        // case create the P-Mode set.
+        PModeSet pms = null;
+        if (fileToPModeMap.isEmpty()) {
+            pms = new PModeSet();
+        } else {
+            // get the current PModeSet from the Holodeck core.
+            pms = (PModeSet) HolodeckB2BCore.getPModeSet();
+        }
 
-            // get the PMode from the file, based on file f
-            PMode pm = new PMode();
-            pm = pm.createFromFile(f);
-
-            // Check if Holodeck B2B has just started and we do not have any P-Mode yet
-            // in the internal reference
-            if (this.pModeIDToFilenameMapping.isEmpty()) {
-                pms = new PModeSet();
-            } else {
-                // get the current PModeSet from the Holodeck core.
-                pms = (PModeSet) HolodeckB2BCore.getPModeSet();
-            }
-
-            // we have a new file which is previously unknown to the system
+        // we have a new file which is previously unknown to the system
+        // check if new PMode is currently known based on it's PMode-ID.
+        String pmodeId = pmode.getId();
+        if (this.fileToPModeMap.containsValue(pmodeId)) {
+            // There is already a file that containing a P-Mode with the same id. P-Mode.ids must however be unique! 
+            // Log error about this and stop processing this file
+            log.error("DUPLICATE P-Mode.ID detected! The P-Mode.ID ["+ pmodeId + "] of P-Mode in '" 
+                        + f.getAbsolutePath() + "' is also registered in '" 
+                        + Utils.getKeyByValue(fileToPModeMap, pmodeId) + "'!");
+            return null;
+        } else {
+            // Add the new P-Mode to the set and mapping
+            pms.set(pmode.getId(), pmode);
+            // pass the new PModeSet to the Holodeck core
+            HolodeckB2BCore.setPModeSet(pms);
             
-            // check if new PMode is currently known based on it's PMode-ID.
-            if (this.pModeIDToFilenameMapping.containsKey(pm.getId())) {
-
-                log.debug("An error occured when processing new pmode XML file from '" + f.getAbsolutePath() + "'.");
-                log.debug("PMode already known based on the PMode-ID.");
-                log.debug("The defined PModeID ('" + pm.getId() + "') is already in use and PMode ID's must be UNIQUE.");
-                log.debug("PMode with this PMode-ID already defined in file '" + this.pModeIDToFilenameMapping.get(pm.getId()) + "'");
-
-            } else {
-
-                // add new entry to the internal mapping of this class
-                this.pModeIDToFilenameMapping.put(pm.getId(), f.getAbsolutePath());
-
-                // add new entry to the PModeSet
-                pms.set(pm.getId(), pm);
-
-                // pass the new PModeSet to the Holodeck core
-                HolodeckB2BCore.setPModeSet(pms);
-
-            }
-
-        } catch (Exception e) {
-            // Something went wrong on while reading the PMode XML file.
-            log.error("An error occured when reading pmode XML file from '" + f.getAbsolutePath() + "' when adding file'. Details: " + e.getMessage());
+            // add new entry to the internal mapping of this class
+            fileToPModeMap.put(f.getAbsolutePath(), pmode.getId());
+            
+            return pmodeId;
         }
     }
 
     /**
-     * Handle the PMode changed event. 
-     * Previous existing file describing a PMode found on file system.
+     * Handles a removed PMode file.
      *
-     * @param f XML file containing the PMode definition in XML.
+     * @param f Reference to the removed file. Note that this file no longer exists and the reference can not be used
+     *          for access the file.
+     * @return The id of the removed P-Mode, can be <code>null</code> if the P-Mode was already removed earlier.
      */
-    protected void onChangeChanged(File f) {
-
-        try {
-
-            // Proces changed PMode xml file(s).
-            log.debug("Changed PMode file '" + f.getAbsolutePath() + "' found.");
-
-            // get the PMode from the file
-            PMode pm = new PMode();
-            pm = pm.createFromFile(f);
-
+    protected String removePMode(File f) {
+        // get the PModeID from the internal mapping (since the file which contained the PModeID is removed from disk).
+        String PModeID = fileToPModeMap.get(f.getAbsolutePath());
+        if ((PModeID != null) && (!PModeID.isEmpty())) {
+            // remove the P-Mode from both set and mapping
             // get the current PModeSet from the Holodeck core.
             PModeSet pms = (PModeSet) HolodeckB2BCore.getPModeSet();
+            // remove existing entry from PModeSet
+            pms.remove(PModeID);
+            // pass the new PModeSet to the Holodeck B2B core
+            HolodeckB2BCore.setPModeSet(pms);
 
-            // check if PMode is currently known based on the location of the PMode definition file.
-            // if file is found, replace the definition by remove and add operations
-            if (this.pModeIDToFilenameMapping.containsValue(f.getAbsolutePath())) {
+            fileToPModeMap.remove(f.getAbsolutePath());
+        } 
 
-                String PModeID = "";
-                
-                // get the PMode ID corresponding to the old PMode definition file
-                PModeID = Utils.getKeyByValue(pModeIDToFilenameMapping, f.getAbsolutePath());
-
-                if ((PModeID != null) && (!PModeID.isEmpty())) {
-
-                    // remove the old entry from the internal mapping of this class
-                    this.pModeIDToFilenameMapping.remove(PModeID);
-                    
-                    // remove existing entry from PModeSet
-                    pms.remove(PModeID);
-                } 
-                
-                // add new entry to the internal mapping of this class
-                this.pModeIDToFilenameMapping.put(pm.getId(), f.getAbsolutePath());
-
-                // add new entry to the PModeSet
-                pms.set(pm.getId(), pm);
-
-                // pass the new PModeSet to the Holodeck core
-                HolodeckB2BCore.setPModeSet(pms);
-
-            } else {
-
-                // we have a new file now let's check it's PMode-ID.
-                // check PMode is currently known based on the PMode-ID.
-                if (this.pModeIDToFilenameMapping.containsKey(pm.getId())) {
-
-                    log.debug("An error occured when processing new pmode XML file from '" + f.getName() + "'.");
-                    log.debug("PMode already known based on the PMode-ID.");
-                    log.debug("The defined PModeID ('" + pm.getId() + "') is already in use and PMode ID's must be UNIQUE.");
-                    log.debug("PMode with this PMode-ID already defined in file '" + this.pModeIDToFilenameMapping.get(pm.getId()) + "'");
-
-                } else {
-
-                    // add new entry to the internal mapping of this class
-                    this.pModeIDToFilenameMapping.put(pm.getId(), f.getAbsolutePath());
-
-                    // add new entry to the PModeSet
-                    pms.set(pm.getId(), pm);
-
-                    // pass the new PModeSet to the Holodeck core
-                    HolodeckB2BCore.setPModeSet(pms);
-
-                }
-            } 
-
-        } catch (Exception e) {
-            // Something went wrong on while reading the PMode XML file.
-            log.error("An error occured when reading pmode XML file from '" + f.getAbsolutePath() + "' on file change'. Details: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Handle the PMode remove event.
-     *
-     * @param f XML file containing the PMode definition in XML.
-     *
-     */
-    protected void onChangeRemove(File f) {
-        try {
-
-            String PModeID = "";
-
-            // Check which PMode file is removed
-            log.debug("Removed PMode file '" + f.getName() + "' no longer exist.");
-
-            // check if we already know a PMode with the same file location.
-            // note that we cannot retrieve the PMode ID any longer since
-            // the file is gone on disk which defined the PMode ID.
-            if (this.pModeIDToFilenameMapping.containsValue(f.getAbsolutePath())) {
-
-                // get the PModeID from the internal mapping (since the file
-                // which contained the PModeID is removed from disk).
-                PModeID = Utils.getKeyByValue(pModeIDToFilenameMapping, f.getAbsolutePath());
-
-                if ((PModeID != null) && (!PModeID.isEmpty())) {
-
-                    // remove existing entry
-                    this.pModeIDToFilenameMapping.remove(PModeID);
-
-                    // get the current PModeSet from the Holodeck core.
-                    PModeSet pms = (PModeSet) HolodeckB2BCore.getPModeSet();
-
-                    // remove existing entry from PModeSet
-                    pms.remove(PModeID);
-
-                    // pass the new PModeSet to the Holodeck B2B core
-                    HolodeckB2BCore.setPModeSet(pms);
-                }
-
-            }
-
-        } catch (Exception e) {
-            // Something went wrong on while reading the PMode XML file.
-            log.error("An error occured when pmode XML file was removed from '" + f.getAbsolutePath() + "'. Details: " + e.getMessage());
-        }
+        return PModeID;
     }
 
 }
