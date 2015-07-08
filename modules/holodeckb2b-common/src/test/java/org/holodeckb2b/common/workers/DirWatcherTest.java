@@ -4,7 +4,6 @@
  */
 package org.holodeckb2b.common.workers;
 
-import org.holodeckb2b.common.workers.DirWatcher;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,11 +13,10 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.holodeckb2b.common.workerpool.TaskConfigurationException;
 import org.junit.After;
-import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -92,8 +90,6 @@ public class DirWatcherTest {
     /**
      * Second test, add a file
      */
-    // TODO test failed, correct and add comment
-    /*
     @Test
     public void testAddToEnd() {
         
@@ -114,7 +110,6 @@ public class DirWatcherTest {
         instance.run();
         assertEquals(1, instance.c);               
     }
-    */
 
     /**
      * Delete first
@@ -138,8 +133,6 @@ public class DirWatcherTest {
     /**
      * Delete second, add to end
      */
-    // TODO test failed, correct and add comment
-    /*
     @Test
     public void testDeleteAndAdd() {
         
@@ -163,7 +156,6 @@ public class DirWatcherTest {
         instance.run();
         assertEquals(2, instance.c);               
     }    
-    */
     
     public class DirWatcherImpl extends DirWatcher {
         public int c = 0;
