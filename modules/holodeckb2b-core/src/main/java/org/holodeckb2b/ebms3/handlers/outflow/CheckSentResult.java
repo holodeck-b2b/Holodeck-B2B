@@ -20,7 +20,6 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
@@ -29,9 +28,11 @@ import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
 import org.holodeckb2b.ebms3.persistent.message.SignalMessage;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
+import org.holodeckb2b.ebms3.util.MessageContextUtils;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
@@ -51,16 +52,24 @@ public class CheckSentResult extends BaseHandler {
     }
 
     /**
-     * When the message is sent out the message units will stay in the {@link ProcessingStates#PROCESSING} processing
-     * state. Only after sending their state will updated. Therefor this handler does no processing in the regular flow.
+     * This method changes the processing state of the message units to {@link ProcessingStates#SENDING} to indicate
+     * they are being sent to the other MSH. 
      * 
      * @param mc            The current message 
      * @return              {@link InvocationResponse#CONTINUE} as this handler only needs to run when the message has
      *                      been sent.
-     * @throws AxisFault    Never
+     * @throws DatabaseException    When the processing state can not be changed
      */
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) {
+    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
+        // Get all message units in this message
+        Collection<MessageUnit> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
+        // And change their processing state
+        for (MessageUnit mu : msgUnits) {
+            MessageUnitDAO.setSending(mu);
+            log.info(mu.getClass().getSimpleName()+ " with msg-id [" + mu.getMessageId() + "] is being sent");
+        }        
+        
         return InvocationResponse.CONTINUE;
     }
  
@@ -98,8 +107,11 @@ public class CheckSentResult extends BaseHandler {
             if (um != null)
                 usermsgs.add(um);
             changeUserMessageState(usermsgs, success);
-        } else 
-            log.debug("Not an ebMS message, nothing to do");
+            
+            // The transport error is handled, so clear the failure to prevent further processing of the error
+            mc.setFailureReason(null);
+        } // else 
+            // Not an ebMS message, nothing to do
     }
 
     /**
@@ -145,7 +157,7 @@ public class CheckSentResult extends BaseHandler {
                 if (success) {
                     MessageUnitDAO.setDelivered(s);
                 } else {
-                    //@todo: Check if retry is possible, if not state should be changed to FAILED!
+                    //@todo: Should we do a retry? 
                     MessageUnitDAO.setTransportFailure(s);
                 }
                 log.debug("Processing state of signal message [" + s.getMessageId() + "] changed");
@@ -173,7 +185,7 @@ public class CheckSentResult extends BaseHandler {
            log.debug("Setting processing state for signal message with msgId=" + um.getMessageId());
             try {
                 if (!success) {
-                    //@todo: Check if retry is possible, if not state should be changed to FAILED!
+                    //@todo: Should we do a retry?
                     MessageUnitDAO.setTransportFailure(um);
                 } else {
                     log.debug("User message is sent, check P-Mode if Receipt is expected");

@@ -200,20 +200,19 @@ public class MessageContextUtils {
     }
 
     /**
-     * Gets a property from the out flow message context to which the given message context is a response.
+     * Gets a property from the out flow message context of the current message exchange.
      * 
-     * @param outMsgCtx     The response {@link MessageContext}
-     * @param key           The name of the property to get the value for
-     * @return              The value of the requested property if it exists
-     *                      in the out flow message context, <code>null</code>
-     *                      otherwise.
+     * @param msgCtx     The current {@link MessageContext}
+     * @param key        The name of the property to get the value for
+     * @return           The value of the requested property if it exists in the out flow message context,or <br>
+     *                   <code>null</code> otherwise.
      */
-    public static Object getPropertyFromOutMsgCtx(MessageContext inMsgCtx, String key) {
-        if (inMsgCtx == null || key == null) 
+    public static Object getPropertyFromOutMsgCtx(MessageContext msgCtx, String key) {
+        if (msgCtx == null || key == null) 
             return null;
         
         try {
-            OperationContext opContext = inMsgCtx.getOperationContext();
+            OperationContext opContext = msgCtx.getOperationContext();
             MessageContext outMsgContext = opContext.getMessageContext(WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
             
             return outMsgContext.getProperty(key);
@@ -223,9 +222,9 @@ public class MessageContextUtils {
     }   
     
     /**
-     * Retrieves all message units that were sent out previously. 
+     * Retrieves all message units that were previously (or are to be) sent. 
      * 
-     * @param mc    The in flow message context
+     * @param mc    The current message context
      * @return      {@link Collection} of {@link MessageUnit} objects for the message units that were sent. 
      */
     public static Collection<MessageUnit> getSentMessageUnits(MessageContext mc) {
