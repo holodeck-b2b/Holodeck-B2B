@@ -77,7 +77,7 @@ public class CheckSentResult extends BaseHandler {
      * @param mc    The current message that was sent out
      */
     @Override
-    public void flowComplete(MessageContext mc) {
+    public void doFlowComplete(MessageContext mc) {
         // First get the ebMS header block, that is the eb:Messaging element
         SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
         
