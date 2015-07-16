@@ -130,7 +130,7 @@ public final class Axis2Utils {
         OperationClient oc;
 
         try {
-            log.debug("Prepare Axis2 client to send message");
+            log.debug("Prepare Axis2 client to send " + message.getClass().getSimpleName());
             sc = new ServiceClient(Config.getAxisConfigurationContext(), null);
             sc.engageModule(Constants.HOLODECKB2B_CORE_MODULE);
             oc = sc.createClient(ServiceClient.ANON_OUT_IN_OP);
@@ -169,11 +169,11 @@ public final class Axis2Utils {
 
         try {
             log.debug("Start the message send process");
-            oc.execute(false);
+            oc.execute(true);
         } catch (AxisFault af) {
             // An error occurred while sending the message, 
-            log.error("An unexpected error occurred while sending the PullRequest with msg-id: "
-                    + message.getMessageId());
+            log.error("An unexpected error occurred while sending the " + message.getClass().getSimpleName()
+                        + " with msg-id: [" + message.getMessageId() + "] Details: " + af.getReason());
         } finally {
             try {
                 sc.cleanup();
