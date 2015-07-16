@@ -61,6 +61,11 @@ public final class ProcessingStates {
     public static final String PROCESSING = "PROCESSING";
     
     /**
+     * The message unit is currently being transferred to the other MSH.
+     */
+    public static final String SENDING = "SENDING";
+    
+    /**
      * The user message is waiting for a receipt
      */
     public static final String AWAITING_RECEIPT = "AWAITING RECEIPT";

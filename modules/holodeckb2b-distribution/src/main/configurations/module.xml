@@ -344,14 +344,7 @@
            class="org.holodeckb2b.ebms3.handlers.outflow.PackagePullRequestSignal">
             <order phase="ebms3OutPhase" after="PackageReceipt"/>
         </handler>
-        <handler name="ConfigureHTTP" 
-            class="org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler">
-            <order phase="MessageOut" />
-        </handler>
-        <handler name="CheckSentResult" 
-            class="org.holodeckb2b.ebms3.handlers.outflow.CheckSentResult">
-            <order phase="MessageOut" after="ConfigureHTTP" />
-        </handler>        
+        
         
         <!-- Security handlers responsible for adding the WSS headers -->
         <handler name="GetSecuritySettings" class="org.holodeckb2b.security.handlers.GetSecurityConfiguration">
@@ -360,7 +353,16 @@
         <handler name="CreateSecurityHeaders" class="org.holodeckb2b.security.handlers.CreateWSSHeaders">
             <order phase="Security" after="GetSecuritySettings"/>      
         </handler>
-        
+
+        <!-- Handlers responsible for configuration and checking of message transport -->
+        <handler name="ConfigureHTTP" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler">
+            <order phase="MessageOut" />
+        </handler>
+        <handler name="CheckSentResult" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.CheckSentResult">
+            <order phase="MessageOut" after="ConfigureHTTP" />
+        </handler>                
     </OutFlow>
     
 
@@ -404,14 +406,6 @@
             class="org.holodeckb2b.ebms3.handlers.outflow.PackagePullRequestSignal">
             <order phase="ebms3OutPhase" after="PackageReceipt"/>
         </handler>
-        <handler name="ConfigureHTTP" 
-            class="org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler">
-            <order phase="MessageOut" />
-        </handler>
-        <handler name="CheckSentResult" 
-            class="org.holodeckb2b.ebms3.handlers.outflow.CheckSentResult">
-            <order phase="MessageOut" after="ConfigureHTTP" />
-        </handler>        
         
         <!-- Security handlers responsible for adding the WSS headers -->
         <handler name="GetSecuritySettings" class="org.holodeckb2b.security.handlers.GetSecurityConfiguration">
@@ -421,6 +415,15 @@
             <order phase="Security" after="GetSecuritySettings"/>      
         </handler>
         
+        <!-- Handlers responsible for configuration and checking of message transport -->
+        <handler name="ConfigureHTTP" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler">
+            <order phase="MessageOut" />
+        </handler>
+        <handler name="CheckSentResult" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.CheckSentResult">
+            <order phase="MessageOut" after="ConfigureHTTP" />
+        </handler>   
     </OutFaultFlow>
     
 </module>
