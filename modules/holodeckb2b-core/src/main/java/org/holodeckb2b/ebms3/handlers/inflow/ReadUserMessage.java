@@ -73,7 +73,7 @@ public class ReadUserMessage extends BaseHandler {
                 } catch (PackagingException ex) {
                     // The UserMessage element in the message does not comply with the spec,
                     //  so it can not be further processed. 
-                    log.warn("Received message contains an invalid ebMS user message!");
+                    log.warn("Received message contains an invalid ebMS user message! + Details: " + ex.getMessage());
                     
                     // Add an error to context, maybe it can be sent as response
                     InvalidHeader   invalidHdrError = new InvalidHeader();

@@ -73,7 +73,8 @@ public class ReadPullRequest extends BaseHandler {
                     MessageUnitDAO.storeReceivedMessageUnit(pullRequest);
                 } catch (PackagingException ex) {
                     // The ebMS header contains an ill formatted pull request
-                    log.warn("Received message contains invalid ebMS pull request signal message!!");
+                    log.warn("Received message contains invalid ebMS pull request signal message! Details: " 
+                                + ex.getMessage());
                     
                     // Add an error to context, maybe it can be sent as response
                     InvalidHeader   invalidHdrError = new InvalidHeader();
