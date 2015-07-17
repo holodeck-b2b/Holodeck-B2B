@@ -33,37 +33,29 @@ import org.holodeckb2b.ebms3.util.MessageContextUtils;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
- * Configures the actual message transport over the HTTP protocol. Configuration
- * is done by setting specific {@see Options}. Not all options (see 
- * <a href="http://wso2.com/library/230/#HTTPConstants">http://wso2.com/library/230/#HTTPConstants</a> 
- * for an overview of all options), are relevant for Holodeck B2B. The options
- * set by this handler are:
- * <ul>
- * <li>Transfer-encoding : When sending messages with large payloads included in 
- * the SOAP Body it is useful to compress the messages during transport. This
- * is done by the standard compression feature of HTTP/1.1 by using the <i>gzip</i>
- * Transfer-Encoding.<br>
- * Whether compression should be enabled is configured in the P-Mode that controls
- * the message transfer. Only if parameter <code>PMode.Protocol.HTTP.Compression</code> 
- * has value <code>true</code> compression is enabled.<br>
- * When compression is enable two options are set to "true": {@see HTTPConstants.#CHUNKED}
- * and {@see HTTPConstants#MC_GZIP_REQUEST} or {@see HTTPConstants#MC_GZIP_RESPONSE} 
- * depending on whether Holodeck B2B is the initiator or responder in the current
- * message transfer.<br>
- * That both the chunked and gzip encodings are enabled is a requirement from HTTP 
- *(see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6">http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6</a>).</li>
- * <li>EndpointReference : The EndpointReference is used to determine the
- * MSH where the message must be delivered. This only relevant when Holodeck B2B
- * is initiator of the message transfer, if Holodeck B2B is responding to a request
- * received from another MSH, the message is just added in the response.<br>
- * In a point to point situation this only consists of an URL, but in a multi-hop
- * context there must be more information to determine the ultimate receiver of
- * the message. As Holodeck B2B currently only support point to point exchanges 
- * we directly set the URL.<br>
- * It is possible that the processed message contains multiple message units. In 
- * that case the P-Mode of the <i>primary</i> message unit (the one contained in
- * the MessageContext parameter {@see MessageContextParameters.#OUT_MESSAGE_UNIT}) 
- * will be used to set the URL.</li>
+ * Configures the actual message transport over the HTTP protocol. The parameters for the transfer are defined by
+ * the {@link IProtocol} interface and currently consist of <i>HTTP gzip compression</i> and <i>HTTP chunking</i>
+ * <p>The actual configuration is done by setting specific {@see Options} in the message context. Not all options (see 
+ * <a href="http://wso2.com/library/230/#HTTPConstants">http://wso2.com/library/230/#HTTPConstants</a> for an overview 
+ * of all options), are relevant for Holodeck B2B. The options set by this handler are:<ul>
+ * <li>Transfer-encoding : When sending messages with large payloads included in the SOAP Body it is useful to compress 
+ *      the messages during transport. This is done by the standard compression feature of HTTP/1.1 by using the 
+ *      <i>gzip</i> Transfer-Encoding.<br>
+ *      Whether compression should be enabled is configured in the P-Mode that controls the message transfer. Only if 
+ *      parameter <code>PMode.Protocol.HTTP.Compression</code> has value <code>true</code> compression is enabled.<br>
+ *      When compression is enable two options are set to "true": {@see HTTPConstants.#CHUNKED} and 
+ *      {@see HTTPConstants#MC_GZIP_REQUEST} or {@see HTTPConstants#MC_GZIP_RESPONSE} depending on whether Holodeck B2B 
+ *      is the initiator or responder in the current message transfer.<br>
+ *      That both the chunked and gzip encodings are enabled is a requirement from HTTP 
+ *      (see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6">http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6</a>).</li>
+ * <li>EndpointReference : The EndpointReference is used to determine the MSH where the message must be delivered. 
+ *      This only relevant when Holodeck B2B is initiator of the message transfer, if Holodeck B2B is responding to a 
+ *      request received from another MSH, the message is just added in the response.<br>
+ *      In a point to point situation this only consists of an URL, but in a multi-hop context there must be more 
+ *      information to determine the ultimate receiver of the message. As Holodeck B2B currently only support point to 
+ *      point exchanges we directly set the URL.<br>
+ *      It is possible that the processed message contains multiple message units. In that case the P-Mode of the 
+ *      <i>primary</i> message unit will be used to set the URL.</li>
  * </ul>
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -148,7 +140,7 @@ public class ConfigureHTTPTransportHandler extends BaseHandler {
             
             // Check if HTTP "chunking" should be used. In case of gzip CE, chunked TE is required. But as Axis2 does 
             // not automaticly enable this we also enable chunking here when compression is used
-            if (compress || (protocolCfg != null ? protocolCfg.useChunking() : true)) {
+            if (compress || (protocolCfg != null ? protocolCfg.useChunking() : false)) {
                 log.debug("Enable chunked transfer-encoding");
                 options.setProperty(HTTPConstants.CHUNKED, Boolean.TRUE);
             } else {
