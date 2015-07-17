@@ -18,6 +18,7 @@
 package org.holodeckb2b.ebms3.persistent.general;
 
 import java.io.Serializable;
+import javax.persistence.Access;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import org.holodeckb2b.common.general.IDescription;
@@ -30,6 +31,7 @@ import org.holodeckb2b.common.general.IDescription;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 @Embeddable
+@Access(javax.persistence.AccessType.FIELD)
 public class Description implements Serializable, IDescription {
 
     /*
@@ -38,11 +40,11 @@ public class Description implements Serializable, IDescription {
     
     @Override
     public String getText() {
-        return DESCRIPTION;
+        return DESCRIPTION_TEXT;
     }
 
     public void setText(String text) {
-        DESCRIPTION = text;
+        DESCRIPTION_TEXT = text;
     }
     
     @Override
@@ -65,7 +67,7 @@ public class Description implements Serializable, IDescription {
      * @param String   The text itself
      */
     public Description(String text) {
-        DESCRIPTION = text;
+        DESCRIPTION_TEXT = text;
     }
 
     /**
@@ -75,7 +77,7 @@ public class Description implements Serializable, IDescription {
      * @param String   The language the text is written in
      */
     public Description(String text, String language) {
-        DESCRIPTION = text;
+        DESCRIPTION_TEXT = text;
         LANG = language;
     }
     
@@ -86,7 +88,7 @@ public class Description implements Serializable, IDescription {
      * used as column names. Therefor the attribute names are in CAPITAL.
      */
     @Column(name = "DESCRIPTION", length = 10000)
-    private String  DESCRIPTION;
+    private String  DESCRIPTION_TEXT;
     
     private String  LANG;
 }

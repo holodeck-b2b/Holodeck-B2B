@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.ebms3.persistent.message;
 
-import com.sun.istack.internal.NotNull;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -117,8 +116,7 @@ public class Receipt extends SignalMessage implements IReceipt {
      * a <i>transient</i> object is defined to store the object temporarely as
      * an object
      */
-    @NotNull
-    @Column(name = "CONTENT", length = 10000)
+    @Column(name = "CONTENT", length = 10000, nullable = false)
     private String          CONTENT;
     
     @Transient
