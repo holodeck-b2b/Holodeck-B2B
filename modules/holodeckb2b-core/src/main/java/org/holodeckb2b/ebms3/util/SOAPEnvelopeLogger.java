@@ -31,12 +31,6 @@ import org.holodeckb2b.common.handler.BaseHandler;
  */
 public class SOAPEnvelopeLogger extends BaseHandler {
 
-    /**
-     * We use a specific log for the SOAP headers so it can easily be enabled or disabled
-     */
-    private Log soapEnvLog = null;
-    
-            
     @Override
     protected byte inFlows() {
         return IN_FLOW | IN_FAULT_FLOW | OUT_FLOW | OUT_FAULT_FLOW;
@@ -44,14 +38,13 @@ public class SOAPEnvelopeLogger extends BaseHandler {
 
     @Override
     protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
-        // Create the log when it does not exist yet
-        if (soapEnvLog != null) 
-            soapEnvLog = LogFactory.getLog("org.holodeckb2b.msgproc.soapenvlog." 
-                                            + (isInFlow((byte) (IN_FLOW | IN_FAULT_FLOW)) ? "IN" : "OUT"));
+        // We use a specific log for the SOAP headers so it can easily be enabled or disabled
+        Log soapEnvLog = LogFactory.getLog("org.holodeckb2b.msgproc.soapenvlog." 
+                                            + (isInFlow(IN_FLOW) || isInFlow(IN_FAULT_FLOW) ? "IN" : "OUT"));
         
         // Only do something when logging is enabled
         if (soapEnvLog.isInfoEnabled()) {
-            soapEnvLog.info(mc.getEnvelope().toStringWithConsume() + "\n");            
+            soapEnvLog.info(mc.getEnvelope().cloneOMElement().toStringWithConsume() + "\n");            
         }
         
         return InvocationResponse.CONTINUE;
