@@ -131,7 +131,7 @@ public class PModeFinder {
             if (agreementRef != null) {
                 // Check P-Mode id, do only when id is expected to be included
                 String pid = agreementRef.getPModeId();
-                if (pid != null && !pid.isEmpty() && (p.includeId() == null || p.includeId())) {
+                if (pid != null && !pid.isEmpty() && (p.includeId() != null && p.includeId())) {
                     if (pid.equals(p.getId()))
                         cValue = MATCH_WEIGHTS.get(PARAMETERS.ID);
                     else
