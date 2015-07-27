@@ -68,7 +68,7 @@ public class Property {
         // Set attributes if data is specified for it
         property.addAttribute(LN_ATTR_NAME, data.getName(), null); // name attribute is required!
         
-        // @todo: When type attribute problem is finally resolved, this comment can be removed
+        // @todo: When type attribute problem (spec problem, see above) is finally resolved, this comment can be removed
         //String type = data.getType();
         //if ( type != null && !type.isEmpty())
         //    property.addAttribute(LN_ATTR_TYPE, type, null);

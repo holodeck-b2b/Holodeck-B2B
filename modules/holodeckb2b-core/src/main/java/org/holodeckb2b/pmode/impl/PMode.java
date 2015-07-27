@@ -17,6 +17,7 @@
 package org.holodeckb2b.pmode.impl;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,13 +26,14 @@ import org.holodeckb2b.common.pmode.IPMode;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
-import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persister;
 
 /**
  * PMode implementation class.
+ * 
  * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 @Root (name="PMode", strict=false)
 public class PMode implements IPMode {
@@ -166,35 +168,33 @@ public class PMode implements IPMode {
     
     
     /**
-     * Creates a new <code>PMode</code> object based 
-     * the PMode definition in the XML file {@see File}.
+     * Creates a new <code>PMode</code> object based from a XML Document in the given file. The XML document in the 
+     * file must conform to the XML schema definition given in <code>pmode.xsd</code>
      * 
      * @param  xsdFile      A handle to file that contains the meta data
      * @return              A <code>PMode</code> for the message meta
      *                      data contained in the given file
      * @throws Exception    When the specified file is not found, readable or
-     *                      does not contain a XML document.
+     *                      does not contain a valid P-Mode XML document.
      */
     public static PMode createFromFile(File xmlFile) throws Exception {
         if( !xmlFile.exists() || !xmlFile.canRead())
             // Given file must exist and be readable to be able to read PMode
-            throw new Exception("Specified XML file '" + xmlFile.getAbsolutePath() + "' not found or no permission to read!");
+            throw new Exception("Specified XML file '" + xmlFile.getAbsolutePath() 
+                                    + "' not found or no permission to read!");
         
-        PMode pmode = null;
-        
+        // When the P-Mode can not be read from the file the Persister.read() may throw a InvocationTargetException
+        // that will contain a PersistenceException exception that describes the actual error. Therefor we catch
+        // InvocationTargetException and only throw the PersistenceException
         try {
-            Serializer  serializer = new Persister();
-            pmode = serializer.read(PMode.class, xmlFile);
-        } catch (Exception ex) {
-            // The specified file could not be read as an XML document
-            throw new Exception("Problem reading XML from '" + xmlFile.getAbsolutePath() + "'", ex);
+            return new Persister().read(PMode.class, xmlFile);            
+        } catch (InvocationTargetException ex) {
+            // Only throw the target exception when it really is an exception
+            Throwable t = ex.getTargetException();
+            if (t != null && t instanceof Exception)
+                throw (Exception) t;
+            else
+                throw ex;
         }
-                
-        return pmode;
     }
-            
-    /**
-     * Constructor
-     */
-    public void Pmode() {};
 }

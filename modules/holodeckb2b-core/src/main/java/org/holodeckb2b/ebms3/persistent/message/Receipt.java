@@ -97,7 +97,7 @@ public class Receipt extends SignalMessage implements IReceipt {
             // Now serialize the placeholder element to database
             CONTENT = c.toStringWithConsume();
         } catch (XMLStreamException ex) {
-            CONTENT = null; //@todo: Should we log something here?            
+            CONTENT = null; 
         }
     }
     
@@ -116,7 +116,7 @@ public class Receipt extends SignalMessage implements IReceipt {
      * a <i>transient</i> object is defined to store the object temporarely as
      * an object
      */
-    @Column(name = "CONTENT", length = 10000)
+    @Column(name = "CONTENT", length = 10000, nullable = false)
     private String          CONTENT;
     
     @Transient

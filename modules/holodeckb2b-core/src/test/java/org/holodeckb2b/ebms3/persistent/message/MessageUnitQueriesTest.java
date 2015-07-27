@@ -16,8 +16,12 @@
  */
 package org.holodeckb2b.ebms3.persistent.message;
 
+import java.io.StringReader;
 import java.util.Collection;
 import javax.persistence.EntityManager;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.om.OMXMLParserWrapper;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistent.processing.ProcessingState;
 import org.holodeckb2b.ebms3.util.JPAUtil;
@@ -50,7 +54,12 @@ public class MessageUnitQueriesTest {
     private static final String T_PMODE2 = "PMODE_2";
     private static final String T_PMODE3 = "PMODE_3";
     
-    
+    private static final String T_CONTENT_1 =   "<content>" +
+                                            "<confirmation>\n" +
+                                            "    <from>Party_X</from>\n" +
+                                            "    <message>Success</message>\n" +
+                                            "</confirmation>\n" +
+                                            "</content>";
     EntityManager   em;
     
     public MessageUnitQueriesTest() {
@@ -88,7 +97,13 @@ public class MessageUnitQueriesTest {
         em.persist(mu3);
 
         Receipt mu4 = new Receipt();
-        mu3.setMessageId(T_MSG_ID_4);
+        mu4.setMessageId(T_MSG_ID_4);
+        
+        OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new StringReader(T_CONTENT_1));
+        // Parse document and get root element
+        OMElement contentElement = builder.getDocumentElement();
+
+        mu4.setContent(contentElement.getChildElements());
         ProcessingState s4 = new ProcessingState(T_PROCSTATE_2);
         em.persist(s4);
         mu4.setProcessingState(s4);

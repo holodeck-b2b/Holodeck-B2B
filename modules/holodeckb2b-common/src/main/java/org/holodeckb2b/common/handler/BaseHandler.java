@@ -109,7 +109,6 @@ public abstract class BaseHandler extends AbstractHandler {
      *                      processing. Note that this will stop processing of the complete flow and may leave message
      *                      units in an undefined state!
      */
-    @Override
     public final InvocationResponse invoke(MessageContext mc) throws AxisFault {
         // Determine which flow the handler currently runs is
         if (mc.isServerSide()) {
@@ -214,7 +213,7 @@ public abstract class BaseHandler extends AbstractHandler {
      *                      in the message context to make it available for handlers in the fault flow!
      */
     protected abstract InvocationResponse doProcessing(MessageContext mc) throws Exception;
-    
+
     /**
      * Runs when the execution of the flow is completed and if the handler is executed during that flow. This method
      * is always executed independent of the flow's processing result. It can be used to check the processing result

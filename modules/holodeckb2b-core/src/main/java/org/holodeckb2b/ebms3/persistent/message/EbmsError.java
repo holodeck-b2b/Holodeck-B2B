@@ -157,8 +157,4 @@ public class EbmsError implements Serializable, IEbmsError {
         
     @Embedded
     private Description     longDescription;
-
-    public void setCategory(Severity severity) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

@@ -87,9 +87,14 @@
     <!--                                                                 -->             
     
     <InFlow>
+        <!-- Log the SOAP envelope -->
+        <handler name="SOAPLog" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger">
+            <order phase="ebms3InPhase" phaseFirst="true"/>      
+        </handler>
+        
         <!-- Indicate the ebMS header is processed by Holodeck B2B -->
         <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
-            <order phase="ebms3InPhase" phaseFirst="true"/>      
+            <order phase="ebms3InPhase" after="SOAPLog"/>      
         </handler>
         <!-- Catch a raised Fault and translate it into an EbMS Error -->
         <handler name="CatchFaults" class="org.holodeckb2b.ebms3.util.CatchAxisFault">
@@ -201,9 +206,14 @@
     </InFlow>
     
     <InFaultFlow>
+        <!-- Log the SOAP envelope -->
+        <handler name="SOAPLog" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger">
+            <order phase="ebms3InPhase" phaseFirst="true"/>      
+        </handler>
+        
         <!-- Indicate the ebMS header is processed by Holodeck B2B -->
         <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
-            <order phase="ebms3InPhase" phaseFirst="true"/>      
+            <order phase="ebms3InPhase" after="SOAPLog"/>      
         </handler>
         <!-- Catch a raised Fault and translate it into an EbMS Error -->
         <handler name="CatchFaults" class="org.holodeckb2b.ebms3.util.CatchAxisFault">
@@ -354,19 +364,11 @@
            class="org.holodeckb2b.ebms3.handlers.outflow.PackagePullRequestSignal">
             <order phase="ebms3OutPhase" after="PackageReceipt"/>
         </handler>
+
         <!-- Check if message is sent through I-Cloud (multi-hop) and add necessary WS-A headers -->
         <handler name="ConfigureMultiHop" 
            class="org.holodeckb2b.multihop.ConfigureMultihop">
             <order phase="ebms3OutPhase" after="PackagePullRequest"/>
-        </handler>        
-        
-        <handler name="ConfigureHTTP" 
-            class="org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler">
-            <order phase="MessageOut" />
-        </handler>
-        <handler name="CheckSentResult" 
-            class="org.holodeckb2b.ebms3.handlers.outflow.CheckSentResult">
-            <order phase="MessageOut" after="ConfigureHTTP" />
         </handler>        
         
         <!-- Security handlers responsible for adding the WSS headers -->
@@ -376,7 +378,20 @@
         <handler name="CreateSecurityHeaders" class="org.holodeckb2b.security.handlers.CreateWSSHeaders">
             <order phase="Security" after="GetSecuritySettings"/>      
         </handler>
-        
+
+        <!-- Handlers responsible for configuration and checking of message transport -->
+        <handler name="ConfigureHTTP" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler">
+            <order phase="MessageOut" />
+        </handler>
+        <handler name="CheckSentResult" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.CheckSentResult">
+            <order phase="MessageOut" after="ConfigureHTTP" />
+        </handler>                
+        <!-- Log the SOAP envelope of the outgoing message -->
+        <handler name="SOAPLog" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger">
+            <order phase="MessageOut" after="CheckSentResult"/>      
+        </handler>
     </OutFlow>
     
     <OutFaultFlow>
@@ -419,19 +434,11 @@
             class="org.holodeckb2b.ebms3.handlers.outflow.PackagePullRequestSignal">
             <order phase="ebms3OutPhase" after="PackageReceipt"/>
         </handler>
+
         <!-- Check if message is sent through I-Cloud (multi-hop) and add necessary WS-A headers -->
         <handler name="ConfigureMultiHop" 
             class="org.holodeckb2b.multihop.ConfigureMultihop">
             <order phase="ebms3OutPhase" after="PackagePullRequest"/>
-        </handler>        
-        
-        <handler name="ConfigureHTTP" 
-            class="org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler">
-            <order phase="MessageOut" />
-        </handler>
-        <handler name="CheckSentResult" 
-            class="org.holodeckb2b.ebms3.handlers.outflow.CheckSentResult">
-            <order phase="MessageOut" after="ConfigureHTTP" />
         </handler>        
         
         <!-- Security handlers responsible for adding the WSS headers -->
@@ -442,6 +449,19 @@
             <order phase="Security" after="GetSecuritySettings"/>      
         </handler>
         
+        <!-- Handlers responsible for configuration and checking of message transport -->
+        <handler name="ConfigureHTTP" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler">
+            <order phase="MessageOut" />
+        </handler>
+        <handler name="CheckSentResult" 
+            class="org.holodeckb2b.ebms3.handlers.outflow.CheckSentResult">
+            <order phase="MessageOut" after="ConfigureHTTP" />
+        </handler>   
+        <!-- Log the SOAP envelope of the outgoing message -->
+        <handler name="SOAPLog" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger">
+            <order phase="MessageOut" after="CheckSentResult"/>      
+        </handler>
     </OutFaultFlow>
     
     

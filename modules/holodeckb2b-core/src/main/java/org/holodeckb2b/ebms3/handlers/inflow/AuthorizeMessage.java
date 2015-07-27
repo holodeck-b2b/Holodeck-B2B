@@ -67,7 +67,7 @@ public class AuthorizeMessage extends BaseHandler {
         log.debug("Get the primary message unit");
         MessageUnit mu = MessageContextUtils.getPrimaryMessageUnit(mc);
         
-        if (mu instanceof PullRequest) {
+        if (mu == null || mu instanceof PullRequest) {
             // Primary message unit is PullRequest => authorization checked separately
             return InvocationResponse.CONTINUE;
         }

@@ -18,27 +18,15 @@ package org.holodeckb2b.ebms3.workers;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.client.OperationClient;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.common.workerpool.TaskConfigurationException;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.persistent.message.Receipt;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.ebms3.util.Axis2Utils;
 
 /**
  * Is responsible for starting the send process of User Message message units. It 
@@ -76,7 +64,7 @@ public class SenderWorker extends AbstractWorkerTask {
                     if (muInProcess != null) {
                         // only when we could succesfully set processing state really start processing
                         log.debug("Start processing message [" + muInProcess.getMessageId() + "]");
-                        send(muInProcess);
+                        Axis2Utils.sendMessage(muInProcess, log);
                         log.info("Successfully processed message [" + muInProcess.getMessageId() + "]");
                     }else {
                         // Message probably already in process
@@ -89,66 +77,6 @@ public class SenderWorker extends AbstractWorkerTask {
         } catch (DatabaseException dbError) {
             log.error("Could not process message because a database error occurred. Details:" 
                         + dbError.toString() + "\n");
-        }
-    }
-
-    /*
-     * Helper method to start the send process. The actual ebMS processing will take place 
-     * in the specific handlers. 
-     */
-    private void send(MessageUnit message) {
-        ServiceClient sc;
-        OperationClient oc;
-            
-        try {
-            log.debug("Prepare Axis2 client to send message");
-            sc = new ServiceClient(Config.getAxisConfigurationContext(), null);
-            sc.engageModule(Constants.HOLODECKB2B_CORE_MODULE);
-            oc = sc.createClient(ServiceClient.ANON_OUT_IN_OP);
-            
-            log.debug("Create an empty MessageContext for message with current configuration");
-            MessageContext msgCtx = new MessageContext();
-            if (message instanceof UserMessage) {
-                log.debug("Message to send is a UserMessage");
-                msgCtx.setProperty(MessageContextProperties.OUT_USER_MESSAGE, message);
-            } else if (message instanceof ErrorMessage) {
-                log.debug("Message to send is a ErrorMessage");
-                MessageContextUtils.addErrorSignalToSend(msgCtx, (ErrorMessage) message);
-            } else if (message instanceof Receipt) {
-                log.debug("Message to send is a Receipt");
-                MessageContextUtils.addReceiptToSend(msgCtx, (Receipt) message);                
-            }   
-            oc.addMessageContext(msgCtx);
-            
-            EndpointReference targetEPR = new EndpointReference("http://holodeck-b2b.org/transport/dummy");
-            Options options = new Options();
-            options.setTo(targetEPR);
-            oc.setOptions(options);
-            
-            log.debug("Axis2 client configured for sending ebMS message");
-            
-        } catch (AxisFault af) {
-            // Setting up the Axis environment failed. Return processing state to SUBMITTED so that it will be resend
-            // Signal this in the log as a fatal error
-            log.fatal("Setting up Axis2 to send message failed! Details: " + af.getReason());
-            //@todo: Message has to be resend after some delay
-            
-            return;
-        }
-        
-        try {
-            log.debug("Start the message send process");
-            oc.execute(true);
-            
-        } catch (AxisFault af) {
-            // An error occurred while sending the message, 
-            
-        } finally {
-            try { 
-                sc.cleanup();
-            } catch (AxisFault af) {
-                
-            }
         }
     }
 

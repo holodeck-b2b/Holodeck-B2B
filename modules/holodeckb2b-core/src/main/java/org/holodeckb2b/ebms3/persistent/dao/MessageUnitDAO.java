@@ -835,6 +835,16 @@ public class MessageUnitDAO {
         setProcessingState(mu, ProcessingStates.TRANSPORT_FAILURE);
     }
 
+    /**
+     * Changes the processing state of a message unit to {@link ProcessingStates#SENDING} to indicate that the message
+     * unit is current being sent out to the other MSH
+     *
+     * @param mu The {@link MessageUnit} that is being sent out
+     * @throws DatabaseException 
+     */
+    public static void setSending(MessageUnit mu) throws DatabaseException {
+        setProcessingState(mu, ProcessingStates.SENDING);
+    }
     /*
      * Helper method to change the current processing state of a MessageUnit object.
      */

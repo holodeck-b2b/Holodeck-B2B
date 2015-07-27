@@ -17,6 +17,7 @@
 
 package org.holodeckb2b.ebms3.submit.core;
 
+import java.util.Collection;
 import java.util.Iterator;
 import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.common.general.IAgreement;
@@ -308,16 +309,24 @@ final class MMDCompleter {
         if (pbi == null || pbi.getProperties() == null) 
             return; // no properties from P-Mode
         
-        for (IProperty p : pbi.getProperties()) {
-            // Check if the same property is also defined in submitted data
-            boolean found = false;
-            for(Iterator<IProperty> x = cd.getMessageProperties().iterator() ; !found && x.hasNext() ;) {
-                IProperty xi = x.next();
-                found = xi.getName().equals(p.getName()) 
+        // Get the collection of message properties provided with submission
+        Collection<IProperty> smp = cd.getMessageProperties();            
+        
+        if (smp != null && !smp.isEmpty()) {
+            // Check if the same property is also defined in both P-Mode and submitted data
+            for (IProperty p : pbi.getProperties()) {
+                boolean found = false;
+                for(Iterator<IProperty> x = smp.iterator() ; !found && x.hasNext() ;) {
+                    IProperty xi = x.next();
+                    found = xi.getName().equals(p.getName()) 
                         && (xi.getType() != null ? xi.getType().equals(p.getType()) : p.getType() == null);
+                }
+                if (!found) // Add the property from P-Mode when not already defined when submitted
+                    cd.getMessageProperties().add(p);
             }
-            if (!found) // Add the property from P-Mode when not already defined when submitted
-                cd.getMessageProperties().add(p);
+        } else {
+            // No properties provided with submission, so use all properties provided in P-Mode
+            cd.setMessageProperties(pbi.getProperties());
         }
     }
     

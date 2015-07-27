@@ -42,8 +42,6 @@ import org.holodeckb2b.ebms3.util.MessageContextUtils;
  * however limits the number of pull request units in the message to just one. Holodeck B2B therefor only uses the first 
  * occurrence of <code>eb:SignalMessage</code> that has a <code>eb:PullRequest</code> child and ignores others.
  * 
- * @todo: Collect authentication information that should be used to authoriza the pull
- * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class ReadPullRequest extends BaseHandler {
@@ -75,7 +73,8 @@ public class ReadPullRequest extends BaseHandler {
                     MessageUnitDAO.storeReceivedMessageUnit(pullRequest);
                 } catch (PackagingException ex) {
                     // The ebMS header contains an ill formatted pull request
-                    log.warn("Received message contains invalid ebMS pull request signal message!!");
+                    log.warn("Received message contains invalid ebMS pull request signal message! Details: " 
+                                + ex.getMessage());
                     
                     // Add an error to context, maybe it can be sent as response
                     InvalidHeader   invalidHdrError = new InvalidHeader();

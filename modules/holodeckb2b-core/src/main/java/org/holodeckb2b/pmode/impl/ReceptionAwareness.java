@@ -59,7 +59,7 @@ public class ReceptionAwareness implements IReceptionAwareness {
     public void validate() throws Exception {
         if (maxRetries > -1)
             if (retryIntervalDuration <= 0)
-                throw new ValueRequiredException("RetryInterval must have positive non zero value");
+                throw new ValueRequiredException("ReceptionAwareness/RetryInterval must have positive non zero value");
     }
     
     /**

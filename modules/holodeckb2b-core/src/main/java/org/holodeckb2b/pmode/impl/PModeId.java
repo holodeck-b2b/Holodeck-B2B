@@ -21,6 +21,8 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
 
 /**
+ * Represents the configuration for the <b>PMode.id</b> parameter.
+ * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
@@ -33,9 +35,9 @@ class PModeId {
     String  id;
     
     /**
-     * Specifies if the PMode ID attribute is required
+     * Specifies if the PMode ID should be included in the actual message
      */
     @Attribute(required = false)
-    Boolean include = true;
+    Boolean include = false;
     
 }
