@@ -17,11 +17,18 @@
 package org.holodeckb2b.common.pmode;
 
 /**
- *
+ * Represents the P-Mode parameters that define what and how payloads should be included in the message. 
+ * <p>The <b>PayloadProfile</b> parameter is described in appendix D of the ebMS V3 Core Specification.
+ * <p><b>NOTE: </b>Currently the payload profile is not used by Holodeck B2B to restrict the payloads that can be 
+ * included in a user message. Therefore this interface currently does not define any methods.
+ * 
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 public interface IPayloadProfile {
  
-    public int getMaxSize();
+    /*
+     *  
+     * public int getMaxSize();
+    */
     
 }

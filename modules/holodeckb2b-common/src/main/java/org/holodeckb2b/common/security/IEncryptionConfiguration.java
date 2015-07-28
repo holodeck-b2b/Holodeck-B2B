@@ -16,8 +16,6 @@
  */
 package org.holodeckb2b.common.security;
 
-import org.holodeckb2b.common.pmode.IKeyTransport;
-
 /**
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @author Bram Bakx <bram at holodeck-b2b.org>

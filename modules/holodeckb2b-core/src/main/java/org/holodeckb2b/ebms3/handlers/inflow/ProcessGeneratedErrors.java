@@ -30,7 +30,7 @@ import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.general.ReplyPattern;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.pmode.IErrorHandling;
-import org.holodeckb2b.common.pmode.IFlow;
+import org.holodeckb2b.common.pmode.IUserMessageFlow;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage;
@@ -129,7 +129,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
                             log.debug("Get P-Mode information to determine how new signal must be processed");
                             // Errorhandling config is contained in flow 
                             String pmodeId = muInError.getPMode();
-                            IFlow flow = (pmodeId != null ? HolodeckB2BCore.getPModeSet().get(pmodeId)
+                            IUserMessageFlow flow = (pmodeId != null ? HolodeckB2BCore.getPModeSet().get(pmodeId)
                                                                     .getLegs().iterator().next().getUserMessageFlow()
                                                             : null);
                             IErrorHandling errorHandling = (flow != null ? flow.getErrorHandlingConfiguration() : null);

@@ -31,7 +31,7 @@ import org.holodeckb2b.common.general.ReplyPattern;
 import org.holodeckb2b.common.pmode.ILeg;
 import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.common.pmode.IReceiptConfiguration;
-import org.holodeckb2b.common.security.IAuthenticationInfo;
+import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;

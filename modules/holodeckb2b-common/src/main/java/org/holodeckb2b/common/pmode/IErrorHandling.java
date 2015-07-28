@@ -22,12 +22,13 @@ import org.holodeckb2b.common.delivery.IDeliverySpecification;
 import org.holodeckb2b.common.general.ReplyPattern;
 
 /**
- * Describes the P-Mode parameters for reporting errors. Error reporting is described in section 6.6 of the ebMS V3 Core 
- * Specification and includes three options for reporting errors: using SOAP Faults, out-of-band notifications and using
- * ebMS Errors. Holodeck B2B will always log detect errors, including received error signals, enabling out-of-band 
- * notifications. Furthermore errors can be reported using ebMS errors. This interface specifies the configuration 
- * parameters for the reporting and is based on the P-Mode parameter group <b>PMode[1].ErrorHandling.Report</b> defined 
- * in appendix D of the Core Specification.
+ * Describes the P-Mode parameters for handling errors.
+ * <p>Error handling is described in section 6.6 of the ebMS V3 Core Specification and includes three options for 
+ * reporting errors: using SOAP Faults, out-of-band notifications and using ebMS Errors. Holodeck B2B will always log 
+ * detected errors, including received error signals, enabling out-of-band notifications.<br>
+ * Furthermore errors can be reported using ebMS errors. This interface specifies the configuration parameters for the 
+ * reporting and is based on the P-Mode parameter group <b>PMode[1].ErrorHandling.Report</b> defined in appendix D of 
+ * the Core Specification.
  * 
  * <p>This version focuses on reporting errors to the sender of the message in error. As a result there is no support 
  * for the P-Mode parameters <b>SenderErrorsTo</b> and <b>ProcessErrorNotifyConsumer</b>. Also 
@@ -36,8 +37,9 @@ import org.holodeckb2b.common.general.ReplyPattern;
  * 
  * <p>The parameter <b>ProcessErrorNotifyProducer</b> defined in the Core Specification is represented by the 
  * {@link #shouldNotifyErrorToBusinessApplication()} that indicates whether the business application should be informed 
- * on errors for a sent message. If this method returns <code>true</code> the {@link #getErrorDelivery()} must return a  
- * {@link IDeliverySpecification} that specifies how the errors should be delivered to the business application.
+ * on errors for a sent message. If this method returns <i>true</i> either {@link #getErrorDelivery()} or 
+ * {@link ILeg#getDefaultDelivery()} must return a {@link IDeliverySpecification} that specifies how the errors should 
+ * be delivered to the business application.
  *
  * <p>According to the ebMS V3 Core Specification an ebMS error of severity <i>failure</i> must always be combined with
  * a SOAP Fault. As noted in <a href="https://issues.oasis-open.org/browse/EBXMLMSG-4">issue #4 in the OASIS ebMS TC's 
@@ -56,9 +58,10 @@ import org.holodeckb2b.common.general.ReplyPattern;
 public interface IErrorHandling {
 
     /**
-     * Gets the indication how Error signals should be sent: as a callback, or synchronously in the back-channel 
-     * response. Note that when the error should be sent via a callback the address where to deliver the error must
-     * also be specified.
+     * Gets the indication how Error signals should be sent: as a callback, or synchronously on the HTTP back-channel,
+     * i.e. as the response.
+     * <p>Note that when the error should be sent via a callback the address where to deliver the error must
+     * also be specified, i.e. {@link #getReceiverErrorsTo()} MUST return a URL.
      * 
      * @return  {@link ReplyPattern#CALLBACK} when the error signal should be sent as a callback,<br>
      *          {@link ReplyPattern#RESPONSE} when the error signal should be sent as a response.
@@ -66,9 +69,9 @@ public interface IErrorHandling {
     public ReplyPattern getPattern();
     
     /**
-     * Gets the URI where error signals should be sent to in case the <i>callback</i> reply pattern is used.
+     * Gets the URL where error signals should be sent to in case the <i>callback</i> reply pattern is used.
      * 
-     * @return The URI where to sent error signals to
+     * @return The URL where to sent error signals to
      */
     public String getReceiverErrorsTo();
     
@@ -76,7 +79,7 @@ public interface IErrorHandling {
      * Gets the indication whether a SOAP Fault should be added to error messages that contain an error with severity
      * <i>failure</i>.
      * <p>NOTE : Holodeck B2B by default does not add SOAP Fault, so this option should only be used to override this.
-     * <p>NOTE : Even when this method return <i>true</i> the SOAP Fault may not be added if the ebMS message contains
+     * <p>NOTE : Even when this method returns <i>true</i> the SOAP Fault may not be added if the ebMS message contains
      *           other message units. 
      * 
      * @return <i>true</i> when a SOAP Fault should be added to ebMS error messages that contain an error with
@@ -111,10 +114,12 @@ public interface IErrorHandling {
     
     /**
      * Gets the indication whether the connected business application should be notified in case an error is generated
-     * for a sent message. 
-     * <p>If the business application should be informed on errors this is done using standard <i>message delivery 
+     * for a sent message.
+     * <p>This corresponds to the <b>PMode[1].ErrorHandling.Report.ProcessErrorNotifyProducer</b> parameter defined in
+     * the ebMS V3 Core Specification.
+     * <p>If the business application should be informed on errors this is done using the standard <i>message delivery 
      * mechanism</i> which is configured by a {@link IDeliverySpecification}. If needed a specific delivery can be 
-     * configured for errors.
+     * configured for errors by providing it through {@link #getErrorDelivery()}.
      * 
      * @return  <code>true</code> when the business application should be notified on errors,<br>
      *          <code>false</code> when the business application does not need to be notified on errors.
@@ -122,8 +127,9 @@ public interface IErrorHandling {
     public boolean shouldNotifyErrorToBusinessApplication();
     
     /**
-     * Get the configuration for the delivery specific to error messages. When the default message delivery (configured
-     * on the leg, see {@link ILeg#getDefaultDelivery()}) can be used this method SHOULD return <code>null</code>. 
+     * Get the configuration for the delivery specific to error messages.
+     * <p>When the default message delivery (configured on the leg, see {@link ILeg#getDefaultDelivery()}) can be used 
+     * this method SHOULD return <code>null</code>. 
      * 
      * @return  The {@link IDeliverySpecification} to use for reporting errors to the business application, or<br>
      *          <code>null</code> if the default delivery must be used for reporting errors

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.common.security;
+package org.holodeckb2b.security.tokens;
 
 /**
  * Represents the authentication info that can be included in an ebMS message and should be used to authorize the sender

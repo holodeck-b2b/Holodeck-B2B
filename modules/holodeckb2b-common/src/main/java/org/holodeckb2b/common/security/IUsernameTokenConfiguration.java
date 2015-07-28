@@ -26,25 +26,31 @@ package org.holodeckb2b.common.security;
  * can be used for message authorization (see section 7.10 and 7.11). Which element an instance of this interface 
  * configures is determined by the parent class. 
  * <p>Depending on the target (default or ebms) this interface corresponds with the P-Mode parameter groups 
- * PMode.[Initiator|Responder].Authorization or PMode[1].Security.UsernameToken.
+ * <b>PMode.[Initiator|Responder].Authorization</b> ("ebms") or <b>PMode[1].Security.UsernameToken</b> (default).
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface IUsernameTokenConfiguration {
     
     /**
-     * Returns the username that should be (included) in the token.
+     * Gets the username that should be (included) in the token.
+     * 
+     * @return The username as String
      */
     public String getUsername();
     
     /**
-     * Returns the password that should be (included) in the token. The password must be returned in clear text for 
-     * processing by Holodeck B2B. Implementations MUST take care of proper protection of the password.
+     * Gets the password that should be (included) in the token. 
+     * <p>The password must be returned in clear text for processing by Holodeck B2B. Implementations MUST take care of 
+     * proper protection of the password.
+     * 
+     * @return String containing the plain text password
      */
     public String getPassword();
     
     /**
-     * Enumeration defining the supported password types
+     * Enumeration defining the supported password types as defined in the Web Services Security Username Token Profile 
+     * Version 1.1.1, section 3.1
      */
     public enum PasswordType { 
         /**
@@ -72,9 +78,11 @@ public interface IUsernameTokenConfiguration {
     
     
     /**
-     * Returns how the password should be included in the token as defined in the <i>WSS UsernameToken Profile</i>.
+     * Gets how the password should be included in the token as defined in the <i>WSS UsernameToken Profile</i>.
      * <p>Currently supported are the types defined in version 1.1.1 of the profile: plain text and digest as defined
      * in the enumeration above.
+     * 
+     * @return The {@link PasswordType} to use for including the password in the username token
      */
     public PasswordType getPasswordType();
     
