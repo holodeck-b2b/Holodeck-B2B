@@ -17,6 +17,7 @@
 
 package org.holodeckb2b.ebms3.constants;
 
+import javax.xml.namespace.QName;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.WSSecurityEngineResult;
 
@@ -38,6 +39,17 @@ public final class SecurityConstants {
      */
     public static final String WSS_NAMESPACE_URI = 
                                 "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
+    
+    /**
+     * The WS-Security utilities namespace URI
+     */
+    public static final String WSU_NAMESPACE_URI = 
+                                "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";    
+    
+    /**
+     * The QName for the wsu:Id attribute defined in the WS-Security spec
+     */
+    public static final QName  QNAME_WSU_ID = new QName(WSU_NAMESPACE_URI, "Id");
     
     /**
      * The namespace URI for XML Signatures
