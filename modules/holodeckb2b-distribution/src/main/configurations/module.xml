@@ -150,8 +150,11 @@
         <handler name="StartProcessingUsrMsg" class="org.holodeckb2b.ebms3.handlers.inflow.StartProcessingUsrMessage">
             <order phase="ebms3InPhase" after="AuthorizeMessage"/>      
         </handler>
-        <handler name="AS4DeCompression" class="org.holodeckb2b.as4.compression.DecompressionHandler">
+        <handler name="CheckSignatureCompleteness" class="org.holodeckb2b.as4.handlers.inflow.CheckSignatureCompleteness">
             <order phase="ebms3InPhase" after="StartProcessingUsrMsg"/>      
+        </handler>
+        <handler name="AS4DeCompression" class="org.holodeckb2b.as4.compression.DecompressionHandler">
+            <order phase="ebms3InPhase" after="CheckSignatureCompleteness"/>      
         </handler>
         <handler name="SavePayloads" class="org.holodeckb2b.ebms3.handlers.inflow.SaveUserMsgAttachments">
             <order phase="ebms3InPhase" after="AS4DeCompression"/>      
@@ -264,8 +267,11 @@
         <handler name="StartProcessingUsrMsg" class="org.holodeckb2b.ebms3.handlers.inflow.StartProcessingUsrMessage">
             <order phase="ebms3InPhase" after="AuthorizeMessage"/>      
         </handler>
-        <handler name="AS4DeCompression" class="org.holodeckb2b.as4.compression.DecompressionHandler">
+        <handler name="CheckSignatureCompleteness" class="org.holodeckb2b.as4.handlers.inflow.CheckSignatureCompleteness">
             <order phase="ebms3InPhase" after="StartProcessingUsrMsg"/>      
+        </handler>
+        <handler name="AS4DeCompression" class="org.holodeckb2b.as4.compression.DecompressionHandler">
+            <order phase="ebms3InPhase" after="CheckSignatureCompleteness"/>      
         </handler>
         <handler name="SavePayloads" class="org.holodeckb2b.ebms3.handlers.inflow.SaveUserMsgAttachments">
             <order phase="ebms3InPhase" after="AS4DeCompression"/>      

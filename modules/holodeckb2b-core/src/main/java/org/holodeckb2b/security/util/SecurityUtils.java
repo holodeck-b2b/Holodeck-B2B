@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;
 import javax.xml.namespace.QName;
@@ -214,11 +215,10 @@ public class SecurityUtils {
      * ds:SignedInfo</code> of the first one to get access to the <code>ds:Reference</code> elements.
      * 
      * @param mc    The {@link MessageContext} of the message to get the reference from
-     * @return      An {@link Iterator} on the list of <code>ds:Reference</code> element contained in the signature,<br> 
-     *              <code>null</code> or an <code>Iterator</code> with no elements if there is no signature in the 
-     *              default security header.
+     * @return      The {@link Collection} of <code>ds:Reference</code> elements contained in the signature,<br> 
+     *              <code>null</code> or an empty collection if there is no signature in the default security header.
      */
-    public static Iterator<OMElement> getSignatureReferences(MessageContext mc) {
+    public static Collection<OMElement> getSignatureReferences(MessageContext mc) {
        // Get all WS-Security headers
         ArrayList<SOAPHeaderBlock> secHeaders = mc.getEnvelope().getHeader()
                                                         .getHeaderBlocksWithNSURI(SecurityConstants.WSS_NAMESPACE_URI);
@@ -242,8 +242,17 @@ public class SecurityUtils {
         
         // The ds:SignedInfo element is the first child of ds:Signature
         OMElement signedInfoElement = signatureElems.next().getFirstElement();
-        // and return all ds:Reference contained in it
-        return signedInfoElement == null ? null :
-                    signedInfoElement.getChildrenWithName(new QName(SecurityConstants.DSIG_NAMESPACE_URI, "Reference"));
+        // Collect all ds:Reference contained in it
+        Collection<OMElement> references = null;
+        if (signedInfoElement != null) {
+            references = new ArrayList<OMElement>();
+            for (Iterator<OMElement> it = 
+                    signedInfoElement.getChildrenWithName(new QName(SecurityConstants.DSIG_NAMESPACE_URI, "Reference"))
+                ; it.hasNext() ;)
+                references.add(it.next());            
+            
+        }
+
+        return references;                    
     }
 }

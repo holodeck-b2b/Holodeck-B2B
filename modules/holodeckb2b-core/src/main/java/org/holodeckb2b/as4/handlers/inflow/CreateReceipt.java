@@ -179,7 +179,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
     }
     
     /**
-     * Creates the content of a Non-Repudation Of Receipt (NRR) Receipt as defined in section 5.1.8 of the AS4 profile. 
+     * Creates the content of a Non-Repudiation Of Receipt (NRR) Receipt as defined in section 5.1.8 of the AS4 profile. 
      * 
      * @param mc    The current {@link MessageContext}, used to get copies of the <code>ds:Reference</code> elements
      * @return      The content for the new Receipt represented as an iteration of <code>OMElement</code>s
@@ -193,10 +193,9 @@ public class CreateReceipt extends AbstractUserMessageHandler {
         ebbpNRIElement.declareNamespace(EBBP_NS, "ebbp");
         
         // Add a ebbp:MessagePartNRInformation for each reference found in Signature element of the received message
-        Iterator<OMElement> references = SecurityUtils.getSignatureReferences(mc);        
-        while (references.hasNext()) {
+        for (OMElement ref : SecurityUtils.getSignatureReferences(mc)) {        
             OMElement ebbpMsgPart = elemFactory.createOMElement(QNAME_MSG_PART_ELEM);
-            ebbpMsgPart.addChild(references.next().cloneOMElement());
+            ebbpMsgPart.addChild(ref.cloneOMElement());
             ebbpNRIElement.addChild(ebbpMsgPart);
         }        
         rcptContent.add(ebbpNRIElement);
