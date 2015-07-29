@@ -22,23 +22,29 @@ import org.holodeckb2b.common.security.ISecurityConfiguration;
 
 /**
  * Represents the configuration of a trading partner involved in the message exchange. Extends the general {@link 
- * ITradingPartner} interface with the security configuration that should be used in the message exchange governed by
- * this P-Mode.
+ * ITradingPartner} interface with the security configuration that should be used when exchanging messages with this
+ * trading partner.
  * <p>In the ebMS specification the security parameters are defined on the leg level (or maybe even finer grained per 
  * message, but that is not really clear). Within Holodeck B2B we assume however that security settings are determined 
  * by the trading partners involved in the message exchange. Therefor the security configuration is part of the trading
  * partner configuration in the P-Mode.
  * 
+ * <p>The security configuration contains the settings that are specific to this trading partner; the settings related 
+ * to signing define how this trading partner will sign it messages, and the encryption settings define how messages to
+ * this trading partner must be encrypted.<br>
+ * This means that the security configuration of trading partner for which Holodeck B2B is the MSH contains the 
+ * <b>private keys</b> and that the security configuration for the other partner contains the <b>public keys</b>. 
+ * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @see ITradingPartner
  */
 public interface ITradingPartnerConfiguration extends ITradingPartner {
 
     /**
-     * Gets the configuration settings for the security to apply to messages sent by this trading partner. 
+     * Gets the security configuration settings for this trading partner. 
      * 
-     * @return  A {@link ISecurityConfiguration} object containing the security settings to apply to message sent by 
-     *          this trading partner, or<br>
-     *          <code>null</code> when no security should be used for messages from this trading partner.
+     * @return  A {@link ISecurityConfiguration} object containing the security settings for the trading partner, or<br>
+     *          <code>null</code> when there are none.
      */
     public ISecurityConfiguration getSecurityConfiguration();
 }

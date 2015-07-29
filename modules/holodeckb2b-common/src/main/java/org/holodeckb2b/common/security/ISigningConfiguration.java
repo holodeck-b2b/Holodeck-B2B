@@ -20,12 +20,14 @@ import org.holodeckb2b.common.config.Config;
 
 /**
  * Defines the configuration of a WSS Signature contained in the security header of the ebMS message. Depending on
- * the direction (incoming or outgoing) of the message the information is used to set or validate the Signature in
+ * the direction (incoming or outgoing) of the message the information is used to create or validate the Signature in
  * the WSS header.
- * <p>The settings defined by the interface correspond with the P-Mode parameter group PMode[1].Security.X509.Sign.
- * <p>NOTE: Most settings only apply to outgoing messages that should be signed. When validating the signature of an
- * incoming message Holodeck B2B will not check the used algorithms but only check if the expected certifcate is used 
- * and if it is not revoked (depending on the revocation setting, see {@link #enableRevocationCheck()}).
+ * <p>The settings defined by the interface correspond with the P-Mode parameter group 
+ * <b>PMode[1].Security.X509.Sign</b>.
+ * <p>NOTE: Most settings only apply to outgoing messages that should be signed. WSS Signatures included in incoming 
+ * messages are always validated, regardless whether a <code>ISigningConfiguration</code> is given for sender of the 
+ * message. If however a <code>ISigningConfiguration</code> is provided Holodeck B2B will check that the expected 
+ * certifcate is used and if it is not revoked (depending on the revocation setting, {@link #enableRevocationCheck()}).
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @author Bram Bakx <bram at holodeck-b2b.org>
@@ -44,7 +46,7 @@ public interface ISigningConfiguration {
     public String getKeystoreAlias();
     
     /**
-     * Gets the password to access the private key hold by the certififcate. Only applies to configurations that are
+     * Gets the password to access the private key hold by the certificate. Only applies to configurations that are
      * used to sign messages.
      * <p>Current implementation of Holodeck B2B requires that result is the password in clear text. Future version may
      * change this to get better secured passwords.

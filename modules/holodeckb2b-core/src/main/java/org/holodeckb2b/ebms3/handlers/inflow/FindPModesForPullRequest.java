@@ -21,7 +21,7 @@ import java.util.Map;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.pmode.IPMode;
-import org.holodeckb2b.common.security.IAuthenticationInfo;
+import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.errors.ProcessingModeMismatch;

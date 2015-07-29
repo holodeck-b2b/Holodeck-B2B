@@ -30,9 +30,9 @@ import org.holodeckb2b.common.delivery.MessageDeliveryException;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.common.pmode.IErrorHandling;
-import org.holodeckb2b.common.pmode.IFlow;
 import org.holodeckb2b.common.pmode.ILeg;
 import org.holodeckb2b.common.pmode.IReceiptConfiguration;
+import org.holodeckb2b.common.pmode.IUserMessageFlow;
 import org.holodeckb2b.common.util.MessageIdGenerator;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.common.workerpool.TaskConfigurationException;
@@ -196,7 +196,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
         if (!deliverError) {
             // Maybe the application does not want to receive notification on receipts but it does want to receive
             // error notifications?
-            IFlow umFlow = leg.getUserMessageFlow();
+            IUserMessageFlow umFlow = leg.getUserMessageFlow();
             IErrorHandling errHandlingConfig = umFlow != null ? umFlow.getErrorHandlingConfiguration() : null;
             if (errHandlingConfig != null) {
                 deliverError = errHandlingConfig.shouldNotifyErrorToBusinessApplication();

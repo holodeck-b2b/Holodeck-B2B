@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.pmode.impl;
 
-import org.holodeckb2b.common.pmode.IKeyTransport;
+import org.holodeckb2b.common.security.IKeyTransport;
 import org.simpleframework.xml.Element;
 
 /**

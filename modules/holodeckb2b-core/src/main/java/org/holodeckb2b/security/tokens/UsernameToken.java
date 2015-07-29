@@ -18,7 +18,6 @@
 package org.holodeckb2b.security.tokens;
 
 import org.apache.wss4j.common.principal.UsernameTokenPrincipal;
-import org.holodeckb2b.common.security.IAuthenticationInfo;
 import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
 
 /**

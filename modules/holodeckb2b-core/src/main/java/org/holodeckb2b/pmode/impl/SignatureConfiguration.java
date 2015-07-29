@@ -41,7 +41,7 @@ public class SignatureConfiguration implements ISigningConfiguration {
     private KeyReferenceMethod keyReferenceMethod = new KeyReferenceMethod();
     
     @Element(name = "Algorithm", required = false)
-    private String signatureAlgorithm = null;
+    private String signatureAlgorithm = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
     
     @Element(name = "HashFunction", required = false)
     private String hashFunction = "http://www.w3.org/2001/04/xmlenc#sha256";

@@ -17,12 +17,13 @@
 package org.holodeckb2b.common.pmode;
 
 /**
- * Contains the P-Mode parameters for the exchange of a user message and its related messages (error or receipt). 
+ * Represents the P-Mode parameters for the exchange of a user message message unit and related error signal message 
+ * units. 
  * 
  * @author Bram Bakx <bram at holodeck-b2b.org>
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public interface IUserMessageFlow extends IFlow {
+public interface IUserMessageFlow {
  
     /**
      * Gets the business information that must included in the message. 
@@ -36,7 +37,7 @@ public interface IUserMessageFlow extends IFlow {
     public IBusinessInfo getBusinessInfo();
     
     /**
-     * Gets the payload profile which defines how payloads are to be included in the message. 
+     * Gets the payload profile which defines what and how payloads are to be included in the message. 
      * <p>The profile is about the payload meta-data like the maximum size of payloads (individual and total), the 
      * maximum number of payloads, whether they must compressed, etc.
      * <p><b>NOTE: </b>Except AS4 compression profiling the payloads is currently NOT supported.
@@ -45,4 +46,15 @@ public interface IUserMessageFlow extends IFlow {
      *         <code>null</code> when not specified. 
      */
     public IPayloadProfile getPayloadProfile();
+
+    /**
+     * Gets the configuration for handling errors which are caused by user message exchanged in this flow. 
+     * <p>Providing configuration for error handling is optional, but it is RECOMMENDED to do so. If no error handling
+     * configuration is provided errors will only be logged but not otherwise reported.
+     * 
+     * @return An {@link IErrorHandling} object representing the error handling configuration, or<br>
+     *         <code>null</code> when not specified 
+     */
+    public IErrorHandling getErrorHandlingConfiguration();    
+
 }

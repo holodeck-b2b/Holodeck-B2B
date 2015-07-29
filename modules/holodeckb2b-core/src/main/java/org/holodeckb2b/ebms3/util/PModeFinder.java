@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.common.general.IAgreement;
@@ -32,7 +31,6 @@ import org.holodeckb2b.common.messagemodel.IUserMessage;
 import org.holodeckb2b.common.messagemodel.util.compare;
 import org.holodeckb2b.common.pmode.IBusinessInfo;
 import org.holodeckb2b.common.pmode.IErrorHandling;
-import org.holodeckb2b.common.pmode.IFlow;
 import org.holodeckb2b.common.pmode.ILeg;
 import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.common.pmode.IPModeSet;
@@ -40,7 +38,7 @@ import org.holodeckb2b.common.pmode.IProtocol;
 import org.holodeckb2b.common.pmode.IPullRequestFlow;
 import org.holodeckb2b.common.pmode.IReceiptConfiguration;
 import org.holodeckb2b.common.pmode.IUserMessageFlow;
-import org.holodeckb2b.common.security.IAuthenticationInfo;
+import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.common.security.ISecurityConfiguration;
 import org.holodeckb2b.common.security.ISigningConfiguration;
 import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
@@ -281,7 +279,7 @@ public class PModeFinder {
                 boolean authorized = false; 
                 ISecurityConfiguration initiatorSecCfg = p.getInitiator() == null ? null :
                                                                             p.getInitiator().getSecurityConfiguration();
-                List<IPullRequestFlow> flows = leg.getPullRequestFlows();
+                Collection<IPullRequestFlow> flows = leg.getPullRequestFlows();
                 if (flows == null || flows.isEmpty()) {
                     // There is no specific configuration for pulling, so use security settings from initiator
                     authorized = verifyPullRequestAuthorization(null, initiatorSecCfg, authInfo);
@@ -439,7 +437,7 @@ public class PModeFinder {
             // Get all relevent P-Mode info
             ILeg leg = p.getLegs().iterator().next();
             IProtocol protocolInfo = leg.getProtocol();
-            IFlow flow = leg.getUserMessageFlow();
+            IUserMessageFlow flow = leg.getUserMessageFlow();
             IErrorHandling errorHandling = flow != null ? flow.getErrorHandlingConfiguration() : null;
             // First check if error has specific URL defined or if generic address should be used
             if (errorHandling != null && url.equalsIgnoreCase(errorHandling.getReceiverErrorsTo()))

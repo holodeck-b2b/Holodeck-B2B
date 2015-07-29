@@ -30,10 +30,10 @@ import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.IEbmsError;
 import org.holodeckb2b.common.messagemodel.IErrorMessage;
 import org.holodeckb2b.common.pmode.IErrorHandling;
-import org.holodeckb2b.common.pmode.IFlow;
 import org.holodeckb2b.common.pmode.ILeg;
 import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.common.pmode.IPullRequestFlow;
+import org.holodeckb2b.common.pmode.IUserMessageFlow;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
@@ -225,7 +225,7 @@ public class DeliverErrors extends BaseHandler {
         // First get the delivery specification for errors related to the user message as this will also be the fall
         // back for errors related to pull request if nothing is specified specifically for pull requests
         ILeg leg = pmode.getLegs().iterator().next(); // Currently only One-Way MEPS supports, so only one leg
-        IFlow umFlow = leg.getUserMessageFlow();
+        IUserMessageFlow umFlow = leg.getUserMessageFlow();
         IErrorHandling errHandling = umFlow != null ? umFlow.getErrorHandlingConfiguration() : null;
         if (errHandling != null) 
             deliverySpec = errHandling.getErrorDelivery();

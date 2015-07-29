@@ -38,7 +38,7 @@ import org.apache.wss4j.dom.handler.WSHandler;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.security.IAuthenticationInfo;
+import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.util.Axis2Utils;

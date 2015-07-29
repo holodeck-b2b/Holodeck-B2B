@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.security.handlers;
 
-import java.util.List;
+import java.util.Collection;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
@@ -90,8 +90,9 @@ public class GetSecurityConfiguration extends BaseHandler {
             */
             log.debug("Primary message unit is PullRequest, always initiator");
             initiator = true;
-            List<IPullRequestFlow> flows = leg.getPullRequestFlows(); 
-            pullReqSecConfig = (flows != null && !flows.isEmpty() ? flows.get(0).getSecurityConfiguration() : null);
+            Collection<IPullRequestFlow> flows = leg.getPullRequestFlows(); 
+            pullReqSecConfig = (flows != null && !flows.isEmpty() ? flows.iterator().next().getSecurityConfiguration() 
+                                                                  : null);
         } else {
             /* If this message unit is an user message Holodeck B2B acts as the initiator when the http message is a
                 request, otherwise it is the response to a PullRequest and Holodeck B2B the responder.
