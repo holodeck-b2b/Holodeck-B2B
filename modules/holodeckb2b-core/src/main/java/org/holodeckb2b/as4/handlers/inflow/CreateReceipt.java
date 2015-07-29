@@ -31,7 +31,6 @@ import org.holodeckb2b.common.general.ReplyPattern;
 import org.holodeckb2b.common.pmode.ILeg;
 import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.common.pmode.IReceiptConfiguration;
-import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -40,6 +39,7 @@ import org.holodeckb2b.ebms3.persistent.message.Receipt;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.util.SecurityUtils;
 
 /**
@@ -61,15 +61,20 @@ public class CreateReceipt extends AbstractUserMessageHandler {
     private static final String EBBP_NS = "http://docs.oasis-open.org/ebxml-bp/ebbp-signals-2.0";
     
     /**
+     * The namespace prefix for the XML schema that defines the elements that must be inserted into a NRR receipt
+     */
+    private static final String EBBP_NS_PREFIX = "ebbp";
+    
+    /**
      * The fully qualified name of the <code>ebbp:NonRepudiationInformation</code> element that is the main element
      * for the NRR Receipt
      */
-    private static final QName QNAME_NRI_ELEM = new QName(EBBP_NS, "NonRepudiationInformation");
+    private static final QName QNAME_NRI_ELEM = new QName(EBBP_NS, "NonRepudiationInformation", EBBP_NS_PREFIX);
     /**
      * The fully qualified name of the <code>ebbp:MessagePartNRInformation</code> element that contains a 
      * <code>ds:Reference</code> element from the original message
      */
-    private static final QName  QNAME_MSG_PART_ELEM = new QName(EBBP_NS, "MessagePartNRInformation");
+    private static final QName  QNAME_MSG_PART_ELEM = new QName(EBBP_NS, "MessagePartNRInformation", EBBP_NS_PREFIX);
     
     
     @Override
@@ -190,7 +195,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
         OMFactory elemFactory = mc.getEnvelope().getOMFactory();
         // Create the ebbp:NonRepudiationInformation container element
         OMElement ebbpNRIElement = elemFactory.createOMElement(QNAME_NRI_ELEM);
-        ebbpNRIElement.declareNamespace(EBBP_NS, "ebbp");
+        ebbpNRIElement.declareNamespace(EBBP_NS, EBBP_NS_PREFIX);
         
         // Add a ebbp:MessagePartNRInformation for each reference found in Signature element of the received message
         for (OMElement ref : SecurityUtils.getSignatureReferences(mc)) {        
