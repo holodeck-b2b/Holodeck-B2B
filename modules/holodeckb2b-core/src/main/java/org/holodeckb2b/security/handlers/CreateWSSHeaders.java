@@ -34,8 +34,12 @@ import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.security.IEncryptionConfiguration;
+import org.holodeckb2b.common.security.IKeyTransport;
 import org.holodeckb2b.common.security.ISigningConfiguration;
 import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.common.security.X509ReferenceType;
+import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.ebms3.constants.DefaultSecurityAlgorithm;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.util.Axis2Utils;
 import org.holodeckb2b.security.callbackhandlers.AttachmentCallbackHandler;
@@ -250,10 +254,16 @@ public class CreateWSSHeaders extends BaseHandler {
         pwdCBHandler.addUser(sigCfg.getKeystoreAlias(), sigCfg.getCertificatePassword());
         
         // How should certificate be referenced in header?
-        mc.setProperty(WSHandlerConstants.SIG_KEY_ID, SecurityUtils.getWSS4JX509KeyId(sigCfg.getKeyReferenceMethod()));
+        mc.setProperty(WSHandlerConstants.SIG_KEY_ID, 
+                                    SecurityUtils.getWSS4JX509KeyId((sigCfg.getKeyReferenceMethod() != null ?
+                                                                     sigCfg.getKeyReferenceMethod() : 
+                                                                     DefaultSecurityAlgorithm.KEY_REFERENCE)));
+                
         // Algorithms to use
-        mc.setProperty(WSHandlerConstants.SIG_DIGEST_ALGO, sigCfg.getHashFunction());
-        mc.setProperty(WSHandlerConstants.SIG_ALGO, sigCfg.getSignatureAlgorithm());        
+        mc.setProperty(WSHandlerConstants.SIG_DIGEST_ALGO, 
+                                    Utils.getValue(sigCfg.getHashFunction(), DefaultSecurityAlgorithm.MESSAGE_DIGEST));
+        mc.setProperty(WSHandlerConstants.SIG_ALGO, 
+                                    Utils.getValue(sigCfg.getSignatureAlgorithm(), DefaultSecurityAlgorithm.SIGNATURE));        
     }
 
     
@@ -281,36 +291,39 @@ public class CreateWSSHeaders extends BaseHandler {
         // And if there are attachments also the attachments must be encrypted. 
         mc.setProperty(WSHandlerConstants.OPTIONAL_ENCRYPTION_PARTS, WSS4J_PART_ATTACHMENTS);
         
+        // Symmetric encryption algorithms to use
+        mc.setProperty(WSHandlerConstants.ENC_SYM_ALGO, 
+                                            Utils.getValue(encCfg.getAlgorithm(), DefaultSecurityAlgorithm.ENCRYPTION));
+        
         // The alias of the certificate to use for encryption
         mc.setProperty(WSHandlerConstants.ENCRYPTION_USER, encCfg.getKeystoreAlias());
         
-        // How should certificate be referenced in header ?
-        mc.setProperty(WSHandlerConstants.ENC_KEY_ID, SecurityUtils.getWSS4JX509KeyId(encCfg.getKeyReferenceMethod()));
+        // KeyTransport configuration defines settings for constructing the xenc:EncryptedKey
+        // Set defaults
+        String            ktAlgorithm = DefaultSecurityAlgorithm.KEY_TRANSPORT;
+        X509ReferenceType ktKeyReference = DefaultSecurityAlgorithm.KEY_REFERENCE;
+        String            ktDigest = DefaultSecurityAlgorithm.MESSAGE_DIGEST;
         
-        // Symmetric encryption algorithms to use
-        mc.setProperty(WSHandlerConstants.ENC_SYM_ALGO, encCfg.getAlgorithm());
+        IKeyTransport   ktConfig = encCfg.getKeyTransport();
         
-        // note: if ENC_KEY_TRANSPORT is equal to RSA-OAEP  
-        // then ENC_DIGEST_ALGO and ENC_MFG_ALGO may be set
-                
-        if (WSConstants.KEYTRANSPORT_RSAOEP_XENC11.equalsIgnoreCase(encCfg.getKeyTransport().getAlgorithm())) {
+        if (ktConfig != null) {
+            // Key encryption algorithm
+            ktAlgorithm = Utils.getValue(ktConfig.getAlgorithm(), DefaultSecurityAlgorithm.KEY_TRANSPORT);
+            // If key transport algorithm is RSA-OAEP also the MGF must be set
+            if (WSConstants.KEYTRANSPORT_RSAOEP_XENC11.equalsIgnoreCase(ktAlgorithm)) 
+                mc.setProperty(WSHandlerConstants.ENC_MGF_ALGO, ktConfig.getMGFAlgorithm());
+            // Message digest 
+            ktDigest = Utils.getValue(ktConfig.getDigestAlgorithm(), DefaultSecurityAlgorithm.MESSAGE_DIGEST);
             
-            //
-            if (!"".equals(encCfg.getKeyTransport().getDigestAlgorithm()) &&
-                !"".equals(encCfg.getKeyTransport().getMGFAlgorithm())    ) {
-                
-                // Digest algorithm for key transport
-                mc.setProperty(WSHandlerConstants.ENC_DIGEST_ALGO, encCfg.getKeyTransport().getDigestAlgorithm());
-        
-                // Encryption mgf algorithm for key transport
-                mc.setProperty(WSHandlerConstants.ENC_MGF_ALGO, encCfg.getKeyTransport().getMGFAlgorithm());
-            }
-                
+            // Key refence method
+            if (ktConfig.getKeyReferenceMethod() != null)
+                ktKeyReference = ktConfig.getKeyReferenceMethod();            
         }
         
-        // Key transport algorithm 
-        mc.setProperty(WSHandlerConstants.ENC_KEY_TRANSPORT, encCfg.getKeyTransport().getAlgorithm());
-        
+        // Set the relevant message context properties
+        mc.setProperty(WSHandlerConstants.ENC_KEY_ID, SecurityUtils.getWSS4JX509KeyId(ktKeyReference));
+        mc.setProperty(WSHandlerConstants.ENC_DIGEST_ALGO, ktDigest);
+        mc.setProperty(WSHandlerConstants.ENC_KEY_TRANSPORT, ktAlgorithm);
     }    
     
     /**

@@ -110,10 +110,9 @@ public class SignatureConfigurationTest {
             assertEquals("727dhjkvdjk%%#^&%dgg", sigCfg.getCertificatePassword());
 
             assertNull(sigCfg.enableRevocationCheck());
-            
-            assertEquals(X509ReferenceType.IssuerAndSerial, sigCfg.getKeyReferenceMethod());
+            assertNull(sigCfg.getKeyReferenceMethod());
             assertNull(sigCfg.getSignatureAlgorithm());
-            assertEquals("http://www.w3.org/2001/04/xmlenc#sha256", sigCfg.getHashFunction());
+            assertNull(sigCfg.getHashFunction());
             
         } catch (Exception e) {
             fail();

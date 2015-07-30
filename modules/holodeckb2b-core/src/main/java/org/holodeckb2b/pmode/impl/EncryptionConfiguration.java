@@ -17,7 +17,6 @@
 package org.holodeckb2b.pmode.impl;
 
 import org.holodeckb2b.common.security.IEncryptionConfiguration;
-import org.holodeckb2b.common.security.X509ReferenceType;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
@@ -37,11 +36,8 @@ public class EncryptionConfiguration implements IEncryptionConfiguration {
     @Element(name = "Algorithm", required = false)
     private String algorithm = null;
     
-    @Element(name = "KeyReferenceMethod", required = false)
-    private KeyReferenceMethod keyReferenceMethod = new KeyReferenceMethod();
-    
-    @Element(name = "KeyTransport")
-    private KeyTransport keyTransport = new KeyTransport();
+    @Element(name = "KeyTransport", required = false)
+    private KeyTransport keyTransport = null;
     
     
     @Override
@@ -52,11 +48,6 @@ public class EncryptionConfiguration implements IEncryptionConfiguration {
     @Override
     public String getCertificatePassword() {
         return keyStoreRef.password;
-    }
-
-    @Override
-    public X509ReferenceType getKeyReferenceMethod() {
-        return keyReferenceMethod.getRefMethod();
     }
 
     @Override

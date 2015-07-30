@@ -625,7 +625,7 @@ As this authorization is also based on WS-Security headers this type uses the ge
                 </xs:annotation>
             </xs:element>
         </xs:sequence>
-        <xs:attribute name="target">
+        <xs:attribute name="target" default="">
             <xs:annotation>
                 <xs:documentation><p>The target attribute specifies the header in which this username token should be added. When not specified the username token is added to the default header.</p>
 </xs:documentation>
@@ -682,8 +682,8 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
 <p>If not specified the <i>RSAwithSHA256</i> algorithm will be used for creating the signature.</p></xs:documentation>
                     </xs:annotation>
                 </xs:element>
-                <xs:element default="http://www.w3.org/2001/04/xmldsig-more#hmac-sha256"
-                    minOccurs="0" name="HashFunction" type="xs:anyURI">
+                <xs:element default="http://www.w3.org/2001/04/xmlenc#sha256" minOccurs="0"
+                    name="HashFunction" type="xs:anyURI">
                     <xs:annotation>
                         <xs:documentation><p>This OPTIONAL element contains the identifier of the algorithm that should be used for creating the message digest. The identifiers are specified in <a href="http://www.w3.org/TR/xmldsig-core1/#sec-AlgID">section 6.1</a> of the XML Signature Syntax and Processing specification version 1.1 (XML-dsig). It is RECOMMENDED to use an algoritm for which support is required by the XML-dsig specification.</p>
 
@@ -708,16 +708,8 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
                 </xs:annotation>
             </xs:element>
             <xs:sequence>
-                <xs:element default="IssuerSerial" minOccurs="0" name="KeyReferenceMethod"
-                    type="tns:KeyReferenceMethods">
-                    <xs:annotation>
-                        <xs:documentation><p>This OPTIONAL element indicates how the certificate must be referenced in the WS-Security header. The options are specified in section 3.2 of the WS-Security X.509 Certificate Token Profile Version 1.1.1 specification.</p> 
-
-<p>If not specified <i>Issuer and Serial number</i> method will be used.</p></xs:documentation>
-                    </xs:annotation>
-                </xs:element>
                 <xs:element name="Algorithm" type="xs:anyURI"
-                    default="http://www.w3.org/2009/xmlenc11#aes128-gcm" minOccurs="0">
+                    default="http://www.w3.org/2001/04/xmlenc#aes128-cbc" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation><p>This OPTIONAL element contains the identifier of the algorithm that should be used to encrypt the message content. The identifiers are specified in <a href="http://www.w3.org/TR/xmlenc-core1/#sec-AlgID">section 5.1</a> of theXML Encryption Syntax and Processing Version 1.1 (XML-enc). It is RECOMMENDED to use an algoritm for which support is required by the XML-enc specification.</p>
 
@@ -726,7 +718,15 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
                 </xs:element>
                 <xs:element name="KeyTransport" minOccurs="0" type="tns:KeyTransport">
                     <xs:annotation>
-                        <xs:documentation><p>This OPTIONAL element contains the settings to add the key transport information to the WS-Security header. If not included in the configuration the <i>RSA-OAEP</i> algorithm will be used for key transport.</p>
+                        <xs:documentation><p>This OPTIONAL element contains the settings to add the key transport information to the WS-Security header, i.e. to construct the <code>xenc:EncryptedKey</code> element.</p>
+
+<p>NOTE: If this element is included in the P-Mode it SHOULD contain at least one child element.</p>
+
+<p>If not included in the configuration the follwoing defaults will be used for key transport:<ul>
+<li>Key Transport Algorithm = RSA-OAEP (including MGF1 with SHA1)</li>
+<li>Message Digest Algorithm = SHA256</li>
+<li>Key Reference Method  = Issuer and Serial number</li>
+</ul></p>
 </xs:documentation>
                     </xs:annotation>
                 </xs:element>
@@ -751,13 +751,15 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
         </xs:restriction>
     </xs:simpleType>
     <xs:complexType name="KeyTransport">
-        <xs:sequence>
+        <xs:sequence maxOccurs="1">
             <xs:element name="Algorithm" type="xs:anyURI" minOccurs="0"
                 default="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
                 <xs:annotation>
-                    <xs:documentation><p>This OPTIONAL element contains the identifier of the algorithm that should be used for key transport. The identifiers are specified in <a href="http://www.w3.org/TR/xmlenc-core1/#sec-AlgID">section 5.1</a> of theXML Encryption Syntax and Processing Version 1.1 (XML-enc). It is RECOMMENDED to use an algoritm for which support is required by the XML-enc specification.</p>
+                    <xs:documentation><p>This OPTIONAL element contains the identifier of the algorithm that should be used for key transport. The identifiers are specified in <a href="http://www.w3.org/TR/xmlenc-core1/#sec-AlgID">section 5.1</a> of the XML Encryption Syntax and Processing Version 1.1 (XML-enc). It is RECOMMENDED to use an algoritm for which support is required by the XML-enc specification.</p>
 
-<p>If not specified the <i>RSA-OAEP (including MGF1 with SHA1)</i> algorithm is used for key transport. In that case the <code>MGFAlgorithm</code> element MUST NOT be used (as the MGF function is already specified by the transport algorithm).</p></xs:documentation>
+<p>When the <i>RSA-OAEP (including MGF1 with SHA1)</i> algorithm is specified the <code>MGFAlgorithm</code> element MUST NOT be used (as the MGF function is already specified by the transport algorithm).</p>
+
+<p>If not specified (because the parent <code>KeyTransport</code> element is ommitted) the <i>RSA-OAEP (including MGF1 with SHA1)</i> algorithm is used for key transport.</p></xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element name="MGFAlgorithm" type="xs:anyURI" minOccurs="0">
@@ -773,6 +775,14 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
                     <xs:documentation><p>This OPTIONAL element contains the identifier of the digest algorithm that should be used for key transport. The identifiers are specified in <a href="http://www.w3.org/TR/xmlenc-core1/#sec-AlgID">section 5.1</a> of theXML Encryption Syntax and Processing Version 1.1 (XML-enc). It is RECOMMENDED to use an algoritm for which support is required by the XML-enc specification.</p>
 
 <p>If not specified the <i>SHA256</i> digest algorithm is used for key transport.</p></xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element default="IssuerSerial" minOccurs="0" name="KeyReferenceMethod"
+                type="tns:KeyReferenceMethods">
+                <xs:annotation>
+                    <xs:documentation><p>This OPTIONAL element indicates how the certificate must be referenced in the WS-Security header. The options are specified in section 3.2 of the WS-Security X.509 Certificate Token Profile Version 1.1.1 specification.</p> 
+
+<p>If not specified <i>Issuer and Serial number</i> method will be used.</p></xs:documentation>
                 </xs:annotation>
             </xs:element>
         </xs:sequence>

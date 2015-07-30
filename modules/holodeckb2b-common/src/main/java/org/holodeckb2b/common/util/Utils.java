@@ -352,4 +352,17 @@ public final class Utils {
             return 1;
         }
     }
+    
+    /**
+     * Check whether the given String is non-empty and returns its value if true, otherwise the supplied default will
+     * be returned. 
+     * 
+     * @param value         The String to check
+     * @param defaultValue  The default value to use if the given string is <code>null</code> or empty
+     * @return      <code>value</code> if it is a non-empty string,<br>
+     *              <code>defaultValue</code> otherwise
+     */
+    public static String getValue(final String value, final String defaultValue) {
+        return (value != null && !value.isEmpty() ? value : defaultValue);
+    }
 } 

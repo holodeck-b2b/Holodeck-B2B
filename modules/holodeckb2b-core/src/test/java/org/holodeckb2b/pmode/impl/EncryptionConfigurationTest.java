@@ -17,8 +17,10 @@
 package org.holodeckb2b.pmode.impl;
 
 import java.io.File;
+import org.holodeckb2b.common.security.X509ReferenceType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
@@ -67,11 +69,11 @@ public class EncryptionConfigurationTest {
             assertEquals("partyc", ec.getKeystoreAlias());
             assertEquals("ExampleC", ec.getCertificatePassword());
             assertEquals("http://www.w3.org/2001/04/xmlenc#aes128-cbc", ec.getAlgorithm() );
-            assertEquals("BSTReference", ec.getKeyReferenceMethod().toString() );
             
             assertEquals("http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p", ec.getKeyTransport().getAlgorithm());
             assertEquals("http://www.w3.org/2009/xmlenc11#mgf1sha1", ec.getKeyTransport().getMGFAlgorithm());
             assertEquals("http://www.w3.org/2001/04/xmlenc#sha256", ec.getKeyTransport().getDigestAlgorithm());
+            assertEquals("BSTReference", ec.getKeyTransport().getKeyReferenceMethod().toString() );
            
         } catch (Exception e) {
             fail();
@@ -90,12 +92,32 @@ public class EncryptionConfigurationTest {
             assertNotNull(ec);
             assertEquals("partyc", ec.getKeystoreAlias());
             assertEquals("ExampleC", ec.getCertificatePassword());
-            assertEquals("http://www.w3.org/2001/04/xmlenc#aes128-cbc", ec.getAlgorithm() );
+            assertNull(ec.getAlgorithm() );
+            assertNull(ec.getKeyTransport());
+           
+        } catch (Exception e) {
+            fail();
+        }            
+    }
+    
+        /**
+     * Test minimal EncryptionConfiguration.
+     */
+
+    @Test
+    public void testEncryptionConfigurationKTOnly () {
+        try {
+            EncryptionConfiguration ec = createFromFile("encryptionConfigKTOnly.xml");
+        
+            assertNotNull(ec);
+            assertEquals("partyc", ec.getKeystoreAlias());
+            assertEquals("ExampleC", ec.getCertificatePassword());
+            assertNull(ec.getAlgorithm() );
             
-            assertNotNull(ec.getKeyTransport());
-            assertEquals("http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p", ec.getKeyTransport().getAlgorithm());
+            assertEquals("http://www.w3.org/2001/04/xmlenc#rsa-oaep", ec.getKeyTransport().getAlgorithm());
             assertEquals("http://www.w3.org/2009/xmlenc11#mgf1sha1", ec.getKeyTransport().getMGFAlgorithm());
             assertEquals("http://www.w3.org/2001/04/xmlenc#sha256", ec.getKeyTransport().getDigestAlgorithm());
+            assertEquals(X509ReferenceType.IssuerAndSerial, ec.getKeyTransport().getKeyReferenceMethod());
            
         } catch (Exception e) {
             fail();

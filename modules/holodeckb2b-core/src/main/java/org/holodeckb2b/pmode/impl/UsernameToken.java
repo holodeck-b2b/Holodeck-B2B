@@ -17,7 +17,6 @@
 
 package org.holodeckb2b.pmode.impl;
 
-import org.holodeckb2b.common.security.ISecurityConfiguration;
 import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
@@ -37,7 +36,7 @@ import org.simpleframework.xml.Text;
 public class UsernameToken implements IUsernameTokenConfiguration {
 
     @Attribute(name = "target", required = false)
-    String target = ISecurityConfiguration.WSSHeaderTarget.DEFAULT.name();
+    String target;
     
     @Element (name = "username")
     private String username;

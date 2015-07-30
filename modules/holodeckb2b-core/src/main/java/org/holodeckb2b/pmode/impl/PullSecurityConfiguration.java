@@ -18,6 +18,7 @@
 package org.holodeckb2b.pmode.impl;
 
 import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.common.util.Utils;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.core.PersistenceException;
 import org.simpleframework.xml.core.Validate;
@@ -49,8 +50,8 @@ public class PullSecurityConfiguration extends SecurityConfiguration {
         if (usernameTokens.size() > 1)
             throw new PersistenceException("There shall be only one UsernameToken element for PullRequestFlow", null);
         else if (usernameTokens.size() == 1) {
-            String tokenTarget = usernameTokens.get(0).target;
-            if (tokenTarget != null && !tokenTarget.equalsIgnoreCase(WSSHeaderTarget.EBMS.name()))
+            String tokenTarget = Utils.getValue(usernameTokens.get(0).target, "");
+            if (!tokenTarget.equalsIgnoreCase(WSSHeaderTarget.EBMS.name()))
                 throw new PersistenceException("Target of UsernameToken must ebms for PullRequestFlow", null);
         }
     }
