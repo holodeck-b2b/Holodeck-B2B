@@ -90,19 +90,19 @@ public class PModeWatcher extends DirWatcher {
      */
     @Override
     protected void doPostProcessing() {
-        log.debug("Process removed P-Mode files");
+        // Process removed P-Mode files
         for (File f : delPModes) {
             String pmodeId = removePMode(f);
             log.info("Removed P-Mode " + (pmodeId != null ? "[" + pmodeId + "] " : "") 
                         + " contained in '" + f.getName()+ "'");
         }
-        log.debug("Process new P-Mode files");
+        // Process new P-Mode files
         for (File f : newPModes) {
             String pmodeId = addPMode(f);
             if (pmodeId != null) 
                 log.info("Added P-Mode [" + pmodeId + "] from file '" + f.getName()+ "'");
         }
-        log.debug("Process changed P-Mode files");
+        // Process changed P-Mode files
         for (File f : chgPModes) {
             /* When the file has changed it does not necessarily mean that the P-Mode contained in the original file has 
               changed. It is also possible that the changed file contains a completely new P-Mode. Therefore the changed
