@@ -38,7 +38,6 @@ import org.holodeckb2b.common.pmode.IProtocol;
 import org.holodeckb2b.common.pmode.IPullRequestFlow;
 import org.holodeckb2b.common.pmode.IReceiptConfiguration;
 import org.holodeckb2b.common.pmode.IUserMessageFlow;
-import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.common.security.ISecurityConfiguration;
 import org.holodeckb2b.common.security.ISigningConfiguration;
 import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
@@ -46,6 +45,7 @@ import org.holodeckb2b.common.util.Utils;
 import static org.holodeckb2b.common.util.Utils.compareStrings;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.tokens.UsernameToken;
 import org.holodeckb2b.security.tokens.X509Certificate;
 import org.holodeckb2b.security.util.SecurityUtils;
@@ -162,7 +162,8 @@ public class PModeFinder {
             
             // Check To info
             if (toPMode != null) {
-                if (to.getRole().equals(toPMode.getRole())) 
+                int c = Utils.compareStrings(to.getRole(), toPMode.getRole());
+                if ( -1 <= c && c <= 1) 
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.TO_ROLE);
                 else
                     continue; // mis-match on To party role
@@ -174,7 +175,8 @@ public class PModeFinder {
             
             // Check From info
             if (fromPMode != null) {
-                if (from.getRole().equals(fromPMode.getRole())) 
+                int c = Utils.compareStrings(from.getRole(), fromPMode.getRole());
+                if ( -1 <= c && c <= 1) 
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.FROM_ROLE);
                 else
                     continue; // mis-match on From party role
