@@ -21,6 +21,7 @@ import org.holodeckb2b.common.security.X509ReferenceType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
@@ -91,6 +92,7 @@ public class SignatureConfigurationTest {
             assertNull(sigCfg.enableRevocationCheck());
             
             assertEquals(X509ReferenceType.BSTReference, sigCfg.getKeyReferenceMethod());
+            assertTrue(sigCfg.includeCertificatePath());
             assertEquals("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", sigCfg.getSignatureAlgorithm());
             assertEquals("http://www.w3.org/2001/04/xmldsig-more#sha384", sigCfg.getHashFunction());
             
@@ -111,6 +113,7 @@ public class SignatureConfigurationTest {
 
             assertNull(sigCfg.enableRevocationCheck());
             assertNull(sigCfg.getKeyReferenceMethod());
+            assertNull(sigCfg.includeCertificatePath());
             assertNull(sigCfg.getSignatureAlgorithm());
             assertNull(sigCfg.getHashFunction());
             

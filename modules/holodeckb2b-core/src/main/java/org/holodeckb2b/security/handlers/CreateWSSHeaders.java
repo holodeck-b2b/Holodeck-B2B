@@ -258,7 +258,13 @@ public class CreateWSSHeaders extends BaseHandler {
                                     SecurityUtils.getWSS4JX509KeyId((sigCfg.getKeyReferenceMethod() != null ?
                                                                      sigCfg.getKeyReferenceMethod() : 
                                                                      DefaultSecurityAlgorithm.KEY_REFERENCE)));
-                
+        // If BST is included, should complete cert path be included?
+        if (sigCfg.getKeyReferenceMethod() == X509ReferenceType.BSTReference 
+                && (sigCfg.includeCertificatePath() != null ? sigCfg.includeCertificatePath() : false))
+            mc.setProperty(WSHandlerConstants.USE_SINGLE_CERTIFICATE, "false");
+        else
+            mc.setProperty(WSHandlerConstants.USE_SINGLE_CERTIFICATE, "true");
+        
         // Algorithms to use
         mc.setProperty(WSHandlerConstants.SIG_DIGEST_ALGO, 
                                     Utils.getValue(sigCfg.getHashFunction(), DefaultSecurityAlgorithm.MESSAGE_DIGEST));

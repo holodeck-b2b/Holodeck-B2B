@@ -40,6 +40,9 @@ public class SignatureConfiguration implements ISigningConfiguration {
     @Element(name = "KeyReferenceMethod", required = false)
     private KeyReferenceMethod keyReferenceMethod;
     
+    @Element(name = "IncludeCertificatePath", required = false)
+    private Boolean includeCertPath = null;
+    
     @Element(name = "Algorithm", required = false)
     private String signatureAlgorithm = null;
     
@@ -61,6 +64,11 @@ public class SignatureConfiguration implements ISigningConfiguration {
         return (keyReferenceMethod != null ? keyReferenceMethod.getRefMethod() : null);
     }
 
+    @Override
+    public Boolean includeCertificatePath() {
+        return includeCertPath;
+    }
+    
     @Override
     public Boolean enableRevocationCheck() {        
         return enableRevocation;

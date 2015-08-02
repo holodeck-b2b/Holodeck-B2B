@@ -674,6 +674,20 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
 <p>If not specified <i>Issuer and Serial number</i> method will be used.</p></xs:documentation>
                     </xs:annotation>
                 </xs:element>
+                <xs:element default="false" minOccurs="0" name="IncludeCertificatePath"
+                    type="xs:boolean">
+                    <xs:annotation>
+                        <xs:documentation><p>This OPTIONAL element indicates whether the complete certificate path must be included in the binary security token that contains the certificate used for signing the message. This setting only applies when Holodeck B2B creates the signature, i.e. is the sender of the signed message. See section 3.1 of the WS-Security X.509 Certificate Token Profile Version 1.1.1 specification for more information on the binary security token types.</p>
+
+<p>By including the certificate path or chain in the binary security token the receiver of message does not need to know the end entity's certificate but can rely on the trust from a certificate authority. This makes certificate management much simpler as only the CA certificates need to be known on the receiving MSH.</p>
+
+<p>Because the certificate path can only be included in a binary security token, this option can only be used when the <code>KeyReferenceMethod</code> is set to <i>BSTReference</i>.</p>
+
+<p>Note that the receiving MSH must also be configured to accept <b>and use</b> a certificate path for validation of the signature. Therefore the default is to only include the end-entity certificate in the WS-Security header.</p>
+
+<p>NOTE: The certificate loaded in the keystore MUST and referenced in <code>KeystoreAlias</code> already contain the complete certificate path, Holodeck B2B will not try to construct the path based on the end-entity certificate!</p></xs:documentation>
+                    </xs:annotation>
+                </xs:element>
                 <xs:element minOccurs="0" name="Algorithm" type="xs:anyURI"
                     default="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256">
                     <xs:annotation>
