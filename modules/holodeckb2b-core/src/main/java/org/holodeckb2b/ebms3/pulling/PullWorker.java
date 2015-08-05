@@ -18,7 +18,6 @@ package org.holodeckb2b.ebms3.pulling;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -166,10 +165,10 @@ public class PullWorker implements IWorkerTask {
                 String mpc = null;
                 ILeg leg = p.getLegs().iterator().next(); // currently only One-Way P-Modes, so only one leg
                 // First check PullRequest flow (sub-channel) and then UserMessage flow
-                List<IPullRequestFlow> flows = leg.getPullRequestFlows();
+                Collection<IPullRequestFlow> flows = leg.getPullRequestFlows();
                 if (flows != null && !flows.isEmpty()) {
-                    mpc = flows.get(0) != null && flows.get(0).getMPC()!= null 
-                                                                    ? flows.get(0).getMPC() : null;
+                    IPullRequestFlow prf = flows.iterator().next();
+                    mpc = prf.getMPC() != null ? prf.getMPC() : null;
                 }
                 if (mpc == null || mpc.isEmpty()) {
                     log.debug("No MPC defined in PullRequest flow, check UserMessage flow");

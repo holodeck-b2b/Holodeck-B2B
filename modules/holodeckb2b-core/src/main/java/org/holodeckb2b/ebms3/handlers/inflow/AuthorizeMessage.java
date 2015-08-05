@@ -23,7 +23,7 @@ import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.common.pmode.ITradingPartnerConfiguration;
-import org.holodeckb2b.common.security.IAuthenticationInfo;
+import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.common.security.ISecurityConfiguration;
 import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;

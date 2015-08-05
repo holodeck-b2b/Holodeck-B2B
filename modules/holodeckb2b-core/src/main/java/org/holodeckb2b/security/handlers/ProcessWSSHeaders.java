@@ -38,11 +38,12 @@ import org.apache.wss4j.dom.handler.WSHandler;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.security.IAuthenticationInfo;
+import org.holodeckb2b.common.util.KeyValuePair;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.util.Axis2Utils;
 import org.holodeckb2b.security.callbackhandlers.AttachmentCallbackHandler;
+import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.tokens.UsernameToken;
 import org.holodeckb2b.security.tokens.X509Certificate;
 import org.holodeckb2b.security.util.NoOpValidator;
@@ -74,9 +75,11 @@ import org.w3c.dom.Element;
  * </table>
  * <p>When a problem is detected in the WS-Security header this is indicated using MessageContext properties named
  * {@link SecurityConstants#INVALID_DEFAULT_HEADER} and {@link SecurityConstants#INVALID_EBMS_HEADER}. The value of the
- * property indicated what caused the problem. As the ebMS V3 Core Specification only describes three security errors: 
- * <i>FailedDecryption</i>, <i>FailedAuthentication</i> and <i>PolicyNoncompliance</i>, the problem indication is 
- * limited to:<ul>
+ * property is a key value pair that indicates what caused the problem. The key contains the what part of the security
+ * header caused the problem and the value holds an error description.<br>
+ * As the ebMS V3 Core Specification only describes three security errors: 
+ * <i>FailedDecryption</i>, <i>FailedAuthentication</i> and <i>PolicyNoncompliance</i>, the problem indication (= key
+ * value) is limited to:<ul>
  * <li>{@link SecurityConstants.WSS_FAILURES#DECRYPTION} : Problem in decrypting the message. Applies to default header 
  *                                                         only</li>
  * <li>{@link SecurityConstants.WSS_FAILURES#SIGNATURE} : Problem with the validation of the signature. Also applies 
@@ -140,10 +143,9 @@ public class ProcessWSSHeaders extends BaseHandler {
                 log.debug("Process the WSS header targeted to default role");
                 results = processor.processSecurityHeader(null, actions);            
             } catch (WSSecurityException ex) {
-                // An exception indicate that the default WS-Sec header was invalid. 
-                log.warn("Processing of default WS-Sec header failed! Details:"
-                        + ex.getMsgID() + ";" + ex.getMessage());
-                mc.setProperty(SecurityConstants.INVALID_DEFAULT_HEADER, SecurityConstants.WSS_FAILURES.UNKNOWN);            
+                // An exception indicates a unexpected problem in processing the default WS-Sec header 
+                handleWSSecurityException(mc, SecurityConstants.DEFAULT_WSS_HEADER, 
+                                          SecurityConstants.WSS_FAILURES.UNKNOWN, ex);                
                 // Further processing of the security header is useless, so continue with next handler
                 return InvocationResponse.CONTINUE;            
             }            
@@ -154,25 +156,44 @@ public class ProcessWSSHeaders extends BaseHandler {
             WSSecurityEngineResult decResult = WSSecurityUtil.fetchActionResult(results, WSConstants.ENCR);
             if (decResult != null && decResult.containsKey(SecurityConstants.WSS_PROCESSING_FAILURE)) {
                 // An exception has occurred during decryption, so decrypting the message failed
-                WSSecurityException ex = (WSSecurityException) decResult.get(SecurityConstants.WSS_PROCESSING_FAILURE);
-                log.warn("Decryption of message failed! Details: " + ex.getMsgID() + ";" + ex.getMessage());
-                // Indicate that decryption failed
-                mc.setProperty(SecurityConstants.INVALID_DEFAULT_HEADER, SecurityConstants.WSS_FAILURES.DECRYPTION);
-                // No need to further process rresult or header
+                handleWSSecurityException(mc, SecurityConstants.DEFAULT_WSS_HEADER, 
+                                          SecurityConstants.WSS_FAILURES.DECRYPTION,
+                                          (WSSecurityException) decResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
+                                         );
+                // No need to further process result or header
                 return InvocationResponse.CONTINUE;
             }
 
             // Process result of Signature
-            if (!processResultSignature(WSSecurityUtil.fetchActionResult(results, WSConstants.SIGN), authInfo)) {
-                // Indicate that signature validation failed
-                mc.setProperty(SecurityConstants.INVALID_DEFAULT_HEADER, SecurityConstants.WSS_FAILURES.SIGNATURE);
-                // No need to further process result or header
-                return InvocationResponse.CONTINUE;            
+            WSSecurityEngineResult signResult = WSSecurityUtil.fetchActionResult(results, WSConstants.SIGN);
+            if (signResult != null) {
+                if (signResult.containsKey(SecurityConstants.WSS_PROCESSING_FAILURE)) {
+                    // An exception has occurred during signature processing
+                    handleWSSecurityException(mc, SecurityConstants.DEFAULT_WSS_HEADER, 
+                                           SecurityConstants.WSS_FAILURES.SIGNATURE,
+                                           (WSSecurityException) decResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
+                                           );
+                    // No need to further process result or header
+                    return InvocationResponse.CONTINUE;                 
+                } else {
+                    log.debug("Default WSS header contained a valid Signature");
+                    // Transform into non WSS4J related object
+                    java.security.cert.X509Certificate cert = (java.security.cert.X509Certificate) 
+                                                            signResult.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
+                    X509Certificate hb2bCert = new X509Certificate(cert);
+                    // Add the information to set of collected authentication info
+                    authInfo.put(SecurityConstants.SIGNATURE, hb2bCert);            
+                }
             }
+
             // Process result of UT 
-            if (!processResultUT(WSSecurityUtil.fetchActionResult(results, WSConstants.UT), null, authInfo)) {            
+            WSSecurityEngineResult utResult = WSSecurityUtil.fetchActionResult(results, WSConstants.UT);
+            if (!processResultUT(utResult, null, authInfo)) {            
                 // Indicate that username token processing failed
-                mc.setProperty(SecurityConstants.INVALID_DEFAULT_HEADER, SecurityConstants.WSS_FAILURES.UT);
+                handleWSSecurityException(mc, SecurityConstants.DEFAULT_WSS_HEADER, 
+                                          SecurityConstants.WSS_FAILURES.UT,
+                                          (WSSecurityException) decResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
+                                         );
                 // No need to further process result or header
                 return InvocationResponse.CONTINUE;            
             }            
@@ -187,27 +208,32 @@ public class ProcessWSSHeaders extends BaseHandler {
                 results = processor.processSecurityHeader(SecurityConstants.EBMS_WSS_HEADER, actions);            
             } catch (WSSecurityException ex) {
                 // An exception here means there were unexpected elements in the WSS header targeted at the "ebms" role.
-                log.warn("Processing of \"ebms\" WS-Sec header failed because unexpected element were encountered! Details:"
-                        + ex.getMsgID() + ";" + ex.getMessage());
-                mc.setProperty(SecurityConstants.INVALID_EBMS_HEADER, SecurityConstants.WSS_FAILURES.UNKNOWN);            
+                handleWSSecurityException(mc, SecurityConstants.EBMS_WSS_HEADER, 
+                                          SecurityConstants.WSS_FAILURES.UNKNOWN, ex);                
                 // Further processing of the security header is useless, so continue with next handler
                 return InvocationResponse.CONTINUE;            
             } 
 
             log.debug("Check results of processing security header targeted to ebms role");
             // Get result of UT processing
-            if (!processResultUT(WSSecurityUtil.fetchActionResult(results, WSConstants.UT), 
-                                 SecurityConstants.EBMS_WSS_HEADER, authInfo)) {            
+            utResult = WSSecurityUtil.fetchActionResult(results, WSConstants.UT);
+            if (!processResultUT(utResult, SecurityConstants.EBMS_WSS_HEADER, authInfo)) {            
                 // Indicate that username token processing failed
-                mc.setProperty(SecurityConstants.INVALID_EBMS_HEADER, SecurityConstants.WSS_FAILURES.UT);
+                handleWSSecurityException(mc, SecurityConstants.EBMS_WSS_HEADER, 
+                                          SecurityConstants.WSS_FAILURES.UT,
+                                          (WSSecurityException) decResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
+                                         );
                 // No need to further process result or header
                 return InvocationResponse.CONTINUE;            
             }    
             // Check that there were no other elements in the "ebms" header
             if (results.size() > 1) {
-                log.warn("The WS-Security header targeted to \"ebms\" role contains unexpected elements!");
                 // Indicate problem as problem with "other" elements as we do not expect anything else than a UT
-                mc.setProperty(SecurityConstants.INVALID_EBMS_HEADER, SecurityConstants.WSS_FAILURES.UNKNOWN);
+                handleWSSecurityException(mc, SecurityConstants.EBMS_WSS_HEADER, 
+                                          SecurityConstants.WSS_FAILURES.UNKNOWN, 
+                                          new WSSecurityException(WSSecurityException.ErrorCode.FAILURE,
+                                                "WS-Security header targeted to \"ebms\" contains unexpected elements!")
+                                         );                
                 // No need to further process result or header
                 return InvocationResponse.CONTINUE;                        
             }
@@ -285,43 +311,57 @@ public class ProcessWSSHeaders extends BaseHandler {
             }
         }   
     }
-    
+
     /**
-     * Processes the result of signature processing. If successful the information from the WS-Security is converted 
-     * to an {@link IAuthenticationInfo} object for later use. As the signature can only exist in the default 
-     * WS-Security header there is no role parameter.
+     * Helper method to handle a {@link WSSecurityException} that occurred in processing of the WS-Security header.
+     * <p>This method logs the error and sets the message context property to indicate that the processing of the header
+     * failed.
      * 
-     * @param signResult  The WSS4J result object for the signature processing
-     * @param authInfo    The list of authentication information contained in the WS-Security headers
-     * @return            <code>false</code> if the signature was not processed successfully,<br>
-     *                    <code>true</code> otherwise
+     * @param mc        The current message context
+     * @param header    The target actor/role of the security header in which the problem occurred
+     * @param part      The part (signature, encryption, ut, other) the problem occurred in
+     * @param ex        The {@link WSSecurityException} that occurred
      */
-    protected boolean processResultSignature(WSSecurityEngineResult signResult, 
-                                             Map<String, IAuthenticationInfo> authInfo) {
+    private void handleWSSecurityException(final MessageContext mc, 
+                                           final String header, 
+                                           final SecurityConstants.WSS_FAILURES part, 
+                                           final WSSecurityException ex) {
+        // Build the error message
+        StringBuffer    errorMsg = new StringBuffer();        
+        switch (part) {
+            case DECRYPTION :
+                errorMsg.append("Failed decryption: "); break;
+            case SIGNATURE :
+                errorMsg.append("Failed signature validation: "); break;
+            case UT :
+                errorMsg.append("Failed username token processing: "); break;
+            case UNKNOWN :
+                errorMsg.append("Processing of WS-Security header failed: "); break;
+        }        
+        errorMsg.append(ex.getMsgID()).append(';').append(ex.getMessage());
+        
+        // Drill down to root cause
+        Throwable cause = ex.getCause();
+        while (cause != null) {
+            errorMsg.append(". Caused by: ").append(cause.getClass().getSimpleName());
+            String msg = cause.getMessage();
+            if ( msg != null && !msg.isEmpty())
+                errorMsg.append(';').append(msg);
             
-        if (signResult == null) {
-            // No signature process, so no fault either
-            return true;
-        } else {
-            if (signResult.containsKey(SecurityConstants.WSS_PROCESSING_FAILURE)) {
-                // An exception has occurred during signature processing
-                WSSecurityException ex = (WSSecurityException) signResult.get(SecurityConstants.WSS_PROCESSING_FAILURE);
-                log.warn("Processing signature of message failed! Details: " + ex.getMsgID() + ";" + ex.getMessage());
-                
-                return false;
-            } else {
-                log.debug("Default WSS header contained a valid Signature");
-                // Transform into non WSS4J related object
-                java.security.cert.X509Certificate cert = (java.security.cert.X509Certificate) 
-                                                            signResult.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
-                X509Certificate hb2bCert = new X509Certificate(cert);
-                // Add the information to set of collected authentication info
-                authInfo.put(SecurityConstants.SIGNATURE, hb2bCert);            
-                
-                return true;
-            }
-        }   
+            cause = cause.getCause();
+        }
+        String errorMessage = errorMsg.toString();
+
+        // Write error message to log
+        log.warn(errorMessage);
+        
+        // Set the message context property to indicate the failed processing
+        mc.setProperty( (SecurityConstants.EBMS_WSS_HEADER.equals(header) ? 
+                            SecurityConstants.INVALID_EBMS_HEADER : SecurityConstants.INVALID_DEFAULT_HEADER)
+                      , new KeyValuePair<SecurityConstants.WSS_FAILURES, String>(part, errorMessage)
+                      );
     }
+    
         
 
     /**

@@ -175,8 +175,11 @@ public class WSSProcessingEngine extends WSSecurityEngine {
                     try {
                         results = p.handleToken((Element) node, requestData, wsDocInfo);
                     } catch (WSSecurityException ex) {
-                        log.info("Processing of " + el.toString() + " element in WS-Sec header failed! Details:"
-                                    + ex.getMsgID() + ";" + ex.getMessage());
+                        if (log.isInfoEnabled()) {
+                            log.info("Processing of " + el.toString() + " element in WS-Sec header failed! Details:"
+                                    + ex.getMsgID() + ";" + ex.getMessage() 
+                                    + (ex.getCause() != null ?  ";" + ex.getCause().getMessage() : ""));
+                        }
                         
                         // Register failure to process this element by adding an empty result for the action
                         //   associated with this element. If no action is known for this element the exception is
@@ -186,6 +189,10 @@ public class WSSProcessingEngine extends WSSecurityEngine {
                             WSSecurityEngineResult result = new WSSecurityEngineResult(action);
                             result.put(SecurityConstants.WSS_PROCESSING_FAILURE, ex);
                             results = java.util.Collections.singletonList(result);
+                            
+                            // Continuing processing the header does not make much sense, so return immediately
+                            returnResults.addAll(0, results);                            
+                            return returnResults;                            
                         } else {
                             throw ex;
                         }

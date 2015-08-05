@@ -2,7 +2,7 @@
 <tns:tSecCfg xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  >
-    <tns:UsernameToken target="ebms">
+    <tns:UsernameToken target="ignoreme">
         <tns:username>DmTnJLxXFgEsuQX</tns:username>
         <tns:password type="Text">ymjl8hCo0BdTvcRf</tns:password>
         <tns:includeNonce>false</tns:includeNonce>

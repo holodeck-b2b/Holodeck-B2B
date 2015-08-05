@@ -1,0 +1,5 @@
+    <KeyTransport>
+        <Algorithm>http://www.w3.org/2009/xmlenc11#rsa-oaep</Algorithm>
+        <DigestAlgorithm>http://www.w3.org/2001/04/xmlenc#sha512</DigestAlgorithm>
+        <KeyReferenceMethod>BSTReference</KeyReferenceMethod>
+    </KeyTransport>

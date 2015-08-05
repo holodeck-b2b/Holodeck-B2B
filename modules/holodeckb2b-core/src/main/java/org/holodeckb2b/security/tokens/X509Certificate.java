@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.security.tokens;
 
-import org.holodeckb2b.common.security.IAuthenticationInfo;
 import org.holodeckb2b.security.util.SecurityUtils;
 
 /**

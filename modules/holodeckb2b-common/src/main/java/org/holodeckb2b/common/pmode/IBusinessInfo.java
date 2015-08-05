@@ -23,15 +23,13 @@ import org.holodeckb2b.common.general.IService;
 /**
  * Describes the P-Mode parameters that contain the meta-data about the <i>business transaction</i> the message exchange
  * is part of. This meta-data can be used by the business application to determine how the message should be processed.
- * This information can also be used by Holodeck B2B to determine which P-Mode defines the processing of a message,
- * especially for received messages if they do not contain the P-Mode id.
- * <p>Beside the MPC the business transaction information only applies to user messages as pull request do not contain
- * business information. 
+ * This information is also used by Holodeck B2B to determine which P-Mode defines the processing of a received message,
+ * especially if they do not contain the P-Mode id.
  * 
  * @author Bram Bakx <bram at holodeck-b2b.org>
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public abstract interface IBusinessInfo {
+public interface IBusinessInfo {
  
     /**
      * Gets the business level operation/activity requested to be executed.
@@ -57,14 +55,14 @@ public abstract interface IBusinessInfo {
     public IService getService();
     
     /**
-     * Gets the set of additional meta-data properties required to handle the message. Note that properties defined in 
-     * the P-Mode will be included in all user messages. If properties depend on the actual content of the message they
-     * should be supplied when the message is submitted. To enable specifying both generic and specific properties 
-     * Holodeck B2B will combine the property sets from P-Mode and submission when processing a message. If both sets
-     * contain a property with the same name, the value given at message submission will be used.
+     * Gets the set of additional meta-data properties required to handle the message.
+     * <p>Note that properties defined in the P-Mode will be included in all user messages. If properties depend on the 
+     * actual content of the message they should be supplied when the message is submitted. To enable specifying both 
+     * generic and specific properties Holodeck B2B will combine the property sets from P-Mode and submission when 
+     * processing a message. If both sets contain a property with the same name, the value given at message submission 
+     * will be used.
      * 
      * @return The set of user defined meta-data properties
      */
-    public Collection<IProperty> getProperties();
-    
+    public Collection<IProperty> getProperties();    
 }

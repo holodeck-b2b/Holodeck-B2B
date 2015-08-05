@@ -38,13 +38,16 @@ public class SignatureConfiguration implements ISigningConfiguration {
     private Boolean enableRevocation = null;
     
     @Element(name = "KeyReferenceMethod", required = false)
-    private KeyReferenceMethod keyReferenceMethod = new KeyReferenceMethod();
+    private KeyReferenceMethod keyReferenceMethod;
+    
+    @Element(name = "IncludeCertificatePath", required = false)
+    private Boolean includeCertPath = null;
     
     @Element(name = "Algorithm", required = false)
     private String signatureAlgorithm = null;
     
     @Element(name = "HashFunction", required = false)
-    private String hashFunction = "http://www.w3.org/2001/04/xmlenc#sha256";
+    private String hashFunction = null;
     
     @Override
     public String getKeystoreAlias() {
@@ -58,9 +61,14 @@ public class SignatureConfiguration implements ISigningConfiguration {
 
     @Override
     public X509ReferenceType getKeyReferenceMethod() {
-        return keyReferenceMethod.getRefMethod();
+        return (keyReferenceMethod != null ? keyReferenceMethod.getRefMethod() : null);
     }
 
+    @Override
+    public Boolean includeCertificatePath() {
+        return includeCertPath;
+    }
+    
     @Override
     public Boolean enableRevocationCheck() {        
         return enableRevocation;

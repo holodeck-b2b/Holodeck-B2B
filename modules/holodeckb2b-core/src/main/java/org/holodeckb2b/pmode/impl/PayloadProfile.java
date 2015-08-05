@@ -29,21 +29,8 @@ import org.simpleframework.xml.Root;
 @Root (name="PayloadProfile", strict=false)
 public class PayloadProfile implements IAS4PayloadProfile {
     
-    @Element (name = "maxSize", required = false)
-    private int maxSize = -1;
-     
     @Element (name = "UseAS4Compression", required = false)
     private Boolean useAS4Compression = Boolean.FALSE;
-    
-    /**
-     * Gets the maximum size for the payload
-     * @return The maximum size in kilobytes for the payload
-     */
-    @Override
-    public int getMaxSize() {
-        return maxSize;
-    }
-    
     
     /**
      * Returns if compression is turned on for the payload.

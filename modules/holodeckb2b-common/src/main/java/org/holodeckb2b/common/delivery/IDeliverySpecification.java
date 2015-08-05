@@ -20,12 +20,15 @@ package org.holodeckb2b.common.delivery;
 import java.util.Map;
 
 /**
- * Is used to specify how a message unit should be delivered to the business application. The specification consists of
- * the {@link IMessageDelivererFactory} that should be used for the delivery and the settings needed to configure the
- * delivery method. The delivery specification is part of the P-Mode that governs the message exchange.
- * <p>For each delivery specification Holodeck B2B will create a factory with the given settings. To allow reuse of a
- * delivery method instance (i.e. a configured delivered method) the [optional] id of a delivery specification will be
- * used by Holodeck B2B to determine if it can reuse an existing factory.
+ * Is used to specify how a message unit should be delivered to the business application.      
+ * <p>Holodeck B2B itself does not deliver the message unit, the actual delivery is done through 
+ * {@link IMessageDeliverer}s. The delivery specification tells Holodeck B2B how to construct the correct deliverer.
+ * <p>The delivery specification consists of the {@link IMessageDelivererFactory} that should be used to create the
+ * actual {@link IMessageDeliverer} and the settings needed to configure them. 
+ * <p>The delivery specification is part of the P-Mode that governs the message exchange.For each delivery specification 
+ * Holodeck B2B will create a factory with the given settings. To allow reuse of a delivery method instance (i.e. a 
+ * configured delivered method) the [optional] id of a delivery specification will be used by Holodeck B2B to determine 
+ * if it can reuse an existing factory.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see IMessageDelivererFactory

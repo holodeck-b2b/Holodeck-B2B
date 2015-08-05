@@ -18,6 +18,7 @@
 package org.holodeckb2b.common.workers;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;

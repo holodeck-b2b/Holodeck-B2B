@@ -4,7 +4,6 @@
 >
     <tns:Encryption>
        <KeystoreAlias password="ExampleC">partyc</KeystoreAlias>
-	<KeyReferenceMethod>SomeKeyReference</KeyReferenceMethod>
 	<Algorithm>http://www.w3.org/2001/04/xmlenc#aes128-cbc</Algorithm>
 	<KeyTransport>
 	    <Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p</Algorithm>

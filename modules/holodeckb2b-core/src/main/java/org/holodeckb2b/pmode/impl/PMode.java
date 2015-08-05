@@ -30,10 +30,15 @@ import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persister;
 
 /**
- * PMode implementation class.
+ * Is an implementation of {@link IPMode} that uses XML documents to persist the P-Mode.
+ * <p>This P-Mode implementation supports the parameters needed for the extensions defined in the AS4 Profile like
+ * Reception Awareness, compression and multi-hop. The structure of the XML documents is defined in the 
+ * <a href="http://holodeck-b2b.org/schemas/2014/10/pmode">http://holodeck-b2b.org/schemas/2014/10/pmode</a> XSD which 
+ * is contained in <code>pmode.xsd</code>.
  * 
  * @author Bram Bakx <bram at holodeck-b2b.org>
  * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @see IPMode
  */
 @Root (name="PMode", strict=false)
 public class PMode implements IPMode {

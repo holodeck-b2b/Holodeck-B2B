@@ -18,15 +18,20 @@
 package org.holodeckb2b.common.security;
 
 /**
- * Describes the P-Mode parameters related to the security processing of messages. Security processing is described in
- * section 7 of the ebMS V3 Core Specification and its related P-Mode parameters in appendix D.3.6. 
- * <p>The P-Mode parameter group Security defines the content of the default WS-Security header in the message. This
- * interface also includes the configuration of the username token that can be included in the WS-Security header 
- * targeted at the "ebms" role. In the ebMS specification the P-Mode parameter group <i>Authorization</i> under 
- * <i>PMode.Initiator</i> and <i>PMode.Responder</i> are used for configuration of this username token.
- * <p><b>NOTE:</b> This security configuration interface is also used to define the authorization configuration for pull 
- * requests on a sub-channel MPC. In that case however only the user name token for the "ebms" role/actor and signature
- * configuration are needed.
+ * Describes the P-Mode parameters related to the security processing of messages. 
+ * <p>Security processing is described in section 7 of the ebMS V3 Core Specification and its related P-Mode parameter 
+ * group <b>PMode[1].Security</b> in appendix D.3.6. This P-Mode parameter group defines the content of the default 
+ * WS-Security header in the message. 
+ * <p>This interface also includes the configuration of the username token that can be included in the WS-Security 
+ * header targeted at the "ebms" role/actor. In the ebMS specification the P-Mode parameter group <b>Authorization</b> 
+ * under <b>PMode.Initiator</b> and <b>PMode.Responder</b> are used for configuration of this username token.<br>
+ * The spec defines <b>PMode[1].Security.PModeAuthorize</b> that determines whether the username token in the "ebms" 
+ * header should be included. In Holodeck B2B this parameter is derived from the existence of a configuration for a 
+ * username token targeted at the "ebms" role/actore, i.e. <b>PMode[1].Security.PModeAuthorize</b> := <code>
+ * {@link #getUsernameTokenConfiguration(WSSHeaderTarget.EBMS)} != null</code> 
+ * <p><b>NOTE:</b> This interface is also used to define the authorization configuration for pull requests on a 
+ * sub-channel MPC. In that case however only the user name token for the "ebms" role/actor and signature configuration 
+ * are needed.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @aurhor Bram Bakx <bram at holodeck-b2b.org>
@@ -34,7 +39,7 @@ package org.holodeckb2b.common.security;
 public interface ISecurityConfiguration {
     
     /**
-     * Identifiers for the target of the security headers that can be included in an ebMS message. 
+     * Identifiers for the target of the WS-Security headers that can be included in an ebMS message. 
      */
     public enum WSSHeaderTarget {
         DEFAULT,
@@ -49,11 +54,11 @@ public interface ISecurityConfiguration {
      * header is for authentication of the ebMS message (for example when pulling). 
      * <p><b>NOTE:</b> The value of P-Mode parameter <i>PMode[1].Security.PModeAuthorize</i> can be derived from the 
      * return value of this method when requesting the username token for the "ebms" role: When returning a non null 
-     * value the P-Mode parameter value is <i>True</i>, otherwise it is <i>False</i>. 
+     * value the P-Mode parameter value is <i>true</i>, otherwise it is <i>false</i>. 
      * 
      * @param   target      The target of the WSS header in which the username token should be included
-     * @return  An {@link IUsernameTokenConfiguration} object containing the information to fill the <code>wsse:UsernameToken</code>
-     *          element in the security header with the specified target,or<br>
+     * @return  An {@link IUsernameTokenConfiguration} object containing the information to fill the 
+     *          <code>wsse:UsernameToken</code> element in the security header with the specified target,or<br>
      *          <code>null</code> when there should be no <code>wsse:UsernameToken</code> element in the security header 
      *          with the specified target
      */

@@ -46,13 +46,8 @@ public class PullSecurityConfiguration extends SecurityConfiguration {
     public void validate() throws PersistenceException {
         if (usernameTokens == null)
             return;
-        if (usernameTokens.size() > 1)
+        else if (usernameTokens.size() > 1)
             throw new PersistenceException("There shall be only one UsernameToken element for PullRequestFlow", null);
-        else if (usernameTokens.size() == 1) {
-            String tokenTarget = usernameTokens.get(0).target;
-            if (tokenTarget != null && !tokenTarget.equalsIgnoreCase(WSSHeaderTarget.EBMS.name()))
-                throw new PersistenceException("Target of UsernameToken must ebms for PullRequestFlow", null);
-        }
     }
     
     /**

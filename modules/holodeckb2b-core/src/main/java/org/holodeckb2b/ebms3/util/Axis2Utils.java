@@ -176,9 +176,10 @@ public final class Axis2Utils {
                         + " with msg-id: [" + message.getMessageId() + "] Details: " + af.getReason());
         } finally {
             try {
+                sc.cleanupTransport();
                 sc.cleanup();
-            } catch (AxisFault af) {
-                log.error("Clean up of Axis2 context to send message failed! Details: " + af.getReason());
+            } catch (AxisFault af2) {
+                log.error("Clean up of Axis2 context to send message failed! Details: " + af2.getReason());
             }
         }
     }

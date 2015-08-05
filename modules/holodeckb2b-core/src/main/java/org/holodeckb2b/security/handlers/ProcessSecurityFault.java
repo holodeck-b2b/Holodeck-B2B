@@ -20,6 +20,7 @@ import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.util.KeyValuePair;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.errors.FailedAuthentication;
 import org.holodeckb2b.ebms3.errors.FailedDecryption;
@@ -33,7 +34,10 @@ import org.holodeckb2b.ebms3.util.MessageContextUtils;
  * processing of the WS-Security header fails on elements used for ebMS processing, i.e. encryption, signature and
  * username tokens, the message must not be processed. Therefor the processing state of all message units contained in 
  * the message must be set to <i>FAILED</i> and ebMS Errors must be generated.
- * 
+ * <p>The ebMS error to be generated depends on the WS-Security element that caused the problem. Problems in the 
+ * signature or username token will result in a <i>FailedAuthentication</i>; problems with decryption in a 
+ * <i>FailedDecryption<i>. If the problem is caused by another element in the header it is ignored because this element
+ * is irrelevant for the ebMS processing.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -49,12 +53,11 @@ public class ProcessSecurityFault extends BaseHandler {
         log.debug("Check for problems with processing WS-Security header(s)");
         
         // First check problems with the default header
-        SecurityConstants.WSS_FAILURES failure = (SecurityConstants.WSS_FAILURES) 
-                                                        mc.getProperty(SecurityConstants.INVALID_DEFAULT_HEADER);        
+        KeyValuePair failure =  (KeyValuePair) mc.getProperty(SecurityConstants.INVALID_DEFAULT_HEADER);        
+        
         if (failure != null) {
-            log.debug("The default WS-Security header is invalid. Cause:" + failure);
-            switch (failure) {
-                case DECRYPTION : 
+            switch ((SecurityConstants.WSS_FAILURES) failure.getKey()) {
+                case DECRYPTION :                     
                     handleDecryptionFailure(mc);
                     break;                
                 case SIGNATURE :
@@ -66,16 +69,16 @@ public class ProcessSecurityFault extends BaseHandler {
             }                             
         } else {
             log.debug("There was no default WS-Security header or it was succesfully validated");            
+            
             // Check the header targeted to ebms role
-            failure = (SecurityConstants.WSS_FAILURES) mc.getProperty(SecurityConstants.INVALID_EBMS_HEADER);
+            failure = (KeyValuePair) mc.getProperty(SecurityConstants.INVALID_EBMS_HEADER);
             // The only error that should occur is for the username token as there should be no other element in this
             // header.
-            if (failure != null && failure == SecurityConstants.WSS_FAILURES.UT) {
+            if (failure != null && failure.getKey() == SecurityConstants.WSS_FAILURES.UT) {
                 handleAuthenticationFailure(mc);
             } else if (failure != null)  {
                 // The was another element in this header that caused an issue! As such an element is not allowed anyway
                 // we generate an InvalidHeader error
-                log.warn("Message contained additional element in WS-Security \"ebms\" header");
                 handleInvalidHeader(mc);
             } else
                 log.debug("There was no \"ebms\" WS-Security header or it was succesfully validated");            
@@ -96,8 +99,6 @@ public class ProcessSecurityFault extends BaseHandler {
         Collection<MessageUnit> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc); 
         if (rcvdMsgUnits != null && !rcvdMsgUnits.isEmpty()) {
             for (MessageUnit mu : rcvdMsgUnits) {        
-                log.debug("Decryption of message containing the message unit [msgId=" 
-                            + mu.getMessageId() + "] failed!");                
                 FailedDecryption authError = new FailedDecryption();
                 authError.setRefToMessageInError(mu.getMessageId());
                 authError.setErrorDetail("Decryption of the message [unit] failed!");
@@ -107,7 +108,6 @@ public class ProcessSecurityFault extends BaseHandler {
             }        
         } else {
             // No message units read from message, generate generic error
-            log.debug("Decryption of message failed! No message units found in message.");                
             FailedDecryption authError = new FailedDecryption();
             authError.setErrorDetail("Decryption of the message failed!");
             MessageContextUtils.addGeneratedError(mc, authError);            
@@ -123,7 +123,6 @@ public class ProcessSecurityFault extends BaseHandler {
     private void handleAuthenticationFailure(MessageContext mc) throws DatabaseException {
         Collection<MessageUnit> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);        
         for (MessageUnit mu : rcvdMsgUnits) {        
-            log.debug("Authentication of message unit [msgId=" + mu.getMessageId() + "] failed!");                
             FailedAuthentication authError = new FailedAuthentication();
             authError.setRefToMessageInError(mu.getMessageId());
             authError.setErrorDetail("Authentication of message unit failed!");
