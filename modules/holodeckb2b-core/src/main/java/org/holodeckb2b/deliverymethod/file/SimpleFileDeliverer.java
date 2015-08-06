@@ -126,7 +126,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
     
     protected static final String RECEIPT_CHILD_NS_URI = 
                                                 "http://holodeck-b2b.org/schemas/2015/08/delivery/ebms/receiptchild";
-    protected static final QName RECEIPT_CHILD_QNAME = new QName(RECEIPT_CHILD_NS_URI, "ReceiptChild", "");
+    protected static final String RECEIPT_CHILD_ELEM_NAME = "ReceiptChild";
     /**
      * Constructs a new deliverer which will write the files to the given directory.
      * 
@@ -241,7 +241,8 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
             source = rcpt;
             
             newContent = new ArrayList<OMElement>();
-            OMElement rcptChild = OMAbstractFactory.getOMFactory().createOMElement(RECEIPT_CHILD_QNAME);
+            OMElement rcptChild = OMAbstractFactory.getOMFactory().createOMElement(RECEIPT_CHILD_ELEM_NAME,
+                                                                                   RECEIPT_CHILD_NS_URI, "");
             rcptChild.declareDefaultNamespace(RECEIPT_CHILD_NS_URI);
                     
             // We need to case the given receipt here to the persistency implementation to get access to the receipt
