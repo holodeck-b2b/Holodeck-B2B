@@ -23,16 +23,19 @@ import org.holodeckb2b.common.delivery.MessageDeliveryException;
 import org.holodeckb2b.common.messagemodel.IMessageUnit;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
+import org.holodeckb2b.ebms3.workers.SubmitFromFile;
 
 /**
  * Is an {@link IMessageDeliverer} implementation that delivers <b>ONLY user message units</b> to the business 
  * application by writing the user message info to a MMD file and the payload contents to separate files in the same 
  * directory. The payload files are referred to through the <code>location</code> attribute of the <code>PartInfo</code> 
  * element in the MMD document.
- * <p>The XML format of the message meta data (MMD) document is defined in the <code>http://holodeck-b2b.org/schemas/2014/06/mmd</code>
- * schema.
+ * <p>The XML format of the message meta data (MMD) document is the same as for the default file based message submitter
+ * ({@link SubmitFromFile}) and defined in the <code>http://holodeck-b2b.org/schemas/2014/06/mmd</code> xml schema 
+ * definition.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @see FileDeliveryFactory
  * @see MessageMetaData
  */
 public class MMDDeliverer extends AbstractFileDeliverer {

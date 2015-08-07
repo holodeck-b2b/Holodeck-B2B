@@ -36,20 +36,20 @@ import org.holodeckb2b.common.delivery.MessageDeliveryException;
  *                      <code>http://holodeck-b2b.org/schemas/2014/06/mmd</code> is used.<br> 
  *             <b>NOTE that this format can only deliver user message message units!</b></dd>
  *      <dt><i>2 - "ebms"</i></dt>
- *                  <dd>also writes the message meta data and payloads to separate files but uses a (wrapped) copy of 
+ *                  <dd>also writes the message meta data and payloads to separate files but uses a copy of 
  *                      ebMS header element as format for the meta data file;</dd>
  *      <dt><i>2 - "single_xml"</i></dt>
  *                  <dd>writes the complete message unit, including the payloads, to one XML file. Because the payloads
  *                      can be binary data they will be included <i>base64</i> encoded.</dd>
  * </dl>
- * 
- * Which format is requested must be specified when creating the factory using the "<i>format</i>" setting. If not 
- * specified the <i>"mmd"</i> format will be used as default.<br>
+ * <p>Which format is requested must be specified when creating the factory using the "<i>format</i>" setting. If not 
+ * specified the <i>"ebms"</i> format will be used as default.<br>
  * Furthermore the directory where to write the files MUST be specified using the "<i>deliveryDirectoy</i>" setting.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see MMDDeliverer
  * @see SimpleFileDeliverer
+ * @see SingleXMLDeliverer
  * 
  */
 public class FileDeliveryFactory implements IMessageDelivererFactory {
