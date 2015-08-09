@@ -66,7 +66,7 @@ import org.holodeckb2b.ebms3.persistent.general.TradingPartner;
             query = "SELECT COUNT(s1.NAME) "
                     + "FROM UserMessage um JOIN um.states s1 " 
                     + "WHERE um.MESSAGE_ID = :msgId " 
-                    + "AND s1.NAME = '" + ProcessingStates.AWAITING_RECEIPT + "'"
+                    + "AND s1.NAME = '" + ProcessingStates.SENDING + "'"
             ),
         @NamedQuery(name="UserMessage.findForPModesInState",
             query = "SELECT um " +
