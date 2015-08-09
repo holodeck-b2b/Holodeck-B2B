@@ -22,6 +22,7 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
@@ -37,6 +38,9 @@ import org.holodeckb2b.ebms3.util.MessageContextUtils;
  * from the message into a array of {@link Receipt} objects and stored in both database and message context (under key 
  * {@link MessageContextProperties#IN_RECEIPTS}). The processing state of the new receipts will be set to {@link 
  * ProcessingStates#RECEIVED}.
+ * <p>The Receipt signal only has value if it refers to another message unit, therefor it must contain a <code> 
+ * eb:RefToMessageId</code> element in the ebMS message header (see section 5.2.3.3 of the ebMS V3 Core Specification). 
+ * If missing a <i>InvalidHeader</i> error is generated and processing of the Receipt is stopped.
  * <p><b>NOTE: </b>This handler will process all receipt signals that are in the message although the ebMS Core 
  * Specification does not allow more than one.
  * 
@@ -59,7 +63,7 @@ public class ReadReceipt extends BaseHandler {
             log.debug("Check for Receipt elements to determine if message contains one or more receipts");
             Iterator rcpts = Receipt.getElements(messaging);
             
-            if (rcpts != null) {
+            if (!Utils.isNullOrEmpty(rcpts)) {
                 log.debug("Receipt(s) found, read information from message");
                 
                 while (rcpts.hasNext()) {
@@ -74,7 +78,7 @@ public class ReadReceipt extends BaseHandler {
                         MessageUnitDAO.storeReceivedMessageUnit(receipt);
                         
                         String refToMsgId = receipt.getRefToMessageId();
-                        if (refToMsgId == null || refToMsgId.isEmpty()) {
+                        if (Utils.isNullOrEmpty(refToMsgId)) {
                             log.info("Received receipt [msgId=" + receipt.getMessageId() 
                                                             + "] does not contain reference");
                             // The receipt can not be processed if we don't know for which message it is intended!
