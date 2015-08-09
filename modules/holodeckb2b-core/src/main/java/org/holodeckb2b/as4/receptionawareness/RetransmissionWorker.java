@@ -64,7 +64,8 @@ public class RetransmissionWorker extends AbstractWorkerTask {
         Collection<UserMessage> waitingForRcpt = null;
         try {
             waitingForRcpt = MessageUnitDAO.getMessageUnitsInState(UserMessage.class,
-                                new String[] {ProcessingStates.AWAITING_RECEIPT, ProcessingStates.TRANSPORT_FAILURE});
+                                                            new String[] {ProcessingStates.AWAITING_RECEIPT, 
+                                                                          ProcessingStates.TRANSPORT_FAILURE});
         } catch (DatabaseException ex) {
             log.error("An error occurred while retrieving message units from the database! Details: " + ex.getMessage());
             return;
@@ -90,8 +91,11 @@ public class RetransmissionWorker extends AbstractWorkerTask {
 
                     if (raConfig == null) {
                         // Not an ILegAS4 instance or no RA config available, can't determine if and how to resend. 
-                        log.warn("Message [" + um.getMessageId() + "] can not be resent due to missing Reception"
+                        log.error("Message [" + um.getMessageId() + "] can not be resent due to missing Reception"
                                     + " Awareness configuration in P-Mode [" + um.getPMode() + "]");
+                        // Because we don't know how to process this message further the only thing we can do is set
+                        // the processing to failed
+                        MessageUnitDAO.setFailed(um);
                         continue; // with next message
                     }
 
