@@ -185,7 +185,7 @@ public class CheckSentResult extends BaseHandler {
            log.debug("Setting processing state for signal message with msgId=" + um.getMessageId());
             try {
                 if (!success) {
-                    //@todo: Should we do a retry?
+                    //@todo: Should we do a specific retry for this? Now done using Reception Awareness retry
                     MessageUnitDAO.setTransportFailure(um);
                 } else {
                     log.debug("User message is sent, check P-Mode if Receipt is expected");

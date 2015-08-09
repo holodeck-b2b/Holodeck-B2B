@@ -81,7 +81,7 @@ public final class ProcessingStates {
     public static final String DONE = "DONE";
     
     /**
-     * The signal message unit is processed but an Error with severity <i>warning</i> was reported
+     * The message unit is processed but an Error with severity <i>warning</i> was reported
      */
     public static final String PROC_WITH_WARNING = "PROCESSED WITH WARNING";
     
