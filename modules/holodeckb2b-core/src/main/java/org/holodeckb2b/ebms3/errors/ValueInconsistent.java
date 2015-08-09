@@ -53,7 +53,7 @@ public class ValueInconsistent extends EbmsError {
     /**
      * The default error message
      */
-    private static final String ERROR_MESSAGE = "ValueInconsistent";
+    private static final String ERROR_SHORT_DESCRIPTION = "ValueInconsistent";
     
     /**
      * Constructs a new <i>ValueInconsistent</i> error with the default values.
@@ -65,9 +65,29 @@ public class ValueInconsistent extends EbmsError {
         setSeverity(ERROR_SEVERITY);
         setOrigin(ERROR_ORIGIN);
         setCategory(ERROR_CATEGORY);        
-        setMessage(ERROR_MESSAGE);
+        setShortDescription(ERROR_SHORT_DESCRIPTION);
+    }
+        
+    /**
+     * Constructs a new <i>ValueInconsistent</i> error with specified detail message 
+     * 
+     * @param errorDetail       A more detailed description of the error
+     */
+    public ValueInconsistent(final String errorDetail) {
+        this();        
+        setErrorDetail(errorDetail);
     }
     
-    
-    
+   /**
+     * Constructs a new <i>ValueInconsistent</i> error with specified detail message and that refers to the given 
+     * message id
+     * 
+     * @param errorDetail       A more detailed description of the error
+     * @param refToMessageId    The message id of the message unit for which this error is created
+     */
+    public ValueInconsistent(final String errorDetail, final String refToMessageId) {
+        this();        
+        setErrorDetail(errorDetail);
+        setRefToMessageInError(refToMessageId);
+    }
 }

@@ -78,7 +78,7 @@ public class ReadPullRequest extends BaseHandler {
                     
                     // Add an error to context, maybe it can be sent as response
                     InvalidHeader   invalidHdrError = new InvalidHeader();
-                    invalidHdrError.setMessage(ex.getMessage());
+                    invalidHdrError.setShortDescription(ex.getMessage());
                     invalidHdrError.setErrorDetail("Source of header containing the error:" + prElement.toString());
                     MessageContextUtils.addGeneratedError(mc, invalidHdrError);                    
                 }                 
