@@ -53,7 +53,13 @@ import org.holodeckb2b.common.messagemodel.IReceipt;
                     "AND s1.START = (SELECT MAX(s2.START) FROM r.states s2) " +
                     "AND s1.NAME = :state " +
                     "ORDER BY s1.START"  
-            )}
+            ),
+        @NamedQuery(name="Receipt.findResponsesTo",
+            query = "SELECT r " +
+                    "FROM Receipt r " +
+                    "WHERE r.REF_TO_MSG_ID = :refToMsgId " 
+            )
+        }
 )
 public class Receipt extends SignalMessage implements IReceipt {
 

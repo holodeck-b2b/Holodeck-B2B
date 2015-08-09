@@ -45,7 +45,11 @@ public class MessageUnitQueriesTest {
     private static final String T_MSG_ID_2 = "987654321098ddsa6543210@msg-id.org";
     private static final String T_MSG_ID_3 = "64554576187627846a122qa@msg-id.org";
     private static final String T_MSG_ID_4 = "98765445545409876543210@msg-id.org";
-    private static final String T_MSG_ID_5 = "fffw2345545409876543210@msg-id.org";   
+    private static final String T_MSG_ID_5 = "fffw2345545409876543220@msg-id.org";   
+    private static final String T_MSG_ID_6 = "sadk2345545409876543210@msg-id.org";   
+    private static final String T_MSG_ID_7 = "djdkck110309kap[6543220@msg-id.org";   
+    private static final String T_MSG_ID_8 = "i2duncdke23owd912kw6310@msg-id.org";   
+    private static final String T_MSG_ID_9 = "adi29190k3210sksk200212@msg-id.org";   
     
     private static final String T_PROCSTATE_1 = "firststate";
     private static final String T_PROCSTATE_2 = "secondstate";
@@ -98,7 +102,7 @@ public class MessageUnitQueriesTest {
 
         Receipt mu4 = new Receipt();
         mu4.setMessageId(T_MSG_ID_4);
-        
+        mu4.setRefToMessageId(T_MSG_ID_2);
         OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new StringReader(T_CONTENT_1));
         // Parse document and get root element
         OMElement contentElement = builder.getDocumentElement();
@@ -112,6 +116,7 @@ public class MessageUnitQueriesTest {
         
         UserMessage mu5 = new UserMessage();
         mu5.setMessageId(T_MSG_ID_5);
+        mu5.setRefToMessageId(T_MSG_ID_3);
         ProcessingState s5 = new ProcessingState(ProcessingStates.DELIVERED);
         em.persist(s5);
         mu5.setProcessingState(s5);
@@ -121,15 +126,17 @@ public class MessageUnitQueriesTest {
 
         UserMessage mu6 = new UserMessage();
         mu6.setMessageId(T_MSG_ID_5);
+        mu6.setRefToMessageId(T_MSG_ID_1);
         ProcessingState s6 = new ProcessingState(ProcessingStates.AWAITING_RECEIPT);
         em.persist(s6);
         mu6.setProcessingState(s6);
-        mu6.setDirection(MessageUnit.Direction.OUT);
+        mu6.setDirection(MessageUnit.Direction.IN);
         mu6.setPMode(T_PMODE2);
         em.persist(mu6);
 
         UserMessage mu7 = new UserMessage();
-        mu7.setMessageId(T_MSG_ID_5);
+        mu7.setMessageId(T_MSG_ID_6);
+        mu7.setRefToMessageId(T_MSG_ID_1);
         ProcessingState s7 = new ProcessingState(ProcessingStates.DELIVERED);
         em.persist(s7);
         mu7.setProcessingState(s7);
@@ -137,6 +144,10 @@ public class MessageUnitQueriesTest {
         mu7.setPMode(T_PMODE3);
         em.persist(mu7);
 
+        ErrorMessage mu8 = new ErrorMessage();
+        mu8.setMessageId(T_MSG_ID_7);
+        mu8.setRefToMessageId(T_MSG_ID_5);
+        em.persist(mu8);
         
         em.getTransaction().commit();
         em.close();
@@ -166,11 +177,8 @@ public class MessageUnitQueriesTest {
     }
 
  
-    /**
-     * Test of find query
-     */
     @Test
-    public void test03_findWithMessageIdQuery() {
+    public void test01_findWithMessageIdQuery() {
         em.getTransaction().begin();
         
         Collection<MessageUnit> result = em.createNamedQuery("MessageUnit.findWithMessageIdInDirection",
@@ -182,5 +190,32 @@ public class MessageUnitQueriesTest {
 
         em.getTransaction().commit();      
     }
-    
+
+    @Test
+    public void test02_getResponsesTo() {
+        em.getTransaction().begin();
+        
+        Collection<MessageUnit> result = em.createNamedQuery("Receipt.findResponsesTo",
+                                            MessageUnit.class)
+                                            .setParameter("refToMsgId", T_MSG_ID_2)
+                                            .getResultList();
+        assertEquals(1, result.size());
+
+        result = null;
+        result = em.createNamedQuery("ErrorMessage.findResponsesTo",
+                                            MessageUnit.class)
+                                            .setParameter("refToMsgId", T_MSG_ID_5)
+                                            .getResultList();
+        assertEquals(1, result.size());
+        
+        result = null;
+        result = em.createNamedQuery("UserMessage.findResponsesTo",
+                                            MessageUnit.class)
+                                            .setParameter("refToMsgId", T_MSG_ID_1)
+                                            .getResultList();
+        assertEquals(2, result.size());
+        
+        em.getTransaction().commit();      
+    }
+
 }

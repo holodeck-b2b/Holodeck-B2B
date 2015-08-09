@@ -75,6 +75,11 @@ import org.holodeckb2b.ebms3.persistent.general.TradingPartner;
                     "AND s1.START = (SELECT MAX(s2.START) FROM um.states s2) " +
                     "AND s1.NAME = :state " +
                     "ORDER BY s1.START"  
+            ),
+        @NamedQuery(name="UserMessage.findResponsesTo",
+            query = "SELECT um " +
+                    "FROM UserMessage um " +
+                    "WHERE um.REF_TO_MSG_ID = :refToMsgId " 
             )
         }
 )
