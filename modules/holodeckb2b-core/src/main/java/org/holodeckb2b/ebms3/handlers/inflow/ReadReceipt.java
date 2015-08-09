@@ -110,7 +110,7 @@ public class ReadReceipt extends BaseHandler {
      */
     private void createInvalidHeaderError(MessageContext mc, OMElement element, String msg) {
         InvalidHeader   invalidHdrError = new InvalidHeader();
-        invalidHdrError.setMessage(msg);
+        invalidHdrError.setShortDescription(msg);
         invalidHdrError.setErrorDetail("Source of header containing the error:" + element.toString());
         MessageContextUtils.addGeneratedError(mc, invalidHdrError);                    
     }

@@ -70,9 +70,29 @@ public class MissingReceipt extends EbmsError {
         setSeverity(ERROR_SEVERITY);
         setOrigin(ERROR_ORIGIN);
         setCategory(ERROR_CATEGORY);        
-        setMessage(ERROR_MESSAGE);
+        setShortDescription(ERROR_MESSAGE);
     }
     
+    /**
+     * Constructs a new <i>MissingReceipt</i> error with specified detail message 
+     * 
+     * @param errorDetail       A more detailed description of the error
+     */
+    public MissingReceipt(final String errorDetail) {
+        this();        
+        setErrorDetail(errorDetail);
+    }
     
-    
+   /**
+     * Constructs a new <i>MissingReceipt</i> error with specified detail message and that refers to the given 
+     * message id
+     * 
+     * @param errorDetail       A more detailed description of the error
+     * @param refToMessageId    The message id of the message unit for which this error is created
+     */
+    public MissingReceipt(final String errorDetail, final String refToMessageId) {
+        this();        
+        setErrorDetail(errorDetail);
+        setRefToMessageInError(refToMessageId);
+    }  
 }
