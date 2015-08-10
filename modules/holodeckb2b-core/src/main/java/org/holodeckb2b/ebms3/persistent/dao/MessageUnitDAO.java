@@ -293,6 +293,9 @@ public class MessageUnitDAO {
             if (asResponse) {
                 procstate = new ProcessingState(ProcessingStates.PROCESSING);
                 receipt.setProcessingState(procstate);
+            } else {
+                procstate = new ProcessingState(ProcessingStates.READY_TO_PUSH);
+                receipt.setProcessingState(procstate);                
             }
 
             // Persist the new message unit
@@ -600,7 +603,8 @@ public class MessageUnitDAO {
     /**
      * Changes the processing state of the given message unit to {@link ProcessingStates#PROCESSING} to indicate that
      * the message is being processed. To prevent that a single message unit is processed twice the state is only
-     * changed if it is not already in <code>ProcessingStates.PROCESSING</code>.
+     * changed if the current processing state has not changed already, i.e. the current state as registered in the
+     * database should be the same as the current state of the given instance.
      *
      * @param mu The {@link MessageUnit} going to be processed
      * @return If the processing state could be changed to <code>ProcessingStates.PROCESSING</code>: A new
@@ -626,7 +630,7 @@ public class MessageUnitDAO {
         }
 
         ProcessingState curState = amu.getCurrentProcessingState();
-        if (curState != null && !curState.getName().equals(ProcessingStates.PROCESSING)) {
+        if (curState != null && curState.getName().equals(mu.getCurrentProcessingState().getName())) {
             ProcessingState newState = new ProcessingState(ProcessingStates.PROCESSING);
             amu.setProcessingState(newState);
             // As the message unit can now be processed, secure that all information is

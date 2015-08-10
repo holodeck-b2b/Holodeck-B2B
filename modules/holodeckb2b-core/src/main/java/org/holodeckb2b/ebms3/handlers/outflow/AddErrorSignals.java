@@ -36,7 +36,12 @@ import org.holodeckb2b.ebms3.util.PModeFinder;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
- * Is the <i>OUT_FLOW</i> handler responsible for adding <i>Error signals</i> that are waiting to be sent to the 
+ * <b>THIS HANDLER IS DEPRECATED!</b>
+ * <p>Bundling should be handled by specific P-Mode parameters because in a multi-hop context the destination URL does 
+ * not guarantee that the ultimate receiver is the same for all message units!
+ * ============================
+ * 
+ * <p>Is the <i>OUT_FLOW</i> handler responsible for adding <i>Error signals</i> that are waiting to be sent to the 
  * outgoing message.
  * <p>Currently error signals will only be added to messages that initiate a message exchange, i.e. that are sent
  * as a request. This allows for an easy bundling rule as the destination URL can be used as selector. Adding errors
@@ -47,6 +52,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
+@Deprecated
 public class AddErrorSignals extends BaseHandler {
 
     /**

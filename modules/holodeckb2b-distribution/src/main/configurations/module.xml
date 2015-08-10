@@ -28,20 +28,7 @@
     - in the "repository" directory of the Holodeck B2B install
     ===================================================================== -->
     <!-- <parameter name="TempDir"/> -->
-    
-    <!-- ====================================================================
-    - This parameter enables bundling of multiple signal message units in of
-    - the same type in a response message. When enabled Holodeck B2B can add 
-    - multiple signal message units generated during the processing of the 
-    - request message to the response preventing loss of information. 
-    - NOTE: This will create ebMS messages that DO NOT conform to the ebMS 
-    - v3 Core Spec and AS4 profile!
-    - The default setting is not to allow this bundling to ensure Core Spec 
-    - and AS4 compliant ebMS messages. To enable the feature set the value
-    - of this parameter to "on" or "true".
-    ===================================================================== -->
-    <parameter name="AllowSignalBundling">off</parameter>
-    
+       
     <!-- ====================================================================
     - This parameter conatains the default setting whether Errors on Errors 
     - should be reported to the sender of the faulty error. This setting can 
@@ -335,17 +322,9 @@
            class="org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage">
             <order phase="ebms3OutPhase" phaseFirst="true"/>
         </handler>
-        <handler name="BundleErrorMessages" 
-            class="org.holodeckb2b.ebms3.handlers.outflow.AddErrorSignals">
-            <order phase="ebms3OutPhase" after="PrepareResponseMessage" />
-        </handler>
-        <handler name="BundleReceiptMessages" 
-            class="org.holodeckb2b.ebms3.handlers.outflow.AddReceiptSignals">
-            <order phase="ebms3OutPhase" after="BundleErrorMessages" />
-        </handler>
         <handler name="CreateSOAPEnvelope" 
             class="org.holodeckb2b.ebms3.handlers.outflow.CreateSOAPEnvelopeHandler">
-            <order phase="ebms3OutPhase" after="BundleReceiptMessages"/>
+            <order phase="ebms3OutPhase" after="PrepareResponseMessage"/>
         </handler>
         <handler name="AddPayloads" 
            class="org.holodeckb2b.ebms3.handlers.outflow.AddPayloads">
@@ -405,17 +384,9 @@
             class="org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage">
             <order phase="ebms3OutPhase" phaseFirst="true"/>
         </handler>
-        <handler name="BundleErrorMessages" 
-            class="org.holodeckb2b.ebms3.handlers.outflow.AddErrorSignals">
-            <order phase="ebms3OutPhase" after="PrepareResponseMessage" />
-        </handler>
-        <handler name="BundleReceiptMessages" 
-            class="org.holodeckb2b.ebms3.handlers.outflow.AddReceiptSignals">
-            <order phase="ebms3OutPhase" after="BundleErrorMessages" />
-        </handler>
         <handler name="CreateSOAPEnvelope" 
             class="org.holodeckb2b.ebms3.handlers.outflow.CreateSOAPEnvelopeHandler">
-            <order phase="ebms3OutPhase" after="BundleReceiptMessages"/>
+            <order phase="ebms3OutPhase" after="PrepareResponseMessage"/>
         </handler>
         <handler name="AddPayloads" 
             class="org.holodeckb2b.ebms3.handlers.outflow.AddPayloads">
