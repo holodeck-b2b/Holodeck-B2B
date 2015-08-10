@@ -22,6 +22,7 @@ import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.pmode.ILeg;
+import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
@@ -75,19 +76,17 @@ public class ProcessReceipts extends BaseHandler {
      * 
      * @param r     The {@link Receipt} to process
      * @param mc    The message context of the message containing the receipt
-     * @return      <code>true</code> if the receipt signal was processed successfully, <code>false</code> otherwise
-     * @throws DatabaseException When a database error occurs while processing the Receipt Signal
+     * @throws      DatabaseException When a database error occurs while processing the Receipt Signal
      */
-    protected boolean processReceipt(final Receipt r, final MessageContext mc) throws DatabaseException {
+    protected void processReceipt(final Receipt r, final MessageContext mc) throws DatabaseException {
         String refToMsgId = r.getRefToMessageId();
         
         // Change processing state to indicate we start processing the receipt. Also checks that the receipt is not
         // already being processed
         Receipt rcpt = MessageUnitDAO.startProcessingMessageUnit(r);
-        if (rcpt == null) {
+        if (rcpt == null) 
             log.debug("Receipt [msgId=" + r.getMessageId() + "] is already being processed, skipping");
-            return false;
-        } else {
+        else {
             log.debug("Start processing Receipt [msgId=" + r.getMessageId() + "] for reference message with msgId=" 
                                                                         + refToMsgId);
             MessageUnit refdMsg = MessageUnitDAO.getSentMessageUnitWithId(refToMsgId);
@@ -97,26 +96,21 @@ public class ProcessReceipts extends BaseHandler {
                         + refToMsgId + "]!");
                 MessageUnitDAO.setFailed(rcpt);
                 // Create error and add to context
-                ValueInconsistent   viError = new ValueInconsistent();
-                viError.setErrorDetail("Receipt contains unknown message reference [" + refToMsgId + "]");
-                viError.setRefToMessageInError(rcpt.getMessageId());
-                MessageContextUtils.addGeneratedError(mc, viError);  
-                return false;
+                MessageContextUtils.addGeneratedError(mc, new ValueInconsistent(refToMsgId, 
+                                                    "Receipt contains unknown message reference [" + refToMsgId + "]"));  
             } else {
                 // Check if the found message unit expects a receipt 
                 String pmodeId = refdMsg.getPMode();
                 if (pmodeId != null) {
-                   if (HolodeckB2BCore.getPModeSet().get(pmodeId).getLegs().iterator().next()
-                            .getReceiptConfiguration() == null) {
+                    IPMode pmode = HolodeckB2BCore.getPModeSet().get(pmodeId);
+                    if (pmode == null || pmode.getLegs().iterator().next().getReceiptConfiguration() == null) {
                         // The P-Mode is not configured for receipts, generate error
-                            MessageUnitDAO.setFailed(rcpt);
-                            // Create error and add to context
-                            ValueInconsistent   inconsistenErr = new ValueInconsistent();
-                            inconsistenErr.setErrorDetail("Referenced message [" + refToMsgId 
-                                                        + "] is not configured for receipts");
-                            inconsistenErr.setRefToMessageInError(rcpt.getMessageId());
-                            MessageContextUtils.addGeneratedError(mc, inconsistenErr);  
-                        return false;
+                        MessageUnitDAO.setFailed(rcpt);
+                        // Create error and add to context
+                        MessageContextUtils.addGeneratedError(mc, 
+                                                new ValueInconsistent("P-Mode of referenced message [" + refToMsgId 
+                                                                      + "] is not configured for receipts",
+                                                                      refToMsgId));  
                     }  else {
                          // Change to processing state of the reference message unit to delivered, but only if it is 
                          // waiting for a receipt as we may otherwise overwrite an error state.
@@ -132,7 +126,6 @@ public class ProcessReceipts extends BaseHandler {
                 }
             }
             log.debug("Done processing Receipt");                       
-            return true;
         }
     }
     
