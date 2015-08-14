@@ -399,7 +399,7 @@ public final class Utils {
      *              <code>false</code> otherwise
      */
     public static boolean isNullOrEmpty(final Iterator i) {
-        return i == null || i.hasNext();
+        return i == null || !i.hasNext();
     }
 
 } 
