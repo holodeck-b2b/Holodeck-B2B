@@ -40,9 +40,12 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * anyway. This is done by checking the <i>ReceiptConfiguration</i> for the leg ({@link ILeg#getReceiptConfiguration()}.
  * If no configuration exists Receipt are not expected and a <i>ProcessingModeMismatch</i> error is generated for the
  * Receipt and its processing state is set to {@link ProcessingStates#FAILURE}.<br>
- * If a receipt configuration exists the user message will be marked as delivered and the Receipt's state will be set to 
- * {@link ProcessingStates#READY_FOR_DELIVERY} to indicate that it can be delivered to the business application. The 
- * actual delivery is done by the {@link DeliverReceipts} handler.
+ * If a receipt configuration exists and if the user message is waiting for a receipt it will be marked as delivered and 
+ * the Receipt's state will be set to {@link ProcessingStates#READY_FOR_DELIVERY} to indicate that it can be delivered 
+ * to the business application. The actual delivery is done by the {@link DeliverReceipts} handler.<br>
+ * If a receipt configuration exists but the user message is not waiting for a receipt anymore (because it is already
+ * acknowledged by another Receipt or it has failed due to an Error) the Receipt's processing state will be changed to
+ * {@link ProcessingStates#DONE}.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -114,14 +117,17 @@ public class ProcessReceipts extends BaseHandler {
                     }  else {
                          // Change to processing state of the reference message unit to delivered, but only if it is 
                          // waiting for a receipt as we may otherwise overwrite an error state.
-                        if (isWaitingForReceipt(refdMsg))
+                        if (isWaitingForReceipt(refdMsg)) {
                             log.debug("Found message unit waiting for Receipt, setting processing state to delivered");
-                            MessageUnitDAO.setDelivered(refdMsg);
-                        
-                        // Maybe the Receipt must also be delivered to the business application, so change state
-                        // to "ready for delivery"
-                        log.debug("Mark Receipt as ready for delivery to business application");
-                        MessageUnitDAO.setReadyForDelivery(rcpt);
+                            MessageUnitDAO.setDelivered(refdMsg);                        
+                            // Maybe the Receipt must also be delivered to the business application, so change state
+                            // to "ready for delivery"
+                            log.debug("Mark Receipt as ready for delivery to business application");
+                            MessageUnitDAO.setReadyForDelivery(rcpt);
+                        } else {
+                            log.debug("Found message unit not waiting for receipt anymore, processing finished.");
+                            MessageUnitDAO.setDone(rcpt);
+                        }
                     }  
                 }
             }
