@@ -16,10 +16,6 @@
 			This schema defines how the standard schema is used by the FileDelivery method when using the "ebms" file format. 
 			NOTE this schema is provided for convenience only for developers that need to process the delivery files.</xsd:documentation>
 	</xsd:annotation>
-	<xsd:import namespace="http://schemas.xmlsoap.org/soap/envelope/"
-		schemaLocation="http://schemas.xmlsoap.org/soap/envelope/"/>
-	<xsd:import namespace="http://www.w3.org/2003/05/soap-envelope"
-		schemaLocation="http://www.w3.org/2003/05/soap-envelope"/>
 	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"
 		schemaLocation="http://www.w3.org/2001/03/xml.xsd"/>
 	<xsd:import namespace="http://holodeck-b2b.org/schemas/2015/08/delivery/ebms/receiptchild"
