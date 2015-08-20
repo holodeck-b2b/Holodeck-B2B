@@ -22,6 +22,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+import org.holodeckb2b.common.pmode.ILeg;
+import org.holodeckb2b.common.pmode.ILeg.Label;
 import org.holodeckb2b.common.pmode.IPMode;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
@@ -62,7 +64,7 @@ public class PMode implements IPMode {
     private Agreement agreement;
     
     @ElementList (entry = "Leg", type = Leg.class , required = true, inline = true)
-    private ArrayList<Leg> Leg;
+    private ArrayList<Leg> legs;
     
     
     /**
@@ -72,7 +74,7 @@ public class PMode implements IPMode {
      * the P-Mode is given an id combined of the P-Mode id, current time and type of delivery, for example the default 
      * delivery specification defined on the Leg will have «P-Mode id»+"-"+«hhmmss» +"-defaultDelivery" as id.
      * <p>The objects containing the {@link DeliverySpecification}s are responsible for including these in the given
-     * <code>Map</code> using the type of delivery of key and the object as value.
+     * <code>Map</code> using the type of delivery as key and the object as value.
      * 
      * @param dependencies  A <code>Map</code> containing all {@link DeliverySpecification} objects that have to be 
      *                      assigned an id. The key of the entry MUST be a <code>String</code> containing the type
@@ -138,9 +140,26 @@ public class PMode implements IPMode {
      */
     @Override
     public ArrayList getLegs() {
-        return this.Leg;
+        return this.legs;
     }
     
+    /**
+     * Gets the leg with the specified label from the P-Mode
+     * 
+     * @return  The specified leg if it exists in the P-Mode, or<br>
+     *          <code>null</code> if there is no leg with the given label
+     */
+    @Override
+    public ILeg getLeg(Label label) {
+        ILeg    leg = null;
+        for(ILeg l : legs) {
+            if (l.getLabel() == label) {
+                leg = l; break;
+            }
+        }
+        
+        return leg;
+    }
     
     /**
      * 
