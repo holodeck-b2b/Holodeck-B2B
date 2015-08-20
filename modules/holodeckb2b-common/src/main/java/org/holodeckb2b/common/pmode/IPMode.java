@@ -19,6 +19,7 @@ package org.holodeckb2b.common.pmode;
 import java.util.Collection;
 import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.common.general.IAgreement;
+import org.holodeckb2b.common.pmode.ILeg.Label;
 
 /**
  * Represents a P-Mode that governs the exchange of messages. 
@@ -140,4 +141,12 @@ public interface IPMode {
      * @return One or two, depending on the MEP, {@link ILeg} objects containing the configuration of the legs.
      */
     public Collection<ILeg> getLegs();
+    
+    /**
+     * Gets the configuration of the leg with the specified label within the P-Mode.
+     * 
+     * @param label     The label of the leg to get the configuration of
+     * @return          A {@link ILeg} object containing the configuration of the leg
+     */
+    public ILeg getLeg(Label label);
 }
