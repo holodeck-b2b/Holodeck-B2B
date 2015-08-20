@@ -189,11 +189,9 @@ final class MMDCompleter {
         CollaborationInfo sci = (CollaborationInfo) cd.getCollaborationInfo();
         IBusinessInfo pbi = (leg.getUserMessageFlow() != null ? leg.getUserMessageFlow().getBusinessInfo() : null);
         
-        if (sci == null)
-            if (pbi != null)
-                sci = new CollaborationInfo();
-            else 
-                throw new MessageSubmitException("Missing required Collaboration information");
+        // The submission must include a ConversationId 
+        if (sci == null || Utils.isNullOrEmpty(sci.getConversationId())) 
+            throw new MessageSubmitException("Missing required ConversationId");
         
         String pa = (pbi != null ? pbi.getAction() : null);
         switch (Utils.compareStrings(sci.getAction(), pa)) {

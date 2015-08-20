@@ -51,7 +51,7 @@ public class FailedAuthentication extends EbmsError {
     /**
      * The default error message
      */
-    private static final String ERROR_MESSAGE = "FailedAuthentication";
+    private static final String ERROR_SHORT_DESCRIPTION = "FailedAuthentication";
     
     /**
      * Constructs a new <i>ConnectionFailure</i> error with the default values.
@@ -63,6 +63,29 @@ public class FailedAuthentication extends EbmsError {
         setSeverity(ERROR_SEVERITY);
         setOrigin(ERROR_ORIGIN);
         setCategory(ERROR_CATEGORY);        
-        setMessage(ERROR_MESSAGE);
+        setShortDescription(ERROR_SHORT_DESCRIPTION);
     }
+        
+    /**
+     * Constructs a new <i>FailedAuthentication</i> error with specified detail message 
+     * 
+     * @param errorDetail       A more detailed description of the error
+     */
+    public FailedAuthentication(final String errorDetail) {
+        this();        
+        setErrorDetail(errorDetail);
+    }
+    
+   /**
+     * Constructs a new <i>FailedAuthentication</i> error with specified detail message and that refers to the given 
+     * message id
+     * 
+     * @param errorDetail       A more detailed description of the error
+     * @param refToMessageId    The message id of the message unit for which this error is created
+     */
+    public FailedAuthentication(final String errorDetail, final String refToMessageId) {
+        this();        
+        setErrorDetail(errorDetail);
+        setRefToMessageInError(refToMessageId);
+    } 
 }

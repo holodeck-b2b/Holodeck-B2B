@@ -28,7 +28,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
@@ -366,4 +368,39 @@ public final class Utils {
     public static String getValue(final String value, final String defaultValue) {
         return (value != null && !value.isEmpty() ? value : defaultValue);
     }
+
+    /**
+     * Checks whether the given String is <code>null</code> or is an empty string, i.e. does not contain any other
+     * characters then whitespace.
+     * 
+     * @param s     The string to check
+     * @return      <code>true</code> if <code>s == null || s.trim().isEmpty() == true</code>,<br>
+     *              <code>false</code> otherwise
+     */
+    public static boolean isNullOrEmpty(final String s) {
+        return s == null || s.trim().isEmpty();
+    }
+
+    /**
+     * Checks whether the given Collection is <code>null</code> or is an empty.
+     * 
+     * @param c     The string to check
+     * @return      <code>true</code> if <code>c == null || c.isEmpty() == true</code>,<br>
+     *              <code>false</code> otherwise
+     */
+    public static boolean isNullOrEmpty(final Collection c) {
+        return c == null || c.isEmpty();
+    }
+
+    /**
+     * Checks whether the given Iterator is <code>null</code> or does not contain any more objects.
+     * 
+     * @param i     The string to check
+     * @return      <code>true</code> if <code>i == null || i.hasNext() == true</code>,<br>
+     *              <code>false</code> otherwise
+     */
+    public static boolean isNullOrEmpty(final Iterator i) {
+        return i == null || !i.hasNext();
+    }
+
 } 

@@ -601,6 +601,39 @@ public class MessageUnitDAO {
     }
 
     /**
+     * Retrieves all {@link MessageUnit}s of the specified type and that are responses to the given message id, i.e.
+     * which <i>refToMessageId</i> equals the given message id.
+     * <p>
+     * <b>NOTE:</b> The entity objects in the resulting list are not completely loaded! Before a message unit is going
+     * to be processed it must be loaded completely.
+     *
+     * @param type          The type of message units to retrieve specified by their Class
+     * @param refToMsgId    The message Id of the message the requested message units should be a response to.
+     * @return A list of {@link MessageUnit} objects representing the message units that are in the given state
+     * @throws DatabaseException
+     */
+    public static <T extends MessageUnit> List<T> getResponsesTo(Class<T> type, String refToMessageId) 
+                                                                                        throws DatabaseException {
+        List<T> result = null;
+
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            String queryName = type.getSimpleName() + ".findResponsesTo";
+            result = em.createNamedQuery(queryName, type)
+                    .setParameter("refToMsgId", refToMessageId)
+                    .getResultList();
+        } catch (Exception e) {
+            // Something went wrong executing the query. Probably because wrong class was specified
+            throw new DatabaseException("An error occurred while executing query to retreive message units!", e);
+        } finally {
+            em.close();
+        }
+
+        return result;
+    }    
+    
+    /**
      * Changes the processing state of the given message unit to {@link ProcessingStates#PROCESSING} to indicate that
      * the message is being processed. To prevent that a single message unit is processed twice the state is only
      * changed if the current processing state has not changed already, i.e. the current state as registered in the

@@ -248,7 +248,7 @@ public class EbmsErrorTest {
     public void test09_SetMessage() {
         EError instance = new EError();
        
-        instance.eError.setMessage(T_MESSAGE);
+        instance.eError.setShortDescription(T_MESSAGE);
         
         em.getTransaction().begin();
         em.persist(instance);

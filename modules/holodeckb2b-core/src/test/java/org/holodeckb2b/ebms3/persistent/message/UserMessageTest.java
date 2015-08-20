@@ -740,6 +740,7 @@ public class UserMessageTest {
         instance.setProcessingState(new ProcessingState(ProcessingStates.SUBMITTED));
         instance.setProcessingState(new ProcessingState(ProcessingStates.READY_TO_PUSH));
         instance.setProcessingState(new ProcessingState(ProcessingStates.PROCESSING));
+        instance.setProcessingState(new ProcessingState(ProcessingStates.SENDING));        
         instance.setProcessingState(new ProcessingState(ProcessingStates.AWAITING_RECEIPT));
         
         em.persist(instance);
@@ -764,9 +765,11 @@ public class UserMessageTest {
         
         instance.setProcessingState(new ProcessingState(ProcessingStates.READY_TO_PUSH));
         instance.setProcessingState(new ProcessingState(ProcessingStates.PROCESSING));
+        instance.setProcessingState(new ProcessingState(ProcessingStates.SENDING));        
         instance.setProcessingState(new ProcessingState(ProcessingStates.AWAITING_RECEIPT));
         instance.setProcessingState(new ProcessingState(ProcessingStates.READY_TO_PUSH));
         instance.setProcessingState(new ProcessingState(ProcessingStates.PROCESSING));
+        instance.setProcessingState(new ProcessingState(ProcessingStates.SENDING));        
         instance.setProcessingState(new ProcessingState(ProcessingStates.AWAITING_RECEIPT));
         
         em.merge(instance);

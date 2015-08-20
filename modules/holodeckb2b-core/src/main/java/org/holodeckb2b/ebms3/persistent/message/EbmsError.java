@@ -36,6 +36,35 @@ import org.holodeckb2b.ebms3.persistent.general.Description;
 @Embeddable
 public class EbmsError implements Serializable, IEbmsError {
 
+    /**
+     * Default constructor, creates an empty ebMS error.
+     */
+    public EbmsError() {}
+    
+    /**
+     * Constructs a new ebMS error with the given values for the specific fields.
+     * 
+     * @param errorCode     
+     * @param severity
+     * @param refToMsgId
+     * @param message
+     * @param detail
+     * @param origin
+     * @param category
+     * @param description 
+     */
+    public EbmsError(final String errorCode, final Severity severity, final String refToMsgId, final String shortDescr, 
+                     final String detail, final String origin, final String category, final Description description) {
+        this.ERROR_CODE = errorCode;
+        this.SEVERITY = severity;
+        this.REF_TO_MSG_IN_ERROR = refToMsgId;
+        this.SHORT_DESCR = shortDescr;
+        this.ERROR_DETAIL = detail;
+        this.ORIGIN = origin;
+        this.CATEGORY = category;
+        this.longDescription = description;        
+    }
+    
     /*
      * Getters and setters
      */
@@ -80,7 +109,7 @@ public class EbmsError implements Serializable, IEbmsError {
         return SHORT_DESCR;
     }
     
-    public void setMessage(String message) {
+    public void setShortDescription(String message) {
         SHORT_DESCR = message;
     }
 

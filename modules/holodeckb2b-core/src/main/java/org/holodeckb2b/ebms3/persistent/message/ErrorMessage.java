@@ -51,7 +51,13 @@ import org.holodeckb2b.common.messagemodel.IErrorMessage;
                     "AND s1.START = (SELECT MAX(s2.START) FROM err.states s2) " +
                     "AND s1.NAME = :state " +
                     "ORDER BY s1.START"  
-            )}
+            ),
+        @NamedQuery(name="ErrorMessage.findResponsesTo",
+            query = "SELECT err " +
+                    "FROM ErrorMessage err " +
+                    "WHERE err.REF_TO_MSG_ID = :refToMsgId " 
+            )
+        }
 )
 public class ErrorMessage extends SignalMessage implements IErrorMessage {
 

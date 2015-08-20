@@ -171,7 +171,7 @@ public class ProcessWSSHeaders extends BaseHandler {
                     // An exception has occurred during signature processing
                     handleWSSecurityException(mc, SecurityConstants.DEFAULT_WSS_HEADER, 
                                            SecurityConstants.WSS_FAILURES.SIGNATURE,
-                                           (WSSecurityException) decResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
+                                           (WSSecurityException) signResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
                                            );
                     // No need to further process result or header
                     return InvocationResponse.CONTINUE;                 
@@ -221,7 +221,7 @@ public class ProcessWSSHeaders extends BaseHandler {
                 // Indicate that username token processing failed
                 handleWSSecurityException(mc, SecurityConstants.EBMS_WSS_HEADER, 
                                           SecurityConstants.WSS_FAILURES.UT,
-                                          (WSSecurityException) decResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
+                                          (WSSecurityException) utResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
                                          );
                 // No need to further process result or header
                 return InvocationResponse.CONTINUE;            
