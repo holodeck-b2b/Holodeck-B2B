@@ -145,12 +145,15 @@ public class ProcessGeneratedErrors extends BaseHandler {
                             // For signals error reporting is optional, so check if error is for a signal and if P-Mode
                             // is configured to report errors. Default is not to report errors for signals
                             boolean sendError = true; 
-                            if (muInError instanceof ErrorMessage)
-                                sendError = errorHandling != null ? errorHandling.shouldReportErrorOnError() 
-                                                                  : Config.shouldReportErrorOnError();
+                            if (muInError instanceof ErrorMessage) 
+                                sendError = errorHandling != null && errorHandling.shouldReportErrorOnError() != null ?
+                                            errorHandling.shouldReportErrorOnError() : 
+                                            Config.shouldReportErrorOnError();
+                            
                             if (muInError instanceof Receipt)
-                                sendError = errorHandling != null ? errorHandling.shouldReportErrorOnReceipt()
-                                                                  : Config.shouldReportErrorOnReceipt();
+                                sendError = errorHandling != null && errorHandling.shouldReportErrorOnReceipt() != null?
+                                            errorHandling.shouldReportErrorOnReceipt() :
+                                            Config.shouldReportErrorOnReceipt();
 
                             if (sendError) {
                                 log.debug("Error should be returned as response? " + asResponse);
