@@ -28,6 +28,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.ext.WSSecurityException.ErrorCode;
 import org.apache.wss4j.common.principal.UsernameTokenPrincipal;
 import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.WSSConfig;
@@ -118,7 +119,10 @@ public class ProcessWSSHeaders extends BaseHandler {
         Document domEnvelope = Axis2Utils.convertToDOM(mc);
         
         if (domEnvelope == null) {
-            log.error("Converting the SOAP envelope to DOM representation failed");            
+            handleWSSecurityException(mc, null, SecurityConstants.WSS_FAILURES.UNKNOWN, 
+                                      new WSSecurityException(ErrorCode.FAILURE, 
+                                                        "Converting the SOAP envelope to DOM representation failed")
+                                     ); 
             return InvocationResponse.CONTINUE;
         }
         
@@ -126,7 +130,7 @@ public class ProcessWSSHeaders extends BaseHandler {
             // Create security header processor
             processor = new WSSReceiveHandler(mc, domEnvelope, log);
         } catch (WSSecurityException ex) {
-            log.error("Setting up the security processor failed! Details: " + ex.getMessage());            
+            handleWSSecurityException(mc, null, SecurityConstants.WSS_FAILURES.UNKNOWN, ex);
             return InvocationResponse.CONTINUE;
         }
         

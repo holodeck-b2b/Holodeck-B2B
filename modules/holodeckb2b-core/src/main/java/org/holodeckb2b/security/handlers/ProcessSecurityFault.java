@@ -25,6 +25,7 @@ import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.errors.FailedAuthentication;
 import org.holodeckb2b.ebms3.errors.FailedDecryption;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
+import org.holodeckb2b.ebms3.errors.OtherContentError;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.util.MessageContextUtils;
@@ -151,15 +152,22 @@ public class ProcessSecurityFault extends BaseHandler {
     }
     
     /**
-     * Handles a WS-Security failure cause by an error in an element not used for processing the ebMS message, e.g.
-     * the Timestamp element. 
-     * <p>Because the specifications do not state how to handle this we currently ignore these errors.
+     * Handles a WS-Security failure cause by a general error in processing the header or in processing an element not 
+     * used for processing the ebMS message, e.g. the Timestamp element. 
+     * <p>Because the error does not relate to a specific security function (authentication or encryption) a general
+     * <i>Other</i> error is returned. 
      * 
      * @param mc    The current message context
      */
-    private void handleOtherFailure(MessageContext mc) {
-        MessageUnit pmu = MessageContextUtils.getPrimaryMessageUnit(mc);
-        log.warn("A problem with processing an element in the WS-Security header was ignored!" 
-                 + "MsgId of primary message unit= " + (pmu != null ? pmu.getMessageId() : "not available"));        
+    private void handleOtherFailure(MessageContext mc) throws DatabaseException{
+        OtherContentError otherErr = new OtherContentError();
+        otherErr.setErrorDetail("The WS-Security header(s) of the message could not be processed!");
+        MessageContextUtils.addGeneratedError(mc, otherErr);
+
+        // Set the processing state of all message units in message to FAILED
+        Collection<MessageUnit> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);        
+        for (MessageUnit mu : rcvdMsgUnits) {        
+            MessageUnitDAO.setFailed(mu); 
+        }
     }
 }
