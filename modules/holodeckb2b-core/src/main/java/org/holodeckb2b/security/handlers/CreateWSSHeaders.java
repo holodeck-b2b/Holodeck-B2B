@@ -367,14 +367,11 @@ public class CreateWSSHeaders extends BaseHandler {
        StringBuffer exMsg = new StringBuffer();
       
        exMsg.append(e.getClass().getSimpleName()).append(" : ").append(e.getMessage());       
-       Throwable cause = e.getCause(); int l = 0;
+       Throwable cause = e.getCause();
        if (cause != null) {
            do {
-               exMsg.append('\n');
-               for (int i = 0; i < ++l; i++)
-                   exMsg.append('\t');
-               exMsg.append("Caused by: ").append(cause.getClass().getSimpleName())
-                                          .append(" : ").append(cause.getMessage());
+               exMsg.append('\n').append('\t').append("Caused by: ").append(cause.getClass().getSimpleName());
+               exMsg.append(" : ").append(cause.getMessage());
                cause = cause.getCause();
            } while (cause != null);
        }
