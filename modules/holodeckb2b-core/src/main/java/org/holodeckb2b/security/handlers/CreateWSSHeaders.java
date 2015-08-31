@@ -41,7 +41,9 @@ import org.holodeckb2b.common.security.X509ReferenceType;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.DefaultSecurityAlgorithm;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
+import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.util.Axis2Utils;
+import org.holodeckb2b.ebms3.util.MessageContextUtils;
 import org.holodeckb2b.security.callbackhandlers.AttachmentCallbackHandler;
 import org.holodeckb2b.security.callbackhandlers.PasswordCallbackHandler;
 import org.holodeckb2b.security.util.SecurityUtils;
@@ -105,16 +107,16 @@ public class CreateWSSHeaders extends BaseHandler {
         Document domEnvelope = Axis2Utils.convertToDOM(mc);
         
         if (domEnvelope == null) {
-            log.error("Converting the SOAP envelope to DOM representation failed");            
-            return InvocationResponse.CONTINUE;
+            logError(mc, null, "Converting the SOAP envelope to DOM representation failed");            
+            return InvocationResponse.ABORT;
         }
         
         try {
             // Create security header processor
             processor = new CreateWSSHeaders.WSSSendHandler(mc, domEnvelope, log);
         } catch (WSSecurityException ex) {
-            log.error("Setting up the security processor failed! Details: " + ex.getMessage());            
-            return InvocationResponse.CONTINUE;
+            logError(mc, null, "Setting up the security processor failed (" + ex.getMessage() + ")");
+            return InvocationResponse.ABORT;
         }
         
         // Set up the message context properties specific for the header targeted to ebms role. This can only contain
@@ -135,10 +137,8 @@ public class CreateWSSHeaders extends BaseHandler {
                 processor.createSecurityHeader(SecurityConstants.EBMS_WSS_HEADER, WSHandlerConstants.USERNAME_TOKEN);            
                 log.debug("Added the WSS header targeted to ebms role");
             } catch (WSSecurityException wse) {
-                log.error("Creating the WSS header for the ebms role failed!" 
-                            + "\n\tDetails: " + wse.getMessage() 
-                            + "\n\tRoot cause:" + wse.getCause().getMessage());
-                //@todo: What's next? 
+                logError(mc, "ebms", wse);
+                return InvocationResponse.ABORT;
             }
             utConfig = null; // reset usernametoken config
         }
@@ -184,17 +184,16 @@ public class CreateWSSHeaders extends BaseHandler {
             processor.createSecurityHeader(null, actions);            
             log.debug("Added the default WSS header");
         } catch (WSSecurityException wse) {
-            log.error("Creating the default WSS header failed!" 
-                        + "\n\tDetails: " + wse.getMessage() 
-                        + "\n\tRoot cause:" + wse.getCause().getMessage());
-            //@todo: What's next? 
+            logError(mc, "default", wse);
+            return InvocationResponse.ABORT;
         }
         
         // Convert the processed SOAP envelope back to the Axiom representation for further processing
         SOAPEnvelope SOAPenv = Axis2Utils.convertToAxiom(domEnvelope);
         
         if (SOAPenv == null) {
-            log.error("Converting the SOAP envelope to Axiom representation failed");
+            logError(mc, null, "Converting the SOAP envelope to Axiom representation failed");
+            return InvocationResponse.ABORT;
         } else {
             mc.setEnvelope(SOAPenv);
             log.debug("Security header(s) successfully added");
@@ -331,6 +330,59 @@ public class CreateWSSHeaders extends BaseHandler {
         mc.setProperty(WSHandlerConstants.ENC_DIGEST_ALGO, ktDigest);
         mc.setProperty(WSHandlerConstants.ENC_KEY_TRANSPORT, ktAlgorithm);
     }    
+
+    /**
+     * Helper method to log error about failure to create the security headers to the message.
+     * 
+     * @param mc        The message context (used to get info about message being processed)
+     * @param role      The role of the WS-Security that was being created, can be null for general error
+     * @param message   Specific error message to log
+     */
+    private void logError(final MessageContext mc, final String role, final String message) {
+        StringBuffer logMsg = new StringBuffer();
+        // Use primary message unit to log error
+        MessageUnit pMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+        
+        logMsg.append("Could not create WS-Security header");
+        if (Utils.isNullOrEmpty(role)) 
+            logMsg.append("(s)");
+        else 
+            logMsg.append(" targeted to ").append(role);
+        logMsg.append(" for message with primary message unit [");
+        logMsg.append(pMU.getClass().getSimpleName()).append(";msgID=").append(pMU.getMessageId()).append(']');
+        logMsg.append("\n\tError details: ").append(message);
+        
+        log.error(logMsg.toString());        
+    }
+    
+    /**
+     * Helper method to log error about failure to create the security headers to the message
+     * 
+     * @param mc        The message context (used to get info about message being processed)
+     * @param role      The role of the WS-Security that was being created, can be null for general error    
+     * @param e         The exception that occurred
+     */
+    private void logError(final MessageContext mc, final String role, final Exception e) {
+       // Create a error message that drills down to root cause
+       StringBuffer exMsg = new StringBuffer();
+      
+       exMsg.append(e.getClass().getSimpleName()).append(" : ").append(e.getMessage());       
+       Throwable cause = e.getCause(); int l = 0;
+       if (cause != null) {
+           do {
+               exMsg.append('\n');
+               for (int i = 0; i < ++l; i++)
+                   exMsg.append('\t');
+               exMsg.append("Caused by: ").append(cause.getClass().getSimpleName())
+                                          .append(" : ").append(cause.getMessage());
+               cause = cause.getCause();
+           } while (cause != null);
+       }
+       
+        logError(mc, role, exMsg.toString());
+    }
+    
+    
     
     /**
      * Is the inner class that does the actual processing of the WS Security header. It is based on {@link WSHandler}
