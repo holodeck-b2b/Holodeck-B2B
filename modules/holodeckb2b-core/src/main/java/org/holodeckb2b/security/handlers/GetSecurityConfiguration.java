@@ -124,10 +124,11 @@ public class GetSecurityConfiguration extends BaseHandler {
         tpEncSecConfig = tradingPartnerEncryption != null ? tradingPartnerEncryption.getSecurityConfiguration() : null;
         
         
-        log.debug("Security is " + (tpSecConfig != null || pullReqSecConfig != null ? "" : "not") 
-                                    + " configured for the primary message unit");
+        log.debug("Security is " 
+                    + (tpSecConfig != null || pullReqSecConfig != null || tpEncSecConfig != null ? "" : "not") 
+                    + " configured for the primary message unit");
         
-        if (tpSecConfig == null && pullReqSecConfig == null)
+        if (tpSecConfig == null && pullReqSecConfig == null && tpEncSecConfig == null)
             // No security needed, done
             return InvocationResponse.CONTINUE;
         
