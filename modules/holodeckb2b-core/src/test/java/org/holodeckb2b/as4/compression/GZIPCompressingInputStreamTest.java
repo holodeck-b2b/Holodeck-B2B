@@ -67,34 +67,51 @@ public class GZIPCompressingInputStreamTest {
     @Test
     public void testCompression() {
         GZIPCompressingInputStream cfis = null;
-        FileOutputStream fos = null;
-        FileInputStream ucf = null;
-        GZIPInputStream cf = null;
+        GZIPInputStream decfis = null;
         
+        FileOutputStream fos = null;
+        FileInputStream fis1 = null;
+        FileInputStream fis2 = null;
+
+        File comF = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "compressed.gz");
+        File decF = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "decompressed.xml");
+
         try {
-            File in = new File(this.getClass().getClassLoader().getResource("compression/uncompressed.xml").getPath());
-            cfis = new GZIPCompressingInputStream(new FileInputStream(in));
+            File uncF = new File(this.getClass().getClassLoader().getResource("compression/uncompressed.xml").getPath());
             
-            File out = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "compressed.gz");
-            fos = new FileOutputStream(out);
-            
+            //Compress
+            cfis = new GZIPCompressingInputStream(new FileInputStream(uncF));            
+            fos = new FileOutputStream(comF);            
             byte[] buffer = new byte[512];
             int r = 0;
             while ( (r = cfis.read(buffer, 0, 512)) > 0 ) {
                 fos.write(buffer, 0, r);
             }
+            fos.close();
             
-            ucf = new FileInputStream(in);
-            cf = new GZIPInputStream(new FileInputStream(out));
+            // Decompress
+            decfis = new GZIPInputStream(new FileInputStream(comF));            
+            fos = new FileOutputStream(decF);            
+            r = 0;
+            while ( (r = decfis.read(buffer, 0, 512)) > 0 ) {
+                fos.write(buffer, 0, r);
+            }
+            fos.close();
+            
+            //Compare
+            fis1 = new FileInputStream(uncF);
+            fis2 = new FileInputStream(decF);
             
             byte[] buffer2 = new byte[512];
             int r2 = 0;
-            while ( ((r = cfis.read(buffer, 0, 512)) > 0) && ((r2 = cfis.read(buffer2, 0, 512)) > 0)) {
+            while ( ((r = fis1.read(buffer, 0, 512)) > 0) & ((r2 = fis2.read(buffer2, 0, 512)) > 0)) {
                 assertEquals(r, r2);
                 assertArrayEquals(buffer, buffer2);
             }
             
             assertEquals(r, r2);
+            
+            fis1.close(); fis2.close();
             
         } catch (FileNotFoundException ex) {
             Logger.getLogger(GZIPCompressingInputStreamTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -106,6 +123,13 @@ public class GZIPCompressingInputStreamTest {
             try {
                 cfis.close();
                 fos.close();
+                fis1.close();
+                fis2.close();
+                
+                if (comF.exists())
+                    comF.delete();
+                if (decF.exists())
+                    decF.delete();
             } catch (IOException ex) {
                 Logger.getLogger(GZIPCompressingInputStreamTest.class.getName()).log(Level.SEVERE, null, ex);
             }
