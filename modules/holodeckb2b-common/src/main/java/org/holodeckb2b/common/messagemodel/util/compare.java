@@ -34,8 +34,8 @@ public final class compare {
      * Checks if two {@link ITradingPartner} objects are equal. Two <code>ITradingPartner</code> objects are equal
      * when their <i>Role</i>s are equal and both have the same set of {@link IPartyId}s.
      * 
-     * @param tp1
-     * @param tp2
+     * @param tp1 first trading partner
+     * @param tp2 second trading partner
      * @return      <code>true</code> if the {@link ITradingPartner} object are equal,
      *              <code>false</code> otherwise
      */
@@ -45,7 +45,10 @@ public final class compare {
         String r1 = tp1.getRole(), r2 = tp2.getRole();
         equal = (r1 == null ? r2 == null : r1.equals(r2));
         
-        equal &= PartyIds(tp1.getPartyIds(), tp2.getPartyIds());        
+        if (equal) {
+            // Evaluate only if the roles are identical
+            equal = PartyIds(tp1.getPartyIds(), tp2.getPartyIds());        
+        }
         
         return equal;
     }
@@ -53,28 +56,32 @@ public final class compare {
     /**
      * Checks if two <code>Collection</code>s of {@link IPartyId} are equal.
      * 
-     * @param pids1
-     * @param pids2
+     * @param pids1 First collection
+     * @param pids2 Second collection
      * @return      <code>true</code> if both collection contain the same party ids,
      *              <code>false</code> otherwise
      */
     public static boolean PartyIds(Collection<IPartyId> pids1, Collection<IPartyId> pids2) {
         boolean equal = pids1.size() == pids2.size();
         
-        // Check every PartyId from the first collection to exist in the second and ensure all id's from the second
-        // collection have been checked
-        boolean[] checked = new boolean[pids2.size()]; // have all items in second collection been checked?
-        for(Iterator<IPartyId> it1 = pids1.iterator() ; equal && it1.hasNext() ;) {
-            IPartyId pi1 = it1.next();
-            // Check if this PartyId exists in the second collection
-            Iterator<IPartyId> it2 = pids2.iterator(); int i = 0;
-            for(; equal && it2.hasNext() ; i++)
-                if (equal = compare.PartyId(pi1, it2.next()))
-                    checked[i] = true; // This item in the second collection is succesfully compared            
+        if (equal)
+        {
+            // Evaluate only if the roles are identical
+            // Check every PartyId from the first collection to exist in the second and ensure all id's from the second
+            // collection have been checked
+            boolean[] checked = new boolean[pids2.size()]; // have all items in second collection been checked?
+            for(Iterator<IPartyId> it1 = pids1.iterator() ; equal && it1.hasNext() ;) {
+                IPartyId pi1 = it1.next();
+                // Check if this PartyId exists in the second collection
+                Iterator<IPartyId> it2 = pids2.iterator(); int i = 0;
+                for(; equal && it2.hasNext() ; i++)
+                    if (equal = compare.PartyId(pi1, it2.next()))
+                        checked[i] = true; // This item in the second collection is successfully compared            
+            }
+            // Check that every id in second collection was found in first collection
+            for(boolean b : checked)
+                equal &= b;
         }
-        // Check that every id in second collection was found in first collection
-        for(boolean b : checked)
-            equal &= b;
         
         return equal;
     }
@@ -83,8 +90,8 @@ public final class compare {
      * Checks if two {@link IPartyId} objects are equal. Two <code>IPartyId</code> object are equal when there values
      * and types are equal.
      * 
-     * @param id1
-     * @param id2
+     * @param id1 first Id
+     * @param id2 second Id
      * @return  <code>true</code> if the party id are equal,
      *          <code>false</code> otherwise
      */
@@ -95,8 +102,10 @@ public final class compare {
         String t1 = id1.getType(), t2 = id2.getType();
         
         equal = (v1 == null ? v2 == null : v1.equals(v2));
-        equal &= (t1 == null ? t2 == null : t1.equals(t2));
-        
+        if (equal) {
+          // Evaluate only if the roles are identical
+          equal = (t1 == null ? t2 == null : t1.equals(t2));
+        }
         return equal;
     }
     
@@ -104,8 +113,8 @@ public final class compare {
      * Checks if two {@link IProperty} objects are equal. Two <code>IProperty</code> objects are equal when there names,
      * values and types are equal.
      * 
-     * @param p1
-     * @param p2
+     * @param p1 first property
+     * @param p2 second property
      * @return  <code>true</code> if the properties are equal,
      *          <code>false</code> otherwise     
      */
@@ -117,8 +126,12 @@ public final class compare {
         String t1 = p1.getType(), t2 = p2.getType();
         
         equal = (n1 == null ? n2 == null : n1.equals(n2));
-        equal &= (v1 == null ? v2 == null : v1.equals(v2));
-        equal &= (t1 == null ? t2 == null : t1.equals(t2));
+        if (equal) {
+          // Evaluate only if the roles are identical
+          equal = (v1 == null ? v2 == null : v1.equals(v2));
+          if (equal)
+            equal = (t1 == null ? t2 == null : t1.equals(t2));
+        }
         
         return equal;
     }
@@ -127,8 +140,8 @@ public final class compare {
      * Checks if two {@link IService} objects are equal. Two <code>IService</code> objects are equal when there names
      * and types are equal.
      * 
-     * @param svc1
-     * @param svc2
+     * @param svc1 first service
+     * @param svc2 second service
      * @return  <code>true</code> if the services are equal,
      *          <code>false</code> otherwise     
      */
@@ -138,7 +151,8 @@ public final class compare {
         String t1 = svc1.getType(), t2 = svc2.getType();
         
         equal = (n1 == null ? n2 == null : n1.equals(n2));
-        equal &= (t1 == null ? t2 == null : t1.equals(t2));
+        if (equal)
+          equal = (t1 == null ? t2 == null : t1.equals(t2));
         
         return equal;
     }

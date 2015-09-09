@@ -20,6 +20,8 @@ package org.holodeckb2b.common.util;
  * Is a simple and write once read many key value pair.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @param <K> Key type
+ * @param <V> Value type
  */
 public class KeyValuePair<K, V> {
     

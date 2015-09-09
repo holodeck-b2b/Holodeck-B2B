@@ -25,7 +25,7 @@ import org.holodeckb2b.common.workerpool.TaskConfigurationException;
 /**
  * Base implementation of a worker that reacts to changes in a specified directory.
  * <p>This worker watches a specified directory for changes in its file listing. Whenever
- * a change is detected {@see #onChange(java.io.File, org.holodeck.common.workers.DirWatcher.Event)}
+ * a change is detected {@link #onChange(java.io.File, org.holodeckb2b.common.workers.PathWatcher.Event)}
  * is called. Descendants must implement this method to do the actual processing.
  * <p>This worker has two parameters:
  * <ul><li><i>watchedPath</i>: The path to the directory to watch for changes</li>

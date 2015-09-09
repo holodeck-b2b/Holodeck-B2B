@@ -10,7 +10,7 @@ import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
 import org.junit.Test;
 
 /**
- * Tests the {@see WorkerPool} 
+ * Tests the {@link WorkerPool} 
  * 
  * @author Sander Fieten <sander@holodeck-b2b.org>
  */

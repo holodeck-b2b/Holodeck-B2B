@@ -25,14 +25,14 @@ public interface IAgreement {
     /**
      * Gets the agreement name.
      * 
-     * @return 
+     * @return The agreement name
      */
     public String getName();
     
     /**
      * Gets the agreement type.
      * 
-     * @return 
+     * @return The agreement type
      */
     public String getType();
    

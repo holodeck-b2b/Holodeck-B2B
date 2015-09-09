@@ -37,7 +37,7 @@ public interface IErrorMessage extends ISignalMessage {
     /**
      * Gets the details of all errors included in this error signal message.
      * 
-     * @return  A collection of {@link IError} objects representing all errors in this error signal.
+     * @return  A collection of {@link IEbmsError} objects representing all errors in this error signal.
      */
     public Collection<IEbmsError> getErrors();
 }
