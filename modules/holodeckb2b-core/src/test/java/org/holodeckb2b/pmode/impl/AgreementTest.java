@@ -38,9 +38,8 @@ public class AgreementTest {
      * 
      * @param fName The filename for the agreement
      * @return Agreement or NULL in case of an error
-     * @throws Exception 
      */
-    public Agreement createFromFile(String fName) throws Exception  {
+    public Agreement createFromFile(String fName) {
 
         try {
             // retrieve the resource from the pmodetest directory.

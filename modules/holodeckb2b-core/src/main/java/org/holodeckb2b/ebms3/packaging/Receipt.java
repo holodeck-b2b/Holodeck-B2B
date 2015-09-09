@@ -40,7 +40,7 @@ import org.holodeckb2b.common.messagemodel.IReceipt;
 public class Receipt {
     
     /**
-     * The fully qualified name of the element as an {@see QName}
+     * The fully qualified name of the element as an {@link QName}
      */
     static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Receipt");
     
@@ -77,6 +77,9 @@ public class Receipt {
      * @param sigElement    The parent <code>eb:SignalMessage</code> element that contains the <code>eb:Receipt</code> element 
      * @return              The {@link org.holodeckb2b.ebms3.persistent.message.Receipt} object containing the information
      *                      on the receipt
+     * @throws PackagingException   When the given element does not conform to
+     *                              ebMS specification and can therefore not be
+     *                              read completely
      */
     public static org.holodeckb2b.ebms3.persistent.message.Receipt readElement(OMElement sigElement) throws PackagingException {
         // Create a new Receipt entity object to store the information in
@@ -92,20 +95,20 @@ public class Receipt {
     }
     
     /**
-     * Gets an {@see Iterator} for all <code>eb:SignalMessage</code> elements 
+     * Gets an {@link Iterator} for all <code>eb:SignalMessage</code> elements 
      * from the given ebMS 3 Messaging header in the SOAP message that represent
      * <i>Receipt</i> signals.
      * 
      * @param messaging   The SOAP Header block that contains the ebMS header,
      *                    i.e. the <code>eb:Messaging</code> element
-     * @return      An {@see Iterator} for all {@see OMElement}s representing a 
+     * @return      An {@link Iterator} for all {@link OMElement}s representing a 
      *              <code>eb:SignalMessage</code> element that contains an 
      *              Error signal, i.e. has one or more <code>eb:Receipt</code> 
      *              child elements  
      */
-    public static Iterator getElements(SOAPHeaderBlock messaging) {
+    public static Iterator<OMElement> getElements(SOAPHeaderBlock messaging) {
         // Check all SignalMessage elements in the header
-        Iterator signals = org.holodeckb2b.ebms3.packaging.SignalMessage.getElements(messaging);
+        Iterator<?> signals = org.holodeckb2b.ebms3.packaging.SignalMessage.getElements(messaging);
         
         ArrayList<OMElement>  receipts = new ArrayList<OMElement>();
         while(signals.hasNext()) {

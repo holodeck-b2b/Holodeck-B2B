@@ -76,13 +76,13 @@ public class ReadError extends BaseHandler {
         if (messaging != null) {
             // Check if there are Error signals
             log.debug("Check for Error elements to determine if message contains one or more errors");
-            Iterator errorSigs = ErrorSignal.getElements(messaging);
+            Iterator<OMElement> errorSigs = ErrorSignal.getElements(messaging);
             
             if (errorSigs != null) {
                 log.debug("Error(s) found, read information from message");
                 
                 while (errorSigs.hasNext()) {
-                    OMElement errElem = (OMElement) errorSigs.next();
+                    OMElement errElem = errorSigs.next();
                     org.holodeckb2b.ebms3.persistent.message.ErrorMessage errorSignal = null;
                     try {
                         // Read information into ErrorMessage object

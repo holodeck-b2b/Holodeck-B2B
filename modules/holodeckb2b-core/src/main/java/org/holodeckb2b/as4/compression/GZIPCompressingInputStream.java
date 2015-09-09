@@ -54,7 +54,7 @@ public class GZIPCompressingInputStream extends DeflaterInputStream {
     // Enumeration that indicates the parts of the GZIP
     enum Part {
         HEADER, BODY, TRAILER
-    };
+    }
 
     // Indicator of which part we are now processing
     private Part part = null;

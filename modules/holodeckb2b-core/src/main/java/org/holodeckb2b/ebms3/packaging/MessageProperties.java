@@ -98,7 +98,7 @@ public class MessageProperties {
         // Create new collection
         ArrayList<org.holodeckb2b.ebms3.persistent.general.Property> props = new ArrayList<org.holodeckb2b.ebms3.persistent.general.Property>();
         // Get all child elements containing the properties
-        Iterator it = mpElement.getChildrenWithName(Property.Q_ELEMENT_NAME);
+        Iterator<?> it = mpElement.getChildrenWithName(Property.Q_ELEMENT_NAME);
         // Read each property element and add it info to the collection
         while (it.hasNext())
             props.add(Property.readElement((OMElement) it.next()));

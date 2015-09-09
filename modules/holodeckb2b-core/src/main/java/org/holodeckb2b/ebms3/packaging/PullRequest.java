@@ -95,7 +95,7 @@ public class PullRequest {
         // Before we can get the PullRequest element we first have to get the parent
         //  SignalMessage element. Because a ebMS message can contain multiple signals
         //  we have to check each for the PullRequest
-        Iterator signals = org.holodeckb2b.ebms3.packaging.SignalMessage.getElements(messaging);
+        Iterator<?> signals = org.holodeckb2b.ebms3.packaging.SignalMessage.getElements(messaging);
         
         // Search for the first PullRequest as there may only be one in an ebMS message
         OMElement pullReq = null;

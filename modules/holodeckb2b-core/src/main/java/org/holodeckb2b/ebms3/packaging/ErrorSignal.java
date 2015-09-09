@@ -45,12 +45,12 @@ import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
 public class ErrorSignal {
     
     /**
-     * The fully qualified name of the element as an {@see QName}
+     * The fully qualified name of the element as an {@link QName}
      */
     static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Error");
     
     /**
-     * The fully qualified name of the ErrorDetail element as an {@see QName}
+     * The fully qualified name of the ErrorDetail element as an {@link QName}
      */
     private static final QName  Q_ERROR_DETAIL = new QName(Constants.EBMS3_NS_URI, "ErrorDetail");
 
@@ -89,12 +89,15 @@ public class ErrorSignal {
     /**
      * Reads the information from a <code>eb:SignalMessage</code> and its child
      * elements that contain the Error signal message unit and stores it a 
-     * {@see ErrorMessage} object. 
+     * {@link ErrorMessage} object. 
      * <p><b>NOTE:</b> The information is stored in an entity object, but this
      * method will NOT persist the object.
      * 
      * @param sigElement    The parent <code>eb:SignalMessage</code> element that contains the <code>eb:Error</code> elements 
      * @return              The {@link ErrorMessage} object containing the information on the Error signal
+     * @throws PackagingException   When the given element does not conform to
+     *                              ebMS specification and can therefore not be
+     *                              read completely
      */
     public static org.holodeckb2b.ebms3.persistent.message.ErrorMessage readElement(OMElement sigElement) throws PackagingException {
         // Create a new EbmsError entity object to store the information in
@@ -104,7 +107,7 @@ public class ErrorSignal {
         MessageInfo.readElement(MessageInfo.getElement(sigElement), errData);
         
         // Now get all child Error elements
-        Iterator it = sigElement.getChildrenWithName(Q_ELEMENT_NAME);
+        Iterator<?> it = sigElement.getChildrenWithName(Q_ELEMENT_NAME);
         while (it.hasNext()) {
             OMElement errorElement = (OMElement) it.next();
             errData.addError(readErrorElement(errorElement));
@@ -114,20 +117,20 @@ public class ErrorSignal {
     }
     
     /**
-     * Gets an {@see Iterator} for all <code>eb:SignalMessage</code> elements 
+     * Gets an {@link Iterator} for all <code>eb:SignalMessage</code> elements 
      * from the given ebMS 3 Messaging header in the SOAP message that represent
      * <i>Error</i> signals.
      * 
      * @param messaging   The SOAP Header block that contains the ebMS header,
      *                    i.e. the <code>eb:Messaging</code> element
-     * @return      An {@see Iterator} for all {@see OMElement}s representing a 
+     * @return      An {@link Iterator} for all {@link OMElement}s representing a 
      *              <code>eb:SignalMessage</code> element that contains an 
      *              Error signal, i.e. has one or more <code>eb:Error</code> 
      *              child elements  
      */
-    public static Iterator getElements(SOAPHeaderBlock messaging) {
+    public static Iterator<OMElement> getElements(SOAPHeaderBlock messaging) {
         // Check all SignalMessage elements in the header
-        Iterator signals = org.holodeckb2b.ebms3.packaging.SignalMessage.getElements(messaging);
+        Iterator<?> signals = org.holodeckb2b.ebms3.packaging.SignalMessage.getElements(messaging);
         
         ArrayList<OMElement>  errors = new ArrayList<OMElement>();
         while(signals.hasNext()) {
@@ -146,10 +149,10 @@ public class ErrorSignal {
      * Error signal message, i.e. the <code>eb:SignalMessage</code> that contains
      * the errors. 
      * 
-     * @param signalmessage     The {@see OMElement} parent object for the new
+     * @param signalmessage     The {@link OMElement} parent object for the new
      *                          element
      * @param error             The data to write to the element
-     * @return                  An {@see OMElement} object representing the 
+     * @return                  An {@link OMElement} object representing the 
      *                          <code>eb:Error</code> element containing the error 
      *                          data 
      */
@@ -199,11 +202,11 @@ public class ErrorSignal {
     
     /**
      * Helper method for reading information from the <code>Error</code> element.
-     * This element contains the error details which are stored in the {@see EbmsError}
+     * This element contains the error details which are stored in the {@link EbmsError}
      * entity object.
      * 
      * @param errorElement      The <code>Error</code> element to read the error details from
-     * @return                  {@see EbmsError} object containing the data read
+     * @return                  {@link EbmsError} object containing the data read
      *                          from the element
      */
     protected static EbmsError readErrorElement(OMElement errorElement) {

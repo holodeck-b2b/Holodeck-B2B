@@ -198,7 +198,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      */
     private OMElement getPayloadFromBody(SOAPBody body, String id) {
         // Search all children in the SOAP body for an element with given id
-        Iterator bodyElements = body.getChildElements();
+        Iterator<?> bodyElements = body.getChildElements();
         OMElement e = null; boolean f = false;
         while (bodyElements.hasNext() && !f) {
             e = (OMElement) bodyElements.next();

@@ -83,9 +83,9 @@ import org.holodeckb2b.ebms3.persistent.general.TradingPartner;
             )
         }
 )
-public class UserMessage extends MessageUnit implements Serializable, org.holodeckb2b.common.messagemodel.IUserMessage {
+public class UserMessage extends MessageUnit implements org.holodeckb2b.common.messagemodel.IUserMessage {
     
-    private enum PartnerType { SENDER, RECEIVER };
+    private enum PartnerType { SENDER, RECEIVER }
     
     /*
      * Getters and setters

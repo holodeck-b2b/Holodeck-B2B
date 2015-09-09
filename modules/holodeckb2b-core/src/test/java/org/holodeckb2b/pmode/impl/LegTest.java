@@ -40,9 +40,8 @@ public class LegTest {
      * 
      * @param fName The filename for the leg
      * @return Leg or NULL in case of an error
-     * @throws Exception 
      */
-    public Leg createFromFile(String fName) throws Exception  {
+    public Leg createFromFile(String fName) {
 
         try {
             // retrieve the resource from the pmodetest directory.

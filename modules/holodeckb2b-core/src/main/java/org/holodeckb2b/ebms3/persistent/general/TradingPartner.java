@@ -46,9 +46,9 @@ public class TradingPartner implements Serializable, ITradingPartner {
     }
     
     /**
-     * Add a {@see PartyId} to the collection of ids that identifies this trading partner.
+     * Add a {@link PartyId} to the collection of ids that identifies this trading partner.
      *
-     * @param id    The party id to add to the collection
+     * @param pid    The party id to add to the collection
      */
     public void addPartyId(PartyId pid) {
         partyIds.add(pid);
@@ -72,7 +72,7 @@ public class TradingPartner implements Serializable, ITradingPartner {
      */
     public TradingPartner() {
         partyIds = new HashSet<IPartyId>();
-    };
+    }
     
     /**
      * Creates a trading partner with the given PartyId and role.
@@ -81,8 +81,8 @@ public class TradingPartner implements Serializable, ITradingPartner {
      * This is possible because it is an embedded object that is automaticly
      * persisted with the TradingPartner object.
      * 
-     * @param id    The PartyId to use for the new trading partner
-     * @param role  The role of the new trading partner
+     * @param partyId    The PartyId to use for the new trading partner
+     * @param role       The role of the new trading partner
      */
     public TradingPartner(String partyId, String role) {
         this();
@@ -94,8 +94,8 @@ public class TradingPartner implements Serializable, ITradingPartner {
     /**
      * Creates a trading partner with the given PartyId and role.
      * 
-     * @param id    The PartyId to use for the new trading partner
-     * @param role  The role of the new trading partner
+     * @param partyId    The PartyId to use for the new trading partner
+     * @param role       The role of the new trading partner
      */
     public TradingPartner(PartyId partyId, String role) {
         this();

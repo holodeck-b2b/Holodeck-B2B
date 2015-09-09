@@ -133,7 +133,7 @@ public class Payload implements Serializable, IPayload {
     /*
      * Constructors
      */
-    public Payload() {};
+    public Payload() {}
     
     /**
      * Creates a simple Payload object with only the essential information as

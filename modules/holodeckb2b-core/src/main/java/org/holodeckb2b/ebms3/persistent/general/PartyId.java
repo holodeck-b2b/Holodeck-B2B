@@ -56,22 +56,22 @@ public class PartyId implements Serializable, IPartyId {
     /*
      * Constructors
      */
-    public PartyId() {};
+    public PartyId() {}
 
     /**
      * Create a new <code>PartyId</code> as with the given id without a type.
      * 
-     * @param String The partyid to use for the new instance
+     * @param id The partyid to use for the new instance
      */
     public PartyId(String id) {
         P_ID = id;
     }
 
     /**
-     * Create a new <code>PartyId</code> as a copy of given {@see IPartyId}.
+     * Create a new <code>PartyId</code> as a copy of given {@link IPartyId}.
      * 
-     * @param String   The id itself
-     * @param String   The type of the PartyId
+     * @param id   The id itself
+     * @param type The type of the PartyId
      */
     public PartyId(String id, String type) {
         P_ID = id;

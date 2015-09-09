@@ -20,7 +20,6 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
 import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.common.general.IPartyId;
 import org.holodeckb2b.common.general.ITradingPartner;
@@ -48,20 +47,20 @@ public class PartyInfo {
      */
     private static class TradingPartner {
     
-        public static enum ElementName { FROM, TO };
+        public static enum ElementName { FROM, TO }
     
         /**
-         * The fully qualified name of the From element as an {@see QName}
+         * The fully qualified name of the From element as an {@link QName}
          */
         private static final QName  Q_FROM_PARTY = new QName(Constants.EBMS3_NS_URI, "From");
 
         /**
-         * The fully qualified name of the To element as an {@see QName}
+         * The fully qualified name of the To element as an {@link QName}
          */
         private static final QName  Q_TO_PARTY = new QName(Constants.EBMS3_NS_URI, "To"); 
     
         /**
-         * The fully qualified name of the PartyId element as an {@see QName}
+         * The fully qualified name of the PartyId element as an {@link QName}
          */
         private static final QName  Q_PARTYID = new QName(Constants.EBMS3_NS_URI, "PartyId");
         
@@ -69,7 +68,7 @@ public class PartyInfo {
         private static final String LN_PARTYID_TYPE = "type";
         
         /**
-         * The fully qualified name of the Role element as an {@see QName}
+         * The fully qualified name of the Role element as an {@link QName}
          */
         private static final QName  Q_ROLE = new QName(Constants.EBMS3_NS_URI, "Role");
         
@@ -151,7 +150,7 @@ public class PartyInfo {
                 tpData.setRole(Constants.DEFAULT_ROLE);
             
             // Read all PartyId elements and add info to entity
-            Iterator it = tpElement.getChildrenWithName(Q_PARTYID);
+            Iterator<?> it = tpElement.getChildrenWithName(Q_PARTYID);
             while (it.hasNext()) {
                 OMElement pidElem = (OMElement) it.next();
                 String pid = pidElem.getText();
@@ -203,7 +202,7 @@ public class PartyInfo {
      * Gets the {@link OMElement} object that represent the <code>PartyInfo</code> 
      * child element of the <code>UserMessage</code> element.
      * 
-     * @param piElement     The parent <code>UserMessage</code> element
+     * @param muElement     The parent <code>UserMessage</code> element
      * @return              The {@link OMElement} object representing the requested element
      *                      or <code>null</code> when the requested element is not found as
      *                      child of the given element.
