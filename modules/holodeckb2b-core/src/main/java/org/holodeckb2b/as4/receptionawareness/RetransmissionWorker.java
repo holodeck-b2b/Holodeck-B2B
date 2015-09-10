@@ -99,27 +99,28 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         continue; // with next message
                     }
 
+                    // Check if retransmit interval has passed
                     // Convert configured retry interval to milliseconds
                     long retransmitInterval = TimeUnit.MILLISECONDS.convert(raConfig.getRetryInterval().getLength(),
-                                                                            raConfig.getRetryInterval().getUnit());
-                    // Initial transmission does not count for max retries
-                    int numOfRetransmits = MessageUnitDAO.getNumberOfTransmissions(um) - 1; 
-                    if (numOfRetransmits >= raConfig.getMaxRetries()) {
-                        // Log missing receipt
-                        missingReceiptsLog.error("No Receipt received for UserMessage with messageId=" 
-                                                + um.getMessageId());
-                        // Change processing state accordingly
-                        MessageUnitDAO.setFailed(um);
-                        log.debug("Changed processing state of user message to reflect failure");
-                        // Generate and report (if requested) MissingReceipt
-                        generateMissingReceiptError(um, leg);
-                    } else {
-                        // Check if retransmit interval has passed
-                        if( ((new Date()).getTime() - um.getCurrentProcessingState().getStartTime().getTime())
-                             >= retransmitInterval) {
-                            log.debug("Retransmit interval expired, resend the message");
-
-                            // Is message to be pushed or pulled?
+                                                                            raConfig.getRetryInterval().getUnit());                    
+                    if (((new Date()).getTime() - um.getCurrentProcessingState().getStartTime().getTime())
+                         >= retransmitInterval) {
+                        // The retransmit interval expired, check if message can be resend or a MissingReceipt error
+                        // has to be generated 
+                        
+                        // Initial transmission does not count for max retries
+                        int numOfRetransmits = MessageUnitDAO.getNumberOfTransmissions(um) - 1;                     
+                        if (numOfRetransmits >= raConfig.getMaxRetries()) {
+                            // No retries left, generate MissingReceipt error
+                            missingReceiptsLog.error("No Receipt received for UserMessage with messageId=" 
+                                                        + um.getMessageId());
+                            // Change processing state accordingly
+                            MessageUnitDAO.setFailed(um);
+                            log.debug("Changed processing state of user message to reflect failure");
+                            // Generate and report (if requested) MissingReceipt
+                            generateMissingReceiptError(um, leg);
+                        } else {
+                            // Message can be resend, is the message to be pushed or pulled?
                             if (isPulled(um)) {
                                 log.debug("Message must be pulled by receiver again");
                                 MessageUnitDAO.setWaitForPull(um);
@@ -128,11 +129,11 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                                 MessageUnitDAO.setReadyToPush(um);
                             }
                             log.debug("Message unit is ready for retransmission");
-                        } else {
+                        } 
+                    } else {
                             // Time to wait for receipt has not expired yet, wait longer
                             log.debug("Retransmit interval not expired yet. Nothing to do.");
-                        }
-                    }
+                    }                    
                 } catch (DatabaseException dbe) {
                     log.error("An error occurred when checking retransmission of message unit [msgID=" 
                                 + um.getMessageId() + "]. Details: " + dbe.getMessage());                        
