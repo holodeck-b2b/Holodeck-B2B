@@ -130,7 +130,7 @@ public class PrepareResponseMessage extends BaseHandler {
         int             cp = -1; // The prio of the currently selected err, 0=Error or Receipt, 1=PullReq, 2=UsrMsg
         
         log.debug("Get the messageIds and types of received message units");
-        Map<String, Class>  rcvdMsgs = getReceivedMessageUnits(mc);
+        Map<String, Class<?>>  rcvdMsgs = getReceivedMessageUnits(mc);
         // Now select the error with highest prio
         for(ErrorMessage e : errors) {
             String refTo = e.getRefToMessageId();
@@ -140,7 +140,7 @@ public class PrepareResponseMessage extends BaseHandler {
                 break; 
             } else {
                 log.debug("Check which type of MU is referenced by error");
-                Class type = rcvdMsgs.get(refTo);
+                Class<?> type = rcvdMsgs.get(refTo);
                 if (type.equals(IUserMessage.class)) {
                     log.debug("Select error referencing the UserMessage unit");
                     r = e; cp = 2;                    
@@ -161,10 +161,10 @@ public class PrepareResponseMessage extends BaseHandler {
      * Gets all message ids and the type of message unit of the message units received. 
      * 
      * @param mc    The current [out flow] message context
-     * @return      {@link Map<String, Class>} containing all messageIds and their message unit type 
+     * @return      {@link Map} containing all messageIds and their message unit type 
      */
-    private Map<String, Class> getReceivedMessageUnits(MessageContext mc) {
-        HashMap<String, Class>   reqMUs = new HashMap<String, Class>();
+    private Map<String, Class<?>> getReceivedMessageUnits(MessageContext mc) {
+        HashMap<String, Class<?>>   reqMUs = new HashMap<>();
         
         UserMessage userMsg = (UserMessage)
                 MessageContextUtils.getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_USER_MESSAGE);

@@ -61,7 +61,7 @@ public class ReadUserMessage extends BaseHandler {
         if (messaging != null) {
             // Check if there is a user message unit
             log.debug("Check for UserMessage element");
-            Iterator it = UserMessage.getElements(messaging);
+            Iterator<?> it = UserMessage.getElements(messaging);
             if (it.hasNext()) {
                 log.debug("UserMessage found, read information from message");
                 OMElement umElement = (OMElement) it.next();

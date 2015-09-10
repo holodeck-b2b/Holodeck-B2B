@@ -38,9 +38,8 @@ public class ProtocolTest {
      * 
      * @param fName The filename for the Protocol
      * @return Protocol or NULL in case of an error
-     * @throws Exception 
      */
-    public Protocol createFromFile(String fName) throws Exception  {
+    public Protocol createFromFile(String fName) {
 
         try {
             // retrieve the resource from the pmodetest directory.

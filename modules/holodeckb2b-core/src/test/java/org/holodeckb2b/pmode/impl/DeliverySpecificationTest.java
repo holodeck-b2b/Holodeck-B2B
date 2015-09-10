@@ -37,9 +37,8 @@ public class DeliverySpecificationTest {
      * 
      * @param fName The filename for the DeliverySpecification
      * @return DeliverySpecification or NULL in case of an error
-     * @throws Exception 
      */
-    public DeliverySpecification createFromFile(String fName) throws Exception  {
+    public DeliverySpecification createFromFile(String fName)  {
 
         try {
             // retrieve the resource from the pmodetest directory.

@@ -972,9 +972,9 @@ public class MessageUnitDAO {
      * Helper method to save all the entity objects related to the {@link UserMessage} entity object.
      * Currently this are only the TradingPartners objects for sender and receiver.
      */
-    private static void persistRelatedObjects(UserMessage um, EntityManager em) throws DatabaseException {
-        em.persist((TradingPartner) um.getSender());
-        em.persist((TradingPartner) um.getReceiver());
+    private static void persistRelatedObjects(UserMessage um, EntityManager em) {
+        em.persist(um.getSender());
+        em.persist(um.getReceiver());
     }
 
     /*

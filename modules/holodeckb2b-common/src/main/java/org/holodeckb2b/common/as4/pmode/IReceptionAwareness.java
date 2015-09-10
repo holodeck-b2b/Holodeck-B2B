@@ -33,8 +33,8 @@ import org.holodeckb2b.common.util.Interval;
  * message was received (and delivered) before. There is no further parameterization.</li>
  * </ol>
  * Enabling the Reception Awareness feature itself is done by including an object of this type on the leg, i.e. when
- * {@link ILegAS4#getReceptionAwareness()} returns a non-null value. Note that we use a special type of leg ({@link 
- * ILegAS4}) to indicate that the leg includes AS4 specific features.
+ * {@link IAS4Leg#getReceptionAwareness()} returns a non-null value. Note that we use a special type of leg ({@link 
+ * IAS4Leg}) to indicate that the leg includes AS4 specific features.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */

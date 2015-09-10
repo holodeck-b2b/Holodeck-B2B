@@ -59,12 +59,12 @@ public class Description implements Serializable, IDescription {
     /*
      * Constructors
      */
-    public Description() {};
+    public Description() {}
 
     /**
      * Create a new <code>Description</code> with the given text.
      * 
-     * @param String   The text itself
+     * @param text   The text itself
      */
     public Description(String text) {
         DESCRIPTION_TEXT = text;
@@ -73,8 +73,8 @@ public class Description implements Serializable, IDescription {
     /**
      * Create a new <code>Description</code> with the given text and language indication.
      * 
-     * @param String   The text itself
-     * @param String   The language the text is written in
+     * @param text     The text itself
+     * @param language The language the text is written in
      */
     public Description(String text, String language) {
         DESCRIPTION_TEXT = text;

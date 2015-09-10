@@ -87,7 +87,9 @@ public abstract class AbstractWorkerTask implements IWorkerTask {
     }
     
     /**
-     * Implements the functionality of the task. 
+     * Implements the functionality of the task.
+     * 
+     *  @throws InterruptedException In case processing gets interrupted
      */
     public abstract void doProcessing() throws InterruptedException;
 }

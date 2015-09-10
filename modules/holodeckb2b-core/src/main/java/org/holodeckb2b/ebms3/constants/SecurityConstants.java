@@ -95,7 +95,7 @@ public final class SecurityConstants {
     /**
      * Enumeration of fault causes in processing the WS-Security header.  
      */
-    public static enum WSS_FAILURES { DECRYPTION, SIGNATURE, UT, UNKNOWN };
+    public static enum WSS_FAILURES { DECRYPTION, SIGNATURE, UT, UNKNOWN }
     
     /**
      * Identifier for the MessageContext property that holds all authentication information for the current message.

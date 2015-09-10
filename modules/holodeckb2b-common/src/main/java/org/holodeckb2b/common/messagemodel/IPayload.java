@@ -97,8 +97,9 @@ public interface IPayload {
      * describing the payload. 
      * 
      * @return      An {@link IDescription} object containing the description of the payload
-     * @deprecated 
+     * @deprecated Use the payload properties instead
      */
+    @Deprecated
     public IDescription getDescription();
     
     /**

@@ -160,14 +160,12 @@ public class CompressionDataHandler extends DataHandler {
      * @throws IOException  When an error occurs while writing the data to the stream
      */
     private void decompress(OutputStream out) throws IOException {
-        GZIPInputStream gzInputStream = new GZIPInputStream(source.getInputStream());
-        
-        byte[]  buffer = new byte[2048];
-        int     r = 0;
-        while ((r = gzInputStream.read(buffer)) > 0)
-            out.write(buffer, 0, r);
-        
-        gzInputStream.close();
-        
+        try (GZIPInputStream gzInputStream = new GZIPInputStream(source.getInputStream()))
+        {            
+            byte[]  buffer = new byte[2048];
+            int     r = 0;
+            while ((r = gzInputStream.read(buffer)) > 0)
+                out.write(buffer, 0, r);
+        }
     }
 }

@@ -52,7 +52,7 @@ public final class Utils {
     private static Tika    mimeTypeDetector;
     
     /** 
-     * Transform a {@see Date} object to a {@see String} formatted according to
+     * Transform a {@link Date} object to a {@link String} formatted according to
      * the specification of the <code>dateTime</code> datatype of XML schema.<br>
      * See <a href="http://www.w3.org/TR/xmlschema-2/#dateTime">section 3.2.7 of the XML
      * Specification</a> for details.
@@ -71,12 +71,12 @@ public final class Utils {
     }
 
     /** 
-     * Parses a {@see String} for XML dateTime (see <a href="http://www.w3.org/TR/xmlschema-2/#dateTime">section 3.2.7 
-     * of the XML Specification</a>) and return a {@see Date} object when a valid date is found.
+     * Parses a {@link String} for XML dateTime (see <a href="http://www.w3.org/TR/xmlschema-2/#dateTime">section 3.2.7 
+     * of the XML Specification</a>) and return a {@link Date} object when a valid date is found.
      * 
      * @param   xmlDateTimeString   The String that should contain the <code>xs:dateTime</code> formatted date
-     * @return  A {@see Date} object for the parsed date
-     * @throws  ParseException
+     * @return  A {@link Date} object for the parsed date
+     * @throws  ParseException on date time parsing error
      */
     public static Date fromXMLDateTime(final String xmlDateTimeString)
             throws ParseException {
@@ -180,9 +180,9 @@ public final class Utils {
         if (obj == null)
             return null;
         
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutput out = new ObjectOutputStream(bos);
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             ObjectOutput out = new ObjectOutputStream(bos))
+        {
             out.writeObject(obj);
             out.close();
             return bos.toByteArray();
@@ -387,7 +387,7 @@ public final class Utils {
      * @return      <code>true</code> if <code>c == null || c.isEmpty() == true</code>,<br>
      *              <code>false</code> otherwise
      */
-    public static boolean isNullOrEmpty(final Collection c) {
+    public static boolean isNullOrEmpty(final Collection<?> c) {
         return c == null || c.isEmpty();
     }
 
@@ -398,7 +398,7 @@ public final class Utils {
      * @return      <code>true</code> if <code>i == null || i.hasNext() == true</code>,<br>
      *              <code>false</code> otherwise
      */
-    public static boolean isNullOrEmpty(final Iterator i) {
+    public static boolean isNullOrEmpty(final Iterator<?> i) {
         return i == null || !i.hasNext();
     }
 

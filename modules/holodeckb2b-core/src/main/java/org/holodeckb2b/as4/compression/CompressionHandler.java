@@ -35,7 +35,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * Is the <i>OUT_FLOW</i> handler part of the AS4 Compression Feature responsible for the compression of the payload
  * data. Whether this feature should be used is indicated by the <code>PMode[1].PayloadService.CompressionType</code>
  * P-Mode parameter (defined in section 3.1 of the AS4 profile). This P-Mode parameter is represented by {@link 
- * IPayloadProfileAS4#getCompressionType()}. 
+ * IAS4PayloadProfile#getCompressionType()}. 
  * <p>When payloads should be compressed two <code>eb:Property</code> elements must be added to the 
  * <code>eb:PartProperties</code> of the payload meta data in the ebMS header:<ol>
  * <li><code>@name = <i>"CompressionType"</i></code> and fixed value <i>"application/gzip"</i>;</li>

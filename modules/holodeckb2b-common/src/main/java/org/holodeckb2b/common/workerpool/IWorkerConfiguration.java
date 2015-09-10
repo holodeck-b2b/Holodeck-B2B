@@ -30,7 +30,7 @@ import org.holodeckb2b.common.util.Interval;
 public interface IWorkerConfiguration {
    
     /**
-     * @returns The name of this worker
+     * @return The name of this worker
      */
     public String getName();
     

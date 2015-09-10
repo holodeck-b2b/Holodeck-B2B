@@ -69,9 +69,9 @@ public class SchemaReference implements Serializable, ISchemaReference {
     /**
      * Creates a new SchemaReference object for the given schema
      * 
-     * @param   String      The location where the schema can be found
-     * @param   String      The namespace of the schema
-     * @param   String      The version of the schema
+     * @param   location     The location where the schema can be found
+     * @param   namespace    The namespace of the schema
+     * @param   version      The version of the schema
      */
     public SchemaReference(String location, String namespace, String version) {
         LOCATION = location;

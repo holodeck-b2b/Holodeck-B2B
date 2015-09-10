@@ -99,7 +99,7 @@ public class PayloadInfo {
         // Create new collection
         ArrayList<org.holodeckb2b.ebms3.persistent.message.Payload> payloads = new ArrayList<org.holodeckb2b.ebms3.persistent.message.Payload>();
         // Get all child elements containing the properties
-        Iterator it = piElement.getChildrenWithName(PartInfo.Q_ELEMENT_NAME);
+        Iterator<?> it = piElement.getChildrenWithName(PartInfo.Q_ELEMENT_NAME);
         // Read each property element and add it info to the collection
         while (it.hasNext())
             payloads.add(PartInfo.readElement((OMElement) it.next()));

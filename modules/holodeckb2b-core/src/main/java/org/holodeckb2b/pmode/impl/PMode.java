@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+
 import org.holodeckb2b.common.pmode.IPMode;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
@@ -137,7 +138,7 @@ public class PMode implements IPMode {
      * @return The PMode <code>legs</code>.
      */
     @Override
-    public ArrayList getLegs() {
+    public ArrayList<Leg> getLegs() {
         return this.Leg;
     }
     

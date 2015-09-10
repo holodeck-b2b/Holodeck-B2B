@@ -40,9 +40,8 @@ public class PModeIdTest {
      * 
      * @param fName The filename for the PMode
      * @return PMode or NULL in case of an error
-     * @throws Exception 
      */
-    public PMode createFromFile(String fName) throws Exception  {
+    public PMode createFromFile(String fName) {
 
         try {
             // retrieve the resource from the pmodetest directory.
