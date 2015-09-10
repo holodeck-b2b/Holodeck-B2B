@@ -35,8 +35,6 @@ public class ProtocolTest {
     public ProtocolTest() {
     }    
     
-    private Protocol createFromFile(String fName) {
-    
     /**
      * Create an Protocol from file.
      * 
