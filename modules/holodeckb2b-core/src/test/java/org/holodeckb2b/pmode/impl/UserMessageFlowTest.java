@@ -38,9 +38,8 @@ public class UserMessageFlowTest {
      * 
      * @param fName The filename for the UserMessageFlow
      * @return UserMessageFlow or NULL in case of an error
-     * @throws Exception 
      */
-    public UserMessageFlow createFromFile(String fName) throws Exception  {
+    public UserMessageFlow createFromFile(String fName)  {
 
         try {
             // retrieve the resource from the pmodetest directory.

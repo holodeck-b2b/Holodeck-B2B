@@ -38,6 +38,9 @@ public class Interval {
 
     /**
      * Create an Interval with specified length
+     * 
+     * @param length the length to set
+     * @param unit the unit to set
      */
     public Interval(long length, TimeUnit unit) {
         this.length = length;
@@ -89,11 +92,22 @@ public class Interval {
      * @return      <code>true</code> if <code>this.length == i.length && this.unit == i.unit</code>,<br>
      *              <code>false</code> otherwise
      */
+    @Override
     public boolean equals(Object o) {
-        if (o instanceof Interval) 
-            return this.length == ((Interval) o).length && this.unit == ((Interval) o).unit;
-        else
-            return false;
+        if (o == this)
+          return true;
+        if (o == null || !getClass ().equals (o.getClass ()))
+          return false;
+        Interval rhs = (Interval) o;
+        return this.length == rhs.length && this.unit == rhs.unit;
     }
-    
+
+    @Override
+    public int hashCode () {
+      int ret = 17;
+      ret = ret * 31 + (int) (this.length >>> 32);
+      ret = ret * 31 + (int) (this.length & 0xffffffffL);
+      ret = ret * 31 + this.unit.hashCode ();
+      return ret;
+    }
 }

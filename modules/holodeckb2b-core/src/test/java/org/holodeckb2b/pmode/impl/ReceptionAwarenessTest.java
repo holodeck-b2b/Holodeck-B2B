@@ -17,9 +17,7 @@
 package org.holodeckb2b.pmode.impl;
 
 import java.io.File;
-import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -37,9 +35,8 @@ public class ReceptionAwarenessTest {
      * 
      * @param fName The filename for the ReceptionAwareness
      * @return ReceptionAwareness or NULL in case of an error
-     * @throws Exception 
      */
-    public ReceptionAwareness createFromFile(String fName) throws Exception  {
+    public ReceptionAwareness createFromFile(String fName) {
 
         try {
             // retrieve the resource from the pmodetest directory.

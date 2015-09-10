@@ -61,13 +61,13 @@ public class ReadReceipt extends BaseHandler {
         if (messaging != null) {
             // Check if there are Receipt signals
             log.debug("Check for Receipt elements to determine if message contains one or more receipts");
-            Iterator rcpts = Receipt.getElements(messaging);
+            Iterator<OMElement> rcpts = Receipt.getElements(messaging);
             
             if (!Utils.isNullOrEmpty(rcpts)) {
                 log.debug("Receipt(s) found, read information from message");
                 
                 while (rcpts.hasNext()) {
-                    OMElement rcptElem = (OMElement) rcpts.next();
+                    OMElement rcptElem = rcpts.next();
                     org.holodeckb2b.ebms3.persistent.message.Receipt receipt = null;
                     try {
                         // Read information into Receipt object

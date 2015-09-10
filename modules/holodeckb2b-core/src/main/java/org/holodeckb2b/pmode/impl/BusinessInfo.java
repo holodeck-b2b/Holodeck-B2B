@@ -88,6 +88,6 @@ public class BusinessInfo implements IBusinessInfo {
     /*
      * Constructor
      */
-    public BusinessInfo() {};
+    public BusinessInfo() {}
     
 }

@@ -184,14 +184,16 @@ public abstract class MessageUnit implements Serializable, org.holodeckb2b.commo
     /**
      * Default constructor creates an empty object
      */
-    public MessageUnit() {};
+    public MessageUnit() {}
     
     /**
      * Constructor to create a new persistent <code>IMessageUnit</code> object 
      * based on another IMessageUnit object.
      * 
-     * @deprecated 
+     * @param src source object to copy from
+     * @deprecated Dont use anymore 
      */
+    @Deprecated
     public MessageUnit(org.holodeckb2b.common.messagemodel.IMessageUnit src) {
         MU_TIMESTAMP = src.getTimestamp();
         MESSAGE_ID = src.getMessageId();

@@ -256,7 +256,7 @@ public class ProcessWSSHeaders extends BaseHandler {
             log.debug("Mark security headers as processed");
             SOAPHeader header = mc.getEnvelope().getHeader();
             if (header != null) {
-                ArrayList wsseHdrs = header.getHeaderBlocksWithNSURI(SecurityConstants.WSS_NAMESPACE_URI);
+                ArrayList<?> wsseHdrs = header.getHeaderBlocksWithNSURI(SecurityConstants.WSS_NAMESPACE_URI);
                 for(Object h : wsseHdrs) {
                     SOAPHeaderBlock soapHdr = (SOAPHeaderBlock) h;
                     String target = soapHdr.getRole();

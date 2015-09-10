@@ -8,7 +8,6 @@ import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.holodeckb2b.common.workerpool.IWorkerConfiguration;
 import org.holodeckb2b.common.workerpool.IWorkerPoolConfiguration;
 import org.junit.After;
@@ -75,7 +74,7 @@ public class XMLWorkerPoolConfigTest {
         List<IWorkerConfiguration> workers = result.getWorkers();
         assertEquals(2, workers.size());
         
-        assertEquals(false, workers.get(0).activate());
+        assertFalse(workers.get(0).activate());
         assertEquals("workerClass1", workers.get(0).getWorkerTask());
         
         Map<String, ?> params = workers.get(0).getTaskParameters();
@@ -146,7 +145,7 @@ public class XMLWorkerPoolConfigTest {
         List<IWorkerConfiguration> workers = result.getWorkers();
         assertEquals(1, workers.size());
         
-        assertEquals(false, workers.get(0).activate());
+        assertFalse(workers.get(0).activate());
         assertEquals("name1", workers.get(0).getName());
         assertEquals("workerClass1", workers.get(0).getWorkerTask());
         

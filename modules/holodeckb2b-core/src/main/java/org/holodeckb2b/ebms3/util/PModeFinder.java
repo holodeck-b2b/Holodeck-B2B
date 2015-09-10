@@ -65,14 +65,14 @@ public class PModeFinder {
     /**
      * 
      */
-    protected static enum PARAMETERS {ID, FROM, FROM_ROLE, TO, TO_ROLE, SERVICE, ACTION, MPC, AGREEMENT};
+    protected static enum PARAMETERS {ID, FROM, FROM_ROLE, TO, TO_ROLE, SERVICE, ACTION, MPC, AGREEMENT}
     
     /**
      * 
      */
     protected static Map<PARAMETERS, Integer> MATCH_WEIGHTS; // {37, 7, 2, 7, 2, 5, 5, 1};
     static {
-        Map<PARAMETERS, Integer> aMap = new EnumMap(PARAMETERS.class);
+        Map<PARAMETERS, Integer> aMap = new EnumMap<> (PARAMETERS.class);
         aMap.put(PARAMETERS.ID, 37);
         aMap.put(PARAMETERS.FROM, 7);
         aMap.put(PARAMETERS.FROM_ROLE, 2);

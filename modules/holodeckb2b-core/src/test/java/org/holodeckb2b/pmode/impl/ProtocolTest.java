@@ -37,6 +37,14 @@ public class ProtocolTest {
     
     private Protocol createFromFile(String fName) {
     
+    /**
+     * Create an Protocol from file.
+     * 
+     * @param fName The filename for the Protocol
+     * @return Protocol or NULL in case of an error
+     */
+    public Protocol createFromFile(String fName) {
+
         try {
             // retrieve the resource from the pmodetest directory.
             File f = new File(this.getClass().getClassLoader().getResource("pmodetest/prot/" + fName).getPath());

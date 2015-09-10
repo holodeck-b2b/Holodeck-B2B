@@ -83,7 +83,7 @@ public class Receipt extends SignalMessage implements IReceipt {
             OMElement contentElement = builder.getDocumentElement();
             // Now the children of this element are the actual content of the Receipt
             xmlContent = new ArrayList<OMElement>();
-            Iterator it = contentElement.getChildElements();
+            Iterator<?> it = contentElement.getChildElements();
             while (it.hasNext())
                 xmlContent.add((OMElement) it.next());
         }
@@ -91,13 +91,13 @@ public class Receipt extends SignalMessage implements IReceipt {
         return xmlContent;
     }
     
-    public void setContent(Iterator elements) {
+    public void setContent(Iterator<OMElement> elements) {
         // Serialize to database object
         // Create a "placeholder" element for all children of the Receipt element
         OMElement c = OMAbstractFactory.getOMFactory().createOMElement(XML_CONTENT_QNAME);
         // add all elements to it
         while (elements.hasNext())
-            c.addChild(((OMElement) elements.next()).cloneOMElement());
+            c.addChild(elements.next().cloneOMElement());
         
         try {
             // Now serialize the placeholder element to database

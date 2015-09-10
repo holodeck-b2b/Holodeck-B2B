@@ -107,7 +107,7 @@ public class MessageInfo {
      * @param mu            The {@link MessageUnit} where information should be
      *                      stored in
      * @throws PackagingException   When the given element does not conform to
-     *                              ebMS specification and can therefor not be
+     *                              ebMS specification and can therefore not be
      *                              read completely
      */
     public static void readElement(OMElement miElement, MessageUnit mu) throws PackagingException {

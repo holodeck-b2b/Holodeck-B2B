@@ -67,7 +67,7 @@ public class FileDeliveryFactory implements IMessageDelivererFactory {
     /**
      * Enumeration for the possible formats
      */
-    enum FileFormat { MMD, EBMS, SINGLE_XML };
+    enum FileFormat { MMD, EBMS, SINGLE_XML }
     
     /**
      * The delivery directory path

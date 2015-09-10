@@ -36,7 +36,7 @@ public class PartyId implements IPartyId {
     /**
      * Default constructor
      */
-    public PartyId() {};
+    public PartyId() {}
     
     /**
      * Creates a <code>PartyId</code> with given data

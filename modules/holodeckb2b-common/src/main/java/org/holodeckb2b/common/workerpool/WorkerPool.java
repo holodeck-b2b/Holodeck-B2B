@@ -17,12 +17,12 @@
 package org.holodeckb2b.common.workerpool;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.util.Interval;
@@ -57,7 +57,7 @@ public class WorkerPool {
         /**
          * The thread the instance is running in
          */
-        Future      runningWorker;
+        Future<?>   runningWorker;
     }
     
     /**
@@ -86,6 +86,7 @@ public class WorkerPool {
     /**
      * Create an empty worker pool with given workerName
      *
+     * @param name the worker name
      */
     public WorkerPool(String name) {
         this.name = name;
@@ -96,6 +97,7 @@ public class WorkerPool {
     /**
      * Create a worker pool with the given configuration
      *
+     * @param config the configuraiton to use
      */
     public WorkerPool(IWorkerPoolConfiguration config) {
         this(config.getName());
@@ -165,6 +167,7 @@ public class WorkerPool {
     /**
      * Cleans up the worker pool and tries to stop all workers when not stopped already
      */
+    @Override
     public void finalize() throws Throwable {
         try {
             if (!pool.isTerminated()) {
@@ -269,7 +272,7 @@ public class WorkerPool {
         log.debug("Adding new worker to the pool");
         
         try {
-            Class   taskClass = Class.forName(workerCfg.getWorkerTask());
+            Class<?> taskClass = Class.forName(workerCfg.getWorkerTask());
 
             int numWorker = (workerCfg.getConcurrentExecutions() == 0 ? 1 : workerCfg.getConcurrentExecutions());
             for(int i = 0; i < numWorker; i++) {

@@ -139,5 +139,5 @@ public interface IPMode {
      * 
      * @return One or two, depending on the MEP, {@link ILeg} objects containing the configuration of the legs.
      */
-    public Collection<ILeg> getLegs();
+    public Collection<? extends ILeg> getLegs();
 }

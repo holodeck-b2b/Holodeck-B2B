@@ -65,13 +65,13 @@ public class Property implements Serializable, IProperty {
     /*
      * Constructors
      */
-    public Property() {};
+    public Property() {}
     
     /**
      * Create a new <code>Property</code> for the given name value pair.
      * 
-     * @param String   The name of the property
-     * @param String   The value of the property
+     * @param name   The name of the property
+     * @param value  The value of the property
      */
     public Property(String name, String value) {
         NAME = name;
@@ -81,9 +81,9 @@ public class Property implements Serializable, IProperty {
     /**
      * Create a new <code>Property</code> for the given name value pair and type.
      * 
-     * @param String   The name of the property
-     * @param String   The value of the property
-     * @param String   The type of the property
+     * @param name   The name of the property
+     * @param value  The value of the property
+     * @param type   The type of the property
      */
     public Property(String name, String value, String type) {
         NAME = name;

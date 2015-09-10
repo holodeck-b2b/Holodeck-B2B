@@ -34,7 +34,7 @@ public interface ILeg {
     /**
      * Enumeration of the allowed <i>"labels"</i> of a leg. 
      */
-    public enum Label  { REQUEST, REPLY };
+    public enum Label  { REQUEST, REPLY }
     
     /**
      * Gets the <i>label</i> of this leg.

@@ -22,7 +22,7 @@ import org.holodeckb2b.ebms3.persistent.message.EbmsError;
 /**
  * Represent the <i>DeCompressionFailure</i> error as defined in section 3.1 of the AS4 profile and signals that a
  * payload compressed using the AS4 Compression Feature could not be decompressed successfully.
- * <p>As this class is a child class of {@see EbmsError} it can be saved directly to the database. When retrieved from 
+ * <p>As this class is a child class of {@link EbmsError} it can be saved directly to the database. When retrieved from 
  * the database again it is however a "normal" <code>EbmsError</code> as this class is not defined as an JPA class.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
