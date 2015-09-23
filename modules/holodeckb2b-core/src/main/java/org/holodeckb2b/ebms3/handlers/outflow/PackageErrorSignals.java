@@ -37,7 +37,6 @@ import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
 import org.holodeckb2b.ebms3.persistent.message.Receipt;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.pmode.impl.ErrorHandling;
 
 /**
  * If there are <i>Error signals </i> that must be sent, this handler adds the <code>eb:SignalMessage</code> elements to 
@@ -65,7 +64,6 @@ import org.holodeckb2b.pmode.impl.ErrorHandling;
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see IErrorHandling
- * @see ErrorHandling
  */
 public class PackageErrorSignals extends BaseHandler {
 
