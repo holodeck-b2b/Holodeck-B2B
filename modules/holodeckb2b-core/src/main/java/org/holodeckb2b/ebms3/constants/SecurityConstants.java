@@ -122,4 +122,8 @@ public final class SecurityConstants {
      */
     public static final String ENCRYPTION = PREFIX + "Encryption";
     
+    /**
+     * Identifier for the indicator whether the SOAP Body should be encrypted
+     */
+    public static final String ENCRYPT_BODY = PREFIX + "encrypt-body";
 }

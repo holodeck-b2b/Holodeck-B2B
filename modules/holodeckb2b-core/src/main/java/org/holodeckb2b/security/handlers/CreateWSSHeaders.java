@@ -288,10 +288,11 @@ public class CreateWSSHeaders extends BaseHandler {
         mc.setProperty("" + encProperties.hashCode(), encProperties);
 
         // Set up encryption config
-        // AS4 requires that only the payloads are encrypted. Although AS4 only requires encryption of the SOAP Body if
-        // if it contains a payload we just encrypt it. 
-        mc.setProperty(WSHandlerConstants.ENCRYPTION_PARTS, (mc.isSOAP11() ? WSS4J_PART_S11_BODY :
-                                                                             WSS4J_PART_S12_BODY));
+        // AS4 requires that only the payloads are encrypted, so we encrypt the Body only when it contains a payload
+        Boolean includesBodyPayload = (Boolean) mc.getProperty(SecurityConstants.ENCRYPT_BODY);
+        if (includesBodyPayload != null && includesBodyPayload)
+            mc.setProperty(WSHandlerConstants.ENCRYPTION_PARTS, (mc.isSOAP11() ? WSS4J_PART_S11_BODY :
+                                                                                 WSS4J_PART_S12_BODY));
         
         // And if there are attachments also the attachments must be encrypted. 
         mc.setProperty(WSHandlerConstants.OPTIONAL_ENCRYPTION_PARTS, WSS4J_PART_ATTACHMENTS);
