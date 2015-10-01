@@ -862,15 +862,15 @@ public class MessageUnitDAO {
     private static <T extends MessageUnit> T setProcessingState(final T mu, String state) throws DatabaseException {
         EntityManager em = JPAUtil.getEntityManager();
         em.getTransaction().begin();
-        T muToModify = (T) em.find(MessageUnit.class, mu.getOID(), LockModeType.PESSIMISTIC_WRITE);
+        T lockedMU = (T) em.find(MessageUnit.class, mu.getOID(), LockModeType.PESSIMISTIC_WRITE);
         
         ProcessingState newState = new ProcessingState(state);
-        muToModify.setProcessingState(newState);
-        T modifiedMU = em.merge(muToModify);
+        mu.setProcessingState(newState);
+        em.merge(mu);
         em.getTransaction().commit();
         em.close();
         
-        return modifiedMU;
+        return lockedMU;
     }
 
     /*
