@@ -151,10 +151,10 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
             // Update the message meta data in data base and change the processing state of the
             // message to indicate it is now ready for delivery to the business application
             MessageUnitDAO.updatePayloadMetaData(um);
-            um = MessageUnitDAO.setReadyForDelivery(um);
+            MessageUnitDAO.setReadyForDelivery(um);
         } catch (IOException | XMLStreamException ex) {
             log.fatal("Payload(s) could not be saved to temporary file! Details:" + ex.getMessage());
-            um = MessageUnitDAO.setFailed(um);
+            MessageUnitDAO.setFailed(um);
             // Stop processing as content can not be saved. Send error to sender of message
             throw new AxisFault("Unable to create file for temporarily storing payload content", ex);
         } 
@@ -234,7 +234,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
         log.debug("Error stored in message context for further processing");
         
         log.debug("Change processing state of the user message");
-        um = MessageUnitDAO.setFailed(um);
+        MessageUnitDAO.setFailed(um);
     }
     
     

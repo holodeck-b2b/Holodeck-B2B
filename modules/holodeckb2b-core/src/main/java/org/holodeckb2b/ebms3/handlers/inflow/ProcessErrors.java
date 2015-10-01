@@ -100,15 +100,15 @@ public class ProcessErrors extends BaseHandler {
                                                                                             + "] to failed");
         if (isWarning(errSignal)) {
             log.debug("The Error signal contains only warnings, so refd message unit is processed");
-            refdMsgUnit = MessageUnitDAO.setWarning(refdMsgUnit);
+            MessageUnitDAO.setWarning(refdMsgUnit);
         } else {
             log.debug("The Error signal indicates failed processing");
-            refdMsgUnit = MessageUnitDAO.setFailed(refdMsgUnit);
+            MessageUnitDAO.setFailed(refdMsgUnit);
         }
 
         log.debug("Done processing Error signal [" + errorSignal.getMessageId() + "]");
         // Errors may need to be delivered to bussiness app which can be done now
-        errorSignal = MessageUnitDAO.setReadyForDelivery(errorSignal);   
+        MessageUnitDAO.setReadyForDelivery(errorSignal);   
         return true;
     }
     
