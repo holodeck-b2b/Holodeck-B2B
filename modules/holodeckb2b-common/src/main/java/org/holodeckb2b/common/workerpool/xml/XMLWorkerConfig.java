@@ -25,7 +25,7 @@ import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Root;
 
 /**
- * Implements the configuration of a Worker as defined by {@see IWorkerConfiguration} using XML. 
+ * Implements the configuration of a Worker as defined by {@link IWorkerConfiguration} using XML. 
  * 
  * <p>The XML element containing the configuration is shown here:
  * <pre>

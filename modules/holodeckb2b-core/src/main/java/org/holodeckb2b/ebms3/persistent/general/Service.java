@@ -54,7 +54,7 @@ public class Service implements Serializable, IService {
     /*
      * Constructors
      */
-    public Service() {};
+    public Service() {}
     
     /**
      * Construct a new Service object with the given name and type

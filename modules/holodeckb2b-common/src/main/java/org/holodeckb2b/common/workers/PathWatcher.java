@@ -75,7 +75,7 @@ public abstract class PathWatcher extends AbstractWorkerTask {
      * Is called before processing of changes in the file list starts. 
      * <p>This method can be used by implementations to prepare for handling the changes.  
      */
-    protected void doPreProcessing() {};    
+    protected void doPreProcessing() {}    
 
     /**
      * Should handle a change in the watched path. This <b>abstract</b> method is
@@ -90,7 +90,7 @@ public abstract class PathWatcher extends AbstractWorkerTask {
      * Is called after processing of changes in the file list starts. 
      * <p>This method can be used by implementations to finalize the processing of changes.  
      */
-    protected void doPostProcessing() {};    
+    protected void doPostProcessing() {}    
     
     /**
      * Should return the current list of files on the given path.

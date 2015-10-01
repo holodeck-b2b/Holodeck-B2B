@@ -35,7 +35,7 @@ import org.holodeckb2b.common.messagemodel.IUserMessage;
 public class UserMessage {
     
     /**
-     * The fully qualified name of the element as an {@see QName}
+     * The fully qualified name of the element as an {@link QName}
      */
     static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "UserMessage");
     
@@ -82,15 +82,15 @@ public class UserMessage {
     }
     
     /**
-     * Gets an {@see Iterator} for the <code>eb:UserMessage</code> elements 
+     * Gets an {@link Iterator} for the <code>eb:UserMessage</code> elements 
      * from the given ebMS 3 Messaging header in the SOAP message.
      * 
      * @param messaging   The SOAP Header block that contains the ebMS header,
      *                    i.e. the <code>eb:Messaging</code> element
-     * @return      An {@see Iterator} for all {@see OMElement}s representing a 
+     * @return      An {@link Iterator} for all {@link OMElement}s representing a 
      *              <code>eb:UserMessage</code> element in the given header
      */
-    public static Iterator getElements(OMElement messaging) {
+    public static Iterator<?> getElements(OMElement messaging) {
         return messaging.getChildrenWithName(Q_ELEMENT_NAME);
     }
     

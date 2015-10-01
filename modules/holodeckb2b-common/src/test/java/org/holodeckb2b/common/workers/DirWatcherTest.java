@@ -160,11 +160,13 @@ public class DirWatcherTest {
     public class DirWatcherImpl extends DirWatcher {
         public int c = 0;
         
+        @Override
         public void run() {
             c = 0;
             super.run();
         }
         
+        @Override
         public void onChange(File f, Event event) {
             System.out.println("Change [" + event.name() + "] reported for " + f.getAbsolutePath());
             c++;

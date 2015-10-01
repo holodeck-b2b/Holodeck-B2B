@@ -76,13 +76,13 @@ public class ReadError extends BaseHandler {
         if (messaging != null) {
             // Check if there are Error signals
             log.debug("Check for Error elements to determine if message contains one or more errors");
-            Iterator errorSigs = ErrorSignal.getElements(messaging);
+            Iterator<OMElement> errorSigs = ErrorSignal.getElements(messaging);
             
             if (errorSigs != null) {
                 log.debug("Error(s) found, read information from message");
                 
                 while (errorSigs.hasNext()) {
-                    OMElement errElem = (OMElement) errorSigs.next();
+                    OMElement errElem = errorSigs.next();
                     org.holodeckb2b.ebms3.persistent.message.ErrorMessage errorSignal = null;
                     try {
                         // Read information into ErrorMessage object
@@ -90,6 +90,8 @@ public class ReadError extends BaseHandler {
                         // And store in database and message context for further processing
                         log.debug("Store Error Signal in database");
                         MessageUnitDAO.storeReceivedMessageUnit(errorSignal);
+                        // Add to message context for further processing
+                        MessageContextUtils.addRcvdError(mc, errorSignal);
                         log.debug("Check consistency of references");
                         if (!checkRefConsistency(errorSignal)) {
                             log.warn("The references containd in Error signal [msgId=" + errorSignal.getMessageId()
@@ -101,9 +103,7 @@ public class ReadError extends BaseHandler {
                             MessageContextUtils.addGeneratedError(mc, viError);  
                             MessageUnitDAO.setFailed(errorSignal);
                         } else {
-                            // Add to message context for further processing
-                            log.debug("References are consistent, add Error to message context for further processing");
-                            MessageContextUtils.addRcvdError(mc, errorSignal);
+                            log.debug("References are consistent");
                         }
                     } catch (PackagingException ex) {
                         log.error("Received error could not read from message! Details: " + ex.getMessage());
@@ -145,7 +145,8 @@ public class ReadError extends BaseHandler {
         } 
         
         while (it.hasNext() && consistent) {
-            consistent = (errorRefToMsgId == refToMessageId || errorRefToMsgId.equals(refToMessageId));
+            consistent = (errorRefToMsgId == refToMessageId 
+                        || (errorRefToMsgId != null && errorRefToMsgId.equals(refToMessageId)));
             errorRefToMsgId = it.next().getRefToMessageInError();
         }
         

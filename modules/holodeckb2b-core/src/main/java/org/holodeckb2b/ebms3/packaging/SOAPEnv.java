@@ -80,11 +80,11 @@ public class SOAPEnv {
 
     
     /**
-     * Gets an {@see OMNamespace} object for the ebMS 3 namespace for the SOAP
+     * Gets an {@link OMNamespace} object for the ebMS 3 namespace for the SOAP
      * envelope the given element is contained in.
      * 
      * @param   e     The element that is contained in the SOAP envelop
-     * @return  The {@see OMNamespace} object for the ebMS 3 namespace if it was 
+     * @return  The {@link OMNamespace} object for the ebMS 3 namespace if it was 
      *          declared in this SOAP message;
      *          <code>null</code> if there is no namespace declared for ebMS 3
      */

@@ -35,7 +35,7 @@ import org.holodeckb2b.common.general.IProperty;
 public class PartProperties {
     
     /**
-     * The fully qualified name of the element as an {@see QName}
+     * The fully qualified name of the element as an {@link QName}
      */
     static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PartProperties");
 
@@ -98,7 +98,7 @@ public class PartProperties {
         // Create new collection
         ArrayList<org.holodeckb2b.ebms3.persistent.general.Property> props = new ArrayList<org.holodeckb2b.ebms3.persistent.general.Property>();
         // Get all child elements containing the properties
-        Iterator it = ppElement.getChildrenWithName(Property.Q_ELEMENT_NAME);
+        Iterator<?> it = ppElement.getChildrenWithName(Property.Q_ELEMENT_NAME);
         // Read each property element and add it info to the collection
         while (it.hasNext())
             props.add(Property.readElement((OMElement) it.next()));

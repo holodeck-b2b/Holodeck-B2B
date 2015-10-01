@@ -59,7 +59,7 @@ public class SecurityUtils {
     public enum CertType { 
         pub, 
         priv 
-    };
+    }
 
     
     /**
@@ -235,7 +235,7 @@ public class SecurityUtils {
             return null; // No default security header
         
         // Get the ds:SignedInfo descendant in the default header.
-        Iterator<OMElement> signatureElems = (Iterator<OMElement>) defHeader.getChildrenWithName(
+        Iterator<OMElement> signatureElems = defHeader.getChildrenWithName(
                                                           new QName(SecurityConstants.DSIG_NAMESPACE_URI, "Signature"));
         if (signatureElems == null || !signatureElems.hasNext())
             return null; // No Signature in default header

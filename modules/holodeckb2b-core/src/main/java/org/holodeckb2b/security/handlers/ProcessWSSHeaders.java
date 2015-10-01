@@ -28,6 +28,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.ext.WSSecurityException.ErrorCode;
 import org.apache.wss4j.common.principal.UsernameTokenPrincipal;
 import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.WSSConfig;
@@ -118,7 +119,10 @@ public class ProcessWSSHeaders extends BaseHandler {
         Document domEnvelope = Axis2Utils.convertToDOM(mc);
         
         if (domEnvelope == null) {
-            log.error("Converting the SOAP envelope to DOM representation failed");            
+            handleWSSecurityException(mc, null, SecurityConstants.WSS_FAILURES.UNKNOWN, 
+                                      new WSSecurityException(ErrorCode.FAILURE, 
+                                                        "Converting the SOAP envelope to DOM representation failed")
+                                     ); 
             return InvocationResponse.CONTINUE;
         }
         
@@ -126,7 +130,7 @@ public class ProcessWSSHeaders extends BaseHandler {
             // Create security header processor
             processor = new WSSReceiveHandler(mc, domEnvelope, log);
         } catch (WSSecurityException ex) {
-            log.error("Setting up the security processor failed! Details: " + ex.getMessage());            
+            handleWSSecurityException(mc, null, SecurityConstants.WSS_FAILURES.UNKNOWN, ex);
             return InvocationResponse.CONTINUE;
         }
         
@@ -171,7 +175,7 @@ public class ProcessWSSHeaders extends BaseHandler {
                     // An exception has occurred during signature processing
                     handleWSSecurityException(mc, SecurityConstants.DEFAULT_WSS_HEADER, 
                                            SecurityConstants.WSS_FAILURES.SIGNATURE,
-                                           (WSSecurityException) decResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
+                                           (WSSecurityException) signResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
                                            );
                     // No need to further process result or header
                     return InvocationResponse.CONTINUE;                 
@@ -221,7 +225,7 @@ public class ProcessWSSHeaders extends BaseHandler {
                 // Indicate that username token processing failed
                 handleWSSecurityException(mc, SecurityConstants.EBMS_WSS_HEADER, 
                                           SecurityConstants.WSS_FAILURES.UT,
-                                          (WSSecurityException) decResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
+                                          (WSSecurityException) utResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
                                          );
                 // No need to further process result or header
                 return InvocationResponse.CONTINUE;            
@@ -252,7 +256,7 @@ public class ProcessWSSHeaders extends BaseHandler {
             log.debug("Mark security headers as processed");
             SOAPHeader header = mc.getEnvelope().getHeader();
             if (header != null) {
-                ArrayList wsseHdrs = header.getHeaderBlocksWithNSURI(SecurityConstants.WSS_NAMESPACE_URI);
+                ArrayList<?> wsseHdrs = header.getHeaderBlocksWithNSURI(SecurityConstants.WSS_NAMESPACE_URI);
                 for(Object h : wsseHdrs) {
                     SOAPHeaderBlock soapHdr = (SOAPHeaderBlock) h;
                     String target = soapHdr.getRole();

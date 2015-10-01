@@ -89,7 +89,7 @@ public class PullConfigurationTest {
             assertEquals(3, workers.size());
             
             assertEquals(new Interval(1985496162, TimeUnit.SECONDS), workers.get(0).getInterval());
-            Map<String,?> params = (Map<String, ?>) workers.get(0).getTaskParameters();
+            Map<String,?> params = workers.get(0).getTaskParameters();
             assertFalse(params.isEmpty());
             assertTrue((Boolean) params.get(PullWorker.PARAM_INCLUDE));
             Collection<String> pmodes = (Collection<String>) params.get(PullWorker.PARAM_PMODES);
@@ -97,7 +97,7 @@ public class PullConfigurationTest {
             assertTrue(pmodes.contains("LO7.wrubhpHfZ9Kzr3buPpHMVI"));
             
             assertEquals(new Interval(1622097273, TimeUnit.SECONDS), workers.get(1).getInterval());
-            params = (Map<String, ?>) workers.get(1).getTaskParameters();
+            params = workers.get(1).getTaskParameters();
             assertFalse(params.isEmpty());
             assertTrue((Boolean) params.get(PullWorker.PARAM_INCLUDE));
             pmodes = (Collection<String>) params.get(PullWorker.PARAM_PMODES);
@@ -105,7 +105,7 @@ public class PullConfigurationTest {
             assertTrue(pmodes.contains("INyEfTQuibb8t"));
             assertTrue(pmodes.contains("Qw1hfHh"));
 
-            params = (Map<String, ?>) workers.get(2).getTaskParameters();
+            params = workers.get(2).getTaskParameters();
             assertFalse(params.isEmpty());
             assertFalse((Boolean) params.get(PullWorker.PARAM_INCLUDE));
             pmodes = (Collection<String>) params.get(PullWorker.PARAM_PMODES);

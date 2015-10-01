@@ -25,7 +25,7 @@ import java.util.zip.DeflaterInputStream;
 
 /**
  * Is an {@link InputStream} implementation with on the fly GZIP compression.
- * <p>It uses the compression of the DeflaterInputStream and adds the GZIP header and trailer.
+ * <p>It uses the compression of the {@link DeflaterInputStream} and adds the GZIP header and trailer.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -54,7 +54,7 @@ public class GZIPCompressingInputStream extends DeflaterInputStream {
     // Enumeration that indicates the parts of the GZIP
     enum Part {
         HEADER, BODY, TRAILER
-    };
+    }
 
     // Indicator of which part we are now processing
     private Part part = null;
@@ -72,6 +72,17 @@ public class GZIPCompressingInputStream extends DeflaterInputStream {
         part = Part.HEADER;
     }
 
+    /**
+     * Reads compressed data into a byte array. This method uses {@link DeflaterInputStream#read(byte[], int, int)} to
+     * do the actual compression. Before it starts with the compressed data it returns the GZIP header and after the
+     * all compressed data is read the GZIP trialer is returned. 
+     * 
+     * @param b     buffer into which the data is read  
+     * @param off   starting offset of the data within b
+     * @param len   maximum number of compressed bytes to read into b
+     * @return      the actual number of bytes read, or -1 if the end of the uncompressed input stream is reached
+     * @throws IOException  if an I/O error occurs or if this input stream is already closed
+     */
     @Override
     public int read(byte b[], int off, int len) throws IOException {
         // The number of bytes read 
@@ -112,10 +123,11 @@ public class GZIPCompressingInputStream extends DeflaterInputStream {
                 position += i;
                 // And also increase counter of number of bytes read
                 count += i;
-            }
+            } 
         }
         
-        return count;
+        // If we did not read anything we should return -1
+        return (count > 0 ? count : -1) ;
     }
 
     /**
