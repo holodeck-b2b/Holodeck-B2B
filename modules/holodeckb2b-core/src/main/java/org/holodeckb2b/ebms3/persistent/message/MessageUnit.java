@@ -36,6 +36,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.processing.ProcessingState;
 
 /**
@@ -112,15 +113,23 @@ public abstract class MessageUnit implements Serializable, org.holodeckb2b.commo
     }
     
     /**
-     * Sets the current state of processing to the given state.
+     * Sets the current state of processing to the given state. 
      * <p>
+     * This method will also set order of the new {@link ProcessingState} to ensure it will be the most recent state.
+     * Note that this does require the message unit to be locked for updates. This is a responsibility for the 
+     * {@link MessageUnitDAO}.
      * 
-     * @param state 
+     * @param state The new {@link ProcessingState} for the message unit
      */
     public void setProcessingState(ProcessingState state) {
         if (states == null) 
             states = new ArrayList<ProcessingState>();
-        
+            
+        if (states.isEmpty()) 
+            state.setOrder(0);
+        else 
+            state.setOrder(states.get(0).getOrder() + 1);
+            
         states.add(0, state);
     }
     
@@ -226,6 +235,6 @@ public abstract class MessageUnit implements Serializable, org.holodeckb2b.commo
     private Date    MU_TIMESTAMP;
     
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @OrderBy("START DESC")
+    @OrderBy("PROC_STATE_NUM DESC")
     private List<ProcessingState>       states;
 }

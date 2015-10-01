@@ -851,6 +851,8 @@ public class MessageUnitDAO {
     private static void setProcessingState(MessageUnit mu, String state) throws DatabaseException {
         EntityManager em = JPAUtil.getEntityManager();
         em.getTransaction().begin();
+        mu = em.find(MessageUnit.class, mu.getOID(), LockModeType.PESSIMISTIC_WRITE);
+        
         ProcessingState newState = new ProcessingState(state);
         mu.setProcessingState(newState);
         em.merge(mu);

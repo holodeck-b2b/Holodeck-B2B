@@ -24,7 +24,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 
 /**
  * Represents a state during the processing of a {@see MessageUnit}. A state consists
@@ -55,6 +54,14 @@ public class ProcessingState implements Serializable {
         return  NAME;
     }
     
+    public void setOrder(int order) {
+        this.PROC_STATE_NUM = order;
+    }
+    
+    public int getOrder() {
+        return PROC_STATE_NUM;
+    }
+     
     public void setStartTime(Date timestamp) {
         START = timestamp;
     }
@@ -78,14 +85,19 @@ public class ProcessingState implements Serializable {
      */
     public ProcessingState(String name) {
         this.NAME = name;
-        this.START = new Date();
+        this.START = new Date();        
     }
     
     /*
      * Fields
      * 
-     * NOTE: The JPA @Column annotation is not used so the attribute names are 
+     * NOTE 1: The JPA @Column annotation is not used so the attribute names are 
      * used as column names. Therefor the attribute names are in CAPITAL.
+     *
+     * NOTE 2: Because the timestamp of processing states is not accurate enough 
+     * to determine the order of the states a extra PROC_STATE_NUM field is used. The
+     * order is only relevant in relation to a specific message unit, not for all
+     * processing states in general.
      */
     
     /*
@@ -94,6 +106,8 @@ public class ProcessingState implements Serializable {
     @Id
     @GeneratedValue
     private long        OID;
+    
+    private int         PROC_STATE_NUM;
     
     private String      NAME;
     
