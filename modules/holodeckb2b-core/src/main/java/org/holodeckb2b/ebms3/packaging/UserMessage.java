@@ -37,7 +37,7 @@ public class UserMessage {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "UserMessage");
+    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "UserMessage", Constants.EBMS3_NS_PREFIX);
     
     /**
      * The local name of the mpc attribute

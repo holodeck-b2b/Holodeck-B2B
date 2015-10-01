@@ -35,7 +35,7 @@ public class PullRequest {
     /**
      * The fully qualified name of the element as an {@see QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PullRequest");
+    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PullRequest", Constants.EBMS3_NS_PREFIX);
     
     /**
      * The local name of the mpc attribute

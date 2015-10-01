@@ -34,17 +34,19 @@ public class CollaborationInfo {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "CollaborationInfo");
+    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "CollaborationInfo",
+                                                   Constants.EBMS3_NS_PREFIX);
 
     /**
      * The fully qualified name of the Action element as an {@link QName}
      */
-    private static final QName  Q_ACTION = new QName(Constants.EBMS3_NS_URI, "Action");
+    private static final QName  Q_ACTION = new QName(Constants.EBMS3_NS_URI, "Action", Constants.EBMS3_NS_PREFIX);
 
     /**
      * The fully qualified name of the element ConversationId as an {@link QName}
      */
-    private static final QName  Q_CONVERSATIONID = new QName(Constants.EBMS3_NS_URI, "ConversationId");
+    private static final QName  Q_CONVERSATIONID = new QName(Constants.EBMS3_NS_URI, "ConversationId",
+                                                             Constants.EBMS3_NS_PREFIX);
 
     /**
      * Creates a <code>CollaborationInfo</code> element and adds it to the given <code>UserMessage</code> element. 

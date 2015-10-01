@@ -41,7 +41,7 @@ public class Property {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Property");
+    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Property", Constants.EBMS3_NS_PREFIX);
     
     // The local name of the name attribute
     private static final String LN_ATTR_NAME = "name";

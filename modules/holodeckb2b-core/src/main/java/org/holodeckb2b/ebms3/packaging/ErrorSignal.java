@@ -47,12 +47,13 @@ public class ErrorSignal {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Error");
+    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Error", Constants.EBMS3_NS_PREFIX);
     
     /**
      * The fully qualified name of the ErrorDetail element as an {@link QName}
      */
-    private static final QName  Q_ERROR_DETAIL = new QName(Constants.EBMS3_NS_URI, "ErrorDetail");
+    private static final QName  Q_ERROR_DETAIL = new QName(Constants.EBMS3_NS_URI, "ErrorDetail", 
+                                                           Constants.EBMS3_NS_PREFIX);
 
     /*
      * The local names of the attributes of the Error element

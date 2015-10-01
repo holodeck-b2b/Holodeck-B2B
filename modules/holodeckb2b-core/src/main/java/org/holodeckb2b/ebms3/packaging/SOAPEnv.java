@@ -38,11 +38,6 @@ public class SOAPEnv {
     public enum SOAPVersion { SOAP_11, SOAP_12 }
 
     /**
-     * The prefix of the ebMS header block elements.
-     */
-    private static final String EBMS3_NS_PREFIX = "eb3";
-    
-    /**
      * Creates a new SOAP Envelope for sending an ebMS 3 message. The created SOAP
      * envelop will already contain a declaration of the ebMS 3 namespace.
      * 
@@ -75,7 +70,7 @@ public class SOAPEnv {
         // Declare all namespaces that are needed by default
         envelope.declareNamespace("http://www.w3.org/1999/XMLSchema-instance/", "xsi");
         envelope.declareNamespace("http://www.w3.org/1999/XMLSchema", "xsd");
-        envelope.declareNamespace(Constants.EBMS3_NS_URI, EBMS3_NS_PREFIX);
+        envelope.declareNamespace(Constants.EBMS3_NS_URI, Constants.EBMS3_NS_PREFIX);
     }
 
     

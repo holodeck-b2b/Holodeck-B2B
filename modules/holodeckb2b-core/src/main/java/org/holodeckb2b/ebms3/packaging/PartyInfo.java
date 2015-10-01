@@ -38,7 +38,7 @@ public class PartyInfo {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PartyInfo");
+    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PartyInfo", Constants.EBMS3_NS_PREFIX);
     
     /**
      * The <code>From</code> and <code>To</code> element are structurally equal,
@@ -52,17 +52,17 @@ public class PartyInfo {
         /**
          * The fully qualified name of the From element as an {@link QName}
          */
-        private static final QName  Q_FROM_PARTY = new QName(Constants.EBMS3_NS_URI, "From");
+        private static final QName  Q_FROM_PARTY = new QName(Constants.EBMS3_NS_URI, "From", Constants.EBMS3_NS_PREFIX);
 
         /**
          * The fully qualified name of the To element as an {@link QName}
          */
-        private static final QName  Q_TO_PARTY = new QName(Constants.EBMS3_NS_URI, "To"); 
+        private static final QName  Q_TO_PARTY = new QName(Constants.EBMS3_NS_URI, "To", Constants.EBMS3_NS_PREFIX); 
     
         /**
          * The fully qualified name of the PartyId element as an {@link QName}
          */
-        private static final QName  Q_PARTYID = new QName(Constants.EBMS3_NS_URI, "PartyId");
+        private static final QName  Q_PARTYID = new QName(Constants.EBMS3_NS_URI, "PartyId", Constants.EBMS3_NS_PREFIX);
         
         // The local name for the PartyId type attribute
         private static final String LN_PARTYID_TYPE = "type";
@@ -70,7 +70,7 @@ public class PartyInfo {
         /**
          * The fully qualified name of the Role element as an {@link QName}
          */
-        private static final QName  Q_ROLE = new QName(Constants.EBMS3_NS_URI, "Role");
+        private static final QName  Q_ROLE = new QName(Constants.EBMS3_NS_URI, "Role", Constants.EBMS3_NS_PREFIX);
         
         /**
          * Creates a <code>From</code> or <code>To</code> element and includes it in the

@@ -33,7 +33,7 @@ public class SignalMessage {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "SignalMessage");
+    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "SignalMessage", Constants.EBMS3_NS_PREFIX);
     
     
     /**

@@ -42,7 +42,7 @@ public class Receipt {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Receipt");
+    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Receipt", Constants.EBMS3_NS_PREFIX);
     
     /**
      * Creates a new <code>eb:SignalMessage</code> for an <i>Receipt</i> signal.

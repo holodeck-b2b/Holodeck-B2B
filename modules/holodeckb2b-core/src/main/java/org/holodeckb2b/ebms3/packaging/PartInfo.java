@@ -39,7 +39,7 @@ public class PartInfo {
     /**
      * The fully qualified name of the element as an {@see QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PartInfo");
+    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PartInfo", Constants.EBMS3_NS_PREFIX);
     
     /**
      * The local name of the href attribute

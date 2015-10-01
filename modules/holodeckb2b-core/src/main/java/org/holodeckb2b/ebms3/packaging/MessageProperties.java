@@ -37,7 +37,8 @@ public class MessageProperties {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "MessageProperties");
+    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "MessageProperties",
+                                                   Constants.EBMS3_NS_PREFIX);
 
     /**
      * Creates a <code>MessageProperties</code> element and adds it to the given <code>UserMessage</code> element. 

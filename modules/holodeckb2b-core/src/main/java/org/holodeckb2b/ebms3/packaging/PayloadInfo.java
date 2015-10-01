@@ -37,7 +37,7 @@ public class PayloadInfo {
     /**
      * The fully qualified name of the element as an {@see QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PayloadInfo");
+    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PayloadInfo", Constants.EBMS3_NS_PREFIX);
 
     /**
      * Creates a <code>PayloadInfo</code> element and adds it to the given <code>UserMessage</code> element. 

@@ -38,7 +38,7 @@ public class Description {
     /**
      * The fully qualified name of the element as an {@see QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Description");
+    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Description", Constants.EBMS3_NS_PREFIX);
     
     // The local name of the lang attribute
     private static final String LN_ATTR_LANG = "lang";
