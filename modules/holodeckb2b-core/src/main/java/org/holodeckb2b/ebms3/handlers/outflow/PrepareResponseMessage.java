@@ -206,7 +206,7 @@ public class PrepareResponseMessage extends BaseHandler {
         for(ErrorMessage e : errors) 
             try {
                 log.debug("Set state of error [" + e.getMessageId() + "] to failed as it can not be included");
-                MessageUnitDAO.setFailed(e);
+                e = MessageUnitDAO.setFailed(e);
                 log.debug("Changed state of error [" + e.getMessageId() + "] to failed!");                
             } catch (DatabaseException dbe) {
                 // Log and ignore error

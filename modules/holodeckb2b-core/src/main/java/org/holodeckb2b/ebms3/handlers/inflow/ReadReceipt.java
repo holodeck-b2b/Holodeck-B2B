@@ -82,7 +82,7 @@ public class ReadReceipt extends BaseHandler {
                             log.info("Received receipt [msgId=" + receipt.getMessageId() 
                                                             + "] does not contain reference");
                             // The receipt can not be processed if we don't know for which message it is intended!
-                            MessageUnitDAO.setFailed(receipt);
+                            receipt = MessageUnitDAO.setFailed(receipt);
                             // Create error and add to message context
                             createInvalidHeaderError(mc, rcptElem, "Missing required refToMessageId");
                         } else {

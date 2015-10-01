@@ -88,8 +88,7 @@ public class DeliverErrors extends BaseHandler {
             // Prepare message for delivery by checking it is still ready for delivery and then 
             // change its processing state to "out for delivery"
             log.debug("Prepare message [" + errorSig.getMessageId() + "] for delivery");
-            boolean readyForDelivery = false;
-            readyForDelivery = MessageUnitDAO.startDeliveryOfMessageUnit(errorSig);
+            boolean readyForDelivery = MessageUnitDAO.startDeliveryOfMessageUnit(errorSig);
                         
             if(readyForDelivery) {
                 // Errors in this signal can be delivered to business application
@@ -107,7 +106,7 @@ public class DeliverErrors extends BaseHandler {
                     }
                 
                 // All errors in signal processed, change the processing state to done
-                MessageUnitDAO.setDone(errorSig);
+                errorSig = MessageUnitDAO.setDone(errorSig);
             } else {
                 log.info("Error signal [" + errorSig.getMessageId() + "] is already processed for delivery");
             }

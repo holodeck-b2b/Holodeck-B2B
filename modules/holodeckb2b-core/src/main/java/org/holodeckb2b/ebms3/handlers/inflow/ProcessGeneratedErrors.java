@@ -105,7 +105,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
                         } else {
                             log.warn("Error without reference can not be sent because successfull message units exist");
                             // As we can not do anything with the error change its processing state to DONE
-                            MessageUnitDAO.setDone(errorMU);
+                            errorMU = MessageUnitDAO.setDone(errorMU);
                         }
                     } else {
                         // This collection of errors references one of the received message units. 

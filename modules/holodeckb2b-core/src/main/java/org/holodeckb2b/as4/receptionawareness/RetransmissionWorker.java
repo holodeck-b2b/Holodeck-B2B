@@ -95,7 +95,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                                     + " Awareness configuration in P-Mode [" + um.getPMode() + "]");
                         // Because we don't know how to process this message further the only thing we can do is set
                         // the processing to failed
-                        MessageUnitDAO.setFailed(um);
+                        um = MessageUnitDAO.setFailed(um);
                         continue; // with next message
                     }
 

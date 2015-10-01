@@ -23,7 +23,6 @@ import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.common.pmode.ITradingPartnerConfiguration;
-import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.common.security.ISecurityConfiguration;
 import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
@@ -33,6 +32,7 @@ import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
 import org.holodeckb2b.ebms3.util.MessageContextUtils;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.tokens.UsernameToken;
 import org.holodeckb2b.security.util.SecurityUtils;
 
@@ -139,7 +139,7 @@ public class AuthorizeMessage extends BaseHandler {
                 authError.setRefToMessageInError(mu.getMessageId());
                 authError.setErrorDetail("Authentication of message unit failed!");
                 MessageContextUtils.addGeneratedError(mc, authError);
-                MessageUnitDAO.setFailed(mu);
+                mu = MessageUnitDAO.setFailed(mu);
             } 
         }
     }
