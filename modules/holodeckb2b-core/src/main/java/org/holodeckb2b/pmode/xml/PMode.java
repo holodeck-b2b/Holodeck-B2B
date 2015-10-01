@@ -22,12 +22,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
-<<<<<<< HEAD:modules/holodeckb2b-core/src/main/java/org/holodeckb2b/pmode/impl/PMode.java
 import org.holodeckb2b.common.pmode.ILeg;
 import org.holodeckb2b.common.pmode.ILeg.Label;
-=======
-
->>>>>>> pmode-decoupling:modules/holodeckb2b-core/src/main/java/org/holodeckb2b/pmode/xml/PMode.java
 import org.holodeckb2b.common.pmode.IPMode;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
@@ -143,13 +139,8 @@ public class PMode implements IPMode {
      * @return The PMode <code>legs</code>.
      */
     @Override
-<<<<<<< HEAD:modules/holodeckb2b-core/src/main/java/org/holodeckb2b/pmode/impl/PMode.java
-    public ArrayList getLegs() {
-        return this.legs;
-=======
     public ArrayList<Leg> getLegs() {
-        return this.Leg;
->>>>>>> pmode-decoupling:modules/holodeckb2b-core/src/main/java/org/holodeckb2b/pmode/xml/PMode.java
+        return this.legs;
     }
     
     /**
