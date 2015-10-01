@@ -19,7 +19,9 @@ package org.holodeckb2b.security.handlers;
 import java.util.Collection;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.IPayload;
 import org.holodeckb2b.common.pmode.ILeg;
 import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.common.pmode.IPullRequestFlow;
@@ -28,6 +30,7 @@ import org.holodeckb2b.common.security.IEncryptionConfiguration;
 import org.holodeckb2b.common.security.ISecurityConfiguration;
 import org.holodeckb2b.common.security.ISigningConfiguration;
 import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
@@ -96,17 +99,15 @@ public class GetSecurityConfiguration extends BaseHandler {
         } else {
             /* If this message unit is an user message Holodeck B2B acts as the initiator when the http message is a
                 request, otherwise it is the response to a PullRequest and Holodeck B2B the responder.
-               The Error and Receipt signal messages are always response to another message and therefor Holodeck B2B
-                will always be the responder (although the messages can be sent using a http request)
-               NOTE that this is valid for One-Way MEP's! If Two-Way MEP's must be supported the derivation must also
-                    check MEP binding
+               The Error and Receipt signal messages are always responses to received user message, so we should check 
+                if that user message was received using Pull or Push as this determins whether we operate as Initiator
+                or Responder                
             */ 
             if (primaryMU instanceof UserMessage) {
                 log.debug("Primary message unit is user message, detect initiator or responder");
                 initiator = isInFlow(INITIATOR);
             } else {
-                log.debug("Primary message unit is a error or receipt signal, always responder");
-                initiator = false;
+                initiator = !Constants.ONE_WAY_PUSH.equals(pmode.getMepBinding());
             }
         }
         
@@ -170,11 +171,23 @@ public class GetSecurityConfiguration extends BaseHandler {
         }
         
         // Check if message must be encrypted. Note this is specified by the SecurityConfiguration
-        // of the Responder (and NOT the Initiator)
-        IEncryptionConfiguration encryptConfig = tpEncSecConfig != null ? tpEncSecConfig.getEncryptionConfiguration() : null;
+        // of the Responder (and NOT the Initiator). We will only encrypt UserMessage, so we only check this when
+        // the primary message unit is a UserMessage
+        if (primaryMU instanceof UserMessage) {
+            IEncryptionConfiguration encryptConfig = tpEncSecConfig != null ? 
+                                                        tpEncSecConfig.getEncryptionConfiguration() : null;
+         
+            if (encryptConfig != null) {
+                addSecurityForMessage(mc, SecurityConstants.ENCRYPTION, encryptConfig);
+                // Check if this message contains payloads in the body to determine whether body should be encrypted
+                boolean includesBodyPl = false;
+                Collection<IPayload> payloads = ((UserMessage) primaryMU).getPayloads();
+                if (!Utils.isNullOrEmpty(payloads))
+                    for (IPayload pl : payloads)
+                        includesBodyPl = pl.getContainment() == IPayload.Containment.BODY;
+                mc.setProperty(SecurityConstants.ENCRYPT_BODY, includesBodyPl);
+            }
             
-        if (encryptConfig != null) {
-            addSecurityForMessage(mc, SecurityConstants.ENCRYPTION, encryptConfig);
             log.debug("Encryption configuration added to message context.");
         }
         
