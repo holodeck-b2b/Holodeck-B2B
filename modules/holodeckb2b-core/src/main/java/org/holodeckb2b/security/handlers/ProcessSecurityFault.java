@@ -105,7 +105,7 @@ public class ProcessSecurityFault extends BaseHandler {
                 authError.setErrorDetail("Decryption of the message [unit] failed!");
                 MessageContextUtils.addGeneratedError(mc, authError);
                 // Set the processing state of the message unit to FAILED
-                mu = MessageUnitDAO.setFailed(mu); 
+                MessageUnitDAO.setFailed(mu); 
             }        
         } else {
             // No message units read from message, generate generic error
@@ -129,7 +129,7 @@ public class ProcessSecurityFault extends BaseHandler {
             authError.setErrorDetail("Authentication of message unit failed!");
             MessageContextUtils.addGeneratedError(mc, authError);
             // Set the processing state of the message unit to FAILED
-            mu = MessageUnitDAO.setFailed(mu); 
+            MessageUnitDAO.setFailed(mu); 
         }
     }
 
@@ -147,7 +147,7 @@ public class ProcessSecurityFault extends BaseHandler {
         // Set the processing state of all message units in message to FAILED
         Collection<MessageUnit> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);        
         for (MessageUnit mu : rcvdMsgUnits) {        
-            mu = MessageUnitDAO.setFailed(mu); 
+            MessageUnitDAO.setFailed(mu); 
         }
     }
     
@@ -167,7 +167,7 @@ public class ProcessSecurityFault extends BaseHandler {
         // Set the processing state of all message units in message to FAILED
         Collection<MessageUnit> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);        
         for (MessageUnit mu : rcvdMsgUnits) {        
-            mu = MessageUnitDAO.setFailed(mu); 
+            MessageUnitDAO.setFailed(mu); 
         }
     }
 }

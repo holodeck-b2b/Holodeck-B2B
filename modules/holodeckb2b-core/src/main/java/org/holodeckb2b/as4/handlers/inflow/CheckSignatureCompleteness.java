@@ -114,7 +114,7 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
         // If not all payloads are referenced the UserMessage should not be processed further, so change it processing
         // state to failed
         if (!allRefd) 
-            um = MessageUnitDAO.setFailed(um);        
+            MessageUnitDAO.setFailed(um);        
         
         return InvocationResponse.CONTINUE;        
     }

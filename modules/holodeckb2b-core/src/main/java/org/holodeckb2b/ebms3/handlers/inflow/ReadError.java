@@ -101,7 +101,7 @@ public class ReadError extends BaseHandler {
                             viError.setErrorDetail("Error contains inconsistent references");
                             viError.setRefToMessageInError(errorSignal.getMessageId());
                             MessageContextUtils.addGeneratedError(mc, viError);  
-                            errorSignal = MessageUnitDAO.setFailed(errorSignal);
+                            MessageUnitDAO.setFailed(errorSignal);
                         } else {
                             log.debug("References are consistent");
                         }

@@ -196,7 +196,7 @@ public class FindPModes extends BaseHandler {
      * @param mu    The message unit for which the P-Mode could not be found
      * @throws DatabaseException    When changing the processing state fails.
      */
-    private void createErrorNoPMode(final MessageContext mc, MessageUnit mu) throws DatabaseException {
+    private void createErrorNoPMode(final MessageContext mc, final MessageUnit mu) throws DatabaseException {
         log.error("No P-Mode found for message unit [" + mu.getMessageId() + "], unable to process it!");
         ProcessingModeMismatch   noPmodeIdError = new ProcessingModeMismatch();
         noPmodeIdError.setRefToMessageInError(mu.getMessageId());
@@ -205,6 +205,6 @@ public class FindPModes extends BaseHandler {
         MessageContextUtils.addGeneratedError(mc, noPmodeIdError);
 
         log.debug("Set the processing state of this user message to failure");
-        mu = MessageUnitDAO.setFailed(mu);
+        MessageUnitDAO.setFailed(mu);
     }
 }

@@ -77,13 +77,13 @@ public class DeliverReceipts extends BaseHandler {
                 try {
                     deliverReceipt(rcptSig);
                     // Receipt signal processed, change the processing state to done
-                    rcptSig = MessageUnitDAO.setDone(rcptSig);
+                    MessageUnitDAO.setDone(rcptSig);
                 } catch (MessageDeliveryException ex) {                        
                     log.warn("Could not deliver receipt (msgId=" + rcptSig.getMessageId() 
                                     + "]) to application! Error details: " + ex.getMessage());
                     // Although the receipt could not be delivered it was processed completely on the ebMS level,
                     //  so processing state is set to warning instead of failure
-                    rcptSig = MessageUnitDAO.setWarning(rcptSig);
+                    MessageUnitDAO.setWarning(rcptSig);
                 }
             } else {
                 log.info("Receipt signal [" + rcptSig.getMessageId() + "] is already processed for delivery");

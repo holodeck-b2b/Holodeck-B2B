@@ -66,7 +66,7 @@ public class CheckSentResult extends BaseHandler {
         Collection<MessageUnit> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
         // And change their processing state
         for (MessageUnit mu : msgUnits) {
-            mu = MessageUnitDAO.setSending(mu);
+            MessageUnitDAO.setSending(mu);
             log.info(mu.getClass().getSimpleName()+ " with msg-id [" + mu.getMessageId() + "] is being sent");
         }        
         
@@ -155,10 +155,10 @@ public class CheckSentResult extends BaseHandler {
            log.debug("Setting processing state for signal message with msgId=" + s.getMessageId());
             try {
                 if (success) {
-                    s = MessageUnitDAO.setDelivered(s);
+                    MessageUnitDAO.setDelivered(s);
                 } else {
                     //@todo: Should we do a retry? 
-                    s = MessageUnitDAO.setTransportFailure(s);
+                    MessageUnitDAO.setTransportFailure(s);
                 }
                 log.debug("Processing state of signal message [" + s.getMessageId() + "] changed");
             } catch (DatabaseException databaseException) {
@@ -186,15 +186,15 @@ public class CheckSentResult extends BaseHandler {
             try {
                 if (!success) {
                     //@todo: Should we do a specific retry for this? Now done using Reception Awareness retry
-                    um = MessageUnitDAO.setTransportFailure(um);
+                    MessageUnitDAO.setTransportFailure(um);
                 } else {
                     log.debug("User message is sent, check P-Mode if Receipt is expected");
                     // Because we only support One-Way the first leg determines
                     ILeg leg = HolodeckB2BCore.getPModeSet().get(um.getPMode()).getLegs().iterator().next();
                     if (leg.getReceiptConfiguration() != null)
-                        um = MessageUnitDAO.setWaitForReceipt(um);
+                        MessageUnitDAO.setWaitForReceipt(um);
                     else
-                        um = MessageUnitDAO.setDelivered(um);
+                        MessageUnitDAO.setDelivered(um);
                 }
                 log.debug("Processing state of user message [" + um.getMessageId() + "] changed to " 
                             + um.getCurrentProcessingState().getName());
