@@ -42,7 +42,6 @@ import org.holodeckb2b.ebms3.persistent.general.Description;
 import org.holodeckb2b.ebms3.persistent.general.Property;
 import org.holodeckb2b.ebms3.persistent.general.SchemaReference;
 import org.holodeckb2b.ebms3.persistent.general.Service;
-import org.holodeckb2b.ebms3.persistent.general.TradingPartner;
 import org.holodeckb2b.ebms3.persistent.message.AgreementReference;
 import org.holodeckb2b.ebms3.persistent.message.CollaborationInfo;
 import org.holodeckb2b.ebms3.persistent.message.EbmsError;
@@ -718,11 +717,12 @@ public class MessageUnitDAO {
      * Changes the processing state of a message unit to {@link ProcessingStates#READY_TO_PUSH} to indicate the message
      * unit is ready to be pushed to the receiving MSH.
      *
-     * @param mu The {@link MessageUnit} that is ready to be pushed
-     * @throws DatabaseException
+     * @param mu    The {@link MessageUnit} that is ready to be pushed
+     * @return      The updated message unit object
+     * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setReadyToPush(MessageUnit mu) throws DatabaseException {
-        setProcessingState(mu, ProcessingStates.READY_TO_PUSH);
+    public static <T extends MessageUnit> T setReadyToPush(T mu) throws DatabaseException {
+        return setProcessingState(mu, ProcessingStates.READY_TO_PUSH);
     }
 
     /**
@@ -730,10 +730,11 @@ public class MessageUnitDAO {
      * unit is ready to be pulled by the receiving MSH.
      *
      * @param mu The {@link MessageUnit} that is ready to be pulled
-     * @throws DatabaseException
+     * @return      The updated message unit object
+     * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setWaitForPull(MessageUnit mu) throws DatabaseException {
-        setProcessingState(mu, ProcessingStates.AWAITING_PULL);
+    public static <T extends MessageUnit> T setWaitForPull(T mu) throws DatabaseException {
+        return setProcessingState(mu, ProcessingStates.AWAITING_PULL);
     }
 
     /**
@@ -741,10 +742,11 @@ public class MessageUnitDAO {
      * message unit is sent and now waiting for a Receipt signal.
      *
      * @param um The {@link UserMessage} that is waiting for a receipt
-     * @throws DatabaseException
+     * @return      The updated message unit object
+     * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setWaitForReceipt(UserMessage um) throws DatabaseException {
-        setProcessingState(um, ProcessingStates.AWAITING_RECEIPT);
+    public static UserMessage setWaitForReceipt(UserMessage um) throws DatabaseException {
+        return setProcessingState(um, ProcessingStates.AWAITING_RECEIPT);
     }
 
     /**
@@ -752,10 +754,11 @@ public class MessageUnitDAO {
      * is successfully delivered.
      *
      * @param mu The {@link MessageUnit} that is delivered successfully
-     * @throws DatabaseException
+     * @return      The updated message unit object
+     * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setDelivered(MessageUnit mu) throws DatabaseException {
-        setProcessingState(mu, ProcessingStates.DELIVERED);
+    public static <T extends MessageUnit> T setDelivered(T mu) throws DatabaseException {
+        return setProcessingState(mu, ProcessingStates.DELIVERED);
     }
 
     /**
@@ -763,10 +766,11 @@ public class MessageUnitDAO {
      * unit could not be processed succesfully.
      *
      * @param mu The {@link MessageUnit} that failed to process successfully
-     * @throws DatabaseException
+     * @return      The updated message unit object
+     * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setFailed(MessageUnit mu) throws DatabaseException {
-        setProcessingState(mu, ProcessingStates.FAILURE);
+    public static <T extends MessageUnit> T setFailed(T mu) throws DatabaseException {
+        return setProcessingState(mu, ProcessingStates.FAILURE);
     }
 
     /**
@@ -774,10 +778,11 @@ public class MessageUnitDAO {
      * the message unit is now ready for delivery to the business application.
      *
      * @param mu The {@link MessageUnit} that is a duplicate
-     * @throws DatabaseException
+     * @return      The updated message unit object
+     * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setReadyForDelivery(MessageUnit mu) throws DatabaseException {
-        setProcessingState(mu, ProcessingStates.READY_FOR_DELIVERY);
+    public static <T extends MessageUnit> T setReadyForDelivery(T mu) throws DatabaseException {
+        return setProcessingState(mu, ProcessingStates.READY_FOR_DELIVERY);
     }
 
     /**
@@ -785,10 +790,11 @@ public class MessageUnitDAO {
      * is a duplicate of an already processed unit.
      *
      * @param mu The {@link MessageUnit} that is a duplicate
-     * @throws DatabaseException
+     * @return      The updated message unit object
+     * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setDuplicate(MessageUnit mu) throws DatabaseException {
-        setProcessingState(mu, ProcessingStates.DUPLICATE);
+    public static <T extends MessageUnit> T setDuplicate(T mu) throws DatabaseException {
+        return setProcessingState(mu, ProcessingStates.DUPLICATE);
     }
 
     /**
@@ -796,10 +802,11 @@ public class MessageUnitDAO {
      * message unit could not be delivered to the business application.
      *
      * @param mu The {@link MessageUnit} that could not be delivered
-     * @throws DatabaseException
+     * @return      The updated message unit object
+     * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setDeliveryFailure(MessageUnit mu) throws DatabaseException {
-        setProcessingState(mu, ProcessingStates.DELIVERY_FAILED);
+    public static <T extends MessageUnit> T setDeliveryFailure(T mu) throws DatabaseException {
+        return setProcessingState(mu, ProcessingStates.DELIVERY_FAILED);
     }
 
     /**
@@ -807,10 +814,11 @@ public class MessageUnitDAO {
      * message unit is successfully processed.
      *
      * @param mu The {@link SignalMessage} that is successfully processed
-     * @throws DatabaseException
+     * @return      The updated message unit object
+     * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setDone(SignalMessage mu) throws DatabaseException {
-        setProcessingState(mu, ProcessingStates.DONE);
+    public static <T extends MessageUnit> T setDone(T mu) throws DatabaseException {
+        return setProcessingState(mu, ProcessingStates.DONE);
     }
 
     /**
@@ -818,10 +826,11 @@ public class MessageUnitDAO {
      * the message unit was processed but there was an Error reported with severity <i>warning</i>.
      *
      * @param mu The {@link MessageUnit} for which the Error was reported
-     * @throws DatabaseException
+     * @return      The updated message unit object
+     * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setWarning(MessageUnit mu) throws DatabaseException {
-        setProcessingState(mu, ProcessingStates.PROC_WITH_WARNING);
+    public static <T extends MessageUnit> T setWarning(T mu) throws DatabaseException {
+        return setProcessingState(mu, ProcessingStates.PROC_WITH_WARNING);
     }
     
     /**
@@ -829,10 +838,11 @@ public class MessageUnitDAO {
      * there was a problem sending the message unit out.
      *
      * @param mu The {@link MessageUnit} that could not be sent out successfully
-     * @throws DatabaseException
+     * @return      The updated message unit object
+     * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setTransportFailure(MessageUnit mu) throws DatabaseException {
-        setProcessingState(mu, ProcessingStates.TRANSPORT_FAILURE);
+    public static <T extends MessageUnit> T setTransportFailure(T mu) throws DatabaseException {
+        return setProcessingState(mu, ProcessingStates.TRANSPORT_FAILURE);
     }
 
     /**
@@ -840,24 +850,27 @@ public class MessageUnitDAO {
      * unit is current being sent out to the other MSH
      *
      * @param mu The {@link MessageUnit} that is being sent out
-     * @throws DatabaseException 
+     * @return      The updated message unit object
+     * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setSending(MessageUnit mu) throws DatabaseException {
-        setProcessingState(mu, ProcessingStates.SENDING);
+    public static <T extends MessageUnit> T setSending(T mu) throws DatabaseException {
+        return setProcessingState(mu, ProcessingStates.SENDING);
     }
     /*
      * Helper method to change the current processing state of a MessageUnit object.
      */
-    private static void setProcessingState(MessageUnit mu, String state) throws DatabaseException {
+    private static <T extends MessageUnit> T setProcessingState(final T mu, String state) throws DatabaseException {
         EntityManager em = JPAUtil.getEntityManager();
         em.getTransaction().begin();
-        mu = em.find(MessageUnit.class, mu.getOID(), LockModeType.PESSIMISTIC_WRITE);
+        T muToModify = (T) em.find(MessageUnit.class, mu.getOID(), LockModeType.PESSIMISTIC_WRITE);
         
         ProcessingState newState = new ProcessingState(state);
-        mu.setProcessingState(newState);
-        em.merge(mu);
+        muToModify.setProcessingState(newState);
+        T modifiedMU = em.merge(muToModify);
         em.getTransaction().commit();
         em.close();
+        
+        return modifiedMU;
     }
 
     /*

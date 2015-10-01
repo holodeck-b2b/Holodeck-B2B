@@ -70,7 +70,7 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
                     decompressFailure.setRefToMessageInError(um.getMessageId());
                     MessageContextUtils.addGeneratedError(mc, decompressFailure);
                     try {
-                        MessageUnitDAO.setFailed(um);
+                        um = MessageUnitDAO.setFailed(um);
                     } catch (DatabaseException dbe) {
                         // Ai, something went wrong when changing the process state
                         log.error("An error occurred when setting processing state to Failure. Details: " 

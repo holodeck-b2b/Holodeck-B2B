@@ -97,7 +97,7 @@ public class ProcessReceipts extends BaseHandler {
                 // This error SHOULD NOT occur because the reference is already checked when finding the P-Mode 
                 log.error("Receipt [msgId=" + r.getMessageId() + "] contains unknown refToMessageId ["
                         + refToMsgId + "]!");
-                MessageUnitDAO.setFailed(rcpt);
+                rcpt = MessageUnitDAO.setFailed(rcpt);
                 // Create error and add to context
                 MessageContextUtils.addGeneratedError(mc, new ValueInconsistent(refToMsgId, 
                                                     "Receipt contains unknown message reference [" + refToMsgId + "]"));  
@@ -108,7 +108,7 @@ public class ProcessReceipts extends BaseHandler {
                     IPMode pmode = HolodeckB2BCore.getPModeSet().get(pmodeId);
                     if (pmode == null || pmode.getLegs().iterator().next().getReceiptConfiguration() == null) {
                         // The P-Mode is not configured for receipts, generate error
-                        MessageUnitDAO.setFailed(rcpt);
+                        rcpt = MessageUnitDAO.setFailed(rcpt);
                         // Create error and add to context
                         MessageContextUtils.addGeneratedError(mc, 
                                                 new ValueInconsistent("P-Mode of referenced message [" + refToMsgId 
@@ -119,14 +119,14 @@ public class ProcessReceipts extends BaseHandler {
                          // waiting for a receipt as we may otherwise overwrite an error state.
                         if (isWaitingForReceipt(refdMsg)) {
                             log.debug("Found message unit waiting for Receipt, setting processing state to delivered");
-                            MessageUnitDAO.setDelivered(refdMsg);                        
+                            refdMsg = MessageUnitDAO.setDelivered(refdMsg);                        
                             // Maybe the Receipt must also be delivered to the business application, so change state
                             // to "ready for delivery"
                             log.debug("Mark Receipt as ready for delivery to business application");
-                            MessageUnitDAO.setReadyForDelivery(rcpt);
+                            rcpt = MessageUnitDAO.setReadyForDelivery(rcpt);
                         } else {
                             log.debug("Found message unit not waiting for receipt anymore, processing finished.");
-                            MessageUnitDAO.setDone(rcpt);
+                            rcpt = MessageUnitDAO.setDone(rcpt);
                         }
                     }  
                 }

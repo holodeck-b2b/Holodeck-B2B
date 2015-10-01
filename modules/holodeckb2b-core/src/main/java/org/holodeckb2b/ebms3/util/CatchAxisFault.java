@@ -86,15 +86,15 @@ public class CatchAxisFault extends BaseHandler {
                         // Check message unit type
                         if (mu instanceof UserMessage) {     
                             if (isInFlow(INITIATOR))
-                                MessageUnitDAO.setReadyToPush(mu);
+                                mu = MessageUnitDAO.setReadyToPush(mu);
                             else
-                                MessageUnitDAO.setWaitForPull(mu);
+                                mu = MessageUnitDAO.setWaitForPull(mu);
                             log.warn("UserMessage with msg-id [" + mu.getMessageId() 
                                                                     + "] could not be sent due to an internal error.");    
                         } else { // must be a Signal 
                             log.error(mu.getClass().getSimpleName() + " with msg-id [" + mu.getMessageId() 
                                                                     + "] could not be sent due to an internal error.");    
-                            MessageUnitDAO.setFailed(mu);
+                            mu = MessageUnitDAO.setFailed(mu);
                         }
                     } catch (DatabaseException ex) {
                         // Unable to change the processing state, log the error. 
@@ -156,7 +156,7 @@ public class CatchAxisFault extends BaseHandler {
                         
                         if (!ProcessingStates.DONE.equals(procStateName) && 
                             !ProcessingStates.DELIVERED.equals(procStateName)) {                                
-                            MessageUnitDAO.setFailed(mu);
+                            mu = MessageUnitDAO.setFailed(mu);
                             log.error(mu.getClass().getSimpleName() + " with msg-id [" + mu.getMessageId() 
                                                     + "] could not be processed completely due to an internal error.");    
                         }

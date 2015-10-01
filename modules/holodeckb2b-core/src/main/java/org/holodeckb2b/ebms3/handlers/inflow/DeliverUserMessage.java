@@ -49,7 +49,7 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, final UserMessage um) throws DatabaseException {
+    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws DatabaseException {
         
         // Prepare message for delivery by checking it is still ready for delivery and then 
         // change its processing state to "out for delivery"
@@ -69,13 +69,13 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
                 mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);
                 log.info("Successfully delivered user message [msgId=" + um.getMessageId() +"]");
                 log.debug("Set the processing state to delivered");            
-                MessageUnitDAO.setDelivered(um);                
+                um = MessageUnitDAO.setDelivered(um);                
             } catch (MessageDeliveryException ex) {
                 log.error("Could not deliver the user message [msgId=" + um.getMessageId() 
                             + "] using specified delivery method!" 
                             + "\n\tError details: " + ex.getMessage());
                 // Indicate failure in processing state
-                MessageUnitDAO.setDeliveryFailure(um);
+                um = MessageUnitDAO.setDeliveryFailure(um);
             }
         } else {
             // This message is not ready for delivery now which is caused by it already been delivered by another
