@@ -381,9 +381,9 @@ public final class Utils {
     }
 
     /**
-     * Checks whether the given Collection is <code>null</code> or is an empty.
+     * Checks whether the given Collection is <code>null</code> or is empty.
      * 
-     * @param c     The string to check
+     * @param c     The Collection to check
      * @return      <code>true</code> if <code>c == null || c.isEmpty() == true</code>,<br>
      *              <code>false</code> otherwise
      */
@@ -392,9 +392,20 @@ public final class Utils {
     }
 
     /**
+     * Checks whether the given Map is <code>null</code> or is empty.
+     * 
+     * @param m     The Map to check
+     * @return      <code>true</code> if <code>m == null || m.isEmpty() == true</code>,<br>
+     *              <code>false</code> otherwise
+     */
+    public static boolean isNullOrEmpty(final Map<?,?> m) {
+        return m == null || m.isEmpty();
+    }
+
+    /**
      * Checks whether the given Iterator is <code>null</code> or does not contain any more objects.
      * 
-     * @param i     The string to check
+     * @param i     The Iterator to check
      * @return      <code>true</code> if <code>i == null || i.hasNext() == true</code>,<br>
      *              <code>false</code> otherwise
      */

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Test config file with one parameter
+-->
+<holodeckb2b-config xmlns="http://holodeck-b2b.org/schemas/2015/10/config">
+    <parameter name="justone">test value 1</parameter>
+    <parameter>this parameter must have a name!</parameter>    
+</holodeckb2b-config>    

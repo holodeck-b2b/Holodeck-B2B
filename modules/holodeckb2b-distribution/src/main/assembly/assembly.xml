@@ -46,6 +46,7 @@
             <directory>src/main/configurations</directory>
             <outputDirectory>holodeck-b2b-${project.version}/conf</outputDirectory>
             <includes>
+                <include>holodeckb2b.xml</include>
                 <include>pulling_configuration.xml</include>
                 <include>workers.xml</include>
                 <include>log4j.properties</include>

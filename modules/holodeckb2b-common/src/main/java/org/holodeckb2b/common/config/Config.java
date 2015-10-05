@@ -19,15 +19,22 @@ package org.holodeckb2b.common.config;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.description.AxisModule;
-import org.apache.axis2.description.Parameter;
+import org.holodeckb2b.common.util.Utils;
 
 /**
  * Contains the configuration of the Holodeck B2B Core.
- * 
- * <p>NOTE: Current implementation does not encrypt the keystore passwords! Therefore access to the module.xml file 
+ * <p>The Holodeck B2B configuration is located in the <code><b>«HB2B_HOME»</b>/conf</code> directory where 
+ * <b>HB2B_HOME</b> is the directory where Holodeck B2B is installed or the system property <i>"holodeckb2b.home"</i>.
+ * <p>The structure of the config file is defined by the XML Schema Definition 
+ * <code>http://holodeck-b2b.org/schemas/2015/10/config</code> which can be found in <code>
+ * src/main/resources/xsd/hb2b-config.xsd</code>.
+ * <p>NOTE: Current implementation does not encrypt the keystore passwords! Therefore access to the config file 
  * SHOULD be limited to the account that is used to run Holodeck B2B.
  * @todo Encryption of keystore passwords
  * 
@@ -107,19 +114,22 @@ public class Config {
      * @param configContext     The Axis2 configuration context
      * @param module            The module configuration
      */
-    public static void init(ConfigurationContext configContext, AxisModule module) {
+    public static void init(ConfigurationContext configContext) throws Exception {
         // Alway start with a new and empty configuration
         config = new Config();
         
         // The Axis2 configuration context
         config.axisCfgCtx = configContext;
+
+        // Read the configuration file
+        ConfigXmlFile configFile = loadConfiguration(configContext);
         
         // The JPA persistency unit to get database access
         //@TODO: REQUIRED, check and throw exception when not available!
-        config.persistencyUnit = readModuleParameter(module, "PersistencyUnit");
+        config.persistencyUnit = configFile.getParameter("PersistencyUnit");
         
         // The hostname to use in message processing
-        String hostName = readModuleParameter(module, "ExternalHostName");
+        String hostName = configFile.getParameter("ExternalHostName");
         if (hostName == null || hostName.isEmpty()) {
             try {
                 hostName = InetAddress.getLocalHost().getCanonicalHostName();
@@ -137,7 +147,7 @@ public class Config {
          * conf directory is used. But it is possible to specify another location
          * using the "WorkerConfig" parameter
          */  
-        String workerCfgFile = readModuleParameter(module, "WorkerConfig");
+        String workerCfgFile = configFile.getParameter("WorkerConfig");
         if (workerCfgFile == null || workerCfgFile.isEmpty())
             // Not specified, use default
             workerCfgFile = configContext.getRealPath("../conf/workers.xml").getAbsolutePath();
@@ -145,7 +155,7 @@ public class Config {
         config.workerConfigFile = workerCfgFile;
     
         // The temp dir
-        String tempDir = readModuleParameter(module, "TempDir");
+        String tempDir = configFile.getParameter("TempDir");
         if (tempDir == null || tempDir.isEmpty())
             // Not specified, use default
             tempDir = configContext.getRealPath("/temp/").getAbsolutePath();
@@ -155,40 +165,64 @@ public class Config {
                             : tempDir + FileSystems.getDefault().getSeparator());
         
         // Option to enable signal bundling
-        String bundling = readModuleParameter(module, "AllowSignalBundling");
+        String bundling = configFile.getParameter("AllowSignalBundling");
         config.allowSignalBundling = "on".equalsIgnoreCase(bundling) || "true".equalsIgnoreCase(bundling) 
                                         || "1".equalsIgnoreCase(bundling);        
 
         // Default setting for reporting Errors on Errors
-        String defErrReporting = readModuleParameter(module, "ReportErrorOnError");
+        String defErrReporting = configFile.getParameter("ReportErrorOnError");
         config.defaultReportErrorOnError = "on".equalsIgnoreCase(defErrReporting) 
                                             || "true".equalsIgnoreCase(defErrReporting) 
                                             || "1".equalsIgnoreCase(defErrReporting);        
         // Default setting for reporting Errors on Receipts
-        defErrReporting = readModuleParameter(module, "ReportErrorOnReceipt");
+        defErrReporting = configFile.getParameter("ReportErrorOnReceipt");
         config.defaultReportErrorOnReceipt = "on".equalsIgnoreCase(defErrReporting) 
                                             || "true".equalsIgnoreCase(defErrReporting) 
                                             || "1".equalsIgnoreCase(defErrReporting);        
         
         // Option to use strict error references check 
-        String strictErrorRefCheck = readModuleParameter(module, "StrictErrorReferencesCheck");
+        String strictErrorRefCheck = configFile.getParameter("StrictErrorReferencesCheck");
         config.useStrictErrorReferencesCheck = "on".equalsIgnoreCase(strictErrorRefCheck) 
                                                 || "true".equalsIgnoreCase(strictErrorRefCheck) 
                                                 || "1".equalsIgnoreCase(strictErrorRefCheck);        
         
         // The password for the keystore holding the private keys
-        config.privKeyStorePassword = readModuleParameter(module, "PrivateKeyStorePassword");
+        config.privKeyStorePassword = configFile.getParameter("PrivateKeyStorePassword");
         
         // The password for the keystore holding the public keys
-        config.pubKeyStorePassword = readModuleParameter(module, "PublicKeyStorePassword");
+        config.pubKeyStorePassword = configFile.getParameter("PublicKeyStorePassword");
         
         // Default setting for certificate revocation check
-        String certRevocationCheck = readModuleParameter(module, "CertificateRevocationCheck");
+        String certRevocationCheck = configFile.getParameter("CertificateRevocationCheck");
         config.defaultRevocationCheck = "on".equalsIgnoreCase(certRevocationCheck) 
                                                 || "true".equalsIgnoreCase(certRevocationCheck) 
                                                 || "1".equalsIgnoreCase(certRevocationCheck);        
         
     }
+
+    /**
+     * Helper method to load the Holodeck B2B XML document from file.
+     * <p>The Holodeck B2B configuration is located in the <code><b>«HB2B_HOME»</b>/conf</code> directory where 
+     * <b>HB2B_HOME</b> is the directory where Holodeck B2B is installed or the system property 
+     * <i>"holodeckb2b.home"</i>.
+     * 
+     * @param configContext     The Axis2 <code>ConfigurationContext</code> in which Holodeck B2B operates
+     * @return                  The Holodeck B2B configuration parameters read from the config file.
+     * @throws Exception When the configuration file can not be read.
+     */
+    private static ConfigXmlFile loadConfiguration(ConfigurationContext configContext) throws Exception {
+        String hb2b_home_dir = System.getProperty("holodeckb2b.home");
+        if (!Utils.isNullOrEmpty(hb2b_home_dir) && !Files.isDirectory(Paths.get(hb2b_home_dir))) {
+            Logger.getLogger(Config.class.getName())
+                        .log(Level.WARNING, "Specified Holodeck B2B HOME does not exists, reverting to default home");
+            hb2b_home_dir = null;
+        } 
+        hb2b_home_dir = Utils.isNullOrEmpty(hb2b_home_dir) ? configContext.getRealPath("").getParent()
+                                                           : hb2b_home_dir;
+               
+        return ConfigXmlFile.loadFromFile(Paths.get(hb2b_home_dir, "conf", "holodeckb2b.xml").toString());                    
+    }
+
     
     /**
      * Gets the Axis2 configuration context. This context is used for processing messages.
@@ -359,22 +393,5 @@ public class Config {
     protected static void assertInitialized() {
         if (config == null)
             throw new IllegalStateException("Configuration should be initialized first.");
-    }
-    
-    /*
-     * Helper to read a parameter from the module.xml
-     */
-    protected static String readModuleParameter(AxisModule m, String n) {
-        Parameter p = m.getParameter(n);
-        
-        if (p == null)
-            return null;
-        else {
-            Object v = p.getValue();
-            if (v == null)
-                return null;
-            else
-                return v.toString();
-        }
     }
 }

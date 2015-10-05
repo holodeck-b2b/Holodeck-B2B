@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This is technically a valid configuration file that does not contain any parameters. 
+-->
+<holodeckb2b-config xmlns="http://holodeck-b2b.org/schemas/2015/10/config"/>

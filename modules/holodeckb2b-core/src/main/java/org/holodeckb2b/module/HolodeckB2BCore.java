@@ -122,7 +122,13 @@ public class HolodeckB2BCore implements Module {
         }
         
         log.debug("Load configuration");
-        Config.init(cc, am);
+        try {
+            Config.init(cc);
+        } catch (Exception ex) {
+            log.fatal("Could not intialize configuration! ABORTING startup!" 
+                     + "\n\tError details: " + ex.getMessage());
+            throw new AxisFault("Could not initialize Holodeck B2B module!", ex);
+        }
         
         log.debug("Initialize worker pool");
         IWorkerPoolConfiguration poolCfg = XMLWorkerPoolConfig.loadFromFile(Config.getWorkerPoolCfgFile());
