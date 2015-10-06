@@ -37,6 +37,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.common.pmode.ILeg.Label;
 import org.holodeckb2b.ebms3.persistent.processing.ProcessingState;
 
 /**
@@ -165,6 +166,24 @@ public abstract class MessageUnit implements Serializable, org.holodeckb2b.commo
     }
     
     /**
+     * Associate this message unit with a leg in the specified P-Mode
+     * 
+     * @param  label    The label of the leg that contains the processing parameters for handling this message unit
+     */
+    public void setLeg(Label label) {
+        this.LEG_LABEL = label;
+    }
+    
+    /**
+     * Gets the label of the leg that configures the processing of this message unit
+     * 
+     * @return  The {@link Ileg} that contains the processing parameters for handling this message unit
+     */
+    public Label getLeg() {
+        return this.LEG_LABEL;       
+    }
+    
+    /**
      * Sets the direction the message unit flows.
      * 
      * @param direction     The direction of the message unit
@@ -181,9 +200,6 @@ public abstract class MessageUnit implements Serializable, org.holodeckb2b.commo
     public Direction getDirection() {
         return DIRECTION;
     }
-    
-    
-    
     
     /**
      * Default constructor creates an empty object
@@ -226,6 +242,8 @@ public abstract class MessageUnit implements Serializable, org.holodeckb2b.commo
 
     private String  PMODE_ID;
 
+    private Label   LEG_LABEL;
+    
     private Direction   DIRECTION;
     
     /*

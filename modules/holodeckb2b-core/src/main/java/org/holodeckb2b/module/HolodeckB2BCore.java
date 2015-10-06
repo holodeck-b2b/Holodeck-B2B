@@ -18,8 +18,6 @@ package org.holodeckb2b.module;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisDescription;
@@ -45,7 +43,7 @@ import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
 import org.holodeckb2b.ebms3.pulling.PullConfigurationWatcher;
 import org.holodeckb2b.ebms3.pulling.PullWorker;
 import org.holodeckb2b.ebms3.submit.core.MessageSubmitterFactory;
-import org.holodeckb2b.pmode.impl.PModeSet;
+import org.holodeckb2b.pmode.InMemoryPModeSet;
 
 /**
  * Axis2 module class for the Holodeck B2B Core module.
@@ -94,14 +92,9 @@ public class HolodeckB2BCore implements Module {
     private static Map<String, IMessageDelivererFactory>    msgDeliveryFactories = null;
     
     /*
-     * Reference to the PModeSet
+     * The configured set of P-Modes.
      */
-    private static IPModeSet pmodeSet = new PModeSet();
-    
-    /**
-     * 
-     */
-    private static CountDownLatch pmodeSetRead = new CountDownLatch(1);
+    private static IPModeSet pmodeSet = null;
     
     /**
      * Initializes the Holodeck B2B Core module.
@@ -129,6 +122,10 @@ public class HolodeckB2BCore implements Module {
                      + "\n\tError details: " + ex.getMessage());
             throw new AxisFault("Could not initialize Holodeck B2B module!", ex);
         }
+        
+        log.debug("Create the P-Mode set");
+        //@todo: Make the implementation configurable, for now just in memory
+        this.pmodeSet = new InMemoryPModeSet();
         
         log.debug("Initialize worker pool");
         IWorkerPoolConfiguration poolCfg = XMLWorkerPoolConfig.loadFromFile(Config.getWorkerPoolCfgFile());
@@ -273,40 +270,12 @@ public class HolodeckB2BCore implements Module {
      * Gets the set of currently configured P-Modes.
      * <p>The P-Modes define how Holodeck B2B should process the messages. The set of P-Modes is therefor the most 
      * important configuration item in Holodeck B2B, without P-Modes it will not be possible to send and receive 
-     * messages.<br>
-     * If this function is called during the startup sequence we will wait for 5 seconds before we return the set. This
-     * prevents that a message is unnecessarily rejected.
+     * messages.
      * 
      * @return  The current set of P-Modes as a {@link IPModeSet}
      * @see IPMode
      */
     public static IPModeSet getPModeSet() {
-        try {
-            // We wait for initialization of the P-Mode set before returning
-            pmodeSetRead.await(5, TimeUnit.SECONDS);
-        } catch (InterruptedException ex) {
-            log.fatal("While waiting for the P-Mode set to be initialized the waiting thread was interrupted");
-            // Preserve interruption
-            Thread.currentThread().interrupt();
-        }
-        
-        synchronized (pmodeSet) {
-            if (pmodeSet != null && pmodeSet.listPModeIds().length == 0)                
-                log.error("There are no P-Modes configured, unable to process messages!");            
-            
-            return pmodeSet;
-        }        
-    }
-    
-    /**
-     * Set the currently configured P-Modes.
-     * @param The PModeSet to be set.
-     */
-    public static void setPModeSet(PModeSet newPmodeSet) {
-        synchronized (pmodeSet) {
-            pmodeSet = newPmodeSet;
-        }
-        // Indicate that P-Mode set is initialized
-        pmodeSetRead.countDown();
+        return pmodeSet;
     }
 }
