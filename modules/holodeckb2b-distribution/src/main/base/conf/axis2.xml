@@ -342,40 +342,46 @@
     <!-- Phases  -->
     <!-- ================================================= -->
     <phaseOrder type="InFlow">
-        <!--  System predefined phases       -->
         <phase name="Transport"/>      
         <phase name="Addressing"/>
         <phase name="Security"/>
         <phase name="PreDispatch"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
             <handler name="HB2BDispatcher" class="org.holodeckb2b.ebms3.handlers.inflow.HolodeckB2BDispatcher"/>                            
-        </phase>           
-        <!--  System predefined phases       -->
-        <!--   After Postdispatch phase module author or service author can add any phase he want      -->
+        </phase>
+        <phase name="Logging">
+            <handler name="SOAPEnvelopeLogger" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger"/>
+        </phase>
         <phase name="ebms3InPhase"/>
     </phaseOrder>
     <phaseOrder type="OutFlow">
         <phase name="ebms3OutPhase"/>
         <phase name="Security"/>
         <phase name="MessageOut"/>
+        <phase name="Logging">
+            <handler name="SOAPEnvelopeLogger" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger"/>
+        </phase>        
     </phaseOrder>
     <phaseOrder type="InFaultFlow">
-        <!--  System predefined phases       -->
         <phase name="Transport"/>      
         <phase name="Addressing"/>
         <phase name="Security"/>
         <phase name="PreDispatch"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
             <handler name="HB2BDispatcher" class="org.holodeckb2b.ebms3.handlers.inflow.HolodeckB2BDispatcher"/>                            
-        </phase>           
-        <!--  System predefined phases       -->
-        <!--   After Postdispatch phase module author or service author can add any phase he want      -->
+        </phase>
+        <phase name="Logging">
+            <handler name="SOAPEnvelopeLogger" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger"/>
+        </phase>
         <phase name="ebms3InPhase"/>
     </phaseOrder>
     <phaseOrder type="OutFaultFlow">
         <phase name="ebms3OutPhase"/>
         <phase name="Security"/>
         <phase name="MessageOut"/>
-    </phaseOrder>        
+        <phase name="Logging">
+            <handler name="SOAPEnvelopeLogger" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger"/>
+        </phase>
+    </phaseOrder>         
 </axisconfig>
 
