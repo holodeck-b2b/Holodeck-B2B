@@ -43,16 +43,7 @@ import org.holodeckb2b.security.tokens.UsernameToken;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class SecurityUtils {
-    
-    /**
-     * Location of the keystore holding the certificates with the public keys
-     */
-    private static final String PUB_KEYSTORE_FILE = "./repository/certs/publickeys.jks";
-    /**
-     * Location of the keystore holding the certificates with the private keys
-     */
-    private static final String PRIV_KEYSTORE_FILE = "./repository/certs/privatekeys.jks";
-    
+        
     /**
      * Enumerates the certificate types for which crypto configurations can be created by this utility class.
      */
@@ -144,11 +135,11 @@ public class SecurityUtils {
         
         switch (certType) {
             case pub  : 
-                keyStoreFile = PUB_KEYSTORE_FILE; 
+                keyStoreFile = Config.getPublicKeyStorePath(); 
                 keyStorePwd = Config.getPublicKeyStorePassword();
                 break;
             case priv : 
-                keyStoreFile = PRIV_KEYSTORE_FILE; 
+                keyStoreFile = Config.getPrivateKeyStorePath();
                 keyStorePwd = Config.getPrivateKeyStorePassword();                
                 break;   
         }
@@ -193,7 +184,7 @@ public class SecurityUtils {
             keystorePwd = Config.getPublicKeyStorePassword().toCharArray();            
             // Create and load the keystore
             KeyStore keyStore = KeyStore.getInstance("JKS");
-            fis = new java.io.FileInputStream(PUB_KEYSTORE_FILE);
+            fis = new java.io.FileInputStream(Config.getPublicKeyStorePath());
             keyStore.load(fis, keystorePwd);    
             
             // Get alias of certificate

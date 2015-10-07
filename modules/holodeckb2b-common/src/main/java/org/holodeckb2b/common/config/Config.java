@@ -49,6 +49,11 @@ public class Config {
     private static Config   config = null;
 
     /*
+     * The Holodeck B2B home directory
+     */
+    private String holodeckHome = null;
+    
+    /*
      * Name of the JPA persistency unit to get database access
      */
     private String  persistencyUnit = null;
@@ -89,9 +94,19 @@ public class Config {
     private boolean useStrictErrorReferencesCheck = false;
     
     /*
+     * The path to the keystore holding the private keys and certificates
+    */
+    private String privKeyStorePath = null;
+    
+    /*
      * The password of the keystore that holds the certificates with the private keys
      */
     private String  privKeyStorePassword = null;
+    
+    /*
+     * The path to the keystore holding the public keys and certificates
+    */
+    private String pubKeyStorePath = null;
     
     /*
      * The password of the keystore that holds the certificates with the public keys
@@ -109,24 +124,35 @@ public class Config {
     private ConfigurationContext    axisCfgCtx = null;
     
     /**
-     * Initializes the configuration based on the Holodeck B2B module configuration.
+     * Initializes the configuration object using the Holodeck B2B configuration file located in <code>
+     * «HB2B_HOME»/conf/holodeckb2b.xml</code> where <b>HB2B_HOME</b> is the directory where Holodeck B2B is installed 
+     * or the system property <i>"holodeckb2b.home"</i>.
      * 
      * @param configContext     The Axis2 configuration context
      * @param module            The module configuration
+     * @throws Exception    When the configuration can not be initialized
      */
     public static void init(ConfigurationContext configContext) throws Exception {
         // Alway start with a new and empty configuration
-        config = new Config();
-        
+        config = new Config(configContext);        
+    }
+    
+    /**
+     * Initializes the singleton object.
+     * 
+     * @param configCtx     The Axis2 configuration context containing the Axis2 settings
+     * @throws Exception    When the configuration can not be initialized
+     */
+    private Config(ConfigurationContext configCtx) throws Exception {        
         // The Axis2 configuration context
-        config.axisCfgCtx = configContext;
+        axisCfgCtx = configCtx;
 
         // Read the configuration file
-        ConfigXmlFile configFile = loadConfiguration(configContext);
+        ConfigXmlFile configFile = loadConfiguration(configCtx);
         
         // The JPA persistency unit to get database access
         //@TODO: REQUIRED, check and throw exception when not available!
-        config.persistencyUnit = configFile.getParameter("PersistencyUnit");
+        persistencyUnit = configFile.getParameter("PersistencyUnit");
         
         // The hostname to use in message processing
         String hostName = configFile.getParameter("ExternalHostName");
@@ -141,7 +167,7 @@ public class Config {
                 hostName = Long.toHexString((long) r.nextInt() * (long) r.nextInt()) + ".generated";
             }
         }
-        config.hostName = hostName;
+        hostName = hostName;
         
         /* The configuration of the workerpool. By default the "workers.xml" in the
          * conf directory is used. But it is possible to specify another location
@@ -150,77 +176,85 @@ public class Config {
         String workerCfgFile = configFile.getParameter("WorkerConfig");
         if (workerCfgFile == null || workerCfgFile.isEmpty())
             // Not specified, use default
-            workerCfgFile = configContext.getRealPath("../conf/workers.xml").getAbsolutePath();
+            workerCfgFile = holodeckHome + "/conf/workers.xml";
         
-        config.workerConfigFile = workerCfgFile;
+        workerConfigFile = workerCfgFile;
     
         // The temp dir
         String tempDir = configFile.getParameter("TempDir");
         if (tempDir == null || tempDir.isEmpty())
             // Not specified, use default
-            tempDir = configContext.getRealPath("/temp/").getAbsolutePath();
+            tempDir = holodeckHome + "/temp/";
         
         // Ensure the path ends with a folder separator
-        config.tempDir = (tempDir.endsWith(FileSystems.getDefault().getSeparator()) ? tempDir 
+        tempDir = (tempDir.endsWith(FileSystems.getDefault().getSeparator()) ? tempDir 
                             : tempDir + FileSystems.getDefault().getSeparator());
         
         // Option to enable signal bundling
         String bundling = configFile.getParameter("AllowSignalBundling");
-        config.allowSignalBundling = "on".equalsIgnoreCase(bundling) || "true".equalsIgnoreCase(bundling) 
+        allowSignalBundling = "on".equalsIgnoreCase(bundling) || "true".equalsIgnoreCase(bundling) 
                                         || "1".equalsIgnoreCase(bundling);        
 
         // Default setting for reporting Errors on Errors
         String defErrReporting = configFile.getParameter("ReportErrorOnError");
-        config.defaultReportErrorOnError = "on".equalsIgnoreCase(defErrReporting) 
+        defaultReportErrorOnError = "on".equalsIgnoreCase(defErrReporting) 
                                             || "true".equalsIgnoreCase(defErrReporting) 
                                             || "1".equalsIgnoreCase(defErrReporting);        
         // Default setting for reporting Errors on Receipts
         defErrReporting = configFile.getParameter("ReportErrorOnReceipt");
-        config.defaultReportErrorOnReceipt = "on".equalsIgnoreCase(defErrReporting) 
+        defaultReportErrorOnReceipt = "on".equalsIgnoreCase(defErrReporting) 
                                             || "true".equalsIgnoreCase(defErrReporting) 
                                             || "1".equalsIgnoreCase(defErrReporting);        
         
         // Option to use strict error references check 
         String strictErrorRefCheck = configFile.getParameter("StrictErrorReferencesCheck");
-        config.useStrictErrorReferencesCheck = "on".equalsIgnoreCase(strictErrorRefCheck) 
+        useStrictErrorReferencesCheck = "on".equalsIgnoreCase(strictErrorRefCheck) 
                                                 || "true".equalsIgnoreCase(strictErrorRefCheck) 
                                                 || "1".equalsIgnoreCase(strictErrorRefCheck);        
         
+        // The location of the keystore holding the private keys, if not provided the default location «HB2B_HOME»/
+        // repository/certs/privatekeys.jks is used
+        privKeyStorePath = configFile.getParameter("PrivateKeyStorePath");
+        if (Utils.isNullOrEmpty(privKeyStorePath))
+            privKeyStorePath = holodeckHome + "/repository/certs/privatekeys.jks";        
+        
         // The password for the keystore holding the private keys
-        config.privKeyStorePassword = configFile.getParameter("PrivateKeyStorePassword");
+        privKeyStorePassword = configFile.getParameter("PrivateKeyStorePassword");
+        
+        // The location of the keystore holding the certificate (public keys), if not provided the default location 
+        // «HB2B_HOME»/repository/certs/publickeys.jks is used
+        pubKeyStorePath = configFile.getParameter("PublicKeyStorePath");
+        if (Utils.isNullOrEmpty(pubKeyStorePath))
+            pubKeyStorePath = holodeckHome + "/repository/certs/publickeys.jks";        
         
         // The password for the keystore holding the public keys
-        config.pubKeyStorePassword = configFile.getParameter("PublicKeyStorePassword");
+        pubKeyStorePassword = configFile.getParameter("PublicKeyStorePassword");
         
         // Default setting for certificate revocation check
         String certRevocationCheck = configFile.getParameter("CertificateRevocationCheck");
-        config.defaultRevocationCheck = "on".equalsIgnoreCase(certRevocationCheck) 
+        defaultRevocationCheck = "on".equalsIgnoreCase(certRevocationCheck) 
                                                 || "true".equalsIgnoreCase(certRevocationCheck) 
-                                                || "1".equalsIgnoreCase(certRevocationCheck);        
-        
+                                                || "1".equalsIgnoreCase(certRevocationCheck);                
     }
 
     /**
      * Helper method to load the Holodeck B2B XML document from file.
-     * <p>The Holodeck B2B configuration is located in the <code><b>«HB2B_HOME»</b>/conf</code> directory where 
-     * <b>HB2B_HOME</b> is the directory where Holodeck B2B is installed or the system property 
-     * <i>"holodeckb2b.home"</i>.
      * 
      * @param configContext     The Axis2 <code>ConfigurationContext</code> in which Holodeck B2B operates
      * @return                  The Holodeck B2B configuration parameters read from the config file.
      * @throws Exception When the configuration file can not be read.
      */
-    private static ConfigXmlFile loadConfiguration(ConfigurationContext configContext) throws Exception {
+    private ConfigXmlFile loadConfiguration(ConfigurationContext configContext) throws Exception {
         String hb2b_home_dir = System.getProperty("holodeckb2b.home");
         if (!Utils.isNullOrEmpty(hb2b_home_dir) && !Files.isDirectory(Paths.get(hb2b_home_dir))) {
             Logger.getLogger(Config.class.getName())
                         .log(Level.WARNING, "Specified Holodeck B2B HOME does not exists, reverting to default home");
             hb2b_home_dir = null;
         } 
-        hb2b_home_dir = Utils.isNullOrEmpty(hb2b_home_dir) ? configContext.getRealPath("").getParent()
-                                                           : hb2b_home_dir;
+        holodeckHome = Utils.isNullOrEmpty(hb2b_home_dir) ? configContext.getRealPath("").getParent()
+                                                               : hb2b_home_dir;
                
-        return ConfigXmlFile.loadFromFile(Paths.get(hb2b_home_dir, "conf", "holodeckb2b.xml").toString());                    
+        return ConfigXmlFile.loadFromFile(Paths.get(holodeckHome, "conf", "holodeckb2b.xml").toString());                    
     }
 
     
@@ -230,8 +264,7 @@ public class Config {
      * @return The Axis2 configuration context.
      */
     public static ConfigurationContext getAxisConfigurationContext() {
-        assertInitialized();
-        
+        assertInitialized();        
         return config.axisCfgCtx;
     }
     
@@ -351,6 +384,17 @@ public class Config {
         assertInitialized();
         return config.useStrictErrorReferencesCheck;
     }
+
+    /**
+     * Gets the path to the keystore containing the private keys and related certificates that are used for signing
+     * and decryption of messages.
+     * 
+     * @return The path to the <i>"private"</i> keystore.
+     */
+    public static String getPrivateKeyStorePath() {
+        assertInitialized();
+        return config.privKeyStorePath;
+    }
     
     /**
      * Gets the password for the keystore that holds the certificates with the private keys. 
@@ -362,6 +406,17 @@ public class Config {
         return config.privKeyStorePassword;
     }
     
+    /**
+     * Gets the path to the keystore containing the certificates (i.e. public keys) that are used for encrypting 
+     * messages and verification of a signed messages.
+     * 
+     * @return The path to the <i>"public"</i> keystore.
+     */
+    public static String getPublicKeyStorePath() {
+        assertInitialized();
+        return config.pubKeyStorePath;
+    }
+
     /**
      * Gets the password for the keystore that holds the certificates with the public keys. 
      * 
