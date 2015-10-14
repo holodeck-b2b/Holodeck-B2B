@@ -147,8 +147,12 @@ public class Config {
         // The Axis2 configuration context
         axisCfgCtx = configCtx;
 
+        // Detect the Holodeck B2B home directory
+        this.holodeckHome = detectHomeDir(configCtx);
+        
         // Read the configuration file
-        ConfigXmlFile configFile = loadConfiguration(configCtx);
+        ConfigXmlFile configFile = ConfigXmlFile.loadFromFile(
+                                                        Paths.get(holodeckHome, "conf", "holodeckb2b.xml").toString());
         
         // The JPA persistency unit to get database access
         //@TODO: REQUIRED, check and throw exception when not available!
@@ -181,8 +185,8 @@ public class Config {
         workerConfigFile = workerCfgFile;
     
         // The temp dir
-        String tempDir = configFile.getParameter("TempDir");
-        if (tempDir == null || tempDir.isEmpty())
+        tempDir = configFile.getParameter("TempDir");
+        if (Utils.isNullOrEmpty(tempDir))
             // Not specified, use default
             tempDir = holodeckHome + "/temp/";
         
@@ -238,23 +242,21 @@ public class Config {
     }
 
     /**
-     * Helper method to load the Holodeck B2B XML document from file.
+     * Helper method to detect what the Holodeck B2B home directory is. 
      * 
      * @param configContext     The Axis2 <code>ConfigurationContext</code> in which Holodeck B2B operates
-     * @return                  The Holodeck B2B configuration parameters read from the config file.
-     * @throws Exception When the configuration file can not be read.
+     * @return                  The Holodeck B2B home directory
      */
-    private ConfigXmlFile loadConfiguration(ConfigurationContext configContext) throws Exception {
+    private String detectHomeDir(ConfigurationContext configContext) {
         String hb2b_home_dir = System.getProperty("holodeckb2b.home");
         if (!Utils.isNullOrEmpty(hb2b_home_dir) && !Files.isDirectory(Paths.get(hb2b_home_dir))) {
             Logger.getLogger(Config.class.getName())
                         .log(Level.WARNING, "Specified Holodeck B2B HOME does not exists, reverting to default home");
             hb2b_home_dir = null;
         } 
-        holodeckHome = Utils.isNullOrEmpty(hb2b_home_dir) ? configContext.getRealPath("").getParent()
+        
+        return Utils.isNullOrEmpty(hb2b_home_dir) ? configContext.getRealPath("").getParent()
                                                                : hb2b_home_dir;
-               
-        return ConfigXmlFile.loadFromFile(Paths.get(holodeckHome, "conf", "holodeckb2b.xml").toString());                    
     }
 
     
@@ -294,6 +296,17 @@ public class Config {
         assertInitialized();
         
         return config.hostName;
+    }
+
+    /**
+     * Gets the Holodeck B2B home directory.
+     * 
+     * @return  The Holodeck B2B home directory.
+     */
+    public static String getHolodeckB2BHome () {
+        assertInitialized();
+        
+        return config.holodeckHome;
     }
     
     /**
