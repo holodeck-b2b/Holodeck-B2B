@@ -32,8 +32,9 @@ import org.simpleframework.xml.Root;
  *      &lt;worker
  *          name=<i>String : Name of this worker</i>
  *          activate=<i>boolean : Should this worker be active?</i>
+ *          delay=<i>integer : The delay in seconds before starting the worker. Optional parameter, default = 0 (start immediately)</li></i>
  *          workerClass=<i>string : Name of the class that implements the workers functionality</i>
- *          concurrent=<i>integer : The number of concurrent executions</i>
+ *          concurrent=<i>integer : The number of concurrent executions. Optional parameter, default = 1</i>
  *          interval=<i>integer : If the worker should run repeatedly, the delay between executions in seconds</i>
  *      &gt;
  *          &lt;-- <i>The worker may need some configuration settings. These can be supplied by adding one or more param child elements</i>--&gt;
@@ -51,6 +52,9 @@ public class XMLWorkerConfig implements IWorkerConfiguration {
     
     @Attribute
     private boolean activate;
+    
+    @Attribute(required=false)
+    private int delay = 0;
     
     @Attribute
     private String workerClass;
@@ -86,6 +90,12 @@ public class XMLWorkerConfig implements IWorkerConfiguration {
         return activate;
     }
 
+    @Override
+    public int getDelay() {
+        // delay specified in XML is in seconds, but return value must be milliseconds!
+        return delay * 1000; 
+    }
+    
     @Override
     public int getConcurrentExecutions() {
         return concurrent;

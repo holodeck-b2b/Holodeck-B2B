@@ -34,9 +34,9 @@ import org.simpleframework.xml.Root;
  * <p>There are two type of pull workers: one specific for a set of P-Modes and a default one responsible for all other
  * P-Modes. Both type share this configuration which includes a list of P-Modes which for the specific worker indicates
  * the P-Modes for which to send the pull requests and for the default worker which P-Modes to exclude.
- * <p>The configuration is read from an XML document defined by the schema <code>http://holodeck-b2b.org/schemas/2014/05/pullconfiguration</code>.
- * This class handles the <code>genericPullerType</code>. The overall configuration document is handled by 
- * {@link PullConfiguration}.
+ * <p>The configuration is read from an XML document defined by the schema 
+ * <code>http://holodeck-b2b.org/schemas/2014/05/pullconfiguration</code>. This class handles the 
+ * <code>genericPullerType</code>. The overall configuration document is handled by {@link PullConfiguration}.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -53,7 +53,7 @@ public class PullerConfig implements IWorkerConfiguration {
     }
 
     @Attribute(required = true)
-    long interval;
+    int interval;
 
     @ElementList(required = false)
     List<PMode> pmodes;
@@ -111,6 +111,14 @@ public class PullerConfig implements IWorkerConfiguration {
     @Override
     public boolean activate() {
         return interval > 0;
+    }
+    
+    /**
+     * @return The 
+     */
+    public int getDelay() {
+        // Return value is in millieseconds, interval is spec'd in seconds
+        return interval * 1000;
     }
 
     /**
