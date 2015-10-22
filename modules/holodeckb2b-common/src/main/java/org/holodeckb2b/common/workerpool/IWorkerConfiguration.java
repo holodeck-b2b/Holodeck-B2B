@@ -51,14 +51,26 @@ public interface IWorkerConfiguration {
     public Map<String, ?> getTaskParameters();    
     
     /**
-     * Should this worker be activated?
+     * Get the indicator whether this worker should be activated?
      * 
      * @return <code>true</code> when the worker should be started, <code>false</code> if it should not.
      */
     public boolean activate();
     
     /**
-     * @return The number of concurrent executions
+     * Gets the delay to wait before starting the worker. 
+     * 
+     * @return The delay to wait before starting the worker, in milliseconds
+     */
+    public int getDelay();
+    
+    /**
+     * Gets the number of workers that should be run concurrently.
+     * <p>NOTE: As there needs to be at least one worker, values less than one will result in one worker being started.
+     * If the worker should not be started at all, the configuration must return <i>false</i> from the <code>activate() 
+     * </code>method.
+     * 
+     * @return The number of concurrent executions. 
      */
     public int getConcurrentExecutions();
         

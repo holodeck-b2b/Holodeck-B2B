@@ -22,7 +22,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.util.Interval;
@@ -274,7 +273,8 @@ public class WorkerPool {
         try {
             Class<?> taskClass = Class.forName(workerCfg.getWorkerTask());
 
-            int numWorker = (workerCfg.getConcurrentExecutions() == 0 ? 1 : workerCfg.getConcurrentExecutions());
+            int numWorker = (workerCfg.getConcurrentExecutions() <= 0 ? 1 : workerCfg.getConcurrentExecutions());
+            int delay = (workerCfg.getDelay() <= 0 ? 0 : workerCfg.getDelay());
             for(int i = 0; i < numWorker; i++) {
                 RunningWorkerInstance   rWorker = new RunningWorkerInstance();
                 rWorker.workerName = workerCfg.getName();
@@ -284,12 +284,16 @@ public class WorkerPool {
 
                 Interval    interval = workerCfg.getInterval();
                 if (interval != null) 
-                    rWorker.runningWorker = pool.scheduleWithFixedDelay(rWorker.task, 0, interval.getLength(), interval.getUnit());
-                else
+                    // Because the initial delay must be in same timeunit as interval it needs to be converted
+                    rWorker.runningWorker = pool.scheduleWithFixedDelay(rWorker.task,
+                                                               interval.getUnit().convert(delay, TimeUnit.MILLISECONDS), 
+                                                               interval.getLength(), interval.getUnit());
+                else if (delay > 0)
+                    rWorker.runningWorker = pool.schedule(rWorker.task, delay, TimeUnit.MILLISECONDS);
+                else    
                     rWorker.runningWorker = pool.submit(rWorker.task);
 
-                workers.add(rWorker);
-                
+                workers.add(rWorker);                
                 log.debug("Added new worker instance [" + workerCfg.getName() + "] to the pool");
             }
         } catch (ClassNotFoundException cnfe) {
