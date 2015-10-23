@@ -159,19 +159,18 @@ public class Config {
         persistencyUnit = configFile.getParameter("PersistencyUnit");
         
         // The hostname to use in message processing
-        String hostName = configFile.getParameter("ExternalHostName");
-        if (hostName == null || hostName.isEmpty()) {
+        hostName = configFile.getParameter("ExternalHostName");
+        if (Utils.isNullOrEmpty(hostName)) {
             try {
                 hostName = InetAddress.getLocalHost().getCanonicalHostName();
             } catch (UnknownHostException e) {}
         
-            if (hostName == null || hostName.isEmpty()) {
+            if (Utils.isNullOrEmpty(hostName)) {
                 // If we still have no hostname, we just generate a random hex number to use as hostname
                 Random r = new Random();
                 hostName = Long.toHexString((long) r.nextInt() * (long) r.nextInt()) + ".generated";
             }
         }
-        hostName = hostName;
         
         /* The configuration of the workerpool. By default the "workers.xml" in the
          * conf directory is used. But it is possible to specify another location
