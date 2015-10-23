@@ -37,6 +37,7 @@ import org.holodeckb2b.common.messagemodel.IPayload.Containment;
 import org.holodeckb2b.common.messagemodel.IUserMessage;
 import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.common.util.MessageIdGenerator;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistent.general.Description;
 import org.holodeckb2b.ebms3.persistent.general.Property;
@@ -342,15 +343,16 @@ public class MessageUnitDAO {
      * @throws DatabaseException If an error occurs when saving the object to the database
      */
     public static void updatePayloadMetaData(UserMessage um) throws DatabaseException {
+        // Check that there is payload info
+        if (Utils.isNullOrEmpty(um.getPayloads()))
+            return;
+        
         EntityManager em = JPAUtil.getEntityManager();
-
         em.getTransaction().begin();
-
         // Ensure that the Payload entity objects are persisted
         for (IPayload ip : um.getPayloads()) {
             em.merge((Payload) ip);
         }
-
         em.getTransaction().commit();
         em.close();
     }
@@ -921,7 +923,7 @@ public class MessageUnitDAO {
         // Copy list of Payload objects
         //
         Collection<IPayload> sPayloads = src.getPayloads();
-        if (sPayloads != null) {
+        if (!Utils.isNullOrEmpty(sPayloads)) {
             for (IPayload pl : sPayloads) {
                 dest.addPayload(createPayload(pl));
             }
@@ -930,7 +932,7 @@ public class MessageUnitDAO {
         // Copy list of message properties
         //
         Collection<IProperty> smsgProps = src.getMessageProperties();
-        if (smsgProps != null) {
+        if (!Utils.isNullOrEmpty(smsgProps)) {
             for (IProperty p : smsgProps) {
                 dest.addMessageProperty(new Property(p.getName(), p.getValue(), p.getType()));
             }
@@ -1022,19 +1024,15 @@ public class MessageUnitDAO {
         // Get the trading partner info
         um.getSender();
         um.getReceiver();
-
         // Get the message properties
-        for (IProperty p : um.getMessageProperties()) {
-            p.getName();
-        }
-
+        if (!Utils.isNullOrEmpty(um.getMessageProperties()))
+            for (IProperty p : um.getMessageProperties()) 
+                p.getName();            
         // Get payload info
-        for (IPayload pl : um.getPayloads()) {
-            for (IProperty p : pl.getProperties()) {
-                p.getName();
-            }
-        }
-
+        if (!Utils.isNullOrEmpty(um.getPayloads()))
+            for (IPayload pl : um.getPayloads())
+                for (IProperty p : pl.getProperties())
+                    p.getName();            
     }
 
     /**

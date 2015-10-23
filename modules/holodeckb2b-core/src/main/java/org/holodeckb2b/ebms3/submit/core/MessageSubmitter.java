@@ -27,6 +27,7 @@ import org.holodeckb2b.common.messagemodel.IUserMessage;
 import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.common.submit.IMessageSubmitter;
 import org.holodeckb2b.common.submit.MessageSubmitException;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.PModeFinder;
@@ -88,23 +89,24 @@ public class MessageSubmitter implements IMessageSubmitter {
      * @throws MessageSubmitException When one of the specified payloads can not be found or when the specified path is
      *                                is not a regular file
      */
-    private void checkPayloads(IUserMessage um, IPMode pmode) throws MessageSubmitException {
-        for(IPayload p : um.getPayloads()) {
-            String contentLocation = p.getContentLocation();
-            // The location must be specified
-            if (contentLocation == null || contentLocation.isEmpty())
-                throw new MessageSubmitException("No location specified for payload [uri=" + p.getPayloadURI() + "]!");
-            try { 
-                // It most point to an existing normal file
-                if (!Files.isRegularFile(Paths.get(contentLocation))) 
-                    throw new Exception("Not a regular file");
-            } catch (Exception e) {
-                // This will only be reach if either an exception occurred while checking the location or when the
-                // given location does not point to a regular file 
-                throw new MessageSubmitException("Specified location of payload [uri=" + p.getPayloadURI() 
-                            + "] content [" + contentLocation + "] does not exist or is not a regular file!");
+    private void checkPayloads(IUserMessage um, IPMode pmode) throws MessageSubmitException {        
+        if (!Utils.isNullOrEmpty(um.getPayloads()))
+            for(IPayload p : um.getPayloads()) {
+                String contentLocation = p.getContentLocation();
+                // The location must be specified
+                if (contentLocation == null || contentLocation.isEmpty())
+                    throw new MessageSubmitException("No location specified for payload [uri=" + p.getPayloadURI() + "]!");
+                try { 
+                    // It most point to an existing normal file
+                    if (!Files.isRegularFile(Paths.get(contentLocation))) 
+                        throw new Exception("Not a regular file");
+                } catch (Exception e) {
+                    // This will only be reach if either an exception occurred while checking the location or when the
+                    // given location does not point to a regular file 
+                    throw new MessageSubmitException("Specified location of payload [uri=" + p.getPayloadURI() 
+                                + "] content [" + contentLocation + "] does not exist or is not a regular file!");
+                }
             }
-        }
     }
 
 

@@ -26,6 +26,7 @@ import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.common.messagemodel.IPayload;
 import org.holodeckb2b.common.pmode.IPMode;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
@@ -81,36 +82,37 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
         
         // Message is signed, check that each payload has a ds:Reference in the Signature
         boolean allRefd = true;
-        for(IPayload payload : um.getPayloads()) {
-            String plRef = payload.getPayloadURI();
-            // If the payload has no reference the SOAP Body is implicitly referenced. So set the reference to the id
-            // from de Body element
-            if (plRef == null || plRef.isEmpty())
-                plRef = getSOAPBodyIdRef(mc);
-            else {
-                // Add prefix to the reference 
-                switch (payload.getContainment()) {
-                    case BODY :
-                        plRef = "#" + plRef; break;
-                    case ATTACHMENT :
-                        plRef = "cid:" + plRef;
+        if (!Utils.isNullOrEmpty(um.getPayloads())) {
+            for(IPayload payload : um.getPayloads()) {
+                String plRef = payload.getPayloadURI();
+                // If the payload has no reference the SOAP Body is implicitly referenced. So set the reference to the id
+                // from de Body element
+                if (plRef == null || plRef.isEmpty())
+                    plRef = getSOAPBodyIdRef(mc);
+                else {
+                    // Add prefix to the reference 
+                    switch (payload.getContainment()) {
+                        case BODY :
+                            plRef = "#" + plRef; break;
+                        case ATTACHMENT :
+                            plRef = "cid:" + plRef;
+                    }
+                }
+                boolean found = false;
+                for(Iterator<OMElement> it = references.iterator(); it.hasNext() && !found ; ) {
+                    OMElement ref = it.next();
+                    found = plRef.equals(ref.getAttributeValue(new QName("URI")));
+                }
+                allRefd &= found;
+                if (!found) {
+                    log.warn("Payload with reference [" + plRef + "] is not signed in user message [" 
+                                + um.getMessageId() + "]");
+                    // If no ds:Reference is found for this payload the message does not conform to the AS4 requirements 
+                    // that all payloads should be signed. Therefore create the ValueInconsistent error
+                    createValueInconsistentError(mc, um.getMessageId(), payload.getPayloadURI());            
                 }
             }
-            boolean found = false;
-            for(Iterator<OMElement> it = references.iterator(); it.hasNext() && !found ; ) {
-                OMElement ref = it.next();
-                found = plRef.equals(ref.getAttributeValue(new QName("URI")));
-            }
-            allRefd &= found;
-            if (!found) {
-                log.warn("Payload with reference [" + plRef + "] is not signed in user message [" 
-                            + um.getMessageId() + "]");
-                // If no ds:Reference is found for this payload the message does not conform to the AS4 requirements 
-                // that all payloads should be signed. Therefore create the ValueInconsistent error
-                createValueInconsistentError(mc, um.getMessageId(), payload.getPayloadURI());            
-            }
         }
-        
         // If not all payloads are referenced the UserMessage should not be processed further, so change it processing
         // state to failed
         if (!allRefd) 

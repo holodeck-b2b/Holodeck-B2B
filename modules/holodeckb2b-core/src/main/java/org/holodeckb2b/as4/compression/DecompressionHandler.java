@@ -24,6 +24,7 @@ import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.general.IProperty;
 import org.holodeckb2b.common.messagemodel.IPayload;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
@@ -47,8 +48,11 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
     
     @Override
     protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws AxisFault {
-        // The compression feature can be used per payload, so check all payloads in message
+        // Decompression is only needed if the message contains payloads at all
+        if (Utils.isNullOrEmpty(um.getPayloads())) 
+            return InvocationResponse.CONTINUE;
         
+        // The compression feature can be used per payload, so check all payloads in message
         for (IPayload p : um.getPayloads()) {
             // Only payloads contained in attachment can use compression
             if (p.getContainment() == IPayload.Containment.ATTACHMENT 

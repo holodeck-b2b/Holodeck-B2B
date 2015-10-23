@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.ebms3.submit.mmd;
 
-import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
@@ -30,13 +29,17 @@ import org.holodeckb2b.common.messagemodel.IAgreementReference;
 import org.holodeckb2b.common.messagemodel.ICollaborationInfo;
 import org.holodeckb2b.common.messagemodel.IPayload;
 import org.holodeckb2b.common.messagemodel.IUserMessage;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.persistent.message.Payload;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.junit.After;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -95,8 +98,8 @@ public class MessageMetaDataTest {
      * to use.
      */
     @Test
-    public void test1_CreateFromFile() throws Exception {
-        String path = this.getClass().getClassLoader().getResource("mmdtest/mmdtest1.xml").getPath();
+    public void test1_Minimal() throws Exception {
+        String path = this.getClass().getClassLoader().getResource("mmdtest/minimal.xml").getPath();
         File   f = new File(path);
         
         try {
@@ -106,9 +109,7 @@ public class MessageMetaDataTest {
             assertNotNull(mmd.getCollaborationInfo());
             assertEquals("q3KuGFmr", mmd.getCollaborationInfo().getConversationId());
             
-            assertNotNull(mmd.getPayloads());
-            assertEquals(2, mmd.getPayloads().size());
-            assertEquals("http://JUsQVnjp/", mmd.getPayloads().iterator().next().getContentLocation());
+            assertNull(mmd.getPayloads());
             
         } catch (Exception ex) {
             ex.printStackTrace();

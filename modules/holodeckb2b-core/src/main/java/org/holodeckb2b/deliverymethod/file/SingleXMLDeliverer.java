@@ -126,20 +126,19 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
         log.debug("Add general message info to XML container");
         // Add the information on the user message to the container
         OMElement  usrMsgElement = UserMessage.createElement(container, mmd);
-            
-        log.debug("Add payload meta info to XML container");        
-        // Generate a element id and set this a reference in payload property
-        int i = 1;
-        for (IPayload p : mmd.getPayloads()) {
-            Property refProp = new Property();
-            refProp.setName("org:holodeckb2b:ref");
-            refProp.setValue("pl-" + i++);
-            ((PartInfo) p).getProperties().add(refProp);
-        }  
-        org.holodeckb2b.ebms3.packaging.PayloadInfo.createElement(usrMsgElement, mmd.getPayloads());
         
-        log.debug("Now add payload contents to XML container");
-        OMElement plContainer = f.createOMElement(new QName("Payloads"), container);
+        if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
+            log.debug("Add payload meta info to XML container");        
+            // Generate a element id and set this a reference in payload property
+            int i = 1;
+            for (IPayload p : mmd.getPayloads()) {
+                Property refProp = new Property();
+                refProp.setName("org:holodeckb2b:ref");
+                refProp.setValue("pl-" + i++);
+                ((PartInfo) p).getProperties().add(refProp);
+            }  
+            org.holodeckb2b.ebms3.packaging.PayloadInfo.createElement(usrMsgElement, mmd.getPayloads());
+        }
         
         String msgFilePath = Utils.preventDuplicateFileName(directory + "message-" 
                                                     + mmd.getMessageId().replaceAll("[^a-zA-Z0-9.-]", "_") 
@@ -152,19 +151,21 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
             xmlWriter.writeStartElement(XML_ROOT_NAME.getLocalPart());
             usrMsgElement.serialize(xmlWriter);
             xmlWriter.flush();
-
-            log.debug("Meta data writen to file, included the payload contents");
-            // Write start tag of Payloads container
-            fw.write("<Payloads>");
-            i = 1;
-            for(IPayload p : mmd.getPayloads()) {
-                log.debug("Create <Payload> element");
-                fw.write("<Payload xml:id=\"pl-" + i++ + "\">");
-                writeEncodedPayload(p.getContentLocation(), fw);
-                fw.write("</Payload>");
+            log.debug("Meta data writen to file");
+            if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
+                log.debug("Write payload contents");
+                fw.write("<Payloads>");
+                int i = 1;
+                for(IPayload p : mmd.getPayloads()) {
+                    log.debug("Create <Payload> element");
+                    fw.write("<Payload xml:id=\"pl-" + i++ + "\">");
+                    writeEncodedPayload(p.getContentLocation(), fw);
+                    fw.write("</Payload>\n");
+                }
+                log.debug("Close the <Payloads> element");
+                fw.write("</Payloads>\n");
             }
-            log.debug("Close the payloads and overall container");
-            fw.write("</Payloads>\n</" + XML_ROOT_NAME.getLocalPart() + ">");
+            fw.write("</" + XML_ROOT_NAME.getLocalPart() + ">");
             fw.close();        
             log.info("User message with msgID=" + mmd.getMessageId() + " successfully delivered");
         } catch (IOException | XMLStreamException ex) {

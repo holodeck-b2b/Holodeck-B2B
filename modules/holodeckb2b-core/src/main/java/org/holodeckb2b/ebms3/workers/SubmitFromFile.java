@@ -24,6 +24,7 @@ import java.util.Map;
 import org.holodeckb2b.common.messagemodel.IPayload;
 import org.holodeckb2b.common.submit.IMessageSubmitter;
 import org.holodeckb2b.common.submit.IMessageSubmitterFactory;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.TaskConfigurationException;
 import org.holodeckb2b.common.workers.DirWatcher;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
@@ -121,12 +122,12 @@ public class SubmitFromFile extends DirWatcher {
      */
     protected void convertPayloadPaths(MessageMetaData mmd, File mmdFile) {
         String basePath = mmdFile.getParent();
-        for (IPayload p : mmd.getPayloads()) {
-            PartInfo pi = (PartInfo) p;
-            if (!(Paths.get(pi.getContentLocation()).isAbsolute()))
-                pi.setContentLocation(Paths.get(basePath, pi.getContentLocation()).normalize().toString());           
-        }
-        
+        if (!Utils.isNullOrEmpty(mmd.getPayloads())) 
+            for (IPayload p : mmd.getPayloads()) {
+                PartInfo pi = (PartInfo) p;
+                if (!(Paths.get(pi.getContentLocation()).isAbsolute()))
+                    pi.setContentLocation(Paths.get(basePath, pi.getContentLocation()).normalize().toString());           
+            }        
     }
     
     /**

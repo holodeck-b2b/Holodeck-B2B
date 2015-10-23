@@ -148,15 +148,17 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
         OMElement    container = f.createOMElement(XML_ROOT_NAME);
         container.declareNamespace(Constants.EBMS3_NS_URI, "eb");
             
-        log.debug("Add payload info to XML container");
-        // We add the local file location as a Part property
-        for (IPayload p : mmd.getPayloads()) {
-            Property locationProp = new Property();
-            locationProp.setName("org:holodeckb2b:location");
-            locationProp.setValue(p.getContentLocation());
-            ((PartInfo) p).getProperties().add(locationProp);
-        }  
-
+        if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
+            log.debug("Add payload info to XML container");
+            // We add the local file location as a Part property
+            for (IPayload p : mmd.getPayloads()) {
+                Property locationProp = new Property();
+                locationProp.setName("org:holodeckb2b:location");
+                locationProp.setValue(p.getContentLocation());
+                ((PartInfo) p).getProperties().add(locationProp);
+            }  
+        }
+        
         log.debug("Add message info to XML container");
         // Add the information on the user message to the container
         OMElement  usrMsgElement = UserMessage.createElement(container, mmd);

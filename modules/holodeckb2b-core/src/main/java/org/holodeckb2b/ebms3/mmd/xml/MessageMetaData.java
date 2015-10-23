@@ -64,7 +64,7 @@ public class MessageMetaData implements IUserMessage {
     @ElementList(name = "MessageProperties", entry = "Property", type = Property.class, required = false)
     private ArrayList<IProperty> msgProperties;
     
-    @ElementList(name = "PayloadInfo", entry = "PartInfo", type = PartInfo.class, required=true)
+    @ElementList(name = "PayloadInfo", entry = "PartInfo", type = PartInfo.class, required=false)
     private ArrayList<IPayload>  payloads;  
     
     /**

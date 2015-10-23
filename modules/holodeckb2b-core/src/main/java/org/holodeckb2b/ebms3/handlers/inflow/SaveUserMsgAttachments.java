@@ -35,6 +35,7 @@ import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.common.messagemodel.IPayload;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.MimeInconsistency;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
@@ -77,13 +78,15 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
     @Override
     protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws AxisFault, DatabaseException {
         
-        Collection<IPayload> payloads = um.getPayloads();
-        log.debug("UserMessage contains " + payloads.size() + " payloads.");
-        
+        Collection<IPayload> payloads = um.getPayloads();        
         // If there are no payloads in the UserMessage directly continue processing
-        if (payloads == null || payloads.isEmpty())
+        if (Utils.isNullOrEmpty(payloads)) {
+            log.debug("UserMessage contains no payloads.");
+            MessageUnitDAO.setReadyForDelivery(um);
             return InvocationResponse.CONTINUE;
+        }
         
+        log.debug("UserMessage contains " + payloads.size() + " payloads.");
         try {
             // Get the directory where to store the payloads from the configuration
             File tmpPayloadDir = getTempDir();

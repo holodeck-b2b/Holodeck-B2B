@@ -90,17 +90,19 @@ abstract class AbstractFileDeliverer implements IMessageDeliverer {
         //  to reflect new locations
         Collection<IPayload>    copiedPLs = new ArrayList<IPayload>();
         try {
-            log.debug("Copy all payload files to delivery directory");
-            for(IPayload p : mmd.getPayloads()) {
-                PartInfo newPLInfo = new PartInfo(p);
-                Path newPath = copyPayloadFile(p, mmd.getMessageId());
-                if (newPath != null) 
-                    newPLInfo.setContentLocation(newPath.toString());
-                copiedPLs.add(newPLInfo);
+            if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
+                log.debug("Copy all payload files to delivery directory");
+                for(IPayload p : mmd.getPayloads()) {
+                    PartInfo newPLInfo = new PartInfo(p);
+                    Path newPath = copyPayloadFile(p, mmd.getMessageId());
+                    if (newPath != null) 
+                        newPLInfo.setContentLocation(newPath.toString());
+                    copiedPLs.add(newPLInfo);
+                }
+                log.debug("Copied all payload files, set as new payload info in MMD");
+                mmd.setPayloads(copiedPLs);
             }
-            log.debug("Copied all payload files, set as new payload info in MMD");
-            mmd.setPayloads(copiedPLs);
-            log.debug("Information complete, write message meta data to file");    
+            log.debug("Write message meta data to file");    
             writeUserMessageInfoToFile(mmd);
             log.info("User message with msgID=" + mmd.getMessageId() + " successfully delivered");
         } catch (IOException ex) {

@@ -8,10 +8,4 @@ NOTE: Not suitable for actual message submission to Holodeck!
     <CollaborationInfo>
         <ConversationId>q3KuGFmr</ConversationId>
     </CollaborationInfo>
-    <PayloadInfo>
-        <PartInfo location="http://JUsQVnjp/">
-        </PartInfo>
-        <PartInfo containment="external" uri="http://test.holodeck-b2b.org/payload">
-        </PartInfo>
-    </PayloadInfo>
 </MessageMetaData>

@@ -66,7 +66,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
         log.debug("Check for payloads to include");
         Collection<IPayload> payloads = um.getPayloads();
         
-        if (payloads == null || payloads.isEmpty()) {
+        if (Utils.isNullOrEmpty(payloads)) {
             // No payloads in this user message, so nothing to do
             log.debug("Usser message has no payloads");
         } else {

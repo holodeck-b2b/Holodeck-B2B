@@ -26,6 +26,7 @@ import org.holodeckb2b.common.general.IProperty;
 import org.holodeckb2b.common.messagemodel.IPayload;
 import org.holodeckb2b.common.pmode.IPayloadProfile;
 import org.holodeckb2b.common.pmode.IUserMessageFlow;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.persistent.general.Property;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
@@ -53,6 +54,10 @@ public class CompressionHandler extends AbstractUserMessageHandler {
     
     @Override
     protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws AxisFault {
+        
+        // First check if this message contains payloads at all
+        if (Utils.isNullOrEmpty(um.getPayloads()))
+            return InvocationResponse.CONTINUE;
         
         log.debug("Check P-Mode configuration if AS4 compression must be used");
         IUserMessageFlow flow = HolodeckB2BCore.getPModeSet().get(um.getPMode())
