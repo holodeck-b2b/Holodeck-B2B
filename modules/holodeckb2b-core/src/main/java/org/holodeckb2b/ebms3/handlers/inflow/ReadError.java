@@ -33,7 +33,7 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.axis2.MessageContextUtils;
 
 /**
  * Is the handler that checks if this message contains one or more Error signals, i.e. the ebMS header contains one or 

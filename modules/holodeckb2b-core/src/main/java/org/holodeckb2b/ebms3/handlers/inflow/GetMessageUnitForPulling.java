@@ -28,7 +28,7 @@ import org.holodeckb2b.ebms3.errors.EmptyMessagePartitionChannel;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.axis2.MessageContextUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for retrieving a message unit waiting to be pulled and which can be 

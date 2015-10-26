@@ -30,7 +30,7 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.axis2.MessageContextUtils;
 
 /**
  * Is the handler in the <i>IN_FLOW</i> responsible for reading the meta data on an user message message unit from the 

@@ -41,7 +41,7 @@ import org.holodeckb2b.ebms3.persistent.message.EbmsError;
 import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**

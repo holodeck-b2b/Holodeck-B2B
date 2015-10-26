@@ -28,7 +28,7 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.packaging.PullRequest;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.axis2.MessageContextUtils;
 
 /**
  * Is an in flow handler that checks if this message contains a pull request, i.e. contains a <eb:PullRequest> element 

@@ -32,7 +32,7 @@ import org.holodeckb2b.common.workerpool.IWorkerTask;
 import org.holodeckb2b.common.workerpool.TaskConfigurationException;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
-import org.holodeckb2b.ebms3.util.Axis2Utils;
+import org.holodeckb2b.axis2.Axis2Utils;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**

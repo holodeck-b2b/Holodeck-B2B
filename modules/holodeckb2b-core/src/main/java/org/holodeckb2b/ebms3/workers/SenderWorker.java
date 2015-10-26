@@ -20,22 +20,20 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.holodeckb2b.axis2.Axis2Utils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.common.workerpool.TaskConfigurationException;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.util.Axis2Utils;
 
 /**
- * Is responsible for starting the send process of User Message message units. It 
- * looks for all messages waiting in the database to get send and starts an Axis2
- * client for each of them. The ebMS specific handlers in the Axis2 handler chain
- * will then take over and do the actual message processing. This worker is only
- * to kick-off the process.
- * <p>This worker does not need configuration to run. As this worker is needed 
- * for Holodeck B2B to work properly it is included in the default worker pool. 
+ * Is responsible for starting the send process of message units. It looks for all messages waiting in the database to 
+ * get send and starts an Axis2 client for each of them. The ebMS specific handlers in the Axis2 handler chain will then 
+ * take over and do the actual message processing. This worker is only to kick-off the process.
+ * <p>This worker does not need configuration to run. As this worker is needed for Holodeck B2B to work properly it is 
+ * included in the default worker pool. 
  * 
  * @author Sander Fieten
  */

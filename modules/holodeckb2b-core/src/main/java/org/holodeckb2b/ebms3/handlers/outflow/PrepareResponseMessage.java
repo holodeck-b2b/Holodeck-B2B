@@ -37,7 +37,7 @@ import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
 import org.holodeckb2b.ebms3.persistent.message.Receipt;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.axis2.MessageContextUtils;
 
 /**
  * Is the first handler of the out flow and is responsible for preparing a response by checking if the handlers in the

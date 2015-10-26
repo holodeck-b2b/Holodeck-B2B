@@ -32,7 +32,7 @@ import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.security.util.SecurityUtils;
 

@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.ebms3.util;
 
+import org.holodeckb2b.axis2.MessageContextUtils;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;

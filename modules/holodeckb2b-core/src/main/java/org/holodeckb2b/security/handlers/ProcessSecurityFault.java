@@ -28,7 +28,7 @@ import org.holodeckb2b.ebms3.errors.InvalidHeader;
 import org.holodeckb2b.ebms3.errors.OtherContentError;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.axis2.MessageContextUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler that checks for faults that occurred during processing of the WS-Security headers. If

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.ebms3.util;
+package org.holodeckb2b.axis2;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,8 +27,10 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.OperationClient;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
+import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
+import org.apache.axis2.description.AxisService;
 import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
@@ -44,12 +46,17 @@ import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.w3c.dom.Document;
 
 /**
- * This class contains helper functions related to the Axis2.
+ * This class contains helper functions related to the Axis2 framework
  *
- * @author safi
+ * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public final class Axis2Utils {
 
+    /**
+     * Name for the anonymous AxisService that uses correct Axis2 operation
+     */
+    private static final String HB2B_ANON_SVC = "hb2b:axis2utils:anon_svc";
+    
     /**
      * Creates the {@link MessageContext} for the response to message currently being processed.
      *
@@ -125,15 +132,21 @@ public final class Axis2Utils {
         }
     }
 
+    /**
+     * Send the message unit to the other MSH. 
+     * 
+     * @param message   The MessageUnit to send 
+     * @param log       The log to use for writing log information
+     */
     public static void sendMessage(MessageUnit message, Log log) {
         ServiceClient sc;
         OperationClient oc;
 
         try {
             log.debug("Prepare Axis2 client to send " + message.getClass().getSimpleName());
-            sc = new ServiceClient(Config.getAxisConfigurationContext(), null);
+            sc = new ServiceClient(Config.getAxisConfigurationContext(), createAnonymousService());
             sc.engageModule(Constants.HOLODECKB2B_CORE_MODULE);
-            oc = sc.createClient(ServiceClient.ANON_OUT_IN_OP);
+            oc = sc.createClient(ANON_OUT_IN_OP);
 
             log.debug("Create an empty MessageContext for message with current configuration");
             MessageContext msgCtx = new MessageContext();
@@ -183,4 +196,18 @@ public final class Axis2Utils {
             }
         }
     }
+    
+    /**
+     * Create an axisService with one (anonymous) operation for OutIn MEP but that does accept an empty responses.
+     *
+     * @return The configured anonymous service
+     */
+    private static AxisService createAnonymousService() {
+        AxisService axisService = new AxisService(HB2B_ANON_SVC);
+
+        OutOptInAxisOperation outInOperation = new OutOptInAxisOperation(ANON_OUT_IN_OP);
+        axisService.addOperation(outInOperation);
+        
+        return axisService;
+    }    
 }

@@ -42,7 +42,7 @@ import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.KeyValuePair;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.util.Axis2Utils;
+import org.holodeckb2b.axis2.Axis2Utils;
 import org.holodeckb2b.security.callbackhandlers.AttachmentCallbackHandler;
 import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.tokens.UsernameToken;

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.holodeckb2b.ebms3.util;
+package org.holodeckb2b.axis2;
 
 import java.util.ArrayList;
 import java.util.Collection;

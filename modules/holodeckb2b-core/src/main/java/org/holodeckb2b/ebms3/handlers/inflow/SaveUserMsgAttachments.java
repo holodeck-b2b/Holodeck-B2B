@@ -44,7 +44,7 @@ import org.holodeckb2b.ebms3.persistent.message.EbmsError;
 import org.holodeckb2b.ebms3.persistent.message.Payload;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.axis2.MessageContextUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for reading the payload content from the SOAP message. The payloads are 

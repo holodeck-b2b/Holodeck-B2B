@@ -30,7 +30,7 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.packaging.Receipt;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.axis2.MessageContextUtils;
 
 /**
  * Is the handler that checks if this message contains one or more Receipt signals, i.e. contains one or more 

@@ -28,7 +28,7 @@ import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
