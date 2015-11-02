@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import org.apache.tika.Tika;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
@@ -65,9 +66,9 @@ public final class Utils {
         if (date == null)
             return null;
         
-        String formatted = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-            .format(date);
-        return formatted.substring(0, 26) + ":" + formatted.substring(26);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXX");
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return formatter.format(date);
     }
 
     /** 
