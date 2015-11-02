@@ -20,7 +20,7 @@ package org.holodeckb2b.deliverymethod.file;
 import java.io.File;
 import java.io.IOException;
 import org.holodeckb2b.common.delivery.MessageDeliveryException;
-import org.holodeckb2b.common.messagemodel.IMessageUnit;
+import org.holodeckb2b.common.messagemodel.ISignalMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.workers.SubmitFromFile;
@@ -45,7 +45,7 @@ public class MMDDeliverer extends AbstractFileDeliverer {
     }
 
     @Override
-    protected void deliverSignalMessage(IMessageUnit sigMsgUnit) throws MessageDeliveryException {
+    protected void deliverSignalMessage(ISignalMessage sigMsgUnit) throws MessageDeliveryException {
         // Not supported, this deliverer only delivers user messages!
     }
 

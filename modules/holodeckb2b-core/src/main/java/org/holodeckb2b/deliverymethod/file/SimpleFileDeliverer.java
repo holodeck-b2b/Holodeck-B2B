@@ -31,9 +31,9 @@ import org.holodeckb2b.common.delivery.IMessageDeliverer;
 import org.holodeckb2b.common.delivery.MessageDeliveryException;
 import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.common.messagemodel.IErrorMessage;
-import org.holodeckb2b.common.messagemodel.IMessageUnit;
 import org.holodeckb2b.common.messagemodel.IPayload;
 import org.holodeckb2b.common.messagemodel.IReceipt;
+import org.holodeckb2b.common.messagemodel.ISignalMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.mmd.xml.PartInfo;
@@ -132,7 +132,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
      * 
      * @param dir   The directory where file should be written to.
      */
-    SimpleFileDeliverer(String dir) {
+    public SimpleFileDeliverer(String dir) {
         super(dir);
     }
 
@@ -176,7 +176,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
      *                                  application     
      */
     @Override
-    protected void deliverSignalMessage(IMessageUnit sigMsgUnit) throws MessageDeliveryException {
+    protected void deliverSignalMessage(ISignalMessage sigMsgUnit) throws MessageDeliveryException {
         OMFactory   f = OMAbstractFactory.getOMFactory();
         OMElement    container = f.createOMElement(XML_ROOT_NAME);
         container.declareNamespace(Constants.EBMS3_NS_URI, "eb");

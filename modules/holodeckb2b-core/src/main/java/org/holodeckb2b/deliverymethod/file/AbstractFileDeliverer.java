@@ -30,6 +30,7 @@ import org.holodeckb2b.common.delivery.IMessageDeliverer;
 import org.holodeckb2b.common.delivery.MessageDeliveryException;
 import org.holodeckb2b.common.messagemodel.IMessageUnit;
 import org.holodeckb2b.common.messagemodel.IPayload;
+import org.holodeckb2b.common.messagemodel.ISignalMessage;
 import org.holodeckb2b.common.messagemodel.IUserMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
@@ -44,7 +45,7 @@ import org.holodeckb2b.ebms3.mmd.xml.PartInfo;
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-abstract class AbstractFileDeliverer implements IMessageDeliverer {
+public abstract class AbstractFileDeliverer implements IMessageDeliverer {
 
     /**
      * The where the files should be stored
@@ -61,16 +62,16 @@ abstract class AbstractFileDeliverer implements IMessageDeliverer {
      * 
      * @param dir   The directory where file should be written to.
      */
-    AbstractFileDeliverer(String dir) {
+    public AbstractFileDeliverer(String dir) {
         this.directory = dir;
     }
     
     @Override
     public void deliver(IMessageUnit rcvdMsgUnit) throws MessageDeliveryException {
         if (rcvdMsgUnit instanceof IUserMessage) 
-            deliverUserMessage(rcvdMsgUnit);
+            deliverUserMessage((IUserMessage) rcvdMsgUnit);
         else // message unit is a signal
-            deliverSignalMessage(rcvdMsgUnit);
+            deliverSignalMessage((ISignalMessage) rcvdMsgUnit);
     }
 
     /**
@@ -80,7 +81,7 @@ abstract class AbstractFileDeliverer implements IMessageDeliverer {
      * @throws MessageDeliveryException When an error occurs while delivering the user message to the business 
      *                                  application
      */
-    protected void deliverUserMessage(IMessageUnit usrMsgUnit) throws MessageDeliveryException {
+    protected void deliverUserMessage(IUserMessage usrMsgUnit) throws MessageDeliveryException {
         log.debug("Delivering user message with msgId=" + usrMsgUnit.getMessageId());
 
         // We first convert the user message into a MMD document
@@ -128,7 +129,7 @@ abstract class AbstractFileDeliverer implements IMessageDeliverer {
      * @throws MessageDeliveryException When an error occurs while delivering the signal message to the business 
      *                                  application
      */
-    protected abstract void deliverSignalMessage(IMessageUnit sigMsgUnit) throws MessageDeliveryException;
+    protected abstract void deliverSignalMessage(ISignalMessage sigMsgUnit) throws MessageDeliveryException;
 
     /**
      * Helper method to copy a the payload content to <i>delivery directory</i>.
