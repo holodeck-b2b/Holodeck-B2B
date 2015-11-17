@@ -216,6 +216,7 @@ public class ErrorSignal {
         error.setCategory(errorElement.getAttributeValue(new QName(CATEGORY_ATTR)));
         error.setErrorCode(errorElement.getAttributeValue(new QName(ERROR_CODE_ATTR)));
         error.setOrigin(errorElement.getAttributeValue(new QName(ORIGIN_ATTR)));
+        error.setShortDescription(errorElement.getAttributeValue(new QName(SHORT_DESCR_ATTR)));
         error.setRefToMessageInError(errorElement.getAttributeValue(new QName(REF_TO_ATTR)));
         // Convert text of attribute to enum value of entity object
         error.setSeverity( EbmsError.Severity.FAILURE.toString()
