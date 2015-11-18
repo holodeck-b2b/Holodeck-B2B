@@ -25,6 +25,7 @@ import java.util.Map;
 import org.holodeckb2b.common.pmode.ILeg;
 import org.holodeckb2b.common.pmode.ILeg.Label;
 import org.holodeckb2b.common.pmode.IPMode;
+import org.holodeckb2b.common.util.Utils;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
@@ -144,18 +145,32 @@ public class PMode implements IPMode {
     }
     
     /**
-     * Gets the leg with the specified label from the P-Mode
+     * Gets the leg with the specified label from the P-Mode.
+     * <p>Note that the requested leg can be found directly based on its assigned label <b>or</b> if the legs have not
+     * been assigned labels on their sequence in the list, with the first being the <i>REQUEST</i> leg and the second
+     * the <i>REPLY</i>.
      * 
      * @return  The specified leg if it exists in the P-Mode, or<br>
      *          <code>null</code> if there is no leg with the given label
      */
     @Override
     public ILeg getLeg(Label label) {
+        if (Utils.isNullOrEmpty(legs))
+            return null;
+        
         ILeg    leg = null;
         for(ILeg l : legs) {
             if (l.getLabel() == label) {
                 leg = l; break;
             }
+        }
+        
+        if (leg == null) {
+            // Leg not found based on label, get based on sequence
+            if (label == Label.REQUEST)
+                leg = legs.get(0);
+            else if (legs.size() > 1)
+                leg = legs.get(1);
         }
         
         return leg;
