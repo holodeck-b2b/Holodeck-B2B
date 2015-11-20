@@ -20,6 +20,7 @@ import java.util.Iterator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
@@ -33,7 +34,6 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
-import org.holodeckb2b.axis2.MessageContextUtils;
 
 /**
  * Is the handler that checks if this message contains one or more Error signals, i.e. the ebMS header contains one or 
@@ -79,7 +79,7 @@ public class ReadError extends BaseHandler {
             Iterator<OMElement> errorSigs = ErrorSignal.getElements(messaging);
             
             if (errorSigs != null) {
-                log.debug("Error(s) found, read information from message");
+                log.debug("Error Signal(s) found, read information from message");
                 
                 while (errorSigs.hasNext()) {
                     OMElement errElem = errorSigs.next();
