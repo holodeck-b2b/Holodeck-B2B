@@ -17,8 +17,8 @@
 1. Contents of this directory
 =============================
 
-This directory is used to store the Java keystore files that hold the 
-certificates that are used for signing and encrypting messages.
+This directory is used by default to store the Java keystore files that 
+hold the certificates that are used for signing and encrypting messages.
 
 It should contain two keystores:
 
@@ -65,12 +65,14 @@ keytool -list -v -storetype pkcs12 -keystore «path to certificate file»
 3. Configuring Holodeck B2B
 ===========================
 
-To give Holodeck B2B access to the keystore you need to configure 
-the keystore passwords in the "module.xml" which is found in 
-«Holodeck B2B base dir»/repository/modules/holodeckb2b-core/META-INF
-Set the element content of the <parameter name="PrivateKeyStorePassword"/> 
-and <parameter name="PublicKeyStorePassword"/> to the passwords of the 
-keystores. 
+To give Holodeck B2B access to the keystores you need to configure the 
+keystore passwords in the Holodeck B2B configuration file which is found 
+in «Holodeck B2B base dir»/conf/holodeckb2b.xml
+Set "PrivateKeyStorePassword" and "PublicKeyStorePassword" parameters to
+the passwords of the respective keystores. 
+Also the location where Holodeck B2B should look for the keystores can be 
+specified by setting the "PrivateKeyStorePath" and "PublicKeyStorePath"
+parameters. 
 
 
 4. Examples
