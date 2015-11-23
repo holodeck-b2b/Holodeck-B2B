@@ -25,6 +25,7 @@ import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.IEbmsError;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
@@ -78,7 +79,7 @@ public class ReadError extends BaseHandler {
             log.debug("Check for Error elements to determine if message contains one or more errors");
             Iterator<OMElement> errorSigs = ErrorSignal.getElements(messaging);
             
-            if (errorSigs != null) {
+            if (Utils.isNullOrEmpty(errorSigs)) {
                 log.debug("Error Signal(s) found, read information from message");
                 
                 while (errorSigs.hasNext()) {
