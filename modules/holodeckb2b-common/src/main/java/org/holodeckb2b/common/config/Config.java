@@ -137,6 +137,10 @@ public class Config {
         config = new Config(configContext);        
     }
     
+    private static boolean isTrue (String s) {
+      return "on".equalsIgnoreCase(s) || "true".equalsIgnoreCase(s) || "1".equalsIgnoreCase(s);
+    }
+    
     /**
      * Initializes the singleton object.
      * 
@@ -195,25 +199,18 @@ public class Config {
         
         // Option to enable signal bundling
         String bundling = configFile.getParameter("AllowSignalBundling");
-        allowSignalBundling = "on".equalsIgnoreCase(bundling) || "true".equalsIgnoreCase(bundling) 
-                                        || "1".equalsIgnoreCase(bundling);        
+        allowSignalBundling = isTrue (bundling);        
 
         // Default setting for reporting Errors on Errors
         String defErrReporting = configFile.getParameter("ReportErrorOnError");
-        defaultReportErrorOnError = "on".equalsIgnoreCase(defErrReporting) 
-                                            || "true".equalsIgnoreCase(defErrReporting) 
-                                            || "1".equalsIgnoreCase(defErrReporting);        
+        defaultReportErrorOnError = isTrue(defErrReporting);        
         // Default setting for reporting Errors on Receipts
         defErrReporting = configFile.getParameter("ReportErrorOnReceipt");
-        defaultReportErrorOnReceipt = "on".equalsIgnoreCase(defErrReporting) 
-                                            || "true".equalsIgnoreCase(defErrReporting) 
-                                            || "1".equalsIgnoreCase(defErrReporting);        
+        defaultReportErrorOnReceipt = isTrue(defErrReporting);        
         
         // Option to use strict error references check 
         String strictErrorRefCheck = configFile.getParameter("StrictErrorReferencesCheck");
-        useStrictErrorReferencesCheck = "on".equalsIgnoreCase(strictErrorRefCheck) 
-                                                || "true".equalsIgnoreCase(strictErrorRefCheck) 
-                                                || "1".equalsIgnoreCase(strictErrorRefCheck);        
+        useStrictErrorReferencesCheck = isTrue(strictErrorRefCheck);        
         
         // The location of the keystore holding the private keys, if not provided the default location «HB2B_HOME»/
         // repository/certs/privatekeys.jks is used
@@ -235,9 +232,7 @@ public class Config {
         
         // Default setting for certificate revocation check
         String certRevocationCheck = configFile.getParameter("CertificateRevocationCheck");
-        defaultRevocationCheck = "on".equalsIgnoreCase(certRevocationCheck) 
-                                                || "true".equalsIgnoreCase(certRevocationCheck) 
-                                                || "1".equalsIgnoreCase(certRevocationCheck);                
+        defaultRevocationCheck = isTrue(certRevocationCheck);                
     }
 
     /**
