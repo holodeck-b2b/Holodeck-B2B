@@ -122,6 +122,12 @@ public class PModeFinder {
             return null;
         
         for (IPMode p : pmodes.getAll()) {
+            // Ignore this P-Mode if it is configured for sending
+            if (p.getLeg(ILeg.Label.REQUEST).getProtocol() != null &&
+                !Utils.isNullOrEmpty(p.getLeg(ILeg.Label.REQUEST).getProtocol().getAddress())) {
+                continue;
+            }
+
             int cValue = 0;
             // P-Mode id and agreement info are contained in optional element
             IAgreementReference agreementRef = mu.getCollaborationInfo().getAgreement();
