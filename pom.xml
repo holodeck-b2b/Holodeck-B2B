@@ -154,7 +154,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.11</version>
+                <version>4.12</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -172,7 +172,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9</version>
+                <version>2.10.3</version>
                 <configuration>
                     <!-- all javadoc of common and core together, so use aggregate -->
                     <aggregate>true</aggregate>
@@ -190,11 +190,114 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.3</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
                 </configuration>
+            </plugin>
+            <plugin>
+              <groupId>com.mycila</groupId>
+              <artifactId>license-maven-plugin</artifactId>
+              <version>2.11</version>
+              <configuration>
+                <header>src/etc/license-template.txt</header>
+                <strictCheck>true</strictCheck>
+                <encoding>${project.build.sourceEncoding}</encoding>
+                <mapping>
+                  <!-- OASIS Content Value Association -->
+                  <cva>XML_STYLE</cva>
+                  <!-- OASIS GeneriCode -->
+                  <gc>XML_STYLE</gc>
+                  <!-- Java files -->
+                  <jav>JAVADOC_STYLE</jav>
+                  <!-- JavaCC source files -->
+                  <jj>JAVADOC_STYLE</jj>
+                  <!-- JavaCC JJTree source files -->
+                  <jjt>JAVADOC_STYLE</jjt>
+                  <!-- Schematron files -->
+                  <sch>XML_STYLE</sch>
+                  <!-- SVG images -->
+                  <svg>XML_STYLE</svg>
+                  <!-- WebService WSDL -->
+                  <wsdl>XML_STYLE</wsdl>
+                  <!-- JAXB Binding Files -->
+                  <xjb>XML_STYLE</xjb>
+                  <!-- XSLT files -->
+                  <xslt>XML_STYLE</xslt>
+                </mapping>
+                <excludes>
+                  <!-- Certificate file -->
+                  <exclude>**/*.cer</exclude>
+                  <!-- CSV files -->
+                  <exclude>**/*.csv</exclude>
+                  <!-- Certificate file -->
+                  <exclude>**/*.der</exclude>
+                  <!-- Binary word documents -->
+                  <exclude>**/*.doc*</exclude>
+                  <!-- Font files -->
+                  <exclude>**/*.eot</exclude>
+                  <!-- Icon files -->
+                  <exclude>**/*.ico</exclude>
+                  <!-- IntelliJ Idea project files -->
+                  <exclude>**/*.iml</exclude>
+                  <!-- Image files -->
+                  <exclude>**/*.JPG*</exclude>
+                  <!-- JavaCC input files -->
+                  <exclude>**/*.jj</exclude>
+                  <!-- JavaCC JJTree input files -->
+                  <exclude>**/*.jjt</exclude>
+                  <!-- Java KeyStore files -->
+                  <exclude>**/*.jks</exclude>
+                  <!-- Log files -->
+                  <exclude>**/*.log</exclude>
+                  <!-- Automatically created mapping files -->
+                  <exclude>**/*.map</exclude>
+                  <!-- MD5 hash files -->
+                  <exclude>**/*.md5</exclude>
+                  <!-- Minified CSS/JS files - usually generated -->
+                  <exclude>**/*.min.css</exclude>
+                  <exclude>**/*.min.js</exclude>
+                  <!-- Open Document file -->
+                  <exclude>**/*.ods</exclude>
+                  <!-- OpenType fonts -->
+                  <exclude>**/*.otf</exclude>
+                  <!-- Certificate file -->
+                  <exclude>**/*.p12</exclude>
+                  <!-- PDF file -->
+                  <exclude>**/*.pdf</exclude>
+                  <!-- PMD configuration file -->
+                  <exclude>**/*.pmd</exclude>
+                  <!-- Policy file -->
+                  <exclude>**/*.policy</exclude>
+                  <!-- Powerpoint files -->
+                  <exclude>**/*.ppt*</exclude>
+                  <!-- SHA1 hash files -->
+                  <exclude>**/*.sha1</exclude>
+                  <!-- SHA256 hash files -->
+                  <exclude>**/*.sha256</exclude>
+                  <!-- SHA512 hash files -->
+                  <exclude>**/*.sha512</exclude>
+                  <!-- Binary Flash files -->
+                  <exclude>**/*.swf</exclude>
+                  <!-- Files marked as test -->
+                  <exclude>**/*.test</exclude>
+                  <!-- TrueType fonts -->
+                  <exclude>**/*.ttf</exclude>
+                  <!-- Generic text file -->
+                  <exclude>**/*.txt</exclude>
+                  <!-- Wiki source files -->
+                  <exclude>**/*.wiki</exclude>
+                  <!-- Font files -->
+                  <exclude>**/*.woff*</exclude>
+                  <!-- Excel files -->
+                  <exclude>**/*.xls*</exclude>
+                  <!-- Special license files without extension -->
+                  <exclude>**/NOTICE</exclude>
+                  <exclude>**/LICENSE</exclude>
+                  <exclude>**/ignore_me</exclude>
+                </excludes>
+              </configuration>
             </plugin>
         </plugins>
     </build>
