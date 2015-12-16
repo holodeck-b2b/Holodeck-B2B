@@ -171,6 +171,7 @@ public final class Axis2Utils {
             EndpointReference targetEPR = new EndpointReference("http://holodeck-b2b.org/transport/dummy");
             Options options = new Options();
             options.setTo(targetEPR);
+            options.setExceptionToBeThrownOnSOAPFault(false);
             oc.setOptions(options);
 
             log.debug("Axis2 client configured for sending ebMS message");
