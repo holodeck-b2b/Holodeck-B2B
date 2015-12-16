@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.pmode.IPMode;
@@ -31,7 +32,6 @@ import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.Receipt;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.util.PModeFinder;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
@@ -149,7 +149,7 @@ public class FindPModes extends BaseHandler {
 
         // If there is no referenced message unit and the error is received as a response to a single message unit
         //  we sent out we still have a reference
-        if (refToMessageId == null && mc.isServerSide()) {
+        if (refToMessageId == null && isInFlow(INITIATOR)) {
             Collection<MessageUnit>  reqMUs = MessageContextUtils.getSentMessageUnits(mc);
             if (reqMUs.size() == 1) {
                 // Request contained one message unit, assuming error applies to it
