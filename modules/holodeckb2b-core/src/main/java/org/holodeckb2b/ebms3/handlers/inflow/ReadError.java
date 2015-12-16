@@ -79,7 +79,7 @@ public class ReadError extends BaseHandler {
             log.debug("Check for Error elements to determine if message contains one or more errors");
             Iterator<OMElement> errorSigs = ErrorSignal.getElements(messaging);
             
-            if (Utils.isNullOrEmpty(errorSigs)) {
+            if (!Utils.isNullOrEmpty(errorSigs)) {
                 log.debug("Error Signal(s) found, read information from message");
                 
                 while (errorSigs.hasNext()) {
