@@ -18,7 +18,7 @@ package org.holodeckb2b.ebms3.persistent.general;
 
 import java.io.Serializable;
 import javax.persistence.Embeddable;
-import org.holodeckb2b.common.general.IPartyId;
+import org.holodeckb2b.interfaces.general.IPartyId;
 
 /**
  * Is a persistency class for PartyIds. As a PartyId is not a very useful entity

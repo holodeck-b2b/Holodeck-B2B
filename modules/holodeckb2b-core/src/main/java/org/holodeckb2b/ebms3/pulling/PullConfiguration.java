@@ -23,10 +23,9 @@ import java.util.List;
 import javax.persistence.PersistenceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.workerpool.IWorkerConfiguration;
-import org.holodeckb2b.common.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.common.workerpool.WorkerPool;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
+import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Namespace;
@@ -52,6 +51,11 @@ import org.simpleframework.xml.core.Validate;
 @Root(name = "pulling", strict = false)
 @Namespace(reference="http://holodeck-b2b.org/schemas/2014/05/pullconfiguration")
 public class PullConfiguration implements IWorkerPoolConfiguration {
+
+    /**
+     * The name of the worker pool that contains the workers that execute the PullRequests
+     */
+    public static final String PULL_WORKER_POOL_NAME = "holodeckb2b:pullers";
     
     @Element(name = "default")
     private PullerConfig  defaultPuller;
@@ -90,7 +94,7 @@ public class PullConfiguration implements IWorkerPoolConfiguration {
      */
     @Override
     public String getName() {
-        return HolodeckB2BCore.PULL_WORKER_POOL_NAME;
+        return PULL_WORKER_POOL_NAME;
     }
 
     /**

@@ -24,8 +24,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import org.holodeckb2b.common.general.IPartyId;
-import org.holodeckb2b.common.general.ITradingPartner;
+import org.holodeckb2b.interfaces.general.IPartyId;
+import org.holodeckb2b.interfaces.general.ITradingPartner;
 
 /**
  * Is a persistency class representing a trading partner involved in a message

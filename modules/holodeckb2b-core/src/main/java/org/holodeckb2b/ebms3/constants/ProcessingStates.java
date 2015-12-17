@@ -17,7 +17,7 @@
 package org.holodeckb2b.ebms3.constants;
 
 /**
- * Constants for describing the processing state of a message.
+ * EbMSConstants for describing the processing state of a message.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */

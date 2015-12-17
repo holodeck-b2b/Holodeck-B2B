@@ -18,16 +18,16 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.List;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.EmptyMessagePartitionChannel;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.axis2.MessageContextUtils;
+import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for retrieving a message unit waiting to be pulled and which can be 

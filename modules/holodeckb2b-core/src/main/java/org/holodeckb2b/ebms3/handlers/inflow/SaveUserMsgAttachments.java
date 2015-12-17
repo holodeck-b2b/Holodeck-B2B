@@ -30,10 +30,9 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.IPayload;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.MimeInconsistency;
@@ -43,7 +42,8 @@ import org.holodeckb2b.ebms3.persistent.message.EbmsError;
 import org.holodeckb2b.ebms3.persistent.message.Payload;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
-import org.holodeckb2b.axis2.MessageContextUtils;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for reading the payload content from the SOAP message. The payloads are 
@@ -204,7 +204,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
         OMElement e = null; boolean f = false;
         while (bodyElements.hasNext() && !f) {
             e = (OMElement) bodyElements.next();
-            f = id.equals(e.getAttributeValue(Constants.QNAME_XMLID));
+            f = id.equals(e.getAttributeValue(EbMSConstants.QNAME_XMLID));
         }
         return (f ? e : null);
     }

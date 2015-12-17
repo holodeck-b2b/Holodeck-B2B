@@ -21,7 +21,7 @@ import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.WSSecurityEngineResult;
 
 /**
- * Constants used in the security related processing of the messages. 
+ * EbMSConstants used in the security related processing of the messages. 
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */

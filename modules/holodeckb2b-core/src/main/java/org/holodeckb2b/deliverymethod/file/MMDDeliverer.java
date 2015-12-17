@@ -18,11 +18,12 @@ package org.holodeckb2b.deliverymethod.file;
 
 import java.io.File;
 import java.io.IOException;
-import org.holodeckb2b.common.delivery.MessageDeliveryException;
-import org.holodeckb2b.common.messagemodel.ISignalMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.workers.SubmitFromFile;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 
 /**
  * Is an {@link IMessageDeliverer} implementation that delivers <b>ONLY user message units</b> to the business 

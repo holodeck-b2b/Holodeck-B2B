@@ -23,7 +23,6 @@ import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.ProcessingModeMismatch;
@@ -33,7 +32,8 @@ import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.Receipt;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.PModeFinder;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for determining the P-Modes that define how the received message units
@@ -179,7 +179,7 @@ public class FindPModes extends BaseHandler {
                 // Ignore here, we probably be thrown again quickly after
             }
             if (refdMsgUnit != null) {
-                pmode = HolodeckB2BCore.getPModeSet().get(refdMsgUnit.getPMode());
+                pmode = HolodeckB2BCoreInterface.getPModeSet().get(refdMsgUnit.getPMode());
             }
         }   
         

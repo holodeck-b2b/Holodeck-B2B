@@ -21,16 +21,16 @@ import java.nio.file.Paths;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.IPayload;
-import org.holodeckb2b.common.messagemodel.IUserMessage;
-import org.holodeckb2b.common.pmode.IPMode;
-import org.holodeckb2b.common.submit.IMessageSubmitter;
-import org.holodeckb2b.common.submit.MessageSubmitException;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.PModeFinder;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
+import org.holodeckb2b.interfaces.submit.MessageSubmitException;
 
 /**
  * Is the default implementation of {@see IMessageSubmitter}.
@@ -63,7 +63,7 @@ public class MessageSubmitter implements IMessageSubmitter {
             UserMessage newUM = MessageUnitDAO.createOutgoingUserMessage(completedMMD, pmode.getId());
             
             //Use P-Mode to find out if this message is to be pulled or pushed to receiver
-            if (Constants.ONE_WAY_PULL.equalsIgnoreCase(pmode.getMepBinding())) {
+            if (EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(pmode.getMepBinding())) {
                 log.debug("Message is to be pulled by receiver, change ProcessingState to wait for pull");
                 MessageUnitDAO.setWaitForPull(newUM);
             } else {

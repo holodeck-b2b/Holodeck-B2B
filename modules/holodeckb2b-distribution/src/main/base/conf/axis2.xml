@@ -55,7 +55,7 @@
     <parameter name="password">axis2</parameter>
 
     <parameter name="contextRoot"/> <!-- axis2</parameter>-->
-    <parameter name="servicePath">msh</parameter>
+    <parameter name="servicePath">services</parameter>
 
     <!-- Following parameter will completely disable REST handling in Axis2-->
     <parameter name="disableREST" locked="false">true</parameter>
@@ -348,6 +348,20 @@
         <phase name="Security"/>
         <phase name="PreDispatch"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
+            <handler name="RequestURIBasedDispatcher"
+                class="org.apache.axis2.dispatchers.RequestURIBasedDispatcher"/>
+            <handler name="SOAPActionBasedDispatcher"
+                class="org.apache.axis2.dispatchers.SOAPActionBasedDispatcher"/>
+            <handler name="RequestURIOperationDispatcher"
+                class="org.apache.axis2.dispatchers.RequestURIOperationDispatcher"/>
+            <handler name="SOAPMessageBodyBasedDispatcher"
+                class="org.apache.axis2.dispatchers.SOAPMessageBodyBasedDispatcher"/>
+            <handler name="HTTPLocationBasedDispatcher"
+                class="org.apache.axis2.dispatchers.HTTPLocationBasedDispatcher"/>
+            <handler name="GenericProviderDispatcher"
+                class="org.apache.axis2.jaxws.dispatchers.GenericProviderDispatcher"/>
+            <handler name="MustUnderstandValidationDispatcher"
+                class="org.apache.axis2.jaxws.dispatchers.MustUnderstandValidationDispatcher"/>
             <handler name="HB2BDispatcher" class="org.holodeckb2b.ebms3.handlers.inflow.HolodeckB2BDispatcher"/>                            
         </phase>           
         <!--  System predefined phases       -->

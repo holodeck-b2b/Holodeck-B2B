@@ -22,6 +22,7 @@ import javax.security.auth.callback.CallbackHandler;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.engine.Handler.InvocationResponse;
 import org.apache.commons.logging.Log;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.WSConstants;
@@ -31,19 +32,19 @@ import org.apache.wss4j.dom.handler.RequestData;
 import org.apache.wss4j.dom.handler.WSHandler;
 import org.apache.wss4j.dom.handler.WSHandlerConstants;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
-import org.holodeckb2b.common.general.Constants;
+import org.holodeckb2b.axis2.Axis2Utils;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.security.IEncryptionConfiguration;
-import org.holodeckb2b.common.security.IKeyTransport;
-import org.holodeckb2b.common.security.ISigningConfiguration;
-import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
-import org.holodeckb2b.common.security.X509ReferenceType;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.DefaultSecurityAlgorithm;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.axis2.Axis2Utils;
-import org.holodeckb2b.axis2.MessageContextUtils;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IKeyTransport;
+import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
 import org.holodeckb2b.security.callbackhandlers.AttachmentCallbackHandler;
 import org.holodeckb2b.security.callbackhandlers.PasswordCallbackHandler;
 import org.holodeckb2b.security.util.SecurityUtils;
@@ -76,7 +77,7 @@ import org.w3c.dom.Document;
  */
 public class CreateWSSHeaders extends BaseHandler {
     
-    protected static final String WSS4J_PART_EBMS_HEADER = "{}{" + Constants.EBMS3_NS_URI + "}Messaging;";
+    protected static final String WSS4J_PART_EBMS_HEADER = "{}{" + EbMSConstants.EBMS3_NS_URI + "}Messaging;";
     
     protected static final String WSS4J_PART_S11_BODY = "{}{http://schemas.xmlsoap.org/soap/envelope/}Body;";
     protected static final String WSS4J_PART_S12_BODY = "{}{http://www.w3.org/2003/05/soap-envelope}Body;";

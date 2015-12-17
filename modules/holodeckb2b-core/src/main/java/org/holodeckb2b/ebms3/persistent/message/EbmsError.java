@@ -22,9 +22,10 @@ import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import org.holodeckb2b.common.general.IDescription;
-import org.holodeckb2b.common.messagemodel.IEbmsError;
 import org.holodeckb2b.ebms3.persistent.general.Description;
+import org.holodeckb2b.interfaces.general.IDescription;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError.Severity;
 
 /**
  * Is the persistency class that represents one error contained in an ebMS <i>Error

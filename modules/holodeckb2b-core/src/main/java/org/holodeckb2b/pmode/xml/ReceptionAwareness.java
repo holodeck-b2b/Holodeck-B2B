@@ -17,8 +17,8 @@
 package org.holodeckb2b.pmode.xml;
 
 import java.util.concurrent.TimeUnit;
-import org.holodeckb2b.common.as4.pmode.IReceptionAwareness;
-import org.holodeckb2b.common.util.Interval;
+import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
+import org.holodeckb2b.interfaces.general.Interval;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.Commit;

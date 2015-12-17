@@ -22,14 +22,14 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.wsdl.WSDLConstants;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.axis2.MessageContextUtils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the Holodeck B2B handler in the out flow that creates an empty ebMS message, i.e. a SOAP Envelope containing 
@@ -62,7 +62,7 @@ public class CreateSOAPEnvelopeHandler extends BaseHandler {
                     log.debug("No message unit in this response, no envelope needed");
                     return InvocationResponse.CONTINUE;
                 }               
-                IPMode pmode = HolodeckB2BCore.getPModeSet().get(primaryMU.getPMode());
+                IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.getPMode());
                 // Currently only One-Way MEPs are supported, so always on first leg
                 ILeg leg = pmode.getLegs().iterator().next();
                 version = leg.getProtocol() != null && "1.1".equals(leg.getProtocol().getSOAPVersion()) ? 

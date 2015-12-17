@@ -19,20 +19,20 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import java.util.Collection;
 import java.util.Map;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.IPMode;
-import org.holodeckb2b.common.pmode.ITradingPartnerConfiguration;
-import org.holodeckb2b.security.tokens.IAuthenticationInfo;
-import org.holodeckb2b.common.security.ISecurityConfiguration;
-import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.errors.FailedAuthentication;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
-import org.holodeckb2b.axis2.MessageContextUtils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.tokens.UsernameToken;
 import org.holodeckb2b.security.util.SecurityUtils;
 
@@ -73,7 +73,7 @@ public class AuthorizeMessage extends BaseHandler {
         }
         
         log.debug("Get the P-Mode for the primary message unit and check if authorization is used");
-        IPMode pmode = HolodeckB2BCore.getPModeSet().get(mu.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(mu.getPMode());
         
         if (pmode == null) {
             // This can happen for general Error signals that do not have a RefToMessageId and can not be linked to

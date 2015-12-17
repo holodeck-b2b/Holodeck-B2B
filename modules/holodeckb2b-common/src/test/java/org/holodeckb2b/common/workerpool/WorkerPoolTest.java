@@ -23,6 +23,7 @@ package org.holodeckb2b.common.workerpool;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
+import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.junit.Test;
 
 /**

@@ -18,10 +18,9 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.ArrayList;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
@@ -29,8 +28,10 @@ import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.Receipt;
-import org.holodeckb2b.axis2.MessageContextUtils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.ebms3.persistent.message.UserMessage;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received receipt signals.
@@ -104,7 +105,7 @@ public class ProcessReceipts extends BaseHandler {
                 // Check if the found message unit expects a receipt 
                 String pmodeId = refdMsg.getPMode();
                 if (pmodeId != null) {
-                    IPMode pmode = HolodeckB2BCore.getPModeSet().get(pmodeId);
+                    IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(pmodeId);
                     if (pmode == null || pmode.getLegs().iterator().next().getReceiptConfiguration() == null) {
                         // The P-Mode is not configured for receipts, generate error
                         MessageUnitDAO.setFailed(rcpt);

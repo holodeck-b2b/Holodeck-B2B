@@ -20,10 +20,10 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import org.holodeckb2b.common.pmode.IPMode;
-import org.holodeckb2b.common.pmode.IPModeSet;
-import org.holodeckb2b.common.pmode.PModeSetException;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.pmode.PModeSetException;
 
 /**
  * Is the default implementation of {@link IPModeSet} that maintains the set of P-Modes in memory. 

@@ -26,10 +26,6 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.common.general.ReplyPattern;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
-import org.holodeckb2b.common.pmode.IReceiptConfiguration;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -37,7 +33,11 @@ import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.Receipt;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.general.ReplyPattern;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.util.SecurityUtils;
 
@@ -89,7 +89,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
         if (delivered != null && delivered) {
             log.debug("User message was succesfully delivered, check if Receipt is needed");
             
-            IPMode pmode = HolodeckB2BCore.getPModeSet().get(um.getPMode());
+            IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode());
             if (pmode == null) {
                 // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
                 // is needed

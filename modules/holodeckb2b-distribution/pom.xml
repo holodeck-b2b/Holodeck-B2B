@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>2.0</version>
+        <version>2.0-rc2</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -20,6 +20,10 @@
             <!--=============================================================== 
                 First the modules of Holodeck itself 
             =============================================================== -->
+            <dependency>
+                <groupId>org.holodeckb2b</groupId>
+                <artifactId>holodeckb2b-interfaces</artifactId>
+            </dependency>
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
                 <artifactId>holodeckb2b-common</artifactId>

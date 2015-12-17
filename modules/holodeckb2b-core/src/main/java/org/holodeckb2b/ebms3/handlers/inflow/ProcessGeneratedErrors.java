@@ -24,12 +24,10 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.common.general.ReplyPattern;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.IErrorHandling;
-import org.holodeckb2b.common.pmode.IUserMessageFlow;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage;
@@ -40,8 +38,10 @@ import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
 import org.holodeckb2b.ebms3.persistent.message.Receipt;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.axis2.MessageContextUtils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.general.ReplyPattern;
+import org.holodeckb2b.interfaces.pmode.IErrorHandling;
+import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the in flow handler that collects all ebMS errors generated during the processing of the received message. The
@@ -128,7 +128,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
                             log.debug("Get P-Mode information to determine how new signal must be processed");
                             // Errorhandling config is contained in flow 
                             String pmodeId = muInError.getPMode();
-                            IUserMessageFlow flow = (pmodeId != null ? HolodeckB2BCore.getPModeSet().get(pmodeId)
+                            IUserMessageFlow flow = (pmodeId != null ? HolodeckB2BCoreInterface.getPModeSet().get(pmodeId)
                                                                     .getLegs().iterator().next().getUserMessageFlow()
                                                             : null);
                             IErrorHandling errorHandling = (flow != null ? flow.getErrorHandlingConfiguration() : null);

@@ -20,18 +20,22 @@
  */
 package org.holodeckb2b.common.workerpool;
 
-import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import org.holodeckb2b.common.workerpool.IWorkerConfiguration;
-import org.holodeckb2b.common.workerpool.IWorkerPoolConfiguration;
+import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
+import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
+import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * Tests correct loading of XML configuration for the worker pool

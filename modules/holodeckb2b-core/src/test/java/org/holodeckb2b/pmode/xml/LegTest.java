@@ -16,9 +16,8 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.pmode.xml.Leg;
 import java.io.File;
-import org.holodeckb2b.common.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.ILeg;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;

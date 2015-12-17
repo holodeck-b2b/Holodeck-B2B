@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.common.security.X509ReferenceType;
+import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
 import org.simpleframework.xml.Text;
 
 /**

@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.ebms3.mmd.xml;
 
-import org.holodeckb2b.common.general.IProperty;
+import org.holodeckb2b.interfaces.general.IProperty;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
 

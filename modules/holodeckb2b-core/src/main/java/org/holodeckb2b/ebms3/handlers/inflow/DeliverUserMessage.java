@@ -17,17 +17,17 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.delivery.IDeliverySpecification;
-import org.holodeckb2b.common.delivery.IMessageDeliverer;
-import org.holodeckb2b.common.delivery.MessageDeliveryException;
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for the delivery of the User message message unit to the business 
@@ -58,10 +58,10 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
             log.debug("Start delivery of user message");
             try {
                 // Get the delivery specification from the P-Mode
-                IPMode pmode = HolodeckB2BCore.getPModeSet().get(um.getPMode());
+                IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode());
                 // For now we just have one leg, so we get the delivery spec of the first leg
                 IDeliverySpecification deliveryMethod = pmode.getLegs().iterator().next().getDefaultDelivery();
-                IMessageDeliverer deliverer = HolodeckB2BCore.getMessageDeliverer(deliveryMethod);
+                IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliveryMethod);
                 log.debug("Delivering the message using delivery specification: " + deliveryMethod.getId());
                 deliverer.deliver(um);
                 // Indicate that message is delivered so receipt can be created

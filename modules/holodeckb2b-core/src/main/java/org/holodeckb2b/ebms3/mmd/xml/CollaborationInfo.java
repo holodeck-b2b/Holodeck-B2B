@@ -16,9 +16,9 @@
  */
 package org.holodeckb2b.ebms3.mmd.xml;
 
-import org.holodeckb2b.common.general.IService;
-import org.holodeckb2b.common.messagemodel.IAgreementReference;
-import org.holodeckb2b.common.messagemodel.ICollaborationInfo;
+import org.holodeckb2b.interfaces.general.IService;
+import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
+import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
 import org.simpleframework.xml.Element;
 
 /**

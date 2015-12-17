@@ -24,7 +24,11 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.util.Interval;
+import org.holodeckb2b.interfaces.general.Interval;
+import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
+import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
+import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
  * Manages a pool of <i>workers</i>. Workers are used to to execute, mostly recurring. tasks in Holodeck B2B like 

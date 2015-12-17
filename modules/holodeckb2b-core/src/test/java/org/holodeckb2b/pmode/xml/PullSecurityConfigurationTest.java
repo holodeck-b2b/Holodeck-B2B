@@ -16,12 +16,10 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.pmode.xml.SecurityConfiguration;
-import org.holodeckb2b.pmode.xml.PullSecurityConfiguration;
 import java.io.File;
-import org.holodeckb2b.common.security.ISecurityConfiguration;
-import org.holodeckb2b.common.security.ISigningConfiguration;
-import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

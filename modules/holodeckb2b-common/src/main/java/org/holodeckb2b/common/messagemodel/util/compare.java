@@ -18,10 +18,10 @@ package org.holodeckb2b.common.messagemodel.util;
 
 import java.util.Collection;
 import java.util.Iterator;
-import org.holodeckb2b.common.general.IPartyId;
-import org.holodeckb2b.common.general.IProperty;
-import org.holodeckb2b.common.general.IService;
-import org.holodeckb2b.common.general.ITradingPartner;
+import org.holodeckb2b.interfaces.general.IPartyId;
+import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.general.IService;
+import org.holodeckb2b.interfaces.general.ITradingPartner;
 
 /**
  *

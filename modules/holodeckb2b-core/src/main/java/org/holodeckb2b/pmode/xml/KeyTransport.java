@@ -17,9 +17,9 @@
 package org.holodeckb2b.pmode.xml;
 
 import org.apache.wss4j.dom.WSConstants;
-import org.holodeckb2b.common.security.IKeyTransport;
-import org.holodeckb2b.common.security.X509ReferenceType;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.interfaces.pmode.security.IKeyTransport;
+import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.core.PersistenceException;
 import org.simpleframework.xml.core.Validate;

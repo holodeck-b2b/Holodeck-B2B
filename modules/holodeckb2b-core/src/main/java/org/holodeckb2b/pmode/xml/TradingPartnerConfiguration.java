@@ -19,9 +19,9 @@ package org.holodeckb2b.pmode.xml;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.holodeckb2b.common.general.IPartyId;
-import org.holodeckb2b.common.pmode.ITradingPartnerConfiguration;
-import org.holodeckb2b.common.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.general.IPartyId;
+import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;

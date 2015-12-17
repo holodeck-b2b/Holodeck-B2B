@@ -17,10 +17,10 @@
 package org.holodeckb2b.ebms3.persistent.dao;
 
 import javax.persistence.EntityManager;
-import org.holodeckb2b.common.general.IPartyId;
-import org.holodeckb2b.common.general.ITradingPartner;
 import org.holodeckb2b.ebms3.persistent.general.PartyId;
 import org.holodeckb2b.ebms3.persistent.general.TradingPartner;
+import org.holodeckb2b.interfaces.general.IPartyId;
+import org.holodeckb2b.interfaces.general.ITradingPartner;
 
 /**
  * Is a <i>data access object</i> class for working with {@see TradingPartner} objects.

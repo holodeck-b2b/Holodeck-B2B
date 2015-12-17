@@ -36,13 +36,13 @@ import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.xml.security.utils.XMLUtils;
 import org.holodeckb2b.common.config.Config;
-import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
 import org.holodeckb2b.ebms3.persistent.message.Receipt;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
+import org.holodeckb2b.module.HolodeckB2BCoreImpl;
 import org.w3c.dom.Document;
 
 /**
@@ -145,7 +145,7 @@ public final class Axis2Utils {
         try {
             log.debug("Prepare Axis2 client to send " + message.getClass().getSimpleName());
             sc = new ServiceClient(Config.getAxisConfigurationContext(), createAnonymousService());
-            sc.engageModule(Constants.HOLODECKB2B_CORE_MODULE);
+            sc.engageModule(HolodeckB2BCoreImpl.HOLODECKB2B_CORE_MODULE);
             oc = sc.createClient(ANON_OUT_IN_OP);
 
             log.debug("Create an empty MessageContext for message with current configuration");

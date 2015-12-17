@@ -18,7 +18,7 @@ package org.holodeckb2b.ebms3.persistent.general;
 
 import java.io.Serializable;
 import javax.persistence.Embeddable;
-import org.holodeckb2b.common.general.IService;
+import org.holodeckb2b.interfaces.general.IService;
 
 /**
  * Is a persistency class for service information. As this is always part of a

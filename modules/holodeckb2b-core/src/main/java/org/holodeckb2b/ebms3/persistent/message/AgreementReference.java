@@ -18,7 +18,7 @@ package org.holodeckb2b.ebms3.persistent.message;
 
 import java.io.Serializable;
 import javax.persistence.Embeddable;
-import org.holodeckb2b.common.messagemodel.IAgreementReference;
+import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 
 /**
  * Is an <i>embeddable</i> persistency class containing a reference to the agreement

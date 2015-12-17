@@ -21,8 +21,8 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 
 /**
  * Is a helper class for handling the ebMS Receipt signals in the ebMS SOAP header. 
@@ -42,7 +42,7 @@ public class Receipt {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Receipt");
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Receipt");
     
     /**
      * Creates a new <code>eb:SignalMessage</code> for an <i>Receipt</i> signal.

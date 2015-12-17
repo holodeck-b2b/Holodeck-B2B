@@ -16,15 +16,14 @@
  */
 package org.holodeckb2b.ebms3.util;
 
-import org.holodeckb2b.axis2.MessageContextUtils;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.messagemodel.IEbmsError;
 import org.holodeckb2b.common.util.MessageIdGenerator;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
@@ -35,6 +34,7 @@ import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.persistent.processing.ProcessingState;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 
 /**
  * Is a special handler to handle unexpected and previously unhandled errors. When such errors are detected the 

@@ -32,7 +32,7 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
-import org.holodeckb2b.common.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 
 /**
  * Is a persistency class representing an ebMS Receipt message unit that is processed 

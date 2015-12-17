@@ -29,11 +29,13 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.config.Config;
-import org.holodeckb2b.common.security.ISigningConfiguration;
-import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
-import org.holodeckb2b.common.security.X509ReferenceType;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
+import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
+import static org.holodeckb2b.interfaces.pmode.security.X509ReferenceType.BSTReference;
+import static org.holodeckb2b.interfaces.pmode.security.X509ReferenceType.KeyIdentifier;
 import org.holodeckb2b.security.tokens.UsernameToken;
 
 /**

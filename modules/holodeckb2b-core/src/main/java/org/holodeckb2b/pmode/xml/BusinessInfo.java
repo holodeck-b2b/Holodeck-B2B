@@ -18,8 +18,8 @@ package org.holodeckb2b.pmode.xml;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.holodeckb2b.common.general.IProperty;
-import org.holodeckb2b.common.pmode.IBusinessInfo;
+import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.pmode.IBusinessInfo;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 

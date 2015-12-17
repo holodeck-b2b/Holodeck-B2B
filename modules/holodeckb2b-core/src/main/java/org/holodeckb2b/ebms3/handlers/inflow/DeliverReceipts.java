@@ -18,19 +18,19 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.delivery.IDeliverySpecification;
-import org.holodeckb2b.common.delivery.IMessageDeliverer;
-import org.holodeckb2b.common.delivery.MessageDeliveryException;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
-import org.holodeckb2b.common.pmode.IReceiptConfiguration;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.Receipt;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for checking if receipt messages should be delivered to the business 
@@ -111,7 +111,7 @@ public class DeliverReceipts extends BaseHandler {
         // If a delivery specification was found the receipt should be delivered, else no reporting is needed
         if (deliverySpec != null) {
             log.debug("Receipt should be delivered using delivery specification with id:" + deliverySpec.getId());
-            IMessageDeliverer deliverer = HolodeckB2BCore.getMessageDeliverer(deliverySpec);
+            IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec);
             // Deliver the Receipt using deliverer
             deliverer.deliver(receipt);
             log.debug("Receipt successfully delivered!");
@@ -131,7 +131,7 @@ public class DeliverReceipts extends BaseHandler {
     protected IDeliverySpecification getReceiptDelivery(final Receipt receipt) {
         IDeliverySpecification deliverySpec = null;
         
-        IPMode pmode = HolodeckB2BCore.getPModeSet().get(receipt.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(receipt.getPMode());
         ILeg leg = pmode.getLegs().iterator().next(); // Currently only One-Way MEPS supports, so only one leg 
         IReceiptConfiguration rcptConfig = leg.getReceiptConfiguration();
         

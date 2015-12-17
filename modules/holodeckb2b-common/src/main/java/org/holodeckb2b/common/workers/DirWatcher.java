@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Map;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.common.workerpool.TaskConfigurationException;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
  * Base implementation of a worker that reacts to changes in a specified directory.

@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.ebms3.mmd.xml;
 
-import org.holodeckb2b.common.general.IService;
+import org.holodeckb2b.interfaces.general.IService;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
 

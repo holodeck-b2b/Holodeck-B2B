@@ -18,7 +18,7 @@ package org.holodeckb2b.ebms3.persistent.general;
 
 import java.io.Serializable;
 import javax.persistence.Embeddable;
-import org.holodeckb2b.common.general.IProperty;
+import org.holodeckb2b.interfaces.general.IProperty;
 
 /**
  * Is a persistency class for a property consisting of a name value pair and 

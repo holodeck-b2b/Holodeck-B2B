@@ -19,10 +19,10 @@ package org.holodeckb2b.ebms3.persistent.message;
 import java.io.Serializable;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
-import org.holodeckb2b.common.general.IService;
-import org.holodeckb2b.common.messagemodel.IAgreementReference;
-import org.holodeckb2b.common.messagemodel.ICollaborationInfo;
 import org.holodeckb2b.ebms3.persistent.general.Service;
+import org.holodeckb2b.interfaces.general.IService;
+import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
+import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
 
 /**
  * Is a persistency class representing the business collaboration meta data about

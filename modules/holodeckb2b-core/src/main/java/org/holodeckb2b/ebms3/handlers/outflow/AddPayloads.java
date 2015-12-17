@@ -29,14 +29,16 @@ import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.IPayload;
 import org.holodeckb2b.common.util.MessageIdGenerator;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.Payload;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import static org.holodeckb2b.interfaces.messagemodel.IPayload.Containment.ATTACHMENT;
+import static org.holodeckb2b.interfaces.messagemodel.IPayload.Containment.BODY;
 
 /**
  * When there is a <i>User Message unit</i> to be sent, this handler will add the payloads to the SOAP message. 
@@ -228,8 +230,8 @@ public class AddPayloads extends AbstractUserMessageHandler {
                                     "] are not equal! Can not create consistent message.");
                     } else if (href != null && (xmlId == null || xmlId.isEmpty())) {
                         log.debug("Set specified reference in meta data [" + href + "] as xml:id on root element");
-                        OMNamespace xmlIdNS = documentElement.declareNamespace(Constants.QNAME_XMLID.getNamespaceURI(), "xml");
-                        documentElement.addAttribute(Constants.QNAME_XMLID.getLocalPart(), href, xmlIdNS);                        
+                        OMNamespace xmlIdNS = documentElement.declareNamespace(EbMSConstants.QNAME_XMLID.getNamespaceURI(), "xml");
+                        documentElement.addAttribute(EbMSConstants.QNAME_XMLID.getLocalPart(), href, xmlIdNS);                        
                     }
                     
                     log.debug("Add payload XML to SOAP Body");

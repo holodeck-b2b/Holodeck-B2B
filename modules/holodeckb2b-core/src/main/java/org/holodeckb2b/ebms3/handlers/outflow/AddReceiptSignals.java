@@ -19,9 +19,9 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
@@ -30,9 +30,9 @@ import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
 import org.holodeckb2b.ebms3.persistent.message.Receipt;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.util.PModeFinder;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for adding <i>Receipt signals</i> that are waiting to be sent to the 
@@ -179,7 +179,7 @@ public class AddReceiptSignals extends BaseHandler {
         log.debug("Get the destination URL of the message");
         String destURL = null;
         MessageUnit mu = toBeBundledWithMUs.iterator().next();
-        IPMode pmode = HolodeckB2BCore.getPModeSet().get(mu.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(mu.getPMode());
 
         if (mu instanceof UserMessage || mu instanceof PullRequest) {
             destURL = pmode.getLegs().iterator().next().getProtocol().getAddress();

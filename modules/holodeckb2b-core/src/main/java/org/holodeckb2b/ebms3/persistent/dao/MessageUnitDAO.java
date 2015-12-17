@@ -25,17 +25,6 @@ import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.exceptions.DuplicateMessageIdError;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.IDescription;
-import org.holodeckb2b.common.general.IProperty;
-import org.holodeckb2b.common.general.ISchemaReference;
-import org.holodeckb2b.common.general.IService;
-import org.holodeckb2b.common.messagemodel.IAgreementReference;
-import org.holodeckb2b.common.messagemodel.ICollaborationInfo;
-import org.holodeckb2b.common.messagemodel.IPayload;
-import org.holodeckb2b.common.messagemodel.IPayload.Containment;
-import org.holodeckb2b.common.messagemodel.IUserMessage;
-import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.common.util.MessageIdGenerator;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
@@ -54,6 +43,17 @@ import org.holodeckb2b.ebms3.persistent.message.Receipt;
 import org.holodeckb2b.ebms3.persistent.message.SignalMessage;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.persistent.processing.ProcessingState;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IDescription;
+import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.general.ISchemaReference;
+import org.holodeckb2b.interfaces.general.IService;
+import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
+import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
  * Is a data access object for {@link MessageUnit} objects (including derived classes like {@link UserMessage}.
@@ -234,7 +234,7 @@ public class MessageUnitDAO {
             if (mpc != null || !mpc.isEmpty()) {
                 newPullReqMU.setMPC(mpc);
             } else {
-                newPullReqMU.setMPC(Constants.DEFAULT_MPC);
+                newPullReqMU.setMPC(EbMSConstants.DEFAULT_MPC);
             }
 
             // Add CREATED to signal PullRequest was made

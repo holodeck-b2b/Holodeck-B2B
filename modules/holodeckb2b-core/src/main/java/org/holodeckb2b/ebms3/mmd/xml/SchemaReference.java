@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.ebms3.mmd.xml;
 
-import org.holodeckb2b.common.general.ISchemaReference;
+import org.holodeckb2b.interfaces.general.ISchemaReference;
 import org.simpleframework.xml.Attribute;
 
 /**

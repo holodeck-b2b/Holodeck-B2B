@@ -21,15 +21,14 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.Map;
-import org.holodeckb2b.common.messagemodel.IPayload;
-import org.holodeckb2b.common.submit.IMessageSubmitter;
-import org.holodeckb2b.common.submit.IMessageSubmitterFactory;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.common.workerpool.TaskConfigurationException;
 import org.holodeckb2b.common.workers.DirWatcher;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.mmd.xml.PartInfo;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
  * This worker reads all MMD documents from the specified directory and submits the corresponding user message to the 
@@ -42,12 +41,6 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class SubmitFromFile extends DirWatcher {
-
-    /**
-     * The factory that will create MessageSubmitter objects that should be used
-     * to submit the messages to Holodeck B2B
-     */
-    protected IMessageSubmitterFactory  msf = null;
     
     /**
      * Initializes the worker. Overrides parent method to ensure that the watched
@@ -66,8 +59,6 @@ public class SubmitFromFile extends DirWatcher {
         
         // Override externsion parameter to set it to fixed "mmd" value
         setExtension("mmd");
-        
-        msf = HolodeckB2BCore.getMessageSubmitterFactory();
     }
     
     @Override
@@ -97,7 +88,7 @@ public class SubmitFromFile extends DirWatcher {
                 log.debug("Succesfully read message meta data from " + f.getName());
                 // Convert relative paths in payload references to absolute ones to prevent file not found errors
                 convertPayloadPaths(mmd, f);                
-                IMessageSubmitter   submitter = msf.createMessageSubmitter();
+                IMessageSubmitter   submitter = HolodeckB2BCoreInterface.getMessageSubmitter();
                 submitter.submitMessage(mmd);
                 log.info("User message from " + f.getName() + " succesfully submitted to Holodeck B2B");
                 // Change extension to reflect success

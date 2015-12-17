@@ -19,8 +19,8 @@ package org.holodeckb2b.ebms3.packaging;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.ICollaborationInfo;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
 
 /**
  * Is a helper class for handling the ebMS CollaborationInfo element in the ebMS SOAP 
@@ -34,17 +34,17 @@ public class CollaborationInfo {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "CollaborationInfo");
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "CollaborationInfo");
 
     /**
      * The fully qualified name of the Action element as an {@link QName}
      */
-    private static final QName  Q_ACTION = new QName(Constants.EBMS3_NS_URI, "Action");
+    private static final QName  Q_ACTION = new QName(EbMSConstants.EBMS3_NS_URI, "Action");
 
     /**
      * The fully qualified name of the element ConversationId as an {@link QName}
      */
-    private static final QName  Q_CONVERSATIONID = new QName(Constants.EBMS3_NS_URI, "ConversationId");
+    private static final QName  Q_CONVERSATIONID = new QName(EbMSConstants.EBMS3_NS_URI, "ConversationId");
 
     /**
      * Creates a <code>CollaborationInfo</code> element and adds it to the given <code>UserMessage</code> element. 

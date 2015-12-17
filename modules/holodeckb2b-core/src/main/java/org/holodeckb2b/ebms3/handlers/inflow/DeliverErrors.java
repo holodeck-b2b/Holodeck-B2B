@@ -21,18 +21,9 @@ import java.util.Iterator;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.delivery.IDeliverySpecification;
-import org.holodeckb2b.common.delivery.IMessageDeliverer;
-import org.holodeckb2b.common.delivery.MessageDeliveryException;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.messagemodel.IEbmsError;
-import org.holodeckb2b.common.messagemodel.IErrorMessage;
-import org.holodeckb2b.common.pmode.IErrorHandling;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
-import org.holodeckb2b.common.pmode.IPullRequestFlow;
-import org.holodeckb2b.common.pmode.IUserMessageFlow;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
@@ -40,8 +31,17 @@ import org.holodeckb2b.ebms3.persistent.message.EbmsError;
 import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
-import org.holodeckb2b.axis2.MessageContextUtils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.pmode.IErrorHandling;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
+import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for checking if error message should be delivered to the business 
@@ -180,7 +180,7 @@ public class DeliverErrors extends BaseHandler {
             deliverError.addError((EbmsError) error); // this cast is okay as the error is from a persistent object
             
             log.debug("Get deliverer from Core");
-            IMessageDeliverer deliverer = HolodeckB2BCore.getMessageDeliverer(deliverySpec);
+            IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec);
             log.debug("Delivering the error using deliverer");
             deliverer.deliver(deliverError);
             log.debug("Error successfully delivered!");
@@ -214,7 +214,7 @@ public class DeliverErrors extends BaseHandler {
         if (refdMU instanceof ErrorMessage && (refdMU.getPMode() == null || refdMU.getPMode().isEmpty()))
             return null; // Error without P-Mode, can not determine delivery
         
-        IPMode pmode = HolodeckB2BCore.getPModeSet().get(refdMU.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(refdMU.getPMode());
         if (pmode == null) {
             log.warn("Sent message unit [" + refdMU.getMessageId() +"] does not reference valid P-Mode [" 
                         + refdMU.getPMode() + "]!");

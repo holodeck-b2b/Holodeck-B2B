@@ -21,13 +21,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.holodeckb2b.common.pmode.IPModeSet;
-import org.holodeckb2b.common.pmode.PModeSetException;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.common.workerpool.IWorkerTask;
-import org.holodeckb2b.common.workerpool.TaskConfigurationException;
 import org.holodeckb2b.common.workers.DirWatcher;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.pmode.PModeSetException;
+import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the {@link IWorkerTask} responsible for updating the Holodeck B2B P-Mode set based on a list of P-Mode XML 
@@ -167,7 +167,7 @@ public class PModeWatcher extends DirWatcher {
         }
 
         // Get the current set of P-Modes. 
-        IPModeSet pmodeSet = HolodeckB2BCore.getPModeSet();
+        IPModeSet pmodeSet = HolodeckB2BCoreInterface.getPModeSet();
         String    pmodeId = pmode.getId();
         
         if (pmodeSet.containsId(pmodeId)) {        
@@ -205,7 +205,7 @@ public class PModeWatcher extends DirWatcher {
             // remove the P-Mode from both set and mapping
             // get the current IPModeSet from the Holodeck core.
             try {
-                HolodeckB2BCore.getPModeSet().remove(pmodeID);
+                HolodeckB2BCoreInterface.getPModeSet().remove(pmodeID);
             } catch (PModeSetException pmse) {
                 log.error("Problem removing P-Mode with id [" + pmodeID + "] from P-Mode set!" 
                          + "\n\tError message: " + pmse.getMessage());

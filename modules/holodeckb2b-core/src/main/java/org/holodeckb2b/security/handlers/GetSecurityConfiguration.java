@@ -19,24 +19,24 @@ package org.holodeckb2b.security.handlers;
 import java.util.Collection;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.general.Constants;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.messagemodel.IPayload;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
-import org.holodeckb2b.common.pmode.IPullRequestFlow;
-import org.holodeckb2b.common.pmode.ITradingPartnerConfiguration;
-import org.holodeckb2b.common.security.IEncryptionConfiguration;
-import org.holodeckb2b.common.security.ISecurityConfiguration;
-import org.holodeckb2b.common.security.ISigningConfiguration;
-import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.axis2.MessageContextUtils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
+import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for determining the security settings that should be applied to the 
@@ -67,7 +67,7 @@ public class GetSecurityConfiguration extends BaseHandler {
                                                                         + " with msg-id=" + primaryMU.getMessageId());
         
         // 2. Get the security settings
-        IPMode pmode = HolodeckB2BCore.getPModeSet().get(primaryMU.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.getPMode());
         
         // It is possible that we can not find a PMode when the primary message unit is an Error signal. In that case
         // no security can be applied
@@ -107,7 +107,7 @@ public class GetSecurityConfiguration extends BaseHandler {
                 log.debug("Primary message unit is user message, detect initiator or responder");
                 initiator = isInFlow(INITIATOR);
             } else {
-                initiator = !Constants.ONE_WAY_PUSH.equals(pmode.getMepBinding());
+                initiator = !EbMSConstants.ONE_WAY_PUSH.equals(pmode.getMepBinding());
             }
         }
         

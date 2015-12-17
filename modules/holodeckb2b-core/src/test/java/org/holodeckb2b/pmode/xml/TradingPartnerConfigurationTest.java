@@ -16,10 +16,9 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.pmode.xml.TradingPartnerConfiguration;
 import java.io.File;
 import java.util.List;
-import org.holodeckb2b.common.general.IPartyId;
+import org.holodeckb2b.interfaces.general.IPartyId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

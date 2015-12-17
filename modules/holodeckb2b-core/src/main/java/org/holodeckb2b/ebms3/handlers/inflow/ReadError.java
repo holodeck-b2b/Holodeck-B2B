@@ -24,7 +24,6 @@ import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.messagemodel.IEbmsError;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
@@ -35,6 +34,7 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 
 /**
  * Is the handler that checks if this message contains one or more Error signals, i.e. the ebMS header contains one or 

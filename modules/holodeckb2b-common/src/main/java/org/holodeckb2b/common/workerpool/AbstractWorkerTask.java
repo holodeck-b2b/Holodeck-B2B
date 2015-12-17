@@ -18,6 +18,7 @@ package org.holodeckb2b.common.workerpool;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
 
 /**
  * Is a base implementation of {@link IWorkerTask} providing basic functionality for a worker task. It provides default

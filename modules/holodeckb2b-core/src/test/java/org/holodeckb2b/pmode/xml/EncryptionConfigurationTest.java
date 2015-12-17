@@ -16,9 +16,8 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.pmode.xml.EncryptionConfiguration;
 import java.io.File;
-import org.holodeckb2b.common.security.X509ReferenceType;
+import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;

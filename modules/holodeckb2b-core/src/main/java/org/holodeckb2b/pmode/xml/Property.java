@@ -20,7 +20,7 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.common.general.IProperty;
+import org.holodeckb2b.interfaces.general.IProperty;
 import org.simpleframework.xml.Element;
 
 /**

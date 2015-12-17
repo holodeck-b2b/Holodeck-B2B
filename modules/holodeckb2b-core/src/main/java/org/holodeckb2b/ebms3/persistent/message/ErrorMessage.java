@@ -27,8 +27,8 @@ import javax.persistence.Entity;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import org.holodeckb2b.common.messagemodel.IEbmsError;
-import org.holodeckb2b.common.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 
 /**
  * Is the persistency class representing the ebMS <i>Error Signal Message Unit</i>.

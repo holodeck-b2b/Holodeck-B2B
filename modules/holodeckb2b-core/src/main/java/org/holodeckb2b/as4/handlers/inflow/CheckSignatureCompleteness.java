@@ -23,17 +23,19 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.IPayload;
-import org.holodeckb2b.common.pmode.IPMode;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
-import org.holodeckb2b.axis2.MessageContextUtils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import static org.holodeckb2b.interfaces.messagemodel.IPayload.Containment.ATTACHMENT;
+import static org.holodeckb2b.interfaces.messagemodel.IPayload.Containment.BODY;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.security.util.SecurityUtils;
 
 /**
@@ -59,7 +61,7 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
     protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws Exception {
         
         // First check if this message needs a Receipt and is signed 
-        IPMode pmode = HolodeckB2BCore.getPModeSet().get(um.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode());
         if (pmode == null) {
             // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
             // is needed
@@ -146,7 +148,7 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
         
             if (SecurityConstants.QNAME_WSU_ID.equals(attr.getQName()))
                 bodyId = attr.getAttributeValue();
-            else if (Constants.QNAME_XMLID.equals(attr.getQName()))
+            else if (EbMSConstants.QNAME_XMLID.equals(attr.getQName()))
                 bodyId = attr.getAttributeValue();
         }
         

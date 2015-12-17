@@ -16,8 +16,8 @@
  */
 package org.holodeckb2b.ebms3.submit.core;
 
-import org.holodeckb2b.common.submit.IMessageSubmitter;
-import org.holodeckb2b.common.submit.IMessageSubmitterFactory;
+import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
+import org.holodeckb2b.interfaces.submit.IMessageSubmitterFactory;
 
 /**
  * Is an implementation of {@see IMessageSubmitterFactory} to create instances of

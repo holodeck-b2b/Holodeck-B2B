@@ -16,7 +16,8 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration.PasswordType;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;

@@ -19,7 +19,7 @@ package org.holodeckb2b.ebms3.persistent.message;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import org.holodeckb2b.common.messagemodel.IPullRequest;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 
 /**
  * Is a persistency class representing an ebMS PullRequest messaage unit that 

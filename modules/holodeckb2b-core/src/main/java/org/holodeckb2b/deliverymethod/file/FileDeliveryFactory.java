@@ -21,9 +21,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-import org.holodeckb2b.common.delivery.IMessageDeliverer;
-import org.holodeckb2b.common.delivery.IMessageDelivererFactory;
-import org.holodeckb2b.common.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory;
+import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 
 /**
  * Is an {@link IMessageDelivererFactory} implementation that creates {@link IMessageDeliverer} implementations that

@@ -36,8 +36,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.common.pmode.ILeg.Label;
 import org.holodeckb2b.ebms3.persistent.processing.ProcessingState;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 
 /**
  * Is a persistency class representing an ebMS messaage unit that is processed 
@@ -57,7 +57,7 @@ import org.holodeckb2b.ebms3.persistent.processing.ProcessingState;
                     "AND mu.DIRECTION = :direction"
             )}
 )
-public abstract class MessageUnit implements Serializable, org.holodeckb2b.common.messagemodel.IMessageUnit {
+public abstract class MessageUnit implements Serializable, org.holodeckb2b.interfaces.messagemodel.IMessageUnit {
 
     /**
      * Indicates whether the message unit was sent (OUT) or received (IN) by Holodeck B2B
@@ -213,7 +213,7 @@ public abstract class MessageUnit implements Serializable, org.holodeckb2b.commo
      * @deprecated Dont use anymore 
      */
     @Deprecated
-    public MessageUnit(org.holodeckb2b.common.messagemodel.IMessageUnit src) {
+    public MessageUnit(org.holodeckb2b.interfaces.messagemodel.IMessageUnit src) {
         MU_TIMESTAMP = src.getTimestamp();
         MESSAGE_ID = src.getMessageId();
         REF_TO_MSG_ID = src.getRefToMessageId();

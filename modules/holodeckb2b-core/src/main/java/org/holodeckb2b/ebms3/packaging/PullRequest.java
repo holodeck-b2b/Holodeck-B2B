@@ -20,7 +20,7 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.holodeckb2b.common.general.Constants;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 
 /**
  * Is a helper class for handling the ebMS PullRequest signal message elements 
@@ -35,7 +35,7 @@ public class PullRequest {
     /**
      * The fully qualified name of the element as an {@see QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PullRequest");
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "PullRequest");
     
     /**
      * The local name of the mpc attribute
@@ -69,7 +69,7 @@ public class PullRequest {
         // If there was no mpc attribute or it was empty (which formally is 
         // illegal because the mpc should be a valid URI) it is set to the default MPC
         if (mpc == null || mpc.isEmpty())
-            mpc = Constants.DEFAULT_MPC;
+            mpc = EbMSConstants.DEFAULT_MPC;
         prData.setMPC(mpc);
 
         // Beside the PullRequest element also the MessageInfo sibling should be 

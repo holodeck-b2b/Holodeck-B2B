@@ -21,9 +21,9 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.IProperty;
-import org.holodeckb2b.common.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
  * Is a helper class for handling the ebMS UserMessage element in the ebMS SOAP 
@@ -37,7 +37,7 @@ public class UserMessage {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "UserMessage");
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "UserMessage");
     
     /**
      * The local name of the mpc attribute
@@ -61,7 +61,7 @@ public class UserMessage {
         
         // MPC attribute only set when not default
         String mpc = data.getMPC();
-        if (mpc != null && !mpc.equals(Constants.DEFAULT_MPC))
+        if (mpc != null && !mpc.equals(EbMSConstants.DEFAULT_MPC))
             usermessage.addAttribute(MPC_ATTR, mpc, null);
         
         // Create the MessageInfo element
@@ -119,7 +119,7 @@ public class UserMessage {
         // If there was no mpc attribute or it was empty (which formally is 
         // illegal because the mpc should be a valid URI) it is set to the default MPC
         if (mpc == null || mpc.isEmpty())
-            mpc = Constants.DEFAULT_MPC;
+            mpc = EbMSConstants.DEFAULT_MPC;
         umData.setMPC(mpc);
 
         // Get the MessageInfo element

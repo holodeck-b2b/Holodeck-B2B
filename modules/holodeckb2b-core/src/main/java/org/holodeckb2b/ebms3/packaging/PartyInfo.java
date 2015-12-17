@@ -20,11 +20,11 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.IPartyId;
-import org.holodeckb2b.common.general.ITradingPartner;
-import org.holodeckb2b.common.messagemodel.IUserMessage;
 import org.holodeckb2b.ebms3.persistent.general.PartyId;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IPartyId;
+import org.holodeckb2b.interfaces.general.ITradingPartner;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
  * Is a helper class for handling the ebMS PartyInfo element in the ebMS SOAP 
@@ -38,7 +38,7 @@ public class PartyInfo {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PartyInfo");
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "PartyInfo");
     
     /**
      * The <code>From</code> and <code>To</code> element are structurally equal,
@@ -52,17 +52,17 @@ public class PartyInfo {
         /**
          * The fully qualified name of the From element as an {@link QName}
          */
-        private static final QName  Q_FROM_PARTY = new QName(Constants.EBMS3_NS_URI, "From");
+        private static final QName  Q_FROM_PARTY = new QName(EbMSConstants.EBMS3_NS_URI, "From");
 
         /**
          * The fully qualified name of the To element as an {@link QName}
          */
-        private static final QName  Q_TO_PARTY = new QName(Constants.EBMS3_NS_URI, "To"); 
+        private static final QName  Q_TO_PARTY = new QName(EbMSConstants.EBMS3_NS_URI, "To"); 
     
         /**
          * The fully qualified name of the PartyId element as an {@link QName}
          */
-        private static final QName  Q_PARTYID = new QName(Constants.EBMS3_NS_URI, "PartyId");
+        private static final QName  Q_PARTYID = new QName(EbMSConstants.EBMS3_NS_URI, "PartyId");
         
         // The local name for the PartyId type attribute
         private static final String LN_PARTYID_TYPE = "type";
@@ -70,7 +70,7 @@ public class PartyInfo {
         /**
          * The fully qualified name of the Role element as an {@link QName}
          */
-        private static final QName  Q_ROLE = new QName(Constants.EBMS3_NS_URI, "Role");
+        private static final QName  Q_ROLE = new QName(EbMSConstants.EBMS3_NS_URI, "Role");
         
         /**
          * Creates a <code>From</code> or <code>To</code> element and includes it in the
@@ -99,7 +99,7 @@ public class PartyInfo {
             // Create the Role element and ensure it has a value. 
             OMElement roleElem = f.createOMElement(Q_ROLE, tpInfo);
             String role = data.getRole();
-            roleElem.setText((role != null && !role.isEmpty() ? role : Constants.DEFAULT_ROLE ));
+            roleElem.setText((role != null && !role.isEmpty() ? role : EbMSConstants.DEFAULT_ROLE ));
             
             return tpInfo;
         }
@@ -145,9 +145,9 @@ public class PartyInfo {
             OMElement roleElement = tpElement.getFirstChildWithName(Q_ROLE);
             if (roleElement != null) {
                 String role = roleElement.getText();
-                tpData.setRole((role != null && !role.isEmpty() ? role : Constants.DEFAULT_ROLE ));
+                tpData.setRole((role != null && !role.isEmpty() ? role : EbMSConstants.DEFAULT_ROLE ));
             } else
-                tpData.setRole(Constants.DEFAULT_ROLE);
+                tpData.setRole(EbMSConstants.DEFAULT_ROLE);
             
             // Read all PartyId elements and add info to entity
             Iterator<?> it = tpElement.getChildrenWithName(Q_PARTYID);

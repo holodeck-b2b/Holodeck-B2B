@@ -22,25 +22,25 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.as4.pmode.IAS4Leg;
-import org.holodeckb2b.common.as4.pmode.IReceptionAwareness;
-import org.holodeckb2b.common.delivery.IDeliverySpecification;
-import org.holodeckb2b.common.delivery.IMessageDeliverer;
-import org.holodeckb2b.common.delivery.MessageDeliveryException;
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.pmode.IErrorHandling;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IReceiptConfiguration;
-import org.holodeckb2b.common.pmode.IUserMessageFlow;
 import org.holodeckb2b.common.util.MessageIdGenerator;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
-import org.holodeckb2b.common.workerpool.TaskConfigurationException;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
+import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
+import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.pmode.IErrorHandling;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * This worker is responsible for the retransmission of user messages that did not receive an AS4 receipt as expected.
@@ -84,7 +84,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                     IAS4Leg leg = null;
                     IReceptionAwareness raConfig = null;
                     try {
-                        leg = (IAS4Leg) HolodeckB2BCore.getPModeSet().
+                        leg = (IAS4Leg) HolodeckB2BCoreInterface.getPModeSet().
                                                             get(um.getPMode()).getLegs().iterator().next();
                         raConfig = leg.getReceptionAwareness();
                     } catch (ClassCastException cce) {} 
@@ -163,8 +163,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
      *              <code>false</code> otherwise (i.e. the message should be pushed)
      */
     private boolean isPulled(UserMessage um) {
-        return Constants.ONE_WAY_PULL.equalsIgnoreCase(
-                                                    HolodeckB2BCore.getPModeSet().get(um.getPMode()).getMepBinding());
+        return EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode()).getMepBinding());
     }
     
     /**
@@ -225,7 +224,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                 } else {
                     try {
                         // Deliver the MissingReceipt error using the given delivery spec
-                        IMessageDeliverer deliverer = HolodeckB2BCore.getMessageDeliverer(deliverySpec);
+                        IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec);
                         deliverer.deliver(errSignal);
                         // Indicate successful delivery
                         MessageUnitDAO.setDone(errSignal);

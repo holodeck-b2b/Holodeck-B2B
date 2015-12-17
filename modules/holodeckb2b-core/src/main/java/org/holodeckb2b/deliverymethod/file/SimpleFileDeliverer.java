@@ -26,13 +26,6 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.common.delivery.IMessageDeliverer;
-import org.holodeckb2b.common.delivery.MessageDeliveryException;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.IErrorMessage;
-import org.holodeckb2b.common.messagemodel.IPayload;
-import org.holodeckb2b.common.messagemodel.IReceipt;
-import org.holodeckb2b.common.messagemodel.ISignalMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.mmd.xml.PartInfo;
@@ -40,6 +33,13 @@ import org.holodeckb2b.ebms3.mmd.xml.Property;
 import org.holodeckb2b.ebms3.packaging.ErrorSignal;
 import org.holodeckb2b.ebms3.packaging.Receipt;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 
 /**
  * Is an {@link IMessageDeliverer} implementation that delivers the message unit to the business application by writing
@@ -121,7 +121,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
     /**
      * The QName of the container element that contains the message info, i.e. the <code>eb:Messaging</code> element
      */
-    protected static final QName XML_ROOT_NAME = new QName(Constants.EBMS3_NS_URI, "Messaging", "eb");
+    protected static final QName XML_ROOT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Messaging", "eb");
     
     protected static final String RECEIPT_CHILD_NS_URI = 
                                                 "http://holodeck-b2b.org/schemas/2015/08/delivery/ebms/receiptchild";
@@ -145,7 +145,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
     protected void writeUserMessageInfoToFile(MessageMetaData mmd) throws IOException {
         OMFactory   f = OMAbstractFactory.getOMFactory();
         OMElement    container = f.createOMElement(XML_ROOT_NAME);
-        container.declareNamespace(Constants.EBMS3_NS_URI, "eb");
+        container.declareNamespace(EbMSConstants.EBMS3_NS_URI, "eb");
             
         if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
             log.debug("Add payload info to XML container");
@@ -178,7 +178,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
     protected void deliverSignalMessage(ISignalMessage sigMsgUnit) throws MessageDeliveryException {
         OMFactory   f = OMAbstractFactory.getOMFactory();
         OMElement    container = f.createOMElement(XML_ROOT_NAME);
-        container.declareNamespace(Constants.EBMS3_NS_URI, "eb");
+        container.declareNamespace(EbMSConstants.EBMS3_NS_URI, "eb");
         
         if (sigMsgUnit instanceof IReceipt) {
             log.debug("Create facade to prevent content from inclusion in XML");

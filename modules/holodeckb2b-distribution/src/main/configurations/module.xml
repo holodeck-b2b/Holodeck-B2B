@@ -1,4 +1,4 @@
-<module name="holodeckb2b-core" class="org.holodeckb2b.module.HolodeckB2BCore">
+<module name="holodeckb2b-core" class="org.holodeckb2b.module.HolodeckB2BCoreImpl">
     <!--                                                                 -->             
     <!--                   Holodeck B2B Handlers                         -->             
     <!--                                                                 -->             

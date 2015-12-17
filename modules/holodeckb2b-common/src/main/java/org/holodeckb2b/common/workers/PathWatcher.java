@@ -17,14 +17,13 @@
 package org.holodeckb2b.common.workers;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
-import org.holodeckb2b.common.workerpool.TaskConfigurationException;
 import org.holodeckb2b.common.workerpool.WorkerPool;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
  * Is a base class for checking file system changes. Extends {@link AbstractWorkerTask} so it can be run as part of a

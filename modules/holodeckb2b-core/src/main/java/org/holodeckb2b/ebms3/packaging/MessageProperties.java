@@ -22,8 +22,8 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.IProperty;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IProperty;
 
 /**
  * Is a helper class for handling the ebMS MessageProperties element in the ebMS SOAP 
@@ -37,7 +37,7 @@ public class MessageProperties {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "MessageProperties");
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "MessageProperties");
 
     /**
      * Creates a <code>MessageProperties</code> element and adds it to the given <code>UserMessage</code> element. 

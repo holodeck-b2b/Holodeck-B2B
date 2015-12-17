@@ -17,6 +17,7 @@
 package org.holodeckb2b.as4.compression;
 
 import org.holodeckb2b.ebms3.persistent.message.EbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError.Severity;
 
 /**
  * Represent the <i>DeCompressionFailure</i> error as defined in section 3.1 of the AS4 profile and signals that a

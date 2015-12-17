@@ -20,9 +20,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.ILeg;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -31,8 +31,8 @@ import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
 import org.holodeckb2b.ebms3.persistent.message.SignalMessage;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.axis2.MessageContextUtils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for changing the processing state of message units that were sent out in
@@ -189,7 +189,7 @@ public class CheckSentResult extends BaseHandler {
                 } else {
                     log.debug("User message is sent, check P-Mode if Receipt is expected");
                     // Because we only support One-Way the first leg determines
-                    ILeg leg = HolodeckB2BCore.getPModeSet().get(um.getPMode()).getLegs().iterator().next();
+                    ILeg leg = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode()).getLegs().iterator().next();
                     if (leg.getReceiptConfiguration() != null)
                         MessageUnitDAO.setWaitForReceipt(um);
                     else

@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.common.pmode.IProtocol;
+import org.holodeckb2b.interfaces.pmode.IProtocol;
 import org.simpleframework.xml.Element;
 
 /**

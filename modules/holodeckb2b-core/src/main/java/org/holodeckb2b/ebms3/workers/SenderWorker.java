@@ -23,10 +23,10 @@ import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.axis2.Axis2Utils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
-import org.holodeckb2b.common.workerpool.TaskConfigurationException;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
  * Is responsible for starting the send process of message units. It looks for all messages waiting in the database to 

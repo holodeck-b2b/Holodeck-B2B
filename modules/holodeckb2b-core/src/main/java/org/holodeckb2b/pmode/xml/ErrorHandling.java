@@ -17,9 +17,9 @@
 package org.holodeckb2b.pmode.xml;
 
 import java.util.Map;
-import org.holodeckb2b.common.delivery.IDeliverySpecification;
-import org.holodeckb2b.common.general.ReplyPattern;
-import org.holodeckb2b.common.pmode.IErrorHandling;
+import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
+import org.holodeckb2b.interfaces.general.ReplyPattern;
+import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.core.Commit;

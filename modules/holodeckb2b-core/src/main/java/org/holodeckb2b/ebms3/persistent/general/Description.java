@@ -20,7 +20,7 @@ import java.io.Serializable;
 import javax.persistence.Access;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import org.holodeckb2b.common.general.IDescription;
+import org.holodeckb2b.interfaces.general.IDescription;
 
 /**
  * Is a persistency class for object descriptions. As a description is always tight to 

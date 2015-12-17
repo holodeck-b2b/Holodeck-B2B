@@ -21,19 +21,19 @@ import java.util.Collection;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.holodeckb2b.axis2.Axis2Utils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
-import org.holodeckb2b.common.pmode.IPModeSet;
-import org.holodeckb2b.common.pmode.IPullRequestFlow;
-import org.holodeckb2b.common.pmode.IUserMessageFlow;
-import org.holodeckb2b.common.workerpool.IWorkerTask;
-import org.holodeckb2b.common.workerpool.TaskConfigurationException;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
-import org.holodeckb2b.axis2.Axis2Utils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
+import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is responsible for starting the send process of Pull Request message units. The ebMS specific handlers in the Axis2 
@@ -178,7 +178,7 @@ public class PullWorker implements IWorkerTask {
                 
                 if (mpc == null || mpc.isEmpty())
                     // No MPC defined in P-Mode, use default MPC
-                    mpc = Constants.DEFAULT_MPC;
+                    mpc = EbMSConstants.DEFAULT_MPC;
                 log.debug("Using [" + mpc + "] as MPC for pull request");
                 
                 try {
@@ -208,12 +208,12 @@ public class PullWorker implements IWorkerTask {
         log.debug("Check if given P-Modes are to be pulled or not");
         if(inclusive) {
             log.debug("P-Modes to pull specified in parameter, check existence in configured P-Mode");
-            final IPModeSet     curPModeSet = HolodeckB2BCore.getPModeSet();
+            final IPModeSet     curPModeSet = HolodeckB2BCoreInterface.getPModeSet();
             for(String pid : pmodes) {
                 IPMode p = curPModeSet.get(pid);
                 ILeg leg = p.getLegs().iterator().next();
                 // The P-Mode should also be configured for pulling
-                if (Constants.ONE_WAY_PULL.equalsIgnoreCase(p.getMepBinding()) 
+                if (EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(p.getMepBinding()) 
                    && leg.getProtocol() != null 
                    && leg.getProtocol().getAddress() != null
                    ) 
@@ -223,14 +223,14 @@ public class PullWorker implements IWorkerTask {
             }            
         } else {
             log.debug("Should pull for all P-Modes except specified");
-            for(IPMode p : HolodeckB2BCore.getPModeSet().getAll()) {
+            for(IPMode p : HolodeckB2BCoreInterface.getPModeSet().getAll()) {
                 // Check if P-Mode is included at all
                 if (pmodes.contains(p.getId())) 
                     log.debug("P-Mode [id=" + p.getId() + "] is excluded from pulling by this pull worker");
                 else {
                     // Check if this P-Mode uses pulling
                     ILeg leg = p.getLegs().iterator().next();
-                    if (Constants.ONE_WAY_PULL.equalsIgnoreCase(p.getMepBinding()) 
+                    if (EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(p.getMepBinding()) 
                        && leg.getProtocol() != null 
                        && leg.getProtocol().getAddress() != null
                        ) 

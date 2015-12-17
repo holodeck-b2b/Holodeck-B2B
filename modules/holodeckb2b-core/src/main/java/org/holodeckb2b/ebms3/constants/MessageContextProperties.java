@@ -16,9 +16,10 @@
  */
 package org.holodeckb2b.ebms3.constants;
 
-import org.holodeckb2b.common.delivery.IMessageDeliverer;
+import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.ebms3.persistent.message.PullRequest;
 import org.holodeckb2b.ebms3.persistent.message.Receipt;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 
 /**
  * Defines constants for {@link MessageContext} properties that Holodeck B2B 

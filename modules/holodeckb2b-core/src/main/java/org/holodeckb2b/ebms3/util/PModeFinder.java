@@ -22,29 +22,29 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.IAgreement;
-import org.holodeckb2b.common.general.IService;
-import org.holodeckb2b.common.general.ITradingPartner;
-import org.holodeckb2b.common.messagemodel.IAgreementReference;
-import org.holodeckb2b.common.messagemodel.ICollaborationInfo;
-import org.holodeckb2b.common.messagemodel.IUserMessage;
 import org.holodeckb2b.common.messagemodel.util.compare;
-import org.holodeckb2b.common.pmode.IBusinessInfo;
-import org.holodeckb2b.common.pmode.IErrorHandling;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
-import org.holodeckb2b.common.pmode.IPModeSet;
-import org.holodeckb2b.common.pmode.IProtocol;
-import org.holodeckb2b.common.pmode.IPullRequestFlow;
-import org.holodeckb2b.common.pmode.IReceiptConfiguration;
-import org.holodeckb2b.common.pmode.IUserMessageFlow;
-import org.holodeckb2b.common.security.ISecurityConfiguration;
-import org.holodeckb2b.common.security.ISigningConfiguration;
-import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IAgreement;
+import org.holodeckb2b.interfaces.general.IService;
+import org.holodeckb2b.interfaces.general.ITradingPartner;
+import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
+import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.pmode.IBusinessInfo;
+import org.holodeckb2b.interfaces.pmode.IErrorHandling;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.pmode.IProtocol;
+import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
+import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.tokens.UsernameToken;
 import org.holodeckb2b.security.tokens.X509Certificate;
@@ -114,7 +114,7 @@ public class PModeFinder {
      *                  <code>null</code> if no P-Mode could be found for the user message message unit.
      */
     public static IPMode forReceivedUserMessage(IUserMessage mu) {
-        IPModeSet pmodes = HolodeckB2BCore.getPModeSet();
+        IPModeSet pmodes = HolodeckB2BCoreInterface.getPModeSet();
         IPMode    hPMode = null;
         int       hValue = 0;
         
@@ -160,7 +160,7 @@ public class PModeFinder {
             // Check trading partner info
             ITradingPartner from = mu.getSender(), to = mu.getReceiver(); 
             ITradingPartner fromPMode = null, toPMode = null;
-            if (p.getMepBinding().equals(Constants.ONE_WAY_PUSH)) {
+            if (p.getMepBinding().equals(EbMSConstants.ONE_WAY_PUSH)) {
                 fromPMode = p.getInitiator(); toPMode = p.getResponder(); 
             } else {
                 fromPMode = p.getResponder(); toPMode = p.getInitiator();
@@ -221,9 +221,9 @@ public class PModeFinder {
                     // Check MPC, should handle default MPC when none is given
                     String mpc = mu.getMPC(); String mpcPMode = pmBI.getMpc();
                     if (mpc == null || mpc.isEmpty())
-                        mpc = Constants.DEFAULT_MPC;
+                        mpc = EbMSConstants.DEFAULT_MPC;
                     if (mpcPMode == null || mpcPMode.isEmpty())
-                        mpcPMode = Constants.DEFAULT_MPC;
+                        mpcPMode = EbMSConstants.DEFAULT_MPC;
                     if (mpc.equalsIgnoreCase(mpcPMode))
                         cValue += MATCH_WEIGHTS.get(PARAMETERS.MPC);
                     else 
@@ -254,7 +254,7 @@ public class PModeFinder {
     public static IPMode forSubmitted(IUserMessage mu) {
         // For now the only method to find the P-Mode is by specifying it directly
         try {
-            return HolodeckB2BCore.getPModeSet().get(mu.getCollaborationInfo().getAgreement().getPModeId());
+            return HolodeckB2BCoreInterface.getPModeSet().get(mu.getCollaborationInfo().getAgreement().getPModeId());
         } catch (NullPointerException npe) {
             return null;
         }
@@ -276,7 +276,7 @@ public class PModeFinder {
      * @see #forReceivedUserMessage(org.holodeckb2b.common.messagemodel.IUserMessage) 
      */
     public static IPMode forSubmittedUserMessage(IUserMessage mu) {
-        IPModeSet pmodes = HolodeckB2BCore.getPModeSet();
+        IPModeSet pmodes = HolodeckB2BCoreInterface.getPModeSet();
         IPMode    hPMode = null;
         int       hValue = 0;
         
@@ -318,8 +318,8 @@ public class PModeFinder {
             // Check trading partner info
             ITradingPartner from = mu.getSender(), to = mu.getReceiver(); 
             ITradingPartner fromPMode = null, toPMode = null;            
-            if (p.getMepBinding().startsWith(Constants.ONE_WAY_PUSH)) {
-                if (p.getMep().equals(Constants.ONE_WAY_MEP) || Utils.isNullOrEmpty(mu.getRefToMessageId())) {
+            if (p.getMepBinding().startsWith(EbMSConstants.ONE_WAY_PUSH)) {
+                if (p.getMep().equals(EbMSConstants.ONE_WAY_MEP) || Utils.isNullOrEmpty(mu.getRefToMessageId())) {
                     // One-Way P-Mode or message on the first leg of two-way
                     fromPMode = p.getInitiator(); toPMode = p.getResponder(); 
                 } else {
@@ -327,7 +327,7 @@ public class PModeFinder {
                     fromPMode = p.getResponder(); toPMode = p.getInitiator();
                 }
             } else {
-                if (p.getMep().equals(Constants.ONE_WAY_MEP) || Utils.isNullOrEmpty(mu.getRefToMessageId())) {
+                if (p.getMep().equals(EbMSConstants.ONE_WAY_MEP) || Utils.isNullOrEmpty(mu.getRefToMessageId())) {
                     // Message is pulled on One-Way P-Mode or on first leg of Two-Way P-Mode 
                     fromPMode = p.getResponder(); toPMode = p.getInitiator();
                 } else { 
@@ -367,7 +367,7 @@ public class PModeFinder {
             
             // Next info items are defined per Leg basis, so check in which Leg this message is sent.
             ILeg leg = null;
-            if (p.getMep().equals(Constants.ONE_WAY_MEP) || Utils.isNullOrEmpty(mu.getRefToMessageId()))
+            if (p.getMep().equals(EbMSConstants.ONE_WAY_MEP) || Utils.isNullOrEmpty(mu.getRefToMessageId()))
                 leg = p.getLeg(ILeg.Label.REQUEST);
             else 
                 leg = p.getLeg(ILeg.Label.REPLY);
@@ -404,9 +404,9 @@ public class PModeFinder {
                     // Check MPC, should handle default MPC when none is given
                     String mpc = mu.getMPC(); String pmodeMPC = pmBI.getMpc();
                     if (Utils.isNullOrEmpty(mpc))
-                        mpc = Constants.DEFAULT_MPC;
+                        mpc = EbMSConstants.DEFAULT_MPC;
                     if (Utils.isNullOrEmpty(pmodeMPC))
-                        pmodeMPC = Constants.DEFAULT_MPC;
+                        pmodeMPC = EbMSConstants.DEFAULT_MPC;
                     if (mpc.equalsIgnoreCase(pmodeMPC))
                         cValue += MATCH_WEIGHTS.get(PARAMETERS.MPC);
                     else 
@@ -437,10 +437,10 @@ public class PModeFinder {
     public static Collection<IPMode> findForPulling(Map<String, IAuthenticationInfo> authInfo, String mpc) {
         ArrayList<IPMode> pmodesForPulling = new ArrayList<IPMode>();
         
-        for(IPMode p : HolodeckB2BCore.getPModeSet().getAll()) {
+        for(IPMode p : HolodeckB2BCoreInterface.getPModeSet().getAll()) {
             // Check if this P-Mode uses pulling with Holodeck B2B being the responder
             ILeg leg = p.getLegs().iterator().next();
-            if (Constants.ONE_WAY_PULL.equalsIgnoreCase(p.getMepBinding())
+            if (EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(p.getMepBinding())
                && ( leg.getProtocol() == null || leg.getProtocol().getAddress() == null )
                ) { 
                 // Leg uses pulling and Holodeck B2B is responder, check if given MPC matches P-Mode MPC defined for UM
@@ -606,7 +606,7 @@ public class PModeFinder {
     public static Collection<IPMode> getPModesWithErrorsTo(String url) {
         Collection<IPMode>  result = new ArrayList<IPMode>();
         
-        for(IPMode p : HolodeckB2BCore.getPModeSet().getAll()) {
+        for(IPMode p : HolodeckB2BCoreInterface.getPModeSet().getAll()) {
             // Get all relevent P-Mode info
             ILeg leg = p.getLegs().iterator().next();
             IProtocol protocolInfo = leg.getProtocol();
@@ -636,7 +636,7 @@ public class PModeFinder {
     public static Collection<IPMode> getPModesWithReceiptsTo(String url) {
         Collection<IPMode>  result = new ArrayList<IPMode>();
         
-        for(IPMode p : HolodeckB2BCore.getPModeSet().getAll()) {
+        for(IPMode p : HolodeckB2BCoreInterface.getPModeSet().getAll()) {
             // Get all relevent P-Mode info
             ILeg leg = p.getLegs().iterator().next();
             IProtocol protocolInfo = leg.getProtocol();

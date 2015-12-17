@@ -17,7 +17,7 @@
 package org.holodeckb2b.ebms3.persistent.message;
 
 import java.io.Serializable;
-import org.holodeckb2b.common.messagemodel.ISignalMessage;
+import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 
 /**
  * Represents a general ebMS <i>Signal Message message unit</i>. As each signal

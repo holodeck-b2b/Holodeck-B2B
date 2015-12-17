@@ -28,13 +28,14 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import org.holodeckb2b.common.general.IDescription;
-import org.holodeckb2b.common.general.IProperty;
-import org.holodeckb2b.common.general.ISchemaReference;
-import org.holodeckb2b.common.messagemodel.IPayload;
 import org.holodeckb2b.ebms3.persistent.general.Description;
 import org.holodeckb2b.ebms3.persistent.general.Property;
 import org.holodeckb2b.ebms3.persistent.general.SchemaReference;
+import org.holodeckb2b.interfaces.general.IDescription;
+import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.general.ISchemaReference;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 
 /**
  * Is persistency class representing a <i>Payload</i> of an ebMS User Message. 

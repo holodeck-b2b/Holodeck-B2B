@@ -20,12 +20,12 @@ import java.util.Collection;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.IDescription;
-import org.holodeckb2b.common.general.IProperty;
-import org.holodeckb2b.common.general.ISchemaReference;
-import org.holodeckb2b.common.messagemodel.IPayload;
 import org.holodeckb2b.ebms3.persistent.message.Payload;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IDescription;
+import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.general.ISchemaReference;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 
 /**
  * Is a helper class for handling the ebMS PartInfo element in the ebMS SOAP 
@@ -39,7 +39,7 @@ public class PartInfo {
     /**
      * The fully qualified name of the element as an {@see QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PartInfo");
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "PartInfo");
     
     /**
      * The local name of the href attribute

@@ -18,7 +18,7 @@ package org.holodeckb2b.ebms3.persistent.general;
 
 import java.io.Serializable;
 import javax.persistence.Embeddable;
-import org.holodeckb2b.common.general.ISchemaReference;
+import org.holodeckb2b.interfaces.general.ISchemaReference;
 
 /**
  * Is a persistency class for a schema reference. As a schema reference is always 

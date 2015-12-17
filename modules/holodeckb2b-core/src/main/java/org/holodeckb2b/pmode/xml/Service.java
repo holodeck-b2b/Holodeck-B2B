@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.common.general.IService;
+import org.holodeckb2b.interfaces.general.IService;
 import org.simpleframework.xml.Element;
 
 /**

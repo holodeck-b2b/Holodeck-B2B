@@ -18,6 +18,7 @@ package org.holodeckb2b.common.workerpool;
 
 import static java.lang.Thread.sleep;
 import java.util.Map;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
  *

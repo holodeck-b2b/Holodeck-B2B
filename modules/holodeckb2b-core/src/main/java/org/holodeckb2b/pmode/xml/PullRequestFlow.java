@@ -16,9 +16,9 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.pmode.IPullRequestFlow;
-import org.holodeckb2b.common.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
+import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
@@ -47,7 +47,7 @@ public class PullRequestFlow implements IPullRequestFlow {
      */
     @Override
     public String getMPC() {
-        return (mpc == null || mpc.isEmpty() ? Constants.DEFAULT_MPC : mpc);
+        return (mpc == null || mpc.isEmpty() ? EbMSConstants.DEFAULT_MPC : mpc);
     }
     
     @Override

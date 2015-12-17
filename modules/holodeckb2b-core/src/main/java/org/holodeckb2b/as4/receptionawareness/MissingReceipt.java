@@ -17,8 +17,8 @@
 package org.holodeckb2b.as4.receptionawareness;
 
 import org.holodeckb2b.as4.handlers.inflow.CreateReceipt;
-import org.holodeckb2b.common.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.ebms3.persistent.message.EbmsError;
+import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 
 /**
  * Represent the <i>MissingReceipt</i> error that is part of the AS4 <i>reception awareness feature</i> and is used to 

@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.ebms3.mmd.xml;
 
-import org.holodeckb2b.common.messagemodel.IAgreementReference;
+import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
 

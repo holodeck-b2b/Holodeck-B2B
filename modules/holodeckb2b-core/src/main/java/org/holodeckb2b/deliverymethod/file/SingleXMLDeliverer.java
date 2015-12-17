@@ -28,17 +28,17 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.util.base64.Base64EncodingWriterOutputStream;
-import org.holodeckb2b.common.delivery.IMessageDeliverer;
-import org.holodeckb2b.common.delivery.MessageDeliveryException;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.IMessageUnit;
-import org.holodeckb2b.common.messagemodel.IPayload;
-import org.holodeckb2b.common.messagemodel.IUserMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.mmd.xml.PartInfo;
 import org.holodeckb2b.ebms3.mmd.xml.Property;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
  * Is an {@link IMessageDeliverer} implementation that delivers the message unit to the business application by writing
@@ -120,7 +120,7 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
     
         OMFactory   f = OMAbstractFactory.getOMFactory();
         OMElement    container = f.createOMElement(XML_ROOT_NAME);
-        container.declareNamespace(Constants.EBMS3_NS_URI, "eb");
+        container.declareNamespace(EbMSConstants.EBMS3_NS_URI, "eb");
             
         log.debug("Add general message info to XML container");
         // Add the information on the user message to the container

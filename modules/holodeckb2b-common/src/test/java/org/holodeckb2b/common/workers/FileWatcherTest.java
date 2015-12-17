@@ -22,8 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.holodeckb2b.common.workerpool.TaskConfigurationException;
-import static org.junit.Assert.*;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 

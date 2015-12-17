@@ -22,12 +22,12 @@ import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.IDescription;
-import org.holodeckb2b.common.messagemodel.IEbmsError;
-import org.holodeckb2b.common.messagemodel.IErrorMessage;
 import org.holodeckb2b.ebms3.persistent.message.EbmsError;
 import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IDescription;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 
 /**
  * Is a helper class for handling the ebMS error signals in the ebMS SOAP header.
@@ -47,12 +47,12 @@ public class ErrorSignal {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Error");
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Error");
     
     /**
      * The fully qualified name of the ErrorDetail element as an {@link QName}
      */
-    private static final QName  Q_ERROR_DETAIL = new QName(Constants.EBMS3_NS_URI, "ErrorDetail");
+    private static final QName  Q_ERROR_DETAIL = new QName(EbMSConstants.EBMS3_NS_URI, "ErrorDetail");
 
     /*
      * The local names of the attributes of the Error element
@@ -219,9 +219,9 @@ public class ErrorSignal {
         error.setShortDescription(errorElement.getAttributeValue(new QName(SHORT_DESCR_ATTR)));
         error.setRefToMessageInError(errorElement.getAttributeValue(new QName(REF_TO_ATTR)));
         // Convert text of attribute to enum value of entity object
-        error.setSeverity( EbmsError.Severity.FAILURE.toString()
+        error.setSeverity( IEbmsError.Severity.FAILURE.toString()
                                 .equalsIgnoreCase(errorElement.getAttributeValue(new QName(SEVRITY_ATTR))) 
-                           ? EbmsError.Severity.FAILURE : EbmsError.Severity.WARNING);
+                           ? IEbmsError.Severity.FAILURE : IEbmsError.Severity.WARNING);
         
         // Read the ErrorDetail child element (if it exists)
         OMElement errDetailElement = errorElement.getFirstChildWithName(Q_ERROR_DETAIL);

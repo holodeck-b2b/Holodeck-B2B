@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.ebms3.persistent.message;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,14 +34,14 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.IProperty;
-import org.holodeckb2b.common.general.ITradingPartner;
-import org.holodeckb2b.common.messagemodel.ICollaborationInfo;
-import org.holodeckb2b.common.messagemodel.IPayload;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistent.general.Property;
 import org.holodeckb2b.ebms3.persistent.general.TradingPartner;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.general.ITradingPartner;
+import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 
 /**
  * Is a persistency class representing an ebMS User Message message unit that 
@@ -82,7 +81,7 @@ import org.holodeckb2b.ebms3.persistent.general.TradingPartner;
             )
         }
 )
-public class UserMessage extends MessageUnit implements org.holodeckb2b.common.messagemodel.IUserMessage {
+public class UserMessage extends MessageUnit implements org.holodeckb2b.interfaces.messagemodel.IUserMessage {
     
     private enum PartnerType { SENDER, RECEIVER }
     
@@ -98,7 +97,7 @@ public class UserMessage extends MessageUnit implements org.holodeckb2b.common.m
     public void setMPC(String mpc) {
         // If no MPC is given automatically assign the default one
         if (mpc == null || mpc.isEmpty())
-            MPC = Constants.DEFAULT_MPC;
+            MPC = EbMSConstants.DEFAULT_MPC;
         else
             MPC = mpc;
     }
@@ -190,7 +189,7 @@ public class UserMessage extends MessageUnit implements org.holodeckb2b.common.m
     /**
      * If no specific MPC is assigned to the user message the default MPC is assumed.
      */
-    private String              MPC = Constants.DEFAULT_MPC;
+    private String              MPC = EbMSConstants.DEFAULT_MPC;
     
     /*
      * A user message is always associated with two trading partners, one

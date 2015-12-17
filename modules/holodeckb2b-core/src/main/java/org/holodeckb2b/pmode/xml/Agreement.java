@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.common.general.IAgreement;
+import org.holodeckb2b.interfaces.general.IAgreement;
 import org.simpleframework.xml.Element;
 
 /**

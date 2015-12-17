@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
-import org.holodeckb2b.common.workerpool.TaskConfigurationException;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;

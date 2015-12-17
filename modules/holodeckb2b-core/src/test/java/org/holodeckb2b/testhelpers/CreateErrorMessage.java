@@ -18,12 +18,12 @@ package org.holodeckb2b.testhelpers;
 
 import java.util.Date;
 import javax.persistence.EntityManager;
-import org.holodeckb2b.common.messagemodel.IEbmsError;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistent.message.EbmsError;
 import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
 import org.holodeckb2b.ebms3.persistent.processing.ProcessingState;
 import org.holodeckb2b.ebms3.util.JPAUtil;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 
 /**
  *
