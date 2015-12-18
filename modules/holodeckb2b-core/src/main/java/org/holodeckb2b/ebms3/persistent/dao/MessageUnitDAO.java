@@ -433,7 +433,7 @@ public class MessageUnitDAO {
         
         String queryString = "SELECT mu " +
                              "FROM " + type.getSimpleName() + " mu JOIN mu.states s1 " +
-                             "WHERE s1.START = (SELECT MAX(s2.START) FROM mu.states s2) " +
+                             "WHERE s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) " +
                              "AND s1.NAME IN :states";
                 
         result = em.createQuery(queryString, type)
