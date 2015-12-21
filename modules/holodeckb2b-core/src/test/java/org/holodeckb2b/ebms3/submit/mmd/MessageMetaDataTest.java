@@ -34,6 +34,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -98,7 +99,7 @@ public class MessageMetaDataTest {
      * to use.
      */
     @Test
-    public void test1_Minimal() throws Exception {
+    public void test_Minimal() throws Exception {
         String path = this.getClass().getClassLoader().getResource("mmdtest/minimal.xml").getPath();
         File   f = new File(path);
         
@@ -121,7 +122,7 @@ public class MessageMetaDataTest {
      * Test of createFromFile method with full MMD content.
      */
     @Test
-    public void test2_CreateFromFile() throws Exception {
+    public void test_CreateFromFile() throws Exception {
         String path = this.getClass().getClassLoader().getResource("mmdtest/mmdtest2.xml").getPath();
         File   f = new File(path);
         
@@ -219,6 +220,42 @@ public class MessageMetaDataTest {
             fail();
         }
     }
+
+        /**
+     * Test of createFromFile method with full MMD content.
+     */
+    @Test
+    public void test_DeleteIndicator() throws Exception {
+        try {
+            String path = this.getClass().getClassLoader().getResource("mmdtest/mmdtest2.xml").getPath();
+            File   f = new File(path);
+            MessageMetaData mmd = MessageMetaData.createFromFile(f);            
+            assertNotNull(mmd);
+            assertEquals(org.holodeckb2b.common.util.Utils.fromXMLDateTime("2014-08-14T15:50:00Z"), mmd.getTimestamp());
+            assertEquals("H8MQXJ", mmd.getMessageId());
+            assertEquals("UGA08vL5hsdNfC-sGoV2RD", mmd.getRefToMessageId());
+
+            assertFalse(mmd.shouldDeleteFilesAfterSubmit());                    
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
+        }
+
+        try {
+            String path = this.getClass().getClassLoader().getResource("mmdtest/mmdtest3.xml").getPath();
+            File   f = new File(path);
+            MessageMetaData mmd = MessageMetaData.createFromFile(f);            
+            assertNotNull(mmd);
+            assertEquals(org.holodeckb2b.common.util.Utils.fromXMLDateTime("2015-12-21T15:50:00Z"), mmd.getTimestamp());
+            assertEquals("n-soaDLzuliyRmzSlBe7", mmd.getMessageId());
+            assertNull(mmd.getRefToMessageId());
+
+            assertTrue(mmd.shouldDeleteFilesAfterSubmit());                    
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
+        }
+    }
     
     /**
      * Test of constructor to create a MMD document for the user message described by 
@@ -226,7 +263,7 @@ public class MessageMetaDataTest {
      * For this test we use a {@see UserMessage} object from the persistency package. 
      */
     @Test
-    public void test3_CreateFromObject() {
+    public void test_CreateFromObject() {
         UserMessage um = new UserMessage();
         
         um.setMPC(T_UM1_MPC);
@@ -263,7 +300,7 @@ public class MessageMetaDataTest {
     
     
     @Test
-    public void test4_WriteToFile() {
+    public void test_WriteToFile() {
         UserMessage um = new UserMessage();
         
         um.setMPC(T_UM1_MPC);
@@ -316,6 +353,22 @@ public class MessageMetaDataTest {
             assertEqualUM(mmd, mmd2);
         else
             fail("MMD not read!");
+        
+        mmd.setDeleteFilesAfterSubmit(true);
+        f.delete();
+        try {
+            mmd.writeToFile(f);
+        } catch (Exception e) {
+            fail("Writing MMD failed: " + e.getMessage());
+        }
+        try {
+            mmd2 = MessageMetaData.createFromFile(f);
+        } catch (Exception e) {
+            fail("Reading saved data failed: " + e.getMessage());
+        }     
+        
+        assertNotNull(mmd2);
+        assertTrue(mmd2.shouldDeleteFilesAfterSubmit());
     }
     
     

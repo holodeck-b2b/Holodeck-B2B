@@ -59,7 +59,6 @@
                 <Property name="k.bl_p7Ey94OwjywF0t8OxNuAs">P5bRGnLlYzlyPyiDI1IPLILM</Property>
             </PartProperties>
         </PartInfo>
-        <PartInfo containment="external" mimeType="kFfLAWpqa-nkHXji04f8k" location="http://eErcDxcB/">            
-        </PartInfo>
+        <PartInfo containment="external" mimeType="kFfLAWpqa-nkHXji04f8k" location="http://eErcDxcB/"/>            
     </PayloadInfo>
 </MessageMetaData>

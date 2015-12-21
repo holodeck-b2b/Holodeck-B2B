@@ -34,11 +34,12 @@ import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
 /**
- * Represents the root element <code>MessageMetaData</code> from the <i>message
- * meta data</i> (MMD for short) XML document that can be used to exchange user 
- * message units between business application and Holodeck B2B.
- * <p>The structure of the MMD documents is defined by XML schema 
- * <i>http://holodeck-b2b.org/schemas/2014/06/mmd</i>. 
+ * Represents the root element <code>MessageMetaData</code> from the <i>message meta data</i> (MMD for short) XML 
+ * document that can be used to exchange User Message message units between business application and Holodeck B2B. The 
+ * structure of the MMD documents is defined by XML schema <i>http://holodeck-b2b.org/schemas/2014/06/mmd</i>. 
+ * <p>New since version 2.0-rc2 is the indicator whether the files containing the payload data should be removed after
+ * successful submission to the Holodeck B2B Core. (Note that this class only enables exchange of the indicator, it is 
+ * upto submitter implementations to use it!). This new attribute is defined in version 1.1 of the XSD.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -64,8 +65,8 @@ public class MessageMetaData implements IUserMessage {
     @ElementList(name = "MessageProperties", entry = "Property", type = Property.class, required = false)
     private ArrayList<IProperty> msgProperties;
     
-    @ElementList(name = "PayloadInfo", entry = "PartInfo", type = PartInfo.class, required=false)
-    private ArrayList<IPayload>  payloads;  
+    @Element(name = "PayloadInfo", required=false)
+    private PayloadInfo  payloadInfo;  
     
     /**
      * Default constructor to create an empty <code>MessageMetaData</object>.
@@ -216,19 +217,42 @@ public class MessageMetaData implements IUserMessage {
     
     @Override
     public Collection<IPayload> getPayloads() {
-        return payloads;
+        return (payloadInfo != null ? payloadInfo.getPayloads() : null);
     }
 
     public void setPayloads(Collection<IPayload> pl) {
-        if(pl != null && pl.size() > 0) {
-            this.payloads = new ArrayList<IPayload>(pl.size());
-            for(IPayload p : pl)
-                this.payloads.add(new PartInfo(p));
-        }
-        else
-            this.payloads = null;
+        if (this.payloadInfo == null)
+            this.payloadInfo = new PayloadInfo(pl);
+        else 
+            this.payloadInfo.setPayloadInfo(pl);        
     }
 
+    /**
+     * Gets the indicator whether the payload files should be deleted after successful submission to the Holodeck B2B
+     * Core.
+     * <p>NOTE:  this class only enables exchange of the indicator, it is upto submitter implementations to use it!
+     * 
+     * @return <code>true</code> when the files should be deleted, <code>false</code> if not. 
+     * @since 2.0-rc2
+     */
+    public boolean shouldDeleteFilesAfterSubmit() {
+        return (payloadInfo != null ? payloadInfo.shouldDeleteFilesAfterSubmit() : false);
+    }
+    
+    /**
+     * Sets the indicator whether the payload files should be deleted after successful submission to the Holodeck B2B
+     * Core. Setting the indicator is only useful for meta-data objects that are used for submission with a submitter
+     * that supports this indicator.
+     * 
+     * @param delete The new value for the indicator
+     */
+    public void setDeleteFilesAfterSubmit(boolean delete) {
+        if (this.payloadInfo == null)
+            this.payloadInfo = new PayloadInfo();
+        
+        this.payloadInfo.setDeleteFilesAfterSubmit(delete);          
+    }
+    
     @Override
     public Date getTimestamp() {
         if( messageInfo != null)

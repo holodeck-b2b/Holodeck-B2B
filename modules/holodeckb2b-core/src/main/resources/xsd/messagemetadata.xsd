@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+<xs:schema version="1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
     targetNamespace="http://holodeck-b2b.org/schemas/2014/06/mmd" attributeFormDefault="unqualified"
     xmlns:tns="http://holodeck-b2b.org/schemas/2014/06/mmd"
     xmlns:xml="http://www.w3.org/XML/1998/namespace">
@@ -25,6 +25,7 @@
     <xs:annotation>
         <xs:documentation xml:lang="en">This schema defines the structure of the message meta-data (or short MMD) document used by Holodeck B2B. 
 XML documents of this type are used when exchanging messages between Holodeck B2B and the connected business application. When sending the Producer should supply the MMD and when deliverying a message to the Consumer Holodeck B2B will supply the MMD. Note that delivery is done by a delivery class and that it may choose not to supply the MMD because the meta-data is provided otherwise.</xs:documentation>
+        <xs:documentation>Version 1.1 of the schema introduces the @deleteFilesAfterSubmit attribute for the eb:PayloadInfo element which can be used to indicate whether the file containing the payload data should be removed after Holodeck B2B has accepted the submission. </xs:documentation>
     </xs:annotation>
     <xs:import namespace="http://www.w3.org/XML/1998/namespace"
         schemaLocation="http://www.w3.org/2001/03/xml.xsd"/>
@@ -197,6 +198,11 @@ If this element occurs multiple all instances MUST identify the same business pa
                 </xs:annotation>
             </xs:element>
         </xs:sequence>
+        <xs:attribute default="false" name="deleteFilesAfterSubmit" type="xs:boolean">
+            <xs:annotation>
+                <xs:documentation>This attribute can be used to indicate whether the files containing the payload data should be removed by Holodeck B2B when the message is succesfully submitted. When not supplied or set to <i>false</i> the <i>Producer</i> application is responsible for deleting the payload file. </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
     <xs:complexType name="PartInfo">
         <xs:sequence>
