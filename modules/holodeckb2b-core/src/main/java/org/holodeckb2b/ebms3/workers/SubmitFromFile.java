@@ -89,7 +89,7 @@ public class SubmitFromFile extends DirWatcher {
                 // Convert relative paths in payload references to absolute ones to prevent file not found errors
                 convertPayloadPaths(mmd, f);                
                 IMessageSubmitter   submitter = HolodeckB2BCoreInterface.getMessageSubmitter();
-                submitter.submitMessage(mmd);
+                submitter.submitMessage(mmd, mmd.shouldDeleteFilesAfterSubmit());
                 log.info("User message from " + f.getName() + " succesfully submitted to Holodeck B2B");
                 // Change extension to reflect success
                 new File(tFileName).renameTo(new File(bFileName + ".accepted"));
