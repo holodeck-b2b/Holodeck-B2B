@@ -33,6 +33,11 @@
     <name>Holodeck B2B - Common</name>
   
     <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-interfaces</artifactId>
+        </dependency>
+                
         <!-- Apache Axis2 kernel -->
         <dependency>
             <groupId>org.apache.axis2</groupId>
@@ -65,11 +70,6 @@
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>interfaces</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
