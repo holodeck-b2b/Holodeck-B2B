@@ -16,13 +16,17 @@
  */
 package org.holodeckb2b.ebms3.submit.core;
 
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.ebms3.persistent.message.Payload;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.PModeFinder;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -42,7 +46,13 @@ public class MessageSubmitter implements IMessageSubmitter {
     private static final Log log = LogFactory.getLog(MessageSubmitter.class.getName());
     
     @Override
+    @Deprecated
     public String submitMessage(IUserMessage um) throws MessageSubmitException {
+        return submitMessage(um, false);
+    }
+    
+    @Override
+    public String submitMessage(IUserMessage um, boolean movePayloads) throws MessageSubmitException {
         
         try {
             log.debug("Find the P-Mode for the message");
@@ -52,6 +62,7 @@ public class MessageSubmitter implements IMessageSubmitter {
                 log.warn("No P-Mode found for submitted message, rejecting message!");
                 throw new MessageSubmitException("No P-Mode found for message");
             }
+            log.debug("Found P-Mode:" + pmode.getId());
             
             log.debug("Check for completeness: combined with P-Mode all info must be known");
             IUserMessage completedMMD = MMDCompleter.complete(um, pmode); // Throws MessageSubmitException if meta-data is not complete
@@ -61,6 +72,14 @@ public class MessageSubmitter implements IMessageSubmitter {
             
             log.debug("Add message to database");
             UserMessage newUM = MessageUnitDAO.createOutgoingUserMessage(completedMMD, pmode.getId());
+            
+            try {
+                moveOrCopyPayloads(newUM, movePayloads);
+            } catch (IOException ex) {
+                log.error("Could not move/copy payload(s) to the internal storage! Unable to process message!" 
+                            + "\n\tError details: " + ex.getMessage());
+                throw new MessageSubmitException("Could not move/copy payload(s) to the internal storage!", ex);
+            }
             
             //Use P-Mode to find out if this message is to be pulled or pushed to receiver
             if (EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(pmode.getMepBinding())) {
@@ -94,7 +113,7 @@ public class MessageSubmitter implements IMessageSubmitter {
             for(IPayload p : um.getPayloads()) {
                 String contentLocation = p.getContentLocation();
                 // The location must be specified
-                if (contentLocation == null || contentLocation.isEmpty())
+                if (Utils.isNullOrEmpty(contentLocation))
                     throw new MessageSubmitException("No location specified for payload [uri=" + p.getPayloadURI() + "]!");
                 try { 
                     // It most point to an existing normal file
@@ -109,6 +128,40 @@ public class MessageSubmitter implements IMessageSubmitter {
             }
     }
 
-
+    /**
+     * Helper method to copy or move the payloads to an internal directory so they will be kept available during the
+     * processing of the message (which may include resending).
+     * 
+     * @param um     The meta data on the submitted user message
+     * @param pmode  The P-Mode that governs the processing this user message
+     * @throws IOException  When the payload could not be moved/copied to the internal payload storage
+     */
+    private void moveOrCopyPayloads(UserMessage um, boolean move) throws IOException {
+        // Path to the "temp" dir where to store payloads during processing
+        String intPlDir = Config.getTempDirectory() + "plcout";
+        // Create the directory if needed
+        Path pathPlDir = Paths.get(intPlDir);
+        if (!Files.exists(pathPlDir)) {
+            log.debug("Create the directory [" + intPlDir + "] for storing payload files");
+            Files.createDirectories(pathPlDir);
+        }
+            
+        if (!Utils.isNullOrEmpty(um.getPayloads()))
+            for (IPayload ip : um.getPayloads()) {
+                Payload p = (Payload) ip;                
+                Path srcPath = Paths.get(p.getContentLocation());
+                // Ensure that the filename in the temp directory is unique
+                Path destPath = Paths.get(Utils.preventDuplicateFileName(intPlDir + "/" + srcPath.getFileName()));
+                if (move) {
+                    log.debug("Moving payload [" + p.getContentLocation() + "] to internal directory");
+                    Files.move(srcPath, destPath);
+                } else {
+                    log.debug("Copying payload [" + p.getContentLocation() + "] to internal directory");
+                    Files.copy(srcPath, destPath);
+                }
+                log.debug("Payload moved/copied to internal directory");
+                p.setContentLocation(destPath.toString());
+            }
+    }
     
 }
