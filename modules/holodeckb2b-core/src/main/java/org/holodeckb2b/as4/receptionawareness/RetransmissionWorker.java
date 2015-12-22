@@ -31,6 +31,7 @@ import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
 import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
@@ -40,7 +41,6 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * This worker is responsible for the retransmission of user messages that did not receive an AS4 receipt as expected.
@@ -87,8 +87,11 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         leg = (IAS4Leg) HolodeckB2BCoreInterface.getPModeSet().
                                                             get(um.getPMode()).getLegs().iterator().next();
                         raConfig = leg.getReceptionAwareness();
-                    } catch (ClassCastException cce) {} 
-
+                    } catch (Exception e) {
+                        // Could not get configuration for retries, maybe P-Mode configuration was deleted?
+                        log.error("Message [" + um.getMessageId() + "] can not be resent due to missing P-Mode ["
+                                    + um.getPMode() + "]");   
+                    } 
                     if (raConfig == null) {
                         // Not an ILegAS4 instance or no RA config available, can't determine if and how to resend. 
                         log.error("Message [" + um.getMessageId() + "] can not be resent due to missing Reception"
