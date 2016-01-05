@@ -148,6 +148,12 @@ public class MessageUnitQueriesTest {
         mu8.setMessageId(T_MSG_ID_7);
         mu8.setRefToMessageId(T_MSG_ID_5);
         em.persist(mu8);
+
+        ErrorMessage mu9 = new ErrorMessage();
+        mu9.setMessageId(T_MSG_ID_9);
+        mu9.setRefToMessageId(T_MSG_ID_5);
+        mu9.setDirection(MessageUnit.Direction.IN);
+        em.persist(mu9);
         
         em.getTransaction().commit();
         em.close();
@@ -186,7 +192,7 @@ public class MessageUnitQueriesTest {
                                             .setParameter("msgId", T_MSG_ID_5)
                                             .setParameter("direction", MessageUnit.Direction.IN)
                                             .getResultList();
-        assertEquals(2, result.size());
+        assertEquals(3, result.size());
 
         em.getTransaction().commit();      
     }
