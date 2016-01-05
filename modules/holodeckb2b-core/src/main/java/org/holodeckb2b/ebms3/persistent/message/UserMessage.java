@@ -57,7 +57,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
             query = "SELECT 'true' " 
                     + "FROM UserMessage um JOIN um.states s1 "
                     + "WHERE um.MESSAGE_ID = :msgId "
-                    + "AND s1.START = (SELECT MAX(s2.START) FROM um.states s2) " 
+                    + "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM um.states s2) " 
                     + "AND s1.NAME = '" + ProcessingStates.DELIVERED + "'"
             ),
         @NamedQuery(name="UserMessage.numOfTransmits",
@@ -70,7 +70,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
             query = "SELECT um " +
                     "FROM UserMessage um JOIN um.states s1 " +
                     "WHERE um.PMODE_ID IN :pmodes " +
-                    "AND s1.START = (SELECT MAX(s2.START) FROM um.states s2) " +
+                    "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM um.states s2) " +
                     "AND s1.NAME = :state " +
                     "ORDER BY s1.START"  
             ),
