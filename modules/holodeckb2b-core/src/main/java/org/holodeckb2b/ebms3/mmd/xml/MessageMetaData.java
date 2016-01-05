@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
 import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
@@ -221,7 +222,9 @@ public class MessageMetaData implements IUserMessage {
     }
 
     public void setPayloads(Collection<IPayload> pl) {
-        if (this.payloadInfo == null)
+        if (Utils.isNullOrEmpty(pl))
+            this.payloadInfo = null;
+        else if (this.payloadInfo == null)
             this.payloadInfo = new PayloadInfo(pl);
         else 
             this.payloadInfo.setPayloadInfo(pl);        

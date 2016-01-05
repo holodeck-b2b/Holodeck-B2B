@@ -316,6 +316,30 @@ public class MessageMetaDataTest {
         ci.setAgreement(agreeRef);
         um.setCollaborationInfo(ci);
         
+        MessageMetaData mmd = new MessageMetaData(um);
+        String path = this.getClass().getClassLoader().getResource("mmdtest").getPath();
+        File   f = new File(path+"/mmd_writetest.xml");
+        
+        if (f.exists())
+            f.delete();
+        
+        try {
+            mmd.writeToFile(f);
+        } catch (Exception e) {
+            fail("Writing MMD without payload info failed: " + e.getMessage());
+        }
+        MessageMetaData mmd2 = null;
+        try {
+            mmd2 = MessageMetaData.createFromFile(f);
+        } catch (Exception e) {
+            fail("Reading saved data (no payloads) failed: " + e.getMessage());
+        }
+
+        if (mmd2 != null)
+            assertEqualUM(mmd, mmd2);
+        else
+            fail("MMD without payloads not read!");
+        
         um.addMessageProperty(new org.holodeckb2b.ebms3.persistent.general.Property(T_UM1_MSGPROP1_NAME, T_UM1_MSGPROP1_VALUE, T_UM1_MSGPROP1_TYPE));
         um.addMessageProperty(new org.holodeckb2b.ebms3.persistent.general.Property(T_UM1_MSGPROP2_NAME, T_UM1_MSGPROP2_VALUE));
         
@@ -330,41 +354,40 @@ public class MessageMetaDataTest {
         pl.setContainment(T_UM1_PAYLD2_CONTAINMENT);
         pl.setContentLocation(T_UM1_PAYLD2_LOC);
         
-        MessageMetaData mmd = new MessageMetaData(um);
+        mmd = new MessageMetaData(um);
         
-        String path = this.getClass().getClassLoader().getResource("mmdtest").getPath();
-        File   f = new File(path+"/mmd_writetest.xml");
         if (f.exists())
             f.delete();
         
         try {
             mmd.writeToFile(f);
         } catch (Exception e) {
-            fail("Writing MMD failed: " + e.getMessage());
+            fail("Writing MMD with payload ino failed: " + e.getMessage());
         }
-        MessageMetaData mmd2 = null;
+        
+        mmd2 = null;
         try {
             mmd2 = MessageMetaData.createFromFile(f);
         } catch (Exception e) {
-            fail("Reading saved data failed: " + e.getMessage());
+            fail("Reading saved data (with payload info) failed: " + e.getMessage());
         }
 
         if (mmd2 != null)
             assertEqualUM(mmd, mmd2);
         else
-            fail("MMD not read!");
+            fail("MMD with payload info not read!");
         
         mmd.setDeleteFilesAfterSubmit(true);
         f.delete();
         try {
             mmd.writeToFile(f);
         } catch (Exception e) {
-            fail("Writing MMD failed: " + e.getMessage());
+            fail("Writing MMD with delete flag set failed: " + e.getMessage());
         }
         try {
             mmd2 = MessageMetaData.createFromFile(f);
         } catch (Exception e) {
-            fail("Reading saved data failed: " + e.getMessage());
+            fail("Reading saved data (with delete flag set) failed: " + e.getMessage());
         }     
         
         assertNotNull(mmd2);
