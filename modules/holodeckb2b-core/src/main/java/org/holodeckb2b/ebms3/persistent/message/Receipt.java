@@ -50,7 +50,7 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
             query = "SELECT r " +
                     "FROM Receipt r JOIN r.states s1 " +
                     "WHERE r.PMODE_ID IN :pmodes " +
-                    "AND s1.START = (SELECT MAX(s2.START) FROM r.states s2) " +
+                    "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM r.states s2) " +
                     "AND s1.NAME = :state " +
                     "ORDER BY s1.START"  
             ),
