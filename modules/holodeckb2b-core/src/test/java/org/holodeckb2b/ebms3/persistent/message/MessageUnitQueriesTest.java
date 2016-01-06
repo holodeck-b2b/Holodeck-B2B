@@ -150,8 +150,8 @@ public class MessageUnitQueriesTest {
         em.persist(mu8);
 
         ErrorMessage mu9 = new ErrorMessage();
-        mu9.setMessageId(T_MSG_ID_9);
-        mu9.setRefToMessageId(T_MSG_ID_5);
+        mu9.setMessageId(T_MSG_ID_5);
+        mu9.setRefToMessageId(T_MSG_ID_7);
         mu9.setDirection(MessageUnit.Direction.IN);
         em.persist(mu9);
         
