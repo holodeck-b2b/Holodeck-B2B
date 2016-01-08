@@ -79,24 +79,24 @@ public class PartProperties {
     
     /**
      * Reads the set of properties from the <code>PartProperties</code> element 
-     * and returns them as a collection of {@link org.holodeckb2b.ebms3.persistent.general.Property}
+     * and returns them as a collection of {@link org.holodeckb2b.ebms3.persistency.entities.Property}
      * entity objects.
      * <p><b>NOTE:</b> The entity objects in the collection are not persisted by 
      * this method! It is the responsibility of the caller to store it.
      * 
      * @param ppElement             The <code>PartProperties</code> element to read the
      *                              properties from
-     * @return                      A new collection of {@link org.holodeckb2b.ebms3.persistent.general.Property} 
+     * @return                      A new collection of {@link org.holodeckb2b.ebms3.persistency.entities.Property} 
      *                              objects 
      * @throws PackagingException   When the given element is not a valid
      *                              <code>MessageProperties</code> element.
      */
-    public static Collection<org.holodeckb2b.ebms3.persistent.general.Property> readElement(OMElement ppElement) throws PackagingException {
+    public static Collection<org.holodeckb2b.ebms3.persistency.entities.Property> readElement(OMElement ppElement) throws PackagingException {
         if (ppElement == null)
             return null;
         
         // Create new collection
-        ArrayList<org.holodeckb2b.ebms3.persistent.general.Property> props = new ArrayList<org.holodeckb2b.ebms3.persistent.general.Property>();
+        ArrayList<org.holodeckb2b.ebms3.persistency.entities.Property> props = new ArrayList<org.holodeckb2b.ebms3.persistency.entities.Property>();
         // Get all child elements containing the properties
         Iterator<?> it = ppElement.getChildrenWithName(Property.Q_ELEMENT_NAME);
         // Read each property element and add it info to the collection

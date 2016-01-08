@@ -18,6 +18,7 @@ package org.holodeckb2b.axis2;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.UUID;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -37,11 +38,11 @@ import org.apache.commons.logging.Log;
 import org.apache.xml.security.utils.XMLUtils;
 import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
-import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.persistent.message.PullRequest;
-import org.holodeckb2b.ebms3.persistent.message.Receipt;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
+import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
+import org.holodeckb2b.ebms3.persistency.entities.Receipt;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.module.HolodeckB2BCoreImpl;
 import org.w3c.dom.Document;
 
@@ -204,7 +205,7 @@ public final class Axis2Utils {
      * @return The configured anonymous service
      */
     private static AxisService createAnonymousService() {
-        AxisService axisService = new AxisService(HB2B_ANON_SVC);
+        AxisService axisService = new AxisService(HB2B_ANON_SVC + ":" + UUID.randomUUID());
 
         OutOptInAxisOperation outInOperation = new OutOptInAxisOperation(ANON_OUT_IN_OP);
         axisService.addOperation(outInOperation);

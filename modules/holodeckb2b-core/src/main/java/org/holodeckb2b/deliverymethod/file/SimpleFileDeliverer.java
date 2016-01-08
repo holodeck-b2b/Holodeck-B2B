@@ -182,7 +182,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
         
         if (sigMsgUnit instanceof IReceipt) {
             log.debug("Create facade to prevent content from inclusion in XML");
-            org.holodeckb2b.ebms3.persistent.message.Receipt rcpt = new DeliveryReceipt((IReceipt) sigMsgUnit);
+            org.holodeckb2b.ebms3.persistency.entities.Receipt rcpt = new DeliveryReceipt((IReceipt) sigMsgUnit);
             log.debug("Add receipt meta data to XML");
             Receipt.createElement(container, rcpt);
         } else if (sigMsgUnit instanceof IErrorMessage) {
@@ -232,7 +232,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
     /**
      * Private inner class to replace actual receipt content with indicator of receipt type in output XML.
      */
-    private static class DeliveryReceipt extends org.holodeckb2b.ebms3.persistent.message.Receipt {
+    private static class DeliveryReceipt extends org.holodeckb2b.ebms3.persistency.entities.Receipt {
 
         private IReceipt    source;
         
@@ -249,8 +249,8 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
             // We need to case the given receipt here to the persistency implementation to get access to the receipt
             // content. 
             ArrayList<OMElement>  actual = null;
-            if (rcpt instanceof org.holodeckb2b.ebms3.persistent.message.Receipt)
-                actual = ((org.holodeckb2b.ebms3.persistent.message.Receipt) rcpt).getContent();
+            if (rcpt instanceof org.holodeckb2b.ebms3.persistency.entities.Receipt)
+                actual = ((org.holodeckb2b.ebms3.persistency.entities.Receipt) rcpt).getContent();
             
             // If there was actual content (and we could get access to it) use the name of first element
             String firstChildName = null;

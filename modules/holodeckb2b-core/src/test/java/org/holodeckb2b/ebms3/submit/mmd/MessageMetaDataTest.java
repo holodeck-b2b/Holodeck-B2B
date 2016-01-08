@@ -20,8 +20,8 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
-import org.holodeckb2b.ebms3.persistent.message.Payload;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
+import org.holodeckb2b.ebms3.persistency.entities.Payload;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.IProperty;
@@ -270,23 +270,23 @@ public class MessageMetaDataTest {
         um.setMessageId(T_UM1_MESSAGEID);
         um.setRefToMessageId(T_UM1_REFTOMSGID);
         
-        org.holodeckb2b.ebms3.persistent.message.CollaborationInfo ci = new org.holodeckb2b.ebms3.persistent.message.CollaborationInfo();
+        org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo ci = new org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo();
         ci.setAction(T_UM1_ACTION);
         ci.setConversationId(T_UM1_CONVID);
-        org.holodeckb2b.ebms3.persistent.general.Service svc = new org.holodeckb2b.ebms3.persistent.general.Service(T_UM1_SERVICE);
+        org.holodeckb2b.ebms3.persistency.entities.Service svc = new org.holodeckb2b.ebms3.persistency.entities.Service(T_UM1_SERVICE);
         ci.setService(svc);
-        org.holodeckb2b.ebms3.persistent.message.AgreementReference agreeRef = new org.holodeckb2b.ebms3.persistent.message.AgreementReference(T_UM1_PMODEID);
+        org.holodeckb2b.ebms3.persistency.entities.AgreementReference agreeRef = new org.holodeckb2b.ebms3.persistency.entities.AgreementReference(T_UM1_PMODEID);
         ci.setAgreement(agreeRef);
         um.setCollaborationInfo(ci);
         
-        um.addMessageProperty(new org.holodeckb2b.ebms3.persistent.general.Property(T_UM1_MSGPROP1_NAME, T_UM1_MSGPROP1_VALUE, T_UM1_MSGPROP1_TYPE));
-        um.addMessageProperty(new org.holodeckb2b.ebms3.persistent.general.Property(T_UM1_MSGPROP2_NAME, T_UM1_MSGPROP2_VALUE));
+        um.addMessageProperty(new org.holodeckb2b.ebms3.persistency.entities.Property(T_UM1_MSGPROP1_NAME, T_UM1_MSGPROP1_VALUE, T_UM1_MSGPROP1_TYPE));
+        um.addMessageProperty(new org.holodeckb2b.ebms3.persistency.entities.Property(T_UM1_MSGPROP2_NAME, T_UM1_MSGPROP2_VALUE));
         
         Payload pl = new Payload();
         pl.setContainment(T_UM1_PAYLD1_CONTAINMENT);
         pl.setContentLocation(T_UM1_PAYLD1_LOC);
-        pl.addProperty(new org.holodeckb2b.ebms3.persistent.general.Property(T_UM1_PAYLD1_PROP_NAME, T_UM1_PAYLD1_PROP_VALUE));
-        pl.setSchemaReference(new org.holodeckb2b.ebms3.persistent.general.SchemaReference(T_UM1_PAYLD1_SCHEMA_LOC, T_UM1_PAYLD1_SCHEMA_NS, T_UM1_PAYLD1_SCHEMA_VER));
+        pl.addProperty(new org.holodeckb2b.ebms3.persistency.entities.Property(T_UM1_PAYLD1_PROP_NAME, T_UM1_PAYLD1_PROP_VALUE));
+        pl.setSchemaReference(new org.holodeckb2b.ebms3.persistency.entities.SchemaReference(T_UM1_PAYLD1_SCHEMA_LOC, T_UM1_PAYLD1_SCHEMA_NS, T_UM1_PAYLD1_SCHEMA_VER));
         um.addPayload(pl);
         
         pl = new Payload();
@@ -307,12 +307,12 @@ public class MessageMetaDataTest {
         um.setMessageId(T_UM1_MESSAGEID);
         um.setRefToMessageId(T_UM1_REFTOMSGID);
         
-        org.holodeckb2b.ebms3.persistent.message.CollaborationInfo ci = new org.holodeckb2b.ebms3.persistent.message.CollaborationInfo();
+        org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo ci = new org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo();
         ci.setAction(T_UM1_ACTION);
         ci.setConversationId(T_UM1_CONVID);
-        org.holodeckb2b.ebms3.persistent.general.Service svc = new org.holodeckb2b.ebms3.persistent.general.Service(T_UM1_SERVICE);
+        org.holodeckb2b.ebms3.persistency.entities.Service svc = new org.holodeckb2b.ebms3.persistency.entities.Service(T_UM1_SERVICE);
         ci.setService(svc);
-        org.holodeckb2b.ebms3.persistent.message.AgreementReference agreeRef = new org.holodeckb2b.ebms3.persistent.message.AgreementReference(T_UM1_PMODEID);
+        org.holodeckb2b.ebms3.persistency.entities.AgreementReference agreeRef = new org.holodeckb2b.ebms3.persistency.entities.AgreementReference(T_UM1_PMODEID);
         ci.setAgreement(agreeRef);
         um.setCollaborationInfo(ci);
         
@@ -340,14 +340,14 @@ public class MessageMetaDataTest {
         else
             fail("MMD without payloads not read!");
         
-        um.addMessageProperty(new org.holodeckb2b.ebms3.persistent.general.Property(T_UM1_MSGPROP1_NAME, T_UM1_MSGPROP1_VALUE, T_UM1_MSGPROP1_TYPE));
-        um.addMessageProperty(new org.holodeckb2b.ebms3.persistent.general.Property(T_UM1_MSGPROP2_NAME, T_UM1_MSGPROP2_VALUE));
+        um.addMessageProperty(new org.holodeckb2b.ebms3.persistency.entities.Property(T_UM1_MSGPROP1_NAME, T_UM1_MSGPROP1_VALUE, T_UM1_MSGPROP1_TYPE));
+        um.addMessageProperty(new org.holodeckb2b.ebms3.persistency.entities.Property(T_UM1_MSGPROP2_NAME, T_UM1_MSGPROP2_VALUE));
         
         Payload pl = new Payload();
         pl.setContainment(T_UM1_PAYLD1_CONTAINMENT);
         pl.setContentLocation(T_UM1_PAYLD1_LOC);
-        pl.addProperty(new org.holodeckb2b.ebms3.persistent.general.Property(T_UM1_PAYLD1_PROP_NAME, T_UM1_PAYLD1_PROP_VALUE));
-        pl.setSchemaReference(new org.holodeckb2b.ebms3.persistent.general.SchemaReference(T_UM1_PAYLD1_SCHEMA_LOC, T_UM1_PAYLD1_SCHEMA_NS, T_UM1_PAYLD1_SCHEMA_VER));
+        pl.addProperty(new org.holodeckb2b.ebms3.persistency.entities.Property(T_UM1_PAYLD1_PROP_NAME, T_UM1_PAYLD1_PROP_VALUE));
+        pl.setSchemaReference(new org.holodeckb2b.ebms3.persistency.entities.SchemaReference(T_UM1_PAYLD1_SCHEMA_LOC, T_UM1_PAYLD1_SCHEMA_NS, T_UM1_PAYLD1_SCHEMA_VER));
         um.addPayload(pl);
         
         pl = new Payload();

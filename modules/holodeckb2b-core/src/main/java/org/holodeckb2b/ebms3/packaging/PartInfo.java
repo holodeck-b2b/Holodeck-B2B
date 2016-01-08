@@ -20,7 +20,7 @@ import java.util.Collection;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.ebms3.persistent.message.Payload;
+import org.holodeckb2b.ebms3.persistency.entities.Payload;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.general.IProperty;
@@ -104,14 +104,14 @@ public class PartInfo {
     
     /**
      * Reads the meta data about one payload from the <code>PartInfo</code> element 
-     * and returns it as a {@link org.holodeckb2b.ebms3.persistent.message.Payload}
+     * and returns it as a {@link org.holodeckb2b.ebms3.persistency.entities.Payload}
      * entity object.
      * <p><b>NOTE:</b> The entity object is not persisted by this method! It is 
      * the responsibility of the caller to store it.
      * 
      * @param piElement             The <code>PartInfo</code> element to read the
      *                              payload meta data from
-     * @return                      A new {@link org.holodeckb2b.ebms3.persistent.message.Payload} 
+     * @return                      A new {@link org.holodeckb2b.ebms3.persistency.entities.Payload} 
      *                              object containing the meta data about the payload
      * @throws PackagingException   When the given element is not a valid
      *                              <code>PartInfo</code> element.

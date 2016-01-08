@@ -63,7 +63,7 @@ public class ReadPullRequest extends BaseHandler {
             if (prElement != null) {
                 log.debug("PullRequest found, read information from message");
                 // Read information into PullRequest object
-                org.holodeckb2b.ebms3.persistent.message.PullRequest pullRequest = null;
+                org.holodeckb2b.ebms3.persistency.entities.PullRequest pullRequest = null;
                 try {
                     pullRequest = PullRequest.readElement(prElement);
                     // And store in database and message context for further processing

@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.as4.compression;
 
-import org.holodeckb2b.ebms3.persistent.message.EbmsError;
+import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError.Severity;
 
 /**

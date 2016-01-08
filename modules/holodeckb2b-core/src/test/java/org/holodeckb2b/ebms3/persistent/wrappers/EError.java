@@ -37,9 +37,9 @@ public class EError implements Serializable {
     private long id;
 
     @Embedded
-    public org.holodeckb2b.ebms3.persistent.message.EbmsError  eError;    
+    public org.holodeckb2b.ebms3.persistency.entities.EbmsError  eError;    
     
     public EError() {
-        eError = new org.holodeckb2b.ebms3.persistent.message.EbmsError();
+        eError = new org.holodeckb2b.ebms3.persistency.entities.EbmsError();
     }
 }

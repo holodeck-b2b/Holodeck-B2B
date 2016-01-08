@@ -33,7 +33,7 @@ import org.holodeckb2b.ebms3.packaging.ErrorSignal;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
+import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 
 /**
@@ -84,7 +84,7 @@ public class ReadError extends BaseHandler {
                 
                 while (errorSigs.hasNext()) {
                     OMElement errElem = errorSigs.next();
-                    org.holodeckb2b.ebms3.persistent.message.ErrorMessage errorSignal = null;
+                    org.holodeckb2b.ebms3.persistency.entities.ErrorMessage errorSignal = null;
                     try {
                         // Read information into ErrorMessage object
                         errorSignal = ErrorSignal.readElement(errElem);    

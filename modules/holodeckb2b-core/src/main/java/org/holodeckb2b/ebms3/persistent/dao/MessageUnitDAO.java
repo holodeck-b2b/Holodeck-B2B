@@ -21,28 +21,28 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
+import javax.persistence.OptimisticLockException;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.exceptions.DuplicateMessageIdError;
 import org.holodeckb2b.common.util.MessageIdGenerator;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistent.general.Description;
-import org.holodeckb2b.ebms3.persistent.general.Property;
-import org.holodeckb2b.ebms3.persistent.general.SchemaReference;
-import org.holodeckb2b.ebms3.persistent.general.Service;
-import org.holodeckb2b.ebms3.persistent.message.AgreementReference;
-import org.holodeckb2b.ebms3.persistent.message.CollaborationInfo;
-import org.holodeckb2b.ebms3.persistent.message.EbmsError;
-import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
-import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.persistent.message.Payload;
-import org.holodeckb2b.ebms3.persistent.message.PullRequest;
-import org.holodeckb2b.ebms3.persistent.message.Receipt;
-import org.holodeckb2b.ebms3.persistent.message.SignalMessage;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.ebms3.persistent.processing.ProcessingState;
+import org.holodeckb2b.ebms3.persistency.entities.AgreementReference;
+import org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo;
+import org.holodeckb2b.ebms3.persistency.entities.Description;
+import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
+import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.ebms3.persistency.entities.Payload;
+import org.holodeckb2b.ebms3.persistency.entities.ProcessingState;
+import org.holodeckb2b.ebms3.persistency.entities.Property;
+import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
+import org.holodeckb2b.ebms3.persistency.entities.Receipt;
+import org.holodeckb2b.ebms3.persistency.entities.SchemaReference;
+import org.holodeckb2b.ebms3.persistency.entities.Service;
+import org.holodeckb2b.ebms3.persistency.entities.SignalMessage;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.general.IProperty;
@@ -64,23 +64,27 @@ public class MessageUnitDAO {
 
     /**
      * Creates and stores a new outgoing User Message message unit in the database. Because this is an outgoing message
-     * it should have a message id and creation timestamp. If not supplied in the meta-data both will be created now.
+     * it must have a message id and creation timestamp. If not supplied in the meta-data both will be created now. Also
+     * Holodeck B2B needs to know the P-Mode that defines how this message should be processed. 
      * <p>
      * The {@link ProcessingState} of the new message unit will be set to {@link ProcessingStates#SUBMITTED} to indicate
      * that is a new message.
      *
-     * @param um        The meta data on the User Message
+     * @param usrMsgMetadata        The meta data on the User Message
      * @param pmodeId   The id of the P-Mode that defines the processing of the message unit
-     * @return          The newly created user message
+     * @return          The newly created user message if it could be created and stored in the database
      * @throws DuplicateMessageIdError  If the message data includes a message id which already exists in the message 
      *                                  database for an outgoing message
      * @throws DatabaseException        If an error occurs when saving the new message unit to the database.
      */
-    public static UserMessage createOutgoingUserMessage(IUserMessage um, String pmodeId) throws DatabaseException {
+    public static UserMessage createOutgoingUserMessage(IUserMessage usrMsgMetadata, String pmodeId) 
+                                                        throws DatabaseException {
         // A submitted user message may already contain an message id, before going further, check that it is unique
-        String msgId = um.getMessageId();
-        if (msgId != null && !msgId.isEmpty()) {
-            // Ensure that message id are unique
+        String msgId = usrMsgMetadata.getMessageId();
+        if (!Utils.isNullOrEmpty(msgId)) {
+            // Ensure that message id are unique, we only check for messages sent by this MSH as these are the only
+            // message under control 
+            // @todo (L): This query could be optimized to check only for existence of the id and not load any MUs
             if (getSentMessageUnitWithId(msgId) != null)
                 // Message id already exists for an outgoing message, raise error
                 throw new DuplicateMessageIdError(msgId);
@@ -89,54 +93,61 @@ public class MessageUnitDAO {
             msgId = MessageIdGenerator.createMessageId();
         
         EntityManager em = JPAUtil.getEntityManager();
-
         try {
-            UserMessage newUserMU = new UserMessage();
-
             // Open transaction to ensure integrity
             em.getTransaction().begin();
+            UserMessage persistentMU = new UserMessage();
+            persistentMU.setDirection(MessageUnit.Direction.OUT);
 
-            copy(um, newUserMU, em); // copy data
+            // copyFromMetadata data and create related entity objects 
+            copyFromMetadata(usrMsgMetadata, persistentMU, em); 
 
             // Set the message id and timestamp when not already done so
-            newUserMU.setMessageId(msgId);
-            Date timeStamp = newUserMU.getTimestamp();
-            newUserMU.setTimestamp((timeStamp == null) ? new Date() : timeStamp);
-            newUserMU.setDirection(MessageUnit.Direction.OUT);
+            persistentMU.setMessageId(msgId);
+            Date timeStamp = persistentMU.getTimestamp();
+            persistentMU.setTimestamp((timeStamp == null) ? new Date() : timeStamp);
 
             // Set P-Mode id
-            newUserMU.setPMode(pmodeId);
+            persistentMU.setPMode(pmodeId);
 
             // Set state to SUBMITTED
             ProcessingState procstate = new ProcessingState(ProcessingStates.SUBMITTED);
-            newUserMU.setProcessingState(procstate);
-            em.persist(newUserMU);
+            persistentMU.setProcessingState(procstate);
 
+            // Persist the new User Message MessageUnit
+            em.persist(persistentMU);
             // Commit changes to DB
             em.getTransaction().commit();
 
-            return newUserMU;
+            return persistentMU;
+        } catch (Exception e) {
+            // Rollback the transaction and rethrow the exception packaged in a DatabaseException
+            em.getTransaction().rollback();
+            throw new DatabaseException("The User Message could not be saved in the database!", e);
         } finally {
             em.close();
         }
     }
 
     /**
-     * Creates and stores a new error signal message unit for the given set of errors.
+     * Creates and stores a new Error Signal message unit for the given set of errors that where generated for a 
+     * received message unit. 
      * <p>
      * The {@link ProcessingState} of the new error message unit will be set to {@link ProcessingStates#CREATED} or
      * {@link ProcessingStates#PROCESSING} to indicate an error that has to be processed later or an error that is
      * directly processed as a response to the message in error. This is indicated by the <code>asResponse</code>
      * parameter.
      *
-     * @param errors The {@link EbmsError}s to include in the new Error signal message unit
-     * @param refToMsgId The message id of the message unit in error. May be <code>null</code> if there is no related
-     * message.
-     * @param pmodeId The id of the PMode that defines the processing of the new Error signal. May be <code>null</code>
-     * if the P-Mode is not known.
-     * @param addSOAPFault boolean indicating whether the Error signal should be combined with a SOAP Fault
-     * @param asResponse The error will be reported as a response
-     * @return The new Error signal message unit
+     * @param errors        The <code>Collection</code> of {@link EbmsError}s to include in the new Error Signal 
+     *                      message unit
+     *                      @todo (L): Should be collection of IEbmsError objects not the entity objects
+     * @param refToMsgId    The message id of the message unit in error. May be <code>null</code> if there is no related
+     *                      message unit.
+     * @param pmodeId       The id of the PMode that defines the processing of the new Error Signal. May be 
+     *                      <code>null</code> if the P-Mode is not known.
+     * @param addSOAPFault  boolean indicating whether the Error signal should be combined with a SOAP Fault
+     * @param asResponse    boolean indicating whether the error should be reported directly as a response
+     * @return              The new Error signal message unit if it could be created and stored in the database
      * @throws DatabaseException If an error occurs when saving the new message unit to the database
      */
     public static ErrorMessage createOutgoingErrorMessageUnit(Collection<EbmsError> errors, 
@@ -144,113 +155,119 @@ public class MessageUnitDAO {
                                                               String pmodeId,
                                                               boolean addSOAPFault,
                                                               boolean asResponse) throws DatabaseException {
+        // An Error Signal MUST contain at least one error
+        if (Utils.isNullOrEmpty(errors))
+            throw new DatabaseException("Error Signal must contain at least one error!");            
+        
         EntityManager em = JPAUtil.getEntityManager();
-
         try {
-            ErrorMessage newErrorMU = new ErrorMessage();
-
             // Open transaction to ensure integrity
             em.getTransaction().begin();
+            ErrorMessage persistentErrorMU = new ErrorMessage();
 
             // Generate a message id and timestamp for the new error message unit
-            newErrorMU.setMessageId(MessageIdGenerator.createMessageId());
-            newErrorMU.setTimestamp(new Date());
-            newErrorMU.setDirection(MessageUnit.Direction.OUT);
+            persistentErrorMU.setMessageId(MessageIdGenerator.createMessageId());
+            persistentErrorMU.setTimestamp(new Date());
+            persistentErrorMU.setDirection(MessageUnit.Direction.OUT);
             
             // Set reference to message in error if available
             if (refToMsgId != null && !refToMsgId.isEmpty()) {
-                newErrorMU.setRefToMessageId(refToMsgId);
+                persistentErrorMU.setRefToMessageId(refToMsgId);
             }
 
             // Set P-Mode id
-            if (pmodeId != null && !pmodeId.isEmpty()) {
-                newErrorMU.setPMode(pmodeId);
+            if (!Utils.isNullOrEmpty(pmodeId)) {
+                persistentErrorMU.setPMode(pmodeId);
             }
 
             // Add the errors to it
             for (EbmsError e : errors) {
-                newErrorMU.addError(e);
+                persistentErrorMU.addError(e);
             }
             
             // Set indicator if SOAP Fault should be added
-            newErrorMU.setAddSOAPFault(addSOAPFault);
+            persistentErrorMU.setAddSOAPFault(addSOAPFault);
             
             // Set state to CREATED
             ProcessingState procstate = new ProcessingState(ProcessingStates.CREATED);
-            newErrorMU.setProcessingState(procstate);
+            persistentErrorMU.setProcessingState(procstate);
 
             if (asResponse) {
                 // If error is reported as response, directly set state to processing
                 procstate = new ProcessingState(ProcessingStates.PROCESSING);
-                newErrorMU.setProcessingState(procstate);
             } else {
                 // Otherwise it is ready to push
                 procstate = new ProcessingState(ProcessingStates.READY_TO_PUSH);
-                newErrorMU.setProcessingState(procstate);
             }
+            persistentErrorMU.setProcessingState(procstate);
 
             // Persist the new message unit
-            em.persist(newErrorMU);
-
+            em.persist(persistentErrorMU);
             // Commit changes to DB
             em.getTransaction().commit();
 
-            return newErrorMU;
+            return persistentErrorMU;
+        } catch (Exception e) {
+            // Rollback the transaction and rethrow the exception packaged in a DatabaseException
+            em.getTransaction().rollback();
+            throw new DatabaseException("The Error Signal could not be saved in the database!", e);
         } finally {
             em.close();
         }
     }
 
     /**
-     * Creates and stores a new pull request signal message unit.
+     * Creates and stores a new Pull Request Signal message unit.
      * <p>
-     * The {@link ProcessingState} of the new pull request message unit will be set to
-     * {@link ProcessingStates#PROCESSING} to indicate that it is processed directly.
+     * Because Pull Request messages are only created when they are sent, the {@link ProcessingState} of the new pull 
+     * request message unit is set to {@link ProcessingStates#PROCESSING} to indicate that it is processed directly.
      *
-     * @param pmodeId The id of the PMode that defines the processing of the new Pull Request signal.
-     * @param mpc The MPC that the pull operation will apply to
-     * @return The new Pull Request signal message unit
+     * @param pmodeId   The id of the PMode that defines the processing of the new Pull Request signal.
+     * @param mpc       The MPC that the pull operation will apply to. If not specified the <i>default MPC</i> will be
+     *                  used for the new Pull Request
+     * @return          The new Pull Request signal message unit if it could be created and stored in the database
      * @throws DatabaseException If an error occurs when saving the new message unit to the database
      */
     public static PullRequest createOutgoingPullRequest(String pmodeId, String mpc) throws DatabaseException {
         EntityManager em = JPAUtil.getEntityManager();
-
         try {
-            PullRequest newPullReqMU = new PullRequest();
-
             // Open transaction to ensure integrity
             em.getTransaction().begin();
+            PullRequest persistentPullReqMU = new PullRequest();
 
             // Generate a message id and timestamp for the new error message unit
-            newPullReqMU.setMessageId(MessageIdGenerator.createMessageId());
-            newPullReqMU.setTimestamp(new Date());
-            newPullReqMU.setDirection(MessageUnit.Direction.OUT);
+            persistentPullReqMU.setMessageId(MessageIdGenerator.createMessageId());
+            persistentPullReqMU.setTimestamp(new Date());
+            persistentPullReqMU.setDirection(MessageUnit.Direction.OUT);
             
             // Set P-Mode id
-            if (pmodeId != null || !pmodeId.isEmpty()) {
-                newPullReqMU.setPMode(pmodeId);
-            }
+            persistentPullReqMU.setPMode(pmodeId);
+            
             // Set MPC
-            if (mpc != null || !mpc.isEmpty()) {
-                newPullReqMU.setMPC(mpc);
+            if (!Utils.isNullOrEmpty(mpc)) {
+                persistentPullReqMU.setMPC(mpc);
             } else {
-                newPullReqMU.setMPC(EbMSConstants.DEFAULT_MPC);
+                persistentPullReqMU.setMPC(EbMSConstants.DEFAULT_MPC);
             }
 
             // Add CREATED to signal PullRequest was made
             ProcessingState procstate = new ProcessingState(ProcessingStates.CREATED);
-            newPullReqMU.setProcessingState(procstate);
+            persistentPullReqMU.setProcessingState(procstate);
             // and immediately change state to PROCESSING to indicate it is being send
             procstate = new ProcessingState(ProcessingStates.PROCESSING);
-            newPullReqMU.setProcessingState(procstate);
+            persistentPullReqMU.setProcessingState(procstate);
 
             // Persist the new message unit
-            em.persist(newPullReqMU);
+            em.persist(persistentPullReqMU);
 
             // Commit changes to DB
             em.getTransaction().commit();
 
-            return newPullReqMU;
+            return persistentPullReqMU;
+        } catch (Exception e) {
+            // Rollback the transaction and rethrow the exception packaged in a DatabaseException
+            em.getTransaction().rollback();
+            throw new DatabaseException("The Pull Request Signal could not be saved in the database!", e);
         } finally {
             em.close();
         }
@@ -268,16 +285,16 @@ public class MessageUnitDAO {
      * @return The stored entity object
      * @throws DatabaseException If an error occurs when saving the new message unit to the database
      */
-    @Deprecated //@todo: Creating a Receipt should use same pattern as other message units!
+    @Deprecated //@todo (H): Creating a Receipt should use same pattern as other message units!
     public static Receipt storeOutgoingReceiptMessageUnit(Receipt receipt, boolean asResponse) throws DatabaseException {
+        
         EntityManager em = JPAUtil.getEntityManager();
-
         try {
             // Open transaction to ensure integrity
             em.getTransaction().begin();
 
             // Generate a message id and timestamp for the new error message unit if not already done
-            if (receipt.getMessageId() == null || receipt.getMessageId().isEmpty()) {
+            if (Utils.isNullOrEmpty(receipt.getMessageId())) {
                 receipt.setMessageId(MessageIdGenerator.createMessageId());
             }
             if (receipt.getTimestamp() == null) {
@@ -297,11 +314,14 @@ public class MessageUnitDAO {
 
             // Persist the new message unit
             em.persist(receipt);
-
             // Commit changes to DB
             em.getTransaction().commit();
 
             return receipt;
+        } catch (Exception e) {
+            // Rollback the transaction and rethrow the exception packaged in a DatabaseException
+            em.getTransaction().rollback();
+            throw new DatabaseException("The Receipt Signal could not be saved in the database!", e);
         } finally {
             em.close();
         }
@@ -309,37 +329,43 @@ public class MessageUnitDAO {
 
     /**
      * Stores information of a received message unit in the database so it can be processed. The information is stored
-     * as-is to correctly reflect the received info.
-     * <p>
+     * as-is to correctly reflect the received info.<br>
      * The processing state of the stored message unit will first be set to {@link ProcessingStates#RECEIVED}.
      *
-     * @param mu The information on the received message unit as a {@link MessageUnit} entity object.
+     * @param mu    The information on the received message unit as a {@link MessageUnit} entity object.
+     * @return      The {@link MessageUnit} as it is stored in the database
      * @throws DatabaseException If an error occurs when saving the object to the database
      */
-    public static void storeReceivedMessageUnit(MessageUnit mu) throws DatabaseException {
+    public static <T extends MessageUnit> T storeReceivedMessageUnit(final T mu) throws DatabaseException {
         EntityManager em = JPAUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
 
-        em.getTransaction().begin();
+            mu.setDirection(MessageUnit.Direction.IN);
+            mu.setProcessingState(new ProcessingState(ProcessingStates.RECEIVED));
 
-        mu.setDirection(MessageUnit.Direction.IN);
-        mu.setProcessingState(new ProcessingState(ProcessingStates.RECEIVED));
-
-        // If the message unit is a UserMessage object, the related entity objects must be persisted first
-        if (mu instanceof UserMessage) {
-            persistRelatedObjects((UserMessage) mu, em);
+            // If the message unit is a UserMessage object, the related TradingPartner entity objects for the Sender
+            // and Receiver must be persisted first
+            if (mu instanceof UserMessage) {
+                em.persist(((UserMessage) mu).getSender());
+                em.persist(((UserMessage) mu).getReceiver());
+            }
+            em.persist(mu);
+            // Commit changes to DB
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            em.getTransaction().rollback();
+            throw new DatabaseException("The received message unit could not be stored in the database!", e);
+        } finally {
+            em.close();
         }
-
-        em.persist(mu);
-
-        // Commit changes to DB
-        em.getTransaction().commit();
-        em.close();
+        return mu;
     }
 
     /**
-     * Updates the stored meta-data of a <i>user message message unit</i> with the information about the payloads.
+     * Updates the information about the payloads for an already stored User Message message unit. 
      *
-     * @param um The {@link UserMessage} entity object that needs to be updated
+     * @param um    The {@link UserMessage} entity object that needs to be updated
      * @throws DatabaseException If an error occurs when saving the object to the database
      */
     public static void updatePayloadMetaData(UserMessage um) throws DatabaseException {
@@ -348,19 +374,27 @@ public class MessageUnitDAO {
             return;
         
         EntityManager em = JPAUtil.getEntityManager();
-        em.getTransaction().begin();
-        // Ensure that the Payload entity objects are persisted
-        for (IPayload ip : um.getPayloads()) {
-            em.merge((Payload) ip);
+        try {
+            em.getTransaction().begin();
+            // Ensure that the Payload entity objects are persisted
+            for (IPayload ip : um.getPayloads()) {
+                em.merge((Payload) ip);
+            }
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            // Updating the payload info failed, rollback and rethrow exception (packaged as DatabaseException)
+            em.getTransaction().rollback();
+            throw new DatabaseException("Update the payload information failed!", e);
+        } finally {
+            em.close();
         }
-        em.getTransaction().commit();
-        em.close();
     }
 
     /**
-     * Sets the P-Mode that defines how this message unit should be processed.
+     * Sets the P-Mode that defines how this message unit should be processed. The MessageUnit entity obect only uses 
+     * the P-Mode Id, so only this is saved to the database.
      *
-     * @param mu The {@link MessageUnit}
+     * @param mu    The {@link MessageUnit} to set the P-Mode for
      * @param pmode The {@link IPMode} that defines how the message unit must be processed
      * @throws DatabaseException If an error occurs when saving the object to the database
      */
@@ -371,43 +405,52 @@ public class MessageUnitDAO {
     /**
      * Sets the P-Mode Id that defines how this message unit should be processed.
      *
-     * @param mu The {@link MessageUnit}
-     * @param pmodeId The P-Mode id of the P-Mode that defines how the message unit must be processed
+     * @param mu        The {@link MessageUnit} to set the P-Mode Id for
+     * @param pmodeId   The P-Mode id of the P-Mode that defines how the message unit must be processed
      * @throws DatabaseException If an error occurs when saving the object to the database
      */
     public static void setPModeId(MessageUnit mu, String pmodeId) throws DatabaseException {
         EntityManager em = JPAUtil.getEntityManager();
-
-        em.getTransaction().begin();
-        mu.setPMode(pmodeId);
-        em.merge(mu);
-        em.getTransaction().commit();
-        em.close();
+        try {
+            em.getTransaction().begin();
+            mu.setPMode(pmodeId);
+            em.merge(mu);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            // The update somehow failed: rollback and rethrow
+            em.getTransaction().rollback();
+            throw new DatabaseException("Setting P-Mode.Id for MessageUnit failed!", e);
+        } finally {
+            em.close();
+        }
     }
 
     /**
      * Checks whether a {@link UserMessage} with the given <code>MessageId</code> has already been delivered, i.e. the
      * <i>current</i> processing state is {@link ProcessingStates#DELIVERED}.
      *
-     * @param messageId The <code>MessageId</code> to check delivery for
-     * @return                      <code>true</code> if a {@link UserMessage} with <code>messageId</code> and
-     * {@link UserMessage#getCurrentProcessingState()} == {@link ProcessingStates#DELIVERED} exists, <code>false</code>
-     * otherwise.
-     * @throws DatabaseException If an error occurs when saving the object to the database
+     * @param messageId   The <code>MessageId</code> to check delivery for
+     * @return            <code>true</code> if a {@link UserMessage} with <code>messageId</code> and
+     *                    {@link UserMessage#getCurrentProcessingState()} == {@link ProcessingStates#DELIVERED} exists, 
+     *                    <br><code>false</code> otherwise.
+     * @throws DatabaseException If an error occurs when executing this query
      */
     public static boolean isUserMsgDelivered(String messageId) throws DatabaseException {
         boolean result = false;
         EntityManager em = JPAUtil.getEntityManager();
-
         try {
             result = "true".equals(em.createNamedQuery("UserMessage.isDelivered",
                     String.class).setParameter("msgId", messageId)
                     .getSingleResult()
             );
-        } catch (NoResultException notDelivered) {
+        } catch (NoResultException nothingFound) {
             result = false;
+        } catch (Exception e) {
+            // Something went wrong during query execution
+            throw new DatabaseException("Could not execute query", e);
+        } finally {
+            em.close();
         }
-
         return result;
     }
 
@@ -420,190 +463,202 @@ public class MessageUnitDAO {
      * @param type      The type of message units to retrieve specified by their Class
      * @param states    Array of processing state [names] that the message units to retrieve should be in
      * @return          A list of objects of class <code>type</code> representing the message units that are in one 
-     *                  of the given states
+     *                  of the given states,<br>or <code>null</code> when no such message units are found.
      * @throws DatabaseException When a problem occurs during the retrieval of the message units
      */
-    public static <T extends MessageUnit> List<T> getMessageUnitsInState(Class<T> type, String[] states) throws DatabaseException {
+    public static <T extends MessageUnit> List<T> getMessageUnitsInState(Class<T> type, String[] states) 
+                                                                            throws DatabaseException {
         List<T> result = null;
         EntityManager em = JPAUtil.getEntityManager();
 
         ArrayList<String> pStates = new ArrayList<>(states.length);
         for(String s : states)
-                pStates.add(s);
+            pStates.add(s);
         
         String queryString = "SELECT mu " +
                              "FROM " + type.getSimpleName() + " mu JOIN mu.states s1 " +
                              "WHERE s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) " +
                              "AND s1.NAME IN :states";
-                
-        result = em.createQuery(queryString, type)
-                                .setParameter("states", pStates)
-                                .getResultList();
-        em.close();
-
+        try {        
+            result = em.createQuery(queryString, type)
+                                    .setParameter("states", pStates)
+                                    .getResultList();
+        } catch (NoResultException nothingFound) {
+            result = null;
+        } catch (Exception e) {
+            // Something went wrong during query execution
+            throw new DatabaseException("Could not execute query", e);
+        } finally {
+            em.close();
+        }        
         return result;
     }
 
     /**
-     * Gets the number of times the <i>User message</i> has already been sent to the receiver without getting a receipt.
+     * Gets the number of times the <i>User Message</i> message unit has already been sent to the receiver without 
+     * getting a receipt.<br>
+     * This method counts the number of times the message was in the {@link ProcessingStates#SENDING} state. This means
+     * that also failed sent attempts, i.e. where a transfort failure occurred, count for the result.
      *
-     * @param um The {@link UserMessage} to get the number for
-     * @return The number of times the {@link UserMessage} was already sent out.
-     * @throws DatabaseException If an error occurs when saving the object to the database
+     * @param um    The {@link UserMessage} to get the number of transmission for
+     * @return      The number of times the {@link UserMessage} was already sent out.
+     * @throws DatabaseException If an error occurs when retrieving the number of transmissions
      */
     public static int getNumberOfTransmissions(UserMessage um) throws DatabaseException {
+        Long result = null;        
         EntityManager em = JPAUtil.getEntityManager();
-
-        Long result = em.createNamedQuery("UserMessage.numOfTransmits", Long.class)
-                .setParameter("msgId", um.getMessageId()).getSingleResult();
-
-        em.close();
-
+        try {
+            result = em.createNamedQuery("UserMessage.numOfTransmits", Long.class)
+                       .setParameter("msgId", um.getMessageId()).getSingleResult();
+        } catch (Exception e) {
+            // Something went wrong during query execution
+            throw new DatabaseException("Could not execute query", e);
+        } finally {
+            em.close();
+        }
         return result.intValue();
     }
 
     /**
-     * Retrieves all received {@link MessageUnit}s with the given <code>MessageId</code>. Although messageIds should be 
-     * unique there can exist multiple <code>MessageUnits</code> with the same messageId due to resending.
+     * Retrieves all received Message Units with the given <code>MessageId</code>. Although messageIds should be 
+     * unique there can exist multiple <code>MessageUnits</code> with the same messageId due to resending (and because
+     * other MSH or business applications may not conform to this constraint).
      * <p><b>NOTE:</b> The entity objects in the resulting list are not completely loaded! Before a message unit is 
      * going to be processed it must be loaded completely.
      *
-     * @param messageId The messageId of the message units to retrieve
-     * @return A list of received {@link MessageUnit}s with the given message id
+     * @param messageId     The messageId of the message units to retrieve
+     * @return              The list of received {@link MessageUnit}s with the given message id or,<br>
+     *                      <code>null</code> if no received message units with this message if where found
      * @throws DatabaseException If an error occurs when saving the object to the database
      */
     public static List<MessageUnit> getReceivedMessageUnitsWithId(String messageId) throws DatabaseException {
         return getMessageUnitsWithIdInDirection(messageId, MessageUnit.Direction.IN);
-    }
-    
-    /**
-     * Retrieves all sent {@link MessageUnit}s with the given <code>MessageId</code>. Although messageIds should be 
-     * unique there can exist multiple <code>MessageUnits</code> with the same messageId due to business applications
-     * submitting messages with the same id.
-     * <p><b>NOTE:</b> The entity objects in the resulting list are not completely loaded! Before a message unit is 
-     * going to be processed it must be loaded completely.
-     *
-     * @param messageId The messageId of the message units to retrieve
-     * @return A list of sent {@link MessageUnit}s with the given message id
-     * @throws DatabaseException If an error occurs when saving the object to the database
-     */
-    @Deprecated
-    public static List<MessageUnit> getSentMessageUnitsWithId(String messageId) throws DatabaseException {
-        return getMessageUnitsWithIdInDirection(messageId, MessageUnit.Direction.OUT);
-    }
+    }    
 
     /**
-     * Retrieves the sent {@link MessageUnit} with the given <code>MessageId</code>. 
+     * Retrieves the sent Message Unit with the given <code>MessageId</code>. 
      * <p><b>NOTE:</b> The returned entity object is not completely loaded! Before processing it, it must be loaded 
      * completely.
      *
      * @param messageId The messageId of the message units to retrieve
-     * @return          A {@link MessageUnit} with the given message id, or<br>
+     * @return          The {@link MessageUnit} with the given message id, or<br>
      *                  <code>null</code> when no sent message unit exists with the given id
      * @throws DatabaseException If an error occurs when saving the object to the database
      */
     public static MessageUnit getSentMessageUnitWithId(String messageId) throws DatabaseException {
-        List<MessageUnit> msgsWithId = getMessageUnitsWithIdInDirection(messageId, MessageUnit.Direction.OUT);
-        
+        List<MessageUnit> msgsWithId = getMessageUnitsWithIdInDirection(messageId, MessageUnit.Direction.OUT);   
         if (msgsWithId.size() > 0) 
             return msgsWithId.get(0);
         else
             return null;
     }
-
     
     /**
-     * Retrieves all {@link MessageUnit}s with the given <code>MessageId</code> that flow in the given direction. 
-     * Although messageIds should be unique there can exist multiple <code>MessageUnits</code> with the same messageId 
-     * due to resending.
+     * Retrieves all Message Units with the given <code>MessageId</code> that flow in the given direction. Although 
+     * messageIds should be unique there can exist multiple <code>MessageUnits</code> with the same messageId 
+     * due to resending (and because other MSH or business applications may not conform to this constraint).
      * <p><b>NOTE:</b> The entity objects in the resulting list are not completely loaded! Before a message unit is 
      * going to be processed it must be loaded completely.
      *
      * @param messageId The messageId of the message units to retrieve
      * @param direction The direction the message units should be in (IN = receiving, OUT=sending)
-     * @return A list of {@link MessageUnit} objects with the given message id and flowing in the given direction
-     * @throws DatabaseException If an error occurs when saving the object to the database
+     * @return          The list of {@link MessageUnit} objects with the given message id and flowing in the given 
+     *                  direction, or<br><code>null</code> when no such message units are found
+     * @throws DatabaseException If an error occurs while executing the query
      */
-    protected static List<MessageUnit> getMessageUnitsWithIdInDirection(String messageId, MessageUnit.Direction direction)
-                    throws DatabaseException {
+    protected static List<MessageUnit> getMessageUnitsWithIdInDirection(String messageId, 
+                                                                        MessageUnit.Direction direction)
+                                                                            throws DatabaseException {
         List<MessageUnit> result = null;
         EntityManager em = JPAUtil.getEntityManager();
-
-        result = em.createNamedQuery("MessageUnit.findWithMessageIdInDirection", MessageUnit.class)
-                .setParameter("msgId", messageId)
-                .setParameter("direction", direction)
-                .getResultList();
-        em.close();
-
+        try {
+            result = em.createNamedQuery("MessageUnit.findWithMessageIdInDirection", MessageUnit.class)
+                    .setParameter("msgId", messageId)
+                    .setParameter("direction", direction)
+                    .getResultList();
+        } catch (NoResultException nothingFound) {
+            result = null;
+        } catch (Exception e) {
+            // Something went wrong during query execution
+            throw new DatabaseException("Could not execute query", e);
+        } finally {
+            em.close();
+        }
         return result;
     }
 
     /**
-     * Retrieves all {@link MessageUnit}s of the specified type and that are in the given state and which processing is
-     * defined by one of the given P-Modes. The result is ordered on the latest processing state change with the oldest
-     * changes first.
-     * <p>
-     * <b>NOTE:</b> The entity objects in the resulting list are not completely loaded! Before a message unit is going
-     * to be processed it must be loaded completely.
+     * Retrieves all MessageUnits of the specified type and that are in the given state and which processing is defined 
+     * by one of the given P-Modes. The message units are ordered ascending on the timestamp of the current processing 
+     * state, i.e. the messages that are the longest in the current state are at the front of the list.
+     * <p><b>NOTE:</b> The entity objects in the resulting list are not completely loaded! Before a message unit is 
+     * going to be processed it must be loaded completely.
      *
-     * @param type The type of message units to retrieve specified by their Class
-     * @param pmodes List of P-Modes.
-     * @param state The name of the state the message units to retrieve should be in
-     * @return A list of {@link MessageUnit} objects representing the message units that are in the given state
-     * @throws DatabaseException
+     * @param type      The type of message units to retrieve specified by their Class
+     * @param pmodes    List of P-Modes.
+     * @param state     The name of the processing state the message units to retrieve should be in
+     * @return          The ordered list of message unit objects of the specified type and which are in the specified 
+     *                  processing state and have their processing defined by one of the specified P-Modes, or<br>
+     *                  <code>null</code> if no such message units where found
+     * @throws DatabaseException When an error occurs while executing the query
      */
-    public static <T extends MessageUnit> List<T> getMessageUnitsForPModesInState(Class<T> type, Collection<IPMode> pmodes, String state) throws DatabaseException {
-        // The query parameter for the PModes is a list op P-Mode Ids. 
-        // So convert list of PModes to list of strings
+    public static <T extends MessageUnit> List<T> getMessageUnitsForPModesInState(Class<T> type, 
+                                                                                  Collection<IPMode> pmodes, 
+                                                                                  String state) 
+                                                                            throws DatabaseException {
+        // The query parameter for the PModes is a list op P-Mode Ids, so convert list of PModes to list of strings
         Collection<String> pmodeIds = new ArrayList<String>();
         for (IPMode pmode : pmodes) {
             pmodeIds.add(pmode.getId());
         }
-
         return getMessageUnitsForPModeIdsInState(type, pmodeIds, state);
     }
 
     /**
-     * Retrieves all {@link MessageUnit}s of the specified type and that are in the given state and which processing is
-     * defined by one of the given P-Modes. The result is ordered on the latest processing state change with the oldest
-     * changes first.
-     * <p>
-     * <b>NOTE:</b> The entity objects in the resulting list are not completely loaded! Before a message unit is going
-     * to be processed it must be loaded completely.
+     * Retrieves all MessageUnits of the specified type and that are in the given state and which processing is defined 
+     * by a P-Mode with one of the given P-Mode ids. The message units are ordered ascending on the timestamp of the 
+     * current processing state, i.e. the messages that are the longest in the current state are at the front of the 
+     * list.
+     * <p><b>NOTE:</b> The entity objects in the resulting list are not completely loaded! Before a message unit is 
+     * going to be processed it must be loaded completely.
      *
-     * @param type The type of message units to retrieve specified by their Class
-     * @param pmodeIds List of P-Mode id's.
-     * @param state The name of the state the message units to retrieve should be in
-     * @return A list of {@link MessageUnit} objects representing the message units that are in the given state
-     * @throws DatabaseException
+     * @param type      The type of message units to retrieve specified by their Class
+     * @param pmodeIds  List of P-Mode ids
+     * @param state     The name of the processing state the message units to retrieve should be in
+     * @return          The ordered list of message unit objects of the specified type and which are in the specified 
+     *                  processing state and have their processing defined by a P-Mode with one of the specified ids,
+     *                  or<br> <code>null</code> if no such message units where found
+     * @throws DatabaseException When an error occurs while executing the query
+
      */
-    public static <T extends MessageUnit> List<T> getMessageUnitsForPModeIdsInState(Class<T> type, Collection<String> pmodeIds, String state) throws DatabaseException {
+    public static <T extends MessageUnit> List<T> getMessageUnitsForPModeIdsInState(Class<T> type, 
+                                                                                    Collection<String> pmodeIds, 
+                                                                                    String state) 
+                                                                                throws DatabaseException {
         List<T> result = null;
-
         EntityManager em = JPAUtil.getEntityManager();
-
         try {
             String queryName = type.getSimpleName() + ".findForPModesInState";
             result = em.createNamedQuery(queryName, type)
                     .setParameter("state", state)
                     .setParameter("pmodes", pmodeIds)
                     .getResultList();
+        } catch (NoResultException nothingFound)  {
+            result = null;
         } catch (Exception e) {
             // Something went wrong executing the query. Probably because wrong class was specified
             throw new DatabaseException("An error occurred while executing query to retreive message units!", e);
         } finally {
             em.close();
         }
-
         return result;
     }
 
     /**
-     * Retrieves all {@link MessageUnit}s of the specified type and that are responses to the given message id, i.e.
-     * which <i>refToMessageId</i> equals the given message id.
-     * <p>
-     * <b>NOTE:</b> The entity objects in the resulting list are not completely loaded! Before a message unit is going
-     * to be processed it must be loaded completely.
+     * Retrieves all Message Units of the specified type that are responses to the given message id, i.e. which 
+     * <i>refToMessageId</i> equals the given message id.
+     * <p><b>NOTE:</b> The entity objects in the resulting list are not completely loaded! Before a message unit is 
+     * going to be processed it must be loaded completely.
      *
      * @param type          The type of message units to retrieve specified by their Class
      * @param refToMsgId    The message Id of the message the requested message units should be a response to.
@@ -613,21 +668,20 @@ public class MessageUnitDAO {
     public static <T extends MessageUnit> List<T> getResponsesTo(Class<T> type, String refToMessageId) 
                                                                                         throws DatabaseException {
         List<T> result = null;
-
         EntityManager em = JPAUtil.getEntityManager();
-
         try {
             String queryName = type.getSimpleName() + ".findResponsesTo";
             result = em.createNamedQuery(queryName, type)
                     .setParameter("refToMsgId", refToMessageId)
                     .getResultList();
+        } catch (NoResultException nothingFound)  {
+            result = null;
         } catch (Exception e) {
             // Something went wrong executing the query. Probably because wrong class was specified
             throw new DatabaseException("An error occurred while executing query to retreive message units!", e);
         } finally {
             em.close();
         }
-
         return result;
     }    
     
@@ -643,37 +697,8 @@ public class MessageUnitDAO {
      *
      * @throws DatabaseException When
      */
-    public static <T extends MessageUnit> T startProcessingMessageUnit(T mu) throws DatabaseException {
-        EntityManager em = JPAUtil.getEntityManager();
-
-        em.getTransaction().begin();
-
-        // First get a new managed entity object for this message unit. 
-        // Also get a lock on the object because we want to prevent simultaneous changes
-        // in processing state
-        T amu = null;
-        try {
-            amu = (T) em.find(MessageUnit.class, mu.getOID(), LockModeType.PESSIMISTIC_WRITE);
-        } catch (Exception e) {
-            // Getting new access to or a lock on the enity failed, so processing state can not be changed
-            return null;
-        }
-
-        ProcessingState curState = amu.getCurrentProcessingState();
-        if (curState != null && !curState.getName().equals(ProcessingStates.PROCESSING)) {
-            ProcessingState newState = new ProcessingState(ProcessingStates.PROCESSING);
-            amu.setProcessingState(newState);
-            // As the message unit can now be processed, secure that all information is
-            // loaded into the entity object before it gets detached from the EM
-            refreshMU(amu, em);
-        } else {
-            amu = null;
-        }
-
-        em.getTransaction().commit();
-        em.close();
-
-        return amu;
+    public static <T extends MessageUnit> T startProcessingMessageUnit(final T mu) throws DatabaseException {
+        return setProcessingState(mu, ProcessingStates.PROCESSING);        
     }
 
     /**
@@ -695,7 +720,7 @@ public class MessageUnitDAO {
         try {
             // Get a lock on the object because we want to prevent simultaneous changes
             // in processing state
-            mu = em.find(MessageUnit.class, mu.getOID(), LockModeType.PESSIMISTIC_WRITE);
+            mu = em.find(MessageUnit.class, mu.getOID());
 
             ProcessingState curState = mu.getCurrentProcessingState();
             if (curState != null && curState.getName().equals(ProcessingStates.READY_FOR_DELIVERY)) {
@@ -704,7 +729,7 @@ public class MessageUnitDAO {
                 em.persist(mu);
                 return true;
             } else {
-                return false;
+                return false;    
             }
         } catch (Exception e) {
             // Getting new access to or a lock on the enity failed, so processing state can not be changed
@@ -858,28 +883,37 @@ public class MessageUnitDAO {
     public static <T extends MessageUnit> T setSending(T mu) throws DatabaseException {
         return setProcessingState(mu, ProcessingStates.SENDING);
     }
+    
     /*
      * Helper method to change the current processing state of a MessageUnit object.
      */
     private static <T extends MessageUnit> T setProcessingState(final T mu, String state) throws DatabaseException {
         EntityManager em = JPAUtil.getEntityManager();
-        em.getTransaction().begin();
-        T lockedMU = (T) em.find(MessageUnit.class, mu.getOID(), LockModeType.PESSIMISTIC_WRITE);
-        
-        ProcessingState newState = new ProcessingState(state);
-        mu.setProcessingState(newState);
-        em.merge(mu);
-        em.getTransaction().commit();
-        em.close();
-        
-        return lockedMU;
+        try {
+            em.getTransaction().begin();            
+            T actualMU = (T) refreshMessageUnit(mu, em);
+            
+            ProcessingState newState = new ProcessingState(state);
+            actualMU.setProcessingState(newState);
+            em.getTransaction().commit();
+            return actualMU;
+        } catch (OptimisticLockException alreadyChanged) {
+            em.getTransaction().rollback();
+            return null;
+        } catch (Exception e) {
+            // Something went wrong while performing the processing state update, rollback transaction and rethrow
+            em.getTransaction().rollback();
+            throw new DatabaseException("Error while updating the processing state!", e);
+        } finally {
+            em.close();
+        }        
     }
 
     /*
-     * Helper method to copy information from an {@link IUserMessage} object to a 
+     * Helper method to copyFromMetadata information from an {@link IUserMessage} object to a 
      * {@link UserMessage} entity object 
      */
-    private static void copy(IUserMessage src, UserMessage dest, EntityManager em) {
+    private static void copyFromMetadata(IUserMessage src, UserMessage dest, EntityManager em) {
         // Copy MessageUnit attributes
         //
         dest.setMessageId(src.getMessageId());
@@ -985,29 +1019,26 @@ public class MessageUnitDAO {
         return npl;
     }
 
-    /*
-     * Helper method to save all the entity objects related to the {@link UserMessage} entity object.
-     * Currently this are only the TradingPartners objects for sender and receiver.
+    /**
+     * Helper method to reload all information for a given {@link MessageUnit} from the database. Besides reloading the
+     * entity object itself it will also trigger all <i>lazily</i> loaded relations.
+     * 
+     * @param mu    The message unit to reload from the database
+     * @param em    The entity manager to use for accessing the database
+     * @return      The completely reloaded message unit
      */
-    private static void persistRelatedObjects(UserMessage um, EntityManager em) {
-        em.persist(um.getSender());
-        em.persist(um.getReceiver());
-    }
-
-    /*
-     * Helper method to load all information from database for a given <code>MessageUnit</code>
-     * entity.
-     * This is needed because the entity object are only managed for a short period and information
-     * from related entity objects must be loaded before the managed state ends.
-     */
-    private static void refreshMU(MessageUnit mu, EntityManager em) {
-
-        // Determine type of message unit
+    private static MessageUnit refreshMessageUnit(final MessageUnit mu, EntityManager em) {
+        
+        MessageUnit actual = em.find(MessageUnit.class, mu.getOID());
+        
+        // Trigger lazily loaded relations 
         if (mu instanceof UserMessage) {
-            refreshUserMsg((UserMessage) mu, em);
+            refreshUserMsg((UserMessage) actual, em);
         } else if (mu instanceof ErrorMessage) {
-            refreshErrorMsg((ErrorMessage) mu, em);
+            refreshErrorMsg((ErrorMessage) actual, em);
         }
+        
+        return actual;
     }
 
     /**

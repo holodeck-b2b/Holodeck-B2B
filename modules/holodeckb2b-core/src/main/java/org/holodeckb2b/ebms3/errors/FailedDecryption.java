@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.ebms3.errors;
 
-import org.holodeckb2b.ebms3.persistent.message.EbmsError;
+import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
 
 /**
  * Represent the standard <i>FailedDecryption</i> error as defined in section 6.7 of the Core specification.

@@ -22,7 +22,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import org.holodeckb2b.ebms3.persistent.general.Service;
+import org.holodeckb2b.ebms3.persistency.entities.Service;
 
 /**
  * JPA Entity wrapper for testing {@see Service}

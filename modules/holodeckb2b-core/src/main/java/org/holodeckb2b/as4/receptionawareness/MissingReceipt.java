@@ -17,7 +17,7 @@
 package org.holodeckb2b.as4.receptionawareness;
 
 import org.holodeckb2b.as4.handlers.inflow.CreateReceipt;
-import org.holodeckb2b.ebms3.persistent.message.EbmsError;
+import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 
 /**

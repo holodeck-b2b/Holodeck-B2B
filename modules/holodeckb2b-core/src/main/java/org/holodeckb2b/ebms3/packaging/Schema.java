@@ -19,7 +19,7 @@ package org.holodeckb2b.ebms3.packaging;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.ebms3.persistent.general.SchemaReference;
+import org.holodeckb2b.ebms3.persistency.entities.SchemaReference;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.ISchemaReference;
 
@@ -87,14 +87,14 @@ public class Schema {
     
     /**
      * Reads the schema data about the payload from the <code>Schema</code> element 
-     * and returns it as a {@link org.holodeckb2b.ebms3.persistent.general.SchemaReference}
+     * and returns it as a {@link org.holodeckb2b.ebms3.persistency.entities.SchemaReference}
      * entity object.
      * <p><b>NOTE:</b> The entity object is not persisted by this method! It is 
      * the responsibility of the caller to store it.
      * 
      * @param siElement             The <code>Schema</code> element to read the
      *                              payload meta data from
-     * @return                      A new {@link org.holodeckb2b.ebms3.persistent.general.SchemaReference} 
+     * @return                      A new {@link org.holodeckb2b.ebms3.persistency.entities.SchemaReference} 
      *                              object containing the meta data about the payload
      * @throws PackagingException   When the given element is not a valid
      *                              <code>Schema</code> element.

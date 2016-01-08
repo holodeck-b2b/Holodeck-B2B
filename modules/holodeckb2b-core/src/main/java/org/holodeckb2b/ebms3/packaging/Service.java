@@ -78,20 +78,20 @@ public class Service {
     
     /**
      * Reads the information from the <code>Service</code> object and returns it
-     * in a new {@link org.holodeckb2b.ebms3.persistent.general.Service} entity
+     * in a new {@link org.holodeckb2b.ebms3.persistency.entities.Service} entity
      * object.
      * <p><b>NOTE:</b> The entity object is not persisted by this method! It is
      * the responsibility of the caller to store it.
      * 
      * @param svcElement             The <code>Service</code> element to read the
      *                               info from
-     * @return                       A new {@link org.holodeckb2b.ebms3.persistent.general.Service} 
+     * @return                       A new {@link org.holodeckb2b.ebms3.persistency.entities.Service} 
      *                               object containing the service info from the
      *                               element
      * @throws PackagingException    When the given element does not contain a valid
      *                               <code>Service</code> element.
      */
-    public static org.holodeckb2b.ebms3.persistent.general.Service readElement(OMElement svcElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.Service readElement(OMElement svcElement) throws PackagingException {
         if (svcElement == null)
             return null;
         
@@ -103,7 +103,7 @@ public class Service {
             throw new PackagingException("Service name is missing from Service element");
         
         // Create the entity object
-        org.holodeckb2b.ebms3.persistent.general.Service svcData = new org.holodeckb2b.ebms3.persistent.general.Service(svcName);
+        org.holodeckb2b.ebms3.persistency.entities.Service svcData = new org.holodeckb2b.ebms3.persistency.entities.Service(svcName);
         
         // Read the optional service type
         svcData.setType(svcElement.getAttributeValue(new QName(LN_ATTR_TYPE)));

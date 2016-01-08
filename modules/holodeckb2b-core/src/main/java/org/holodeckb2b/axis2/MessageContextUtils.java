@@ -22,13 +22,12 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.persistent.message.EbmsError;
-import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
-import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.persistent.message.PullRequest;
-import org.holodeckb2b.ebms3.persistent.message.Receipt;
-import org.holodeckb2b.ebms3.persistent.message.SignalMessage;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
+import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
+import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
+import org.holodeckb2b.ebms3.persistency.entities.Receipt;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 
 /**
  * Contains some utility methods related to the {@link MessageContext}.
@@ -321,7 +320,7 @@ public class MessageContextUtils {
         
         // No user message, check for Receipt
         try {
-            Collection<SignalMessage> rcpts = (Collection<SignalMessage>) 
+            Collection<Receipt> rcpts = (Collection<Receipt>) 
                                                         mc.getProperty(MessageContextProperties.IN_RECEIPTS);
             pMU = rcpts.iterator().next();
         } catch (Exception ex) {}
@@ -332,7 +331,7 @@ public class MessageContextUtils {
         
         // No receipts either, maybe errors?
         try {
-            Collection<SignalMessage> errs = (Collection<SignalMessage>) 
+            Collection<ErrorMessage> errs = (Collection<ErrorMessage>) 
                                                         mc.getProperty(MessageContextProperties.IN_ERRORS);
             pMU = errs.iterator().next();
         } catch (Exception ex) {}
@@ -382,7 +381,7 @@ public class MessageContextUtils {
 
         // No pull request message, check for Receipt
         try {
-            Collection<SignalMessage> rcpts = (Collection<SignalMessage>) 
+            Collection<Receipt> rcpts = (Collection<Receipt>) 
                                                         mc.getProperty(MessageContextProperties.OUT_RECEIPTS);
             pMU = rcpts.iterator().next();
         } catch (Exception ex) {}
@@ -392,7 +391,7 @@ public class MessageContextUtils {
         
         // No receipts either, maybe errors?
         try {
-            Collection<SignalMessage> errs = (Collection<SignalMessage>) 
+            Collection<ErrorMessage> errs = (Collection<ErrorMessage>) 
                                                         mc.getProperty(MessageContextProperties.OUT_ERROR_SIGNALS);
             pMU = errs.iterator().next();
         } catch (Exception ex) {}        

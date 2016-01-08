@@ -91,25 +91,25 @@ public class CollaborationInfo {
     /**
      * Reads the business transaction information of the UserMessage message unit 
      * contained in the <code>CollaborationInfo</code> element and returns it in 
-     * a new {@link org.holodeckb2b.ebms3.persistent.message.CollaborationInfo} 
+     * a new {@link org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo} 
      * object.
      * <p><b>NOTE:</b> This method does NOT persist the entity object! It is the
      * responsibility of the caller to save it.
      * 
      * @param ciElement             The <code>CollaborationInfo</code> element that contains the
      *                              info about this User Message message unit
-     * @return                      The {@link org.holodeckb2b.ebms3.persistent.message.CollaborationInfo} object
+     * @return                      The {@link org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo} object
      *                              the information is returned in
      * @throws PackagingException   When the given element does not contain a valid
      *                              <code>CollaborationInfo</code> element.
      */
-    public static org.holodeckb2b.ebms3.persistent.message.CollaborationInfo readElement(OMElement ciElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo readElement(OMElement ciElement) throws PackagingException {
         // There must be a CollaborationInfo element 
         if (ciElement == null)
             return null;
         
         // Create new entity object
-        org.holodeckb2b.ebms3.persistent.message.CollaborationInfo ciData = new org.holodeckb2b.ebms3.persistent.message.CollaborationInfo();
+        org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo ciData = new org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo();
         
         // Start with reading the required elements: Service, Action and ConversationId
         OMElement child = Service.getElement(ciElement);

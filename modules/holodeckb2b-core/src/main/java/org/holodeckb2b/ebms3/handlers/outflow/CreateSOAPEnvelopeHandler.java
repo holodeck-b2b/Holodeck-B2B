@@ -26,7 +26,7 @@ import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;

@@ -102,13 +102,13 @@ public class Description {
      *                      <code>null</code> if the given element does not contain
      *                      a <code>Description</code> element
      */
-    public static org.holodeckb2b.ebms3.persistent.general.Description readElement(OMElement descrElement) {
+    public static org.holodeckb2b.ebms3.persistency.entities.Description readElement(OMElement descrElement) {
         // Check if there was a Description element to read
         if (descrElement == null)
             return null;
         else {
             // Create new entity object
-            org.holodeckb2b.ebms3.persistent.general.Description  descrData = new org.holodeckb2b.ebms3.persistent.general.Description();
+            org.holodeckb2b.ebms3.persistency.entities.Description  descrData = new org.holodeckb2b.ebms3.persistency.entities.Description();
 
             // Read description content
             descrData.setText(descrElement.getText());

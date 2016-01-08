@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.ebms3.persistent.general;
 
-import org.holodeckb2b.ebms3.persistent.general.Property;
+import org.holodeckb2b.ebms3.persistency.entities.Property;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.holodeckb2b.ebms3.persistent.wrappers.EProperty;

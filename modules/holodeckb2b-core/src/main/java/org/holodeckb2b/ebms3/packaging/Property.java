@@ -78,20 +78,20 @@ public class Property {
     
     /**
      * Reads the information from the <code>Property</code> object and returns it
-     * in a new {@link org.holodeckb2b.ebms3.persistent.general.Property} entity
+     * in a new {@link org.holodeckb2b.ebms3.persistency.entities.Property} entity
      * object.
      * <p><b>NOTE:</b> The entity object is not persisted by this method! It is
      * the responsibility of the caller to store it.
      * 
      * @param propElement            The <code>Property</code> element to read the
      *                               info from
-     * @return                       A new {@link org.holodeckb2b.ebms3.persistent.general.Property} 
+     * @return                       A new {@link org.holodeckb2b.ebms3.persistency.entities.Property} 
      *                               object containing the service info from the
      *                               element
      * @throws PackagingException    When the given element does not contain a valid
      *                               <code>Property</code> element.
      */    
-    public static org.holodeckb2b.ebms3.persistent.general.Property readElement(OMElement propElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.Property readElement(OMElement propElement) throws PackagingException {
         if (propElement == null) 
             return null;
         
@@ -103,7 +103,7 @@ public class Property {
         String value = propElement.getText();
         
         // Create the entity object
-        org.holodeckb2b.ebms3.persistent.general.Property propData = new org.holodeckb2b.ebms3.persistent.general.Property(name, value);
+        org.holodeckb2b.ebms3.persistency.entities.Property propData = new org.holodeckb2b.ebms3.persistency.entities.Property(name, value);
         
         //@todo: Uncomment when spec is changed and type is allowed
 //        // Read type attribute

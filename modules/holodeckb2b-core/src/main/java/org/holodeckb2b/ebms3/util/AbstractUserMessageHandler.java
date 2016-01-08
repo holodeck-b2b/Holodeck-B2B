@@ -22,7 +22,7 @@ import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.handlers.inflow.ReadUserMessage;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 
 /**
  * Extends {@link BaseHandler} to ensure the handler only runs when there is a User Message to process. It checks 

@@ -96,7 +96,7 @@ public class UserMessage {
     
     /**
      * Reads the meta data of a User Message message unit from the <code>eb:UserMessage</code> 
-     * element and return it as a {@link org.holodeckb2b.ebms3.persistent.message.UserMessage}
+     * element and return it as a {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage}
      * entity object.
      * <p><b>NOTE 1:</b> The entity object is not persisted by this method! It 
      * is the responsibility of the caller to store it.
@@ -104,14 +104,14 @@ public class UserMessage {
      * 
      * @param   umElement           The <code>UserMessage</code> element that contains
      *                              the meta data to read
-     * @return                      A new {@link org.holodeckb2b.ebms3.persistent.message.UserMessage} 
+     * @return                      A new {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage} 
      *                              object 
      * @throws PackagingException   When the given element is not a valid
      *                              <code>UserMessage</code> element.
      */
-    public static org.holodeckb2b.ebms3.persistent.message.UserMessage readElement(OMElement umElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.UserMessage readElement(OMElement umElement) throws PackagingException {
         // Create a new PullRequest entity object to store the information in
-        org.holodeckb2b.ebms3.persistent.message.UserMessage umData = new org.holodeckb2b.ebms3.persistent.message.UserMessage();
+        org.holodeckb2b.ebms3.persistency.entities.UserMessage umData = new org.holodeckb2b.ebms3.persistency.entities.UserMessage();
         
         // The PullRequest itself only contains the [optional] mpc attribute
         String  mpc = umElement.getAttributeValue(new QName(MPC_ATTR));

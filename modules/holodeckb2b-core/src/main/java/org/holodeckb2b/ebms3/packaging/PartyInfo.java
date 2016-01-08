@@ -20,7 +20,7 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.ebms3.persistent.general.PartyId;
+import org.holodeckb2b.ebms3.persistency.entities.PartyId;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
@@ -122,24 +122,24 @@ public class PartyInfo {
         
         /**
          * Reads the trading partner information from a <code>From</code> or 
-         * <code>To</code> element and returns it as a {@link org.holodeckb2b.ebms3.persistent.general.TradingPartner}
+         * <code>To</code> element and returns it as a {@link org.holodeckb2b.ebms3.persistency.entities.TradingPartner}
          * object.
          * <p><b>NOTE:</b> Although the information is returned in an entity object,
          * the object is not persisted. 
          * 
          * @param tpElement     The element to read the information from
-         * @return              A {@link org.holodeckb2b.ebms3.persistent.general.TradingPartner}
+         * @return              A {@link org.holodeckb2b.ebms3.persistency.entities.TradingPartner}
          *                      object containing the information from the element
          * @throws PackagingException   When the given element does not conform to
          *                              ebMS specification and can therefor not be
          *                              read completely
          */
-        public static org.holodeckb2b.ebms3.persistent.general.TradingPartner readElement(OMElement tpElement) throws PackagingException {
+        public static org.holodeckb2b.ebms3.persistency.entities.TradingPartner readElement(OMElement tpElement) throws PackagingException {
             if (tpElement == null)
                 return null; // If there is no element content, there is no data
             
             // Create the entity object
-            org.holodeckb2b.ebms3.persistent.general.TradingPartner tpData = new org.holodeckb2b.ebms3.persistent.general.TradingPartner();
+            org.holodeckb2b.ebms3.persistency.entities.TradingPartner tpData = new org.holodeckb2b.ebms3.persistency.entities.TradingPartner();
             
             // Check for a Role element and use its value
             OMElement roleElement = tpElement.getFirstChildWithName(Q_ROLE);
@@ -213,24 +213,24 @@ public class PartyInfo {
     
     /**
      * Reads the information on the sender and receiver of the UserMessage message
-     * unit and stores it in the given {@link org.holodeckb2b.ebms3.persistent.message.UserMessage} 
+     * unit and stores it in the given {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage} 
      * object.
      * <p><b>NOTE:</b> This method does NOT persist the entity object! It is the
      * responsibility of the caller to save changes.
      * 
      * @param piElement             The <code>PartyInfo</code> element that contains the
      *                              info about the sender and receiver of this User Message message unit
-     * @param umData                The {@link org.holodeckb2b.ebms3.persistent.message.UserMessage} object
+     * @param umData                The {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage} object
      *                              to update
      * @throws PackagingException   When the given element does not contain a valid
      *                              <code>eb:PartyInfo</code> element.
      */
-    public static void readElement(OMElement piElement, org.holodeckb2b.ebms3.persistent.message.UserMessage umData) throws PackagingException {
+    public static void readElement(OMElement piElement, org.holodeckb2b.ebms3.persistency.entities.UserMessage umData) throws PackagingException {
         if (piElement == null)
             return;
         
         // Read the content, i.e. the from and to element
-        org.holodeckb2b.ebms3.persistent.general.TradingPartner tp = TradingPartner.readElement(TradingPartner.getElement(piElement, TradingPartner.ElementName.FROM));
+        org.holodeckb2b.ebms3.persistency.entities.TradingPartner tp = TradingPartner.readElement(TradingPartner.getElement(piElement, TradingPartner.ElementName.FROM));
         if (tp != null)
             umData.setSender(tp);
         else 

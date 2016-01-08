@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.axis2.Axis2Utils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.persistent.message.PullRequest;
+import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;

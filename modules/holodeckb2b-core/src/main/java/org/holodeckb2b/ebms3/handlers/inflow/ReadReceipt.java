@@ -68,7 +68,7 @@ public class ReadReceipt extends BaseHandler {
                 
                 while (rcpts.hasNext()) {
                     OMElement rcptElem = rcpts.next();
-                    org.holodeckb2b.ebms3.persistent.message.Receipt receipt = null;
+                    org.holodeckb2b.ebms3.persistency.entities.Receipt receipt = null;
                     try {
                         // Read information into Receipt object
                         receipt = Receipt.readElement(rcptElem);

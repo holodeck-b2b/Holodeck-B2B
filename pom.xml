@@ -19,7 +19,7 @@
         
     <properties>
         <axis2-version>1.6.3</axis2-version>
-        <axiom-version>1.2.16</axiom-version>
+        <axiom-version>1.2.14</axiom-version>
         <netbeans.hint.license>gpl30</netbeans.hint.license>
     </properties>
     
@@ -106,12 +106,12 @@
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>4.1.7.Final</version>
+                <version>5.0.5.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-entitymanager</artifactId>
-                <version>4.1.7.Final</version>
+                <version>5.0.5.Final</version>
                 <scope>runtime</scope>
             </dependency>
             
@@ -154,7 +154,7 @@
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.9</version>
+                <version>1.10</version>
             </dependency>
             <!--=============================================================== 
                 Test dependencies

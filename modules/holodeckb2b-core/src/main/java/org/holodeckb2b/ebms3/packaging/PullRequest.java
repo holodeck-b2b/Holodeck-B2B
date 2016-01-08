@@ -59,9 +59,9 @@ public class PullRequest {
      *                              ebMS specification and can therefor not be
      *                              read completely
      */
-    public static org.holodeckb2b.ebms3.persistent.message.PullRequest readElement(OMElement prElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.PullRequest readElement(OMElement prElement) throws PackagingException {
         // Create a new PullRequest entity object to store the information in
-        org.holodeckb2b.ebms3.persistent.message.PullRequest prData = new org.holodeckb2b.ebms3.persistent.message.PullRequest();
+        org.holodeckb2b.ebms3.persistency.entities.PullRequest prData = new org.holodeckb2b.ebms3.persistency.entities.PullRequest();
         
         // The PullRequest itself only contains the [optional] mpc attribute
         String  mpc = prElement.getAttributeValue(new QName(MPC_ATTR));
@@ -112,7 +112,7 @@ public class PullRequest {
      * @param receipt       The information to include in the pull request signal
      * @return              The new element representing the pull request signal
      */
-    public static OMElement createElement(OMElement messaging, org.holodeckb2b.ebms3.persistent.message.PullRequest pullRequest) {
+    public static OMElement createElement(OMElement messaging, org.holodeckb2b.ebms3.persistency.entities.PullRequest pullRequest) {
         // First create the SignalMessage element that is the placeholder for
         // the Receipt element containing the receipt info
         OMElement signalmessage = SignalMessage.createElement(messaging);

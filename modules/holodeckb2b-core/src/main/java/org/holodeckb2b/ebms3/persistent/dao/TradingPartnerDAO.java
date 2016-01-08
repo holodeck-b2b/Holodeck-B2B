@@ -17,8 +17,8 @@
 package org.holodeckb2b.ebms3.persistent.dao;
 
 import javax.persistence.EntityManager;
-import org.holodeckb2b.ebms3.persistent.general.PartyId;
-import org.holodeckb2b.ebms3.persistent.general.TradingPartner;
+import org.holodeckb2b.ebms3.persistency.entities.PartyId;
+import org.holodeckb2b.ebms3.persistency.entities.TradingPartner;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
 

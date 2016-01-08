@@ -22,8 +22,8 @@ import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.holodeckb2b.ebms3.persistent.message.EbmsError;
-import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
+import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
+import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
@@ -99,9 +99,9 @@ public class ErrorSignal {
      *                              ebMS specification and can therefore not be
      *                              read completely
      */
-    public static org.holodeckb2b.ebms3.persistent.message.ErrorMessage readElement(OMElement sigElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.ErrorMessage readElement(OMElement sigElement) throws PackagingException {
         // Create a new EbmsError entity object to store the information in
-        org.holodeckb2b.ebms3.persistent.message.ErrorMessage errData = new org.holodeckb2b.ebms3.persistent.message.ErrorMessage();
+        org.holodeckb2b.ebms3.persistency.entities.ErrorMessage errData = new org.holodeckb2b.ebms3.persistency.entities.ErrorMessage();
         
         // First read general information from the MessageInfo child 
         MessageInfo.readElement(MessageInfo.getElement(sigElement), errData);
