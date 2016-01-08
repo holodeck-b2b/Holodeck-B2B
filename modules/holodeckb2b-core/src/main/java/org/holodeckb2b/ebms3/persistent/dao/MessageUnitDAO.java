@@ -687,19 +687,52 @@ public class MessageUnitDAO {
     
     /**
      * Changes the processing state of the given message unit to {@link ProcessingStates#PROCESSING} to indicate that
-     * the message is being processed. To prevent that a single message unit is processed twice the state is only
-     * changed if it is not already in <code>ProcessingStates.PROCESSING</code>.
-     *
-     * @param mu The {@link MessageUnit} going to be processed
+     * the message is being processed. 
+     * 
+     * @param mu                The {@link MessageUnit} going to be processed
      * @return If the processing state could be changed to <code>ProcessingStates.PROCESSING</code>: A new
      * {@link MessageUnit} object representing the message unit in processing. This entity object has all information
      * loaded from database and can be safely detached from the EntityManager. <code>null</code> otherwise.
-     *
      * @throws DatabaseException When
      */
     public static <T extends MessageUnit> T startProcessingMessageUnit(final T mu) throws DatabaseException {
-        return setProcessingState(mu, ProcessingStates.PROCESSING);        
+        return startProcessingMessageUnit(mu, null);
     }
+    
+    /**
+     * Changes the processing state of the given message unit to {@link ProcessingStates#PROCESSING} to indicate that
+     * the message is being processed. To prevent that a single message unit is processed twice the state is only
+     * changed if the current state equals the given state.
+     *
+     * @param mu                The {@link MessageUnit} going to be processed
+     * @param reqCurrentState   The state the message unit should have in order to change to <i>PROCESSING</i>, if
+     *                          <code>null</code> the change will always take place
+     * @return If the processing state could be changed to <code>ProcessingStates.PROCESSING</code>: A new
+     * {@link MessageUnit} object representing the message unit in processing. This entity object has all information
+     * loaded from database and can be safely detached from the EntityManager. <code>null</code> otherwise.
+     * @throws DatabaseException When
+     */
+    public static <T extends MessageUnit> T startProcessingMessageUnit(final T mu, String reqCurrentState) 
+                                                                    throws DatabaseException {
+        EntityManager em = JPAUtil.getEntityManager();
+        em.getTransaction().begin();
+
+        try {
+            T actual = (T) refreshMessageUnit(mu, em);
+
+            if (Utils.isNullOrEmpty(reqCurrentState) 
+               || reqCurrentState.equals(actual.getCurrentProcessingState().getName())) {
+                actual.setProcessingState(new ProcessingState(ProcessingStates.PROCESSING));
+                em.getTransaction().commit();
+                return actual;
+            } else
+               return null;
+        } catch (Exception e) {            
+            return null;
+        } finally {
+            em.close();
+        }
+    }    
 
     /**
      * Changes the processing state of the given message unit to {@link ProcessingStates#OUT_FOR_DELIVERY} to indicate
@@ -718,15 +751,14 @@ public class MessageUnitDAO {
         em.getTransaction().begin();
 
         try {
-            // Get a lock on the object because we want to prevent simultaneous changes
-            // in processing state
+            // Get the latest information from the database
             mu = em.find(MessageUnit.class, mu.getOID());
 
             ProcessingState curState = mu.getCurrentProcessingState();
             if (curState != null && curState.getName().equals(ProcessingStates.READY_FOR_DELIVERY)) {
                 ProcessingState newState = new ProcessingState(ProcessingStates.OUT_FOR_DELIVERY);
                 mu.setProcessingState(newState);
-                em.persist(mu);
+                em.getTransaction().commit();
                 return true;
             } else {
                 return false;    
@@ -735,7 +767,6 @@ public class MessageUnitDAO {
             // Getting new access to or a lock on the enity failed, so processing state can not be changed
             return false;
         } finally {
-            em.getTransaction().commit();
             em.close();
         }
     }

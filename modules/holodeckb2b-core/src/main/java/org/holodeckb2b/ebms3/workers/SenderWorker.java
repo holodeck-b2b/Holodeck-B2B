@@ -24,8 +24,8 @@ import org.holodeckb2b.axis2.Axis2Utils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
@@ -58,7 +58,8 @@ public class SenderWorker extends AbstractWorkerTask {
                 log.info("Found " + newMsgs.size() + " messages to send");
                 for (MessageUnit message : newMsgs) {
                     // Indicate that processing will start
-                    MessageUnit muInProcess = MessageUnitDAO.startProcessingMessageUnit(message);
+                    MessageUnit muInProcess = MessageUnitDAO.startProcessingMessageUnit(message, 
+                                                                                    ProcessingStates.READY_TO_PUSH);
                     if (muInProcess != null) {
                         // only when we could succesfully set processing state really start processing
                         log.debug("Start processing message [" + muInProcess.getMessageId() + "]");
@@ -68,7 +69,7 @@ public class SenderWorker extends AbstractWorkerTask {
                         // Message probably already in process
                         log.debug("Could not start processing message [" + message.getMessageId() 
                                     + "] because switching to processing state was unsuccesful");
-                    }
+                    }                    
                 }
             } else
                 log.info("No messages found that are ready for sending");
