@@ -20,14 +20,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.Payload;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.PModeFinder;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -71,7 +74,7 @@ public class MessageSubmitter implements IMessageSubmitter {
             checkPayloads(completedMMD, pmode); // Throws MessageSubmitException if there is a problem with a specified payloads
             
             log.debug("Add message to database");
-            UserMessage newUM = MessageUnitDAO.createOutgoingUserMessage(completedMMD, pmode.getId());
+            EntityProxy<UserMessage> newUM = MessageUnitDAO.createOutgoingUserMessage(completedMMD, pmode.getId());
             
             try {
                 moveOrCopyPayloads(newUM, movePayloads);
@@ -91,7 +94,7 @@ public class MessageSubmitter implements IMessageSubmitter {
             }
             
             log.info("Message succesfully submitted");
-            return newUM.getMessageId();
+            return newUM.entity.getMessageId();
             
         } catch (DatabaseException dbe) {
             log.error("An error occured when saving user message to database. Details: " + dbe.getMessage());
@@ -109,25 +112,77 @@ public class MessageSubmitter implements IMessageSubmitter {
      *                                is not a regular file
      */
     private void checkPayloads(IUserMessage um, IPMode pmode) throws MessageSubmitException {        
-        if (!Utils.isNullOrEmpty(um.getPayloads()))
-            for(IPayload p : um.getPayloads()) {
-                String contentLocation = p.getContentLocation();
-                // The location must be specified
-                if (Utils.isNullOrEmpty(contentLocation))
-                    throw new MessageSubmitException("No location specified for payload [uri=" + p.getPayloadURI() + "]!");
-                try { 
-                    // It most point to an existing normal file
-                    if (!Files.isRegularFile(Paths.get(contentLocation))) 
-                        throw new Exception("Not a regular file");
-                } catch (Exception e) {
-                    // This will only be reach if either an exception occurred while checking the location or when the
-                    // given location does not point to a regular file 
+        Collection<IPayload> payloads = um.getPayloads();
+        if (!Utils.isNullOrEmpty(payloads))
+            for(IPayload p : payloads) {
+                // Check that content is available
+                if (!checkContent(p))
                     throw new MessageSubmitException("Specified location of payload [uri=" + p.getPayloadURI() 
-                                + "] content [" + contentLocation + "] does not exist or is not a regular file!");
-                }
+                                + "] content [" + p.getContentLocation() 
+                                + "] is invalid (non existing or not a regular file!");
+                // Check references
+                if (!checkPayloadRefs(p, payloads))
+                    throw new MessageSubmitException("Specified location of payload [uri=" + p.getPayloadURI() 
+                                + "] content [" + p.getContentLocation() 
+                                + "] is invalid (non existing or not a regular file!");                                    
             }
     }
+    
+    /**
+     * Helper method to check that the specified file for the payload content is available if the payload should be
+     * included in the message (containment is either BODY or ATTACHMENT)
+     * 
+     * @param payload   The payload meta-data
+     * @return          <code>true</code> when the payload should be contained in the message and a file is available 
+     *                  at the specified path or when the payload is externally referenced, <br>
+     *                  <code>false</code> otherwise
+     */
+    private boolean checkContent(IPayload payload) {
+        if (payload.getContainment() != IPayload.Containment.EXTERNAL) {
+            String contentLocation = payload.getContentLocation();
+            // The location must be specified
+            if (Utils.isNullOrEmpty(contentLocation))
+                return false;
+            else 
+                // It most point to an existing normal file
+                if (Files.isRegularFile(Paths.get(contentLocation))) 
+                    return true;
+                else 
+                    return false;
+        } else
+            // For external payload content location is not relevant
+            return true;
+    }
 
+    /**
+     * Helper method to check the URI reference for the payloads to include in the message.
+     * <p>The references must be unique within the set of simularly included payloads, so there must be no other payload 
+     * with the same containment and reference. 
+     * <p>Payloads that should be included as attachment however don't need to have a reference assigned by the 
+     * Producing application, so here we accept that multiple <code>null</code> values exist.
+     * 
+     * @param p         The meta-data on the payload to check the reference for
+     * @param paylaods  The meta-data on all payloads included in the message 
+     * @return          <code>true</code> if the references are unique for each payload,<br>
+     *                  <code>false</code> if duplicates exists
+     */
+    private boolean checkPayloadRefs(IPayload p, Collection<IPayload> payloads) {
+        boolean c = true;
+        Iterator<IPayload> it = payloads.iterator();
+        do {
+            IPayload p1 = it.next();
+            String   r0 = p.getPayloadURI(), r1 = p1.getPayloadURI();
+            c = (p == p1)  // Same object, so always okay
+                || p.getContainment() != p1.getContainment() // The containment differs
+                    // The containment is attachment, so URI's should be different or both null
+                || (p.getContainment() == IPayload.Containment.ATTACHMENT 
+                    && (r0 == r1 || !r0.equalsIgnoreCase(r1)))  
+                    // The containment is body or external, URI should be different and not null
+                || (r0 != r1 && !r0.equalsIgnoreCase(r1));                
+        } while (c && it.hasNext());       
+        return c;
+    }
+    
     /**
      * Helper method to copy or move the payloads to an internal directory so they will be kept available during the
      * processing of the message (which may include resending).
@@ -135,8 +190,9 @@ public class MessageSubmitter implements IMessageSubmitter {
      * @param um     The meta data on the submitted user message
      * @param pmode  The P-Mode that governs the processing this user message
      * @throws IOException  When the payload could not be moved/copied to the internal payload storage
+     * @throws DatabaseException When the new payload locations couldn't be saved to the database
      */
-    private void moveOrCopyPayloads(UserMessage um, boolean move) throws IOException {
+    private void moveOrCopyPayloads(EntityProxy<UserMessage> um, boolean move) throws IOException, DatabaseException {
         // Path to the "temp" dir where to store payloads during processing
         String intPlDir = Config.getTempDirectory() + "plcout";
         // Create the directory if needed
@@ -145,9 +201,10 @@ public class MessageSubmitter implements IMessageSubmitter {
             log.debug("Create the directory [" + intPlDir + "] for storing payload files");
             Files.createDirectories(pathPlDir);
         }
-            
-        if (!Utils.isNullOrEmpty(um.getPayloads()))
-            for (IPayload ip : um.getPayloads()) {
+
+        Collection<IPayload> payloads = um.entity.getPayloads();
+        if (!Utils.isNullOrEmpty(payloads)) {
+            for (IPayload ip : payloads) {
                 Payload p = (Payload) ip;                
                 Path srcPath = Paths.get(p.getContentLocation());
                 // Ensure that the filename in the temp directory is unique
@@ -162,6 +219,9 @@ public class MessageSubmitter implements IMessageSubmitter {
                 log.debug("Payload moved/copied to internal directory");
                 p.setContentLocation(destPath.toString());
             }
+            // Update the database with new locations
+            MessageUnitDAO.updatePayloadMetaData(um);
+        }
     }
     
 }
