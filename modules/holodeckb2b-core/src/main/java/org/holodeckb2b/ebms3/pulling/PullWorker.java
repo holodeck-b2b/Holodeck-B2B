@@ -23,8 +23,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.axis2.Axis2Utils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
@@ -33,7 +35,6 @@ import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is responsible for starting the send process of Pull Request message units. The ebMS specific handlers in the Axis2 
@@ -41,7 +42,7 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
  * process.
  * <p>The worker will check for which P-Modes it has to send the pull requests. This can be a fixed list of P-Modes or
  * all P-Modes except some specific ones. This is specified during the initialization of the worker by the parameters
- * named {@link #PARAM_PMODES} and {@link #PARAM_INCLUDE} that specify the list of P-Mode [ids] and whether the list
+ * named <i>pmodes</i> and <code>include?</code> that specify the list of P-Mode [ids] and whether the list
  * is inclusive or exclusive. 
  * <p>For each P-Mode that can execute a pull a new {@link PullRequest} is created to start the messaging process.
  *
@@ -111,10 +112,10 @@ public class PullWorker implements IWorkerTask {
     /**
      * Sets the parameters of this pull worker. The pull worker has two optional parameters, listed below. When
      * passing the parameters to the worker the indicated constants should be used as parameter name.<ol>
-     * <li><i>{@link #PARAM_PMODES}</i>, <code>Collection&lt;String&gt;</code> : A collection of P-Mode ids this pull worker
-     *      should or should not do the pulling for;</li>
-     * <li><i>{@link #PARAM_INCLUDE}</i>, <code>Boolean</code> : Indicates whether the set of P-Mode ids given in the
-     *      second parameter should be included (value=<code>Boolean.TRUE</code>) or excluded (value=
+     * <li><i>{@link #PARAM_PMODES} ("pmodes")</i>, <code>Collection&lt;String&gt;</code> : A collection of P-Mode ids 
+     *      this pull worker should or should not do the pulling for;</li>
+     * <li><i>{@link #PARAM_INCLUDE} ("include?")</i>, <code>Boolean</code> : Indicates whether the set of P-Mode ids 
+     *      given in the second parameter should be included (value=<code>Boolean.TRUE</code>) or excluded (value=
      *      <code>Boolean.FALSE</code>) in the pulling. Defaults is to include.</li>
      * </ol> 
      */
@@ -183,16 +184,14 @@ public class PullWorker implements IWorkerTask {
                 
                 try {
                     log.debug("Create the PullRequest signal");
-                    PullRequest pullRequest = MessageUnitDAO.createOutgoingPullRequest(p.getId(), mpc);
-                    log.debug("PullRequest created [" + pullRequest.getMessageId() + "] for P-Mode [" + p.getId() + "] and MPC=" + mpc);
-                    log.debug("Start send for PullRequest [" + pullRequest.getMessageId() + "]");
+                    EntityProxy<PullRequest> pullRequest = MessageUnitDAO.createOutgoingPullRequest(p.getId(), mpc);
+                    log.debug("PullRequest created [" + pullRequest.entity.getMessageId() 
+                                + "] for P-Mode [" + p.getId() + "] and MPC=" + mpc);
                     Axis2Utils.sendMessage(pullRequest, log);
-                    log.info("Successfully sent pull request [" + pullRequest.getMessageId() + "]");
                 } catch (DatabaseException ex) {
                     log.error("Could not create PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
                 }
             }
-
     }
 
     /**
@@ -219,7 +218,8 @@ public class PullWorker implements IWorkerTask {
                    ) 
                     pmodesToPull.add(p);
                 else
-                    log.warn("A unknown P-Mode or one that does not need pulling was specified for pulling! [id=" + pid + "]");
+                    log.warn("A unknown P-Mode or one that does not need pulling was specified for pulling!"
+                             + "[id=" + pid + "]");
             }            
         } else {
             log.debug("Should pull for all P-Modes except specified");

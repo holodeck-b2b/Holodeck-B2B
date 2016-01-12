@@ -23,14 +23,15 @@ import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for detecting and when requested eliminating duplicate <i>user messages</i>.
@@ -60,7 +61,9 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
     }
     
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws AxisFault {
+    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> umProxy) throws AxisFault {
+        // Extract entity object from proxy
+        UserMessage um = umProxy.entity;
         
         // First determine if duplicate check must be executed for this UserMessage 
         //
@@ -112,7 +115,7 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
                                                 + "] is a duplicate of an already delivered message");
 
                     log.debug("Update processing state to duplicate");
-                    um = MessageUnitDAO.setDuplicate(um);
+                    MessageUnitDAO.setDuplicate(umProxy);
                     
                     // To prevent repeated delivery but still send a receipt set message as delivered
                     mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);

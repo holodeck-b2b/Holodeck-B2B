@@ -22,15 +22,16 @@ import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.Receipt;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for checking if receipt messages should be delivered to the business 
@@ -55,7 +56,7 @@ public class DeliverReceipts extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         // Check if this message contains receipt signals
-        Collection<Receipt> rcptSignals = (Collection<Receipt>) 
+        Collection<EntityProxy<Receipt>> rcptSignals = (Collection<EntityProxy<Receipt>>) 
                                                     mc.getProperty(MessageContextProperties.IN_RECEIPTS);
         
         if (rcptSignals == null || rcptSignals.isEmpty())
@@ -65,24 +66,27 @@ public class DeliverReceipts extends BaseHandler {
         log.debug("Message contains " + rcptSignals.size() + " Receipt signals");
         
         // Process each signal
-        for(Receipt rcptSig : rcptSignals) {
+        for(EntityProxy<Receipt> rcptSigProxy : rcptSignals) {
+            // Extract the entity object
+            Receipt rcptSig = rcptSigProxy.entity;
+            
             // Prepare message for delivery by checking it is still ready for delivery and then 
             // change its processing state to "out for delivery"
             log.debug("Prepare message [" + rcptSig.getMessageId() + "] for delivery");
-            boolean readyForDelivery = MessageUnitDAO.startDeliveryOfMessageUnit(rcptSig);
+            boolean readyForDelivery = MessageUnitDAO.startDeliveryOfMessageUnit(rcptSigProxy);
                         
             if(readyForDelivery) {
                 // Receipt in this signal can be delivered to business application
                 try {
                     deliverReceipt(rcptSig);
                     // Receipt signal processed, change the processing state to done
-                    MessageUnitDAO.setDone(rcptSig);
+                    MessageUnitDAO.setDone(rcptSigProxy);
                 } catch (MessageDeliveryException ex) {                        
                     log.warn("Could not deliver receipt (msgId=" + rcptSig.getMessageId() 
                                     + "]) to application! Error details: " + ex.getMessage());
                     // Although the receipt could not be delivered it was processed completely on the ebMS level,
                     //  so processing state is set to warning instead of failure
-                    MessageUnitDAO.setWarning(rcptSig);
+                    MessageUnitDAO.setWarning(rcptSigProxy);
                 }
             } else {
                 log.info("Receipt signal [" + rcptSig.getMessageId() + "] is already processed for delivery");

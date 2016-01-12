@@ -18,9 +18,11 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 
 /**
@@ -37,15 +39,16 @@ public class StartProcessingUsrMessage extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws DatabaseException {
-        String msgId = um.getMessageId();
+    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> um) throws DatabaseException {
+        String msgId = um.entity.getMessageId();
         log.debug("Change processing state to indicate start of processing of message [" + msgId + "]" );
-        um = MessageUnitDAO.startProcessingMessageUnit(um);
-        if (um == null) {
-            // Because the returned null is directly assigned to mu the user message unit is automaticly removed
-            // from the context and not processed further
+        if (!MessageUnitDAO.startProcessingMessageUnit(um)) {
+            // Changing the state failed which indicates that the message unit is already being processed
             log.warn("User message [msgId= " + msgId + "] is already being processed");
-        }
+            // Remove the User Message from the context to prevent further processing
+            mc.removeProperty(MessageContextProperties.IN_USER_MESSAGE);
+        } else 
+            log.warn("User message [msgId= " + msgId + "] is ready for processing");
         
         return InvocationResponse.CONTINUE;
     }

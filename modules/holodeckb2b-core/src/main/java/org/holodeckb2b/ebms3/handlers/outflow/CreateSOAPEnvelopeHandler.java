@@ -27,9 +27,9 @@ import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the Holodeck B2B handler in the out flow that creates an empty ebMS message, i.e. a SOAP Envelope containing 
@@ -57,7 +57,7 @@ public class CreateSOAPEnvelopeHandler extends BaseHandler {
             SOAPEnv.SOAPVersion version;
             if (isInFlow(INITIATOR)) {
                 log.debug("Use P-Mode of primary message unit to get SOAP version");
-                MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+                MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
                 if (primaryMU == null) {
                     log.debug("No message unit in this response, no envelope needed");
                     return InvocationResponse.CONTINUE;

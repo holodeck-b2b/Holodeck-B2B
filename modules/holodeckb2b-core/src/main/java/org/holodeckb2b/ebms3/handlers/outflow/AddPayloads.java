@@ -98,7 +98,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
                 }
             }
             if (cidGenerated) {
-                MessageUnitDAO.updatePayloadMetaData(um);
+                MessageUnitDAO.updateMessageUnitInfo(um);
                 log.debug("Generated MIME Content-Id(s) saved to database");
             }
             log.debug("Payloads successfully added to message");                

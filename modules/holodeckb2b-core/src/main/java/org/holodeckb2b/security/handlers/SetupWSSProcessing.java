@@ -24,13 +24,13 @@ import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.security.callbackhandlers.PasswordCallbackHandler;
 import org.holodeckb2b.security.util.SecurityUtils;
 
@@ -80,7 +80,7 @@ public class SetupWSSProcessing extends BaseHandler {
         mc.setProperty(WSHandlerConstants.ENABLE_TIMESTAMP_CACHE, "false");
         
         log.debug("Get the primary message unit for this message to check specific setting");
-        MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+        MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
         if (primaryMU == null)
             // No primary message => this is probably an empty response
             return InvocationResponse.CONTINUE;

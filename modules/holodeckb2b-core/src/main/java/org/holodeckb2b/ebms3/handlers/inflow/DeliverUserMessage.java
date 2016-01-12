@@ -20,14 +20,15 @@ import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.pmode.IPMode;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for the delivery of the User message message unit to the business 
@@ -48,12 +49,14 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws DatabaseException {
+    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> umProxy) throws DatabaseException {
+        // Extract the entity object
+        UserMessage um = umProxy.entity;
         
         // Prepare message for delivery by checking it is still ready for delivery and then 
         // change its processing state to "out for delivery"
         log.debug("Prepare message [" + um.getMessageId() + "] for delivery");
-        if(MessageUnitDAO.startDeliveryOfMessageUnit(um)) {
+        if(MessageUnitDAO.startDeliveryOfMessageUnit(umProxy)) {
             // Message can be delivered to business application
             log.debug("Start delivery of user message");
             try {
@@ -68,13 +71,13 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
                 mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);
                 log.info("Successfully delivered user message [msgId=" + um.getMessageId() +"]");
                 log.debug("Set the processing state to delivered");            
-                um = MessageUnitDAO.setDelivered(um);                
+                MessageUnitDAO.setDelivered(umProxy);                
             } catch (MessageDeliveryException ex) {
                 log.error("Could not deliver the user message [msgId=" + um.getMessageId() 
                             + "] using specified delivery method!" 
                             + "\n\tError details: " + ex.getMessage());
                 // Indicate failure in processing state
-                um = MessageUnitDAO.setDeliveryFailure(um);
+                MessageUnitDAO.setDeliveryFailure(umProxy);
             }
         } else {
             // This message is not ready for delivery now which is caused by it already been delivered by another

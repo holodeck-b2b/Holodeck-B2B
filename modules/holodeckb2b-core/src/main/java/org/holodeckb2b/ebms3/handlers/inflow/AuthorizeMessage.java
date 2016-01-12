@@ -24,14 +24,15 @@ import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.errors.FailedAuthentication;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.tokens.UsernameToken;
 import org.holodeckb2b.security.util.SecurityUtils;
@@ -65,15 +66,15 @@ public class AuthorizeMessage extends BaseHandler {
     protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
         
         log.debug("Get the primary message unit");
-        MessageUnit mu = MessageContextUtils.getPrimaryMessageUnit(mc);
+        EntityProxy<MessageUnit> mu = MessageContextUtils.getPrimaryMessageUnit(mc);
         
-        if (mu == null || mu instanceof PullRequest) {
+        if (mu == null || mu.entity instanceof PullRequest) {
             // Primary message unit is PullRequest => authorization checked separately
             return InvocationResponse.CONTINUE;
         }
         
         log.debug("Get the P-Mode for the primary message unit and check if authorization is used");
-        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(mu.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(mu.entity.getPMode());
         
         if (pmode == null) {
             // This can happen for general Error signals that do not have a RefToMessageId and can not be linked to
@@ -93,7 +94,7 @@ public class AuthorizeMessage extends BaseHandler {
         ISecurityConfiguration tpSecConfig = tradingPartner != null ? tradingPartner.getSecurityConfiguration() : null;
 
         /* Authorization of user messages is only based on a user name token that should be included in the WSS header
-        targeted to "ebms". If there is no UT configuration for the "ebms" target we do not authorize the message. An 
+        targeted to "ebms". If there is no UT configuration for the "ebms" entity we do not authorize the message. An 
         UT included in the message will be ignored.
         */
         IUsernameTokenConfiguration utConfig = tpSecConfig == null ? null :
@@ -110,11 +111,11 @@ public class AuthorizeMessage extends BaseHandler {
                                                   : null;
         
         if (!SecurityUtils.verifyUsernameToken(utConfig, ebmsUT)) {
-            log.warn("Message [Primary msg msgId=" + mu.getMessageId() + "] could not be authorized!");
+            log.warn("Message [Primary msg msgId=" + mu.entity.getMessageId() + "] could not be authorized!");
             // Generate error and set all message units (except PullRequest) to failed
             failMsgUnits(mc);            
         } else {
-            log.info("Message [Primary msg msgId=" + mu.getMessageId() + "] successfully authorized");
+            log.info("Message [Primary msg msgId=" + mu.entity.getMessageId() + "] successfully authorized");
         }
         
         return InvocationResponse.CONTINUE;
@@ -129,9 +130,10 @@ public class AuthorizeMessage extends BaseHandler {
     protected void failMsgUnits(MessageContext mc) throws DatabaseException {
         
         log.debug("Get all message units contained in message");
-        Collection<MessageUnit> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
+        Collection<EntityProxy> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
         
-        for (MessageUnit mu : rcvdMsgUnits) {
+        for (EntityProxy proxy : rcvdMsgUnits) {
+            MessageUnit mu = proxy.entity;
             // PullRequest are authenticated seperately, so process only other message unit types
             if (! (mu instanceof PullRequest)) {
                 log.debug("Authentication of message unit [msgId=" + mu.getMessageId() + "] failed!");                
@@ -139,7 +141,7 @@ public class AuthorizeMessage extends BaseHandler {
                 authError.setRefToMessageInError(mu.getMessageId());
                 authError.setErrorDetail("Authentication of message unit failed!");
                 MessageContextUtils.addGeneratedError(mc, authError);
-                MessageUnitDAO.setFailed(mu);
+                MessageUnitDAO.setFailed(proxy);
             } 
         }
     }

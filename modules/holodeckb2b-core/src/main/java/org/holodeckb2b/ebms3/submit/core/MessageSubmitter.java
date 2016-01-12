@@ -220,7 +220,7 @@ public class MessageSubmitter implements IMessageSubmitter {
                 p.setContentLocation(destPath.toString());
             }
             // Update the database with new locations
-            MessageUnitDAO.updatePayloadMetaData(um);
+            MessageUnitDAO.updateMessageUnitInfo(um);
         }
     }
     

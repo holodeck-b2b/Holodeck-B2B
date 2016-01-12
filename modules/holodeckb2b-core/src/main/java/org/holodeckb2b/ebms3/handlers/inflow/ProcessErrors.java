@@ -23,9 +23,10 @@ import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 
@@ -46,15 +47,17 @@ public class ProcessErrors extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         log.debug("Check for received errors in message.");
-        ArrayList<ErrorMessage>  errorSignals = (ArrayList<ErrorMessage>) mc.getProperty(MessageContextProperties.IN_ERRORS);
+        ArrayList<EntityProxy<ErrorMessage>>  errorSignals = 
+                              (ArrayList<EntityProxy<ErrorMessage>>) mc.getProperty(MessageContextProperties.IN_ERRORS);
         
         if (errorSignals != null && !errorSignals.isEmpty()) {
             log.debug("Message contains " + errorSignals.size() + " Error signals, start processing");
-            for (ErrorMessage e : errorSignals)
+            for (EntityProxy<ErrorMessage> e : errorSignals)
                 // Ignore Errors that already failed
-                if (!ProcessingStates.FAILURE.equals(e.getCurrentProcessingState().getName())) {
+                if (!ProcessingStates.FAILURE.equals(e.entity.getCurrentProcessingState().getName())) {
                     if (!processErrorSignal(e, mc)) {
-                        log.warn("Error Signal [msgId=" + e.getMessageId() + "] could not be processed succesfully!");
+                        log.warn("Error Signal [msgId=" + e.entity.getMessageId() 
+                                                                            + "] could not be processed succesfully!");
                     }
                 }
             log.debug("Error Signals processed");
@@ -81,23 +84,25 @@ public class ProcessErrors extends BaseHandler {
      *                      <code>false</code> otherwise
      * @throws DatabaseException When a database error occurs while processing the Error Signal
      */
-    protected boolean processErrorSignal(final ErrorMessage errSignal, MessageContext mc) throws DatabaseException {
-        log.debug("Start processing Error [msgId=" + errSignal.getMessageId() + "]");        
+    protected boolean processErrorSignal(final EntityProxy<ErrorMessage> errSignalProxy, MessageContext mc) 
+                                                                                        throws DatabaseException {
+        log.debug("Start processing Error [msgId=" + errSignalProxy.entity.getMessageId() + "]");        
         // Change processing state to indicate we start processing the error. Also checks that the error is not
         // already being processed
-        ErrorMessage errorSignal = MessageUnitDAO.startProcessingMessageUnit(errSignal);
-        if (errorSignal == null) {
-            log.debug("Error [msgId=" + errorSignal.getMessageId() + "] is already being processed, skipping");
+        if (!MessageUnitDAO.startProcessingMessageUnit(errSignalProxy)) {
+            log.debug("Error [msgId=" + errSignalProxy.entity.getMessageId() 
+                                                                           + "] is already being processed, skipping");
             return false;
         }
 
         log.debug("Get referenced message unit");
-        MessageUnit refdMsgUnit = MessageUnitDAO.getSentMessageUnitWithId(errSignal.getRefToMessageId());
+        EntityProxy<MessageUnit> refdMsgUnit = 
+                                    MessageUnitDAO.getSentMessageUnitWithId(errSignalProxy.entity.getRefToMessageId());
 
         // Change the processing state of the found messages
-        log.debug("Setting processing state of referenced message [" + refdMsgUnit.getMessageId() 
+        log.debug("Setting processing state of referenced message [" + refdMsgUnit.entity.getMessageId() 
                                                                                             + "] to failed");
-        if (isWarning(errSignal)) {
+        if (isWarning(errSignalProxy.entity)) {
             log.debug("The Error signal contains only warnings, so refd message unit is processed");
             MessageUnitDAO.setWarning(refdMsgUnit);
         } else {
@@ -105,9 +110,9 @@ public class ProcessErrors extends BaseHandler {
             MessageUnitDAO.setFailed(refdMsgUnit);
         }
 
-        log.debug("Done processing Error signal [" + errorSignal.getMessageId() + "]");
+        log.debug("Done processing Error signal [" + errSignalProxy.entity.getMessageId() + "]");
         // Errors may need to be delivered to bussiness app which can be done now
-        MessageUnitDAO.setReadyForDelivery(errorSignal);   
+        MessageUnitDAO.setReadyForDelivery(errSignalProxy);   
         return true;
     }
     

@@ -43,6 +43,7 @@ import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
 import org.holodeckb2b.ebms3.persistency.entities.Receipt;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.module.HolodeckB2BCoreImpl;
 import org.w3c.dom.Document;
 
@@ -139,10 +140,11 @@ public final class Axis2Utils {
      * @param message   The MessageUnit to send 
      * @param log       The log to use for writing log information
      */
-    public static void sendMessage(MessageUnit message, Log log) {
+    public static void sendMessage(EntityProxy msgProxy, Log log) {
         ServiceClient sc;
         OperationClient oc;
 
+        MessageUnit message = msgProxy.entity;
         try {
             log.debug("Prepare Axis2 client to send " + message.getClass().getSimpleName());
             sc = new ServiceClient(Config.getAxisConfigurationContext(), createAnonymousService());
@@ -154,16 +156,16 @@ public final class Axis2Utils {
 
             if (message instanceof UserMessage) {
                 log.debug("Message to send is a UserMessage");
-                msgCtx.setProperty(MessageContextProperties.OUT_USER_MESSAGE, message);
+                msgCtx.setProperty(MessageContextProperties.OUT_USER_MESSAGE, msgProxy);
             } else if (message instanceof PullRequest) {
                 log.debug("Message to send is a PullRequest");
-                msgCtx.setProperty(MessageContextProperties.OUT_PULL_REQUEST, message);
+                msgCtx.setProperty(MessageContextProperties.OUT_PULL_REQUEST, msgProxy);
             } else if (message instanceof ErrorMessage) {
                 log.debug("Message to send is a ErrorMessage");
-                MessageContextUtils.addErrorSignalToSend(msgCtx, (ErrorMessage) message);
+                MessageContextUtils.addErrorSignalToSend(msgCtx, msgProxy);
             } else if (message instanceof Receipt) {
                 log.debug("Message to send is a Receipt");
-                MessageContextUtils.addReceiptToSend(msgCtx, (Receipt) message);
+                MessageContextUtils.addReceiptToSend(msgCtx, msgProxy);
             }
             oc.addMessageContext(msgCtx);
 

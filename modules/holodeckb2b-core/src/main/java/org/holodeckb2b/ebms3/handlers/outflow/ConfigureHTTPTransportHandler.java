@@ -26,11 +26,11 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.Receipt;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.IProtocol;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Configures the actual message transport over the HTTP protocol. The parameters for the transfer are defined by
@@ -81,7 +81,7 @@ public class ConfigureHTTPTransportHandler extends BaseHandler {
         
         // Get the primary message unit that is processed
         log.debug("Get the primary MessageUnit from MessageContext");
-        MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+        MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
         
         // Only when message contains a message unit there is something to do
         if (primaryMU != null) {

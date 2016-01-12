@@ -23,6 +23,7 @@ import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.handlers.inflow.ReadUserMessage;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 
 /**
  * Extends {@link BaseHandler} to ensure the handler only runs when there is a User Message to process. It checks 
@@ -59,9 +60,9 @@ public abstract class AbstractUserMessageHandler extends BaseHandler {
     protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
         
         log.debug("Check if MessageContext contains a MessageUnit");
-        UserMessage mu = null;
+        EntityProxy<UserMessage> mu = null;
         try {            
-            mu = (UserMessage) mc.getProperty((isInFlow(IN_FLOW) ? 
+            mu = (EntityProxy<UserMessage>) mc.getProperty((isInFlow(IN_FLOW) ? 
                     MessageContextProperties.IN_USER_MESSAGE : MessageContextProperties.OUT_USER_MESSAGE));
         } catch (ClassCastException cce) {
             // MessageContext did contain an object for the given key, but it is not a UserMessage! 
@@ -72,7 +73,7 @@ public abstract class AbstractUserMessageHandler extends BaseHandler {
                                         "MessageContext contained a non UserMessage object as user message!"));
         }
         
-        if (mu == null || ProcessingStates.FAILURE.equals(mu.getCurrentProcessingState().getName())) {
+        if (mu == null || ProcessingStates.FAILURE.equals(mu.entity.getCurrentProcessingState().getName())) {
             // This flow does not contain a UserMessage message unit to process, so nothing to do
             log.debug("MessageContext does not contain a UserMessage message unit for processing, continue flow");
             return InvocationResponse.CONTINUE;
@@ -86,7 +87,7 @@ public abstract class AbstractUserMessageHandler extends BaseHandler {
      * Abstract method that implementations must use to do the actual user message processing.
      * 
      * @param mc            The Axis2 {@link MessageContext} of the processed message
-     * @param um            The currently processed {@links UserMessage}
+     * @param um            The {@link EntityProxy} to the currently processed {@links UserMessage}
      * @return              How to continue processing of the message. If message processing should not continue, it is
      *                      RECOMMENDED to throw an AxisFault instead of returning <code>InvocationResponse.ABORT</code>
      *                      because this enables sending a response.
@@ -95,5 +96,5 @@ public abstract class AbstractUserMessageHandler extends BaseHandler {
      *                      units in an undefined state! Also ensure that all information needed for a response is set
      *                      in the message context to make it available for handlers in the fault flow!
      */
-    protected abstract InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws Exception;    
+    protected abstract InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> um) throws Exception;    
 }

@@ -29,6 +29,7 @@ import org.holodeckb2b.ebms3.errors.InvalidHeader;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 
 /**
@@ -84,10 +85,11 @@ public class ReadUserMessage extends BaseHandler {
                 
                 // Store it in both database and message context for further processing
                 log.debug("Saving user message meta data to database");
-                umData = MessageUnitDAO.storeReceivedMessageUnit(umData);
+                EntityProxy<org.holodeckb2b.ebms3.persistency.entities.UserMessage> userMessage = 
+                                                                        MessageUnitDAO.storeReceivedMessageUnit(umData);
                 log.debug("Message meta data saved to database");
 
-                mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umData);
+                mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessage);
                 log.debug("User message with msgId " + umData.getMessageId() + " succesfully read");  
             }
         }

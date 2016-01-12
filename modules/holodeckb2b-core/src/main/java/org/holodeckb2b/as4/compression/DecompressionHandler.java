@@ -24,8 +24,9 @@ import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -47,7 +48,10 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
 
     
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws AxisFault {
+    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> umProxy) throws AxisFault {
+        // Extract the entity object from the proxy
+        UserMessage um = umProxy.entity;
+        
         // Decompression is only needed if the message contains payloads at all
         if (Utils.isNullOrEmpty(um.getPayloads())) 
             return InvocationResponse.CONTINUE;
@@ -74,7 +78,7 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
                     decompressFailure.setRefToMessageInError(um.getMessageId());
                     MessageContextUtils.addGeneratedError(mc, decompressFailure);
                     try {
-                        um = MessageUnitDAO.setFailed(um);
+                        MessageUnitDAO.setFailed(umProxy);
                     } catch (DatabaseException dbe) {
                         // Ai, something went wrong when changing the process state
                         log.error("An error occurred when setting processing state to Failure. Details: " 

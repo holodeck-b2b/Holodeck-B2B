@@ -24,11 +24,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.util.MessageIdGenerator;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -61,7 +63,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
         
         // Get all the message id's for unacknowlegded user messages
         log.debug("Get all user messages that may need to be resent");
-        Collection<UserMessage> waitingForRcpt = null;
+        Collection<EntityProxy<UserMessage>> waitingForRcpt = null;
         try {
             waitingForRcpt = MessageUnitDAO.getMessageUnitsInState(UserMessage.class,
                                                             new String[] {ProcessingStates.AWAITING_RECEIPT, 
@@ -71,11 +73,13 @@ public class RetransmissionWorker extends AbstractWorkerTask {
             return;
         }
         
-        if (waitingForRcpt != null && !waitingForRcpt.isEmpty()) {
+        if (!Utils.isNullOrEmpty(waitingForRcpt)) {
             log.debug(waitingForRcpt.size() + " messages may be waiting for a Receipt");
             
             // For each message check if it should be retransmitted or not
-            for (UserMessage um : waitingForRcpt) {
+            for (EntityProxy<UserMessage> umProxy : waitingForRcpt) {
+                // Extract the entity object from the proxy
+                UserMessage um = umProxy.entity;
                 try {
                     log.debug("Get retry configuration from P-Mode [" + um.getPMode() + "]");
                     // Retry information is contained in Leg, and as we only have One-way it is always the first 
@@ -98,7 +102,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                                     + " Awareness configuration in P-Mode [" + um.getPMode() + "]");
                         // Because we don't know how to process this message further the only thing we can do is set
                         // the processing to failed
-                        um = MessageUnitDAO.setFailed(um);
+                        MessageUnitDAO.setFailed(umProxy);
                         continue; // with next message
                     }
 
@@ -118,7 +122,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                             missingReceiptsLog.error("No Receipt received for UserMessage with messageId=" 
                                                         + um.getMessageId());
                             // Change processing state accordingly
-                            MessageUnitDAO.setFailed(um);
+                            MessageUnitDAO.setFailed(umProxy);
                             log.debug("Changed processing state of user message to reflect failure");
                             // Generate and report (if requested) MissingReceipt
                             generateMissingReceiptError(um, leg);
@@ -126,10 +130,10 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                             // Message can be resend, is the message to be pushed or pulled?
                             if (isPulled(um)) {
                                 log.debug("Message must be pulled by receiver again");
-                                MessageUnitDAO.setWaitForPull(um);
+                                MessageUnitDAO.setWaitForPull(umProxy);
                             } else {
                                 log.debug("Message must be pushed to receiver again");
-                                MessageUnitDAO.setReadyToPush(um);
+                                MessageUnitDAO.setReadyToPush(umProxy);
                             }
                             log.debug("Message unit is ready for retransmission");
                         } 
@@ -188,8 +192,9 @@ public class RetransmissionWorker extends AbstractWorkerTask {
         errSignal.setTimestamp(new Date());
         errSignal.addError(missingReceiptError);
         
+        EntityProxy<ErrorMessage> errorSignal;
         try {
-            MessageUnitDAO.storeReceivedMessageUnit(errSignal);
+            errorSignal = MessageUnitDAO.storeReceivedMessageUnit(errSignal);
         } catch (DatabaseException ex) {
             log.error("An error occured while saving the MissingReceipt error in database!" 
                         + "Details: " + ex.getMessage());
@@ -223,24 +228,24 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                     log.error("No delivery specification available for notification of MissingReceipt!" 
                                 + " P-Mode=" + um.getPMode());
                     // Indicate delivery failure
-                    MessageUnitDAO.setFailed(errSignal);
+                    MessageUnitDAO.setFailed(errorSignal);
                 } else {
                     try {
                         // Deliver the MissingReceipt error using the given delivery spec
                         IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec);
                         deliverer.deliver(errSignal);
                         // Indicate successful delivery
-                        MessageUnitDAO.setDone(errSignal);
+                        MessageUnitDAO.setDone(errorSignal);
                     } catch (MessageDeliveryException ex) {
                         log.error("An error occurred while delivering the MissingReceipt error to business application!"
                                     + "Details: "  + ex.getMessage());
                         // Indicate delivery failure
-                        MessageUnitDAO.setFailed(errSignal);
+                        MessageUnitDAO.setFailed(errorSignal);
                     }
                 }
             } else
                 // Indicate MissingReceipt error processing is complete
-                MessageUnitDAO.setDone(errSignal);
+                MessageUnitDAO.setDone(errorSignal);
         } catch (DatabaseException dbe) {
             log.error("An error occurred while updating the processing state of the MissingReceipt error!" 
                      + " Details: " + dbe.getMessage());

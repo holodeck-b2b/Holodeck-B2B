@@ -23,17 +23,19 @@ import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.ProcessingModeMismatch;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.Receipt;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.PModeFinder;
-import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for determining the P-Modes that define how the received message units
@@ -66,15 +68,16 @@ public class FindPModes extends BaseHandler {
     
         try {
             log.debug("Check for User mesage unit");
-            UserMessage usrMsg = (UserMessage) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
+            EntityProxy<UserMessage> usrMsg = (EntityProxy<UserMessage>) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
             if (usrMsg != null) {
                 log.debug("Message contains a User message unit, find the P-Mode");
-                IPMode pmode = PModeFinder.forReceivedUserMessage(usrMsg);
+                IPMode pmode = PModeFinder.forReceivedUserMessage(usrMsg.entity);
                 if (pmode == null) {
                     // No matching P-Mode could be found for this message, return error
                     createErrorNoPMode(mc, usrMsg);
                 } else {
-                    log.debug("Found P-Mode [" + pmode.getId() + "] for message [" + usrMsg.getMessageId() + "]");
+                    log.debug("Found P-Mode [" + pmode.getId() + "] for message [" 
+                                                                                + usrMsg.entity.getMessageId() + "]");
                     MessageUnitDAO.setPMode(usrMsg, pmode);
                 }
             } else {
@@ -82,17 +85,18 @@ public class FindPModes extends BaseHandler {
             }
             
             log.debug("Check for Error message units");
-            ArrayList<ErrorMessage>  errorSignals = (ArrayList<ErrorMessage>) 
+            ArrayList<EntityProxy<ErrorMessage>>  errorSignals = (ArrayList<EntityProxy<ErrorMessage>>) 
                                                                 mc.getProperty(MessageContextProperties.IN_ERRORS);
-            if (errorSignals != null && !errorSignals.isEmpty()) {
+            if (!Utils.isNullOrEmpty(errorSignals)) {
                 log.debug("Message contains " + errorSignals.size() + " Error signals, start processing");
-                for (ErrorMessage e : errorSignals) {
-                    IPMode pmode = findForReceivedErrorSignal(e, mc);
+                for (EntityProxy<ErrorMessage> e : errorSignals) {
+                    IPMode pmode = findForReceivedErrorSignal(e.entity, mc);
                     if (pmode == null) {
                         // No matching P-Mode could be found for this message, return error
                         createErrorNoPMode(mc, e);
                     } else {
-                        log.debug("Found P-Mode [" + pmode.getId() + "] for message [" + e.getMessageId() + "]");
+                        log.debug("Found P-Mode [" + pmode.getId() + "] for message [" 
+                                                                                    + e.entity.getMessageId() + "]");
                         MessageUnitDAO.setPMode(e, pmode);
                     } 
                 }
@@ -101,17 +105,17 @@ public class FindPModes extends BaseHandler {
             }
         
             log.debug("Check for Receipt message units");
-            ArrayList<Receipt>  rcptSignals = (ArrayList<Receipt>) 
+            ArrayList<EntityProxy<Receipt>>  rcptSignals = (ArrayList<EntityProxy<Receipt>>) 
                                                                 mc.getProperty(MessageContextProperties.IN_RECEIPTS);
-            if (rcptSignals != null && !rcptSignals.isEmpty()) {
+            if (!Utils.isNullOrEmpty(rcptSignals)) {
                 log.debug("Message contains " + rcptSignals.size() + " Receipt signals, start processing");
-                for (Receipt r : rcptSignals) {
-                    IPMode pmode = getPModeFromRefdMessage(r.getRefToMessageId());
+                for (EntityProxy<Receipt> r : rcptSignals) {
+                    IPMode pmode = getPModeFromRefdMessage(r.entity.getRefToMessageId());
                     if (pmode == null) {
                         // No matching P-Mode could be found for this message, return error
                         createErrorNoPMode(mc, r);
                     } else {
-                        log.debug("Found P-Mode [" + pmode.getId() + "] for message [" + r.getMessageId() + "]");
+                        log.debug("Found P-Mode [" + pmode.getId() + "] for message [" + r.entity.getMessageId() + "]");
                         MessageUnitDAO.setPMode(r, pmode);
                     } 
                 }
@@ -150,10 +154,10 @@ public class FindPModes extends BaseHandler {
         // If there is no referenced message unit and the error is received as a response to a single message unit
         //  we sent out we still have a reference
         if (refToMessageId == null && isInFlow(INITIATOR)) {
-            Collection<MessageUnit>  reqMUs = MessageContextUtils.getSentMessageUnits(mc);
+            Collection<EntityProxy>  reqMUs = MessageContextUtils.getSentMessageUnits(mc);
             if (reqMUs.size() == 1) {
                 // Request contained one message unit, assuming error applies to it
-                refToMessageId = reqMUs.iterator().next().getMessageId();
+                refToMessageId = reqMUs.iterator().next().entity.getMessageId();
                 e.setRefToMessageId(refToMessageId);
             } // else:  No or more than one message unit in request => can not be related to specific message unit
         }   
@@ -171,7 +175,7 @@ public class FindPModes extends BaseHandler {
     protected static IPMode getPModeFromRefdMessage(String refToMsgId) {
         IPMode pmode = null;
         
-        MessageUnit refdMsgUnit = null;
+        EntityProxy<MessageUnit> refdMsgUnit = null;
         if (refToMsgId != null && !refToMsgId.isEmpty()) {
             try {
                 refdMsgUnit = MessageUnitDAO.getSentMessageUnitWithId(refToMsgId);
@@ -179,14 +183,13 @@ public class FindPModes extends BaseHandler {
                 // Ignore here, we probably be thrown again quickly after
             }
             if (refdMsgUnit != null) {
-                pmode = HolodeckB2BCoreInterface.getPModeSet().get(refdMsgUnit.getPMode());
+                pmode = HolodeckB2BCoreInterface.getPModeSet().get(refdMsgUnit.entity.getPMode());
             }
         }   
         
         return pmode;
     }
-    
-        
+            
     /**
      * Helper method to create a Error to signal that no P-Mode can be found for a message unit and to change the 
      * processing state of the message unit to {@link ProcessingStates#FAILURE}.
@@ -195,7 +198,11 @@ public class FindPModes extends BaseHandler {
      * @param mu    The message unit for which the P-Mode could not be found
      * @throws DatabaseException    When changing the processing state fails.
      */
-    private void createErrorNoPMode(final MessageContext mc, final MessageUnit mu) throws DatabaseException {
+    private void createErrorNoPMode(final MessageContext mc, final EntityProxy muProxy) 
+                                            throws DatabaseException {
+        // Extract entity object
+        MessageUnit mu = muProxy.entity;
+        
         log.error("No P-Mode found for message unit [" + mu.getMessageId() + "], unable to process it!");
         ProcessingModeMismatch   noPmodeIdError = new ProcessingModeMismatch();
         noPmodeIdError.setRefToMessageInError(mu.getMessageId());
@@ -204,6 +211,6 @@ public class FindPModes extends BaseHandler {
         MessageContextUtils.addGeneratedError(mc, noPmodeIdError);
 
         log.debug("Set the processing state of this user message to failure");
-        MessageUnitDAO.setFailed(mu);
+        MessageUnitDAO.setFailed(muProxy);
     }
 }

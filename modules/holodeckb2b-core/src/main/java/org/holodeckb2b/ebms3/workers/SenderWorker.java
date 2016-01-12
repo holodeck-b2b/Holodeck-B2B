@@ -25,6 +25,7 @@ import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
@@ -49,27 +50,22 @@ public class SenderWorker extends AbstractWorkerTask {
     @Override
     public void doProcessing() {
         try {
-            log.debug("Getting list of user messages to send");
-
-            List<MessageUnit> newMsgs = MessageUnitDAO.getMessageUnitsInState(MessageUnit.class,
+            log.debug("Getting list of message units to send");
+            List<EntityProxy<MessageUnit>> newMsgs = MessageUnitDAO.getMessageUnitsInState(MessageUnit.class,
                                                                         new String[] {ProcessingStates.READY_TO_PUSH});
 
             if (newMsgs != null && newMsgs.size() > 0) {
-                log.info("Found " + newMsgs.size() + " messages to send");
-                for (MessageUnit message : newMsgs) {
+                log.info("Found " + newMsgs.size() + " message units to send");
+                for (EntityProxy<MessageUnit> message : newMsgs) {
                     // Indicate that processing will start
-                    MessageUnit muInProcess = MessageUnitDAO.startProcessingMessageUnit(message, 
-                                                                                    ProcessingStates.READY_TO_PUSH);
-                    if (muInProcess != null) {
+                    if (MessageUnitDAO.startProcessingMessageUnit(message)) {
                         // only when we could succesfully set processing state really start processing
-                        log.debug("Start processing message [" + muInProcess.getMessageId() + "]");
-                        Axis2Utils.sendMessage(muInProcess, log);
-                        log.info("Successfully processed message [" + muInProcess.getMessageId() + "]");
-                    }else {
+                        log.debug("Start processing message [" + message.entity.getMessageId() + "]");
+                        Axis2Utils.sendMessage(message, log);
+                    } else
                         // Message probably already in process
-                        log.debug("Could not start processing message [" + message.getMessageId() 
-                                    + "] because switching to processing state was unsuccesful");
-                    }                    
+                        log.debug("Could not start processing message [" + message.entity.getMessageId() 
+                                    + "] because switching to processing state was unsuccesful");                                        
                 }
             } else
                 log.info("No messages found that are ready for sending");

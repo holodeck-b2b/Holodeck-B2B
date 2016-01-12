@@ -26,6 +26,7 @@ import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.pmode.ILeg;
@@ -36,7 +37,6 @@ import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for determining the security settings that should be applied to the 
@@ -58,7 +58,7 @@ public class GetSecurityConfiguration extends BaseHandler {
     protected InvocationResponse doProcessing(MessageContext mc) throws AxisFault {
         
         log.debug("Get the primary message unit for this message");
-        MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+        MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
         if (primaryMU == null)
             // No primary message => this is probably an empty response
             return InvocationResponse.CONTINUE;

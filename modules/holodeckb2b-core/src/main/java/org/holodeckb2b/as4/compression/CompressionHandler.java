@@ -24,13 +24,14 @@ import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.persistency.entities.Property;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4PayloadProfile;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.pmode.IPayloadProfile;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the <i>OUT_FLOW</i> handler part of the AS4 Compression Feature responsible for the compression of the payload
@@ -53,7 +54,9 @@ public class CompressionHandler extends AbstractUserMessageHandler {
 
     
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws AxisFault {
+    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> umProxy) throws AxisFault {
+        // Extract the entity object from the proxy
+        UserMessage um = umProxy.entity;
         
         // First check if this message contains payloads at all
         if (Utils.isNullOrEmpty(um.getPayloads()))

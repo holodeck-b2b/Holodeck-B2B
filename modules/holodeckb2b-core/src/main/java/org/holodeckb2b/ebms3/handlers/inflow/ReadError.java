@@ -32,8 +32,9 @@ import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.ebms3.packaging.ErrorSignal;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PackagingException;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 
 /**
@@ -90,9 +91,9 @@ public class ReadError extends BaseHandler {
                         errorSignal = ErrorSignal.readElement(errElem);    
                         // And store in database and message context for further processing
                         log.debug("Store Error Signal in database");
-                        MessageUnitDAO.storeReceivedMessageUnit(errorSignal);
+                        EntityProxy<ErrorMessage> errSigProxy = MessageUnitDAO.storeReceivedMessageUnit(errorSignal);
                         // Add to message context for further processing
-                        MessageContextUtils.addRcvdError(mc, errorSignal);
+                        MessageContextUtils.addRcvdError(mc, errSigProxy);
                         log.debug("Check consistency of references");
                         if (!checkRefConsistency(errorSignal)) {
                             log.warn("The references containd in Error signal [msgId=" + errorSignal.getMessageId()
@@ -102,7 +103,7 @@ public class ReadError extends BaseHandler {
                             viError.setErrorDetail("Error contains inconsistent references");
                             viError.setRefToMessageInError(errorSignal.getMessageId());
                             MessageContextUtils.addGeneratedError(mc, viError);  
-                            MessageUnitDAO.setFailed(errorSignal);
+                            MessageUnitDAO.setFailed(errSigProxy);
                         } else {
                             log.debug("References are consistent");
                         }

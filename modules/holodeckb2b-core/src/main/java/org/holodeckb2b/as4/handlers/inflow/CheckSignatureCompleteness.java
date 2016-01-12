@@ -27,15 +27,16 @@ import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import static org.holodeckb2b.interfaces.messagemodel.IPayload.Containment.ATTACHMENT;
 import static org.holodeckb2b.interfaces.messagemodel.IPayload.Containment.BODY;
 import org.holodeckb2b.interfaces.pmode.IPMode;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.security.util.SecurityUtils;
 
 /**
@@ -58,7 +59,9 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws Exception {
+    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> umProxy) throws Exception {
+        // Extract the entity object from proxy
+        UserMessage um = umProxy.entity;
         
         // First check if this message needs a Receipt and is signed 
         IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode());
@@ -118,7 +121,7 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
         // If not all payloads are referenced the UserMessage should not be processed further, so change it processing
         // state to failed
         if (!allRefd) 
-            MessageUnitDAO.setFailed(um);        
+            MessageUnitDAO.setFailed(umProxy);        
         
         return InvocationResponse.CONTINUE;        
     }

@@ -29,15 +29,16 @@ import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.Receipt;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.util.SecurityUtils;
 
@@ -82,11 +83,13 @@ public class CreateReceipt extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws AxisFault {
+    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> umProxy) throws AxisFault {        
         // Only when user message was successfully delivered to business application the Receipt should be created
         Boolean delivered = (Boolean) mc.getProperty(MessageContextProperties.DELIVERED_USER_MSG);
         
         if (delivered != null && delivered) {
+            // Extract the entity object from the proxy
+            UserMessage um = umProxy.entity;
             log.debug("User message was succesfully delivered, check if Receipt is needed");
             
             IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode());
@@ -131,15 +134,15 @@ public class CreateReceipt extends AbstractUserMessageHandler {
             log.debug("Store the receipt signal in database");
             try {
                 //@todo: Use same pattern for creating the receipt as other message unit (let MsgDAO factor object)
-                rcptData = MessageUnitDAO.storeOutgoingReceiptMessageUnit(rcptData, asResponse);
+                EntityProxy<Receipt> receipt = MessageUnitDAO.storeOutgoingReceiptMessageUnit(rcptData, asResponse);
                 if (asResponse) {
                     log.debug("Store the receipt in the MessageContext");
-                    mc.setProperty(MessageContextProperties.RESPONSE_RECEIPT, rcptData);
+                    mc.setProperty(MessageContextProperties.RESPONSE_RECEIPT, receipt);
                     mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
                 } else {
                     if (rcptConfig.getTo() != null && !rcptConfig.getTo().isEmpty()) {
                         log.debug("The Receipt should be sent separately, change its processing state to READY_TO_PUSH");
-                        MessageUnitDAO.setReadyToPush(rcptData);
+                        MessageUnitDAO.setReadyToPush(receipt);
                     } else {
                         log.debug("Receipt will be piggybacked on next PullRequest");
                     }

@@ -26,11 +26,13 @@ import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
@@ -41,7 +43,6 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for checking if error message should be delivered to the business 
@@ -73,7 +74,7 @@ public class DeliverErrors extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         // Check if this message contains error signals
-        Collection<ErrorMessage> errorSignals = (Collection<ErrorMessage>) 
+        Collection<EntityProxy<ErrorMessage>> errorSignals = (Collection<EntityProxy<ErrorMessage>>) 
                                                     mc.getProperty(MessageContextProperties.IN_ERRORS);
         
         if (errorSignals == null || errorSignals.isEmpty())
@@ -83,11 +84,14 @@ public class DeliverErrors extends BaseHandler {
         log.debug("Message contains " + errorSignals.size() + " Error signals");
         
         // Process each signal
-        for(ErrorMessage errorSig : errorSignals) {
+        for(EntityProxy<ErrorMessage> errSigProxy : errorSignals) {
+            // Extract the entity object
+            ErrorMessage errorSig = errSigProxy.entity;
+            
             // Prepare message for delivery by checking it is still ready for delivery and then 
             // change its processing state to "out for delivery"
             log.debug("Prepare message [" + errorSig.getMessageId() + "] for delivery");
-            boolean readyForDelivery = MessageUnitDAO.startDeliveryOfMessageUnit(errorSig);
+            boolean readyForDelivery = MessageUnitDAO.startDeliveryOfMessageUnit(errSigProxy);
                         
             if(readyForDelivery) {
                 // Errors in this signal can be delivered to business application
@@ -105,7 +109,7 @@ public class DeliverErrors extends BaseHandler {
                     }
                 
                 // All errors in signal processed, change the processing state to done
-                errorSig = MessageUnitDAO.setDone(errorSig);
+                MessageUnitDAO.setDone(errSigProxy);
             } else {
                 log.info("Error signal [" + errorSig.getMessageId() + "] is already processed for delivery");
             }
@@ -143,7 +147,7 @@ public class DeliverErrors extends BaseHandler {
             log.debug("The error references message unit with msgId=" + refToMsgId);
             // Get the referenced message unit. There may be more than one MU with the given id, we assume they
             // all use the same P-Mode
-            MessageUnit refdMsgUnit = null;
+            EntityProxy<MessageUnit> refdMsgUnit = null;
             try {
                 refdMsgUnit = MessageUnitDAO.getSentMessageUnitWithId(refToMsgId);
             } catch (DatabaseException dbe) {
@@ -153,7 +157,7 @@ public class DeliverErrors extends BaseHandler {
 
             if (refdMsgUnit != null)
                 // Found referenced message unit(s), use its P-Mode to determine if and how to deliver error
-                deliverySpec = getErrorDelivery(refdMsgUnit);
+                deliverySpec = getErrorDelivery(refdMsgUnit.entity);
             else
                 // No messsage units found for refToMsgId. This should not occur here as this is already checked in
                 // previous handler!
@@ -162,10 +166,10 @@ public class DeliverErrors extends BaseHandler {
             log.debug("Error does not directly reference a message unit");
             // If the error is a direct response and there was just on outgoing message unit we still have a 
             // reference
-            Collection<MessageUnit>  reqMUs = MessageContextUtils.getSentMessageUnits(mc);
+            Collection<EntityProxy>  reqMUs = MessageContextUtils.getSentMessageUnits(mc);
             if (reqMUs.size() == 1) {
                 log.debug("Request contained one message unit, assuming error applies to it");
-                deliverySpec = getErrorDelivery(reqMUs.iterator().next());
+                deliverySpec = getErrorDelivery(reqMUs.iterator().next().entity);
             }
         }
         

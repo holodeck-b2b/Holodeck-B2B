@@ -212,7 +212,8 @@ public class CreateWSSHeaders extends BaseHandler {
      * @param utConfig      The configuration for the username token
      * @param pwdCBHandler  The {@link PasswordCallbackHandler} to use for handing over the password to WSS4J library
      */
-    private void setupUsernameToken(MessageContext mc, IUsernameTokenConfiguration utConfig, PasswordCallbackHandler pwdCBHandler) {
+    private void setupUsernameToken(MessageContext mc, IUsernameTokenConfiguration utConfig, 
+                                    PasswordCallbackHandler pwdCBHandler) {
         mc.setProperty(WSHandlerConstants.USER, utConfig.getUsername());
         mc.setProperty(WSHandlerConstants.ADD_USERNAMETOKEN_CREATED, Boolean.toString(utConfig.includeCreated()));
         mc.setProperty(WSHandlerConstants.ADD_USERNAMETOKEN_NONCE, Boolean.toString(utConfig.includeNonce()));
@@ -282,7 +283,8 @@ public class CreateWSSHeaders extends BaseHandler {
      * @param sigConfig     The configuration for creating the signature
      * @param pwdCBHandler  The {@link PasswordCallbackHandler} to use for handing over the password to WSS4J library
      */
-    private void setupEncryption(MessageContext mc, IEncryptionConfiguration encCfg, PasswordCallbackHandler pwdCBHandler) {
+    private void setupEncryption(MessageContext mc, IEncryptionConfiguration encCfg, 
+                                 PasswordCallbackHandler pwdCBHandler) {
         // Set up crypto engine
         Properties encProperties = SecurityUtils.createCryptoConfig(SecurityUtils.CertType.pub);
         mc.setProperty(WSHandlerConstants.ENC_PROP_REF_ID, "" + encProperties.hashCode());
@@ -343,7 +345,7 @@ public class CreateWSSHeaders extends BaseHandler {
     private void logError(final MessageContext mc, final String role, final String message) {
         StringBuffer logMsg = new StringBuffer();
         // Use primary message unit to log error
-        MessageUnit pMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+        MessageUnit  pMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
         
         logMsg.append("Could not create WS-Security header");
         if (Utils.isNullOrEmpty(role)) 
