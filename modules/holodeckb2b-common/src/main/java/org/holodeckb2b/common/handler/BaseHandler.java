@@ -151,11 +151,14 @@ public abstract class BaseHandler extends AbstractHandler {
         
         // Do actual processing in implementation
         try {
-            return doProcessing(mc);
-        } catch (Exception ex) {
+            log.trace("Start processing");
+            InvocationResponse result = doProcessing(mc);
+            log.trace("End processing");
+            return result;
+        } catch (Throwable t) {
             // Unhandled exception during processing, should not happen!
-            log.fatal("An unhandled exception occurred while processing the message! Details: " + ex.getMessage());
-            throw new AxisFault("Internal error", ex);
+            log.fatal("An unhandled exception occurred while processing the message! Details: " + t.getMessage());
+            throw new AxisFault("Internal error", t);
         }
     }
 
