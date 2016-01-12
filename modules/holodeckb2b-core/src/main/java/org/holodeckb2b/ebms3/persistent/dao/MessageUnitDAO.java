@@ -801,7 +801,7 @@ public class MessageUnitDAO {
      */
     public static EntityProxy<MessageUnit> getSentMessageUnitWithId(String messageId) throws DatabaseException {
         List<EntityProxy<MessageUnit>> msgsWithId = getMessageUnitsWithIdInDirection(messageId, MessageUnit.Direction.OUT);   
-        if (msgsWithId.size() > 0) 
+        if (!Utils.isNullOrEmpty(msgsWithId)) 
             return msgsWithId.get(0);
         else
             return null;
