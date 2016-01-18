@@ -38,8 +38,8 @@ import org.holodeckb2b.security.tokens.UsernameToken;
 import org.holodeckb2b.security.util.SecurityUtils;
 
 /**
- * Is the handler responsible for authorizing the processing of a received message (and by that, the message units 
- * included in it).
+ * Is the <i>IN_FLOW</i> handler responsible for authorizing the processing of a received message (and by that, the 
+ * message units included in it).
  * <p>Authorization of message units is specified in section 7.10 of the ebMS V3 Core Specification. It uses a 
  * WS-Security UsernameToken element in a WSS header targeted to the "ebms" role/actor. The configuration is done using 
  * P-Mode parameters in the <code>PMode.Initiator|Responder.Authorization</code> group depending on the role Holodeck 
@@ -47,6 +47,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS)</code>.<br>
  * If the P-Mode does not include a configuration setting for username tokens there is no authorization performed. This
  * also implies that a message containing an unexpected username token is not rejected.
+ * <p>The P-Mode of the <i>primary</i> message unit is used to determine whether the message must be authorized.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
