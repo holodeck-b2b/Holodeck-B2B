@@ -67,7 +67,8 @@ public class CheckSentResult extends BaseHandler {
         // And change their processing state
         for (EntityProxy mu : msgUnits) {
             MessageUnitDAO.setSending(mu);
-            log.info(mu.getClass().getSimpleName()+ " with msg-id [" + mu.entity.getMessageId() + "] is being sent");
+            log.info(mu.entity.getClass().getSimpleName() + " with msg-id [" 
+                                                                    + mu.entity.getMessageId() + "] is being sent");
         }        
         
         return InvocationResponse.CONTINUE;
