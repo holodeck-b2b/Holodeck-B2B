@@ -20,7 +20,7 @@
 This directory is used by default to store the Java keystore files that 
 hold the certificates that are used for signing and encrypting messages.
 
-It should contain two keystores:
+It contains two keystores:
 
 1) "publickeys.jks" holding the public keys. These are used to validate
    the signature of a received message and to encrypt sent messages.
@@ -28,12 +28,24 @@ It should contain two keystores:
 2) "privatekeys.jks" holding the private keys. These are used to sign
    sent messages and decrypt received messages.
 
-The delivery package does not include keystores, you must create them
-when you start using the security features. The keystores are 
-automatically created when you add the first certificate (see below).
+The delivery package by default includes empty keystores, with simple
+passwords "secret" for the private one and "nosecrets" for the public
+one. It is HIGHLY RECOMMENDED to change these passwords to more safer
+ones, see below how to configure Holodeck B2B for the new passwords.
 
+2. Configuring Holodeck B2B
+===========================
 
-2. Adding certificates
+To give Holodeck B2B access to the keystores you need to configure the 
+keystore passwords in the Holodeck B2B configuration file which is found 
+in «Holodeck B2B base dir»/conf/holodeckb2b.xml
+Set "PrivateKeyStorePassword" and "PublicKeyStorePassword" parameters to
+the passwords of the respective keystores. 
+Also the location where Holodeck B2B should look for the keystores can be 
+specified by setting the "PrivateKeyStorePath" and "PublicKeyStorePath"
+parameters. 
+
+3. Adding certificates
 ======================
 
 To add a X.509v3 certificate holding the public key of a trading
@@ -60,20 +72,6 @@ keytool -importkeystore -srcstoretype PKCS12 \
 NOTE: Use the following command to list the certificates in the PKCS#12 
 file and show their names / aliases:
 keytool -list -v -storetype pkcs12 -keystore «path to certificate file»
-
-
-3. Configuring Holodeck B2B
-===========================
-
-To give Holodeck B2B access to the keystores you need to configure the 
-keystore passwords in the Holodeck B2B configuration file which is found 
-in «Holodeck B2B base dir»/conf/holodeckb2b.xml
-Set "PrivateKeyStorePassword" and "PublicKeyStorePassword" parameters to
-the passwords of the respective keystores. 
-Also the location where Holodeck B2B should look for the keystores can be 
-specified by setting the "PrivateKeyStorePath" and "PublicKeyStorePath"
-parameters. 
-
 
 4. Examples
 ===========
