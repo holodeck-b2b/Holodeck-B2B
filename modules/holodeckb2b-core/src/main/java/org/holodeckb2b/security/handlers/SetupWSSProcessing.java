@@ -155,8 +155,9 @@ public class SetupWSSProcessing extends BaseHandler {
             PasswordCallbackHandler pwdCBHandler = new PasswordCallbackHandler();
             mc.setProperty(WSHandlerConstants.PW_CALLBACK_REF, pwdCBHandler);
         
-            // The password to access the certificate in the keystore
-            pwdCBHandler.addUser(encConfig.getKeystoreAlias(), encConfig.getCertificatePassword());
+            // The password to access the certificate in the keystore, alias converted to lower case because JKS 
+            // aliasses are case insensitive and in lower case
+            pwdCBHandler.addUser(encConfig.getKeystoreAlias().toLowerCase(), encConfig.getCertificatePassword());
         } else {
             log.debug("Encryption configuration is NULL! No access to private key.");
         }

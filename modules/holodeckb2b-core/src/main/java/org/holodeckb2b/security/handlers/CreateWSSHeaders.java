@@ -249,10 +249,11 @@ public class CreateWSSHeaders extends BaseHandler {
         // should be signed is not specified. But to prevent manipulation Holodeck B2B includes them in the signature
         mc.setProperty(WSHandlerConstants.OPTIONAL_SIGNATURE_PARTS, WSS4J_PART_UT + WSS4J_PART_ATTACHMENTS);
         
-        // The alias of the certificate to use for signing
-        mc.setProperty(WSHandlerConstants.SIGNATURE_USER, sigCfg.getKeystoreAlias());
+        // The alias of the certificate to use for signing, converted to lower case because JKS aliasses are case 
+        // insensitive
+        mc.setProperty(WSHandlerConstants.SIGNATURE_USER, sigCfg.getKeystoreAlias().toLowerCase());
         // The password to access the certificate in the keystore
-        pwdCBHandler.addUser(sigCfg.getKeystoreAlias(), sigCfg.getCertificatePassword());
+        pwdCBHandler.addUser(sigCfg.getKeystoreAlias().toLowerCase(), sigCfg.getCertificatePassword());
         
         // How should certificate be referenced in header?
         mc.setProperty(WSHandlerConstants.SIG_KEY_ID, 
