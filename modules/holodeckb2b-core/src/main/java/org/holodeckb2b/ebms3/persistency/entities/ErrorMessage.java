@@ -24,7 +24,6 @@ import javax.persistence.CollectionTable;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -164,7 +163,7 @@ public class ErrorMessage extends SignalMessage implements IErrorMessage {
     /**
      * The list of errors contained in this Error signal
      */
-    @ElementCollection(targetClass = EbmsError.class, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = EbmsError.class)
     @CollectionTable(name="ERR_MU_ERRORS")
     private List<IEbmsError>       errors;
     
