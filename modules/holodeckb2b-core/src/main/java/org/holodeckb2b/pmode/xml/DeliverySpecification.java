@@ -19,6 +19,7 @@ package org.holodeckb2b.pmode.xml;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory;
@@ -70,10 +71,13 @@ public class DeliverySpecification implements IDeliverySpecification {
 
     @Override
     public Map<String, ?> getSettings() {
-        HashMap<String, String>  settings = new HashMap<String, String>();
-        for (Property p : parameters)
-            settings.put(p.getName(), p.getValue());
-        
-        return settings;
+        if (!Utils.isNullOrEmpty(parameters)) {
+            HashMap<String, String>  settings = new HashMap<String, String>();
+            for (Property p : parameters)
+                settings.put(p.getName(), p.getValue());
+
+            return settings;
+        } else
+            return null;        
     }
 }

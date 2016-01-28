@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipException;
 import javax.activation.DataHandler;
 
 /**
@@ -113,9 +114,10 @@ public class CompressionDataHandler extends DataHandler {
      * 
      * @param out           The output stream to write the data to
      * @throws IOException  When (de)compressing of the content fails
+     * @throws ZipException When the data can not be decompressed because it is corrupted
      */
     @Override
-    public void writeTo(OutputStream out) throws IOException {
+    public void writeTo(OutputStream out) throws IOException, ZipException {
         if (CompressionFeature.COMPRESSED_CONTENT_TYPE.equalsIgnoreCase(resultContentType))
             compress(out);
         else
@@ -128,9 +130,10 @@ public class CompressionDataHandler extends DataHandler {
      * 
      * @return An input stream to read the data from the attachment
      * @throws IOException  When (de)compressing of the content fails     
+     * @throws ZipException When the data can not be decompressed because it is corrupted
      */
     @Override
-    public InputStream getInputStream() throws IOException {
+    public InputStream getInputStream() throws IOException, ZipException {
         if (CompressionFeature.COMPRESSED_CONTENT_TYPE.equalsIgnoreCase(resultContentType))
             return new GZIPCompressingInputStream(super.getInputStream());
         else
@@ -157,8 +160,9 @@ public class CompressionDataHandler extends DataHandler {
      * 
      * @param out           The {@link OutputStream} to write the uncompressed data to
      * @throws IOException  When an error occurs while writing the data to the stream
+     * @throws ZipException When the data can not be decompressed because it is corrupted
      */
-    private void decompress(OutputStream out) throws IOException {
+    private void decompress(OutputStream out) throws IOException, ZipException {
         try (GZIPInputStream gzInputStream = new GZIPInputStream(source.getInputStream()))
         {            
             byte[]  buffer = new byte[2048];

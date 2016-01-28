@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.security.handlers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,12 +38,13 @@ import org.apache.wss4j.dom.WSSecurityEngineResult;
 import org.apache.wss4j.dom.handler.RequestData;
 import org.apache.wss4j.dom.handler.WSHandler;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
+import org.holodeckb2b.axis2.Axis2Utils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.KeyValuePair;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.axis2.Axis2Utils;
 import org.holodeckb2b.security.callbackhandlers.AttachmentCallbackHandler;
 import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.tokens.UsernameToken;
@@ -156,27 +158,50 @@ public class ProcessWSSHeaders extends BaseHandler {
 
             log.debug("Check results of processing security header targeted to default role");
 
-            // Check decryption result
+            // Check decryption result, because the decryption error can be triggered during the hash calculation part
+            // of signature processing, we also need to check the signature result
+            WSSecurityEngineResult signResult = WSSecurityUtil.fetchActionResult(results, WSConstants.SIGN);
             WSSecurityEngineResult decResult = WSSecurityUtil.fetchActionResult(results, WSConstants.ENCR);
-            if (decResult != null && decResult.containsKey(SecurityConstants.WSS_PROCESSING_FAILURE)) {
-                // An exception has occurred during decryption, so decrypting the message failed
-                handleWSSecurityException(mc, SecurityConstants.DEFAULT_WSS_HEADER, 
-                                          SecurityConstants.WSS_FAILURES.DECRYPTION,
-                                          (WSSecurityException) decResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
-                                         );
-                // No need to further process result or header
-                return InvocationResponse.CONTINUE;
+
+            if (decResult != null) {
+                // The message was encrypted, check if there was an issue with decryption of the symmetric key or
+                // SOAP Envelope elements
+                if (decResult.containsKey(SecurityConstants.WSS_PROCESSING_FAILURE)) {
+                    // An exception has occurred during decryption, so decrypting the message failed
+                    handleWSSecurityException(mc, SecurityConstants.DEFAULT_WSS_HEADER, 
+                                        SecurityConstants.WSS_FAILURES.DECRYPTION,
+                                        (WSSecurityException) decResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
+                                       );
+                    // No need to further process result or header
+                    return InvocationResponse.CONTINUE;
+                }
+                // The decryption error may also have occurred while calculating the hash
+                if (signResult != null && signResult.containsKey(SecurityConstants.WSS_PROCESSING_FAILURE)) {
+                    // Get exception stack
+                    List<Throwable> exStack = Utils.getCauses(
+                                    (WSSecurityException) signResult.get(SecurityConstants.WSS_PROCESSING_FAILURE));
+                    // We assume the problem was caused by decryption if the root cause is a 
+                    // java.security.GeneralSecurityException and its "parent" is an IOException
+                    if (exStack.get(exStack.size() - 1) instanceof java.security.GeneralSecurityException) {
+                        // The "parent" exception should be a IOException 
+                        if ((exStack.size() >= 2) && (exStack.get(exStack.size() - 2) instanceof IOException)) {
+                            // Believe this error during signature verification is caused by decryption issue
+                            handleWSSecurityException(mc, SecurityConstants.DEFAULT_WSS_HEADER, 
+                                    SecurityConstants.WSS_FAILURES.DECRYPTION, exStack.get(exStack.size() - 1));
+                            return InvocationResponse.CONTINUE;                            
+                        }
+                    }                    
+                }
             }
 
             // Process result of Signature
-            WSSecurityEngineResult signResult = WSSecurityUtil.fetchActionResult(results, WSConstants.SIGN);
             if (signResult != null) {
                 if (signResult.containsKey(SecurityConstants.WSS_PROCESSING_FAILURE)) {
                     // An exception has occurred during signature processing
                     handleWSSecurityException(mc, SecurityConstants.DEFAULT_WSS_HEADER, 
-                                           SecurityConstants.WSS_FAILURES.SIGNATURE,
-                                           (WSSecurityException) signResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
-                                           );
+                                        SecurityConstants.WSS_FAILURES.SIGNATURE,
+                                        (WSSecurityException) signResult.get(SecurityConstants.WSS_PROCESSING_FAILURE)
+                                        );
                     // No need to further process result or header
                     return InvocationResponse.CONTINUE;                 
                 } else {
@@ -324,12 +349,12 @@ public class ProcessWSSHeaders extends BaseHandler {
      * @param mc        The current message context
      * @param header    The target actor/role of the security header in which the problem occurred
      * @param part      The part (signature, encryption, ut, other) the problem occurred in
-     * @param ex        The {@link WSSecurityException} that occurred
+     * @param ex        The exception that occurred and caused security processing failure
      */
     private void handleWSSecurityException(final MessageContext mc, 
                                            final String header, 
                                            final SecurityConstants.WSS_FAILURES part, 
-                                           final WSSecurityException ex) {
+                                           final Throwable ex) {
         // Build the error message
         StringBuffer    errorMsg = new StringBuffer();        
         switch (part) {
@@ -342,7 +367,10 @@ public class ProcessWSSHeaders extends BaseHandler {
             case UNKNOWN :
                 errorMsg.append("Processing of WS-Security header failed: "); break;
         }        
-        errorMsg.append(ex.getMsgID()).append(';').append(ex.getMessage());
+        if (ex instanceof WSSecurityException)
+            errorMsg.append(((WSSecurityException) ex).getMsgID()).append(';');
+        
+        errorMsg.append(ex.getMessage());
         
         // Drill down to root cause
         Throwable cause = ex.getCause();

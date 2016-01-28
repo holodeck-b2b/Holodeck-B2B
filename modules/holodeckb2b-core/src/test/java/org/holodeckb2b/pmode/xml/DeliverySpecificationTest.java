@@ -16,9 +16,9 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.pmode.xml.DeliverySpecification;
 import java.io.File;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
@@ -65,6 +65,7 @@ public class DeliverySpecificationTest {
             
             // Check DeliverySpecification object
             assertNotNull(ds);
+            assertNull(ds.getSettings());
             
         } catch (Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
@@ -91,5 +92,4 @@ public class DeliverySpecificationTest {
         }
         
     }
-
 }

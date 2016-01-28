@@ -22,6 +22,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.zip.ZipException;
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -30,11 +31,13 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.as4.compression.DeCompressionFailure;
 import org.holodeckb2b.axis2.MessageContextUtils;
 import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
+import org.holodeckb2b.ebms3.errors.FailedDecryption;
 import org.holodeckb2b.ebms3.errors.MimeInconsistency;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
@@ -142,7 +145,33 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                             createInconsistentError(mc, um, plRef);
                             return InvocationResponse.CONTINUE;
                         } else {
-                            dh.writeTo(new FileOutputStream(plFile));
+                            try {
+                                dh.writeTo(new FileOutputStream(plFile));
+                            } catch (ZipException decompressError) {
+                                log.error("Payload [" + plRef + "] in message [" + um.entity.getMessageId() 
+                                            + "] could not be decompressed! Details: " + decompressError.getMessage());
+                                DeCompressionFailure decompressFailure = new DeCompressionFailure(
+                                        "Payload [" + plRef + "] in message could not be decompressed!", 
+                                        um.entity.getMessageId());
+                                MessageContextUtils.addGeneratedError(mc, decompressFailure);
+                                log.debug("Error generated and stored in MC, change processing state of user message");
+                                MessageUnitDAO.setFailed(um);
+                            } catch (IOException readException) {
+                                // Check if this IO exception is caused by decryption failure
+                                if (Utils.getRootCause(readException) 
+                                                                instanceof java.security.GeneralSecurityException) {
+                                    log.error("Payload [" + plRef + "] in message [" + um.entity.getMessageId() 
+                                                + "] could not be decompressed! Details: " 
+                                                + Utils.getRootCause(readException).getMessage());
+                                    FailedDecryption decryptFailure = new FailedDecryption(
+                                            "Payload [" + plRef + "] in message could not be decrypted!",
+                                            um.entity.getMessageId());
+                                    MessageContextUtils.addGeneratedError(mc, decryptFailure);
+                                    log.debug("Error generated and stored in MC, change processing state of user message");
+                                    MessageUnitDAO.setFailed(um);
+                                    return InvocationResponse.CONTINUE;
+                                }
+                            }
                             log.debug("Payload saved to temporary file, set content location in meta data");
                             p.setContentLocation(plFile.getAbsolutePath());
                             p.setMimeType(dh.getContentType());
