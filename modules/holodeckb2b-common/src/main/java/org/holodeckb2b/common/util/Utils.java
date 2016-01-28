@@ -28,9 +28,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
@@ -414,4 +416,33 @@ public final class Utils {
         return i == null || !i.hasNext();
     }
 
+    /**
+     * Gets the root cause of the exception by traversing the exception stack and returning the
+     * last available exception in it.
+     * 
+     * @param t     The {@link Throwable} object to get the root cause for 
+     * @return      The root cause (note that this can be the throwable itself)
+     */
+    public static Throwable getRootCause(final Throwable t) {
+        List<Throwable> exceptionStack = getCauses(t);
+        return exceptionStack.get(exceptionStack.size() - 1);
+    }
+    
+    /**
+     * Gets the exception stack of an exception, i.e. the list of all exception that where registered as causes.
+     * 
+     * @param t     The {@link Throwable} object to get the exception stack for
+     * @return      A list of {@link Throwable} object with the first item being the exception itself and the last
+     *              item the root cause.
+     */
+    public static List<Throwable> getCauses(final Throwable t) {
+        ArrayList<Throwable> exceptionStack = new ArrayList<Throwable>();
+        Throwable i = t;
+        while (i != null) {
+            exceptionStack.add(i);
+            i = i.getCause();
+        } 
+        
+        return exceptionStack;
+    }
 } 
