@@ -20,6 +20,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
@@ -248,9 +249,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
                     
             // We need to case the given receipt here to the persistency implementation to get access to the receipt
             // content. 
-            ArrayList<OMElement>  actual = null;
-            if (rcpt instanceof org.holodeckb2b.ebms3.persistency.entities.Receipt)
-                actual = ((org.holodeckb2b.ebms3.persistency.entities.Receipt) rcpt).getContent();
+            List<OMElement>  actual = rcpt.getContent();
             
             // If there was actual content (and we could get access to it) use the name of first element
             String firstChildName = null;
