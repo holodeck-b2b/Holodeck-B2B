@@ -24,27 +24,13 @@ import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPModelBuilder;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.client.OperationClient;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
 import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.axis2.wsdl.WSDLConstants;
-import org.apache.commons.logging.Log;
 import org.apache.xml.security.utils.XMLUtils;
-import org.holodeckb2b.common.config.Config;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
-import org.holodeckb2b.ebms3.persistency.entities.Receipt;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.module.HolodeckB2BCoreImpl;
 import org.w3c.dom.Document;
 
 /**
@@ -135,78 +121,11 @@ public final class Axis2Utils {
     }
 
     /**
-     * Send the message unit to the other MSH. 
-     * 
-     * @param message   The MessageUnit to send 
-     * @param log       The log to use for writing log information
-     */
-    public static void sendMessage(EntityProxy msgProxy, Log log) {
-        ServiceClient sc;
-        OperationClient oc;
-
-        MessageUnit message = msgProxy.entity;
-        try {
-            log.debug("Prepare Axis2 client to send " + message.getClass().getSimpleName());
-            sc = new ServiceClient(Config.getAxisConfigurationContext(), createAnonymousService());
-            sc.engageModule(HolodeckB2BCoreImpl.HOLODECKB2B_CORE_MODULE);
-            oc = sc.createClient(ANON_OUT_IN_OP);
-
-            log.debug("Create an empty MessageContext for message with current configuration");
-            MessageContext msgCtx = new MessageContext();
-
-            if (message instanceof UserMessage) {
-                log.debug("Message to send is a UserMessage");
-                msgCtx.setProperty(MessageContextProperties.OUT_USER_MESSAGE, msgProxy);
-            } else if (message instanceof PullRequest) {
-                log.debug("Message to send is a PullRequest");
-                msgCtx.setProperty(MessageContextProperties.OUT_PULL_REQUEST, msgProxy);
-            } else if (message instanceof ErrorMessage) {
-                log.debug("Message to send is a ErrorMessage");
-                MessageContextUtils.addErrorSignalToSend(msgCtx, msgProxy);
-            } else if (message instanceof Receipt) {
-                log.debug("Message to send is a Receipt");
-                MessageContextUtils.addReceiptToSend(msgCtx, msgProxy);
-            }
-            oc.addMessageContext(msgCtx);
-
-            // This dummy EPR has to be provided to be able to trigger message sending. It will be replaced later
-            // with the correct URL defined in the P-Mode
-            EndpointReference targetEPR = new EndpointReference("http://holodeck-b2b.org/transport/dummy");
-            Options options = new Options();
-            options.setTo(targetEPR);
-            options.setExceptionToBeThrownOnSOAPFault(false);
-            oc.setOptions(options);
-
-            log.debug("Axis2 client configured for sending ebMS message");
-        } catch (AxisFault af) {
-            // Setting up the Axis environment failed. As it prevents sending the message it is logged as a fatal error 
-            log.fatal("Setting up Axis2 to send message failed! Details: " + af.getReason());
-            return;
-        }
-
-        try {
-            log.debug("Start the message send process");
-            oc.execute(true);
-        } catch (AxisFault af) {
-            // An error occurred while sending the message, 
-            log.error("An unexpected error occurred while sending the " + message.getClass().getSimpleName()
-                        + " with msg-id: [" + message.getMessageId() + "] Details: " + af.getReason());
-        } finally {
-            try {
-                sc.cleanupTransport();
-                sc.cleanup();
-            } catch (AxisFault af2) {
-                log.error("Clean up of Axis2 context to send message failed! Details: " + af2.getReason());
-            }
-        }
-    }
-    
-    /**
      * Create an axisService with one (anonymous) operation for OutIn MEP but that does accept an empty responses.
      *
      * @return The configured anonymous service
      */
-    private static AxisService createAnonymousService() {
+    public static AxisService createAnonymousService() {
         AxisService axisService = new AxisService(HB2B_ANON_SVC + ":" + UUID.randomUUID());
 
         OutOptInAxisOperation outInOperation = new OutOptInAxisOperation(ANON_OUT_IN_OP);

@@ -33,7 +33,7 @@ import org.apache.wss4j.dom.handler.WSHandler;
 import org.apache.wss4j.dom.handler.WSHandlerConstants;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.holodeckb2b.axis2.Axis2Utils;
-import org.holodeckb2b.axis2.MessageContextUtils;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.DefaultSecurityAlgorithm;

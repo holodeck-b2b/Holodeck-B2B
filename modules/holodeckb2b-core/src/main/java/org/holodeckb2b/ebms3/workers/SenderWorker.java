@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.axis2.Axis2Utils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
+import org.holodeckb2b.ebms.axis2.Axis2Sender;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
@@ -61,7 +61,7 @@ public class SenderWorker extends AbstractWorkerTask {
                     if (MessageUnitDAO.startProcessingMessageUnit(message)) {
                         // only when we could succesfully set processing state really start processing
                         log.debug("Start processing message [" + message.entity.getMessageId() + "]");
-                        Axis2Utils.sendMessage(message, log);
+                        Axis2Sender.sendMessage(message, log);
                     } else
                         // Message probably already in process
                         log.debug("Could not start processing message [" + message.entity.getMessageId() 

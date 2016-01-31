@@ -21,8 +21,8 @@ import java.util.Collection;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.axis2.Axis2Utils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.ebms.axis2.Axis2Sender;
 import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
@@ -187,7 +187,7 @@ public class PullWorker implements IWorkerTask {
                     EntityProxy<PullRequest> pullRequest = MessageUnitDAO.createOutgoingPullRequest(p.getId(), mpc);
                     log.debug("PullRequest created [" + pullRequest.entity.getMessageId() 
                                 + "] for P-Mode [" + p.getId() + "] and MPC=" + mpc);
-                    Axis2Utils.sendMessage(pullRequest, log);
+                    Axis2Sender.sendMessage(pullRequest, log);
                 } catch (DatabaseException ex) {
                     log.error("Could not create PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
                 }
