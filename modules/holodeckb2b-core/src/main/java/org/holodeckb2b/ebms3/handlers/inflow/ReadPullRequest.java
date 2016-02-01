@@ -21,6 +21,7 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
@@ -28,7 +29,6 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.packaging.PullRequest;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 
 /**
  * Is an in flow handler that checks if this message contains a pull request, i.e. contains a <eb:PullRequest> element 
@@ -67,10 +67,11 @@ public class ReadPullRequest extends BaseHandler {
                 try {
                     pullRequest = PullRequest.readElement(prElement);
                     // And store in database and message context for further processing
-                    log.info("PullRequest [msgId=" + pullRequest.getMessageId() + "] for MPC " + pullRequest.getMPC() + " received.");
-                    mc.setProperty(MessageContextProperties.IN_PULL_REQUEST, pullRequest);
-                    log.debug("Store PullRequest in database");
-                    MessageUnitDAO.storeReceivedMessageUnit(pullRequest);
+                    log.info("PullRequest [msgId=" + pullRequest.getMessageId() + "] for MPC " + pullRequest.getMPC() 
+                                + " received.");
+                    log.debug("Store PullRequest in database and message context");
+                    mc.setProperty(MessageContextProperties.IN_PULL_REQUEST, 
+                                                                MessageUnitDAO.storeReceivedMessageUnit(pullRequest));                    
                 } catch (PackagingException ex) {
                     // The ebMS header contains an ill formatted pull request
                     log.warn("Received message contains invalid ebMS pull request signal message! Details: " 
