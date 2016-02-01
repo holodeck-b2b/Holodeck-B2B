@@ -19,10 +19,10 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
@@ -72,7 +72,7 @@ public class AddReceiptSignals extends BaseHandler {
             return InvocationResponse.ABORT;
         }
         
-        if(Utils.isNullOrEmpty(rcptSigs)) {
+        if(!Utils.isNullOrEmpty(rcptSigs)) {
             log.debug("Message already contains Receipt signals, can not add additional ones");
             return InvocationResponse.CONTINUE;
         }
@@ -154,6 +154,10 @@ public class AddReceiptSignals extends BaseHandler {
             Collection<EntityProxy<Receipt>> createdRcpts = 
                                          MessageUnitDAO.getMessageUnitsForPModesInState(Receipt.class, 
                                                                                         pmodes, 
+                                                                                        ProcessingStates.CREATED);
+            if (!Utils.isNullOrEmpty(createdRcpts))
+                rcpts.addAll(createdRcpts);
+            createdRcpts = MessageUnitDAO.getMessageUnitsForPModesInState(Receipt.class, pmodes, 
                                                                                         ProcessingStates.READY_TO_PUSH);
             if (!Utils.isNullOrEmpty(createdRcpts))
                 rcpts.addAll(createdRcpts);
