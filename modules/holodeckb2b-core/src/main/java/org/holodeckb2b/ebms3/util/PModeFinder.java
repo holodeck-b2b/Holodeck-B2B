@@ -25,6 +25,7 @@ import java.util.Map;
 import org.holodeckb2b.common.messagemodel.util.compare;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IAgreement;
 import org.holodeckb2b.interfaces.general.IService;
@@ -44,7 +45,6 @@ import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.tokens.UsernameToken;
 import org.holodeckb2b.security.tokens.X509Certificate;
@@ -123,8 +123,9 @@ public class PModeFinder {
         
         for (IPMode p : pmodes.getAll()) {
             // Ignore this P-Mode if it is configured for sending
-            if (p.getLeg(ILeg.Label.REQUEST).getProtocol() != null &&
-                !Utils.isNullOrEmpty(p.getLeg(ILeg.Label.REQUEST).getProtocol().getAddress())) {
+            if (p.getMepBinding().equals(EbMSConstants.ONE_WAY_PUSH) 
+                && p.getLeg(ILeg.Label.REQUEST).getProtocol() != null 
+                && !Utils.isNullOrEmpty(p.getLeg(ILeg.Label.REQUEST).getProtocol().getAddress())) {
                 continue;
             }
 
