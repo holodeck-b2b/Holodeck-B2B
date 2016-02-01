@@ -34,7 +34,7 @@ XML documents of this type are used when exchanging messages between Holodeck B2
             <xs:documentation xml:lang="en">A message that needs to be transferred between two business applications translates into a UserMessage message unit in an ebMS v3 message. Therefore the meta data information is structured like the standard ebMS header element for such a message unit. 
 
 When submitting a message for sending the submitter, i.e. the business application, does not need to supply all information. That is because the message exchange is controlled by the P-Mode (see section 4 of the Core Specification, http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/core/ebms_core-3.0-spec.html) which can already define most of the information. 
-At least enough information must be supplied to detect which P-Mode Holodeck B2B should use to send the message. It is RECOMMENDED to include the P-Mode id in the message meta data for easy and unambigious determination of the P-Mode to use. 
+At least enough information must be supplied to detect which P-Mode Holodeck B2B should use to send the message. Currently it MUST include the P-Mode id for easy and unambigious determination of the P-Mode to use. 
 
 Which other information also must be supplied depends on the completeness of the P-Mode. At least the ConversationId element (child of CollaborationInfo) is REQUIRED as it is a required element in the ebMS message and only known at the business level which means it should be supplied when submitting a message. Also only known to the business level is the actual information to exchange, i.e. the paylaods, therefore the PayloadInfo SHOULD be included in the MMD as well.
 
