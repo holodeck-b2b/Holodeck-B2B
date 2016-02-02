@@ -39,7 +39,7 @@ class PayloadInfo {
      * The <code>deleteFilesAfterSubmit</code> attribute, default value is false
      */
     @Attribute(name = "deleteFilesAfterSubmit", required = false)
-    private Boolean deleteFilesAfterSubmit = Boolean.FALSE;
+    private Boolean deleteFilesAfterSubmit;
     
     /**
      * The list of <code>PartInfo</code> child elements, must be at least one
@@ -59,7 +59,7 @@ class PayloadInfo {
      * @param payloadInfo The meta-data on the individual payloads
      */
     PayloadInfo(Collection<IPayload> payloadInfo) {
-        this(payloadInfo, false);
+        this(payloadInfo, null);
     }
     
     /**
@@ -68,7 +68,7 @@ class PayloadInfo {
      * @param payloadInfo           The meta-data on the individual payloads
      * @param deleteAfterSubmit     Value to use for the "delete flag"
      */
-    PayloadInfo(Collection<IPayload> payloadInfo, boolean deleteAfterSubmit) {
+    PayloadInfo(Collection<IPayload> payloadInfo, Boolean deleteAfterSubmit) {
         this.deleteFilesAfterSubmit = deleteAfterSubmit;
         setPayloadInfo(payloadInfo);
     }
