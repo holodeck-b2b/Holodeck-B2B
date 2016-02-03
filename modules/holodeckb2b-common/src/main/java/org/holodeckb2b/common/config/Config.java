@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.axis2.context.ConfigurationContext;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.interfaces.config.IConfiguration;
 
 /**
  * Contains the configuration of the Holodeck B2B Core.
@@ -33,20 +34,14 @@ import org.holodeckb2b.common.util.Utils;
  * <b>HB2B_HOME</b> is the directory where Holodeck B2B is installed or the system property <i>"holodeckb2b.home"</i>.
  * <p>The structure of the config file is defined by the XML Schema Definition 
  * <code>http://holodeck-b2b.org/schemas/2015/10/config</code> which can be found in <code>
- * src/main/resources/xsd/hb2b-config.xsd</code>.
+ * src/main/resources/xsd/hb2b-xsd</code>.
  * <p>NOTE: Current implementation does not encrypt the keystore passwords! Therefore access to the config file 
  * SHOULD be limited to the account that is used to run Holodeck B2B.
  * @todo Encryption of keystore passwords
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class Config {
-    
-    /*
-     * Singleton pattern is used for configuration as we only need it once for
-     * each instance
-     */
-    private static Config   config = null;
+public class Config implements IConfiguration {
 
     /*
      * The Holodeck B2B home directory
@@ -123,31 +118,19 @@ public class Config {
      */
     private ConfigurationContext    axisCfgCtx = null;
     
+    private boolean isTrue (String s) {
+      return "on".equalsIgnoreCase(s) || "true".equalsIgnoreCase(s) || "1".equalsIgnoreCase(s);
+    }
+    
     /**
      * Initializes the configuration object using the Holodeck B2B configuration file located in <code>
      * «HB2B_HOME»/conf/holodeckb2b.xml</code> where <b>HB2B_HOME</b> is the directory where Holodeck B2B is installed 
      * or the system property <i>"holodeckb2b.home"</i>.
      * 
-     * @param configContext     The Axis2 configuration context
-     * @param module            The module configuration
-     * @throws Exception    When the configuration can not be initialized
-     */
-    public static void init(ConfigurationContext configContext) throws Exception {
-        // Alway start with a new and empty configuration
-        config = new Config(configContext);        
-    }
-    
-    private static boolean isTrue (String s) {
-      return "on".equalsIgnoreCase(s) || "true".equalsIgnoreCase(s) || "1".equalsIgnoreCase(s);
-    }
-    
-    /**
-     * Initializes the singleton object.
-     * 
      * @param configCtx     The Axis2 configuration context containing the Axis2 settings
      * @throws Exception    When the configuration can not be initialized
      */
-    private Config(ConfigurationContext configCtx) throws Exception {        
+    public Config(ConfigurationContext configCtx) throws Exception {        
         // The Axis2 configuration context
         axisCfgCtx = configCtx;
 
@@ -259,9 +242,8 @@ public class Config {
      * 
      * @return The Axis2 configuration context.
      */
-    public static ConfigurationContext getAxisConfigurationContext() {
-        assertInitialized();        
-        return config.axisCfgCtx;
+    public ConfigurationContext getAxisConfigurationContext() {
+        return axisCfgCtx;
     }
     
     /**
@@ -269,10 +251,8 @@ public class Config {
      * 
      * @return The name of the persistency unit
      */
-    public static String getPersistencyUnit() {
-        assertInitialized();
-        
-        return config.persistencyUnit;
+    public String getPersistencyUnit() {
+        return persistencyUnit;
     }
     
     /**
@@ -286,10 +266,8 @@ public class Config {
      * 
      * @return  The host name
      */
-    public static String getHostName () {
-        assertInitialized();
-        
-        return config.hostName;
+    public String getHostName () {
+        return hostName;
     }
 
     /**
@@ -297,10 +275,8 @@ public class Config {
      * 
      * @return  The Holodeck B2B home directory.
      */
-    public static String getHolodeckB2BHome () {
-        assertInitialized();
-        
-        return config.holodeckHome;
+    public String getHolodeckB2BHome () {
+        return holodeckHome;
     }
     
     /**
@@ -311,10 +287,8 @@ public class Config {
      * 
      * @return The absolute path to the worker pool configuration file.
      */
-    public static String getWorkerPoolCfgFile() {
-        assertInitialized();
-        
-        return config.workerConfigFile;
+    public String getWorkerPoolCfgFile() {
+        return workerConfigFile;
     }
     
     /**
@@ -328,10 +302,8 @@ public class Config {
      * @return  The absolute path to the temp directory. Ends with a directory
      *          separator.
      */
-    public static String getTempDirectory() {
-        assertInitialized();
-        
-        return config.tempDir;
+    public String getTempDirectory() {
+        return tempDir;
     }
     
     /**
@@ -343,10 +315,8 @@ public class Config {
      * 
      * @return Indication whether bundling of signals in a response is allowed
      */    
-    public static boolean allowSignalBundling() {
-        assertInitialized();
-        
-        return config.allowSignalBundling;
+    public boolean allowSignalBundling() {
+        return allowSignalBundling;
     }
 
     /**
@@ -358,9 +328,8 @@ public class Config {
      * @return <code>true</code> if generated errors on errors should by default be reported to the sender,<br>
      *         <code>false</code> otherwise 
      */
-    public static boolean shouldReportErrorOnError() {
-        assertInitialized();        
-        return config.defaultReportErrorOnError;
+    public boolean shouldReportErrorOnError() {
+        return defaultReportErrorOnError;
     }
 
     /**
@@ -372,9 +341,8 @@ public class Config {
      * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
      *         <code>false</code> otherwise 
      */
-    public static boolean shouldReportErrorOnReceipt() {
-        assertInitialized();        
-        return config.defaultReportErrorOnReceipt;
+    public boolean shouldReportErrorOnReceipt() {
+        return defaultReportErrorOnReceipt;
     }
     
     /**
@@ -387,9 +355,8 @@ public class Config {
      * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
      *         <code>false</code> otherwise 
      */
-    public static boolean useStrictErrorRefCheck() {
-        assertInitialized();
-        return config.useStrictErrorReferencesCheck;
+    public boolean useStrictErrorRefCheck() {
+        return useStrictErrorReferencesCheck;
     }
 
     /**
@@ -398,9 +365,8 @@ public class Config {
      * 
      * @return The path to the <i>"private"</i> keystore.
      */
-    public static String getPrivateKeyStorePath() {
-        assertInitialized();
-        return config.privKeyStorePath;
+    public String getPrivateKeyStorePath() {
+        return privKeyStorePath;
     }
     
     /**
@@ -408,9 +374,8 @@ public class Config {
      * 
      * @return  The password for accessing the keystore with the private keys
      */
-    public static String getPrivateKeyStorePassword() {
-        assertInitialized();
-        return config.privKeyStorePassword;
+    public String getPrivateKeyStorePassword() {
+        return privKeyStorePassword;
     }
     
     /**
@@ -419,9 +384,8 @@ public class Config {
      * 
      * @return The path to the <i>"public"</i> keystore.
      */
-    public static String getPublicKeyStorePath() {
-        assertInitialized();
-        return config.pubKeyStorePath;
+    public String getPublicKeyStorePath() {
+        return pubKeyStorePath;
     }
 
     /**
@@ -429,9 +393,8 @@ public class Config {
      * 
      * @return  The password for accessing the keystore with the public keys
      */
-    public static String getPublicKeyStorePassword() {
-        assertInitialized();
-        return config.pubKeyStorePassword;
+    public String getPublicKeyStorePassword() {
+        return pubKeyStorePassword;
     }
 
     /**
@@ -444,16 +407,7 @@ public class Config {
      * @return <code>true</code> if the revocation of certificates should by default be checked,<br>
      *         <code>false</code> otherwise 
      */
-    public static boolean shouldCheckCertificateRevocation() {
-        assertInitialized();
-        return config.defaultRevocationCheck;
-    }
-    
-    /**
-     * Checks if the configuration object was correctly initialized
-     */
-    protected static void assertInitialized() {
-        if (config == null)
-            throw new IllegalStateException("Configuration should be initialized first.");
+    public boolean shouldCheckCertificateRevocation() {
+        return defaultRevocationCheck;
     }
 }

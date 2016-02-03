@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.interfaces.core;
 
+import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
@@ -31,6 +32,14 @@ import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
  */
 public interface IHolodeckB2BCore {
 
+    /**
+     * Should return the current configuration of this Holodeck B2B instance. The configuration parameters can be used
+     * by extension to integrate their functionality with the core.
+     * 
+     * @return  The current configuration as a {@link IConfiguration}
+     */
+    public IConfiguration getConfiguration();
+    
     /**
      * Should return a {@link IMessageDeliverer} object configured as specified by the {@link IDeliverySpecification} 
      * that can be used to deliver message units to the <i>Consumer</i> business application.

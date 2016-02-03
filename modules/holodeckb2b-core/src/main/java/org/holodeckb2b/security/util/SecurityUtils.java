@@ -28,9 +28,10 @@ import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
+import org.holodeckb2b.interfaces.config.IConfiguration;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
@@ -130,18 +131,19 @@ public class SecurityUtils {
      * @return  The Crypto configuration for the requested certificate type
      */
     public static Properties createCryptoConfig(CertType certType) {
+        IConfiguration config = HolodeckB2BCoreInterface.getConfiguration();
         Properties cryptoProperties = new Properties();
         String     keyStoreFile = null;
         String     keyStorePwd = null;
         
         switch (certType) {
             case pub  : 
-                keyStoreFile = Config.getPublicKeyStorePath(); 
-                keyStorePwd = Config.getPublicKeyStorePassword();
+                keyStoreFile = config.getPublicKeyStorePath(); 
+                keyStorePwd = config.getPublicKeyStorePassword();
                 break;
             case priv : 
-                keyStoreFile = Config.getPrivateKeyStorePath();
-                keyStorePwd = Config.getPrivateKeyStorePassword();                
+                keyStoreFile = config.getPrivateKeyStorePath();
+                keyStorePwd = config.getPrivateKeyStorePassword();                
                 break;   
         }
         
@@ -176,16 +178,17 @@ public class SecurityUtils {
      *              <code>null</code> otherwise (not found or error during search)
      */
     public static String getKeystoreAlias(X509Certificate cert) {
+        IConfiguration config = HolodeckB2BCoreInterface.getConfiguration();
         String alias = null;
         FileInputStream fis = null;
         char[]  keystorePwd;
         
         try {
             // Get the password for accessing the keystore
-            keystorePwd = Config.getPublicKeyStorePassword().toCharArray();            
+            keystorePwd = config.getPublicKeyStorePassword().toCharArray();            
             // Create and load the keystore
             KeyStore keyStore = KeyStore.getInstance("JKS");
-            fis = new java.io.FileInputStream(Config.getPublicKeyStorePath());
+            fis = new java.io.FileInputStream(config.getPublicKeyStorePath());
             keyStore.load(fis, keystorePwd);    
             
             // Get alias of certificate

@@ -25,7 +25,6 @@ import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.holodeckb2b.axis2.Axis2Utils;
-import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
@@ -33,6 +32,7 @@ import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
 import org.holodeckb2b.ebms3.persistency.entities.Receipt;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.module.HolodeckB2BCoreImpl;
 
 /**
@@ -54,7 +54,8 @@ public class Axis2Sender {
         MessageUnit message = msgProxy.entity;
         try {
             log.debug("Prepare Axis2 client to send " + message.getClass().getSimpleName());
-            sc = new ServiceClient(Config.getAxisConfigurationContext(), Axis2Utils.createAnonymousService());
+            sc = new ServiceClient(HolodeckB2BCoreInterface.getConfiguration().getAxisConfigurationContext(), 
+                                   Axis2Utils.createAnonymousService());
             sc.engageModule(HolodeckB2BCoreImpl.HOLODECKB2B_CORE_MODULE);
             oc = sc.createClient(ANON_OUT_IN_OP);
 

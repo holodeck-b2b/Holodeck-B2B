@@ -21,7 +21,6 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.ebms.axis2.MessageContextUtils;
-import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -35,6 +34,7 @@ import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 
 /**
@@ -141,7 +141,7 @@ public class ReadError extends BaseHandler {
         boolean consistent = true; 
         Iterator<IEbmsError> it = errSignal.getErrors().iterator();
         String errorRefToMsgId = it.next().getRefToMessageInError(); 
-        if (refToMessageId == null && !Config.useStrictErrorRefCheck()) {
+        if (refToMessageId == null && !HolodeckB2BCoreInterface.getConfiguration().useStrictErrorRefCheck()) {
             // Signal level ref == null => all individual refs should be same, take first as leading
             refToMessageId = errorRefToMsgId;
         } 

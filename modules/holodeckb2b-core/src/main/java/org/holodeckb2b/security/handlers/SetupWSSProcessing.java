@@ -20,7 +20,6 @@ import java.util.Properties;
 import org.apache.axis2.context.MessageContext;
 import org.apache.wss4j.dom.handler.WSHandlerConstants;
 import org.holodeckb2b.ebms.axis2.MessageContextUtils;
-import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
@@ -74,7 +73,7 @@ public class SetupWSSProcessing extends BaseHandler {
         // Revocation check
         log.debug("Set revocation check for certifcates to default setting");
         mc.setProperty(WSHandlerConstants.ENABLE_REVOCATION, 
-                                                        Boolean.toString(Config.shouldCheckCertificateRevocation()));        
+                     Boolean.toString(HolodeckB2BCoreInterface.getConfiguration().shouldCheckCertificateRevocation()));        
         // Replay detection (disabled in this version)
         mc.setProperty(WSHandlerConstants.ENABLE_NONCE_CACHE, "false");
         mc.setProperty(WSHandlerConstants.ENABLE_TIMESTAMP_CACHE, "false");

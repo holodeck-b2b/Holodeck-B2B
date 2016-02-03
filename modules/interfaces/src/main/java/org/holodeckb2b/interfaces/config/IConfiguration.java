@@ -32,14 +32,7 @@ public interface IConfiguration {
      * @return The Axis2 configuration context.
      */
     public ConfigurationContext getAxisConfigurationContext();
-    
-    /**
-     * Gets the name of the JPA persistency unit to use for accessing the database
-     * 
-     * @return The name of the persistency unit
-     */
-    public String getPersistencyUnit();
-    
+        
     /**
      * Gets the host name. During the message processing a host name may be needed, 
      * for example for generating a message id. Because the host name of the machine 

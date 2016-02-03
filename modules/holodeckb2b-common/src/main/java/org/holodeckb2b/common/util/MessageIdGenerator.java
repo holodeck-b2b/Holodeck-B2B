@@ -18,7 +18,7 @@ package org.holodeckb2b.common.util;
 
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import org.holodeckb2b.common.config.Config;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Generates unique identifiers for use in message processing.
@@ -38,7 +38,7 @@ public class MessageIdGenerator {
         
         // Right part of the msg-id is the host name which can be either specified,
         //  retrieved or randomly generated
-        String rightPart = Config.getHostName();
+        String rightPart = HolodeckB2BCoreInterface.getConfiguration().getHostName();
         
         return leftPart + '@' + rightPart;
     }

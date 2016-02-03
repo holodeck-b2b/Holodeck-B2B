@@ -19,8 +19,8 @@ package org.holodeckb2b.ebms3.persistent.dao;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.module.HolodeckB2BCoreImpl;
 
 
 /**
@@ -65,6 +65,6 @@ public class JPAUtil {
         if (emf != null)
             return emf;
         else
-            return Persistence.createEntityManagerFactory(Config.getPersistencyUnit());
+            return Persistence.createEntityManagerFactory(HolodeckB2BCoreImpl.getPersistencyUnit());
     }
 }

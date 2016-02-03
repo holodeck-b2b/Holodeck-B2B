@@ -25,7 +25,6 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.ebms.axis2.MessageContextUtils;
-import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -149,12 +148,12 @@ public class ProcessGeneratedErrors extends BaseHandler {
                             if (muInError instanceof ErrorMessage) 
                                 sendError = errorHandling != null && errorHandling.shouldReportErrorOnError() != null ?
                                             errorHandling.shouldReportErrorOnError() : 
-                                            Config.shouldReportErrorOnError();
+                                            HolodeckB2BCoreInterface.getConfiguration().shouldReportErrorOnError();
                             
                             if (muInError instanceof Receipt)
                                 sendError = errorHandling != null && errorHandling.shouldReportErrorOnReceipt() != null?
                                             errorHandling.shouldReportErrorOnReceipt() :
-                                            Config.shouldReportErrorOnReceipt();
+                                            HolodeckB2BCoreInterface.getConfiguration().shouldReportErrorOnReceipt();
 
                             if (sendError) {
                                 log.debug("Error should be returned as response? " + asResponse);

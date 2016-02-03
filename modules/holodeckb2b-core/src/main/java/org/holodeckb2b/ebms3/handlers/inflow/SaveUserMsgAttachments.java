@@ -33,7 +33,6 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.as4.compression.DeCompressionFailure;
 import org.holodeckb2b.ebms.axis2.MessageContextUtils;
-import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
@@ -46,6 +45,7 @@ import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 
@@ -207,7 +207,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      * @throws IOException   When the specified directory does not exist and can not be created.
      */
     private File getTempDir() throws IOException {        
-        String tmpPayloadDirPath = Config.getTempDirectory() + PAYLOAD_DIR;
+        String tmpPayloadDirPath = HolodeckB2BCoreInterface.getConfiguration().getTempDirectory() + PAYLOAD_DIR;
         File tmpPayloadDir = new File(tmpPayloadDirPath);
         if (!tmpPayloadDir.exists()) {
             log.debug("Temp directory for payloads does not exist");

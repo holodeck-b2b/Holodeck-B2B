@@ -22,7 +22,6 @@ import java.util.Map;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.ebms.axis2.MessageContextUtils;
-import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -33,6 +32,7 @@ import org.holodeckb2b.ebms3.persistency.entities.Receipt;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
@@ -86,7 +86,7 @@ public class PrepareResponseMessage extends BaseHandler {
         else if (errors.size() > 1) {
             // The were multiple error signals generated in the in flow, check if bundling is allowed
             log.debug("Response contains multiple error signals");
-            if (Config.allowSignalBundling()) {
+            if (HolodeckB2BCoreInterface.getConfiguration().allowSignalBundling()) {
                 // Bundling is enabled, so include all errors
                 log.debug("Bundling allowed, add all errors to response");
                 // Copy to current context so it gets processed correctly

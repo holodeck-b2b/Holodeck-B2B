@@ -34,6 +34,7 @@ import org.holodeckb2b.ebms3.pulling.PullConfiguration;
 import org.holodeckb2b.ebms3.pulling.PullConfigurationWatcher;
 import org.holodeckb2b.ebms3.pulling.PullWorker;
 import org.holodeckb2b.ebms3.submit.core.MessageSubmitterFactory;
+import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
@@ -65,6 +66,11 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * Logger
      */
     private static Log log = LogFactory.getLog(HolodeckB2BCoreImpl.class);
+    
+    /**
+     * The configuration of this Holodeck B2B instance
+     */
+    private static  Config          instanceConfiguration = null;
     
     /**
      * Pool of worker threads that handle recurring tasks like message sending and
@@ -119,7 +125,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         
         log.debug("Load configuration");
         try {
-            Config.init(cc);
+            instanceConfiguration = new Config(cc);
         } catch (Exception ex) {
             log.fatal("Could not intialize configuration! ABORTING startup!" 
                      + "\n\tError details: " + ex.getMessage());
@@ -131,15 +137,17 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         this.pmodeSet = new InMemoryPModeSet();
         
         log.debug("Initialize worker pool");
-        IWorkerPoolConfiguration poolCfg = XMLWorkerPoolConfig.loadFromFile(Config.getWorkerPoolCfgFile());
+        IWorkerPoolConfiguration poolCfg = 
+                                        XMLWorkerPoolConfig.loadFromFile(instanceConfiguration.getWorkerPoolCfgFile());
         if (poolCfg != null) {
             workers = new WorkerPool(poolCfg);
             log.info("Started the worker pool");
         } else {
             // As the workers are needed for correct functioning of Holodeck B2B, failure to either
             // load the configuration or start the pool is fatal.
-            log.fatal("Could not load workers from file " + Config.getWorkerPoolCfgFile());
-            throw new AxisFault("Unable to start Holodeck B2B. Could not load workers from file " + Config.getWorkerPoolCfgFile());
+            log.fatal("Could not load workers from file " + instanceConfiguration.getWorkerPoolCfgFile());
+            throw new AxisFault("Unable to start Holodeck B2B. Could not load workers from file " 
+                                + instanceConfiguration.getWorkerPoolCfgFile());
         }
         
         log.debug("Create the pull worker pool");
@@ -185,6 +193,20 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         
         
         log.info("Holodeck B2B Core module STOPPED.");
+    }
+    
+    /**
+     * Returns the current configuration of this Holodeck B2B instance. The configuration parameters can be used
+     * by extension to integrate their functionality with the core.
+     * 
+     * @return  The current configuration as a {@link IConfiguration} object
+     */
+    public IConfiguration getConfiguration() {
+        if (instanceConfiguration == null) {
+            log.fatal("Missing configuration for this Holodeck B2B instance!");
+            throw new IllegalStateException("Missing configuration for this Holodeck B2B instance!");
+        } else
+            return instanceConfiguration;
     }
     
     /**
@@ -260,6 +282,19 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
        
         log.debug("Get and return deliverer from the factory");
         return mdf.createMessageDeliverer();
+    }
+    
+    /**
+     * Get the JPA persistency unit name to get access to the Holodeck B2B Core database.
+     * 
+     * @return The name of the JPA persistency unit to get access to the Holodeck B2B database
+     */
+    public static String getPersistencyUnit() {
+        if (instanceConfiguration == null) {
+            log.fatal("Missing configuration for this Holodeck B2B instance!");
+            throw new IllegalStateException("Missing configuration for this Holodeck B2B instance!");
+        } else
+            return instanceConfiguration.getPersistencyUnit();
     }
     
     /**

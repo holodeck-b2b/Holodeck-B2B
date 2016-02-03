@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.persistency.entities.Payload;
@@ -32,6 +31,7 @@ import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.PModeFinder;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
@@ -194,7 +194,7 @@ public class MessageSubmitter implements IMessageSubmitter {
      */
     private void moveOrCopyPayloads(EntityProxy<UserMessage> um, boolean move) throws IOException, DatabaseException {
         // Path to the "temp" dir where to store payloads during processing
-        String intPlDir = Config.getTempDirectory() + "plcout";
+        String intPlDir = HolodeckB2BCoreInterface.getConfiguration().getTempDirectory() + "plcout";
         // Create the directory if needed
         Path pathPlDir = Paths.get(intPlDir);
         if (!Files.exists(pathPlDir)) {
