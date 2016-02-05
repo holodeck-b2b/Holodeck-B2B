@@ -136,6 +136,10 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         //@todo: Make the implementation configurable, for now just in memory
         this.pmodeSet = new InMemoryPModeSet();
         
+        // From this point on external components can be started which need access to the Core
+        log.debug("Make Core available to outside world");
+        HolodeckB2BCoreInterface.setImplementation(this);
+                
         log.debug("Initialize worker pool");
         IWorkerPoolConfiguration poolCfg = 
                                         XMLWorkerPoolConfig.loadFromFile(instanceConfiguration.getWorkerPoolCfgFile());
@@ -158,9 +162,6 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         
         log.debug("Create list of available message delivery methods");
         msgDeliveryFactories = new HashMap<String, IMessageDelivererFactory>();
-        
-        log.debug("Make Core available to outside world");
-        HolodeckB2BCoreInterface.setImplementation(this);
         
         log.info("Holodeck B2B Core module STARTED.");
     }
