@@ -18,7 +18,7 @@ package org.holodeckb2b.ebms3.submit.core;
 
 import java.util.Collection;
 import java.util.Iterator;
-import org.holodeckb2b.common.messagemodel.util.compare;
+import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.mmd.xml.AgreementReference;
 import org.holodeckb2b.ebms3.mmd.xml.CollaborationInfo;
@@ -140,7 +140,7 @@ final class MMDCompleter {
             cd.setSender(ps);
         else if (ps != null) {
             // Both P-Mode and submitted MMD contain sender, ensure they are equal
-            if (!compare.TradingPartner(ms, ps))
+            if (!CompareUtils.areEqual(ms, ps))
                 throw new MessageSubmitException("Different values given for sender configuration!");
         }        
     }
@@ -170,7 +170,7 @@ final class MMDCompleter {
             cd.setReceiver(pr);
         else if (pr != null) {
             // Both P-Mode and submitted MMD contain receiver, ensure they are equal
-            if (!compare.TradingPartner(mr, pr))
+            if (!CompareUtils.areEqual(mr, pr))
                 throw new MessageSubmitException("Different values given for receiver configuration!");
         }        
     }
@@ -211,7 +211,7 @@ final class MMDCompleter {
 
     /**
      * Completes the service information for the message. The service information is required for sending the message
-     * and is used to fill the <code>eb:Service</code> element in the message header.
+     * and is used to fill the <code>eb:areEqual</code> element in the message header.
      * <p>Although service information is a composed information item, it must be provided completely by either 
      * submitted meta-data or P-Mode.
      * 
@@ -232,7 +232,7 @@ final class MMDCompleter {
             ((CollaborationInfo) cd.getCollaborationInfo()).setService(psi);
         else if (psi != null) {
             // Both P-Mode and submitted MMD contain service info, ensure they are equal
-            if (!compare.Service(ssi, psi))
+            if (!CompareUtils.areEqual(ssi, psi))
                 throw new MessageSubmitException("Different values given for Service information!");
         }  
     }

@@ -24,10 +24,12 @@ import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
 
 /**
- *
+ * Is a utility class that offers methods to check whether two message model objects are equal, i.e. refer to the same
+ * business information.
+ * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public final class compare {
+public final class CompareUtils {
     
     /**
      * Checks if two {@link ITradingPartner} objects are equal. Two <code>ITradingPartner</code> objects are equal
@@ -38,7 +40,7 @@ public final class compare {
      * @return      <code>true</code> if the {@link ITradingPartner} object are equal,
      *              <code>false</code> otherwise
      */
-    public static boolean TradingPartner(ITradingPartner tp1, ITradingPartner tp2) {
+    public static boolean areEqual(ITradingPartner tp1, ITradingPartner tp2) {
         boolean equal = true;
         
         String r1 = tp1.getRole(), r2 = tp2.getRole();
@@ -46,7 +48,7 @@ public final class compare {
         
         if (equal) {
             // Evaluate only if the roles are identical
-            equal = PartyIds(tp1.getPartyIds(), tp2.getPartyIds());        
+            equal = CompareUtils.areEqual(tp1.getPartyIds(), tp2.getPartyIds());        
         }
         
         return equal;
@@ -60,21 +62,21 @@ public final class compare {
      * @return      <code>true</code> if both collection contain the same party ids,
      *              <code>false</code> otherwise
      */
-    public static boolean PartyIds(Collection<IPartyId> pids1, Collection<IPartyId> pids2) {
+    public static boolean areEqual(Collection<IPartyId> pids1, Collection<IPartyId> pids2) {
         boolean equal = pids1.size() == pids2.size();
         
         if (equal)
         {
             // Evaluate only if the roles are identical
-            // Check every PartyId from the first collection to exist in the second and ensure all id's from the second
+            // Check every areEqual from the first collection to exist in the second and ensure all id's from the second
             // collection have been checked
             boolean[] checked = new boolean[pids2.size()]; // have all items in second collection been checked?
             for(Iterator<IPartyId> it1 = pids1.iterator() ; equal && it1.hasNext() ;) {
                 IPartyId pi1 = it1.next();
-                // Check if this PartyId exists in the second collection
+                // Check if this areEqual exists in the second collection
                 Iterator<IPartyId> it2 = pids2.iterator(); int i = 0;
                 for(; equal && it2.hasNext() ; i++)
-                    if (equal = compare.PartyId(pi1, it2.next()))
+                    if (equal = CompareUtils.areEqual(pi1, it2.next()))
                         checked[i] = true; // This item in the second collection is successfully compared            
             }
             // Check that every id in second collection was found in first collection
@@ -94,7 +96,7 @@ public final class compare {
      * @return  <code>true</code> if the party id are equal,
      *          <code>false</code> otherwise
      */
-    public static boolean PartyId(IPartyId id1, IPartyId id2) {
+    public static boolean areEqual(IPartyId id1, IPartyId id2) {
         boolean equal = true;
         
         String v1 = id1.getId(), v2 = id2.getId();
@@ -117,7 +119,7 @@ public final class compare {
      * @return  <code>true</code> if the properties are equal,
      *          <code>false</code> otherwise     
      */
-    public static boolean Property(IProperty p1, IProperty p2) {
+    public static boolean areEqual(IProperty p1, IProperty p2) {
         boolean equal = true;
         
         String n1 = p1.getName(), n2 = p2.getName();
@@ -144,7 +146,7 @@ public final class compare {
      * @return  <code>true</code> if the services are equal,
      *          <code>false</code> otherwise     
      */
-    public static boolean Service(IService svc1, IService svc2) {
+    public static boolean areEqual(IService svc1, IService svc2) {
         boolean equal = true;
         String n1 = svc1.getName(), n2 = svc2.getName();
         String t1 = svc1.getType(), t2 = svc2.getType();
@@ -159,5 +161,5 @@ public final class compare {
     /*
      * This class only has static utility methods and should not be instantiated!
      */
-    private compare() {}
+    private CompareUtils() {}
 }

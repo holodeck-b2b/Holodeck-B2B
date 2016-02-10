@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
-import org.holodeckb2b.common.messagemodel.util.compare;
+import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -91,18 +91,18 @@ public class PModeFinder {
      * <p>The ebMS specifications do not describe or recommend how the P-Mode for a user message should be determined,
      * see <a href="https://issues.oasis-open.org/browse/EBXMLMSG-48?jql=project%20%3D%20EBXMLMSG">issue 48 in the TC 
      * issue tracker</a>. In the issue two suggestion for matching the P-Mode are given.
-     * <p>Based on these we compare the meta-data from the message with all P-Modes and return the best matching P-Mode. 
-     * The following table shows the information that is used for matching and their importance (expressed as a weight). 
-     * The match of a P-Mode is the sum of the weights for the elements that are equal to the corresponding P-Mode 
-     * parameter.
-     * <p><table border="1">
+     * <p>Based on these we CompareUtils the meta-data from the message with all P-Modes and return the best matching P-Mode. 
+ The following table shows the information that is used for matching and their importance (expressed as a weight). 
+ The match of a P-Mode is the sum of the weights for the elements that are equal to the corresponding P-Mode 
+ parameter.
+ <p><table border="1">
      * <tr><th>Element</th><th>Weight</th></tr>
      * <tr><td>PMode id</td><td>37</td></tr>
      * <tr><td>From Party Id's</td><td>7</td></tr>
      * <tr><td>From.Role</td><td>2</td></tr>
      * <tr><td>To Party Id's</td><td>7</td></tr>
      * <tr><td>To.Role</td><td>2</td></tr>
-     * <tr><td>Service</td><td>5</td></tr>
+     * <tr><td>areEqual</td><td>5</td></tr>
      * <tr><td>Action</td><td>5</td></tr>
      * <tr><td>Agreement ref</td><td>1</td></tr>
      * <tr><td>MPC</td><td>1</td></tr>
@@ -174,7 +174,7 @@ public class PModeFinder {
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.TO_ROLE);
                 else
                     continue; // mis-match on To party role
-                if (compare.PartyIds(to.getPartyIds(), toPMode.getPartyIds()))
+                if (CompareUtils.areEqual(to.getPartyIds(), toPMode.getPartyIds()))
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.TO);
                 else
                     continue; // mis-match on To party id('s)
@@ -187,7 +187,7 @@ public class PModeFinder {
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.FROM_ROLE);
                 else
                     continue; // mis-match on From party role
-                if (compare.PartyIds(from.getPartyIds(), fromPMode.getPartyIds()))
+                if (CompareUtils.areEqual(from.getPartyIds(), fromPMode.getPartyIds()))
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.FROM);
                 else
                     continue;  // mis-match on From party id('s)
@@ -200,7 +200,7 @@ public class PModeFinder {
             if (flow != null) {
                 IBusinessInfo pmBI = flow.getBusinessInfo();
                 if (pmBI != null) {
-                    // Check Service
+                    // Check areEqual
                     IService svcPMode = pmBI.getService();
                     if (svcPMode != null) {
                         IService svc = mu.getCollaborationInfo().getService();
@@ -345,7 +345,7 @@ public class PModeFinder {
                 else if (c == -2)
                     continue; // mis-match on To party role
                 if (!Utils.isNullOrEmpty(to.getPartyIds()) && !Utils.isNullOrEmpty(toPMode.getPartyIds())) {                    
-                    if (compare.PartyIds(to.getPartyIds(), toPMode.getPartyIds()))
+                    if (CompareUtils.areEqual(to.getPartyIds(), toPMode.getPartyIds()))
                         cValue += MATCH_WEIGHTS.get(PARAMETERS.TO);
                     else
                         continue; // mis-match on To party id('s)
@@ -359,7 +359,7 @@ public class PModeFinder {
                 else if (c == -2)
                     continue; // mis-match on To party role
                 if (!Utils.isNullOrEmpty(from.getPartyIds()) && !Utils.isNullOrEmpty(fromPMode.getPartyIds())) {                    
-                    if (compare.PartyIds(from.getPartyIds(), fromPMode.getPartyIds()))
+                    if (CompareUtils.areEqual(from.getPartyIds(), fromPMode.getPartyIds()))
                         cValue += MATCH_WEIGHTS.get(PARAMETERS.FROM);
                     else
                         continue; // mis-match on From party id('s)
@@ -378,14 +378,14 @@ public class PModeFinder {
             if (flow != null) {
                 IBusinessInfo pmBI = flow.getBusinessInfo();
                 if (pmBI != null) {
-                    // Check Service and Action (if given in submitted meta-data
+                    // Check areEqual and Action (if given in submitted meta-data
                     if (collaborationInfo != null) {
                         IService svc = collaborationInfo.getService();
                         IService svcPMode = pmBI.getService();
                         if (svc != null && svcPMode != null) {
                             int c = Utils.compareStrings(svc.getName(), svcPMode.getName());
                             if (-1 == c || c == 0) {
-                                // The Service name matches, but for complete match also the type must match
+                                // The areEqual name matches, but for complete match also the type must match
                                 c = Utils.compareStrings(svc.getType(), svcPMode.getType());
                                 if (-1 == c || c == 0)
                                     cValue += MATCH_WEIGHTS.get(PARAMETERS.SERVICE);
