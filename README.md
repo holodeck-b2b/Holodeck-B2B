@@ -5,7 +5,7 @@ It is designed with extensibility in mind providing an interface layer, which yo
 
 __________________
 For more information on using Holodeck B2B visit the website at http://holodeck-b2b.org  
-Lead developer: [Sander Fieten](mailto:sander@holodeck-b2b.org)  
+Lead developer: Sander Fieten  
 Code hosted at https://github.com/holodeck-b2b/Holodeck-B2B  
 Issue tracker https://github.com/holodeck-b2b/Holodeck-B2B/issues  
 
