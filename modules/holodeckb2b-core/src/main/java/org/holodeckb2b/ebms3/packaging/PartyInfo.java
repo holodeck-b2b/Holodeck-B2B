@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +20,11 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.IPartyId;
-import org.holodeckb2b.common.general.ITradingPartner;
-import org.holodeckb2b.common.messagemodel.IUserMessage;
-import org.holodeckb2b.ebms3.persistent.general.PartyId;
+import org.holodeckb2b.ebms3.persistency.entities.PartyId;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IPartyId;
+import org.holodeckb2b.interfaces.general.ITradingPartner;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
  * Is a helper class for handling the ebMS PartyInfo element in the ebMS SOAP 
@@ -39,7 +38,7 @@ public class PartyInfo {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PartyInfo");
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "PartyInfo");
     
     /**
      * The <code>From</code> and <code>To</code> element are structurally equal,
@@ -48,30 +47,30 @@ public class PartyInfo {
      */
     private static class TradingPartner {
     
-        public static enum ElementName { FROM, TO };
+        public static enum ElementName { FROM, TO }
     
         /**
-         * The fully qualified name of the From element as an {@see QName}
+         * The fully qualified name of the From element as an {@link QName}
          */
-        private static final QName  Q_FROM_PARTY = new QName(Constants.EBMS3_NS_URI, "From");
+        private static final QName  Q_FROM_PARTY = new QName(EbMSConstants.EBMS3_NS_URI, "From");
 
         /**
-         * The fully qualified name of the To element as an {@see QName}
+         * The fully qualified name of the To element as an {@link QName}
          */
-        private static final QName  Q_TO_PARTY = new QName(Constants.EBMS3_NS_URI, "To"); 
+        private static final QName  Q_TO_PARTY = new QName(EbMSConstants.EBMS3_NS_URI, "To"); 
     
         /**
-         * The fully qualified name of the PartyId element as an {@see QName}
+         * The fully qualified name of the PartyId element as an {@link QName}
          */
-        private static final QName  Q_PARTYID = new QName(Constants.EBMS3_NS_URI, "PartyId");
+        private static final QName  Q_PARTYID = new QName(EbMSConstants.EBMS3_NS_URI, "PartyId");
         
         // The local name for the PartyId type attribute
         private static final String LN_PARTYID_TYPE = "type";
         
         /**
-         * The fully qualified name of the Role element as an {@see QName}
+         * The fully qualified name of the Role element as an {@link QName}
          */
-        private static final QName  Q_ROLE = new QName(Constants.EBMS3_NS_URI, "Role");
+        private static final QName  Q_ROLE = new QName(EbMSConstants.EBMS3_NS_URI, "Role");
         
         /**
          * Creates a <code>From</code> or <code>To</code> element and includes it in the
@@ -100,7 +99,7 @@ public class PartyInfo {
             // Create the Role element and ensure it has a value. 
             OMElement roleElem = f.createOMElement(Q_ROLE, tpInfo);
             String role = data.getRole();
-            roleElem.setText((role != null && !role.isEmpty() ? role : Constants.DEFAULT_ROLE ));
+            roleElem.setText((role != null && !role.isEmpty() ? role : EbMSConstants.DEFAULT_ROLE ));
             
             return tpInfo;
         }
@@ -123,35 +122,35 @@ public class PartyInfo {
         
         /**
          * Reads the trading partner information from a <code>From</code> or 
-         * <code>To</code> element and returns it as a {@link org.holodeckb2b.ebms3.persistent.general.TradingPartner}
+         * <code>To</code> element and returns it as a {@link org.holodeckb2b.ebms3.persistency.entities.TradingPartner}
          * object.
          * <p><b>NOTE:</b> Although the information is returned in an entity object,
          * the object is not persisted. 
          * 
          * @param tpElement     The element to read the information from
-         * @return              A {@link org.holodeckb2b.ebms3.persistent.general.TradingPartner}
+         * @return              A {@link org.holodeckb2b.ebms3.persistency.entities.TradingPartner}
          *                      object containing the information from the element
          * @throws PackagingException   When the given element does not conform to
          *                              ebMS specification and can therefor not be
          *                              read completely
          */
-        public static org.holodeckb2b.ebms3.persistent.general.TradingPartner readElement(OMElement tpElement) throws PackagingException {
+        public static org.holodeckb2b.ebms3.persistency.entities.TradingPartner readElement(OMElement tpElement) throws PackagingException {
             if (tpElement == null)
                 return null; // If there is no element content, there is no data
             
             // Create the entity object
-            org.holodeckb2b.ebms3.persistent.general.TradingPartner tpData = new org.holodeckb2b.ebms3.persistent.general.TradingPartner();
+            org.holodeckb2b.ebms3.persistency.entities.TradingPartner tpData = new org.holodeckb2b.ebms3.persistency.entities.TradingPartner();
             
             // Check for a Role element and use its value
             OMElement roleElement = tpElement.getFirstChildWithName(Q_ROLE);
             if (roleElement != null) {
                 String role = roleElement.getText();
-                tpData.setRole((role != null && !role.isEmpty() ? role : Constants.DEFAULT_ROLE ));
+                tpData.setRole((role != null && !role.isEmpty() ? role : EbMSConstants.DEFAULT_ROLE ));
             } else
-                tpData.setRole(Constants.DEFAULT_ROLE);
+                tpData.setRole(EbMSConstants.DEFAULT_ROLE);
             
             // Read all PartyId elements and add info to entity
-            Iterator it = tpElement.getChildrenWithName(Q_PARTYID);
+            Iterator<?> it = tpElement.getChildrenWithName(Q_PARTYID);
             while (it.hasNext()) {
                 OMElement pidElem = (OMElement) it.next();
                 String pid = pidElem.getText();
@@ -203,7 +202,7 @@ public class PartyInfo {
      * Gets the {@link OMElement} object that represent the <code>PartyInfo</code> 
      * child element of the <code>UserMessage</code> element.
      * 
-     * @param piElement     The parent <code>UserMessage</code> element
+     * @param muElement     The parent <code>UserMessage</code> element
      * @return              The {@link OMElement} object representing the requested element
      *                      or <code>null</code> when the requested element is not found as
      *                      child of the given element.
@@ -214,24 +213,24 @@ public class PartyInfo {
     
     /**
      * Reads the information on the sender and receiver of the UserMessage message
-     * unit and stores it in the given {@link org.holodeckb2b.ebms3.persistent.message.UserMessage} 
+     * unit and stores it in the given {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage} 
      * object.
      * <p><b>NOTE:</b> This method does NOT persist the entity object! It is the
      * responsibility of the caller to save changes.
      * 
      * @param piElement             The <code>PartyInfo</code> element that contains the
      *                              info about the sender and receiver of this User Message message unit
-     * @param umData                The {@link org.holodeckb2b.ebms3.persistent.message.UserMessage} object
+     * @param umData                The {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage} object
      *                              to update
      * @throws PackagingException   When the given element does not contain a valid
      *                              <code>eb:PartyInfo</code> element.
      */
-    public static void readElement(OMElement piElement, org.holodeckb2b.ebms3.persistent.message.UserMessage umData) throws PackagingException {
+    public static void readElement(OMElement piElement, org.holodeckb2b.ebms3.persistency.entities.UserMessage umData) throws PackagingException {
         if (piElement == null)
             return;
         
         // Read the content, i.e. the from and to element
-        org.holodeckb2b.ebms3.persistent.general.TradingPartner tp = TradingPartner.readElement(TradingPartner.getElement(piElement, TradingPartner.ElementName.FROM));
+        org.holodeckb2b.ebms3.persistency.entities.TradingPartner tp = TradingPartner.readElement(TradingPartner.getElement(piElement, TradingPartner.ElementName.FROM));
         if (tp != null)
             umData.setSender(tp);
         else 

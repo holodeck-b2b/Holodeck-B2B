@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,26 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.ebms3.handlers.outflow;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.IPMode;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
+import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
-import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.persistent.message.PullRequest;
-import org.holodeckb2b.ebms3.persistent.message.Receipt;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
 import org.holodeckb2b.ebms3.util.PModeFinder;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for adding <i>Error signals</i> that are waiting to be sent to the 
@@ -60,136 +60,76 @@ public class AddErrorSignals extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) {
+    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         
         log.debug("Check if this message already contains Error signals to send");
-        Collection<ErrorMessage> errorSigs = null;
+        Collection<EntityProxy<ErrorMessage>> errorSigs = null;
         try {
-            errorSigs = (Collection<ErrorMessage>) mc.getProperty(MessageContextProperties.OUT_ERROR_SIGNALS);
+            errorSigs = (Collection<EntityProxy<ErrorMessage>>) mc.getProperty(MessageContextProperties.OUT_ERROR_SIGNALS);
         } catch(ClassCastException cce) {
             log.fatal("Illegal state of processing! MessageContext contained a " + errorSigs.getClass().getName()
                         + " object as collection of error signals!");
             return InvocationResponse.ABORT;
         }
         
-        if(errorSigs != null && !errorSigs.isEmpty()) {
+        if(!Utils.isNullOrEmpty(errorSigs)) {
             log.debug("Message already contains Error signals, can not add additional ones");
             return InvocationResponse.CONTINUE;
         }
         
-        // Check which other message units are already in the message that errors would be bundled with
-        Collection<MessageUnit> bundledMUs = null;
-        try {
-            log.debug("Get bundled message units");
-            bundledMUs = getMessageUnits(mc);
-        } catch (IllegalStateException e) {
-            // Objects in message context are not of expected type!
-            log.fatal(e.getMessage());
-            return InvocationResponse.ABORT;
-        }
+        // Whether Errors can be bundled is determined by the primary message unit
+        log.debug("Get primary message unit already in the message");
+        EntityProxy<MessageUnit> primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
         
-        if(bundledMUs.isEmpty()) {
-            // This message does not any other message unit => it is not an ebMS message (strange as Holodeck B2B module was engaged)
+        if(primaryMU == null) {
+            // This message does not have any other message unit 
+            // => it is not an ebMS message (strange as Holodeck B2B module was engaged)
             log.warn("No ebMS message units in message!");
             return InvocationResponse.CONTINUE;
         }
         
         log.debug("Get errors that can be bundled with current message unit");
-        Collection<ErrorMessage> errsToAdd = getBundableErrors(bundledMUs);
-        if (errsToAdd == null || errsToAdd.isEmpty()) {
+        Collection<EntityProxy<ErrorMessage>> errsToAdd = getBundableErrors(primaryMU);
+        if (Utils.isNullOrEmpty(errsToAdd)) {
             log.debug("No error signal(s) found to add to the message");
             return InvocationResponse.CONTINUE;
         } else
             log.debug(errsToAdd.size() + " error signal(s) will be added to the message");
         
         // Change the processing state of the errors that are included
-        for(ErrorMessage e : errsToAdd) {
-            log.debug("Change processing state of error signal [" + e.getMessageId() + "] to indicate it is included");
-            try {
-                // When processing state is changed add the error to the list of errors to send
-                ErrorMessage error = MessageUnitDAO.startProcessingMessageUnit(e);
-                if (error != null) {
-                    log.debug("Processing state changed for error signal with msgId=" + error.getMessageId());
-                    MessageContextUtils.addErrorSignalToSend(mc, error);
-                } else
-                    log.debug("Could not change processing state for error signal with msgId=" + e.getMessageId() 
-                                + ", skipping");                
-            } catch (DatabaseException dbe) {
-                log.error("An error occurred while changing the processing state of error signal [" 
-                            + e.getMessageId() + "]. Details: " + dbe.getMessage());
-            }
+        for(EntityProxy<ErrorMessage> e : errsToAdd) {
+            log.debug("Change processing state of error signal [" + e.entity.getMessageId() 
+                                                                                    + "] to indicate it is included");
+            // When processing state is changed add the error to the list of errors to send
+            if (MessageUnitDAO.startProcessingMessageUnit(e)) {
+                log.debug("Processing state changed for error signal with msgId=" + e.entity.getMessageId());
+                MessageContextUtils.addErrorSignalToSend(mc, e);
+            } 
         }
         
         return InvocationResponse.CONTINUE;
     }
     
     /**
-     * Retrieves all other types of message units already in this message. 
-     * 
-     * @param mc    The message context
-     * @return      {@link Collection} of {@link MessageUnit} objects for the message units already in the message. 
-     */
-    private Collection<MessageUnit> getMessageUnits(MessageContext mc) {
-        Collection<MessageUnit>   otherMUs = new ArrayList<MessageUnit>();
-        
-        log.debug("Check if message contains an User Message");
-        try {
-            UserMessage userMsg = (UserMessage) mc.getProperty(MessageContextProperties.OUT_USER_MESSAGE);
-            if (userMsg != null) {
-                log.debug("Message contains an User Message");
-                otherMUs.add(userMsg);
-            }
-        } catch (ClassCastException cce) {
-            throw new IllegalStateException("Illegal state of processing! MessageContext contained another object as UserMessage!");
-        }
-        
-        log.debug("Check if message already contains another signal message");
-        try {
-            PullRequest pullReq = (PullRequest) mc.getProperty(MessageContextProperties.OUT_PULL_REQUEST);
-            if (pullReq != null) {
-                log.debug("Message contains a PullRequest");
-                otherMUs.add(pullReq);
-            }
-        } catch (ClassCastException cce) {
-            throw new IllegalStateException("Illegal state of processing! MessageContext contained another object as PullRequest!");
-        }
-        try {
-            Collection<Receipt> receipts = (ArrayList<Receipt>) mc.getProperty(MessageContextProperties.OUT_RECEIPTS);
-            if (receipts != null && !receipts.isEmpty()) {
-                log.debug("Message contains one or more Receipts signals");
-                otherMUs.addAll(receipts);
-            }
-        } catch (ClassCastException e) {
-            throw new IllegalStateException("Illegal state of processing! MessageContext contained an object that was not collection of receipts!");
-        }
-        
-        return otherMUs;
-    }
-    
-    /**
      * Retrieves the {@link ErrorMessage}s waiting to be sent and that can be bundled with the already included message
      * units.
      * <p>An <i>error signal</i> can be included in this message if the URL the error should be sent to equals the 
-     * destination URL of the other message units.
-     * <p>NOTE: It is assumed that the message units already included in the message have to be sent to the same 
-     * URL, so only one message unit is checked.
+     * destination URL of the <i>primary</i> message unit.
      * <p>An error signal is waiting to be sent if its processing state is either {@link ProcessingStates#CREATED} or 
      * {@link ProcessingStates#TRANSPORT_FAILURE}.
      * 
-     * @param toBeBundledWithMUs
-     * @param isResponse 
-     * @return 
+     * @param primaryMU     The primary message unit contained in the message
+     * @return              A collection of Error signal that can be bundled with the given primary message unit
      */
-    private Collection<ErrorMessage> getBundableErrors(Collection<MessageUnit> toBeBundledWithMUs) {
-        ArrayList<ErrorMessage> errors = new ArrayList<ErrorMessage>();
+    private Collection<EntityProxy<ErrorMessage>> getBundableErrors(EntityProxy<MessageUnit> primaryMU) {
+        ArrayList<EntityProxy<ErrorMessage>> errors = new ArrayList<EntityProxy<ErrorMessage>>();
         Collection<IPMode>       pmodes = null;
         
         log.debug("Get the destination URL of the message");
         String destURL = null;
-        MessageUnit mu = toBeBundledWithMUs.iterator().next();
-        IPMode pmode = HolodeckB2BCore.getPModeSet().get(mu.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.entity.getPMode());
 
-        if (mu instanceof UserMessage || mu instanceof PullRequest) {
+        if (primaryMU.entity instanceof UserMessage ||  primaryMU.entity instanceof PullRequest) {
             destURL = pmode.getLegs().iterator().next().getProtocol().getAddress();
         } else { // MessageUnit instanceof Receipt
             destURL = pmode.getLegs().iterator().next().getReceiptConfiguration().getTo();
@@ -198,7 +138,7 @@ public class AddErrorSignals extends BaseHandler {
         log.debug("Get P-Modes of errors that can be bundled");
         pmodes = PModeFinder.getPModesWithErrorsTo(destURL);
             
-        if(pmodes == null || pmodes.isEmpty()) {
+        if(Utils.isNullOrEmpty(pmodes)) {
             log.debug("No P-Modes found that allow bundling of errors to this message");
             return null;
         }
@@ -206,13 +146,17 @@ public class AddErrorSignals extends BaseHandler {
         log.debug("Errors from " + pmodes.size() + " P-Modes can be bundled to message.");
         log.debug("Retrieve errors waiting to send");
         try {
-            Collection<ErrorMessage> createdErrors = 
-                       MessageUnitDAO.getMessageUnitsForPModesInState(ErrorMessage.class, pmodes, ProcessingStates.READY_TO_PUSH);
-            if (createdErrors != null && !createdErrors.isEmpty())
+            Collection<EntityProxy<ErrorMessage>> createdErrors = 
+                                         MessageUnitDAO.getMessageUnitsForPModesInState(ErrorMessage.class, 
+                                                                                        pmodes, 
+                                                                                        ProcessingStates.READY_TO_PUSH);
+            if (!Utils.isNullOrEmpty(createdErrors))
                 errors.addAll(createdErrors);
-            Collection<ErrorMessage> failedErrors = 
-                       MessageUnitDAO.getMessageUnitsForPModesInState(ErrorMessage.class, pmodes, ProcessingStates.TRANSPORT_FAILURE);
-            if (failedErrors != null && !failedErrors.isEmpty())
+            Collection<EntityProxy<ErrorMessage>> failedErrors = 
+                                    MessageUnitDAO.getMessageUnitsForPModesInState(ErrorMessage.class, 
+                                                                                   pmodes, 
+                                                                                   ProcessingStates.TRANSPORT_FAILURE);
+            if (!Utils.isNullOrEmpty(failedErrors))
                 errors.addAll(failedErrors);
         } catch (DatabaseException dbe) {
             log.error("An error occurred while retrieving error signals from the database! Details: " + dbe.getMessage());
@@ -222,9 +166,9 @@ public class AddErrorSignals extends BaseHandler {
         // As we only allow one error signal in the message we select the oldest one if more are available
         if (errors.size() > 1) {
             log.debug("More than one error available, select oldest as bundling not allowed");
-            ErrorMessage oldestError = errors.get(0);
-            for(ErrorMessage e : errors)
-                if (e.getTimestamp().before(oldestError.getTimestamp()))
+            EntityProxy<ErrorMessage> oldestError = errors.get(0);
+            for(EntityProxy<ErrorMessage> e : errors)
+                if (e.entity.getTimestamp().before(oldestError.entity.getTimestamp()))
                     oldestError = e;
             errors.clear();
             errors.add(oldestError);

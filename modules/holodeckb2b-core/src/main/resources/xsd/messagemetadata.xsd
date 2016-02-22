@@ -1,23 +1,23 @@
 <?xml version="1.0"?>
 <!--
+
     Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
-    
-    This file is part of Holodeck B2B.
-    
-    Holodeck B2B is free software: you can redistribute it and/or modify
+
+    This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
-    Holodeck B2B is distributed in the hope that it will be useful,
+
+    This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
-    along with Holodeck B2B. If not, see <http://www.gnu.org/licenses/>.
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 -->
-<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+<xs:schema version="1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
     targetNamespace="http://holodeck-b2b.org/schemas/2014/06/mmd" attributeFormDefault="unqualified"
     xmlns:tns="http://holodeck-b2b.org/schemas/2014/06/mmd"
     xmlns:xml="http://www.w3.org/XML/1998/namespace">
@@ -25,6 +25,7 @@
     <xs:annotation>
         <xs:documentation xml:lang="en">This schema defines the structure of the message meta-data (or short MMD) document used by Holodeck B2B. 
 XML documents of this type are used when exchanging messages between Holodeck B2B and the connected business application. When sending the Producer should supply the MMD and when deliverying a message to the Consumer Holodeck B2B will supply the MMD. Note that delivery is done by a delivery class and that it may choose not to supply the MMD because the meta-data is provided otherwise.</xs:documentation>
+        <xs:documentation>Version 1.1 of the schema introduces the @deleteFilesAfterSubmit attribute for the eb:PayloadInfo element which can be used to indicate whether the file containing the payload data should be removed after Holodeck B2B has accepted the submission. </xs:documentation>
     </xs:annotation>
     <xs:import namespace="http://www.w3.org/XML/1998/namespace"
         schemaLocation="http://www.w3.org/2001/03/xml.xsd"/>
@@ -33,7 +34,7 @@ XML documents of this type are used when exchanging messages between Holodeck B2
             <xs:documentation xml:lang="en">A message that needs to be transferred between two business applications translates into a UserMessage message unit in an ebMS v3 message. Therefore the meta data information is structured like the standard ebMS header element for such a message unit. 
 
 When submitting a message for sending the submitter, i.e. the business application, does not need to supply all information. That is because the message exchange is controlled by the P-Mode (see section 4 of the Core Specification, http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/core/ebms_core-3.0-spec.html) which can already define most of the information. 
-At least enough information must be supplied to detect which P-Mode Holodeck B2B should use to send the message. It is RECOMMENDED to include the P-Mode id in the message meta data for easy and unambigious determination of the P-Mode to use. 
+At least enough information must be supplied to detect which P-Mode Holodeck B2B should use to send the message. Currently it MUST include the P-Mode id for easy and unambigious determination of the P-Mode to use. 
 
 Which other information also must be supplied depends on the completeness of the P-Mode. At least the ConversationId element (child of CollaborationInfo) is REQUIRED as it is a required element in the ebMS message and only known at the business level which means it should be supplied when submitting a message. Also only known to the business level is the actual information to exchange, i.e. the paylaods, therefore the PayloadInfo SHOULD be included in the MMD as well.
 
@@ -197,6 +198,11 @@ If this element occurs multiple all instances MUST identify the same business pa
                 </xs:annotation>
             </xs:element>
         </xs:sequence>
+        <xs:attribute default="false" name="deleteFilesAfterSubmit" type="xs:boolean">
+            <xs:annotation>
+                <xs:documentation>This attribute can be used to indicate whether the files containing the payload data should be removed by Holodeck B2B when the message is succesfully submitted. When not supplied or set to <i>false</i> the <i>Producer</i> application is responsible for deleting the payload file. </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
     <xs:complexType name="PartInfo">
         <xs:sequence>
@@ -228,12 +234,12 @@ Because payloads may be related to each other the business application may wish 
         </xs:attribute>
         <xs:attribute name="mimeType" type="tns:non-empty-string" use="optional">
             <xs:annotation>
-                <xs:documentation>The MIME type of payload content. This is an OPTIONAL element, when no MIME type is given Holodeck B2B will try to detect the correct MIME type based on the payload content.</xs:documentation>
+                <xs:documentation>The MIME type of payload content. This is an OPTIONAL attribute, when no MIME type is given Holodeck B2B will try to detect the correct MIME type based on the payload content.</xs:documentation>
             </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="location" type="xs:anyURI" use="required">
+        <xs:attribute name="location" type="xs:anyURI" use="optional">
             <xs:annotation>
-                <xs:documentation>The location where Holodeck B2B can retrieve the payload content.</xs:documentation>
+                <xs:documentation>The location where Holodeck B2B can retrieve the payload content. This attribute MUST be specified for payloads contained in the message, i.e. containment is body or attachment. Not used for external payloads</xs:documentation>
             </xs:annotation>
         </xs:attribute>
     </xs:complexType>

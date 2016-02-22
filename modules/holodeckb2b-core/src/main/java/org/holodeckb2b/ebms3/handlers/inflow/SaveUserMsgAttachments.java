@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.io.File;
@@ -23,6 +22,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.zip.ZipException;
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -31,19 +31,23 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.config.Config;
+import org.holodeckb2b.as4.compression.DeCompressionFailure;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.IPayload;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
+import org.holodeckb2b.ebms3.errors.FailedDecryption;
 import org.holodeckb2b.ebms3.errors.MimeInconsistency;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
+import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
+import org.holodeckb2b.ebms3.persistency.entities.Payload;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.persistent.message.EbmsError;
-import org.holodeckb2b.ebms3.persistent.message.Payload;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for reading the payload content from the SOAP message. The payloads are 
@@ -72,17 +76,21 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      * 
      * @throws AxisFault    When the directory or a file for temporarily storing the payload contents is not available 
      *                      and can not be created
+     * @throws DatabaseException When a database problem occurs when changing the processing state of the message unit
      */
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws AxisFault {
+    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> um) 
+                                                                            throws AxisFault, DatabaseException {
         
-        Collection<IPayload> payloads = um.getPayloads();
-        log.debug("UserMessage contains " + payloads.size() + " payloads.");
-        
+        Collection<IPayload> payloads = um.entity.getPayloads();        
         // If there are no payloads in the UserMessage directly continue processing
-        if (payloads == null || payloads.isEmpty())
+        if (Utils.isNullOrEmpty(payloads)) {
+            log.debug("UserMessage contains no payloads.");
+            MessageUnitDAO.setReadyForDelivery(um);
             return InvocationResponse.CONTINUE;
+        }
         
+        log.debug("UserMessage contains " + payloads.size() + " payloads.");
         try {
             // Get the directory where to store the payloads from the configuration
             File tmpPayloadDir = getTempDir();
@@ -100,73 +108,92 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                 // The reference defines how the payload is contained in the message
                 String plRef = p.getPayloadURI();
 
-                if (p.getContainment() == IPayload.Containment.BODY) {
-                    // Payload is a element from the SOAP body
-                    OMElement plElement= null;
-                    if (plRef == null || plRef.isEmpty()) {
-                        log.debug("No reference included in payload meta data => SOAP body is the payload");
-                         plElement = mc.getEnvelope().getBody().getFirstElement();
-                    } else {
-                        log.debug("Payload is element with id " + plRef + " of SOAP body");
-                        plElement = getPayloadFromBody(mc.getEnvelope().getBody(), plRef);
-                    }
-                    
-                    if (plElement == null) {
-                        // The reference is invalid as no element exists in the body. This makes this an 
-                        // invalid UserMessage! Create an ValueInconsistent error and store it in the MessageContext 
-                        createInconsistentError(mc, um, null);
-                        return InvocationResponse.CONTINUE;
-                    } else {
-                        // Found the referenced element, save it (and its children) fo file
-                        log.debug("Found referenced element in SOAP body");
-                        saveXMLPayload(plElement, plFile);
-                        log.debug("Payload saved to temporary file, set content location in meta data");
-                        p.setMimeType("application/xml");
-                        p.setContentLocation(plFile.getAbsolutePath());
-                    }
-                } else if (p.getContainment() == IPayload.Containment.ATTACHMENT) {
-                    log.debug("Payload is contained in attachment with MIME Content-id= " + plRef);
-                    // Get access to the actual content
-                    log.debug("Get DataHandler for attachment");
-                    DataHandler dh = mc.getAttachment(plRef);
-                    if (dh == null) {
-                        // The reference is invalid as no element exists in the body with the given id. This makes this an 
-                        // invalid UserMessage! Create an ValueInconsistent error and store it in the MessageContext 
-                        createInconsistentError(mc, um, plRef);
-                        return InvocationResponse.CONTINUE;
-                    } else {
-                        dh.writeTo(new FileOutputStream(plFile));
-                        log.debug("Payload saved to temporary file, set content location in meta data");
-                        p.setContentLocation(plFile.getAbsolutePath());    
-                        p.setMimeType(dh.getContentType());
-                    }
-                } else {
-                    log.debug("Payload is not contained in message but located at " + plRef);
-                    // External payload are not processed by Holodeck B2B, the URI is just passed to the business app
+                switch (p.getContainment()) {
+                    case BODY:
+                        // Payload is a element from the SOAP body
+                        OMElement plElement= null;
+                        if (Utils.isNullOrEmpty(plRef)) {
+                            log.debug("No reference included in payload meta data => SOAP body is the payload");
+                            plElement = mc.getEnvelope().getBody().getFirstElement();
+                        } else {
+                            log.debug("Payload is element with id " + plRef + " of SOAP body");
+                            plElement = getPayloadFromBody(mc.getEnvelope().getBody(), plRef);
+                        }   
+                        if (plElement == null) {
+                            // The reference is invalid as no element exists in the body. This makes this an
+                            // invalid UserMessage! Create an ValueInconsistent error and store it in the MessageContext
+                            createInconsistentError(mc, um, null);
+                            return InvocationResponse.CONTINUE;
+                        } else {
+                            // Found the referenced element, save it (and its children) fo file
+                            log.debug("Found referenced element in SOAP body");
+                            saveXMLPayload(plElement, plFile);
+                            log.debug("Payload saved to temporary file, set content location in meta data");
+                            p.setMimeType("application/xml");
+                            p.setContentLocation(plFile.getAbsolutePath());
+                        }   
+                        break;
+                    case ATTACHMENT:
+                        log.debug("Payload is contained in attachment with MIME Content-id= " + plRef);
+                        // Get access to the actual content
+                        log.debug("Get DataHandler for attachment");
+                        DataHandler dh = mc.getAttachment(plRef);
+                        if (dh == null) {
+                            // The reference is invalid as no element exists in the body with the given id. This makes
+                            // this an invalid UserMessage! Create an ValueInconsistent error and store it in the 
+                            // MessageContext
+                            createInconsistentError(mc, um, plRef);
+                            return InvocationResponse.CONTINUE;
+                        } else {
+                            try {
+                                dh.writeTo(new FileOutputStream(plFile));
+                            } catch (ZipException decompressError) {
+                                log.error("Payload [" + plRef + "] in message [" + um.entity.getMessageId() 
+                                            + "] could not be decompressed! Details: " + decompressError.getMessage());
+                                DeCompressionFailure decompressFailure = new DeCompressionFailure(
+                                        "Payload [" + plRef + "] in message could not be decompressed!", 
+                                        um.entity.getMessageId());
+                                MessageContextUtils.addGeneratedError(mc, decompressFailure);
+                                log.debug("Error generated and stored in MC, change processing state of user message");
+                                MessageUnitDAO.setFailed(um);
+                            } catch (IOException readException) {
+                                // Check if this IO exception is caused by decryption failure
+                                if (Utils.getRootCause(readException) 
+                                                                instanceof java.security.GeneralSecurityException) {
+                                    log.error("Payload [" + plRef + "] in message [" + um.entity.getMessageId() 
+                                                + "] could not be decompressed! Details: " 
+                                                + Utils.getRootCause(readException).getMessage());
+                                    FailedDecryption decryptFailure = new FailedDecryption(
+                                            "Payload [" + plRef + "] in message could not be decrypted!",
+                                            um.entity.getMessageId());
+                                    MessageContextUtils.addGeneratedError(mc, decryptFailure);
+                                    log.debug("Error generated and stored in MC, change processing state of user message");
+                                    MessageUnitDAO.setFailed(um);
+                                    return InvocationResponse.CONTINUE;
+                                }
+                            }
+                            log.debug("Payload saved to temporary file, set content location in meta data");
+                            p.setContentLocation(plFile.getAbsolutePath());
+                            p.setMimeType(dh.getContentType());
+                        }   
+                        break;
+                    default:
+                        log.debug("Payload is not contained in message but located at " + plRef);
+                        // External payload are not processed by Holodeck B2B, the URI is just passed to business app
                 }
             }
             
             log.debug("All payloads saved to temp file");
             // Update the message meta data in data base and change the processing state of the
             // message to indicate it is now ready for delivery to the business application
-            MessageUnitDAO.updatePayloadMetaData(um);
+            MessageUnitDAO.updateMessageUnitInfo(um);
             MessageUnitDAO.setReadyForDelivery(um);
         } catch (IOException | XMLStreamException ex) {
             log.fatal("Payload(s) could not be saved to temporary file! Details:" + ex.getMessage());
-            try { 
-                MessageUnitDAO.setFailed(um);
-            } catch (DatabaseException dbe) {
-                log.error("An error occurred while change the processing state of the message!" 
-                            + "Details: " + dbe.getMessage());
-            }
+            MessageUnitDAO.setFailed(um);
             // Stop processing as content can not be saved. Send error to sender of message
             throw new AxisFault("Unable to create file for temporarily storing payload content", ex);
-        } catch (DatabaseException ex) {
-            // Oops, something went wrong saving the data
-            log.error("A error occurred when updating the meta data in the database. Details: " + ex.getMessage());
-
-            //@todo: Create an error so response can be sent 
-        }
+        } 
         
         return InvocationResponse.CONTINUE;
     }
@@ -180,7 +207,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      * @throws IOException   When the specified directory does not exist and can not be created.
      */
     private File getTempDir() throws IOException {        
-        String tmpPayloadDirPath = Config.getTempDirectory() + PAYLOAD_DIR;
+        String tmpPayloadDirPath = HolodeckB2BCoreInterface.getConfiguration().getTempDirectory() + PAYLOAD_DIR;
         File tmpPayloadDir = new File(tmpPayloadDirPath);
         if (!tmpPayloadDir.exists()) {
             log.debug("Temp directory for payloads does not exist");
@@ -207,11 +234,11 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      */
     private OMElement getPayloadFromBody(SOAPBody body, String id) {
         // Search all children in the SOAP body for an element with given id
-        Iterator bodyElements = body.getChildElements();
+        Iterator<?> bodyElements = body.getChildElements();
         OMElement e = null; boolean f = false;
         while (bodyElements.hasNext() && !f) {
             e = (OMElement) bodyElements.next();
-            f = id.equals(e.getAttributeValue(Constants.QNAME_XMLID));
+            f = id.equals(e.getAttributeValue(EbMSConstants.QNAME_XMLID));
         }
         return (f ? e : null);
     }
@@ -226,8 +253,9 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      * @param invalidRef    The invalid payload reference, can be <code>null</code> if the body payload is missing
      * @throws DatabaseException When updating the processing state fails.
      */
-    private void createInconsistentError(MessageContext mc, UserMessage um, String invalidRef) throws DatabaseException {
-        log.warn("UserMessage with id " + um.getMessageId() + 
+    private void createInconsistentError(MessageContext mc, EntityProxy<UserMessage> um, String invalidRef) 
+                                                                                        throws DatabaseException {
+        log.warn("UserMessage with id " + um.entity.getMessageId() + 
                  " can not be processed because payload" 
                  + (invalidRef != null ? " with href=" + invalidRef  : "") 
                  + " is not included in message");
@@ -236,7 +264,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
             error = new ValueInconsistent();
         else
             error = new MimeInconsistency();
-        error.setRefToMessageInError(um.getMessageId());
+        error.setRefToMessageInError(um.entity.getMessageId());
         error.setErrorDetail("The payload" + (invalidRef != null ? " with href=" + invalidRef  : "") 
                                            + " could not be found in the message!");
         MessageContextUtils.addGeneratedError(mc, error);

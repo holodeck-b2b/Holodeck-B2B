@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
-import org.holodeckb2b.common.general.Constants;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 
 /**
  * Is a helper class for handling a SOAPEnv for an ebMS V3 message. 
@@ -61,25 +61,35 @@ public class SOAPEnv {
         
         org.apache.axiom.soap.SOAPEnvelope envelope = omFactory.getDefaultEnvelope();
         
-        // Declare all namespaces that are needed by default
-        envelope.declareNamespace("http://www.w3.org/1999/XMLSchema-instance/", "xsi");
-        envelope.declareNamespace("http://www.w3.org/1999/XMLSchema", "xsd");
-        envelope.declareNamespace(Constants.EBMS3_NS_URI, EBMS3_NS_PREFIX);
+        declareNamespaces(envelope);
         
         return envelope;
     }
     
     /**
-     * Gets an {@see OMNamespace} object for the ebMS 3 namespace for the SOAP
+     * Ensures that the requires namespaces are declared on the SOAP envelope element. 
+     * 
+     * @param envelope  The SOAP envelope element to add the namespace declarations to
+     */
+    public static void declareNamespaces(SOAPEnvelope envelope) {
+        // Declare all namespaces that are needed by default
+        envelope.declareNamespace("http://www.w3.org/1999/XMLSchema-instance/", "xsi");
+        envelope.declareNamespace("http://www.w3.org/1999/XMLSchema", "xsd");
+        envelope.declareNamespace(EbMSConstants.EBMS3_NS_URI, EBMS3_NS_PREFIX);
+    }
+
+    
+    /**
+     * Gets an {@link OMNamespace} object for the ebMS 3 namespace for the SOAP
      * envelope the given element is contained in.
      * 
      * @param   e     The element that is contained in the SOAP envelop
-     * @return  The {@see OMNamespace} object for the ebMS 3 namespace if it was 
+     * @return  The {@link OMNamespace} object for the ebMS 3 namespace if it was 
      *          declared in this SOAP message;
      *          <code>null</code> if there is no namespace declared for ebMS 3
      */
     public static OMNamespace getEbms3Namespace(OMElement e) {
-        return e.findNamespace(Constants.EBMS3_NS_URI, null);
+        return e.findNamespace(EbMSConstants.EBMS3_NS_URI, null);
     }
     
     /**

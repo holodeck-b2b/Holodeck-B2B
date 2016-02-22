@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,11 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.util.Interval;
+import org.holodeckb2b.interfaces.general.Interval;
+import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
+import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
+import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
  * Manages a pool of <i>workers</i>. Workers are used to to execute, mostly recurring. tasks in Holodeck B2B like 
@@ -56,7 +60,7 @@ public class WorkerPool {
         /**
          * The thread the instance is running in
          */
-        Future      runningWorker;
+        Future<?>   runningWorker;
     }
     
     /**
@@ -85,6 +89,7 @@ public class WorkerPool {
     /**
      * Create an empty worker pool with given workerName
      *
+     * @param name the worker name
      */
     public WorkerPool(String name) {
         this.name = name;
@@ -95,6 +100,7 @@ public class WorkerPool {
     /**
      * Create a worker pool with the given configuration
      *
+     * @param config the configuraiton to use
      */
     public WorkerPool(IWorkerPoolConfiguration config) {
         this(config.getName());
@@ -136,6 +142,10 @@ public class WorkerPool {
     public void stop(int delay) {
         log.info("Stopping worker pool");
 
+        if (pool == null)
+            // No pool to shutdown
+            return;
+                    
         pool.shutdown();
         try {
             // Wait the given delay for workers to terminate
@@ -160,6 +170,7 @@ public class WorkerPool {
     /**
      * Cleans up the worker pool and tries to stop all workers when not stopped already
      */
+    @Override
     public void finalize() throws Throwable {
         try {
             if (!pool.isTerminated()) {
@@ -264,9 +275,10 @@ public class WorkerPool {
         log.debug("Adding new worker to the pool");
         
         try {
-            Class   taskClass = Class.forName(workerCfg.getWorkerTask());
+            Class<?> taskClass = Class.forName(workerCfg.getWorkerTask());
 
-            int numWorker = (workerCfg.getConcurrentExecutions() == 0 ? 1 : workerCfg.getConcurrentExecutions());
+            int numWorker = (workerCfg.getConcurrentExecutions() <= 0 ? 1 : workerCfg.getConcurrentExecutions());
+            int delay = (workerCfg.getDelay() <= 0 ? 0 : workerCfg.getDelay());
             for(int i = 0; i < numWorker; i++) {
                 RunningWorkerInstance   rWorker = new RunningWorkerInstance();
                 rWorker.workerName = workerCfg.getName();
@@ -276,12 +288,16 @@ public class WorkerPool {
 
                 Interval    interval = workerCfg.getInterval();
                 if (interval != null) 
-                    rWorker.runningWorker = pool.scheduleWithFixedDelay(rWorker.task, 0, interval.getLength(), interval.getUnit());
-                else
+                    // Because the initial delay must be in same timeunit as interval it needs to be converted
+                    rWorker.runningWorker = pool.scheduleWithFixedDelay(rWorker.task,
+                                                               interval.getUnit().convert(delay, TimeUnit.MILLISECONDS), 
+                                                               interval.getLength(), interval.getUnit());
+                else if (delay > 0)
+                    rWorker.runningWorker = pool.schedule(rWorker.task, delay, TimeUnit.MILLISECONDS);
+                else    
                     rWorker.runningWorker = pool.submit(rWorker.task);
 
-                workers.add(rWorker);
-                
+                workers.add(rWorker);                
                 log.debug("Added new worker instance [" + workerCfg.getName() + "] to the pool");
             }
         } catch (ClassNotFoundException cnfe) {

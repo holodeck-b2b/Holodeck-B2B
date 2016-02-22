@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@ package org.holodeckb2b.ebms3.packaging;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.ICollaborationInfo;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
 
 /**
  * Is a helper class for handling the ebMS CollaborationInfo element in the ebMS SOAP 
@@ -34,17 +34,17 @@ public class CollaborationInfo {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "CollaborationInfo");
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "CollaborationInfo");
 
     /**
      * The fully qualified name of the Action element as an {@link QName}
      */
-    private static final QName  Q_ACTION = new QName(Constants.EBMS3_NS_URI, "Action");
+    private static final QName  Q_ACTION = new QName(EbMSConstants.EBMS3_NS_URI, "Action");
 
     /**
      * The fully qualified name of the element ConversationId as an {@link QName}
      */
-    private static final QName  Q_CONVERSATIONID = new QName(Constants.EBMS3_NS_URI, "ConversationId");
+    private static final QName  Q_CONVERSATIONID = new QName(EbMSConstants.EBMS3_NS_URI, "ConversationId");
 
     /**
      * Creates a <code>CollaborationInfo</code> element and adds it to the given <code>UserMessage</code> element. 
@@ -91,25 +91,25 @@ public class CollaborationInfo {
     /**
      * Reads the business transaction information of the UserMessage message unit 
      * contained in the <code>CollaborationInfo</code> element and returns it in 
-     * a new {@link org.holodeckb2b.ebms3.persistent.message.CollaborationInfo} 
+     * a new {@link org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo} 
      * object.
      * <p><b>NOTE:</b> This method does NOT persist the entity object! It is the
      * responsibility of the caller to save it.
      * 
      * @param ciElement             The <code>CollaborationInfo</code> element that contains the
      *                              info about this User Message message unit
-     * @return                      The {@link org.holodeckb2b.ebms3.persistent.message.CollaborationInfo} object
+     * @return                      The {@link org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo} object
      *                              the information is returned in
      * @throws PackagingException   When the given element does not contain a valid
      *                              <code>CollaborationInfo</code> element.
      */
-    public static org.holodeckb2b.ebms3.persistent.message.CollaborationInfo readElement(OMElement ciElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo readElement(OMElement ciElement) throws PackagingException {
         // There must be a CollaborationInfo element 
         if (ciElement == null)
             return null;
         
         // Create new entity object
-        org.holodeckb2b.ebms3.persistent.message.CollaborationInfo ciData = new org.holodeckb2b.ebms3.persistent.message.CollaborationInfo();
+        org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo ciData = new org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo();
         
         // Start with reading the required elements: Service, Action and ConversationId
         OMElement child = Service.getElement(ciElement);

@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
+
     Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
-    
-    This file is part of Holodeck B2B.
-    
-    Holodeck B2B is free software: you can redistribute it and/or modify
+
+    This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
-    Holodeck B2B is distributed in the hope that it will be useful,
+
+    This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
-    along with Holodeck B2B. If not, see <http://www.gnu.org/licenses/>.
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
   targetNamespace="http://holodeck-b2b.org/schemas/2012/12/workers"
@@ -35,6 +35,7 @@
 <ul>
 <li>A REQUIRED name attribute of type xs:string that contains the name of this worker</li>
 <li>A REQUIRED activate attribute of type xs:boolean which indicates if the worker be active</li>
+<li>A OPTIONAL delay attribute of type xs:integer which contains the delay in seconds before starting the worker. If not specified the worker is started immediately.</li>
 <li>A REQUIRED workerClass attribute of type xs:string that must contain the name of the class that implements the workers functionality</li>
 <li>A OPTIONAL concurrent attribute of type xs:integer that indicates the number of concurrent executions</li>
 <li>A OPTIONAL interval attribute of type xs:integer that defines the interval in seconds between repeated executions of the worker. If not specified the worker will be executed just once</li>
@@ -47,6 +48,7 @@ The parameter child elements can contain settings specific to the worker and con
             </xs:sequence>
             <xs:attribute name="name" use="required" type="xs:NCName"/>
             <xs:attribute name="activate" use="required" type="xs:boolean"/>
+            <xs:attribute name="delay" use="optional" default="0" type="xs:integer"/>
             <xs:attribute name="workerClass" use="required" type="xs:string"/>
             <xs:attribute name="concurrent" type="xs:integer"/>
             <xs:attribute name="interval" use="optional" type="xs:integer"/>

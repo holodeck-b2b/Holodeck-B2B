@@ -1,3 +1,21 @@
+<!--
+
+    Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
@@ -5,11 +23,12 @@
     <groupId>org.holodeckb2b</groupId>
     <artifactId>holodeckb2b</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.beta.2.2</version>
+    <version>2.0.0</version>
     <name>Holodeck B2B</name>
     <url>http://www.holodeck-b2b.org/</url>
+    <inceptionYear>2015</inceptionYear>    
     <description>
-        A Standard Open source implementation of AS4 profile of ebMS V3.
+        A standard open source implementation of the AS4 profile of ebMS V3.
     </description>
     <organization>
         <name>The Holodeck B2B Team</name>
@@ -17,7 +36,8 @@
     </organization>
         
     <properties>
-        <axis2-version>1.6.2</axis2-version>
+        <axis2-version>1.6.3</axis2-version>
+        <axiom-version>1.2.14</axiom-version>
         <netbeans.hint.license>gpl30</netbeans.hint.license>
     </properties>
     
@@ -25,6 +45,7 @@
         <module>modules/holodeckb2b-common</module>
         <module>modules/holodeckb2b-core</module>
         <module>modules/holodeckb2b-distribution</module>
+        <module>modules/interfaces</module>
     </modules>
 
     <licenses>
@@ -32,14 +53,18 @@
             <name>GNU General Public License v3</name>
             <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
         </license>
-    </licenses>
-    
+    </licenses>    
     
     <dependencyManagement>
         <dependencies>
             <!--=============================================================== 
                 First the modules of Holodeck itself 
             =============================================================== -->
+            <dependency>
+                <groupId>org.holodeckb2b</groupId>
+                <artifactId>holodeckb2b-interfaces</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
                 <artifactId>holodeckb2b-common</artifactId>
@@ -76,7 +101,21 @@
                 <artifactId>axis2-transport-http</artifactId>
                 <version>${axis2-version}</version>
             </dependency>
-                   
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-api</artifactId>
+                <version>${axiom-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-impl</artifactId>
+                <version>${axiom-version}</version>
+            </dependency>   
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-dom</artifactId>
+                <version>${axiom-version}</version>
+            </dependency>
             <!--=============================================================== 
                 Hibernate is used to store configuration and message meta data
                 in database
@@ -84,12 +123,12 @@
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>4.1.7.Final</version>
+                <version>5.0.5.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-entitymanager</artifactId>
-                <version>4.1.7.Final</version>
+                <version>5.0.5.Final</version>
                 <scope>runtime</scope>
             </dependency>
             
@@ -97,11 +136,6 @@
              <!--=============================================================== 
                 XML Processing libraries
             =============================================================== --> 
-            <dependency>
-                <groupId>org.jdom</groupId>
-                <artifactId>jdom</artifactId>
-                <version>1.1.3</version>
-            </dependency>
             <dependency>
                 <groupId>org.simpleframework</groupId>
                 <artifactId>simple-xml</artifactId>
@@ -132,7 +166,7 @@
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.9</version>
+                <version>1.10</version>
             </dependency>
             <!--=============================================================== 
                 Test dependencies
@@ -140,7 +174,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.11</version>
+                <version>4.12</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -158,7 +192,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9</version>
+                <version>2.10.3</version>
+                <configuration>
+                    <!-- all javadoc of common and core together, so use aggregate -->
+                    <aggregate>true</aggregate>
+                </configuration>
                 <executions>
                     <execution>
                         <id>aggregate</id>
@@ -172,7 +210,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.3</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>

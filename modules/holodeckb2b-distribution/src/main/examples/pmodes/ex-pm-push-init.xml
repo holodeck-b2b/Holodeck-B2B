@@ -2,11 +2,12 @@
 <!--
 Example P-Mode configuration for a One-Way/Push scenario. 
     
-This configuration reflects the sender of the message.
+This configuration reflects the sender of the message.  If you are setting up a test environment based on the "Getting Started" page from the web site 
+you should install this P-Mode on instance A. 
 -->
-<PMode xmlns="http://holodeck-b2b.org/schemas/2014/06/pmode"
+<PMode xmlns="http://holodeck-b2b.org/schemas/2014/10/pmode"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://holodeck-b2b.org/schemas/2014/06/pmode ../../repository/xsd/pmode.xsd">
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2014/10/pmode ../../repository/xsd/pmode.xsd">
     <id>ex-pm-push</id>
     <mep>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay</mep>
     <mepBinding>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push</mepBinding>
@@ -44,7 +45,7 @@ This configuration reflects the sender of the message.
             <BusinessInfo>
                 <Action>StoreMessage</Action>
                 <Service>
-                    <name>Test</name>
+                    <name>Examples</name>
                     <type>org:holodeckb2b:services</type>
                 </Service>
             </BusinessInfo>         

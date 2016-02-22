@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,23 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.IPMode;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.EmptyMessagePartitionChannel;
+import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.persistent.message.PullRequest;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for retrieving a message unit waiting to be pulled and which can be 
@@ -48,19 +47,29 @@ public class GetMessageUnitForPulling extends BaseHandler {
     }
     
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) {
+    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         // First check whether this flow contained a valid pull request
         log.debug("Check for authenticated pull request");
         List<IPMode> authPModes = (List<IPMode>) mc.getProperty(MessageContextProperties.PULL_AUTH_PMODES);
-        
         if (authPModes == null || authPModes.isEmpty()) {
             // Nothing to do, even if request contained a PullRequest no authorized P-modes could be found
             return InvocationResponse.CONTINUE;
+        } 
+        
+        // The request contained a valid PullRequest, indicate start of processing
+        EntityProxy<PullRequest> prProxy = (EntityProxy<PullRequest>) 
+                                                            mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
+        log.debug("Starting processing of received pull request");
+        if (!MessageUnitDAO.startProcessingMessageUnit(prProxy)) {
+            // Changing processing state failed, stop processing the pull request, but continue 
+            //  message processing as other parts may be processed succesfully
+            log.info("Failed to change processing state! Can not process PullRequest in message.");
+            return InvocationResponse.CONTINUE;
         }
+        PullRequest pullrequest = prProxy.entity;
         
         log.debug("Get the oldest message that can be pulled for the MPC in pull request");
-        PullRequest pullrequest = (PullRequest) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
-        UserMessage pulledMsg = getMUForPulling(authPModes, pullrequest.getMPC());
+        EntityProxy<UserMessage> pulledMsg = getMUForPulling(authPModes, pullrequest.getMPC());
         
         if (pulledMsg == null) {
             // No message available -> return Empty MPC error
@@ -74,7 +83,7 @@ public class GetMessageUnitForPulling extends BaseHandler {
             
             MessageContextUtils.addGeneratedError(mc, mpcEmptyError);            
         } else {
-            log.debug("Message selected for pulling, msgId=" + pulledMsg.getMessageId());
+            log.debug("Message selected for pulling, msgId=" + pulledMsg.entity.getMessageId());
             mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, pulledMsg);
             log.debug("Message stored in context for processing in out flow");
             mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
@@ -96,40 +105,37 @@ public class GetMessageUnitForPulling extends BaseHandler {
      * @return              The message unit to returned as result for Pull Request
      *                      or <code>null</code> if no message unit is available
      *                      for processing
+     * @throws DatabaseException When a database error occurs while retrieving the message units waiting to be pulled.
      */
-    private UserMessage getMUForPulling(List<IPMode> authPModes, String reqMPC) {
+    private EntityProxy<UserMessage> getMUForPulling(List<IPMode> authPModes, String reqMPC) throws DatabaseException {
         log.debug("Get list of messages waiting to be pulled");
-        List<UserMessage> waitingMU = null;
-        try {
-            waitingMU = MessageUnitDAO.getMessageUnitsForPModesInState(UserMessage.class, authPModes, ProcessingStates.AWAITING_PULL);
-        } catch (DatabaseException ex) {
-            Logger.getLogger(GetMessageUnitForPulling.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        List<EntityProxy<UserMessage>> waitingMU = null;
+        waitingMU = MessageUnitDAO.getMessageUnitsForPModesInState(UserMessage.class, authPModes, 
+                                                                    ProcessingStates.AWAITING_PULL);
         
         // Are there messages waiting?
-        if (waitingMU == null || waitingMU.isEmpty()) {
+        if (Utils.isNullOrEmpty(waitingMU))
             return null;
-        } else {
+        else {
             // There is at least one message available, take the oldest one. This is the first one in result list (as
             // the result is ordered)
             // Message must be selected only if their MPC (defined in message meta-data or P-Mode) matches the requested 
             // MPC and its state can be changed to Processing to ensure that message will only be pulled once
             boolean r = false; int i = 0;
-            UserMessage pulledMsg = null;
+            EntityProxy<UserMessage> pulledMsgProxy = null;
             do {
-                pulledMsg = waitingMU.get(i);
-                log.debug("Selected message unit with msgId=" + pulledMsg.getMessageId() + " for pulling");
+                pulledMsgProxy = waitingMU.get(i);
+                log.debug("Selected message unit with msgId=" + pulledMsgProxy.entity.getMessageId() + " for pulling");
                 
                 // The usermessage should be on assigned to the requested MPC or a parent MPC
-                if (reqMPC.startsWith(pulledMsg.getMPC())) {
+                if (reqMPC.startsWith(pulledMsgProxy.entity.getMPC())) {
                     log.debug("Set processing state to Processing");
                     try {
-                        pulledMsg = MessageUnitDAO.startProcessingMessageUnit(pulledMsg);
+                        r = MessageUnitDAO.startProcessingMessageUnit(pulledMsgProxy);
                     } catch (DatabaseException ex) {
                         log.error("An error occurred while setting processing state! Details: " + ex.getMessage());
                         // Maybe the error is specific for this MU, so continue with others
                     }
-                    r = pulledMsg.getCurrentProcessingState().getName().equals(ProcessingStates.PROCESSING);
                     log.debug("Processing state was " + (r ? "" : "not ")  + "changed");
                 } else
                     log.debug("MPC value of selected message is different from requested MPC!");                
@@ -137,7 +143,7 @@ public class GetMessageUnitForPulling extends BaseHandler {
             } while (!r && i < waitingMU.size());
             
             if (r) 
-                return pulledMsg;
+                return pulledMsgProxy;
             else {
                 log.debug("None of the available messages could be set to processing");
                 return null;

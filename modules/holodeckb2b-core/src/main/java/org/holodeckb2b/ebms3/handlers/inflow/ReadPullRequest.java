@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
@@ -28,7 +29,6 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.packaging.PullRequest;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
 
 /**
  * Is an in flow handler that checks if this message contains a pull request, i.e. contains a <eb:PullRequest> element 
@@ -42,8 +42,6 @@ import org.holodeckb2b.ebms3.util.MessageContextUtils;
  * however limits the number of pull request units in the message to just one. Holodeck B2B therefor only uses the first 
  * occurrence of <code>eb:SignalMessage</code> that has a <code>eb:PullRequest</code> child and ignores others.
  * 
- * @todo: Collect authentication information that should be used to authoriza the pull
- * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class ReadPullRequest extends BaseHandler {
@@ -54,7 +52,7 @@ public class ReadPullRequest extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) {
+    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         // First get the ebMS header block, that is the eb:Messaging element
         SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
         
@@ -65,29 +63,26 @@ public class ReadPullRequest extends BaseHandler {
             if (prElement != null) {
                 log.debug("PullRequest found, read information from message");
                 // Read information into PullRequest object
-                org.holodeckb2b.ebms3.persistent.message.PullRequest pullRequest = null;
+                org.holodeckb2b.ebms3.persistency.entities.PullRequest pullRequest = null;
                 try {
                     pullRequest = PullRequest.readElement(prElement);
                     // And store in database and message context for further processing
-                    log.info("PullRequest [msgId=" + pullRequest.getMessageId() + "] for MPC " + pullRequest.getMPC() + " received.");
-                    mc.setProperty(MessageContextProperties.IN_PULL_REQUEST, pullRequest);
-                    log.debug("Store PullRequest in database");
-                    MessageUnitDAO.storeReceivedMessageUnit(pullRequest);
+                    log.info("PullRequest [msgId=" + pullRequest.getMessageId() + "] for MPC " + pullRequest.getMPC() 
+                                + " received.");
+                    log.debug("Store PullRequest in database and message context");
+                    mc.setProperty(MessageContextProperties.IN_PULL_REQUEST, 
+                                                                MessageUnitDAO.storeReceivedMessageUnit(pullRequest));                    
                 } catch (PackagingException ex) {
                     // The ebMS header contains an ill formatted pull request
-                    log.warn("Received message contains invalid ebMS pull request signal message!!");
+                    log.warn("Received message contains invalid ebMS pull request signal message! Details: " 
+                                + ex.getMessage());
                     
                     // Add an error to context, maybe it can be sent as response
                     InvalidHeader   invalidHdrError = new InvalidHeader();
-                    invalidHdrError.setMessage(ex.getMessage());
+                    invalidHdrError.setShortDescription(ex.getMessage());
                     invalidHdrError.setErrorDetail("Source of header containing the error:" + prElement.toString());
                     MessageContextUtils.addGeneratedError(mc, invalidHdrError);                    
-                } catch (DatabaseException ex) {
-                    // Ai, something went wrong when storing the pull request
-                    log.error("An error occurred when saving the PullRequest to the database. Details: " + ex.getMessage());
-                    // Although the pull request could not be stored, other processing may finish succesfully
-                }
-                
+                }                 
             } else
                 log.debug("ebMS message does not contain PullRequest");
         } else {

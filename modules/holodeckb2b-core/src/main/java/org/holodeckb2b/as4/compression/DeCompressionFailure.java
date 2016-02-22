@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.as4.compression;
 
-import org.holodeckb2b.ebms3.persistent.message.EbmsError;
+import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError.Severity;
 
 /**
  * Represent the <i>DeCompressionFailure</i> error as defined in section 3.1 of the AS4 profile and signals that a
  * payload compressed using the AS4 Compression Feature could not be decompressed successfully.
- * <p>As this class is a child class of {@see EbmsError} it can be saved directly to the database. When retrieved from 
+ * <p>As this class is a child class of {@link EbmsError} it can be saved directly to the database. When retrieved from 
  * the database again it is however a "normal" <code>EbmsError</code> as this class is not defined as an JPA class.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -64,6 +64,29 @@ public class DeCompressionFailure extends EbmsError {
         setSeverity(ERROR_SEVERITY);
         setOrigin(ERROR_ORIGIN);
         setCategory(ERROR_CATEGORY);        
-        setMessage(ERROR_MESSAGE);
+        setShortDescription(ERROR_MESSAGE);
     }
+
+    /**
+     * Constructs a new <i>DeCompressionFailure</i> error with specified detail message 
+     * 
+     * @param errorDetail       A more detailed description of the error
+     */
+    public DeCompressionFailure(final String errorDetail) {
+        this();        
+        setErrorDetail(errorDetail);
+    }
+    
+   /**
+     * Constructs a new <i>DeCompressionFailure</i> error with specified detail message and that refers to the given 
+     * message id
+     * 
+     * @param errorDetail       A more detailed description of the error
+     * @param refToMessageId    The message id of the message unit for which this error is created
+     */
+    public DeCompressionFailure(final String errorDetail, final String refToMessageId) {
+        this();        
+        setErrorDetail(errorDetail);
+        setRefToMessageInError(refToMessageId);
+    }      
 }

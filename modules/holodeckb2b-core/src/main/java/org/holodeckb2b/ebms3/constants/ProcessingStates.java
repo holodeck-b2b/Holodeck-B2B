@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 package org.holodeckb2b.ebms3.constants;
 
 /**
- * Constants for describing the processing state of a message.
+ * EbMSConstants for describing the processing state of a message.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -61,9 +61,14 @@ public final class ProcessingStates {
     public static final String PROCESSING = "PROCESSING";
     
     /**
+     * The message unit is currently being transferred to the other MSH.
+     */
+    public static final String SENDING = "SENDING";
+    
+    /**
      * The user message is waiting for a receipt
      */
-    public static final String AWAITING_RECEIPT = "AWAITING_RECEIPT";
+    public static final String AWAITING_RECEIPT = "AWAITING RECEIPT";
     
     /**
      * The message unit is successfully delivered
@@ -74,27 +79,32 @@ public final class ProcessingStates {
      * The signal message unit is successfully processed
      */
     public static final String DONE = "DONE";
-
+    
+    /**
+     * The message unit is processed but an Error with severity <i>warning</i> was reported
+     */
+    public static final String PROC_WITH_WARNING = "PROCESSED WITH WARNING";
+    
     /**
      * The user message is ready to be delivered to the business application
      */
-    public static final String READY_FOR_DELIVERY = "READY_FOR_DELIVERY";
+    public static final String READY_FOR_DELIVERY = "READY FOR DELIVERY";
     
     /**
      * The user message is currently being delivered to the business application
      */
-    public static final String OUT_FOR_DELIVERY = "OUT_FOR_DELIVERY";
+    public static final String OUT_FOR_DELIVERY = "OUT FOR DELIVERY";
     
     /**
      * Holodeck B2B has tried to deliver the user message to the business application,
      * but the attempt failed. Now wait for retry or if no retries possible failure.
      */
-    public static final String DELIVERY_FAILED = "DELIVERY_FAILED";
+    public static final String DELIVERY_FAILED = "DELIVERY FAILED";
    
     /**
      * A problem occurred when the message unit was sent out.  
      */
-    public static final String TRANSPORT_FAILURE = "TRANSPORT_FAILURE";
+    public static final String TRANSPORT_FAILURE = "TRANSPORT FAILURE";
     
     /**
      * Processing of the message unit failed

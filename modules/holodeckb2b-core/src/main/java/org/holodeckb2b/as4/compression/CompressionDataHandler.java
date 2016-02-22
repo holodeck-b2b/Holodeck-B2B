@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,13 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.as4.compression;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipException;
 import javax.activation.DataHandler;
 
 /**
@@ -90,8 +91,9 @@ public class CompressionDataHandler extends DataHandler {
      * is equal to "application/gzip" the data from the contained DataHandler will be compressed, otherwise the data
      * will be decompressed.
      * 
-     * @returns The MIME type of the output from this DataHandler
+     * @return The MIME type of the output from this DataHandler
      */
+    @Override
     public String getContentType() {
         return resultContentType;
     }
@@ -106,14 +108,38 @@ public class CompressionDataHandler extends DataHandler {
         return "binary";
     }
 
-    
+    /**
+     * Writes the data to the given <code>OutputStream</code>. Depending on the set content type the data will be either 
+     * compressed (content type equals "application/gzip") or decompressed (all other values).
+     * 
+     * @param out           The output stream to write the data to
+     * @throws IOException  When (de)compressing of the content fails
+     * @throws ZipException When the data can not be decompressed because it is corrupted
+     */
     @Override
-    public void writeTo(OutputStream out) throws IOException {
+    public void writeTo(OutputStream out) throws IOException, ZipException {
         if (CompressionFeature.COMPRESSED_CONTENT_TYPE.equalsIgnoreCase(resultContentType))
             compress(out);
         else
             decompress(out);
     }
+    
+    /**
+     * Reads the data from the attachment. Depending on the set content type the data will be either compressed 
+     * (content type equals "application/gzip") or decompressed (all other values).
+     * 
+     * @return An input stream to read the data from the attachment
+     * @throws IOException  When (de)compressing of the content fails     
+     * @throws ZipException When the data can not be decompressed because it is corrupted
+     */
+    @Override
+    public InputStream getInputStream() throws IOException, ZipException {
+        if (CompressionFeature.COMPRESSED_CONTENT_TYPE.equalsIgnoreCase(resultContentType))
+            return new GZIPCompressingInputStream(super.getInputStream());
+        else
+            return new GZIPInputStream(super.getInputStream());
+    }
+    
     
     /**
      * Writes the data GZip compressed to the given output stream.
@@ -134,16 +160,15 @@ public class CompressionDataHandler extends DataHandler {
      * 
      * @param out           The {@link OutputStream} to write the uncompressed data to
      * @throws IOException  When an error occurs while writing the data to the stream
+     * @throws ZipException When the data can not be decompressed because it is corrupted
      */
-    private void decompress(OutputStream out) throws IOException {
-        GZIPInputStream gzInputStream = new GZIPInputStream(source.getInputStream());
-        
-        byte[]  buffer = new byte[2048];
-        int     r = 0;
-        while ((r = gzInputStream.read(buffer)) > 0)
-            out.write(buffer, 0, r);
-        
-        gzInputStream.close();
-        
+    private void decompress(OutputStream out) throws IOException, ZipException {
+        try (GZIPInputStream gzInputStream = new GZIPInputStream(source.getInputStream()))
+        {            
+            byte[]  buffer = new byte[2048];
+            int     r = 0;
+            while ((r = gzInputStream.read(buffer)) > 0)
+                out.write(buffer, 0, r);
+        }
     }
 }
