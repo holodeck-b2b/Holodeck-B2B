@@ -42,3 +42,5 @@ ehthumbs.db
 Thumbs.db
 
 /.project
+*.iml
+/.idea
