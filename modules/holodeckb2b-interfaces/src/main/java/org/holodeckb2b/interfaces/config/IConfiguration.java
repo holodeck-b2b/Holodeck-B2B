@@ -54,16 +54,6 @@ public interface IConfiguration {
     public String getHolodeckB2BHome ();
     
     /**
-     * Gets the location of the workerpool configuration file. 
-     * <p>By default the configuration file named <code>workers.xml</code> in the 
-     * <code>conf</code> directory is used. But it is possible to specify another 
-     * location using the <i>WorkerConfig</i> parameter.
-     * 
-     * @return The absolute path to the worker pool configuration file.
-     */
-    public String getWorkerPoolCfgFile();
-    
-    /**
      * Gets the directory to use for temporarily storing files.
      * <p>By default this the <code>temp</code> directory in the Holodeck B2B
      * installation. The directory to use can also be specified using the
