@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EventHandler>
+    <HandlerClass>org.holodeckb2b.pmode.xml.events.EventHandler</HandlerClass>
+</EventHandler>

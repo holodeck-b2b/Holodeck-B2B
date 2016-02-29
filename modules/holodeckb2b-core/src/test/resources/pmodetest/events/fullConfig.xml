@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EventHandler>
+    <HandlerClass>org.holodeckb2b.pmode.xml.events.EventHandler</HandlerClass>
+    <HandledEvent>org.holodeckb2b.pmode.xml.events.TestEvent1</HandledEvent>
+    <HandledEvent>org.holodeckb2b.pmode.xml.events.TestEvent2</HandledEvent>
+    <ForMessageUnit>UserMessage</ForMessageUnit>
+    <ForMessageUnit>SignalMessage</ForMessageUnit>
+    <Parameter>
+        <name>p1</name>
+        <value>value1</value>
+    </Parameter>
+    <Parameter>
+        <name>p2</name>
+        <value>value2</value>
+    </Parameter>
+</EventHandler>

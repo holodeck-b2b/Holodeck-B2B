@@ -23,6 +23,7 @@ import java.util.Map;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.pmode.IProtocol;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
@@ -58,6 +59,9 @@ public class Leg implements IAS4Leg {
     
     @Element (name = "UserMessageFlow", required = false)
     private UserMessageFlow userMessageFlow;
+    
+    @ElementList (name = "EventHandlers", entry = "EventHandler", type = EventHandlerConfig.class, required = false)
+    private ArrayList<IMessageProcessingEventConfiguration> eventHandlers;
     
     @Attribute (name = "label", required = false)
     private Label label;
@@ -151,5 +155,15 @@ public class Leg implements IAS4Leg {
     @Override
     public IReceptionAwareness getReceptionAwareness() {
         return rcptAwareness;
+    }
+
+    /**
+     * Returns the event handlers configured for this leg
+     * 
+     * @since 2.1.0
+     */
+    @Override
+    public List<IMessageProcessingEventConfiguration> getMessageProcessingEventConfiguration() {
+        return eventHandlers;
     }
 }
