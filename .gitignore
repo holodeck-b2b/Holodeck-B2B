@@ -43,3 +43,6 @@ Thumbs.db
 
 /.project
 /.settings/
+
+*.iml
+/.idea
