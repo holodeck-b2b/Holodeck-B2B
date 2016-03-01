@@ -43,10 +43,14 @@ public interface IMessageProcessingEventConfiguration {
     /**
      * Gets the list of events that this configuration applies to, i.e. which event types can and should be handled by 
      * the configured {@link IMessageProcessingEventHandler}.  
+     * <p>NOTE: The handler will receive all events that are either an instance of the given class or of a class that
+     *          is a subtype of the given class / interface. If class <code>A</code> implements interface <code>B</code>
+     *          that is contained in the list events of class <code>A</code> will be passed to the handler. The same is 
+     *          is true for instances of class <code>C</code> when it extends <code>A</code>.
      * 
      * @return The {@link List} of classes / interfaces that implement the {@link IMessageProcessingEvent} interface and 
-     *         that will be handled by this configuration. If no classes are given (value is <code>null</code> or empty
-     *         list) all events will be passed to the configured handler.
+     *         that will be handled by this configuration. If none are given (value is <code>null</code> or empty list) 
+     *         all events will be passed to the configured handler.
      */
     public List<Class<? extends IMessageProcessingEvent>> getHandledEvents();
     

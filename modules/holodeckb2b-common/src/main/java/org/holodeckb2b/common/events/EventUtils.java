@@ -49,8 +49,13 @@ public final class EventUtils {
         IMessageUnit subject = event.getSubject();
         List<Class<? extends IMessageProcessingEvent>> handledEvents = handlerCfg.getHandledEvents();
         List<Class<? extends IMessageUnit>> forMsgUnits = handlerCfg.appliesTo();
-        // Does handler apply to this event type?
-        shouldHandle &= Utils.isNullOrEmpty(handledEvents) || handledEvents.contains(event.getClass());
+        // Does handler apply to this event type? Need to check the type hierarchy to decide
+        if (!Utils.isNullOrEmpty(handledEvents)) {
+            boolean appliesTo = false;
+            for (Class cls : handledEvents)
+                appliesTo |= cls.isAssignableFrom(subject.getClass());                    
+            shouldHandle &= appliesTo;            
+        }
         // And to the message unit type? Here we can't just check if the refd message unit class is contained
         // in the config, but have to check on (super)interfaces
         if (!Utils.isNullOrEmpty(forMsgUnits)) {
