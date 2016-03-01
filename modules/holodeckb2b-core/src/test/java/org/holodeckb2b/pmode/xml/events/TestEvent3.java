@@ -16,22 +16,42 @@
  */
 package org.holodeckb2b.pmode.xml.events;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandler;
+import java.util.Date;
+import java.util.UUID;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class EventHandler implements IMessageProcessingEventHandler {
-
-    private Log log = LogFactory.getLog(EventHandler.class);
+public class TestEvent3 implements TestEvent2 {
+    
+    private IMessageUnit msgUnit = null;
+    
+    public TestEvent3() {};
+    
+    public TestEvent3(IMessageUnit mu) {
+        msgUnit = mu;
+    }
     
     @Override
-    public void handleEvent(IMessageProcessingEvent event) throws IllegalArgumentException {
-        log.info("Handling a " + event.getClass().getSimpleName() + " with id=" + event.getId());
+    public String getId() {
+        return UUID.randomUUID().toString();
+    }
+
+    @Override
+    public Date getTimestamp() {
+        return new Date();
+    }
+
+    @Override
+    public String getMessage() {
+        return "Event #1";
+    }
+
+    @Override
+    public IMessageUnit getSubject() {
+        return msgUnit;
     }
     
 }

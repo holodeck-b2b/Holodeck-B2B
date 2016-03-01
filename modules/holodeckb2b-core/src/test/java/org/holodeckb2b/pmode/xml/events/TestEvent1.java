@@ -17,6 +17,7 @@
 package org.holodeckb2b.pmode.xml.events;
 
 import java.util.Date;
+import java.util.UUID;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
@@ -27,24 +28,32 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  */
 public class TestEvent1 implements IMessageProcessingEvent {
 
+    private IMessageUnit msgUnit = null;
+    
+    public TestEvent1() {};
+    
+    public TestEvent1(IMessageUnit mu) {
+        msgUnit = mu;
+    }
+    
     @Override
     public String getId() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return UUID.randomUUID().toString();
     }
 
     @Override
     public Date getTimestamp() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new Date();
     }
 
     @Override
     public String getMessage() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return "Event #1";
     }
 
     @Override
     public IMessageUnit getSubject() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return msgUnit;
     }
     
 }

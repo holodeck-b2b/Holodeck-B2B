@@ -16,22 +16,23 @@
  */
 package org.holodeckb2b.pmode.xml.events;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandler;
+import java.util.Map;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandlerFactory;
 
 /**
- *
+ * An implementation of {@link IMessageProcessingEventHandlerFactory} for testing the event handler configuration
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class EventHandler implements IMessageProcessingEventHandler {
+public class EventHandlerFactory implements IMessageProcessingEventHandlerFactory<EventHandler>{
 
-    private Log log = LogFactory.getLog(EventHandler.class);
-    
     @Override
-    public void handleEvent(IMessageProcessingEvent event) throws IllegalArgumentException {
-        log.info("Handling a " + event.getClass().getSimpleName() + " with id=" + event.getId());
+    public void init(Map<String, ?> settings) {
+        // Ignored no settings needed
+    }
+
+    @Override
+    public EventHandler createHandler() {
+        return new EventHandler();
     }
     
 }
