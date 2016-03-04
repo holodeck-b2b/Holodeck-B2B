@@ -98,7 +98,7 @@ public class HolodeckB2BCoreInterface {
      * @return  The {@link IMessageProcessingEventProcessor} managing the event processing
      * @since 2.1.0
      */
-    public IMessageProcessingEventProcessor getEventProcessor() {
+    public static IMessageProcessingEventProcessor getEventProcessor() {
         assertInitialized();
         return coreImplementation.getEventProcessor();
     }
