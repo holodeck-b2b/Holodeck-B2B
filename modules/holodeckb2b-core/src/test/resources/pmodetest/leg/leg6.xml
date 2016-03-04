@@ -38,10 +38,10 @@ label="REQUEST">
     </UserMessageFlow>
     <EventHandlers>
         <EventHandler>
-            <HandlerClass>org.holodeckb2b.pmode.xml.events.EventHandler</HandlerClass>
+            <HandlerClass>org.holodeckb2b.pmode.xml.events.EventHandlerFactory</HandlerClass>
         </EventHandler>
         <EventHandler>
-            <HandlerClass>org.holodeckb2b.pmode.xml.events.EventHandler</HandlerClass>
+            <HandlerClass>org.holodeckb2b.pmode.xml.events.EventHandlerFactory</HandlerClass>
             <HandledEvent>org.holodeckb2b.pmode.xml.events.TestEvent1</HandledEvent>
             <HandledEvent>org.holodeckb2b.pmode.xml.events.TestEvent2</HandledEvent>
             <ForMessageUnit>UserMessage</ForMessageUnit>
