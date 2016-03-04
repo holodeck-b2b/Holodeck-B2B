@@ -34,6 +34,7 @@ import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
+import org.holodeckb2b.events.ReceiptCreatedEvent;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.pmode.ILeg;
@@ -148,6 +149,9 @@ public class CreateReceipt extends AbstractUserMessageHandler {
                     }
                 }
                 log.debug("Receipt for message [msgId=" + um.getMessageId() + "] created successfully");
+                // Trigger event to signal that the event was created
+                HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new ReceiptCreatedEvent(um, receipt.entity), 
+                                                                        mc);
             } catch (DatabaseException ex) {
                 // Storing the new Receipt signal failed! This is a severe problem, but it does not
                 // need to stop processing because the user message is already delivered. The receipt

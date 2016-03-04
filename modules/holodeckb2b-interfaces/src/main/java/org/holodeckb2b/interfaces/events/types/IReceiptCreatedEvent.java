@@ -17,11 +17,27 @@
 package org.holodeckb2b.interfaces.events.types;
 
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 
 /**
- *
+ * Is the <i>message processing event</i> that indicates that a <i>Receipt</i> has been created for a <b>received</b> 
+ * <i>User Message</i>. This event is to inform the business application that Holodeck B2B will acknowledge to the 
+ * Sender of the User Message that is it correctly received the message. Not to be confused with the <i>Notify</i> 
+ * operation that indicates that a Receipt is received by Holodeck B2B for an earlier sent User Message!
+ * <p>NOTE: There is no guarantee on the order in which this event and the related User Message will be delivered to the
+ * business application. It depends on the mechanisms used to deliver the User Message and the event in which order they 
+ * will arrive. 
+ * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @since 2.1.0
  */
 public interface IReceiptCreatedEvent extends IMessageProcessingEvent {
     
+    /**
+     * Gets the <i>Receipt</i> that was created to acknowledge that the <i>User Message</i> that is the subject of this
+     * event was received by Holodeck B2B.
+     * 
+     * @return The {@link IReceipt} that was created
+     */
+    public IReceipt getReceipt();
 }
