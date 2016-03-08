@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.ebms.axis2;
 
+import java.util.List;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.OperationClient;
@@ -25,6 +26,7 @@ import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.holodeckb2b.axis2.Axis2Utils;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
@@ -50,6 +52,7 @@ public class Axis2Sender {
     public static void sendMessage(EntityProxy msgProxy, Log log) {
         ServiceClient sc;
         OperationClient oc;
+        MessageContext msgCtx = new MessageContext();
 
         MessageUnit message = msgProxy.entity;
         try {
@@ -60,8 +63,7 @@ public class Axis2Sender {
             oc = sc.createClient(ANON_OUT_IN_OP);
 
             log.debug("Create an empty MessageContext for message with current configuration");
-            MessageContext msgCtx = new MessageContext();
-
+            
             if (message instanceof UserMessage) {
                 log.debug("Message to send is a UserMessage");
                 msgCtx.setProperty(MessageContextProperties.OUT_USER_MESSAGE, msgProxy);
@@ -96,9 +98,19 @@ public class Axis2Sender {
             log.debug("Start the message send process");
             oc.execute(true);
         } catch (AxisFault af) {
-            // An error occurred while sending the message, 
-            log.error("An unexpected error occurred while sending the " + message.getClass().getSimpleName()
-                        + " with msg-id: [" + message.getMessageId() + "] Details: " + af.getReason());
+            /* An error occurred while sending the message, it should however be already processed by one of the 
+               handlers. In that case the message context will not contain the failure reason. To prevent redundant 
+               logging we check if there is a failure reason before we log the error here.
+            */
+            List<Throwable> errorStack = Utils.getCauses(af);
+            StringBuilder logMsg = new StringBuilder("\n\tError stack: ")
+                                                    .append(errorStack.get(0).getClass().getSimpleName());
+            for(int i = 1; i < errorStack.size(); i++) {
+                logMsg.append("\n\t    Caused by: ").append(errorStack.get(i).getClass().getSimpleName());
+            }
+            logMsg.append(" {").append(errorStack.get(errorStack.size() - 1).getMessage()).append('}');
+            log.error("An error occurred while sending the message [" + message.getMessageId() + "]!" 
+                     + logMsg.toString());
         } finally {
             try {
                 sc.cleanupTransport();
