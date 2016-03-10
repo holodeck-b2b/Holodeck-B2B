@@ -52,14 +52,6 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 @Table(name="RECEIPT")
 @DiscriminatorValue("RECEIPT")
 @NamedQueries({
-        @NamedQuery(name="Receipt.findForPModesInState",
-            query = "SELECT r " +
-                    "FROM Receipt r JOIN r.states s1 " +
-                    "WHERE r.PMODE_ID IN :pmodes " +
-                    "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM r.states s2) " +
-                    "AND s1.NAME = :state " +
-                    "ORDER BY s1.START"  
-            ),
         @NamedQuery(name="Receipt.findResponsesTo",
             query = "SELECT r " +
                     "FROM Receipt r " +

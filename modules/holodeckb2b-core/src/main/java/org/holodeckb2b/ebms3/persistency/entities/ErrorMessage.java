@@ -49,14 +49,6 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 @Table(name="ERROR_MESSAGE")
 @DiscriminatorValue("ERRORMSG")
 @NamedQueries({
-        @NamedQuery(name="ErrorMessage.findForPModesInState",
-            query = "SELECT err " +
-                    "FROM ErrorMessage err JOIN err.states s1 " +
-                    "WHERE err.PMODE_ID IN :pmodes " +
-                    "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM err.states s2) " +
-                    "AND s1.NAME = :state " +
-                    "ORDER BY s1.START"  
-            ),
         @NamedQuery(name="ErrorMessage.findResponsesTo",
             query = "SELECT err " +
                     "FROM ErrorMessage err " +

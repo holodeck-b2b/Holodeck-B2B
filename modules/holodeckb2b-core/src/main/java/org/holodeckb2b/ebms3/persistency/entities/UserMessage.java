@@ -74,14 +74,6 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
                     + "WHERE um.MESSAGE_ID = :msgId " 
                     + "AND s1.NAME = '" + ProcessingStates.SENDING + "'"
             ),
-        @NamedQuery(name="UserMessage.findForPModesInState",
-            query = "SELECT um " +
-                    "FROM UserMessage um JOIN um.states s1 " +
-                    "WHERE um.PMODE_ID IN :pmodes " +
-                    "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM um.states s2) " +
-                    "AND s1.NAME = :state " +
-                    "ORDER BY s1.START"  
-            ),
         @NamedQuery(name="UserMessage.findResponsesTo",
             query = "SELECT um " +
                     "FROM UserMessage um " +

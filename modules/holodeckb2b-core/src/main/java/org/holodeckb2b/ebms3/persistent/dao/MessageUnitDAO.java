@@ -728,13 +728,13 @@ public class MessageUnitDAO {
             pStates.add(s);
         
         String queryString = "SELECT mu " +
-                             "FROM " + type.getSimpleName() + " mu JOIN mu.states s1 " +
+                             "FROM " + type.getSimpleName() + " mu JOIN FETCH mu.states s1 " +
                              "WHERE s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) " +
                              "AND s1.NAME IN :states";
-        try {        
+        try {  
             result = em.createQuery(queryString, type)
                                     .setParameter("states", pStates)
-                                    .getResultList();
+                                    .getResultList();          
         } catch (NoResultException nothingFound) {
             result = null;
         } catch (Exception e) {
@@ -743,7 +743,7 @@ public class MessageUnitDAO {
         } finally {
             em.close();
         }        
-                
+        
         return createProxyResultList(result);
     }
 
@@ -893,12 +893,18 @@ public class MessageUnitDAO {
                                                                                 throws DatabaseException {
         List<T> result = null;
         EntityManager em = JPAUtil.getEntityManager();
-        try {
-            String queryName = type.getSimpleName() + ".findForPModesInState";
-            result = em.createNamedQuery(queryName, type)
-                    .setParameter("state", state)
-                    .setParameter("pmodes", pmodeIds)
-                    .getResultList();
+
+        String queryString = "SELECT mu " +
+                             "FROM " + type.getSimpleName() + " mu JOIN FETCH mu.states s1 " +    
+                             "WHERE mu.PMODE_ID IN :pmodes " +
+                             "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) " +
+                             "AND s1.NAME = :state " +
+                             "ORDER BY s1.START";
+        try {  
+            result = em.createQuery(queryString, type)
+                                    .setParameter("state", state)
+                                    .setParameter("pmodes", pmodeIds)
+                                    .getResultList();
         } catch (NoResultException nothingFound)  {
             result = null;
         } catch (Exception e) {
