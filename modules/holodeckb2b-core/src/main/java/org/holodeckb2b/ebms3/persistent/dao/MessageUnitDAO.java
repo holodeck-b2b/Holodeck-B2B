@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import org.hibernate.dialect.lock.OptimisticEntityLockException;
+import javax.persistence.OptimisticLockException;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.exceptions.DuplicateMessageIdError;
 import org.holodeckb2b.common.util.MessageIdGenerator;
@@ -662,7 +662,7 @@ public class MessageUnitDAO {
             } else
                 // Current states differ, nothing changed!
                 return false;
-        } catch (OptimisticEntityLockException alreadyChanged) { 
+        } catch (OptimisticLockException alreadyChanged) { 
             // During transaction the message unit was already updated, so state can not be changed. 
             // Rollback and return false
             em.getTransaction().rollback();
