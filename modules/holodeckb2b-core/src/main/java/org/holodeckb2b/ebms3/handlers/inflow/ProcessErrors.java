@@ -21,6 +21,8 @@ import java.util.Iterator;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
@@ -96,8 +98,12 @@ public class ProcessErrors extends BaseHandler {
         }
 
         log.debug("Get referenced message unit");
-        EntityProxy<MessageUnit> refdMsgUnit = 
-                                    MessageUnitDAO.getSentMessageUnitWithId(errSignalProxy.entity.getRefToMessageId());
+        // There may not be a refToMessageId, in that case the message unit from the request is referenced
+        String refToMessageId = !Utils.isNullOrEmpty(errSignalProxy.entity.getRefToMessageId()) ?
+                                errSignalProxy.entity.getRefToMessageId()
+                                : MessageContextUtils.getSentMessageUnits(mc).iterator().next().entity.getMessageId();
+        
+        EntityProxy<MessageUnit> refdMsgUnit = MessageUnitDAO.getSentMessageUnitWithId(refToMessageId);
 
         // Change the processing state of the found messages
         log.debug("Setting processing state of referenced message [" + refdMsgUnit.entity.getMessageId() 
