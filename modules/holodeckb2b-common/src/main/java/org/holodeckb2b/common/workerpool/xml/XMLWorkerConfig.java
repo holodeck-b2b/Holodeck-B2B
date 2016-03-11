@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@ package org.holodeckb2b.common.workerpool.xml;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.holodeckb2b.common.util.Interval;
-import org.holodeckb2b.common.workerpool.IWorkerConfiguration;
+import org.holodeckb2b.interfaces.general.Interval;
+import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Root;

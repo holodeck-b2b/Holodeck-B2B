@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import java.util.Iterator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -29,8 +30,8 @@ import org.holodeckb2b.ebms3.errors.InvalidHeader;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.packaging.Receipt;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
 
 /**
  * Is the handler that checks if this message contains one or more Receipt signals, i.e. contains one or more 
@@ -68,25 +69,26 @@ public class ReadReceipt extends BaseHandler {
                 
                 while (rcpts.hasNext()) {
                     OMElement rcptElem = rcpts.next();
-                    org.holodeckb2b.ebms3.persistent.message.Receipt receipt = null;
+                    org.holodeckb2b.ebms3.persistency.entities.Receipt receipt = null;
                     try {
                         // Read information into Receipt object
                         receipt = Receipt.readElement(rcptElem);
 
                         // And store in database and message context for further processing
                         log.debug("Store Receipt in database");
-                        MessageUnitDAO.storeReceivedMessageUnit(receipt);
+                        EntityProxy<org.holodeckb2b.ebms3.persistency.entities.Receipt> rcptProxy = 
+                                MessageUnitDAO.storeReceivedMessageUnit(receipt);
                         
                         String refToMsgId = receipt.getRefToMessageId();
                         if (Utils.isNullOrEmpty(refToMsgId)) {
                             log.info("Received receipt [msgId=" + receipt.getMessageId() 
                                                             + "] does not contain reference");
                             // The receipt can not be processed if we don't know for which message it is intended!
-                            receipt = MessageUnitDAO.setFailed(receipt);
+                            MessageUnitDAO.setFailed(rcptProxy);
                             // Create error and add to message context
                             createInvalidHeaderError(mc, rcptElem, "Missing required refToMessageId");
                         } else {
-                            MessageContextUtils.addRcvdReceipt(mc, receipt);
+                            MessageContextUtils.addRcvdReceipt(mc, rcptProxy);
                             log.info("Receipt [msgId=" + receipt.getMessageId() + "] received for message with id:" 
                                             + receipt.getRefToMessageId());
                         }

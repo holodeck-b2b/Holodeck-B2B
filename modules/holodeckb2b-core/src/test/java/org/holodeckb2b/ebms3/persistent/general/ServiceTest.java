@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,19 +16,18 @@
  */
 package org.holodeckb2b.ebms3.persistent.general;
 
-import org.holodeckb2b.ebms3.persistent.general.Service;
+import org.holodeckb2b.ebms3.persistency.entities.Service;
 import java.util.List;
 import javax.persistence.EntityManager;
-import org.holodeckb2b.common.general.IService;
 import org.holodeckb2b.ebms3.persistent.wrappers.EService;
 import org.holodeckb2b.ebms3.util.JPAUtil;
 import org.junit.After;
-import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.FixMethodOrder;
+import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 /**

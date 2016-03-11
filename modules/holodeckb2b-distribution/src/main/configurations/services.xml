@@ -5,10 +5,12 @@
                      class="org.holodeckb2b.ebms3.handlers.inflow.CheckForResponse"/>
   </messageReceivers>
 
-  <operation name="ebms">
+  <operation name="Receive">
      <messageReceiver 
          class="org.holodeckb2b.ebms3.handlers.inflow.CheckForResponse"/> 
   </operation>
+
+  <parameter name="supportSingleOperation" locked="xsd:true">true</parameter>
 
   <module ref="holodeckb2b-core" />
 </service>

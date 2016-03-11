@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@ package org.holodeckb2b.ebms3.mmd.xml;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.holodeckb2b.common.general.IPartyId;
-import org.holodeckb2b.common.general.ITradingPartner;
+import org.holodeckb2b.interfaces.general.IPartyId;
+import org.holodeckb2b.interfaces.general.ITradingPartner;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.ebms3.persistent.wrappers;
 
 import java.io.Serializable;
@@ -38,9 +37,9 @@ public class EError implements Serializable {
     private long id;
 
     @Embedded
-    public org.holodeckb2b.ebms3.persistent.message.EbmsError  eError;    
+    public org.holodeckb2b.ebms3.persistency.entities.EbmsError  eError;    
     
     public EError() {
-        eError = new org.holodeckb2b.ebms3.persistent.message.EbmsError();
+        eError = new org.holodeckb2b.ebms3.persistency.entities.EbmsError();
     }
 }

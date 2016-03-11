@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,24 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.as4.receptionawareness;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.as4.pmode.IAS4Leg;
-import org.holodeckb2b.common.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
+import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for detecting and when requested eliminating duplicate <i>user messages</i>.
@@ -61,7 +61,9 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
     }
     
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws AxisFault {
+    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> umProxy) throws AxisFault {
+        // Extract entity object from proxy
+        UserMessage um = umProxy.entity;
         
         // First determine if duplicate check must be executed for this UserMessage 
         //
@@ -69,7 +71,7 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
         log.debug("Check if duplicate check must be executed");
         
         // Get P-Mode configuration
-        IPMode pmode = HolodeckB2BCore.getPModeSet().get(um.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode());
         if (pmode == null) {
             // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
             // is needed
@@ -113,7 +115,7 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
                                                 + "] is a duplicate of an already delivered message");
 
                     log.debug("Update processing state to duplicate");
-                    um = MessageUnitDAO.setDuplicate(um);
+                    MessageUnitDAO.setDuplicate(umProxy);
                     
                     // To prevent repeated delivery but still send a receipt set message as delivered
                     mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);

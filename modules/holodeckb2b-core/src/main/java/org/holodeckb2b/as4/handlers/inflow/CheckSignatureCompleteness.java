@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,16 +23,20 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.IPayload;
-import org.holodeckb2b.common.pmode.IPMode;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import static org.holodeckb2b.interfaces.messagemodel.IPayload.Containment.ATTACHMENT;
+import static org.holodeckb2b.interfaces.messagemodel.IPayload.Containment.BODY;
+import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.security.util.SecurityUtils;
 
 /**
@@ -55,10 +59,12 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws Exception {
+    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> umProxy) throws Exception {
+        // Extract the entity object from proxy
+        UserMessage um = umProxy.entity;
         
         // First check if this message needs a Receipt and is signed 
-        IPMode pmode = HolodeckB2BCore.getPModeSet().get(um.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode());
         if (pmode == null) {
             // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
             // is needed
@@ -81,40 +87,41 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
         
         // Message is signed, check that each payload has a ds:Reference in the Signature
         boolean allRefd = true;
-        for(IPayload payload : um.getPayloads()) {
-            String plRef = payload.getPayloadURI();
-            // If the payload has no reference the SOAP Body is implicitly referenced. So set the reference to the id
-            // from de Body element
-            if (plRef == null || plRef.isEmpty())
-                plRef = getSOAPBodyIdRef(mc);
-            else {
-                // Add prefix to the reference 
-                switch (payload.getContainment()) {
-                    case BODY :
-                        plRef = "#" + plRef; break;
-                    case ATTACHMENT :
-                        plRef = "cid:" + plRef;
+        if (!Utils.isNullOrEmpty(um.getPayloads())) {
+            for(IPayload payload : um.getPayloads()) {
+                String plRef = payload.getPayloadURI();
+                // If the payload has no reference the SOAP Body is implicitly referenced. So set the reference to the id
+                // from de Body element
+                if (plRef == null || plRef.isEmpty())
+                    plRef = getSOAPBodyIdRef(mc);
+                else {
+                    // Add prefix to the reference 
+                    switch (payload.getContainment()) {
+                        case BODY :
+                            plRef = "#" + plRef; break;
+                        case ATTACHMENT :
+                            plRef = "cid:" + plRef;
+                    }
+                }
+                boolean found = false;
+                for(Iterator<OMElement> it = references.iterator(); it.hasNext() && !found ; ) {
+                    OMElement ref = it.next();
+                    found = plRef.equals(ref.getAttributeValue(new QName("URI")));
+                }
+                allRefd &= found;
+                if (!found) {
+                    log.warn("Payload with reference [" + plRef + "] is not signed in user message [" 
+                                + um.getMessageId() + "]");
+                    // If no ds:Reference is found for this payload the message does not conform to the AS4 requirements 
+                    // that all payloads should be signed. Therefore create the ValueInconsistent error
+                    createValueInconsistentError(mc, um.getMessageId(), payload.getPayloadURI());            
                 }
             }
-            boolean found = false;
-            for(Iterator<OMElement> it = references.iterator(); it.hasNext() && !found ; ) {
-                OMElement ref = it.next();
-                found = plRef.equals(ref.getAttributeValue(new QName("URI")));
-            }
-            allRefd &= found;
-            if (!found) {
-                log.warn("Payload with reference [" + plRef + "] is not signed in user message [" 
-                            + um.getMessageId() + "]");
-                // If no ds:Reference is found for this payload the message does not conform to the AS4 requirements 
-                // that all payloads should be signed. Therefore create the ValueInconsistent error
-                createValueInconsistentError(mc, um.getMessageId(), payload.getPayloadURI());            
-            }
         }
-        
         // If not all payloads are referenced the UserMessage should not be processed further, so change it processing
         // state to failed
         if (!allRefd) 
-            MessageUnitDAO.setFailed(um);        
+            MessageUnitDAO.setFailed(umProxy);        
         
         return InvocationResponse.CONTINUE;        
     }
@@ -144,7 +151,7 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
         
             if (SecurityConstants.QNAME_WSU_ID.equals(attr.getQName()))
                 bodyId = attr.getAttributeValue();
-            else if (Constants.QNAME_XMLID.equals(attr.getQName()))
+            else if (EbMSConstants.QNAME_XMLID.equals(attr.getQName()))
                 bodyId = attr.getAttributeValue();
         }
         

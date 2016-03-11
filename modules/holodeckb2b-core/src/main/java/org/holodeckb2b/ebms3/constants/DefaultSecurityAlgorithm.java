@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.ebms3.constants;
 
-import org.holodeckb2b.common.security.X509ReferenceType;
+import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
 
 /**
  * Defines constants containing the identifiers for the security algorithms that Holodeck B2B uses as a default when

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,16 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.deliverymethod.file;
 
 import java.io.File;
 import java.io.IOException;
-import org.holodeckb2b.common.delivery.MessageDeliveryException;
-import org.holodeckb2b.common.messagemodel.IMessageUnit;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.workers.SubmitFromFile;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 
 /**
  * Is an {@link IMessageDeliverer} implementation that delivers <b>ONLY user message units</b> to the business 
@@ -45,7 +45,7 @@ public class MMDDeliverer extends AbstractFileDeliverer {
     }
 
     @Override
-    protected void deliverSignalMessage(IMessageUnit sigMsgUnit) throws MessageDeliveryException {
+    protected void deliverSignalMessage(ISignalMessage sigMsgUnit) throws MessageDeliveryException {
         // Not supported, this deliverer only delivers user messages!
     }
 

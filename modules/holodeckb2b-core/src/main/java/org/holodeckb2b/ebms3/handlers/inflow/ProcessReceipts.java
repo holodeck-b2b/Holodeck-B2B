@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,24 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.ArrayList;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.ebms3.persistency.entities.Receipt;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.persistent.message.Receipt;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received receipt signals.
@@ -59,13 +60,14 @@ public class ProcessReceipts extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         log.debug("Check for received receipts in message.");
-        ArrayList<Receipt>  receipts = (ArrayList<Receipt>) mc.getProperty(MessageContextProperties.IN_RECEIPTS);
+        ArrayList<EntityProxy<Receipt>>  receipts = 
+                                (ArrayList<EntityProxy<Receipt>>) mc.getProperty(MessageContextProperties.IN_RECEIPTS);
         
         if (!Utils.isNullOrEmpty(receipts)) {
             log.debug("Message contains " + receipts.size() + " Receipts signals, start processing");
-            for (Receipt r : receipts)
+            for (EntityProxy<Receipt> r : receipts)
                 // Ignore Receipts that already failed
-                if (!ProcessingStates.FAILURE.equals(r.getCurrentProcessingState().getName()))
+                if (!ProcessingStates.FAILURE.equals(r.entity.getCurrentProcessingState().getName()))
                     processReceipt(r, mc);                
             log.debug("Receipts processed");
         } else
@@ -81,58 +83,60 @@ public class ProcessReceipts extends BaseHandler {
      * @param mc    The message context of the message containing the receipt
      * @throws      DatabaseException When a database error occurs while processing the Receipt Signal
      */
-    protected void processReceipt(final Receipt r, final MessageContext mc) throws DatabaseException {
-        String refToMsgId = r.getRefToMessageId();
-        
+    protected void processReceipt(final EntityProxy<Receipt> rcptProxy, final MessageContext mc) 
+                                                                                            throws DatabaseException {
         // Change processing state to indicate we start processing the receipt. Also checks that the receipt is not
         // already being processed
-        Receipt rcpt = MessageUnitDAO.startProcessingMessageUnit(r);
-        if (rcpt == null) 
-            log.debug("Receipt [msgId=" + r.getMessageId() + "] is already being processed, skipping");
-        else {
-            log.debug("Start processing Receipt [msgId=" + r.getMessageId() + "] for reference message with msgId=" 
-                                                                        + refToMsgId);
-            MessageUnit refdMsg = MessageUnitDAO.getSentMessageUnitWithId(refToMsgId);
-            if (refdMsg == null) {
-                // This error SHOULD NOT occur because the reference is already checked when finding the P-Mode 
-                log.error("Receipt [msgId=" + r.getMessageId() + "] contains unknown refToMessageId ["
-                        + refToMsgId + "]!");
-                MessageUnitDAO.setFailed(rcpt);
-                // Create error and add to context
-                MessageContextUtils.addGeneratedError(mc, new ValueInconsistent(refToMsgId, 
-                                                    "Receipt contains unknown message reference [" + refToMsgId + "]"));  
-            } else {
-                // Check if the found message unit expects a receipt 
-                String pmodeId = refdMsg.getPMode();
-                if (pmodeId != null) {
-                    IPMode pmode = HolodeckB2BCore.getPModeSet().get(pmodeId);
-                    if (pmode == null || pmode.getLegs().iterator().next().getReceiptConfiguration() == null) {
-                        // The P-Mode is not configured for receipts, generate error
-                        MessageUnitDAO.setFailed(rcpt);
-                        // Create error and add to context
-                        MessageContextUtils.addGeneratedError(mc, 
-                                                new ValueInconsistent("P-Mode of referenced message [" + refToMsgId 
-                                                                      + "] is not configured for receipts",
-                                                                      refToMsgId));  
-                    }  else {
-                         // Change to processing state of the reference message unit to delivered, but only if it is 
-                         // waiting for a receipt as we may otherwise overwrite an error state.
-                        if (isWaitingForReceipt(refdMsg)) {
-                            log.debug("Found message unit waiting for Receipt, setting processing state to delivered");
-                            MessageUnitDAO.setDelivered(refdMsg);                        
-                            // Maybe the Receipt must also be delivered to the business application, so change state
-                            // to "ready for delivery"
-                            log.debug("Mark Receipt as ready for delivery to business application");
-                            MessageUnitDAO.setReadyForDelivery(rcpt);
-                        } else {
-                            log.debug("Found message unit not waiting for receipt anymore, processing finished.");
-                            MessageUnitDAO.setDone(rcpt);
-                        }
-                    }  
-                }
-            }
-            log.debug("Done processing Receipt");                       
+        if (!MessageUnitDAO.startProcessingMessageUnit(rcptProxy)) {
+            log.debug("Receipt [msgId=" + rcptProxy.entity.getMessageId() + "] is already being processed, skipping");
+            return;
         }
+        
+        String refToMsgId = rcptProxy.entity.getRefToMessageId();
+        log.debug("Start processing Receipt [msgId=" + rcptProxy.entity.getMessageId() 
+                    + "] for referenced message with msgId=" + refToMsgId);
+        EntityProxy<MessageUnit> refdMsg = MessageUnitDAO.getSentMessageUnitWithId(refToMsgId);
+
+        if (refdMsg == null) {
+            // This error SHOULD NOT occur because the reference is already checked when finding the P-Mode 
+            log.error("Receipt [msgId=" + rcptProxy.entity.getMessageId() + "] contains unknown refToMessageId ["
+                        + refToMsgId + "]!");
+            MessageUnitDAO.setFailed(rcptProxy);
+            // Create error and add to context
+            MessageContextUtils.addGeneratedError(mc, new ValueInconsistent("Receipt contains unknown reference [" 
+                                                                            + refToMsgId + "]", 
+                                                                            rcptProxy.entity.getMessageId()));  
+        } else {
+            // Check if the found message unit expects a receipt 
+            String pmodeId = refdMsg.entity.getPMode();
+            if (pmodeId != null) {
+                IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(pmodeId);
+                if (pmode == null || pmode.getLegs().iterator().next().getReceiptConfiguration() == null) {
+                    // The P-Mode is not configured for receipts, generate error
+                    MessageUnitDAO.setFailed(rcptProxy);
+                    // Create error and add to context
+                    MessageContextUtils.addGeneratedError(mc, 
+                                            new ValueInconsistent("P-Mode of referenced message [" + refToMsgId 
+                                                                  + "] is not configured for receipts",
+                                                                  rcptProxy.entity.getMessageId()));  
+                }  else {
+                     // Change to processing state of the reference message unit to delivered, but only if it is 
+                     // waiting for a receipt as we may otherwise overwrite an error state.
+                    if (isWaitingForReceipt(refdMsg.entity)) {
+                        log.debug("Found message unit waiting for Receipt, setting processing state to delivered");
+                        MessageUnitDAO.setDelivered(refdMsg);                        
+                        // Maybe the Receipt must also be delivered to the business application, so change state
+                        // to "ready for delivery"
+                        log.debug("Mark Receipt as ready for delivery to business application");
+                        MessageUnitDAO.setReadyForDelivery(rcptProxy);
+                    } else {
+                        log.debug("Found message unit not waiting for receipt anymore, processing finished.");
+                        MessageUnitDAO.setDone(rcptProxy);
+                    }
+                }  
+            }
+        }
+        log.debug("Done processing Receipt");                       
     }
     
     /**
@@ -146,7 +150,7 @@ public class ProcessReceipts extends BaseHandler {
      * @param mu    The {@link MessageUnit} to check
      * @return      <code>true</code> if the message unit is waiting for a receipt, <code>false</code> otherwise 
      */
-    protected boolean isWaitingForReceipt(MessageUnit mu) {
+    protected boolean isWaitingForReceipt(final MessageUnit mu) {
         // Check the previous state (there should be, but not guaranteed if receipt is in error)
         String prevState = null;
         if (mu.getProcessingStates().size() > 1)

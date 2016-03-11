@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.security.util;
 
 import java.io.FileInputStream;
@@ -29,12 +28,15 @@ import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.config.Config;
-import org.holodeckb2b.common.security.ISigningConfiguration;
-import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
-import org.holodeckb2b.common.security.X509ReferenceType;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
+import org.holodeckb2b.interfaces.config.IConfiguration;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
+import static org.holodeckb2b.interfaces.pmode.security.X509ReferenceType.BSTReference;
+import static org.holodeckb2b.interfaces.pmode.security.X509ReferenceType.KeyIdentifier;
 import org.holodeckb2b.security.tokens.UsernameToken;
 
 /**
@@ -43,16 +45,7 @@ import org.holodeckb2b.security.tokens.UsernameToken;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class SecurityUtils {
-    
-    /**
-     * Location of the keystore holding the certificates with the public keys
-     */
-    private static final String PUB_KEYSTORE_FILE = "./repository/certs/publickeys.jks";
-    /**
-     * Location of the keystore holding the certificates with the private keys
-     */
-    private static final String PRIV_KEYSTORE_FILE = "./repository/certs/privatekeys.jks";
-    
+        
     /**
      * Enumerates the certificate types for which crypto configurations can be created by this utility class.
      */
@@ -138,18 +131,19 @@ public class SecurityUtils {
      * @return  The Crypto configuration for the requested certificate type
      */
     public static Properties createCryptoConfig(CertType certType) {
+        IConfiguration config = HolodeckB2BCoreInterface.getConfiguration();
         Properties cryptoProperties = new Properties();
         String     keyStoreFile = null;
         String     keyStorePwd = null;
         
         switch (certType) {
             case pub  : 
-                keyStoreFile = PUB_KEYSTORE_FILE; 
-                keyStorePwd = Config.getPublicKeyStorePassword();
+                keyStoreFile = config.getPublicKeyStorePath(); 
+                keyStorePwd = config.getPublicKeyStorePassword();
                 break;
             case priv : 
-                keyStoreFile = PRIV_KEYSTORE_FILE; 
-                keyStorePwd = Config.getPrivateKeyStorePassword();                
+                keyStoreFile = config.getPrivateKeyStorePath();
+                keyStorePwd = config.getPrivateKeyStorePassword();                
                 break;   
         }
         
@@ -184,16 +178,17 @@ public class SecurityUtils {
      *              <code>null</code> otherwise (not found or error during search)
      */
     public static String getKeystoreAlias(X509Certificate cert) {
+        IConfiguration config = HolodeckB2BCoreInterface.getConfiguration();
         String alias = null;
         FileInputStream fis = null;
         char[]  keystorePwd;
         
         try {
             // Get the password for accessing the keystore
-            keystorePwd = Config.getPublicKeyStorePassword().toCharArray();            
+            keystorePwd = config.getPublicKeyStorePassword().toCharArray();            
             // Create and load the keystore
             KeyStore keyStore = KeyStore.getInstance("JKS");
-            fis = new java.io.FileInputStream(PUB_KEYSTORE_FILE);
+            fis = new java.io.FileInputStream(config.getPublicKeyStorePath());
             keyStore.load(fis, keystorePwd);    
             
             // Get alias of certificate

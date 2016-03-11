@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,26 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.deliverymethod.file;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.common.delivery.IMessageDeliverer;
-import org.holodeckb2b.common.delivery.MessageDeliveryException;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.IErrorMessage;
-import org.holodeckb2b.common.messagemodel.IMessageUnit;
-import org.holodeckb2b.common.messagemodel.IPayload;
-import org.holodeckb2b.common.messagemodel.IReceipt;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.mmd.xml.PartInfo;
@@ -41,6 +34,13 @@ import org.holodeckb2b.ebms3.mmd.xml.Property;
 import org.holodeckb2b.ebms3.packaging.ErrorSignal;
 import org.holodeckb2b.ebms3.packaging.Receipt;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 
 /**
  * Is an {@link IMessageDeliverer} implementation that delivers the message unit to the business application by writing
@@ -122,7 +122,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
     /**
      * The QName of the container element that contains the message info, i.e. the <code>eb:Messaging</code> element
      */
-    protected static final QName XML_ROOT_NAME = new QName(Constants.EBMS3_NS_URI, "Messaging", "eb");
+    protected static final QName XML_ROOT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Messaging", "eb");
     
     protected static final String RECEIPT_CHILD_NS_URI = 
                                                 "http://holodeck-b2b.org/schemas/2015/08/delivery/ebms/receiptchild";
@@ -132,7 +132,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
      * 
      * @param dir   The directory where file should be written to.
      */
-    SimpleFileDeliverer(String dir) {
+    public SimpleFileDeliverer(String dir) {
         super(dir);
     }
 
@@ -146,17 +146,19 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
     protected void writeUserMessageInfoToFile(MessageMetaData mmd) throws IOException {
         OMFactory   f = OMAbstractFactory.getOMFactory();
         OMElement    container = f.createOMElement(XML_ROOT_NAME);
-        container.declareNamespace(Constants.EBMS3_NS_URI, "eb");
+        container.declareNamespace(EbMSConstants.EBMS3_NS_URI, "eb");
             
-        log.debug("Add payload info to XML container");
-        // We add the local file location as a Part property
-        for (IPayload p : mmd.getPayloads()) {
-            Property locationProp = new Property();
-            locationProp.setName("org:holodeckb2b:location");
-            locationProp.setValue(p.getContentLocation());
-            ((PartInfo) p).getProperties().add(locationProp);
-        }  
-
+        if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
+            log.debug("Add payload info to XML container");
+            // We add the local file location as a Part property
+            for (IPayload p : mmd.getPayloads()) {
+                Property locationProp = new Property();
+                locationProp.setName("org:holodeckb2b:location");
+                locationProp.setValue(p.getContentLocation());
+                ((PartInfo) p).getProperties().add(locationProp);
+            }  
+        }
+        
         log.debug("Add message info to XML container");
         // Add the information on the user message to the container
         OMElement  usrMsgElement = UserMessage.createElement(container, mmd);
@@ -174,14 +176,14 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
      *                                  application     
      */
     @Override
-    protected void deliverSignalMessage(IMessageUnit sigMsgUnit) throws MessageDeliveryException {
+    protected void deliverSignalMessage(ISignalMessage sigMsgUnit) throws MessageDeliveryException {
         OMFactory   f = OMAbstractFactory.getOMFactory();
         OMElement    container = f.createOMElement(XML_ROOT_NAME);
-        container.declareNamespace(Constants.EBMS3_NS_URI, "eb");
+        container.declareNamespace(EbMSConstants.EBMS3_NS_URI, "eb");
         
         if (sigMsgUnit instanceof IReceipt) {
             log.debug("Create facade to prevent content from inclusion in XML");
-            org.holodeckb2b.ebms3.persistent.message.Receipt rcpt = new DeliveryReceipt((IReceipt) sigMsgUnit);
+            org.holodeckb2b.ebms3.persistency.entities.Receipt rcpt = new DeliveryReceipt((IReceipt) sigMsgUnit);
             log.debug("Add receipt meta data to XML");
             Receipt.createElement(container, rcpt);
         } else if (sigMsgUnit instanceof IErrorMessage) {
@@ -231,7 +233,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
     /**
      * Private inner class to replace actual receipt content with indicator of receipt type in output XML.
      */
-    private static class DeliveryReceipt extends org.holodeckb2b.ebms3.persistent.message.Receipt {
+    private static class DeliveryReceipt extends org.holodeckb2b.ebms3.persistency.entities.Receipt {
 
         private IReceipt    source;
         
@@ -247,9 +249,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
                     
             // We need to case the given receipt here to the persistency implementation to get access to the receipt
             // content. 
-            ArrayList<OMElement>  actual = null;
-            if (rcpt instanceof org.holodeckb2b.ebms3.persistent.message.Receipt)
-                actual = ((org.holodeckb2b.ebms3.persistent.message.Receipt) rcpt).getContent();
+            List<OMElement>  actual = rcpt.getContent();
             
             // If there was actual content (and we could get access to it) use the name of first element
             String firstChildName = null;

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,27 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.ebms3.submit.core;
 
 import java.util.Collection;
 import java.util.Iterator;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.IAgreement;
-import org.holodeckb2b.common.general.IProperty;
-import org.holodeckb2b.common.general.IService;
-import org.holodeckb2b.common.general.ITradingPartner;
-import org.holodeckb2b.common.messagemodel.IUserMessage;
-import org.holodeckb2b.common.messagemodel.util.compare;
-import org.holodeckb2b.common.pmode.IBusinessInfo;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
-import org.holodeckb2b.common.submit.MessageSubmitException;
+import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.mmd.xml.AgreementReference;
 import org.holodeckb2b.ebms3.mmd.xml.CollaborationInfo;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.mmd.xml.Service;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IAgreement;
+import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.general.IService;
+import org.holodeckb2b.interfaces.general.ITradingPartner;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.pmode.IBusinessInfo;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.submit.MessageSubmitException;
 
 /**
  * Is a helper class to create a complete set of configuration parameters that define how a submitted user message must
@@ -129,7 +128,7 @@ final class MMDCompleter {
         ITradingPartner ms = cd.getSender(); // sender from MMD
         ITradingPartner ps = null; // sender from PMode
         // When pulling is used the responder is sending the message!
-        if (pmode.getMepBinding().equals(Constants.ONE_WAY_PUSH))
+        if (pmode.getMepBinding().equals(EbMSConstants.ONE_WAY_PUSH))
             ps = pmode.getInitiator();
         else
             ps = pmode.getResponder();
@@ -141,7 +140,7 @@ final class MMDCompleter {
             cd.setSender(ps);
         else if (ps != null) {
             // Both P-Mode and submitted MMD contain sender, ensure they are equal
-            if (!compare.TradingPartner(ms, ps))
+            if (!CompareUtils.areEqual(ms, ps))
                 throw new MessageSubmitException("Different values given for sender configuration!");
         }        
     }
@@ -159,7 +158,7 @@ final class MMDCompleter {
         ITradingPartner mr = cd.getReceiver(); // receiver from MMD
         ITradingPartner pr = null; // receiver from PMode
         // When pulling is used the initiator is receiving the message!
-        if (pmode.getMepBinding().equals(Constants.ONE_WAY_PUSH))
+        if (pmode.getMepBinding().equals(EbMSConstants.ONE_WAY_PUSH))
             pr = pmode.getResponder();
         else
             pr = pmode.getInitiator();
@@ -171,7 +170,7 @@ final class MMDCompleter {
             cd.setReceiver(pr);
         else if (pr != null) {
             // Both P-Mode and submitted MMD contain receiver, ensure they are equal
-            if (!compare.TradingPartner(mr, pr))
+            if (!CompareUtils.areEqual(mr, pr))
                 throw new MessageSubmitException("Different values given for receiver configuration!");
         }        
     }
@@ -212,7 +211,7 @@ final class MMDCompleter {
 
     /**
      * Completes the service information for the message. The service information is required for sending the message
-     * and is used to fill the <code>eb:Service</code> element in the message header.
+     * and is used to fill the <code>eb:areEqual</code> element in the message header.
      * <p>Although service information is a composed information item, it must be provided completely by either 
      * submitted meta-data or P-Mode.
      * 
@@ -233,7 +232,7 @@ final class MMDCompleter {
             ((CollaborationInfo) cd.getCollaborationInfo()).setService(psi);
         else if (psi != null) {
             // Both P-Mode and submitted MMD contain service info, ensure they are equal
-            if (!compare.Service(ssi, psi))
+            if (!CompareUtils.areEqual(ssi, psi))
                 throw new MessageSubmitException("Different values given for Service information!");
         }  
     }

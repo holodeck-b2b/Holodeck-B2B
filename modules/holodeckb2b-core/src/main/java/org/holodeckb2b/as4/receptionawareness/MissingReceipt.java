@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,12 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.as4.receptionawareness;
 
 import org.holodeckb2b.as4.handlers.inflow.CreateReceipt;
-import org.holodeckb2b.common.as4.pmode.IReceptionAwareness;
-import org.holodeckb2b.ebms3.persistent.message.EbmsError;
+import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
+import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 
 /**
  * Represent the <i>MissingReceipt</i> error that is part of the AS4 <i>reception awareness feature</i> and is used to 

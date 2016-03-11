@@ -8,7 +8,7 @@
     part of the default implementation for P-Mode configuration that
     uses XML files to define the P-Modes with one file per P-Mode. For
     more information about configuring a P-Mode see the XSD that defines 
-    the P-Mode file (<<namespace of PMode xsd here>>). 
+    the P-Mode file (http://holodeck-b2b.org/schemas/2014/10/pmode). 
     
     If you want to have a fixed set of P-Modes set the interval 
     attribute to 0 (zero) so the P-Modes are read only when Holodeck B2B
@@ -17,9 +17,8 @@
     to process messages!
     =============================================================== -->
     <worker name="pmodeWatcher" interval="20" activate="true"
-        workerClass="org.holodeckb2b.pmode.impl.PModeWatcher">
+        workerClass="org.holodeckb2b.pmode.xml.PModeWatcher">
         <parameter name="watchPath">conf/pmodes</parameter>
-    <parameter name="extension">xml</parameter>
     </worker>
 
     <!-- ==============================================================

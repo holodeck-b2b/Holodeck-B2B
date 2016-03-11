@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,17 +20,17 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
-import org.holodeckb2b.common.pmode.IPModeSet;
-import org.holodeckb2b.common.pmode.IProtocol;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
-import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.persistent.message.Receipt;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.ebms3.persistency.entities.Receipt;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.pmode.IProtocol;
 
 /**
  * Configures the actual message transport over the HTTP protocol. The parameters for the transfer are defined by
@@ -81,12 +81,12 @@ public class ConfigureHTTPTransportHandler extends BaseHandler {
         
         // Get the primary message unit that is processed
         log.debug("Get the primary MessageUnit from MessageContext");
-        MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+        MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
         
         // Only when message contains a message unit there is something to do
         if (primaryMU != null) {
             log.debug("Get P-Mode configuration for primary MU");
-            IPModeSet pmSet = HolodeckB2BCore.getPModeSet();
+            IPModeSet pmSet = HolodeckB2BCoreInterface.getPModeSet();
             IPMode pmode = pmSet.get(primaryMU.getPMode());
             // For response error messages the P-Mode may be unknown, so no special HTTP configuration
             if (pmode == null) {

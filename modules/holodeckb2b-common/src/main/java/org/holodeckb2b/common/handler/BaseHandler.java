@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -149,11 +149,14 @@ public abstract class BaseHandler extends AbstractHandler {
         
         // Do actual processing in implementation
         try {
-            return doProcessing(mc);
-        } catch (Exception ex) {
+            log.trace("Start processing");
+            InvocationResponse result = doProcessing(mc);
+            log.trace("End processing");
+            return result;
+        } catch (Throwable t) {
             // Unhandled exception during processing, should not happen!
-            log.fatal("An unhandled exception occurred while processing the message! Details: " + ex.getMessage());
-            throw new AxisFault("Internal error", ex);
+            log.fatal("An unhandled exception occurred while processing the message! Details: " + t.getMessage());
+            throw new AxisFault("Internal error", t);
         }
     }
 

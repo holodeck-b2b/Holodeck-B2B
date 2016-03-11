@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  */
 package org.holodeckb2b.ebms3.submit.core;
 
-import org.holodeckb2b.common.submit.IMessageSubmitter;
-import org.holodeckb2b.common.submit.IMessageSubmitterFactory;
+import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
+import org.holodeckb2b.interfaces.submit.IMessageSubmitterFactory;
 
 /**
  * Is an implementation of {@see IMessageSubmitterFactory} to create instances of

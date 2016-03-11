@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.ArrayList;
@@ -25,24 +24,25 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.config.Config;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.common.general.ReplyPattern;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.IErrorHandling;
-import org.holodeckb2b.common.pmode.IUserMessageFlow;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage;
+import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
+import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
+import org.holodeckb2b.ebms3.persistency.entities.Receipt;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.persistent.message.EbmsError;
-import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
-import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.persistent.message.PullRequest;
-import org.holodeckb2b.ebms3.persistent.message.Receipt;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.general.ReplyPattern;
+import org.holodeckb2b.interfaces.pmode.IErrorHandling;
+import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 
 /**
  * Is the in flow handler that collects all ebMS errors generated during the processing of the received message. The
@@ -73,7 +73,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
         log.debug("Check if errors were generated");
         ArrayList<EbmsError>    errors = (ArrayList<EbmsError>) mc.getProperty(MessageContextProperties.GENERATED_ERRORS);
         
-        if (errors == null || errors.isEmpty()) {
+        if (Utils.isNullOrEmpty(errors)) {
             log.debug("No errors were generated during this in flow, nothing to do");
         } else {
             log.debug(errors.size() + " error(s) were generated during this in flow");
@@ -95,8 +95,8 @@ public class ProcessGeneratedErrors extends BaseHandler {
                         // Therefor we only sent out this error if there no message unit with a processing state 
                         // different than FAILURE
                         // Anyhow the error should be registered
-                        ErrorMessage errorMU = MessageUnitDAO.createOutgoingErrorMessageUnit(errForMsg, null, null,
-                                                                                             false, true);
+                        EntityProxy<ErrorMessage> errorMU = 
+                                    MessageUnitDAO.createOutgoingErrorMessageUnit(errForMsg, null, null, false, true);
                         
                         if (onlyFailedMessageUnits(mc)) {
                             log.debug("All message units failed to process successfully, anonymous error can be sent");
@@ -118,18 +118,18 @@ public class ProcessGeneratedErrors extends BaseHandler {
                             URL should be possible and how that shoud be configured.
                             */
                             log.debug("Message unit in error is PullRequest, error must be sent as response");
-                            ErrorMessage errorMU = MessageUnitDAO.createOutgoingErrorMessageUnit(errForMsg, 
-                                                                                                 refToMsgId, 
-                                                                                                 null, 
-                                                                                                 false,
-                                                                                                 true);
+                            EntityProxy<ErrorMessage> errorMU = MessageUnitDAO.createOutgoingErrorMessageUnit(errForMsg, 
+                                                                                                        refToMsgId, 
+                                                                                                        null, 
+                                                                                                        false,
+                                                                                                        true);
                             MessageContextUtils.addErrorSignalToSend(mc, errorMU);
                             mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
                         } else {
                             log.debug("Get P-Mode information to determine how new signal must be processed");
                             // Errorhandling config is contained in flow 
                             String pmodeId = muInError.getPMode();
-                            IUserMessageFlow flow = (pmodeId != null ? HolodeckB2BCore.getPModeSet().get(pmodeId)
+                            IUserMessageFlow flow = (pmodeId != null ? HolodeckB2BCoreInterface.getPModeSet().get(pmodeId)
                                                                     .getLegs().iterator().next().getUserMessageFlow()
                                                             : null);
                             IErrorHandling errorHandling = (flow != null ? flow.getErrorHandlingConfiguration() : null);
@@ -148,22 +148,23 @@ public class ProcessGeneratedErrors extends BaseHandler {
                             if (muInError instanceof ErrorMessage) 
                                 sendError = errorHandling != null && errorHandling.shouldReportErrorOnError() != null ?
                                             errorHandling.shouldReportErrorOnError() : 
-                                            Config.shouldReportErrorOnError();
+                                            HolodeckB2BCoreInterface.getConfiguration().shouldReportErrorOnError();
                             
                             if (muInError instanceof Receipt)
                                 sendError = errorHandling != null && errorHandling.shouldReportErrorOnReceipt() != null?
                                             errorHandling.shouldReportErrorOnReceipt() :
-                                            Config.shouldReportErrorOnReceipt();
+                                            HolodeckB2BCoreInterface.getConfiguration().shouldReportErrorOnReceipt();
 
                             if (sendError) {
                                 log.debug("Error should be returned as response? " + asResponse);
                                 log.debug("Create Error signal and store in message database");
-                                ErrorMessage errorMU = MessageUnitDAO.createOutgoingErrorMessageUnit(errForMsg, 
-                                                                                                     refToMsgId, 
-                                                                                                     muInError.getPMode(), 
-                                                                                                     addSOAPFault,
-                                                                                                     asResponse);
-                                log.debug("Error signal stored in datase");
+                                EntityProxy<ErrorMessage> errorMU = 
+                                                    MessageUnitDAO.createOutgoingErrorMessageUnit(errForMsg, 
+                                                                                                  refToMsgId, 
+                                                                                                  muInError.getPMode(), 
+                                                                                                  addSOAPFault,
+                                                                                                  asResponse);
+                                log.debug("Error signal stored in database");
                                 if (sendError && asResponse) {
                                     log.debug("This error signal should be returned as a response, prepare MessageContext");
                                     MessageContextUtils.addErrorSignalToSend(mc, errorMU);
@@ -237,32 +238,29 @@ public class ProcessGeneratedErrors extends BaseHandler {
     private Map<String, MessageUnit> getAllMessageUnits(MessageContext mc) {   
         Map<String, MessageUnit>     allMUs = new HashMap<String, MessageUnit>();
         
-        UserMessage userMsg = (UserMessage)
+        EntityProxy<UserMessage> userMsg = (EntityProxy<UserMessage>)
                 MessageContextUtils.getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_USER_MESSAGE);
         if (userMsg != null) {
-            log.debug("Request message contained an User Message, check if in error");
-            allMUs.put(userMsg.getMessageId(), userMsg);
+            allMUs.put(userMsg.entity.getMessageId(), userMsg.entity);
         }            
-        PullRequest pullReq = (PullRequest) 
+        EntityProxy<PullRequest> pullReq = (EntityProxy<PullRequest>) 
                 MessageContextUtils.getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_PULL_REQUEST);
         if (pullReq != null) {
             log.debug("Request message contained a PullRequest");
-            allMUs.put(pullReq.getMessageId(), pullReq);
+            allMUs.put(pullReq.entity.getMessageId(), pullReq.entity);
         }
-        Collection<Receipt> receipts = (ArrayList<Receipt>)
+        Collection<EntityProxy<Receipt>> receipts = (ArrayList<EntityProxy<Receipt>>)
                 MessageContextUtils.getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_RECEIPTS);
-        if (receipts != null && !receipts.isEmpty()) {
-            log.debug("Request message contained one or more Receipts signals");
-            for(Receipt r : receipts)
-                allMUs.put(r.getMessageId(), r);
-        }
-        Collection<ErrorMessage> errors = (ArrayList<ErrorMessage>) 
+        if (!Utils.isNullOrEmpty(receipts))
+            for(EntityProxy<Receipt> r : receipts)
+                allMUs.put(r.entity.getMessageId(), r.entity);
+        
+        Collection<EntityProxy<ErrorMessage>> errors = (ArrayList<EntityProxy<ErrorMessage>>) 
                 MessageContextUtils.getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_ERRORS);
-        if (errors != null && !errors.isEmpty()) {
-            log.debug("Request message contained one or more Error signals");
-            for(ErrorMessage e : errors)
-                allMUs.put(e.getMessageId(), e);
-        }
+        if (!Utils.isNullOrEmpty(errors))
+            for(EntityProxy<ErrorMessage> e : errors)
+                allMUs.put(e.entity.getMessageId(), e.entity);
+        
         
         return allMUs;
     }

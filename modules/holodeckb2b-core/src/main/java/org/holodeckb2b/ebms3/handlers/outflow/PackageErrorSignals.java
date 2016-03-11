@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 package org.holodeckb2b.ebms3.handlers.outflow;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.soap.SOAP11Version;
 import org.apache.axiom.soap.SOAPBody;
@@ -29,15 +30,14 @@ import org.apache.axiom.soap.SOAPFaultText;
 import org.apache.axiom.soap.SOAPFaultValue;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.IErrorHandling;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
-import org.holodeckb2b.ebms3.persistent.message.PullRequest;
-import org.holodeckb2b.ebms3.persistent.message.Receipt;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.pmode.impl.ErrorHandling;
+import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 
 /**
  * If there are <i>Error signals </i> that must be sent, this handler adds the <code>eb:SignalMessage</code> elements to 
@@ -65,7 +65,6 @@ import org.holodeckb2b.pmode.impl.ErrorHandling;
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see IErrorHandling
- * @see ErrorHandling
  */
 public class PackageErrorSignals extends BaseHandler {
 
@@ -80,9 +79,10 @@ public class PackageErrorSignals extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(MessageContext mc) {
         // First check if there are any errors to include
-        ArrayList<ErrorMessage> errors = (ArrayList<ErrorMessage>) mc.getProperty(MessageContextProperties.OUT_ERROR_SIGNALS);
+        ArrayList<EntityProxy<ErrorMessage>> errors = 
+                    (ArrayList<EntityProxy<ErrorMessage>>) mc.getProperty(MessageContextProperties.OUT_ERROR_SIGNALS);
         
-        if (errors == null || errors.isEmpty())
+        if (Utils.isNullOrEmpty(errors))
             // No errors in this message, continue processing
             return InvocationResponse.CONTINUE;
         
@@ -94,13 +94,13 @@ public class PackageErrorSignals extends BaseHandler {
         
         // If one of the errors is of severity FAILURE a SOAP may be added
         boolean addSOAPFault = false;
-        for(ErrorMessage e : errors) {
+        for(EntityProxy<ErrorMessage> e : errors) {
             log.debug("Add eb:SignalMessage element to the existing eb:Messaging header");
-            org.holodeckb2b.ebms3.packaging.ErrorSignal.createElement(messaging, e);
+            org.holodeckb2b.ebms3.packaging.ErrorSignal.createElement(messaging, e.entity);
             log.debug("eb:SignalMessage element succesfully added to header");
             
             // Check if a SOAPFault should be added                
-            addSOAPFault |= e.shouldHaveSOAPFault();
+            addSOAPFault |= e.entity.shouldHaveSOAPFault();
         }
         
         // If SOAP Fault should be added, check if possible
@@ -117,47 +117,22 @@ public class PackageErrorSignals extends BaseHandler {
     }   
     
     /**
-     * Checks if a SOAPFault can be added to the current message. This is allowed when there is no
-     * other message unit that must be contained in the SOAP body.
+     * Checks if a SOAPFault can be added to the current message. This is allowed when there is no other message unit 
+     * that must be contained in the SOAP message.
      * 
      * @param mc        The current message context
      * @return          <code>true</code> if a SOAPFault can be added, <code>false</code> otherwise
      */
     protected boolean isSOAPFaultAllowed(MessageContext mc) {
-        log.debug("Check if message contains another message unit");
+        // Check if message contains a non Error Signal message unit
+        boolean onlyErrorMU = true;
+        Iterator<EntityProxy> msgUnitsIt = MessageContextUtils.getSentMessageUnits(mc).iterator();
         
-        try {
-            log.debug("Check for UserMessage message unit");
-            UserMessage um = (UserMessage) mc.getProperty(MessageContextProperties.OUT_USER_MESSAGE);
-            
-            if (um != null) {
-                log.debug("Message does contain an UserMessage for sending, SOAPFault should not be added");
-                return false;
-            }
-        } catch (Exception e) {}
+        do {
+            onlyErrorMU = msgUnitsIt.next().entity instanceof ErrorMessage;
+        } while (onlyErrorMU && msgUnitsIt.hasNext());
         
-        log.debug("Message does not contain an UserMessage, check for PullRequest");
-        try {
-            PullRequest pr = (PullRequest) mc.getProperty(MessageContextProperties.OUT_PULL_REQUEST);
-            
-            if (pr != null) {
-                log.debug("Message does contain a PullRequest for sending, SOAPFault should not be added");
-                return false;
-            }
-        } catch (Exception e) {}
-        
-        log.debug("Message does not contain a PullRequest, check for Receipt");
-        try {
-            ArrayList<Receipt> rcpts = (ArrayList<Receipt>) mc.getProperty(MessageContextProperties.OUT_RECEIPTS);
-            
-            if (rcpts != null && !rcpts.isEmpty()) {
-                log.debug("Message does contain a Receipt for sending, SOAPFault should not be added");
-                return false;
-            }
-        } catch (Exception e) {}
-
-        log.debug("Message does not contain another message unit, SOAP Fault can be added");
-        return true;
+        return onlyErrorMU;
     }
 
     /**
@@ -189,7 +164,8 @@ public class PackageErrorSignals extends BaseHandler {
         }
 
         SOAPFaultReason fReason = factory.createSOAPFaultReason(fault);
-        String          reason = "An error occurred while processing the received ebMS message. Check ebMS errors for details.";
+        String          reason = 
+                        "An error occurred while processing the received ebMS message. Check ebMS errors for details.";
         if (isSoap11) {
             fReason.setText(reason);
         } else {

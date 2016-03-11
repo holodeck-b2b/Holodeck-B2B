@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,24 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.delivery.IDeliverySpecification;
-import org.holodeckb2b.common.delivery.IMessageDeliverer;
-import org.holodeckb2b.common.delivery.MessageDeliveryException;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
-import org.holodeckb2b.common.pmode.IReceiptConfiguration;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
+import org.holodeckb2b.ebms3.persistency.entities.Receipt;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.persistent.message.Receipt;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for checking if receipt messages should be delivered to the business 
@@ -56,7 +56,7 @@ public class DeliverReceipts extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         // Check if this message contains receipt signals
-        Collection<Receipt> rcptSignals = (Collection<Receipt>) 
+        Collection<EntityProxy<Receipt>> rcptSignals = (Collection<EntityProxy<Receipt>>) 
                                                     mc.getProperty(MessageContextProperties.IN_RECEIPTS);
         
         if (rcptSignals == null || rcptSignals.isEmpty())
@@ -66,24 +66,27 @@ public class DeliverReceipts extends BaseHandler {
         log.debug("Message contains " + rcptSignals.size() + " Receipt signals");
         
         // Process each signal
-        for(Receipt rcptSig : rcptSignals) {
+        for(EntityProxy<Receipt> rcptSigProxy : rcptSignals) {
+            // Extract the entity object
+            Receipt rcptSig = rcptSigProxy.entity;
+            
             // Prepare message for delivery by checking it is still ready for delivery and then 
             // change its processing state to "out for delivery"
             log.debug("Prepare message [" + rcptSig.getMessageId() + "] for delivery");
-            boolean readyForDelivery = MessageUnitDAO.startDeliveryOfMessageUnit(rcptSig);
+            boolean readyForDelivery = MessageUnitDAO.startDeliveryOfMessageUnit(rcptSigProxy);
                         
             if(readyForDelivery) {
                 // Receipt in this signal can be delivered to business application
                 try {
                     deliverReceipt(rcptSig);
                     // Receipt signal processed, change the processing state to done
-                    MessageUnitDAO.setDone(rcptSig);
+                    MessageUnitDAO.setDone(rcptSigProxy);
                 } catch (MessageDeliveryException ex) {                        
                     log.warn("Could not deliver receipt (msgId=" + rcptSig.getMessageId() 
                                     + "]) to application! Error details: " + ex.getMessage());
                     // Although the receipt could not be delivered it was processed completely on the ebMS level,
                     //  so processing state is set to warning instead of failure
-                    MessageUnitDAO.setWarning(rcptSig);
+                    MessageUnitDAO.setWarning(rcptSigProxy);
                 }
             } else {
                 log.info("Receipt signal [" + rcptSig.getMessageId() + "] is already processed for delivery");
@@ -112,7 +115,7 @@ public class DeliverReceipts extends BaseHandler {
         // If a delivery specification was found the receipt should be delivered, else no reporting is needed
         if (deliverySpec != null) {
             log.debug("Receipt should be delivered using delivery specification with id:" + deliverySpec.getId());
-            IMessageDeliverer deliverer = HolodeckB2BCore.getMessageDeliverer(deliverySpec);
+            IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec);
             // Deliver the Receipt using deliverer
             deliverer.deliver(receipt);
             log.debug("Receipt successfully delivered!");
@@ -132,7 +135,7 @@ public class DeliverReceipts extends BaseHandler {
     protected IDeliverySpecification getReceiptDelivery(final Receipt receipt) {
         IDeliverySpecification deliverySpec = null;
         
-        IPMode pmode = HolodeckB2BCore.getPModeSet().get(receipt.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(receipt.getPMode());
         ILeg leg = pmode.getLegs().iterator().next(); // Currently only One-Way MEPS supports, so only one leg 
         IReceiptConfiguration rcptConfig = leg.getReceiptConfiguration();
         

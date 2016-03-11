@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 package org.holodeckb2b.ebms3.constants;
 
 /**
- * Constants for describing the processing state of a message.
+ * EbMSConstants for describing the processing state of a message.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */

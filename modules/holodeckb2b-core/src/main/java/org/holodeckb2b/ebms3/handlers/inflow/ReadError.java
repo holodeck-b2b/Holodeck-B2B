@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,10 @@ import java.util.Iterator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.config.Config;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.messagemodel.IEbmsError;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
@@ -31,9 +31,11 @@ import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.ebms3.packaging.ErrorSignal;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PackagingException;
+import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 
 /**
  * Is the handler that checks if this message contains one or more Error signals, i.e. the ebMS header contains one or 
@@ -78,20 +80,20 @@ public class ReadError extends BaseHandler {
             log.debug("Check for Error elements to determine if message contains one or more errors");
             Iterator<OMElement> errorSigs = ErrorSignal.getElements(messaging);
             
-            if (errorSigs != null) {
-                log.debug("Error(s) found, read information from message");
+            if (!Utils.isNullOrEmpty(errorSigs)) {
+                log.debug("Error Signal(s) found, read information from message");
                 
                 while (errorSigs.hasNext()) {
                     OMElement errElem = errorSigs.next();
-                    org.holodeckb2b.ebms3.persistent.message.ErrorMessage errorSignal = null;
+                    org.holodeckb2b.ebms3.persistency.entities.ErrorMessage errorSignal = null;
                     try {
                         // Read information into ErrorMessage object
                         errorSignal = ErrorSignal.readElement(errElem);    
                         // And store in database and message context for further processing
                         log.debug("Store Error Signal in database");
-                        MessageUnitDAO.storeReceivedMessageUnit(errorSignal);
+                        EntityProxy<ErrorMessage> errSigProxy = MessageUnitDAO.storeReceivedMessageUnit(errorSignal);
                         // Add to message context for further processing
-                        MessageContextUtils.addRcvdError(mc, errorSignal);
+                        MessageContextUtils.addRcvdError(mc, errSigProxy);
                         log.debug("Check consistency of references");
                         if (!checkRefConsistency(errorSignal)) {
                             log.warn("The references containd in Error signal [msgId=" + errorSignal.getMessageId()
@@ -101,7 +103,7 @@ public class ReadError extends BaseHandler {
                             viError.setErrorDetail("Error contains inconsistent references");
                             viError.setRefToMessageInError(errorSignal.getMessageId());
                             MessageContextUtils.addGeneratedError(mc, viError);  
-                            MessageUnitDAO.setFailed(errorSignal);
+                            MessageUnitDAO.setFailed(errSigProxy);
                         } else {
                             log.debug("References are consistent");
                         }
@@ -139,7 +141,7 @@ public class ReadError extends BaseHandler {
         boolean consistent = true; 
         Iterator<IEbmsError> it = errSignal.getErrors().iterator();
         String errorRefToMsgId = it.next().getRefToMessageInError(); 
-        if (refToMessageId == null && !Config.useStrictErrorRefCheck()) {
+        if (refToMessageId == null && !HolodeckB2BCoreInterface.getConfiguration().useStrictErrorRefCheck()) {
             // Signal level ref == null => all individual refs should be same, take first as leading
             refToMessageId = errorRefToMsgId;
         } 

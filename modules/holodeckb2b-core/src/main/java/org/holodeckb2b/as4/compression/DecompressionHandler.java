@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,15 @@ import java.util.Collection;
 import java.util.Iterator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.common.general.IProperty;
-import org.holodeckb2b.common.messagemodel.IPayload;
+import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 
 /**
  * Is the <i>IN_FLOW</i> handler part of the AS4 Compression Feature responsible for the decompression of the payload
@@ -46,9 +48,15 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
 
     
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws AxisFault {
-        // The compression feature can be used per payload, so check all payloads in message
+    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> umProxy) throws AxisFault {
+        // Extract the entity object from the proxy
+        UserMessage um = umProxy.entity;
         
+        // Decompression is only needed if the message contains payloads at all
+        if (Utils.isNullOrEmpty(um.getPayloads())) 
+            return InvocationResponse.CONTINUE;
+        
+        // The compression feature can be used per payload, so check all payloads in message
         for (IPayload p : um.getPayloads()) {
             // Only payloads contained in attachment can use compression
             if (p.getContainment() == IPayload.Containment.ATTACHMENT 
@@ -70,7 +78,7 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
                     decompressFailure.setRefToMessageInError(um.getMessageId());
                     MessageContextUtils.addGeneratedError(mc, decompressFailure);
                     try {
-                        um = MessageUnitDAO.setFailed(um);
+                        MessageUnitDAO.setFailed(umProxy);
                     } catch (DatabaseException dbe) {
                         // Ai, something went wrong when changing the process state
                         log.error("An error occurred when setting processing state to Failure. Details: " 

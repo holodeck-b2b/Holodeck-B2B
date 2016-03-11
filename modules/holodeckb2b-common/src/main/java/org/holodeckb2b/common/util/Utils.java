@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,9 +28,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
@@ -53,11 +55,12 @@ public final class Utils {
     private static Tika    mimeTypeDetector;
     
     /** 
-     * Transform a {@see Date} object to a {@see String} formatted according to the specification of the 
-     * <code>dateTime</code> datatype of XML schema. The time will be expressed as UTC.<br>
-     * See <a href="http://www.w3.org/TR/xmlschema-2/#dateTime">section 3.2.7 of the XML Specification</a> for details.
+     * Transform a {@link Date} object to a {@link String} formatted according to
+     * the specification of the <code>dateTime</code> datatype of XML schema.<br>
+     * See <a href="http://www.w3.org/TR/xmlschema-2/#dateTime">section 3.2.7 of the XML
+     * Specification</a> for details.
      * 
-     * @param   date  The date as Date object to convert to String.
+     * @param   date  The date as Calendar object to convert to String.
      * @return  The date as an <code>xs:dateTime</code> formatted String 
      *          or <code>null</code> when date object was <code>null</code>
      */
@@ -65,10 +68,9 @@ public final class Utils {
         if (date == null)
             return null;
         
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        
-        return sdf.format(date);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXX");
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return formatter.format(date);
     }
 
     /** 
@@ -382,9 +384,9 @@ public final class Utils {
     }
 
     /**
-     * Checks whether the given Collection is <code>null</code> or is an empty.
+     * Checks whether the given Collection is <code>null</code> or is empty.
      * 
-     * @param c     The string to check
+     * @param c     The Collection to check
      * @return      <code>true</code> if <code>c == null || c.isEmpty() == true</code>,<br>
      *              <code>false</code> otherwise
      */
@@ -393,9 +395,20 @@ public final class Utils {
     }
 
     /**
+     * Checks whether the given Map is <code>null</code> or is empty.
+     * 
+     * @param m     The Map to check
+     * @return      <code>true</code> if <code>m == null || m.isEmpty() == true</code>,<br>
+     *              <code>false</code> otherwise
+     */
+    public static boolean isNullOrEmpty(final Map<?,?> m) {
+        return m == null || m.isEmpty();
+    }
+
+    /**
      * Checks whether the given Iterator is <code>null</code> or does not contain any more objects.
      * 
-     * @param i     The string to check
+     * @param i     The Iterator to check
      * @return      <code>true</code> if <code>i == null || i.hasNext() == true</code>,<br>
      *              <code>false</code> otherwise
      */
@@ -403,4 +416,33 @@ public final class Utils {
         return i == null || !i.hasNext();
     }
 
+    /**
+     * Gets the root cause of the exception by traversing the exception stack and returning the
+     * last available exception in it.
+     * 
+     * @param t     The {@link Throwable} object to get the root cause for 
+     * @return      The root cause (note that this can be the throwable itself)
+     */
+    public static Throwable getRootCause(final Throwable t) {
+        List<Throwable> exceptionStack = getCauses(t);
+        return exceptionStack.get(exceptionStack.size() - 1);
+    }
+    
+    /**
+     * Gets the exception stack of an exception, i.e. the list of all exception that where registered as causes.
+     * 
+     * @param t     The {@link Throwable} object to get the exception stack for
+     * @return      A list of {@link Throwable} object with the first item being the exception itself and the last
+     *              item the root cause.
+     */
+    public static List<Throwable> getCauses(final Throwable t) {
+        ArrayList<Throwable> exceptionStack = new ArrayList<Throwable>();
+        Throwable i = t;
+        while (i != null) {
+            exceptionStack.add(i);
+            i = i.getCause();
+        } 
+        
+        return exceptionStack;
+    }
 } 

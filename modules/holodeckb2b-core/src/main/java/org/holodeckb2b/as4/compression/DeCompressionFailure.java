@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.as4.compression;
 
-import org.holodeckb2b.ebms3.persistent.message.EbmsError;
+import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError.Severity;
 
 /**
  * Represent the <i>DeCompressionFailure</i> error as defined in section 3.1 of the AS4 profile and signals that a

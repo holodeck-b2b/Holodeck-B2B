@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.deliverymethod.file;
 
 import java.nio.file.FileSystems;
@@ -22,9 +21,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-import org.holodeckb2b.common.delivery.IMessageDeliverer;
-import org.holodeckb2b.common.delivery.IMessageDelivererFactory;
-import org.holodeckb2b.common.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory;
+import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 
 /**
  * Is an {@link IMessageDelivererFactory} implementation that creates {@link IMessageDeliverer} implementations that

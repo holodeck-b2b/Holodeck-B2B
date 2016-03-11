@@ -1,47 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten, Bram Bakx
-    
-    This file is part of Holodeck B2B.
 
-    Holodeck B2B is free software: you can redistribute it and/or modify
+    Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
+
+    This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Holodeck B2B is distributed in the hope that it will be useful,
+    This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Holodeck B2B. If not, see <http://www.gnu.org/licenses/>.
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
     targetNamespace="http://holodeck-b2b.org/schemas/2014/10/pmode"
     attributeFormDefault="unqualified" xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode">
     <xs:annotation>
-        <xs:documentation>This schema defines the XML structure for the representation of a P-Mode as used by the default implementation of for maintaining the P-Mode set. In this implementation the P-Mode set consists of all XML documents in a directory. Each XML document represents one P-Mode and must conform to this schema. See the package org.holodeckb2b.pmode.impl for more info on the default implementation of P-Modes.</xs:documentation>
+        <xs:documentation><p>The ebMS specification only defines an abstract P-Mode model, the actual P-Mode definition is left up to implementations. This schema defines the XML structure for the representation of a P-Mode as used by the default implementation for maintaining the P-Mode set. In this implementation the P-Mode set consists of all XML documents in a directory. Each XML document represents one P-Mode and must conform to this schema. See the package <code>org.holodeckb2b.pmode.xml</code> for more info on the default implementation of P-Modes.</p></xs:documentation>
     </xs:annotation>
     <xs:element name="PMode" type="tns:PMode">
         <xs:annotation>
-            <xs:documentation><p>The ebMS specification only defines an abstract P-Mode model, the actual P-Mode definition is left up to implementations. This XML schema defines the structure of the default implementation provided in Holodeck B2B.</p>
+            <xs:documentation><p>The P-Mode as defined in this schema is based on the structure described in appendix D of the Core Specification. As described in section D.2 one leg may involve two sets of P-Mode parameters if pulling is used as the pull request signal has its own set of parameters. This is reflected in this model by the <i>flow</i> concept. When a leg uses the pull binding it has two flows, one for the pull request and one for the user message.</p>
 
-<p>This schema is based on the structure described in appendix D of the Core Specification. As described in section D.2 one leg may involve two sets of P-Mode parameters if pulling is used as the pull request signal has its own set of parameters. This is reflected in this model by the <i>flow</i> concept. When a leg uses the pull binding it has two flows, one for the pull request and one for the user message.</p>
-
-<p>The P-Mode parameters are used to set values in the ebMS message header and determine how and where to send messages. All parameter values must be known when the message is sent, but it is not necessary to include them all in the P-Mode. This would require a P-Mode for each exchanged message while some message only differ on some configuration parameters. Therefor Holodeck B2B allows the P-Mode to define only the common parameters and supply the message specific ones when the message is submitted. It is RECOMMENDED to include at least the initiator or responder of the exchange and information about the user message. 
-<br/>Security settings however can only be specified in the P-Mode. So if security must be applied to the messages governed by this P-Mode the configuration must be included in the Initiator and or Responder elements.</p></xs:documentation>
+<p>The P-Mode parameters are used to set values in the ebMS message header and determine how and where to send messages. All parameter values must be known when the message is sent, but it is not necessary to include them all in the P-Mode. This would require a P-Mode for each exchanged message while some messages only differ on specific configuration parameters. Therefor Holodeck B2B allows the P-Mode to define only the common parameters and supply the message specific ones when the message is submitted. It is RECOMMENDED to include at least the initiator or responder of the exchange and information about the user message. 
+<br/>Security settings however can <b>only be specified in the P-Mode</b>. So if security must be applied to the messages governed by this P-Mode the configuration must be included in the Initiator and or Responder elements.</p></xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:complexType name="PMode">
         <xs:sequence>
             <xs:element name="id">
                 <xs:annotation>
-                    <xs:documentation><p>The REQUIRED identifier of this P-Mode. The P-Mode identifier is defined as optional in the ebMS v3 Core Specification and including it in the message header may cause problems in the receiving MSH if it uses no or another id for this P-Mode. Therefor the inclusion of the id in the message header is optional and can be set using the <code>include</code> attribute. When this attribute has value "false" the P-Mode id will not be included in the message header or used to find the P-Mode when a message is received. The default value is "false".</p>
+                    <xs:documentation><p>The REQUIRED identifier of this P-Mode. The P-Mode identifier is defined as optional in the ebMS v3 Core Specification and including it in the message header may cause problems in the receiving MSH if it uses no or another id for this P-Mode. Therefor the inclusion of the id in the message header is optional and can be set using the <code>include</code> attribute. When this attribute has value <i>"false"</i> (default value) the P-Mode id will not be included in the message header or used to find the P-Mode when a message is received.</p>
 
 <p>NOTE 1: As the P-Mode id is included in the message as part of the agreement reference, including the P-Mode id requires the specification of an agreement reference either in the P-Mode or when the message is submitted.</p>
 
-<p>NOTE 2: If set to "false" the P-Mode id included in a received message will not be used to determine the P-Mode that handles the message. This is to prevent an unintended match on the identifier set by a sender.</p></xs:documentation>
+<p>NOTE 2: If set to <i>"false"</i> the P-Mode id included in a received message will not be used to determine the P-Mode that handles the message. This is to prevent an unintended match on the identifier set by a sender.</p></xs:documentation>
                 </xs:annotation>
                 <xs:complexType>
                     <xs:simpleContent>
@@ -81,22 +79,22 @@
             </xs:element>
             <xs:element name="Initiator" type="tns:TradingPartner" minOccurs="0">
                 <xs:annotation>
-                    <xs:documentation><p>This element includes the information on the <i>Initiator</i> of the MEP, i.e. the partner that sends the first ebMS message. Note that this is not always the sender of the first user message because in the pull scenario the first ebMS message (the PullRequest) is sent by the partner that will receive the user message. See the <a href="www.holodeck-b2b.org/http://holodeck-b2b.org/documentation/message-exchange-patterns/">Holodeck website</a> and chapter 2 of the ebMS V3 Core Specification for more info.</p>
+                    <xs:documentation><p>This element includes the information on the <i>Initiator</i> of the MEP, i.e. the partner that sends the first ebMS message. Note that this is not always the Sender of the first user message because in the pull scenario the first ebMS message (the pull request) is sent by the partner that will receive the user message. See the <a href="www.holodeck-b2b.org/http://holodeck-b2b.org/documentation/message-exchange-patterns/">Holodeck website</a> and chapter 2 of the ebMS V3 Core Specification for more info.</p>
 
-<p>NOTE: This element is optional in the P-Mode. When not specified the information must be specified when a user message is submitted to Holodeck B2B. Attention should be paid to the fact that the meta-data on submission is expressed in <i>sender</i> ("From") and <i>receiver</i> ("To") roles which may not be equal to initiator and responder.</p></xs:documentation>
+<p>NOTE: This element is optional in the P-Mode. When not specified the information must be specified when a user message is submitted to Holodeck B2B. Attention should be paid to the fact that the meta-data on submission is expressed in <i>Sender</i> ("From") and <i>Receiver</i> ("To") roles which, as explained above, may not be equal to <i>Initiator</i> and <i>Responder</i>.</p></xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element name="Responder" type="tns:TradingPartner" minOccurs="0">
                 <xs:annotation>
-                    <xs:documentation><p>This element includes the information on the <i>Responder</i> of the MEP. The information is the same as for <code>Initiator</code>.</p></xs:documentation>
+                    <xs:documentation><p>This element includes the information on the <i>Responder</i> of the MEP. The information is the same as for <i>Initiator</i>.</p></xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element maxOccurs="1" name="Agreement" type="tns:Agreement" minOccurs="0">
                 <xs:annotation>
-                    <xs:documentation>This element contains the identification of the business level agreement between the trading partners. This agreement does not define how message should be processed and is therefor optional. 
+                    <xs:documentation><p>This element contains the identification of the business level agreement between the trading partners. This agreement does not define how message should be processed and is therefor optional.</p> 
 
-However the P-Mode id is included in the message header as part of the agreement reference and therefor the information is required when the P-Mode id should be included. 
-It is therefor RECOMMENDED to include the agreement info when the include attribute has value "true". If not included in the P-Mode the submission of a user message must contain the agreement info.</xs:documentation>
+<p>However the P-Mode id is included in the message header as part of the agreement reference and therefor the information is required when the P-Mode id should be included. 
+It is therefor RECOMMENDED to include the agreement info when the include attribute has value "true". If not included in the P-Mode the submission of a user message must contain the agreement info.</p></xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element maxOccurs="1" name="Leg" type="tns:Leg">
@@ -104,7 +102,7 @@ It is therefor RECOMMENDED to include the agreement info when the include attrib
                     <xs:documentation><p>The <code>Leg</code> element contains the configuration settings for one leg of the P-Mode, i.e. the exchange of one user message. See section 2 of the ebMS Core Specification for more information on the messaging model and concept of legs.<br/>
 In the P-Mode model described in the ebMS specification a leg can be identified by number (1 or 2) or label (<i>request</i> or <i>reply</i>). In this implementation the label primarily defines the order of the legs, but if no labels are specified the order of the elements also defines the order of the legs.</p>.
 
-<p>All child elements are optional because it is not known upfront which information is needed for a specific P-Mode and which information will be provided when a message is submitted. It is however RECOMMENDED to provide the UserMessageFlow element to define which user messages can be exchanged over this leg.</p>
+<p>All child elements are optional because it is not known upfront which information is needed for a specific P-Mode and which information will be provided when a message is submitted. It is however RECOMMENDED to provide the <code>UserMessageFlow</code> element to define which user messages can be exchanged over this leg.</p>
 </xs:documentation>
                     <xs:documentation><p>NOTE: As Holodeck B2B currently only supports One-Way MEPs there can be just one Leg element.</p></xs:documentation>
                 </xs:annotation>
@@ -115,8 +113,7 @@ In the P-Mode model described in the ebMS specification a leg can be identified 
         <xs:annotation>
             <xs:documentation><p>The trading partner configuration MUST contain one or more party ids that identify the trading partner. If multiple <code>PartyId</code> elements are included all party ids will be included in the message and used to find the P-Mode. The business role the trading partner is acting in is OPTIONAL and can be provided when the message is submitted.</p>
 
-<p>Additionally settings for signing, encryption and/or usernametokens can be specified in the <code>SecurityConfiguration</code> child element. This is different from the ebMS specification where the security parameters are defined on the leg level (or maybe even finer grained per message, but that is not really clear). Within Holodeck B2B we assume however that security settings are determined by the trading partners involved in the message exchange. Therefor the security configuration is part of the trading
-partner configuration in the P-Mode.</p>
+<p>Additionally settings for signing, encryption and/or usernametokens can be specified in the <code>SecurityConfiguration</code> child element. This is different from the ebMS specification where the security parameters are defined on the leg level (or maybe even finer grained per message, but that is not really clear). Within Holodeck B2B we assume however that security settings are determined by the trading partners involved in the message exchange. Therefor the security configuration is part of the trading partner configuration in the P-Mode.</p>
 
 <p>The security configuration contains the settings that are specific to this trading partner; the settings related to signing define how this trading partner will sign it messages, and the encryption settings define how messages to this trading partner must be encrypted.<br/>
 This means that the security configuration of trading partner for which Holodeck B2B is the MSH contains the <b>private keys</b> and that the security configuration for the other partner contains the <b>public keys</b>.</p>
@@ -128,7 +125,7 @@ This means that the security configuration of trading partner for which Holodeck
                 <xs:annotation>
                     <xs:documentation><p>Identification of the trading partner. The identification of the partner can consist of the id itself and the identification of the naming scheme to which the id belongs. This naming scheme or domain is specified in the <code>@type</code> attribute.<br/>
 The ebMS specification requires that the <code>PartyId</code> value MUST be an URI when no <code>@type</code> attribute is specified (see section 5.2.2.4 of ebMS Core Specification).</p>
-<p>Note that for one partner multiple <code>PartyId</code>s can be specified. All given PartyIds MUST identify the same organisation (see also section 5.2.2.3 of ebMS Core Specification).</p></xs:documentation>
+<p>Note that for one partner multiple <code>PartyId</code>s can be specified. All given PartyIds MUST however identify the same organisation (see also section 5.2.2.3 of ebMS Core Specification).</p></xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element minOccurs="0" name="Role" type="tns:non-empty-string">
@@ -167,7 +164,7 @@ Note that this is probably different then the role the MSH is playing in the MEP
             <xs:element minOccurs="0" name="Receipt" type="tns:ReceiptType">
                 <xs:annotation>
                     <xs:documentation><p>This element indicates whether Receipts are used on this leg and contains the configuration for Receipt processing.<br/>
-The ebMS V3 Core Specification does not specify in detail when and how receipt signals should be used. It only specifies P-Mode parameters for whether the receipt should be send, the reply pattern to use and the address where to sent the receipts to if to sent as a response. The content of the signal are not strictly defined and are left open for further specification in profiles (like AS4). Currently Holodeck B2B will always generate a receipt signal as specified in the AS4 profile (see section 5.1.8 of the profile).</p>
+The ebMS V3 Core Specification does not specify in detail when and how receipt signals should be used. It only specifies P-Mode parameters for whether the receipt should be send, the reply pattern to use and the address where to sent the receipts to if not sent as a response. The content of the signal are not strictly defined and are left open for further specification in profiles (like AS4). Currently Holodeck B2B will always generate a receipt signal as specified in the AS4 profile (see section 5.1.8 of the profile).</p>
 
 <p>The parameters for Receipt are defined in appendix D of the Core Specification as part of the P-Mode parameter group <b>Security</b>. As they are not directly related to security settings we moved them to a separate <i>"Receipt"</i> group and this element.<br/> 
 The ebMS specification defines the <b>PMode[1].Security.SendReceipt</b> parameter that indicate whether a Receipt should be sent for a user message. This parameter is not directly implemented in this schema but its value derived from the existence of the <code>Receipt</code> element for a leg, i.e. <b>PMode[1].Security.Receipt</b> := <code>boolean(./Receipt)</code>.</p></xs:documentation>
@@ -267,12 +264,12 @@ The ebMS specification defines the <b>PMode[1].Security.SendReceipt</b> paramete
             <xs:sequence>
                 <xs:element name="ReplyPattern" type="tns:ReplyPatternType">
                     <xs:annotation>
-                        <xs:documentation><p>This element represents the <b>PMode.Security.SendReceipt.ReplyPattern</b> parameter and indicates whether the Receipt signal is to be sent as a callback (value "CALLBACK"), or synchronously in the transport back-channel response (value "RESPONSE"). When set to "CALLBACK" also the sibling <code>To</code> MUST be set</p></xs:documentation>
+                        <xs:documentation><p>This element represents the <b>PMode.Security.SendReceipt.ReplyPattern</b> parameter and indicates whether the Receipt signal is to be sent as a callback (value <i>"CALLBACK"</i>), or synchronously in the transport back-channel response (value <i>"RESPONSE"</i>). When set to <i>"CALLBACK"</i> also the sibling <code>To</code> MUST be set if this leg uses <i>Push</i>. When this leg uses <i>Pull</i> the <code>To</code> element MAY be ommitted in which case the Receipt will be <i>piggybacked</i> with the next Pull Request.</p></xs:documentation>
                     </xs:annotation>
                 </xs:element>
                 <xs:element name="To" type="xs:string" minOccurs="0">
                     <xs:annotation>
-                        <xs:documentation><p>This element contains the URL where the Receipt signals should be sent to in case the reply pattern is set to "CALLBACK". It MUST be used when this leg uses push. If this leg uses pulling it MAY be omitted in which case the Receipt signal will be piggybacked on the next PullRequest. If an URL is provided the Receipt signal will be pushed independently.</p>
+                        <xs:documentation><p>This element contains the URL where the Receipt signals should be sent to in case the reply pattern is set to <i>"CALLBACK"</i>.</p>
 
 <p>NOTE: This P-Mode parameter is not defined in the ebMS V3 Core Specification but defined in Part 2 (see <a href="https://tools.oasis-open.org/issues/browse/EBXMLMSG-33?jql=project%20%3D%20EBXMLMSG">issue 33 in OASIS TC issue tracker</a>).</p></xs:documentation>
                     </xs:annotation>
@@ -281,7 +278,7 @@ The ebMS specification defines the <b>PMode[1].Security.SendReceipt</b> paramete
             <xs:sequence>
                 <xs:element name="NotifyReceiptToBusinessApplication" type="xs:boolean">
                     <xs:annotation>
-                        <xs:documentation><p>This element indicates whether the business application that submitted an acknowledged user message should be notified about the reception of the Receipt signal.</p>
+                        <xs:documentation><p>This element indicates whether the <i>Producer</i>, i.e. the business application that submitted the user message, should be notified about the reception of the Receipt signal.</p>
 
 <p>Note that the ebMS specifications do not specify a specific parameter for the receipt notification. There is only the parameter <b>PMode[1].ErrorHandling.Report.MissingReceiptNotifyProducer</b> defined in the AS4 Profile to indicate whether the business application should be notified about a missing receipt, but not about receiving one. The <code>NotifyReceiptToBusinessApplication</code> element applies to both situations, receiving or missing an expected receipt. It is not possible to configure these situations separately.</p>
 <p>Also note that for detecting a missing receipt an interval to wait for a Receipt has to be specified. This is however part of the AS4 Reception Awareness feature and therefore also part of its configuration.</p></xs:documentation>
@@ -474,7 +471,6 @@ The notification of errors uses the same delivery mechanism as user messages wit
     </xs:complexType>
     <xs:complexType name="PayloadProfile">
         <xs:sequence>
-            <xs:element name="maxSizePayload" type="xs:positiveInteger" minOccurs="0"/>
             <xs:element name="UseAS4Compression" type="xs:boolean" default="false" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>This element specifies whether the AS4 Compression Feature should be used. If enabled all payloads contained as attachment to the SOAP message will be compressed using gzip. The compression is not applied to paylaods contained in the SOAP body or on an external location.

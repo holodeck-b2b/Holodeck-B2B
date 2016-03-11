@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,29 +22,29 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.IAgreement;
-import org.holodeckb2b.common.general.IService;
-import org.holodeckb2b.common.general.ITradingPartner;
-import org.holodeckb2b.common.messagemodel.IAgreementReference;
-import org.holodeckb2b.common.messagemodel.IUserMessage;
-import org.holodeckb2b.common.messagemodel.util.compare;
-import org.holodeckb2b.common.pmode.IBusinessInfo;
-import org.holodeckb2b.common.pmode.IErrorHandling;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
-import org.holodeckb2b.common.pmode.IPModeSet;
-import org.holodeckb2b.common.pmode.IProtocol;
-import org.holodeckb2b.common.pmode.IPullRequestFlow;
-import org.holodeckb2b.common.pmode.IReceiptConfiguration;
-import org.holodeckb2b.common.pmode.IUserMessageFlow;
-import org.holodeckb2b.common.security.ISecurityConfiguration;
-import org.holodeckb2b.common.security.ISigningConfiguration;
-import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
-import static org.holodeckb2b.common.util.Utils.compareStrings;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IAgreement;
+import org.holodeckb2b.interfaces.general.IService;
+import org.holodeckb2b.interfaces.general.ITradingPartner;
+import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
+import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.pmode.IBusinessInfo;
+import org.holodeckb2b.interfaces.pmode.IErrorHandling;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.pmode.IProtocol;
+import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
+import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.tokens.UsernameToken;
 import org.holodeckb2b.security.tokens.X509Certificate;
@@ -91,18 +91,18 @@ public class PModeFinder {
      * <p>The ebMS specifications do not describe or recommend how the P-Mode for a user message should be determined,
      * see <a href="https://issues.oasis-open.org/browse/EBXMLMSG-48?jql=project%20%3D%20EBXMLMSG">issue 48 in the TC 
      * issue tracker</a>. In the issue two suggestion for matching the P-Mode are given.
-     * <p>Based on these we compare the meta-data from the message with all P-Modes and return the best matching P-Mode. 
-     * The following table shows the information that is used for matching and their importance (expressed as a weight). 
-     * The match of a P-Mode is the sum of the weights for the elements that are equal to the corresponding P-Mode 
-     * parameter.
-     * <p><table border="1">
+     * <p>Based on these we CompareUtils the meta-data from the message with all P-Modes and return the best matching P-Mode. 
+ The following table shows the information that is used for matching and their importance (expressed as a weight). 
+ The match of a P-Mode is the sum of the weights for the elements that are equal to the corresponding P-Mode 
+ parameter.
+ <p><table border="1">
      * <tr><th>Element</th><th>Weight</th></tr>
      * <tr><td>PMode id</td><td>37</td></tr>
      * <tr><td>From Party Id's</td><td>7</td></tr>
      * <tr><td>From.Role</td><td>2</td></tr>
      * <tr><td>To Party Id's</td><td>7</td></tr>
      * <tr><td>To.Role</td><td>2</td></tr>
-     * <tr><td>Service</td><td>5</td></tr>
+     * <tr><td>areEqual</td><td>5</td></tr>
      * <tr><td>Action</td><td>5</td></tr>
      * <tr><td>Agreement ref</td><td>1</td></tr>
      * <tr><td>MPC</td><td>1</td></tr>
@@ -114,7 +114,7 @@ public class PModeFinder {
      *                  <code>null</code> if no P-Mode could be found for the user message message unit.
      */
     public static IPMode forReceivedUserMessage(IUserMessage mu) {
-        IPModeSet pmodes = HolodeckB2BCore.getPModeSet();
+        IPModeSet pmodes = HolodeckB2BCoreInterface.getPModeSet();
         IPMode    hPMode = null;
         int       hValue = 0;
         
@@ -122,6 +122,13 @@ public class PModeFinder {
             return null;
         
         for (IPMode p : pmodes.getAll()) {
+            // Ignore this P-Mode if it is configured for sending
+            if (p.getMepBinding().equals(EbMSConstants.ONE_WAY_PUSH) 
+                && p.getLeg(ILeg.Label.REQUEST).getProtocol() != null 
+                && !Utils.isNullOrEmpty(p.getLeg(ILeg.Label.REQUEST).getProtocol().getAddress())) {
+                continue;
+            }
+
             int cValue = 0;
             // P-Mode id and agreement info are contained in optional element
             IAgreementReference agreementRef = mu.getCollaborationInfo().getAgreement();
@@ -139,9 +146,9 @@ public class PModeFinder {
                 // Check agreement info
                 IAgreement agreementPMode = p.getAgreement();
                 if (agreementPMode != null) {
-                    if (agreementRef.getName().equals(agreementPMode.getName())) {
+                    if (Utils.compareStrings(agreementRef.getName(), agreementPMode.getName()) == 0) {
                         // names equal, but for match also types must be equal
-                        int i = compareStrings(agreementRef.getType(), agreementPMode.getType());
+                        int i = Utils.compareStrings(agreementRef.getType(), agreementPMode.getType());
                         if (i == -1 || i == 0)
                             cValue += MATCH_WEIGHTS.get(PARAMETERS.AGREEMENT);
                         else 
@@ -154,7 +161,7 @@ public class PModeFinder {
             // Check trading partner info
             ITradingPartner from = mu.getSender(), to = mu.getReceiver(); 
             ITradingPartner fromPMode = null, toPMode = null;
-            if (p.getMepBinding().equals(Constants.ONE_WAY_PUSH)) {
+            if (p.getMepBinding().equals(EbMSConstants.ONE_WAY_PUSH)) {
                 fromPMode = p.getInitiator(); toPMode = p.getResponder(); 
             } else {
                 fromPMode = p.getResponder(); toPMode = p.getInitiator();
@@ -167,7 +174,7 @@ public class PModeFinder {
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.TO_ROLE);
                 else
                     continue; // mis-match on To party role
-                if (compare.PartyIds(to.getPartyIds(), toPMode.getPartyIds()))
+                if (CompareUtils.areEqual(to.getPartyIds(), toPMode.getPartyIds()))
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.TO);
                 else
                     continue; // mis-match on To party id('s)
@@ -180,7 +187,7 @@ public class PModeFinder {
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.FROM_ROLE);
                 else
                     continue; // mis-match on From party role
-                if (compare.PartyIds(from.getPartyIds(), fromPMode.getPartyIds()))
+                if (CompareUtils.areEqual(from.getPartyIds(), fromPMode.getPartyIds()))
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.FROM);
                 else
                     continue;  // mis-match on From party id('s)
@@ -193,12 +200,12 @@ public class PModeFinder {
             if (flow != null) {
                 IBusinessInfo pmBI = flow.getBusinessInfo();
                 if (pmBI != null) {
-                    // Check Service
+                    // Check areEqual
                     IService svcPMode = pmBI.getService();
                     if (svcPMode != null) {
                         IService svc = mu.getCollaborationInfo().getService();
                         if (svc.getName().equals(svcPMode.getName())) {
-                            int i = compareStrings(svc.getType(), svcPMode.getType());
+                            int i = Utils.compareStrings(svc.getType(), svcPMode.getType());
                             if (i == -1 || i == 0)
                                 cValue += MATCH_WEIGHTS.get(PARAMETERS.SERVICE);
                             else 
@@ -215,9 +222,9 @@ public class PModeFinder {
                     // Check MPC, should handle default MPC when none is given
                     String mpc = mu.getMPC(); String mpcPMode = pmBI.getMpc();
                     if (mpc == null || mpc.isEmpty())
-                        mpc = Constants.DEFAULT_MPC;
+                        mpc = EbMSConstants.DEFAULT_MPC;
                     if (mpcPMode == null || mpcPMode.isEmpty())
-                        mpcPMode = Constants.DEFAULT_MPC;
+                        mpcPMode = EbMSConstants.DEFAULT_MPC;
                     if (mpc.equalsIgnoreCase(mpcPMode))
                         cValue += MATCH_WEIGHTS.get(PARAMETERS.MPC);
                     else 
@@ -248,11 +255,176 @@ public class PModeFinder {
     public static IPMode forSubmitted(IUserMessage mu) {
         // For now the only method to find the P-Mode is by specifying it directly
         try {
-            return HolodeckB2BCore.getPModeSet().get(mu.getCollaborationInfo().getAgreement().getPModeId());
+            return HolodeckB2BCoreInterface.getPModeSet().get(mu.getCollaborationInfo().getAgreement().getPModeId());
         } catch (NullPointerException npe) {
             return null;
         }
     }
+
+    /**
+     * Finds the P-Mode for a submitted user message message unit.
+     * <p>The submit operation is defined as abstract in the ebMS specifications so there is not standard way for 
+     * determination of the P-Mode for a submitted user message. In this method a matching algorithm similar to the one
+     * used to find the P-Mode for received user message is used. 
+     * <p>It uses the same meta-data elements and weights to find the P-Mode. The difference with the algorithm for
+     * received messages is that a mismatch caused by a <code>null</code> value for either the meta-data or P-Mode 
+     * element does not cause a complete mismatch between meta-data and P-Mode. This is because it is common that only 
+     * one provides a value for the element.
+     * 
+     * @param mu        The user message message unit to find the P-Mode for
+     * @return          The P-Mode for the message unit if the message unit can be matched to a P-Mode,
+     *                  <code>null</code> if no P-Mode could be found for the user message message unit.
+     * @see #forReceivedUserMessage(org.holodeckb2b.common.messagemodel.IUserMessage) 
+     */
+    public static IPMode forSubmittedUserMessage(IUserMessage mu) {
+        IPModeSet pmodes = HolodeckB2BCoreInterface.getPModeSet();
+        IPMode    hPMode = null;
+        int       hValue = 0;
+        
+        if (pmodes == null)
+            return null;
+        
+        for (IPMode p : pmodes.getAll()) {
+            int cValue = 0;
+            
+            // First check if the meta-data contains a P-Mode id
+            ICollaborationInfo  collaborationInfo = mu.getCollaborationInfo();
+            IAgreementReference agreementRef = collaborationInfo != null ? collaborationInfo.getAgreement() : null;
+            
+            if (agreementRef != null) {
+                String pid = agreementRef.getPModeId();
+                // If a P-Mode id is specified in submission meta-data it must match against P-Mode, otherwise no match
+                if (!Utils.isNullOrEmpty(pid)) {
+                    if (pid.equals(p.getId()))
+                        cValue = MATCH_WEIGHTS.get(PARAMETERS.ID);
+                    else
+                        continue; // mis-match on P-Mode id
+                }                    
+                // Check agreement info
+                IAgreement agreementPMode = p.getAgreement();
+                if (agreementPMode != null) {
+                    int i = Utils.compareStrings(agreementRef.getName(), agreementPMode.getName());                    
+                    if (i == 0) {
+                        // names equal, but for match also types must be equal
+                        Utils.compareStrings(agreementRef.getType(), agreementPMode.getType());
+                        if (i == -1 || i == 0)
+                            cValue += MATCH_WEIGHTS.get(PARAMETERS.AGREEMENT);
+                        else if (i == -2)
+                            continue; // mis-match on agreement type
+                    } else if (i == -2)
+                        continue; // mis-match on agreement name
+                }
+            }
+            
+            // Check trading partner info
+            ITradingPartner from = mu.getSender(), to = mu.getReceiver(); 
+            ITradingPartner fromPMode = null, toPMode = null;            
+            if (p.getMepBinding().startsWith(EbMSConstants.ONE_WAY_PUSH)) {
+                if (p.getMep().equals(EbMSConstants.ONE_WAY_MEP) || Utils.isNullOrEmpty(mu.getRefToMessageId())) {
+                    // One-Way P-Mode or message on the first leg of two-way
+                    fromPMode = p.getInitiator(); toPMode = p.getResponder(); 
+                } else {
+                    // Submitted message is reply in a two-Way P-Mode that started with a Push
+                    fromPMode = p.getResponder(); toPMode = p.getInitiator();
+                }
+            } else {
+                if (p.getMep().equals(EbMSConstants.ONE_WAY_MEP) || Utils.isNullOrEmpty(mu.getRefToMessageId())) {
+                    // Message is pulled on One-Way P-Mode or on first leg of Two-Way P-Mode 
+                    fromPMode = p.getResponder(); toPMode = p.getInitiator();
+                } else { 
+                    // Submitted message is reply in a two-Way P-Mode that started with a Pull
+                    fromPMode = p.getInitiator(); toPMode = p.getResponder();
+                }
+            }
+            
+            // Check To info
+            if (to != null && toPMode != null) {
+                int c = Utils.compareStrings(to.getRole(), toPMode.getRole());
+                if (-1 == c || c == 0) 
+                    cValue += MATCH_WEIGHTS.get(PARAMETERS.TO_ROLE);
+                else if (c == -2)
+                    continue; // mis-match on To party role
+                if (!Utils.isNullOrEmpty(to.getPartyIds()) && !Utils.isNullOrEmpty(toPMode.getPartyIds())) {                    
+                    if (CompareUtils.areEqual(to.getPartyIds(), toPMode.getPartyIds()))
+                        cValue += MATCH_WEIGHTS.get(PARAMETERS.TO);
+                    else
+                        continue; // mis-match on To party id('s)
+                }
+            }            
+            // Check From info
+            if (from != null && fromPMode != null) {
+                int c = Utils.compareStrings(from.getRole(), fromPMode.getRole());
+                if (-1 == c || c == 0) 
+                    cValue += MATCH_WEIGHTS.get(PARAMETERS.FROM_ROLE);
+                else if (c == -2)
+                    continue; // mis-match on To party role
+                if (!Utils.isNullOrEmpty(from.getPartyIds()) && !Utils.isNullOrEmpty(fromPMode.getPartyIds())) {                    
+                    if (CompareUtils.areEqual(from.getPartyIds(), fromPMode.getPartyIds()))
+                        cValue += MATCH_WEIGHTS.get(PARAMETERS.FROM);
+                    else
+                        continue; // mis-match on From party id('s)
+                }
+            }
+            
+            // Next info items are defined per Leg basis, so check in which Leg this message is sent.
+            ILeg leg = null;
+            if (p.getMep().equals(EbMSConstants.ONE_WAY_MEP) || Utils.isNullOrEmpty(mu.getRefToMessageId()))
+                leg = p.getLeg(ILeg.Label.REQUEST);
+            else 
+                leg = p.getLeg(ILeg.Label.REPLY);
+            
+            // The meta-data on a User Message message unit is contained in the UserMessage Flow of the leg
+            IUserMessageFlow    flow = leg.getUserMessageFlow();            
+            if (flow != null) {
+                IBusinessInfo pmBI = flow.getBusinessInfo();
+                if (pmBI != null) {
+                    // Check areEqual and Action (if given in submitted meta-data
+                    if (collaborationInfo != null) {
+                        IService svc = collaborationInfo.getService();
+                        IService svcPMode = pmBI.getService();
+                        if (svc != null && svcPMode != null) {
+                            int c = Utils.compareStrings(svc.getName(), svcPMode.getName());
+                            if (-1 == c || c == 0) {
+                                // The areEqual name matches, but for complete match also the type must match
+                                c = Utils.compareStrings(svc.getType(), svcPMode.getType());
+                                if (-1 == c || c == 0)
+                                    cValue += MATCH_WEIGHTS.get(PARAMETERS.SERVICE);
+                                else 
+                                    continue; // mis-match on service type
+                            } else if (c == -2)
+                                continue; // mis-match on service name
+                        }                    
+                        // Check Action
+                        int c = Utils.compareStrings(collaborationInfo.getAction(), pmBI.getAction());
+                        if (-1 == c || c == 0)
+                            cValue += MATCH_WEIGHTS.get(PARAMETERS.ACTION);
+                        else if (c == -2)
+                            continue; // mis-match on action
+                    }
+                    
+                    // Check MPC, should handle default MPC when none is given
+                    String mpc = mu.getMPC(); String pmodeMPC = pmBI.getMpc();
+                    if (Utils.isNullOrEmpty(mpc))
+                        mpc = EbMSConstants.DEFAULT_MPC;
+                    if (Utils.isNullOrEmpty(pmodeMPC))
+                        pmodeMPC = EbMSConstants.DEFAULT_MPC;
+                    if (mpc.equalsIgnoreCase(pmodeMPC))
+                        cValue += MATCH_WEIGHTS.get(PARAMETERS.MPC);
+                    else 
+                        continue; // mis-match on MPC
+                }                
+            }
+            
+            // Does this P-Mode better match to the message meta data than the current highest match?
+            if (cValue > hValue) {
+                // Yes, it does, set it as new best match
+                hValue = cValue;
+                hPMode = p;                
+            }
+        }        
+        
+        return hPMode;      
+    }    
     
     /**
      * Gets the list of P-Modes for which Holodeck B2B is the responder in a pull operation for the given MPC and 
@@ -266,10 +438,10 @@ public class PModeFinder {
     public static Collection<IPMode> findForPulling(Map<String, IAuthenticationInfo> authInfo, String mpc) {
         ArrayList<IPMode> pmodesForPulling = new ArrayList<IPMode>();
         
-        for(IPMode p : HolodeckB2BCore.getPModeSet().getAll()) {
+        for(IPMode p : HolodeckB2BCoreInterface.getPModeSet().getAll()) {
             // Check if this P-Mode uses pulling with Holodeck B2B being the responder
             ILeg leg = p.getLegs().iterator().next();
-            if (Constants.ONE_WAY_PULL.equalsIgnoreCase(p.getMepBinding())
+            if (EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(p.getMepBinding())
                && ( leg.getProtocol() == null || leg.getProtocol().getAddress() == null )
                ) { 
                 // Leg uses pulling and Holodeck B2B is responder, check if given MPC matches P-Mode MPC defined for UM
@@ -435,7 +607,7 @@ public class PModeFinder {
     public static Collection<IPMode> getPModesWithErrorsTo(String url) {
         Collection<IPMode>  result = new ArrayList<IPMode>();
         
-        for(IPMode p : HolodeckB2BCore.getPModeSet().getAll()) {
+        for(IPMode p : HolodeckB2BCoreInterface.getPModeSet().getAll()) {
             // Get all relevent P-Mode info
             ILeg leg = p.getLegs().iterator().next();
             IProtocol protocolInfo = leg.getProtocol();
@@ -465,7 +637,7 @@ public class PModeFinder {
     public static Collection<IPMode> getPModesWithReceiptsTo(String url) {
         Collection<IPMode>  result = new ArrayList<IPMode>();
         
-        for(IPMode p : HolodeckB2BCore.getPModeSet().getAll()) {
+        for(IPMode p : HolodeckB2BCoreInterface.getPModeSet().getAll()) {
             // Get all relevent P-Mode info
             ILeg leg = p.getLegs().iterator().next();
             IProtocol protocolInfo = leg.getProtocol();

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.ebms3.constants;
 
 import javax.xml.namespace.QName;
@@ -22,7 +21,7 @@ import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.WSSecurityEngineResult;
 
 /**
- * Constants used in the security related processing of the messages. 
+ * EbMSConstants used in the security related processing of the messages. 
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */

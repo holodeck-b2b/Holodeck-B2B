@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,18 +19,17 @@ package org.holodeckb2b.security.handlers;
 import java.util.Properties;
 import org.apache.axis2.context.MessageContext;
 import org.apache.wss4j.dom.handler.WSHandlerConstants;
-import org.holodeckb2b.common.config.Config;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
-import org.holodeckb2b.common.pmode.ITradingPartnerConfiguration;
-import org.holodeckb2b.common.security.IEncryptionConfiguration;
-import org.holodeckb2b.common.security.ISecurityConfiguration;
-import org.holodeckb2b.common.security.ISigningConfiguration;
-import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
 import org.holodeckb2b.security.callbackhandlers.PasswordCallbackHandler;
 import org.holodeckb2b.security.util.SecurityUtils;
 
@@ -74,13 +73,13 @@ public class SetupWSSProcessing extends BaseHandler {
         // Revocation check
         log.debug("Set revocation check for certifcates to default setting");
         mc.setProperty(WSHandlerConstants.ENABLE_REVOCATION, 
-                                                        Boolean.toString(Config.shouldCheckCertificateRevocation()));        
+                     Boolean.toString(HolodeckB2BCoreInterface.getConfiguration().shouldCheckCertificateRevocation()));        
         // Replay detection (disabled in this version)
         mc.setProperty(WSHandlerConstants.ENABLE_NONCE_CACHE, "false");
         mc.setProperty(WSHandlerConstants.ENABLE_TIMESTAMP_CACHE, "false");
         
         log.debug("Get the primary message unit for this message to check specific setting");
-        MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+        MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
         if (primaryMU == null)
             // No primary message => this is probably an empty response
             return InvocationResponse.CONTINUE;
@@ -89,7 +88,7 @@ public class SetupWSSProcessing extends BaseHandler {
                                                                         + " with msg-id=" + primaryMU.getMessageId());
         
         // 2. Get the security settings
-        IPMode pmode = HolodeckB2BCore.getPModeSet().get(primaryMU.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.getPMode());
         
         // It is possible that we can not find a PMode when the primary message unit is a signal. In that case there
         // is no special configuration needed
@@ -155,8 +154,9 @@ public class SetupWSSProcessing extends BaseHandler {
             PasswordCallbackHandler pwdCBHandler = new PasswordCallbackHandler();
             mc.setProperty(WSHandlerConstants.PW_CALLBACK_REF, pwdCBHandler);
         
-            // The password to access the certificate in the keystore
-            pwdCBHandler.addUser(encConfig.getKeystoreAlias(), encConfig.getCertificatePassword());
+            // The password to access the certificate in the keystore, alias converted to lower case because JKS 
+            // aliasses are case insensitive and in lower case
+            pwdCBHandler.addUser(encConfig.getKeystoreAlias().toLowerCase(), encConfig.getCertificatePassword());
         } else {
             log.debug("Encryption configuration is NULL! No access to private key.");
         }

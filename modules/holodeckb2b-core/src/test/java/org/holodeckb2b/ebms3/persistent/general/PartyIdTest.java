@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.ebms3.persistent.general;
 
-import org.holodeckb2b.ebms3.persistent.general.PartyId;
+import org.holodeckb2b.ebms3.persistency.entities.PartyId;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.holodeckb2b.ebms3.persistent.wrappers.EPartyId;

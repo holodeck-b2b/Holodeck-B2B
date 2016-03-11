@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,27 +16,31 @@
  */
 package org.holodeckb2b.ebms3.submit.mmd;
 
-import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
-import org.holodeckb2b.common.general.IDescription;
-import org.holodeckb2b.common.general.IPartyId;
-import org.holodeckb2b.common.general.IProperty;
-import org.holodeckb2b.common.general.ISchemaReference;
-import org.holodeckb2b.common.general.IService;
-import org.holodeckb2b.common.general.ITradingPartner;
-import org.holodeckb2b.common.messagemodel.IAgreementReference;
-import org.holodeckb2b.common.messagemodel.ICollaborationInfo;
-import org.holodeckb2b.common.messagemodel.IPayload;
-import org.holodeckb2b.common.messagemodel.IUserMessage;
-import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.persistent.message.Payload;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
+import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
+import org.holodeckb2b.ebms3.persistency.entities.Payload;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.interfaces.general.IDescription;
+import org.holodeckb2b.interfaces.general.IPartyId;
+import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.general.ISchemaReference;
+import org.holodeckb2b.interfaces.general.IService;
+import org.holodeckb2b.interfaces.general.ITradingPartner;
+import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
+import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.junit.After;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -95,8 +99,8 @@ public class MessageMetaDataTest {
      * to use.
      */
     @Test
-    public void test1_CreateFromFile() throws Exception {
-        String path = this.getClass().getClassLoader().getResource("mmdtest/mmdtest1.xml").getPath();
+    public void test_Minimal() throws Exception {
+        String path = this.getClass().getClassLoader().getResource("mmdtest/minimal.xml").getPath();
         File   f = new File(path);
         
         try {
@@ -106,9 +110,7 @@ public class MessageMetaDataTest {
             assertNotNull(mmd.getCollaborationInfo());
             assertEquals("q3KuGFmr", mmd.getCollaborationInfo().getConversationId());
             
-            assertNotNull(mmd.getPayloads());
-            assertEquals(2, mmd.getPayloads().size());
-            assertEquals("http://JUsQVnjp/", mmd.getPayloads().iterator().next().getContentLocation());
+            assertNull(mmd.getPayloads());
             
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -120,7 +122,7 @@ public class MessageMetaDataTest {
      * Test of createFromFile method with full MMD content.
      */
     @Test
-    public void test2_CreateFromFile() throws Exception {
+    public void test_CreateFromFile() throws Exception {
         String path = this.getClass().getClassLoader().getResource("mmdtest/mmdtest2.xml").getPath();
         File   f = new File(path);
         
@@ -218,6 +220,42 @@ public class MessageMetaDataTest {
             fail();
         }
     }
+
+        /**
+     * Test of createFromFile method with full MMD content.
+     */
+    @Test
+    public void test_DeleteIndicator() throws Exception {
+        try {
+            String path = this.getClass().getClassLoader().getResource("mmdtest/mmdtest2.xml").getPath();
+            File   f = new File(path);
+            MessageMetaData mmd = MessageMetaData.createFromFile(f);            
+            assertNotNull(mmd);
+            assertEquals(org.holodeckb2b.common.util.Utils.fromXMLDateTime("2014-08-14T15:50:00Z"), mmd.getTimestamp());
+            assertEquals("H8MQXJ", mmd.getMessageId());
+            assertEquals("UGA08vL5hsdNfC-sGoV2RD", mmd.getRefToMessageId());
+
+            assertFalse(mmd.shouldDeleteFilesAfterSubmit());                    
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
+        }
+
+        try {
+            String path = this.getClass().getClassLoader().getResource("mmdtest/mmdtest3.xml").getPath();
+            File   f = new File(path);
+            MessageMetaData mmd = MessageMetaData.createFromFile(f);            
+            assertNotNull(mmd);
+            assertEquals(org.holodeckb2b.common.util.Utils.fromXMLDateTime("2015-12-21T15:50:00Z"), mmd.getTimestamp());
+            assertEquals("n-soaDLzuliyRmzSlBe7", mmd.getMessageId());
+            assertNull(mmd.getRefToMessageId());
+
+            assertTrue(mmd.shouldDeleteFilesAfterSubmit());                    
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
+        }
+    }
     
     /**
      * Test of constructor to create a MMD document for the user message described by 
@@ -225,30 +263,30 @@ public class MessageMetaDataTest {
      * For this test we use a {@see UserMessage} object from the persistency package. 
      */
     @Test
-    public void test3_CreateFromObject() {
+    public void test_CreateFromObject() {
         UserMessage um = new UserMessage();
         
         um.setMPC(T_UM1_MPC);
         um.setMessageId(T_UM1_MESSAGEID);
         um.setRefToMessageId(T_UM1_REFTOMSGID);
         
-        org.holodeckb2b.ebms3.persistent.message.CollaborationInfo ci = new org.holodeckb2b.ebms3.persistent.message.CollaborationInfo();
+        org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo ci = new org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo();
         ci.setAction(T_UM1_ACTION);
         ci.setConversationId(T_UM1_CONVID);
-        org.holodeckb2b.ebms3.persistent.general.Service svc = new org.holodeckb2b.ebms3.persistent.general.Service(T_UM1_SERVICE);
+        org.holodeckb2b.ebms3.persistency.entities.Service svc = new org.holodeckb2b.ebms3.persistency.entities.Service(T_UM1_SERVICE);
         ci.setService(svc);
-        org.holodeckb2b.ebms3.persistent.message.AgreementReference agreeRef = new org.holodeckb2b.ebms3.persistent.message.AgreementReference(T_UM1_PMODEID);
+        org.holodeckb2b.ebms3.persistency.entities.AgreementReference agreeRef = new org.holodeckb2b.ebms3.persistency.entities.AgreementReference(T_UM1_PMODEID);
         ci.setAgreement(agreeRef);
         um.setCollaborationInfo(ci);
         
-        um.addMessageProperty(new org.holodeckb2b.ebms3.persistent.general.Property(T_UM1_MSGPROP1_NAME, T_UM1_MSGPROP1_VALUE, T_UM1_MSGPROP1_TYPE));
-        um.addMessageProperty(new org.holodeckb2b.ebms3.persistent.general.Property(T_UM1_MSGPROP2_NAME, T_UM1_MSGPROP2_VALUE));
+        um.addMessageProperty(new org.holodeckb2b.ebms3.persistency.entities.Property(T_UM1_MSGPROP1_NAME, T_UM1_MSGPROP1_VALUE, T_UM1_MSGPROP1_TYPE));
+        um.addMessageProperty(new org.holodeckb2b.ebms3.persistency.entities.Property(T_UM1_MSGPROP2_NAME, T_UM1_MSGPROP2_VALUE));
         
         Payload pl = new Payload();
         pl.setContainment(T_UM1_PAYLD1_CONTAINMENT);
         pl.setContentLocation(T_UM1_PAYLD1_LOC);
-        pl.addProperty(new org.holodeckb2b.ebms3.persistent.general.Property(T_UM1_PAYLD1_PROP_NAME, T_UM1_PAYLD1_PROP_VALUE));
-        pl.setSchemaReference(new org.holodeckb2b.ebms3.persistent.general.SchemaReference(T_UM1_PAYLD1_SCHEMA_LOC, T_UM1_PAYLD1_SCHEMA_NS, T_UM1_PAYLD1_SCHEMA_VER));
+        pl.addProperty(new org.holodeckb2b.ebms3.persistency.entities.Property(T_UM1_PAYLD1_PROP_NAME, T_UM1_PAYLD1_PROP_VALUE));
+        pl.setSchemaReference(new org.holodeckb2b.ebms3.persistency.entities.SchemaReference(T_UM1_PAYLD1_SCHEMA_LOC, T_UM1_PAYLD1_SCHEMA_NS, T_UM1_PAYLD1_SCHEMA_VER));
         um.addPayload(pl);
         
         pl = new Payload();
@@ -262,59 +300,98 @@ public class MessageMetaDataTest {
     
     
     @Test
-    public void test4_WriteToFile() {
+    public void test_WriteToFile() {
         UserMessage um = new UserMessage();
         
         um.setMPC(T_UM1_MPC);
         um.setMessageId(T_UM1_MESSAGEID);
         um.setRefToMessageId(T_UM1_REFTOMSGID);
         
-        org.holodeckb2b.ebms3.persistent.message.CollaborationInfo ci = new org.holodeckb2b.ebms3.persistent.message.CollaborationInfo();
+        org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo ci = new org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo();
         ci.setAction(T_UM1_ACTION);
         ci.setConversationId(T_UM1_CONVID);
-        org.holodeckb2b.ebms3.persistent.general.Service svc = new org.holodeckb2b.ebms3.persistent.general.Service(T_UM1_SERVICE);
+        org.holodeckb2b.ebms3.persistency.entities.Service svc = new org.holodeckb2b.ebms3.persistency.entities.Service(T_UM1_SERVICE);
         ci.setService(svc);
-        org.holodeckb2b.ebms3.persistent.message.AgreementReference agreeRef = new org.holodeckb2b.ebms3.persistent.message.AgreementReference(T_UM1_PMODEID);
+        org.holodeckb2b.ebms3.persistency.entities.AgreementReference agreeRef = new org.holodeckb2b.ebms3.persistency.entities.AgreementReference(T_UM1_PMODEID);
         ci.setAgreement(agreeRef);
         um.setCollaborationInfo(ci);
         
-        um.addMessageProperty(new org.holodeckb2b.ebms3.persistent.general.Property(T_UM1_MSGPROP1_NAME, T_UM1_MSGPROP1_VALUE, T_UM1_MSGPROP1_TYPE));
-        um.addMessageProperty(new org.holodeckb2b.ebms3.persistent.general.Property(T_UM1_MSGPROP2_NAME, T_UM1_MSGPROP2_VALUE));
-        
-        Payload pl = new Payload();
-        pl.setContainment(T_UM1_PAYLD1_CONTAINMENT);
-        pl.setContentLocation(T_UM1_PAYLD1_LOC);
-        pl.addProperty(new org.holodeckb2b.ebms3.persistent.general.Property(T_UM1_PAYLD1_PROP_NAME, T_UM1_PAYLD1_PROP_VALUE));
-        pl.setSchemaReference(new org.holodeckb2b.ebms3.persistent.general.SchemaReference(T_UM1_PAYLD1_SCHEMA_LOC, T_UM1_PAYLD1_SCHEMA_NS, T_UM1_PAYLD1_SCHEMA_VER));
-        um.addPayload(pl);
-        
-        pl = new Payload();
-        pl.setContainment(T_UM1_PAYLD2_CONTAINMENT);
-        pl.setContentLocation(T_UM1_PAYLD2_LOC);
-        
         MessageMetaData mmd = new MessageMetaData(um);
-        
         String path = this.getClass().getClassLoader().getResource("mmdtest").getPath();
         File   f = new File(path+"/mmd_writetest.xml");
+        
         if (f.exists())
             f.delete();
         
         try {
             mmd.writeToFile(f);
         } catch (Exception e) {
-            fail("Writing MMD failed: " + e.getMessage());
+            fail("Writing MMD without payload info failed: " + e.getMessage());
         }
         MessageMetaData mmd2 = null;
         try {
             mmd2 = MessageMetaData.createFromFile(f);
         } catch (Exception e) {
-            fail("Reading saved data failed: " + e.getMessage());
+            fail("Reading saved data (no payloads) failed: " + e.getMessage());
         }
 
         if (mmd2 != null)
             assertEqualUM(mmd, mmd2);
         else
-            fail("MMD not read!");
+            fail("MMD without payloads not read!");
+        
+        um.addMessageProperty(new org.holodeckb2b.ebms3.persistency.entities.Property(T_UM1_MSGPROP1_NAME, T_UM1_MSGPROP1_VALUE, T_UM1_MSGPROP1_TYPE));
+        um.addMessageProperty(new org.holodeckb2b.ebms3.persistency.entities.Property(T_UM1_MSGPROP2_NAME, T_UM1_MSGPROP2_VALUE));
+        
+        Payload pl = new Payload();
+        pl.setContainment(T_UM1_PAYLD1_CONTAINMENT);
+        pl.setContentLocation(T_UM1_PAYLD1_LOC);
+        pl.addProperty(new org.holodeckb2b.ebms3.persistency.entities.Property(T_UM1_PAYLD1_PROP_NAME, T_UM1_PAYLD1_PROP_VALUE));
+        pl.setSchemaReference(new org.holodeckb2b.ebms3.persistency.entities.SchemaReference(T_UM1_PAYLD1_SCHEMA_LOC, T_UM1_PAYLD1_SCHEMA_NS, T_UM1_PAYLD1_SCHEMA_VER));
+        um.addPayload(pl);
+        
+        pl = new Payload();
+        pl.setContainment(T_UM1_PAYLD2_CONTAINMENT);
+        pl.setContentLocation(T_UM1_PAYLD2_LOC);
+        
+        mmd = new MessageMetaData(um);
+        
+        if (f.exists())
+            f.delete();
+        
+        try {
+            mmd.writeToFile(f);
+        } catch (Exception e) {
+            fail("Writing MMD with payload ino failed: " + e.getMessage());
+        }
+        
+        mmd2 = null;
+        try {
+            mmd2 = MessageMetaData.createFromFile(f);
+        } catch (Exception e) {
+            fail("Reading saved data (with payload info) failed: " + e.getMessage());
+        }
+
+        if (mmd2 != null)
+            assertEqualUM(mmd, mmd2);
+        else
+            fail("MMD with payload info not read!");
+        
+        mmd.setDeleteFilesAfterSubmit(true);
+        f.delete();
+        try {
+            mmd.writeToFile(f);
+        } catch (Exception e) {
+            fail("Writing MMD with delete flag set failed: " + e.getMessage());
+        }
+        try {
+            mmd2 = MessageMetaData.createFromFile(f);
+        } catch (Exception e) {
+            fail("Reading saved data (with delete flag set) failed: " + e.getMessage());
+        }     
+        
+        assertNotNull(mmd2);
+        assertTrue(mmd2.shouldDeleteFilesAfterSubmit());
     }
     
     

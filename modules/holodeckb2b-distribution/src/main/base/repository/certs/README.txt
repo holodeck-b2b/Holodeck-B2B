@@ -1,4 +1,4 @@
-* Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
+* Copyright (C) 2016 The Holodeck B2B Team, Sander Fieten
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -17,10 +17,10 @@
 1. Contents of this directory
 =============================
 
-This directory is used to store the Java keystore files that hold the 
-certificates that are used for signing and encrypting messages.
+This directory is used by default to store the Java keystore files that 
+hold the certificates that are used for signing and encrypting messages.
 
-It should contain two keystores:
+It contains two keystores:
 
 1) "publickeys.jks" holding the public keys. These are used to validate
    the signature of a received message and to encrypt sent messages.
@@ -28,13 +28,36 @@ It should contain two keystores:
 2) "privatekeys.jks" holding the private keys. These are used to sign
    sent messages and decrypt received messages.
 
-The delivery package does not include keystores, you must create them
-when you start using the security features. The keystores are 
-automatically created when you add the first certificate (see below).
+The distribution package by default includes empty keystores, with simple
+passwords "secret" for the private one and "nosecrets" for the public
+one. It is HIGHLY RECOMMENDED to change these passwords to more safer
+ones, see below how to configure Holodeck B2B for the new passwords.
 
+2. Configuring Holodeck B2B
+===========================
 
-2. Adding certificates
-======================
+To give Holodeck B2B access to the keystores you need to configure the 
+keystore passwords in the Holodeck B2B configuration file which is found 
+in «Holodeck B2B base dir»/conf/holodeckb2b.xml
+Set "PrivateKeyStorePassword" and "PublicKeyStorePassword" parameters to
+the passwords of the respective keystores. 
+
+NOTE: If you want the change the passwords for the default keystores you
+must also change the password on the keystore files by executing the
+following command: 
+    keytool -storepasswd -keystore «path to keystore»
+
+Also the location where Holodeck B2B should look for the keystores can be 
+specified by setting the "PrivateKeyStorePath" and "PublicKeyStorePath"
+parameters. 
+
+3. Adding certificates and private keys
+=======================================
+
+Each certificate or private key that is added to a keystore is assigned an
+id, called the alias. This alias is used in the P-Mode to identify the 
+certificate / key that must be used for processing the message. It is 
+RECOMMENDED to use descriptive aliases for easy identification.
 
 To add a X.509v3 certificate holding the public key of a trading
 partner to the public keystore use the following command:
@@ -61,27 +84,16 @@ NOTE: Use the following command to list the certificates in the PKCS#12
 file and show their names / aliases:
 keytool -list -v -storetype pkcs12 -keystore «path to certificate file»
 
-
-3. Configuring Holodeck B2B
-===========================
-
-To give Holodeck B2B access to the keystore you need to configure 
-the keystore passwords in the "module.xml" which is found in 
-«Holodeck B2B base dir»/repository/modules/holodeckb2b-core/META-INF
-Set the element content of the <parameter name="PrivateKeyStorePassword"/> 
-and <parameter name="PublicKeyStorePassword"/> to the passwords of the 
-keystores. 
-
-
 4. Examples
 ===========
 
 The examples/certs directory contains two sample keystores which contain
 the certificates that are used in the example P-Modes (contained in 
-examples/pmodes). Their passwords are "secrets" for the private keystore 
-and "nosecrets" for the public one.
+examples/pmodes). Their passwords are the same as the default keystores.
+You can therefor just overwrite the default keystores with the example
+keystores.
 
-When using the private key certificates in a P-Mode the password for
-a certificate is "Example" + 'A' | 'B' | 'C' | 'D'
+When using the private key in a P-Mode the password for is 
+"Example" + 'A' | 'B' | 'C' | 'D'
 
 

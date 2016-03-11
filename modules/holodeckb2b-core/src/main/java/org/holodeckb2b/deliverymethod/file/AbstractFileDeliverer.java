@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.deliverymethod.file;
 
 import java.io.File;
@@ -26,14 +25,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.delivery.IMessageDeliverer;
-import org.holodeckb2b.common.delivery.MessageDeliveryException;
-import org.holodeckb2b.common.messagemodel.IMessageUnit;
-import org.holodeckb2b.common.messagemodel.IPayload;
-import org.holodeckb2b.common.messagemodel.IUserMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.mmd.xml.PartInfo;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
  * Is an abstract {@link IMessageDeliverer} implementation that implements the delivery of user messages by writing the
@@ -44,7 +44,7 @@ import org.holodeckb2b.ebms3.mmd.xml.PartInfo;
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-abstract class AbstractFileDeliverer implements IMessageDeliverer {
+public abstract class AbstractFileDeliverer implements IMessageDeliverer {
 
     /**
      * The where the files should be stored
@@ -61,16 +61,16 @@ abstract class AbstractFileDeliverer implements IMessageDeliverer {
      * 
      * @param dir   The directory where file should be written to.
      */
-    AbstractFileDeliverer(String dir) {
+    public AbstractFileDeliverer(String dir) {
         this.directory = dir;
     }
     
     @Override
     public void deliver(IMessageUnit rcvdMsgUnit) throws MessageDeliveryException {
         if (rcvdMsgUnit instanceof IUserMessage) 
-            deliverUserMessage(rcvdMsgUnit);
+            deliverUserMessage((IUserMessage) rcvdMsgUnit);
         else // message unit is a signal
-            deliverSignalMessage(rcvdMsgUnit);
+            deliverSignalMessage((ISignalMessage) rcvdMsgUnit);
     }
 
     /**
@@ -80,7 +80,7 @@ abstract class AbstractFileDeliverer implements IMessageDeliverer {
      * @throws MessageDeliveryException When an error occurs while delivering the user message to the business 
      *                                  application
      */
-    protected void deliverUserMessage(IMessageUnit usrMsgUnit) throws MessageDeliveryException {
+    protected void deliverUserMessage(IUserMessage usrMsgUnit) throws MessageDeliveryException {
         log.debug("Delivering user message with msgId=" + usrMsgUnit.getMessageId());
 
         // We first convert the user message into a MMD document
@@ -90,17 +90,19 @@ abstract class AbstractFileDeliverer implements IMessageDeliverer {
         //  to reflect new locations
         Collection<IPayload>    copiedPLs = new ArrayList<IPayload>();
         try {
-            log.debug("Copy all payload files to delivery directory");
-            for(IPayload p : mmd.getPayloads()) {
-                PartInfo newPLInfo = new PartInfo(p);
-                Path newPath = copyPayloadFile(p, mmd.getMessageId());
-                if (newPath != null) 
-                    newPLInfo.setContentLocation(newPath.toString());
-                copiedPLs.add(newPLInfo);
+            if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
+                log.debug("Copy all payload files to delivery directory");
+                for(IPayload p : mmd.getPayloads()) {
+                    PartInfo newPLInfo = new PartInfo(p);
+                    Path newPath = copyPayloadFile(p, mmd.getMessageId());
+                    if (newPath != null) 
+                        newPLInfo.setContentLocation(newPath.toString());
+                    copiedPLs.add(newPLInfo);
+                }
+                log.debug("Copied all payload files, set as new payload info in MMD");
+                mmd.setPayloads(copiedPLs);
             }
-            log.debug("Copied all payload files, set as new payload info in MMD");
-            mmd.setPayloads(copiedPLs);
-            log.debug("Information complete, write message meta data to file");    
+            log.debug("Write message meta data to file");    
             writeUserMessageInfoToFile(mmd);
             log.info("User message with msgID=" + mmd.getMessageId() + " successfully delivered");
         } catch (IOException ex) {
@@ -126,7 +128,7 @@ abstract class AbstractFileDeliverer implements IMessageDeliverer {
      * @throws MessageDeliveryException When an error occurs while delivering the signal message to the business 
      *                                  application
      */
-    protected abstract void deliverSignalMessage(IMessageUnit sigMsgUnit) throws MessageDeliveryException;
+    protected abstract void deliverSignalMessage(ISignalMessage sigMsgUnit) throws MessageDeliveryException;
 
     /**
      * Helper method to copy a the payload content to <i>delivery directory</i>.

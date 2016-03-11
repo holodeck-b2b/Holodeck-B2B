@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,6 +22,7 @@ import javax.security.auth.callback.CallbackHandler;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.engine.Handler.InvocationResponse;
 import org.apache.commons.logging.Log;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.WSConstants;
@@ -31,19 +32,19 @@ import org.apache.wss4j.dom.handler.RequestData;
 import org.apache.wss4j.dom.handler.WSHandler;
 import org.apache.wss4j.dom.handler.WSHandlerConstants;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
-import org.holodeckb2b.common.general.Constants;
+import org.holodeckb2b.axis2.Axis2Utils;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.security.IEncryptionConfiguration;
-import org.holodeckb2b.common.security.IKeyTransport;
-import org.holodeckb2b.common.security.ISigningConfiguration;
-import org.holodeckb2b.common.security.IUsernameTokenConfiguration;
-import org.holodeckb2b.common.security.X509ReferenceType;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.DefaultSecurityAlgorithm;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
-import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.util.Axis2Utils;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IKeyTransport;
+import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
 import org.holodeckb2b.security.callbackhandlers.AttachmentCallbackHandler;
 import org.holodeckb2b.security.callbackhandlers.PasswordCallbackHandler;
 import org.holodeckb2b.security.util.SecurityUtils;
@@ -76,7 +77,7 @@ import org.w3c.dom.Document;
  */
 public class CreateWSSHeaders extends BaseHandler {
     
-    protected static final String WSS4J_PART_EBMS_HEADER = "{}{" + Constants.EBMS3_NS_URI + "}Messaging;";
+    protected static final String WSS4J_PART_EBMS_HEADER = "{}{" + EbMSConstants.EBMS3_NS_URI + "}Messaging;";
     
     protected static final String WSS4J_PART_S11_BODY = "{}{http://schemas.xmlsoap.org/soap/envelope/}Body;";
     protected static final String WSS4J_PART_S12_BODY = "{}{http://www.w3.org/2003/05/soap-envelope}Body;";
@@ -211,7 +212,8 @@ public class CreateWSSHeaders extends BaseHandler {
      * @param utConfig      The configuration for the username token
      * @param pwdCBHandler  The {@link PasswordCallbackHandler} to use for handing over the password to WSS4J library
      */
-    private void setupUsernameToken(MessageContext mc, IUsernameTokenConfiguration utConfig, PasswordCallbackHandler pwdCBHandler) {
+    private void setupUsernameToken(MessageContext mc, IUsernameTokenConfiguration utConfig, 
+                                    PasswordCallbackHandler pwdCBHandler) {
         mc.setProperty(WSHandlerConstants.USER, utConfig.getUsername());
         mc.setProperty(WSHandlerConstants.ADD_USERNAMETOKEN_CREATED, Boolean.toString(utConfig.includeCreated()));
         mc.setProperty(WSHandlerConstants.ADD_USERNAMETOKEN_NONCE, Boolean.toString(utConfig.includeNonce()));
@@ -247,10 +249,11 @@ public class CreateWSSHeaders extends BaseHandler {
         // should be signed is not specified. But to prevent manipulation Holodeck B2B includes them in the signature
         mc.setProperty(WSHandlerConstants.OPTIONAL_SIGNATURE_PARTS, WSS4J_PART_UT + WSS4J_PART_ATTACHMENTS);
         
-        // The alias of the certificate to use for signing
-        mc.setProperty(WSHandlerConstants.SIGNATURE_USER, sigCfg.getKeystoreAlias());
+        // The alias of the certificate to use for signing, converted to lower case because JKS aliasses are case 
+        // insensitive
+        mc.setProperty(WSHandlerConstants.SIGNATURE_USER, sigCfg.getKeystoreAlias().toLowerCase());
         // The password to access the certificate in the keystore
-        pwdCBHandler.addUser(sigCfg.getKeystoreAlias(), sigCfg.getCertificatePassword());
+        pwdCBHandler.addUser(sigCfg.getKeystoreAlias().toLowerCase(), sigCfg.getCertificatePassword());
         
         // How should certificate be referenced in header?
         mc.setProperty(WSHandlerConstants.SIG_KEY_ID, 
@@ -281,7 +284,8 @@ public class CreateWSSHeaders extends BaseHandler {
      * @param sigConfig     The configuration for creating the signature
      * @param pwdCBHandler  The {@link PasswordCallbackHandler} to use for handing over the password to WSS4J library
      */
-    private void setupEncryption(MessageContext mc, IEncryptionConfiguration encCfg, PasswordCallbackHandler pwdCBHandler) {
+    private void setupEncryption(MessageContext mc, IEncryptionConfiguration encCfg, 
+                                 PasswordCallbackHandler pwdCBHandler) {
         // Set up crypto engine
         Properties encProperties = SecurityUtils.createCryptoConfig(SecurityUtils.CertType.pub);
         mc.setProperty(WSHandlerConstants.ENC_PROP_REF_ID, "" + encProperties.hashCode());
@@ -342,7 +346,7 @@ public class CreateWSSHeaders extends BaseHandler {
     private void logError(final MessageContext mc, final String role, final String message) {
         StringBuffer logMsg = new StringBuffer();
         // Use primary message unit to log error
-        MessageUnit pMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+        MessageUnit  pMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
         
         logMsg.append("Could not create WS-Security header");
         if (Utils.isNullOrEmpty(role)) 

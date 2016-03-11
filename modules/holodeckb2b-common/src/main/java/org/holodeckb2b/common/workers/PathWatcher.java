@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,18 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.common.workers;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
-import org.holodeckb2b.common.workerpool.TaskConfigurationException;
 import org.holodeckb2b.common.workerpool.WorkerPool;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
  * Is a base class for checking file system changes. Extends {@link AbstractWorkerTask} so it can be run as part of a
