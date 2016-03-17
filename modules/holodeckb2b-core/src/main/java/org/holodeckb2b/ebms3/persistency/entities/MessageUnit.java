@@ -41,7 +41,7 @@ import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 
 /**
- * Is the JPA entity class representing an ebMS message unit that is processed by Holodeck B2B. 
+ * Is a persistency class representing an ebMS message unit that is processed by Holodeck B2B. 
  * <p>This class stores the general meta-data relevant to all kinds of message units. In addition to the information 
  * included in the <code>eb:MessageInfo</code> element contained in the ebMS header this consists of the processing
  * states.
@@ -61,7 +61,8 @@ import org.holodeckb2b.interfaces.pmode.ILeg.Label;
             query = "SELECT mu " +
                     "FROM MessageUnit mu " +
                     "WHERE mu.MESSAGE_ID = :msgId " +
-                    "AND mu.DIRECTION = :direction"
+                    "AND mu.DIRECTION = :direction " +
+                    "ORDER BY mu.MU_TIMESTAMP DESC"
             )}
 )
 public abstract class MessageUnit implements Serializable, org.holodeckb2b.interfaces.messagemodel.IMessageUnit {
@@ -167,6 +168,22 @@ public abstract class MessageUnit implements Serializable, org.holodeckb2b.inter
     public Label getLeg() {
         return this.LEG_LABEL;       
     }
+
+    /**
+     * Gets the indication whether this message unit is send using a multi-hop exchange
+     * 
+     * @return  <code>true</code> if multi-hop is used for exchange of this message unit,<br>
+     *          <code>false</code> otherwise
+     * @todo: Choose version number!
+     * @since 2.1.0
+     */
+    public boolean usesMultiHop() {
+        return USES_MULTI_HOP;
+    }
+    
+    public void setMultiHop(boolean usesMultiHop) {
+        this.USES_MULTI_HOP = usesMultiHop;
+    }
     
     /**
      * Sets the direction the message unit flows.
@@ -214,6 +231,8 @@ public abstract class MessageUnit implements Serializable, org.holodeckb2b.inter
     private Label   LEG_LABEL;
     
     private Direction   DIRECTION;
+    
+    private boolean     USES_MULTI_HOP = false;
     
     /*
      * Because timestamp is a reserved SQL-99 word it is prefixed

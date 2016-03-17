@@ -4,14 +4,17 @@
     <!--                                                                 -->             
     
     <InFlow>
-        <!-- Log the SOAP envelope -->
+        <!-- Log the SOAP envelope
+            NOTE: This is done in the Logging phase to ensure it is done at start of message processing and the
+                  logging will contain all headers.
+         -->
         <handler name="SOAPLog" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger">
-            <order phase="ebms3InPhase" phaseFirst="true"/>      
+            <order phase="Logging" phaseFirst="true"/>      
         </handler>
-        
+
         <!-- Indicate the ebMS header is processed by Holodeck B2B -->
         <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
-            <order phase="ebms3InPhase" after="SOAPLog"/>      
+            <order phase="ebms3InPhase" phaseFirst="true"/>      
         </handler>
         <!-- Catch a raised Fault and translate it into an EbMS Error -->
         <handler name="CatchFaults" class="org.holodeckb2b.ebms3.util.CatchAxisFault">
@@ -33,13 +36,18 @@
         <handler name="ReadErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ReadError">
             <order phase="ebms3InPhase" after="ReadReceipts"/>
         </handler>
+        <!-- Check whether the message was received through I-Cloud, i.e. uses multi-hop feature -->
+        <handler name="CheckForMultiHop" class="org.holodeckb2b.multihop.CheckFromICloud">
+            <order phase="ebms3InPhase" after="ReadErrors"/>      
+        </handler>
+        
         <!--
             Find the P-Modes for the read message units except the PullRequests because 
             their P-Mode can only be determined based on the provided authentication info
             in the WS-Security header
         -->
         <handler name="FindPModes" class="org.holodeckb2b.ebms3.handlers.inflow.FindPModes">
-            <order phase="ebms3InPhase" after="ReadErrors"/>      
+            <order phase="ebms3InPhase" after="CheckForMultiHop"/>      
         </handler>
         
         <!--
@@ -121,14 +129,17 @@
     </InFlow>
     
     <InFaultFlow>
-        <!-- Log the SOAP envelope -->
+        <!-- Log the SOAP envelope
+            NOTE: This is done in the Logging phase to ensure it is done at start of message processing and the
+                  logging will contain all headers.
+         -->
         <handler name="SOAPLog" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger">
-            <order phase="ebms3InPhase" phaseFirst="true"/>      
+            <order phase="Logging" phaseFirst="true"/>      
         </handler>
         
         <!-- Indicate the ebMS header is processed by Holodeck B2B -->
         <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
-            <order phase="ebms3InPhase" after="SOAPLog"/>      
+            <order phase="ebms3InPhase" phaseFirst="true"/>      
         </handler>
         <!-- Catch a raised Fault and translate it into an EbMS Error -->
         <handler name="CatchFaults" class="org.holodeckb2b.ebms3.util.CatchAxisFault">
@@ -150,13 +161,18 @@
         <handler name="ReadErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ReadError">
             <order phase="ebms3InPhase" after="ReadReceipts"/>
         </handler>
+        <!-- Check whether the message was received through I-Cloud, i.e. uses multi-hop feature -->
+        <handler name="CheckForMultiHop" class="org.holodeckb2b.multihop.CheckFromICloud">
+            <order phase="ebms3InPhase" after="ReadErrors"/>      
+        </handler>
+        
         <!--
             Find the P-Modes for the read message units except the PullRequests because 
             their P-Mode can only be determined based on the provided authentication info
             in the WS-Security header
         -->
         <handler name="FindPModes" class="org.holodeckb2b.ebms3.handlers.inflow.FindPModes">
-            <order phase="ebms3InPhase" after="ReadErrors"/>      
+            <order phase="ebms3InPhase" after="CheckForMultiHop"/>      
         </handler>
         
         <!--
@@ -242,17 +258,21 @@
            class="org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage">
             <order phase="ebms3OutPhase" phaseFirst="true"/>
         </handler>
+<!-- Because bundling in "normal" P2P exchanges is not very well interoperability tested and because in multi-hop
+     bundling can more easily create issues, we for now disable it completely 
+
         <handler name="BundleErrorMessages" 
             class="org.holodeckb2b.ebms3.handlers.outflow.AddErrorSignals">
-            <order phase="ebms3OutPhase" after="PrepareResponseMessage" />
+            <order phase="ebms3OutPhase" after="PrepareResponseMessage"/>
         </handler>
         <handler name="BundleReceiptMessages" 
             class="org.holodeckb2b.ebms3.handlers.outflow.AddReceiptSignals">
             <order phase="ebms3OutPhase" after="BundleErrorMessages" />
         </handler>
+-->
         <handler name="CreateSOAPEnvelope" 
             class="org.holodeckb2b.ebms3.handlers.outflow.CreateSOAPEnvelopeHandler">
-            <order phase="ebms3OutPhase" after="BundleReceiptMessages"/>
+            <order phase="ebms3OutPhase" after="PrepareResponseMessage"/>
         </handler>
         <handler name="AddPayloads" 
            class="org.holodeckb2b.ebms3.handlers.outflow.AddPayloads">
@@ -277,7 +297,12 @@
            class="org.holodeckb2b.ebms3.handlers.outflow.PackagePullRequestSignal">
             <order phase="ebms3OutPhase" after="PackageReceipt"/>
         </handler>
-        
+
+        <!-- Check if message is sent through I-Cloud (multi-hop) and add necessary WS-A headers -->
+        <handler name="ConfigureMultiHop" 
+           class="org.holodeckb2b.multihop.ConfigureMultihop">
+            <order phase="ebms3OutPhase" after="PackagePullRequest"/>
+        </handler>        
         
         <!-- Security handlers responsible for adding the WSS headers -->
         <handler name="GetSecuritySettings" class="org.holodeckb2b.security.handlers.GetSecurityConfiguration">
@@ -295,30 +320,37 @@
         <handler name="CheckSentResult" 
             class="org.holodeckb2b.ebms3.handlers.outflow.CheckSentResult">
             <order phase="MessageOut" after="ConfigureHTTP" />
-        </handler>                
-        <!-- Log the SOAP envelope of the outgoing message -->
+        </handler>
+        
+        <!-- Log the SOAP envelope
+            NOTE: This is done in the Logging phase to ensure it is done at end of message processing and the
+                  logging will contain all headers.
+         -->
         <handler name="SOAPLog" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger">
-            <order phase="MessageOut" after="CheckSentResult"/>      
+            <order phase="Logging" phaseFirst="true"/>      
         </handler>
     </OutFlow>
     
-
     <OutFaultFlow>
         <handler name="PrepareResponseMessage" 
             class="org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage">
             <order phase="ebms3OutPhase" phaseFirst="true"/>
         </handler>
+<!-- Because bundling in "normal" P2P exchanges is not very well interoperability tested and because in multi-hop
+     bundling can more easily create issues, we for now disable it completely 
+     
         <handler name="BundleErrorMessages" 
             class="org.holodeckb2b.ebms3.handlers.outflow.AddErrorSignals">
-            <order phase="ebms3OutPhase" after="PrepareResponseMessage" />
+            <order phase="ebms3OutPhase" after="PrepareResponseMessage"/>
         </handler>
         <handler name="BundleReceiptMessages" 
             class="org.holodeckb2b.ebms3.handlers.outflow.AddReceiptSignals">
             <order phase="ebms3OutPhase" after="BundleErrorMessages" />
         </handler>
+-->
         <handler name="CreateSOAPEnvelope" 
             class="org.holodeckb2b.ebms3.handlers.outflow.CreateSOAPEnvelopeHandler">
-            <order phase="ebms3OutPhase" after="BundleReceiptMessages"/>
+            <order phase="ebms3OutPhase" after="PrepareResponseMessage"/>
         </handler>
         <handler name="AddPayloads" 
             class="org.holodeckb2b.ebms3.handlers.outflow.AddPayloads">
@@ -333,7 +365,7 @@
         </handler>
         <handler name="PackageErrorSignals" 
             class="org.holodeckb2b.ebms3.handlers.outflow.PackageErrorSignals">
-            <order phase="ebms3OutPhase" after="AS4Compression"/>
+            <order phase="ebms3OutPhase" after="PackageUserMessage"/>
         </handler>
         <handler name="PackageReceipt" 
             class="org.holodeckb2b.ebms3.handlers.outflow.PackageReceiptSignal">
@@ -343,6 +375,12 @@
             class="org.holodeckb2b.ebms3.handlers.outflow.PackagePullRequestSignal">
             <order phase="ebms3OutPhase" after="PackageReceipt"/>
         </handler>
+
+        <!-- Check if message is sent through I-Cloud (multi-hop) and add necessary WS-A headers -->
+        <handler name="ConfigureMultiHop" 
+            class="org.holodeckb2b.multihop.ConfigureMultihop">
+            <order phase="ebms3OutPhase" after="PackagePullRequest"/>
+        </handler>        
         
         <!-- Security handlers responsible for adding the WSS headers -->
         <handler name="GetSecuritySettings" class="org.holodeckb2b.security.handlers.GetSecurityConfiguration">
@@ -361,10 +399,13 @@
             class="org.holodeckb2b.ebms3.handlers.outflow.CheckSentResult">
             <order phase="MessageOut" after="ConfigureHTTP" />
         </handler>   
-        <!-- Log the SOAP envelope of the outgoing message -->
+
+        <!-- Log the SOAP envelope
+            NOTE: This is done in the Logging phase to ensure it is done at end of message processing and the
+                  logging will contain all headers.
+         -->
         <handler name="SOAPLog" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger">
-            <order phase="MessageOut" after="CheckSentResult"/>      
+            <order phase="Logging" phaseFirst="true"/>      
         </handler>
-    </OutFaultFlow>
-    
+    </OutFaultFlow>        
 </module>

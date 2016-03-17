@@ -23,7 +23,7 @@
     version="2.1.0">
     <xs:annotation>
         <xs:documentation><p>The ebMS specification only defines an abstract P-Mode model, the actual P-Mode definition is left up to implementations. This schema defines the XML structure for the representation of a P-Mode as used by the default implementation for maintaining the P-Mode set. In this implementation the P-Mode set consists of all XML documents in a directory. Each XML document represents one P-Mode and must conform to this schema. See the package <code>org.holodeckb2b.pmode.xml</code> for more info on the default implementation of P-Modes.</p></xs:documentation>
-        <xs:documentation><p>In version 2.1.0 of the schema the <code>EventHandler</code> element was added. As this is an optional element P-Mode documents constructed using the old version are still valid and result in unchanged processing. Therefore the same namespace is used and only the version has been increased</p> 
+        <xs:documentation><p>In version 2.1.0 of the schema the <code>EventHandler</code> and <code>AddActorOrRoleAttribute</code> elements were added. As these are optional elements P-Mode documents constructed using the old version are still valid and result in unchanged processing. Therefore the same namespace is used and only the version has been increased</p> 
         </xs:documentation>
     </xs:annotation>
     <xs:element name="PMode" type="tns:PMode">
@@ -240,6 +240,13 @@ The last child element is the <code>Parameter</code> element that can occur zero
             <xs:element name="Address" type="xs:anyURI" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation><p>This element contains the URL where messages must be delivered to.</p></xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element default="false" minOccurs="0" name="AddActorOrRoleAttribute"
+                type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation><p>This element indicates whether the AS4 multi-hop feature as defined in section 4 of the AS4 standard is to be used for message exchanges on this leg. When multi-hop is used the ebMS header of a User Message is targeted to a specific role and response signals will have a specific WS-Addressing header containing routing information.</p>
+<p>By default multi-hop is not used and the value for this element is false</p></xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element name="SoapVersion" minOccurs="0" default="1.2">

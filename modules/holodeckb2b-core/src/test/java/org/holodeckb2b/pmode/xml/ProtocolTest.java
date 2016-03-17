@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
+/*
+ * Copyright (C) 2015 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,20 +19,22 @@ package org.holodeckb2b.pmode.xml;
 import org.holodeckb2b.pmode.xml.Protocol;
 import java.io.File;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
 /**
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ *
+ * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class ProtocolTest {
     
     public ProtocolTest() {
-        
-    }
+    }    
     
     /**
      * Create an Protocol from file.
@@ -44,193 +46,88 @@ public class ProtocolTest {
 
         try {
             // retrieve the resource from the pmodetest directory.
-            File f = new File(this.getClass().getClassLoader().getResource("pmodetest/protocol/" + fName).getPath());
-
-            Serializer serializer = new Persister();
+            File f = new File(this.getClass().getClassLoader().getResource("pmodetest/prot/" + fName).getPath());
+            
+            Serializer  serializer = new Persister();
             return serializer.read(Protocol.class, f);
         }
         catch (Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             return null;
         }
-        
     }
     
-    
-    /**
-     * Test for Protocol not being NULL.
-     */
     @Test
-    public void testProtocolNotNull() {
+    public void testCompleteProtocol() {
+        Protocol p = createFromFile("complete.xml");
         
-        try {
-            Protocol protocol;
-            protocol = createFromFile("protocolEmpty.xml");
-            
-            assertNotNull(protocol);
-            
-        } catch (Exception ex) {
-            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-            fail();
-        }
+        assertNotNull(p);
         
+        assertEquals("http://www.oxygenxml.com/" ,p.getAddress());
+        assertTrue(p.shouldAddActorOrRoleAttribute());
+        assertEquals("1.1", p.getSOAPVersion());
+        assertFalse(p.useChunking());
+        assertFalse(p.useHTTPCompression());
     }
 
-    
-    /**
-     * Test for the address of the Protocol not being NULL.
-     */
     @Test
-    public void testProtocolAddressNotNull() {
+    public void testAddressOnly() {
+        Protocol p = createFromFile("addrOnly.xml");
         
-        try {
-            Protocol protocol = createFromFile("protocolAddress1.xml");
-            
-            assertNotNull(protocol);
-            assertNotNull(protocol.getAddress());
-            
-        } catch (Exception ex) {
-            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-            fail();
-        }
+        assertNotNull(p);
         
-    }    
-
-    /**
-     * Test for the address value of the Protocol.
-     */
+        assertEquals("http://www.oxygenxml.com/address" ,p.getAddress());
+        
+        assertFalse(p.shouldAddActorOrRoleAttribute());
+        assertEquals("1.2", p.getSOAPVersion());
+        assertTrue(p.useChunking());
+        assertFalse(p.useHTTPCompression());
+    }
+    
     @Test
-    public void testProtocolAddressValue() {
+    public void testChunkingOnly() {
+        Protocol p = createFromFile("chunkOnly.xml");
         
-        try {
-            Protocol protocol = createFromFile("protocolAddress2.xml");
-            
-            assertNotNull(protocol);
-            assertNotNull(protocol.getAddress());
-            assertEquals("http://www.holodeck-b2b.org/", protocol.getAddress());
-            
-        } catch (Exception ex) {
-            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-            fail();
-        }
+        assertNotNull(p);
         
-    }      
+        assertNull(p.getAddress());        
+        assertFalse(p.shouldAddActorOrRoleAttribute());
+        assertEquals("1.2", p.getSOAPVersion());
+        assertFalse(p.useChunking());
+        assertFalse(p.useHTTPCompression());    
+    }
     
-    /**
-     * Test for the SOAP version of the Protocol not being NULL.
-     */
     @Test
-    public void testProtocolSoapVersionNotNull() {
+    public void testSoapVersionOnly() {
+        Protocol p = createFromFile("soapOnly.xml");
         
-        try {
-            Protocol protocol = createFromFile("protocolSoapVersion1.xml");
-            
-            assertNotNull(protocol);
-            assertNotNull(protocol.getSOAPVersion());
-            
-        } catch (Exception ex) {
-            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-            fail();
-        }
+        assertNotNull(p);
         
-    }    
+        assertNull(p.getAddress());        
+        assertFalse(p.shouldAddActorOrRoleAttribute());
+        assertEquals("1.1", p.getSOAPVersion());
+        assertTrue(p.useChunking());
+        assertFalse(p.useHTTPCompression());    
+    }
     
-    
-    /**
-     * Test for the SOAP version value of the Protocol.
-     */
     @Test
-    public void testProtocolSoapVersionValue() {
+    public void testHttpCompressionOnly() {
+        Protocol p = createFromFile("httpCompressionOnly.xml");
         
-        try {
-            Protocol protocol = createFromFile("protocolSoapVersion2.xml");
-            
-            assertNotNull(protocol);
-            assertNotNull(protocol.getSOAPVersion());
-            assertEquals("1.2", protocol.getSOAPVersion());
-            
-        } catch (Exception ex) {
-            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-            fail();
-        }
+        assertNotNull(p);
         
-    }     
+        assertNull(p.getAddress());        
+        assertFalse(p.shouldAddActorOrRoleAttribute());
+        assertEquals("1.2", p.getSOAPVersion());
+        assertTrue(p.useChunking());
+        assertTrue(p.useHTTPCompression());    
+    }
     
-    /**
-     * Test for chunking of the Protocol not being NULL.
-     */
     @Test
-    public void testProtocolUseChunkingNotNull() {
+    public void testAddActorOnly() {
+        Protocol p = createFromFile("multihopOnly.xml");
         
-        try {
-            Protocol protocol = createFromFile("protocolChunking1.xml");
-            
-            assertNotNull(protocol);
-            assertNotNull(protocol.useChunking());
-            
-        } catch (Exception ex) {
-            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-            fail();
-        }
-        
-    }    
-    
-    /**
-     * Test for chunking value of the Protocol.
-     */
-    @Test
-    public void testProtocolUseChunkingValue() {
-        
-        try {
-            Protocol protocol = createFromFile("protocolChunking2.xml");
-            
-            assertNotNull(protocol);
-            assertNotNull(protocol.useChunking());
-            assertEquals(Boolean.FALSE, protocol.useChunking());
-            
-        } catch (Exception ex) {
-            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-            fail();
-        }
-        
-    } 
-    
-    /**
-     * Test for HTTP compression of the Protocol not being NULL.
-     */
-    @Test
-    public void testProtocolUseHttpCompressionNotNull() {
-        
-        try {
-            Protocol protocol = createFromFile("protocolHttpCompression1.xml");
-            
-            assertNotNull(protocol);
-            assertNotNull(protocol.useHTTPCompression());
-            
-        } catch (Exception ex) {
-            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-            fail();
-        }
-        
-    }      
-    
-    /**
-     * Test for HTTP compression value of the Protocol.
-     */
-    @Test
-    public void testProtocolUseHttpCompressionValue() {
-        
-        try {
-            Protocol protocol = createFromFile("protocolHttpCompression2.xml");
-            
-            assertNotNull(protocol);
-            assertNotNull(protocol.useHTTPCompression());
-            
-        } catch (Exception ex) {
-            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-            fail();
-        }
-        
-    }          
-    
+        // Because the multi-hop actor is only useful when sending there must also be an address
+        assertNull(p);
+    }
 }

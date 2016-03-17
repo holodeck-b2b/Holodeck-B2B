@@ -352,10 +352,11 @@ public class MessageUnitDAO {
             // Set state to CREATED
             ProcessingState procstate = new ProcessingState(ProcessingStates.CREATED);
             receipt.setProcessingState(procstate);
-            // If Receipt is reported as response, directly set state to processing
+
+            // If error is reported as response, directly set state to processing
             if (asResponse)
                 receipt.setProcessingState(new ProcessingState(ProcessingStates.PROCESSING));
-            
+
             // Persist the new message unit
             em.persist(receipt);
             // Commit changes to DB
@@ -947,8 +948,60 @@ public class MessageUnitDAO {
         }
         return createProxyResultList(result);
     }    
-
     
+    /**
+     * Updates the multi-hop indicator of the message unit.
+     * 
+     * @param mu        The {@link EntityProxy} for the {@link MessageUnit} which multi-hop indicator should be set
+     * @param multihop  The indicator whether this message unit uses multi-hop
+     * @throws DatabaseException When a database error occurs
+     * @todo Set version number, only update multi hop, like P-Mode id
+     * @since
+     */
+    public static void setMultiHop(EntityProxy<MessageUnit> mu, boolean multihop) throws DatabaseException {       
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            MessageUnit actualMU = refreshMessageUnit(mu.entity, em);
+            actualMU.setMultiHop(multihop);
+            em.merge(actualMU);
+            em.getTransaction().commit();
+            
+            // Update the EntityProxy with new entity
+            mu.entity = actualMU;
+        } catch (Exception e) {
+            // The update somehow failed: rollback and rethrow
+            em.getTransaction().rollback();
+            throw new DatabaseException("Setting multihop indicator for MessageUnit failed!", e);
+        } finally {
+            em.close();
+        }
+    }
+    
+    /**
+     * Loads all meta-data for a message unit from the database.
+     * <p>The "query" methods of this class return lists of {@link EntityProxy} objects that only have the basic info
+     * loaded. This method should be used to get all meta-data for a message unit. 
+     * <p>NOTE: This methods reloads the complete message unit, so any change applied to it will be lost!
+     * 
+     * @param mu    The {@link EntityProxy} for the {@link MessageUnit} that needs to be loaded
+     * @throws DatabaseException When an error occurs while loading the message units meta-data
+     */
+    public static <T extends MessageUnit> void loadCompletely(EntityProxy<T> mu) throws DatabaseException {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            // Update the EntityProxy with new entity
+            mu.entity = refreshMessageUnit(mu.entity, em);
+            em.getTransaction().commit();            
+        } catch (Exception e) {
+            // The update somehow failed: rollback and rethrow
+            em.getTransaction().rollback();
+            throw new DatabaseException("Error while getting the message unit from database!", e);
+        } finally {
+            em.close();
+        }        
+    }
     /**
      * Helper method to convert a result list of entity objects into a list of {@link EntityProxy} objects.
      * 
@@ -1038,7 +1091,7 @@ public class MessageUnitDAO {
      * @param em    The entity manager to use for accessing the database
      * @return      A new {@link TradingPartner} entity object containing the provided information
      */
-    public static TradingPartner createTradingPartner(ITradingPartner tp, EntityManager em) {
+    private static TradingPartner createTradingPartner(ITradingPartner tp, EntityManager em) {
         if (tp == null)
             return null; // nothing to create if no information given
         

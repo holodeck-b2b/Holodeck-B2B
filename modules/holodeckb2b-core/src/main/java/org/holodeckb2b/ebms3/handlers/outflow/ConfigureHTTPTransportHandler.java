@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.ebms3.handlers.outflow;
 
-import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
@@ -120,8 +120,7 @@ public class ConfigureHTTPTransportHandler extends BaseHandler {
                     log.error("P-Mode does not contain destination URL for " + primaryMU.getClass().getSimpleName());
                 }
                 log.debug("Destination URL=" + destURL);
-                EndpointReference targetEPR = new EndpointReference(destURL);
-                options.setTo(targetEPR);
+                mc.setProperty(Constants.Configuration.TRANSPORT_URL, destURL);
             }
 
             // Check if HTTP compression and/or chunking should be used and set options accordingly

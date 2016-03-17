@@ -18,7 +18,6 @@ package org.holodeckb2b.common.handler;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.engine.Handler;
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -110,8 +109,7 @@ public abstract class BaseHandler extends AbstractHandler {
      *                      processing. Note that this will stop processing of the complete flow and may leave message
      *                      units in an undefined state!
      */
-    @Override
-    public final Handler.InvocationResponse invoke(MessageContext mc) throws AxisFault {
+    public final InvocationResponse invoke(MessageContext mc) throws AxisFault {
         // Determine which flow the handler currently runs is
         if (mc.isServerSide()) {
             // Running serverside means Holodeck B2B acts as responder
@@ -143,7 +141,7 @@ public abstract class BaseHandler extends AbstractHandler {
             // This is handler is not supposed to run in the current flow
             LogFactory.getLog(BaseHandler.class.getName())
                         .debug("Handler " + this.getClass().getName() + " runs in unsupported " + currentFlowName + "!");
-            return Handler.InvocationResponse.CONTINUE;
+            return InvocationResponse.CONTINUE;
         } 
             
         // Running in correct flow, create a logger
@@ -217,8 +215,8 @@ public abstract class BaseHandler extends AbstractHandler {
      *                      units in an undefined state! Also ensure that all information needed for a response is set
      *                      in the message context to make it available for handlers in the fault flow!
      */
-    protected abstract Handler.InvocationResponse doProcessing(MessageContext mc) throws Exception;
-    
+    protected abstract InvocationResponse doProcessing(MessageContext mc) throws Exception;
+
     /**
      * Runs when the execution of the flow is completed and if the handler is executed during that flow. This method
      * is always executed independent of the flow's processing result. It can be used to check the processing result

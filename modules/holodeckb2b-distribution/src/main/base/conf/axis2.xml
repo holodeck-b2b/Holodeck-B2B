@@ -25,7 +25,7 @@
     Service groups and/or services, depending on the level at which the parameter is declared.
     This value of this parameter defaults to true.
     -->
-    <parameter name="exposeServiceMetadata">true</parameter>
+    <parameter name="exposeServiceMetadata">false</parameter>
 
 
     <!--Uncomment if you want to plugin your own attachments lifecycle implementation -->
@@ -166,7 +166,7 @@
     <!-- Global Modules  -->
     <!-- ================================================= -->
     <!-- Comment this to disable Addressing -->
-    <!-- <module ref="addressing"/> -->
+    <module ref="addressing"/>
 
     <!--Configuring module , providing parameters for modules whether they refer or not-->
     <!--<moduleConfig name="addressing">-->
@@ -342,8 +342,8 @@
     <!-- Phases  -->
     <!-- ================================================= -->
     <phaseOrder type="InFlow">
-        <!--  System predefined phases       -->
         <phase name="Transport"/>      
+        <phase name="Logging"/>
         <phase name="Addressing"/>
         <phase name="Security"/>
         <phase name="PreDispatch"/>
@@ -363,33 +363,31 @@
             <handler name="MustUnderstandValidationDispatcher"
                 class="org.apache.axis2.jaxws.dispatchers.MustUnderstandValidationDispatcher"/>
             <handler name="HB2BDispatcher" class="org.holodeckb2b.ebms3.handlers.inflow.HolodeckB2BDispatcher"/>                            
-        </phase>           
-        <!--  System predefined phases       -->
-        <!--   After Postdispatch phase module author or service author can add any phase he want      -->
+        </phase>
         <phase name="ebms3InPhase"/>
     </phaseOrder>
     <phaseOrder type="OutFlow">
         <phase name="ebms3OutPhase"/>
         <phase name="Security"/>
         <phase name="MessageOut"/>
+        <phase name="Logging"/>
     </phaseOrder>
     <phaseOrder type="InFaultFlow">
-        <!--  System predefined phases       -->
         <phase name="Transport"/>      
+        <phase name="Logging"/>
         <phase name="Addressing"/>
         <phase name="Security"/>
         <phase name="PreDispatch"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
             <handler name="HB2BDispatcher" class="org.holodeckb2b.ebms3.handlers.inflow.HolodeckB2BDispatcher"/>                            
-        </phase>           
-        <!--  System predefined phases       -->
-        <!--   After Postdispatch phase module author or service author can add any phase he want      -->
+        </phase>
         <phase name="ebms3InPhase"/>
     </phaseOrder>
     <phaseOrder type="OutFaultFlow">
         <phase name="ebms3OutPhase"/>
         <phase name="Security"/>
         <phase name="MessageOut"/>
-    </phaseOrder>        
+        <phase name="Logging"/>
+    </phaseOrder>         
 </axisconfig>
 
