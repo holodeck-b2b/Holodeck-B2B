@@ -20,6 +20,7 @@ import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 
@@ -87,6 +88,20 @@ public class HolodeckB2BCoreInterface {
         assertInitialized();
         return coreImplementation.getPModeSet();
     }    
+    
+    /**
+     * Gets the core component that is responsible for processing <i>"events"</i> that are raised while processing a 
+     * message unit. Such <i>"message processing events"</i> may need to be send to the business (or other external) 
+     * application to keep them updated. The {@link IMessageProcessingEventProcessor} will manage the notifications to
+     * the external applications based on the configuration provided in the P-Mode.
+     * 
+     * @return  The {@link IMessageProcessingEventProcessor} managing the event processing
+     * @since 2.1.0
+     */
+    public static IMessageProcessingEventProcessor getEventProcessor() {
+        assertInitialized();
+        return coreImplementation.getEventProcessor();
+    }
     
     /**
      * Sets the Holodeck B2B Core implementation that is in use. 

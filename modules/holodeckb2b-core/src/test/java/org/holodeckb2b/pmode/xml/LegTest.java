@@ -184,5 +184,37 @@ public class LegTest {
         }
         
     }    
-    
+
+    /**
+     * Test leg WITH:
+     * 
+     * - label (=attribute)
+     * - Protocol 
+     * - Receipt 
+     * - ReceptionAwareness 
+     * - UserMessageFlow 
+     * - DefaultDelivery 
+     * - PullRequestFlow
+     * - EventHandlers
+     * 
+     */
+    @Test
+    public void testLegWithEventHandlers() {
+        try {
+            Leg leg = createFromFile("leg6.xml");
+            assertNotNull(leg);
+            
+            assertEquals(2, leg.getMessageProcessingEventConfiguration().size());            
+            assertNull(leg.getMessageProcessingEventConfiguration().get(0).getHandledEvents());
+            assertNull(leg.getMessageProcessingEventConfiguration().get(0).appliesTo());
+            
+            assertEquals(2, leg.getMessageProcessingEventConfiguration().get(1).getHandledEvents().size());
+            assertEquals(2, leg.getMessageProcessingEventConfiguration().get(1).appliesTo().size());                        
+        } catch (Exception ex) {
+            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
+            fail();
+        }
+        
+        
+    }    
 }

@@ -20,6 +20,7 @@ import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
@@ -33,16 +34,16 @@ import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 public interface IHolodeckB2BCore {
 
     /**
-     * Should return the current configuration of this Holodeck B2B instance. The configuration parameters can be used
-     * by extension to integrate their functionality with the core.
+     * Gets the current configuration of this Holodeck B2B instance. The configuration parameters can be used by 
+     * extensions to integrate their functionality with the core.
      * 
      * @return  The current configuration as a {@link IConfiguration}
      */
     public IConfiguration getConfiguration();
     
     /**
-     * Should return a {@link IMessageDeliverer} object configured as specified by the {@link IDeliverySpecification} 
-     * that can be used to deliver message units to the <i>Consumer</i> business application.
+     * Gets a {@link IMessageDeliverer} object configured as specified by the {@link IDeliverySpecification} that can be 
+     * used to deliver message units to the <i>Consumer</i> business application.
      * 
      * @param deliverySpec      Specification of the delivery method for which a deliver must be returned.
      * @return                  A {@link IMessageDeliverer} object for the given delivery specification
@@ -52,7 +53,7 @@ public interface IHolodeckB2BCore {
     public IMessageDeliverer getMessageDeliverer(IDeliverySpecification deliverySpec) throws MessageDeliveryException;
     
     /**
-     * Should return a {@link IMessageSubmitter} object that can be used by the <i>Producer</i> business application for 
+     * Gets a {@link IMessageSubmitter} object that can be used by the <i>Producer</i> business application for 
      * submitting User Messages to the Holodeck B2B Core. 
      * 
      * @return  A {@link IMessageSubmitter} object to use for submission of User Messages
@@ -60,7 +61,7 @@ public interface IHolodeckB2BCore {
     public IMessageSubmitter getMessageSubmitter();
     
     /**
-     * Should return the set of currently configured P-Modes.
+     * Gets the set of currently configured P-Modes.
      * <p>The P-Modes define how Holodeck B2B should process the messages. The set of P-Modes is therefor the most 
      * important configuration item in Holodeck B2B, without P-Modes it will not be possible to send and receive 
      * messages.
@@ -69,4 +70,15 @@ public interface IHolodeckB2BCore {
      * @see IPMode
      */
     public IPModeSet getPModeSet();
+    
+    /**
+     * Gets the core component that is responsible for processing <i>"events"</i> that are raised while processing a 
+     * message unit. Such <i>"message processing events"</i> may need to be send to the business (or other external) 
+     * application to keep them updated. The {@link IMessageProcessingEventProcessor} will manage the notifications to
+     * the external applications based on the configuration provided in the P-Mode.
+     * 
+     * @return  The {@link IMessageProcessingEventProcessor} managing the event processing
+     * @since 2.1.0
+     */
+    public IMessageProcessingEventProcessor getEventProcessor();
 }

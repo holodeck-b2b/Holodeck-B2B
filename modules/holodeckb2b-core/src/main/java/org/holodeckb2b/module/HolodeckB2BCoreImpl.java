@@ -28,12 +28,14 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.holodeckb2b.common.config.Config;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.WorkerPool;
 import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
 import org.holodeckb2b.ebms3.pulling.PullConfiguration;
 import org.holodeckb2b.ebms3.pulling.PullConfigurationWatcher;
 import org.holodeckb2b.ebms3.pulling.PullWorker;
 import org.holodeckb2b.ebms3.submit.core.MessageSubmitterFactory;
+import org.holodeckb2b.events.SyncEventProcessor;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
@@ -41,6 +43,7 @@ import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
@@ -99,10 +102,17 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      */
     private static Map<String, IMessageDelivererFactory>    msgDeliveryFactories = null;
     
-    /*
-     * The configured set of P-Modes.
+    /**
+     * The configured set of P-Modes at this instance.
      */
     private static IPModeSet pmodeSet = null;
+    
+    /**
+     * The component responsible for processing of events that occur while processing a message. The processor will 
+     * pass the events on to the configured event handlers.     * 
+     * @since 2.1.0
+     */
+    private static IMessageProcessingEventProcessor eventProcessor = null;
     
     /**
      * Initializes the Holodeck B2B Core module.
@@ -135,6 +145,20 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         log.debug("Create the P-Mode set");
         //@todo: Make the implementation configurable, for now just in memory
         this.pmodeSet = new InMemoryPModeSet();
+        
+        log.debug("Create the processor for message processing events");
+        String eventProcessorClassname = instanceConfiguration.getMessageProcessingEventProcessor();        
+        if (!Utils.isNullOrEmpty(eventProcessorClassname)) {
+            try {
+               eventProcessor = (IMessageProcessingEventProcessor) Class.forName(eventProcessorClassname).newInstance();
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
+               // Could not create the specified event processor, fall back to default implementation
+               log.error("Could not load the specified event processor: " + eventProcessorClassname 
+                        + ". Using default implementation instead.");
+            }
+        } else
+            eventProcessor = new SyncEventProcessor();
+        log.debug("Created " + eventProcessor.getClass().getSimpleName() + " event processor");
         
         // From this point on external components can be started which need access to the Core
         log.debug("Make Core available to outside world");
@@ -319,5 +343,20 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      */
     public IPModeSet getPModeSet() {
         return pmodeSet;
+    }
+
+    /**
+     * Gets the core component that is responsible for processing <i>"events"</i> that are raised while processing a 
+     * message unit. 
+     * <p>By default the {@link SyncEventProcessor} implementation is used for processing events, but the processor to
+     * use can be configured by setting the <i>"MessageProcessingEventProcessor"</i> parameter in the Holodeck B2B 
+     * configuration file.
+     * 
+     * @return  The {@link IMessageProcessingEventProcessor} managing the event processing
+     * @since 2.1.0
+     */
+    @Override
+    public IMessageProcessingEventProcessor getEventProcessor() {
+        return eventProcessor;
     }
 }

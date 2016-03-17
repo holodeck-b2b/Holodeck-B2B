@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import org.apache.axis2.context.ConfigurationContext;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 
 /**
  * Contains the configuration of the Holodeck B2B Core.
@@ -118,6 +119,12 @@ public class Config implements IConfiguration {
      */
     private ConfigurationContext    axisCfgCtx = null;
     
+    /*
+     * The class name of the event processor that is to be used for handling message processing events
+     * @since 2.1.0
+     */
+    private String messageProcessingEventProcessorClass = null;
+            
     private boolean isTrue (String s) {
       return "on".equalsIgnoreCase(s) || "true".equalsIgnoreCase(s) || "1".equalsIgnoreCase(s);
     }
@@ -215,7 +222,10 @@ public class Config implements IConfiguration {
         
         // Default setting for certificate revocation check
         String certRevocationCheck = configFile.getParameter("CertificateRevocationCheck");
-        defaultRevocationCheck = isTrue(certRevocationCheck);                
+        defaultRevocationCheck = isTrue(certRevocationCheck);     
+        
+        // The class name of the event processor
+        messageProcessingEventProcessorClass = configFile.getParameter("MessageProcessingEventProcessor");
     }
 
     /**
@@ -409,5 +419,18 @@ public class Config implements IConfiguration {
      */
     public boolean shouldCheckCertificateRevocation() {
         return defaultRevocationCheck;
+    }
+    
+    /**
+     * Gets the configured class name of the component that is responsible for the processing of event that are raised 
+     * during the message processing. This is an optional configuration parameter and when not set the Holodeck B2B Core 
+     * will use a default implementation. To use a custom implementation set class name in the 
+     * <i>MessageProcessingEventProcessor</i> parameter
+     * 
+     * @return String containing the class name of the {@link IMessageProcessingEventProcessor} implementation to 
+     * @since 2.1.0
+     */
+    public String getMessageProcessingEventProcessor() {
+        return messageProcessingEventProcessorClass;
     }
 }
