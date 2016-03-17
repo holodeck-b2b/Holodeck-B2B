@@ -5,9 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added
 * Support for the AS4 Multi-hop feature as specified in [section 4 of the AS4 OASIS Standard](http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/profiles/AS4-profile/v1.0/os/AS4-profile-v1.0-os.html#__RefHeading__21622_149522555).
+**NOTE:** The addition for multi-hop support adds the `USES_MULTI_HOP` attribute to the `MessageUnit` persistency class 
+and therefore also requires a database change for the corresponding `MSG_UNIT` table. 
 * Event framework to enable additional notification to external components about events that occur during message 
 processing. See package org.holodeckb2b.interface.events for the new interfaces. 
-* Event for creation of a Receipt (see org.holodeckb2b.interfaces.events.types.IReceiptCreatedEvent
+* Event for creation of a Receipt (see `org.holodeckb2b.interfaces.events.types.IReceiptCreatedEvent`)
 
 ### Changed
 * The addition of the event framework resulted in changes to the Holodeck B2B Core and P-Modes interfaces to get access 
