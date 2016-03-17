@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@ package org.holodeckb2b.ebms3.packaging;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.IProperty;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IProperty;
 
 /**
  * Is a helper class for handling the ebMS Property elements that occur in the ebMS SOAP 
@@ -41,7 +41,7 @@ public class Property {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Property", Constants.EBMS3_NS_PREFIX);
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Property");
     
     // The local name of the name attribute
     private static final String LN_ATTR_NAME = "name";
@@ -78,20 +78,20 @@ public class Property {
     
     /**
      * Reads the information from the <code>Property</code> object and returns it
-     * in a new {@link org.holodeckb2b.ebms3.persistent.general.Property} entity
+     * in a new {@link org.holodeckb2b.ebms3.persistency.entities.Property} entity
      * object.
      * <p><b>NOTE:</b> The entity object is not persisted by this method! It is
      * the responsibility of the caller to store it.
      * 
      * @param propElement            The <code>Property</code> element to read the
      *                               info from
-     * @return                       A new {@link org.holodeckb2b.ebms3.persistent.general.Property} 
+     * @return                       A new {@link org.holodeckb2b.ebms3.persistency.entities.Property} 
      *                               object containing the service info from the
      *                               element
      * @throws PackagingException    When the given element does not contain a valid
      *                               <code>Property</code> element.
      */    
-    public static org.holodeckb2b.ebms3.persistent.general.Property readElement(OMElement propElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.Property readElement(OMElement propElement) throws PackagingException {
         if (propElement == null) 
             return null;
         
@@ -103,7 +103,7 @@ public class Property {
         String value = propElement.getText();
         
         // Create the entity object
-        org.holodeckb2b.ebms3.persistent.general.Property propData = new org.holodeckb2b.ebms3.persistent.general.Property(name, value);
+        org.holodeckb2b.ebms3.persistency.entities.Property propData = new org.holodeckb2b.ebms3.persistency.entities.Property(name, value);
         
         //@todo: Uncomment when spec is changed and type is allowed
 //        // Read type attribute

@@ -19,10 +19,11 @@ package org.holodeckb2b.multihop;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler that checks whether the received message was sent through the I-Cloud. This is 
@@ -54,7 +55,7 @@ public class CheckFromICloud extends BaseHandler {
             
             if (isMultiHop) {
                 log.debug("Message received through I-Cloud, update message units");
-                for (MessageUnit mu : MessageContextUtils.getRcvdMessageUnits(mc))
+                for (EntityProxy<MessageUnit> mu : MessageContextUtils.getRcvdMessageUnits(mc))
                     MessageUnitDAO.setMultiHop(mu, isMultiHop);
             }
         }

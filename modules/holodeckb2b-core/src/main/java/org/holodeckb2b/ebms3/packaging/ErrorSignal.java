@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,12 +22,12 @@ import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.IDescription;
-import org.holodeckb2b.common.messagemodel.IEbmsError;
-import org.holodeckb2b.common.messagemodel.IErrorMessage;
-import org.holodeckb2b.ebms3.persistent.message.EbmsError;
-import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
+import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
+import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IDescription;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 
 /**
  * Is a helper class for handling the ebMS error signals in the ebMS SOAP header.
@@ -47,13 +47,12 @@ public class ErrorSignal {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Error", Constants.EBMS3_NS_PREFIX);
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Error");
     
     /**
      * The fully qualified name of the ErrorDetail element as an {@link QName}
      */
-    private static final QName  Q_ERROR_DETAIL = new QName(Constants.EBMS3_NS_URI, "ErrorDetail", 
-                                                           Constants.EBMS3_NS_PREFIX);
+    private static final QName  Q_ERROR_DETAIL = new QName(EbMSConstants.EBMS3_NS_URI, "ErrorDetail");
 
     /*
      * The local names of the attributes of the Error element
@@ -100,9 +99,9 @@ public class ErrorSignal {
      *                              ebMS specification and can therefore not be
      *                              read completely
      */
-    public static org.holodeckb2b.ebms3.persistent.message.ErrorMessage readElement(OMElement sigElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.ErrorMessage readElement(OMElement sigElement) throws PackagingException {
         // Create a new EbmsError entity object to store the information in
-        org.holodeckb2b.ebms3.persistent.message.ErrorMessage errData = new org.holodeckb2b.ebms3.persistent.message.ErrorMessage();
+        org.holodeckb2b.ebms3.persistency.entities.ErrorMessage errData = new org.holodeckb2b.ebms3.persistency.entities.ErrorMessage();
         
         // First read general information from the MessageInfo child 
         MessageInfo.readElement(MessageInfo.getElement(sigElement), errData);
@@ -217,11 +216,12 @@ public class ErrorSignal {
         error.setCategory(errorElement.getAttributeValue(new QName(CATEGORY_ATTR)));
         error.setErrorCode(errorElement.getAttributeValue(new QName(ERROR_CODE_ATTR)));
         error.setOrigin(errorElement.getAttributeValue(new QName(ORIGIN_ATTR)));
+        error.setShortDescription(errorElement.getAttributeValue(new QName(SHORT_DESCR_ATTR)));
         error.setRefToMessageInError(errorElement.getAttributeValue(new QName(REF_TO_ATTR)));
         // Convert text of attribute to enum value of entity object
-        error.setSeverity( EbmsError.Severity.FAILURE.toString()
+        error.setSeverity( IEbmsError.Severity.FAILURE.toString()
                                 .equalsIgnoreCase(errorElement.getAttributeValue(new QName(SEVRITY_ATTR))) 
-                           ? EbmsError.Severity.FAILURE : EbmsError.Severity.WARNING);
+                           ? IEbmsError.Severity.FAILURE : IEbmsError.Severity.WARNING);
         
         // Read the ErrorDetail child element (if it exists)
         OMElement errDetailElement = errorElement.getFirstChildWithName(Q_ERROR_DETAIL);

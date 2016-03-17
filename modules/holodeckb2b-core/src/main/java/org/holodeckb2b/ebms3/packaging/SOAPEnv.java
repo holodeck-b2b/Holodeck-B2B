@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
-import org.holodeckb2b.common.general.Constants;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 
 /**
  * Is a helper class for handling a SOAPEnv for an ebMS V3 message. 
@@ -37,6 +37,11 @@ public class SOAPEnv {
      */
     public enum SOAPVersion { SOAP_11, SOAP_12 }
 
+    /**
+     * The prefix of the ebMS header block elements.
+     */
+    private static final String EBMS3_NS_PREFIX = "eb3";
+    
     /**
      * Creates a new SOAP Envelope for sending an ebMS 3 message. The created SOAP
      * envelop will already contain a declaration of the ebMS 3 namespace.
@@ -70,7 +75,7 @@ public class SOAPEnv {
         // Declare all namespaces that are needed by default
         envelope.declareNamespace("http://www.w3.org/1999/XMLSchema-instance/", "xsi");
         envelope.declareNamespace("http://www.w3.org/1999/XMLSchema", "xsd");
-        envelope.declareNamespace(Constants.EBMS3_NS_URI, Constants.EBMS3_NS_PREFIX);
+        envelope.declareNamespace(EbMSConstants.EBMS3_NS_URI, EBMS3_NS_PREFIX);
     }
 
     
@@ -84,7 +89,7 @@ public class SOAPEnv {
      *          <code>null</code> if there is no namespace declared for ebMS 3
      */
     public static OMNamespace getEbms3Namespace(OMElement e) {
-        return e.findNamespace(Constants.EBMS3_NS_URI, null);
+        return e.findNamespace(EbMSConstants.EBMS3_NS_URI, null);
     }
     
     /**

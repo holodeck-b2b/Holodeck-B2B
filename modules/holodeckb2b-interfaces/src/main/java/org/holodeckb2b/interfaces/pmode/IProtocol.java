@@ -44,6 +44,8 @@ public interface IProtocol {
      * 
      * @return  <code>true</code> if the SOAP target role/actor must be added to the ebMS message header,<br>
      *          <code>false</code> if the default target should be used.
+     * @todo: Set version number
+     * @since
      */
     public boolean shouldAddActorOrRoleAttribute();
     

@@ -24,20 +24,22 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.messagemodel.IEbmsError;
-import org.holodeckb2b.common.messagemodel.IReceipt;
-import org.holodeckb2b.common.pmode.IProtocol;
+import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.mmd.xml.CollaborationInfo;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
+import org.holodeckb2b.ebms3.persistency.entities.SignalMessage;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.persistent.message.ErrorMessage;
-import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.persistent.message.PullRequest;
-import org.holodeckb2b.ebms3.persistent.message.SignalMessage;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.pmode.IProtocol;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for adding the necessary WS-Addressing headers to the message to sent it
@@ -76,11 +78,12 @@ public class ConfigureMultihop extends BaseHandler {
         
         // If the primary message unit is a user message it can be multi-hop in itself. Receipt and/or Error signals
         // depends on whether the original message was sent using multi-hop.
-        MessageUnit primMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+        MessageUnit primMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
         if (primMU instanceof UserMessage) {
             // Whether the user message is sent using multi-hop is defined by P-Mode parameter 
             // PMode[1].Protocol.AddActorOrRoleAttribute
-            IProtocol prot = HolodeckB2BCore.getPModeSet().get(primMU.getPMode()).getLegs().iterator().next().getProtocol();            
+            IProtocol prot = HolodeckB2BCoreInterface.getPModeSet().get(primMU.getPMode())
+                                                                   .getLegs().iterator().next().getProtocol();            
             if (prot == null || !prot.shouldAddActorOrRoleAttribute()) 
                 log.debug("Primary message is a non multi-hop UserMessage");
             else {
@@ -103,7 +106,7 @@ public class ConfigureMultihop extends BaseHandler {
                 log.debug("Primary message unit is response signal to multi-hop User Message -> add routing info");
                 addRoutingInfo(mc, usrMessage, (SignalMessage) primMU);
             } else
-                log.debug("Primary message unit is response signal to non multi-hop User Message");            
+                log.debug("Primary message unit is response signal to non (multi-hop) User Message");            
         }
         
         return InvocationResponse.CONTINUE;
@@ -129,17 +132,18 @@ public class ConfigureMultihop extends BaseHandler {
         }
         
         if (refToMsgId != null && !refToMsgId.isEmpty()) {
-            List<MessageUnit> refdMessages = null;
+            List<EntityProxy<MessageUnit>> refdMessages = null;
             try {
                 refdMessages = MessageUnitDAO.getReceivedMessageUnitsWithId(refToMsgId);
-                if (refdMessages != null && refdMessages.size() >= 1) {
+                if (!Utils.isNullOrEmpty(refdMessages)) {
                     // Signal refers to one other message unit, check that it is a User Message
-                    MessageUnit refdMU = refdMessages.get(0);
-                    if (refdMU instanceof UserMessage)
-                        // Load the object completely
-                        refdUM = (UserMessage) MessageUnitDAO.loadCompletely(refdMU);
-                    else
-                        log.debug("Referenced message unit is not a UserMessage!");
+                    EntityProxy<MessageUnit> refdMU = refdMessages.get(0);
+                    if (refdMU.entity instanceof UserMessage) {
+                        // Load all meta-data for the user message
+                        MessageUnitDAO.loadCompletely(refdMU);  
+                        refdUM = (UserMessage) refdMU.entity;
+                    } else
+                        log.warn("Multi-hop signal on signal is not supported!");                                            
                 } else
                    log.debug("Signal message refers to no or multiple message units in database");
             } catch (DatabaseException dbe) {};           

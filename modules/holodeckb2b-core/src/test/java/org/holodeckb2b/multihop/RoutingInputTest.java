@@ -20,9 +20,9 @@ import java.io.File;
 import java.util.Iterator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.holodeckb2b.common.general.Constants;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -64,7 +64,7 @@ public class RoutingInputTest {
         Iterator ciChilds = umChild.getChildrenWithLocalName("CollaborationInfo");
         assertTrue(ciChilds.hasNext());
         OMElement ciChild = (OMElement) ciChilds.next();
-        assertEquals(Constants.EBMS3_NS_URI, ciChild.getNamespaceURI());
+        assertEquals(EbMSConstants.EBMS3_NS_URI, ciChild.getNamespaceURI());
     }
     
 }

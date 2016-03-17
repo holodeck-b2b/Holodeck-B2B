@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@ package org.holodeckb2b.ebms3.packaging;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.IDescription;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IDescription;
 
 /**
  * Is a helper class for handling the ebMS Description element in the ebMS SOAP 
@@ -38,7 +38,7 @@ public class Description {
     /**
      * The fully qualified name of the element as an {@see QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Description", Constants.EBMS3_NS_PREFIX);
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Description");
     
     // The local name of the lang attribute
     private static final String LN_ATTR_LANG = "lang";
@@ -102,13 +102,13 @@ public class Description {
      *                      <code>null</code> if the given element does not contain
      *                      a <code>Description</code> element
      */
-    public static org.holodeckb2b.ebms3.persistent.general.Description readElement(OMElement descrElement) {
+    public static org.holodeckb2b.ebms3.persistency.entities.Description readElement(OMElement descrElement) {
         // Check if there was a Description element to read
         if (descrElement == null)
             return null;
         else {
             // Create new entity object
-            org.holodeckb2b.ebms3.persistent.general.Description  descrData = new org.holodeckb2b.ebms3.persistent.general.Description();
+            org.holodeckb2b.ebms3.persistency.entities.Description  descrData = new org.holodeckb2b.ebms3.persistency.entities.Description();
 
             // Read description content
             descrData.setText(descrElement.getText());

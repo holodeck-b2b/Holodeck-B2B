@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,9 @@ package org.holodeckb2b.ebms3.packaging;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.ISchemaReference;
-import org.holodeckb2b.ebms3.persistent.general.SchemaReference;
+import org.holodeckb2b.ebms3.persistency.entities.SchemaReference;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.ISchemaReference;
 
 /**
  * Is a helper class for handling the ebMS Schema element in the ebMS SOAP 
@@ -35,7 +35,7 @@ public class Schema {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Schema", Constants.EBMS3_NS_PREFIX);
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Schema");
     
     // The local name of the location attribute
     private static final String LN_ATTR_LOCATION = "location";
@@ -87,14 +87,14 @@ public class Schema {
     
     /**
      * Reads the schema data about the payload from the <code>Schema</code> element 
-     * and returns it as a {@link org.holodeckb2b.ebms3.persistent.general.SchemaReference}
+     * and returns it as a {@link org.holodeckb2b.ebms3.persistency.entities.SchemaReference}
      * entity object.
      * <p><b>NOTE:</b> The entity object is not persisted by this method! It is 
      * the responsibility of the caller to store it.
      * 
      * @param siElement             The <code>Schema</code> element to read the
      *                              payload meta data from
-     * @return                      A new {@link org.holodeckb2b.ebms3.persistent.general.SchemaReference} 
+     * @return                      A new {@link org.holodeckb2b.ebms3.persistency.entities.SchemaReference} 
      *                              object containing the meta data about the payload
      * @throws PackagingException   When the given element is not a valid
      *                              <code>Schema</code> element.

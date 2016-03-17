@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ package org.holodeckb2b.ebms3.packaging;
 import javax.xml.namespace.QName;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.holodeckb2b.common.general.Constants;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 
 /**
  * Is a helper class for handling the ebMS Messaging element in the SOAP header.
@@ -77,7 +77,7 @@ public class Messaging {
         try {
             // there should only be one messaging element so we can just get the first one
             messaging = (SOAPHeaderBlock) env.getHeader().getFirstChildWithName(
-                                                            new QName(Constants.EBMS3_NS_URI, LOCAL_NAME)); 
+                                                            new QName(EbMSConstants.EBMS3_NS_URI, LOCAL_NAME)); 
         } catch (Exception ex) {
             // Returned element not a header block or no header available -> can not be the messaging element, leave null 
             messaging = null;

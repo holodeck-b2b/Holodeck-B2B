@@ -1,11 +1,28 @@
+<!--
 
+    Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>2.1</version>
+        <version>2.0.0-mh</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -17,54 +34,57 @@
 
     <dependencies>
  
-            <!--=============================================================== 
-                First the modules of Holodeck itself 
-            =============================================================== -->
-            <dependency>
-                <groupId>org.holodeckb2b</groupId>
-                <artifactId>holodeckb2b-common</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>org.holodeckb2b</groupId>
-                <artifactId>holodeckb2b-core</artifactId>
-            </dependency>
-   
-            <!-- 
-                Add Bouncy Castle crypto provider to enable newer security algorithms
-            -->
-            <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
-                <version>1.52</version>
-                <scope>runtime</scope>
-            </dependency>    
-                
-            <!-- Logging -->
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <scope>runtime</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-                <version>1.7.12</version>
-                <scope>runtime</scope>
-            </dependency>
-         
-            <!-- Database support -->
-            <dependency>
-                <groupId>org.apache.derby</groupId>
-                <artifactId>derby</artifactId>
-                <version>10.10.1.1</version>
-                <scope>runtime</scope>
-            </dependency>
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>5.1.21</version>
-                <scope>runtime</scope>
-            </dependency>
+        <!--=============================================================== 
+            First the modules of Holodeck itself 
+        =============================================================== -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-interfaces</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-core</artifactId>
+        </dependency>
+        <!-- 
+            Add Bouncy Castle crypto provider to enable newer security algorithms
+        -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.52</version>
+            <scope>runtime</scope>
+        </dependency>    
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.12</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Database support -->
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>10.10.1.1</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.21</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
       
     <build>
@@ -88,7 +108,5 @@
                 </executions>
             </plugin>
         </plugins>
-    </build>
-  
-  
+    </build>  
 </project>

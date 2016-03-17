@@ -20,8 +20,9 @@ import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.holodeckb2b.common.messagemodel.IUserMessage;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
  * Represent the <code>ebint:RoutingInput</code> WS-A EPR parameter that is used to include routing information to 
@@ -34,7 +35,8 @@ public class RoutingInput {
     /**
      * QName for the ebint:RoutingInput element
      */
-    public static final QName Q_ELEMENT_NAME = new QName(MultiHopConstants.ROUTING_INPUT_NS_URI, "RoutingInput", "ebint");
+    public static final QName Q_ELEMENT_NAME = new QName(MultiHopConstants.ROUTING_INPUT_NS_URI, "RoutingInput", 
+                                                        "ebint");
  
     /**
      * Creates a new <code>ebint:RoutingInput</code> element in the context of the given SOAP envelope using the data 
@@ -51,6 +53,7 @@ public class RoutingInput {
         
         // Create the RoutingInput element
         OMElement routingInput = f.createOMElement(Q_ELEMENT_NAME);
+        routingInput.declareNamespace(EbMSConstants.EBMS3_NS_URI, EbMSConstants.EBMS3_NS_PREFIX);
         
         // And add a regular UserMessage child to it
         OMElement usrMsgElem = UserMessage.createElement(routingInput, routinginfo);

@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.general.IProperty;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IProperty;
 
 /**
  * Is a helper class for handling the ebMS PartProperties element in the ebMS SOAP 
@@ -37,7 +37,7 @@ public class PartProperties {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PartProperties", Constants.EBMS3_NS_PREFIX);
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "PartProperties");
 
     /**
      * Creates a <code>PartProperties</code> element and adds it to the given <code>PartInfo</code> element. 
@@ -79,24 +79,24 @@ public class PartProperties {
     
     /**
      * Reads the set of properties from the <code>PartProperties</code> element 
-     * and returns them as a collection of {@link org.holodeckb2b.ebms3.persistent.general.Property}
+     * and returns them as a collection of {@link org.holodeckb2b.ebms3.persistency.entities.Property}
      * entity objects.
      * <p><b>NOTE:</b> The entity objects in the collection are not persisted by 
      * this method! It is the responsibility of the caller to store it.
      * 
      * @param ppElement             The <code>PartProperties</code> element to read the
      *                              properties from
-     * @return                      A new collection of {@link org.holodeckb2b.ebms3.persistent.general.Property} 
+     * @return                      A new collection of {@link org.holodeckb2b.ebms3.persistency.entities.Property} 
      *                              objects 
      * @throws PackagingException   When the given element is not a valid
      *                              <code>MessageProperties</code> element.
      */
-    public static Collection<org.holodeckb2b.ebms3.persistent.general.Property> readElement(OMElement ppElement) throws PackagingException {
+    public static Collection<org.holodeckb2b.ebms3.persistency.entities.Property> readElement(OMElement ppElement) throws PackagingException {
         if (ppElement == null)
             return null;
         
         // Create new collection
-        ArrayList<org.holodeckb2b.ebms3.persistent.general.Property> props = new ArrayList<org.holodeckb2b.ebms3.persistent.general.Property>();
+        ArrayList<org.holodeckb2b.ebms3.persistency.entities.Property> props = new ArrayList<org.holodeckb2b.ebms3.persistency.entities.Property>();
         // Get all child elements containing the properties
         Iterator<?> it = ppElement.getChildrenWithName(Property.Q_ELEMENT_NAME);
         // Read each property element and add it info to the collection
