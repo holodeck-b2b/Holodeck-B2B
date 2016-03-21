@@ -110,6 +110,16 @@ public class Config implements IConfiguration {
     private String  pubKeyStorePassword = null;    
     
     /*
+     * The path to the keystore holding the trusted certificates
+    */
+    private String trustKeyStorePath = null;
+    
+    /*
+     * The password of the keystore that holds the trusted certificates
+     */
+    private String  trustKeyStorePassword = null;    
+
+    /*
      * Default setting whether the revocation of a certificate should be checked 
      */
     private boolean defaultRevocationCheck = false;
@@ -219,6 +229,15 @@ public class Config implements IConfiguration {
         
         // The password for the keystore holding the public keys
         pubKeyStorePassword = configFile.getParameter("PublicKeyStorePassword");
+        
+        // The location of the keystore holding the trusted certificate, if not provided the default location 
+        // «HB2B_HOME»/repository/certs/trustedcerts.jks is used
+        trustKeyStorePath = configFile.getParameter("TrustKeyStorePath");
+        if (Utils.isNullOrEmpty(trustKeyStorePath))
+            trustKeyStorePath = holodeckHome + "/repository/certs/trustedcerts.jks";        
+        
+        // The password for the keystore holding the public keys
+        trustKeyStorePassword = configFile.getParameter("TrustKeyStorePassword");
         
         // Default setting for certificate revocation check
         String certRevocationCheck = configFile.getParameter("CertificateRevocationCheck");
@@ -405,6 +424,31 @@ public class Config implements IConfiguration {
      */
     public String getPublicKeyStorePassword() {
         return pubKeyStorePassword;
+    }
+
+    /**
+     * Gets the path to the keystore containing the CA certificates that should be trusted when validating the 
+     * certificate that was used for signing a received message.
+     * <p>This "trust" keystore should be used to store certificates that are not directly related to a specific trading 
+     * partner but are needed to validate the trading partners certificate. By using the trust store the trading 
+     * partners certificate doesn't need to be registered in Holodeck B2B but can be included in the message itself 
+     * using a <code>BinarySecurityToken</code> element.
+     * 
+     * @return The path to the <i>"trust"</i> keystore.
+     * @since 2.1.0
+     */
+    public String getTrustKeyStorePath() {
+        return trustKeyStorePath;
+    }
+
+    /**
+     * Gets the password for the keystore that holds the trusted CA certificates.
+     * 
+     * @return  The password for accessing the keystore with the trusted certificates.
+     * @since 2.1.0
+     */
+    public String getTrustKeyStorePassword() {
+        return trustKeyStorePassword;
     }
 
     /**

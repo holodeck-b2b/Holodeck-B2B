@@ -20,18 +20,27 @@
 This directory is used by default to store the Java keystore files that 
 hold the certificates that are used for signing and encrypting messages.
 
-It contains two keystores:
+It contains three keystores:
 
 1) "publickeys.jks" holding the public keys. These are used to validate
-   the signature of a received message and to encrypt sent messages.
+   the signature of a received message and to encrypt sent messages. 
+   This keystore should be used to store the certificates of trading
+   partners.
 
 2) "privatekeys.jks" holding the private keys. These are used to sign
    sent messages and decrypt received messages.
 
+3) “trustedcerts.jks” holding the certificates of trusted Certificate
+   Authorities. These are used to validate the certificate of a 
+   signature. If the certificate of the trading partner is included in
+   the message it does not need to be in the public keystore if the 
+   issuing CA is in this keystore.
+
 The distribution package by default includes empty keystores, with simple
-passwords "secret" for the private one and "nosecrets" for the public
-one. It is HIGHLY RECOMMENDED to change these passwords to more safer
-ones, see below how to configure Holodeck B2B for the new passwords.
+passwords "secret" for the private, "nosecrets" for the public and 
+“trusted” for the trusted keystore. It is HIGHLY RECOMMENDED to change 
+these passwords to more safer ones, see below how to configure Holodeck 
+B2B for the new passwords.
 
 2. Configuring Holodeck B2B
 ===========================
@@ -39,8 +48,9 @@ ones, see below how to configure Holodeck B2B for the new passwords.
 To give Holodeck B2B access to the keystores you need to configure the 
 keystore passwords in the Holodeck B2B configuration file which is found 
 in «Holodeck B2B base dir»/conf/holodeckb2b.xml
-Set "PrivateKeyStorePassword" and "PublicKeyStorePassword" parameters to
-the passwords of the respective keystores. 
+Set "PrivateKeyStorePassword”, "PublicKeyStorePassword" and 
+“TrustStorePassword" parameters to the passwords of the respective
+keystores. 
 
 NOTE: If you want the change the passwords for the default keystores you
 must also change the password on the keystore files by executing the
@@ -48,7 +58,8 @@ following command:
     keytool -storepasswd -keystore «path to keystore»
 
 Also the location where Holodeck B2B should look for the keystores can be 
-specified by setting the "PrivateKeyStorePath" and "PublicKeyStorePath"
+specified by setting the "PrivateKeyStorePath”, "PublicKeyStorePath"
+or “TrustStorePath"
 parameters. 
 
 3. Adding certificates and private keys
@@ -60,10 +71,11 @@ certificate / key that must be used for processing the message. It is
 RECOMMENDED to use descriptive aliases for easy identification.
 
 To add a X.509v3 certificate holding the public key of a trading
-partner to the public keystore use the following command:
+partner to the public keystore or a certificate of a trusted CA use the
+following command:
 
 keytool -importcert \
-        -keystore «Holodeck B2B base dir»/repository/certs/publickeys.jks \
+        -keystore «path to the keystore» 
         -storepass «your keystore password» \
         -alias «alias for the cert in keystore» \
         -file «path to certificate file» 
@@ -87,7 +99,7 @@ keytool -list -v -storetype pkcs12 -keystore «path to certificate file»
 4. Examples
 ===========
 
-The examples/certs directory contains two sample keystores which contain
+The examples/certs directory contains three sample keystores which contain
 the certificates that are used in the example P-Modes (contained in 
 examples/pmodes). Their passwords are the same as the default keystores.
 You can therefor just overwrite the default keystores with the example
