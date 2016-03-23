@@ -34,7 +34,7 @@ public class Protocol implements IProtocol {
     private Boolean shouldshouldAddActorOrRoleAttribute;
     
     @Element (name = "UseChunking" , required = false)
-    private Boolean chunked = true;
+    private Boolean chunked = false;
     
     @Element (name = "SoapVersion", required = false)
     private String soapVersion = "1.2";
