@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.pmode.xml.Protocol;
 import java.io.File;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -80,7 +79,7 @@ public class ProtocolTest {
         
         assertFalse(p.shouldAddActorOrRoleAttribute());
         assertEquals("1.2", p.getSOAPVersion());
-        assertTrue(p.useChunking());
+        assertFalse(p.useChunking());
         assertFalse(p.useHTTPCompression());
     }
     
@@ -93,7 +92,7 @@ public class ProtocolTest {
         assertNull(p.getAddress());        
         assertFalse(p.shouldAddActorOrRoleAttribute());
         assertEquals("1.2", p.getSOAPVersion());
-        assertFalse(p.useChunking());
+        assertTrue(p.useChunking());
         assertFalse(p.useHTTPCompression());    
     }
     
@@ -106,7 +105,7 @@ public class ProtocolTest {
         assertNull(p.getAddress());        
         assertFalse(p.shouldAddActorOrRoleAttribute());
         assertEquals("1.1", p.getSOAPVersion());
-        assertTrue(p.useChunking());
+        assertFalse(p.useChunking());
         assertFalse(p.useHTTPCompression());    
     }
     
@@ -119,7 +118,7 @@ public class ProtocolTest {
         assertNull(p.getAddress());        
         assertFalse(p.shouldAddActorOrRoleAttribute());
         assertEquals("1.2", p.getSOAPVersion());
-        assertTrue(p.useChunking());
+        assertFalse(p.useChunking());
         assertTrue(p.useHTTPCompression());    
     }
     
