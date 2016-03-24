@@ -27,6 +27,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.persistency.entities.Receipt;
@@ -150,8 +151,10 @@ public class CreateReceipt extends AbstractUserMessageHandler {
                 }
                 log.debug("Receipt for message [msgId=" + um.getMessageId() + "] created successfully");
                 // Trigger event to signal that the event was created
-                HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new ReceiptCreatedEvent(um, receipt.entity), 
-                                                                        mc);
+                HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(
+                   new ReceiptCreatedEvent(um, receipt.entity, 
+                                           um.getCurrentProcessingState().getName().equals(ProcessingStates.DUPLICATE)), 
+                   mc);
             } catch (DatabaseException ex) {
                 // Storing the new Receipt signal failed! This is a severe problem, but it does not
                 // need to stop processing because the user message is already delivered. The receipt

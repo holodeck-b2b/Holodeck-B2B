@@ -40,4 +40,14 @@ public interface IReceiptCreatedEvent extends IMessageProcessingEvent {
      * @return The {@link IReceipt} that was created
      */
     public IReceipt getReceipt();
+    
+    /**
+     * Indicates whether the received <i>User Message</i> for which this <i>Receipt</i> was created is a <i>duplicate
+     * </i>and because of <i>duplicate elimination</i> not delivered to the business application. Duplicate elimination 
+     * is part of the <i>AS4 Reception Awareness feature</i> and can be configured in the P-Mode.
+     * 
+     * @return  <code>true</code> if the Receipt was created for a duplicate,<br>
+     *          <code>false</code> otherwise
+     */
+    public boolean isForEliminatedDuplicate();
 }
