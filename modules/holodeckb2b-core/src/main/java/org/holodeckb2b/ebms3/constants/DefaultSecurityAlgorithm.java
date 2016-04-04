@@ -28,7 +28,7 @@ public final class DefaultSecurityAlgorithm {
    
     public static final String SIGNATURE = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
     
-    public static final String ENCRYPTION = "http://www.w3.org/2001/04/xmlenc#aes128-cbc";
+    public static final String ENCRYPTION = "http://www.w3.org/2009/xmlenc11#aes128-gcm";
     
     /**
      * Note that the default message digest algorithm is both used for signature and encryption (key transport)
