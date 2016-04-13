@@ -29,8 +29,8 @@ It contains two keystores:
    sent messages and decrypt received messages.
 
 The distribution package by default includes empty keystores, with simple
-passwords "secret" for the private one and "nosecrets" for the public
-one. It is HIGHLY RECOMMENDED to change these passwords to more safer
+passwords: "secret" for the private one and "nosecrets" for the public
+one. It is HIGHLY RECOMMENDED to change these passwords to safer
 ones, see below how to configure Holodeck B2B for the new passwords.
 
 2. Configuring Holodeck B2B
@@ -90,10 +90,10 @@ keytool -list -v -storetype pkcs12 -keystore «path to certificate file»
 The examples/certs directory contains two sample keystores which contain
 the certificates that are used in the example P-Modes (contained in 
 examples/pmodes). Their passwords are the same as the default keystores.
-You can therefor just overwrite the default keystores with the example
+You can therefore just overwrite the default keystores with the example
 keystores.
 
-When using the private key in a P-Mode the password for is 
+When using the private key in a P-Mode the password is 
 "Example" + 'A' | 'B' | 'C' | 'D'
 
 
