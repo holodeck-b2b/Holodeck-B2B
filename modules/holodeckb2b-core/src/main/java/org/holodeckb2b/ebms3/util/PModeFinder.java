@@ -566,7 +566,7 @@ public class PModeFinder {
             return false;
         
         // Verify username token in ebms header, first check if pull request flow contains config for this UT
-        IUsernameTokenConfiguration expectedUT = pullSecCfg.getUsernameTokenConfiguration(
+        IUsernameTokenConfiguration expectedUT = pullSecCfg == null ? null : pullSecCfg.getUsernameTokenConfiguration(
                                                                         ISecurityConfiguration.WSSHeaderTarget.EBMS);
         if (expectedUT == null) {
             // if not fall back to trading partner config
