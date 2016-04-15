@@ -22,6 +22,7 @@ import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Lob;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError.Severity;
@@ -144,13 +145,16 @@ public class EbmsError implements Serializable, IEbmsError {
     
     private String          ERROR_CODE;
     
-    @Column(name = "ERROR_DETAIL", length = 10000)
+    @Lob
+    @Column(length = 10000)
     private String          ERROR_DETAIL;
 
     private String          ORIGIN;
     
     private String          REF_TO_MSG_IN_ERROR;
     
+    @Lob
+    @Column(length = 1024)
     private String          SHORT_DESCR;
    
     @Enumerated(EnumType.STRING)
