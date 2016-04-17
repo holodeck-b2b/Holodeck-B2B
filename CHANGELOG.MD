@@ -13,6 +13,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed 
 
 ### Fixed 
-* Issues #8 and #9
+* Database doesn't save long meta data strings [#8](https://github.com/holodeck-b2b/Holodeck-B2B/issues/8)
+* NPE when using PullRequestFlow without security configuration [#9](https://github.com/holodeck-b2b/Holodeck-B2B/issues/9)  
+* IOException possible on parallel submission to Holodeck B2B Core [#10](https://github.com/holodeck-b2b/Holodeck-B2B/issues/10)  
 
 ### Security
