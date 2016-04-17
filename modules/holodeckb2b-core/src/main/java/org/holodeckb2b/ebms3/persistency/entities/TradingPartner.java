@@ -19,11 +19,13 @@ package org.holodeckb2b.ebms3.persistency.entities;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
 
@@ -123,6 +125,8 @@ public class TradingPartner implements Serializable, ITradingPartner {
     /*
      * Role. Field name is changed because ROLE is SQL-99 keyword
      */
+    @Lob
+    @Column(length = 1024)
     private String  TP_ROLE;
     
     /*

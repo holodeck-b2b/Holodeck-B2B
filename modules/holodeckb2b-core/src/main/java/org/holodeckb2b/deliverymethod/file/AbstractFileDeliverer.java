@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.commons.logging.Log;
@@ -166,7 +167,7 @@ public abstract class AbstractFileDeliverer implements IMessageDeliverer {
                                                        + (ext != null ? ext : "")));
         
         try {
-            Files.copy(sourcePath, targetPath);
+            Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception ex) {
             // Can not move payload file -> delivery not possible
             throw new IOException("Unable to deliver message because payload file [" 

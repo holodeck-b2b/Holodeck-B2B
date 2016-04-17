@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -225,8 +226,9 @@ public final class Utils {
      * 
      * @param baseName      The file name to check for possible duplicates.
      * @return              The base name added with a numerical suffix if necessary to prevent duplicates
+     * @throws IOException  When a parent directory does not exist (anymore)
      */
-    public static String preventDuplicateFileName(final String baseName) {
+    public static String preventDuplicateFileName(final String baseName) throws IOException {
         if (baseName == null || baseName.isEmpty())
             return null;
         
@@ -240,9 +242,15 @@ public final class Utils {
         }
         
         Path targetPath = Paths.get(baseName);
-        int i = 1;
-        while (Files.exists(targetPath))
-            targetPath = Paths.get(nameOnly + "-" + i++ + ext);
+        File f = null; int i = 1;
+        while (f == null) {
+            try {
+                f = Files.createFile(targetPath).toFile();                
+            } catch (FileAlreadyExistsException faee) {
+                // Okay, the file already exists, try with increased sequence number
+                targetPath = Paths.get(nameOnly + "-" + i++ + ext);
+            }
+        }
         
         return targetPath.toString();
     }

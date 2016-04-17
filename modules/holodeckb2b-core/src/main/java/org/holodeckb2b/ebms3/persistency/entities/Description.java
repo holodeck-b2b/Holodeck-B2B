@@ -19,6 +19,7 @@ package org.holodeckb2b.ebms3.persistency.entities;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.Lob;
 import org.holodeckb2b.interfaces.general.IDescription;
 
 /**
@@ -83,7 +84,8 @@ public class Description implements Serializable, IDescription {
      * NOTE: The JPA @Column annotation is not used so the attribute names are 
      * used as column names. Therefor the attribute names are in CAPITAL.
      */
-    @Column(name = "DESCRIPTION", length = 10000)
+    @Lob
+    @Column(name = "DESCRIPTION", length = 32768)
     private String  DESCRIPTION_TEXT;
     
     private String  LANG;

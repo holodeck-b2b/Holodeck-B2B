@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.Iterator;
 import org.apache.commons.logging.Log;
@@ -211,10 +212,10 @@ public class MessageSubmitter implements IMessageSubmitter {
                 Path destPath = Paths.get(Utils.preventDuplicateFileName(intPlDir + "/" + srcPath.getFileName()));
                 if (move) {
                     log.debug("Moving payload [" + p.getContentLocation() + "] to internal directory");
-                    Files.move(srcPath, destPath);
+                    Files.move(srcPath, destPath, StandardCopyOption.REPLACE_EXISTING);
                 } else {
                     log.debug("Copying payload [" + p.getContentLocation() + "] to internal directory");
-                    Files.copy(srcPath, destPath);
+                    Files.copy(srcPath, destPath, StandardCopyOption.REPLACE_EXISTING);
                 }
                 log.debug("Payload moved/copied to internal directory");
                 p.setContentLocation(destPath.toString());
