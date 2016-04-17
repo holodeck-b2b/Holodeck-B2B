@@ -16,8 +16,10 @@
  */
 package org.holodeckb2b.ebms3.persistency.entities;
 
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 
@@ -52,6 +54,8 @@ public class PullRequest extends SignalMessage implements IPullRequest {
      * used as column names. Therefor the attribute names are in CAPITAL.
      * 2) The primary key field is inherited from super class
      */    
+    @Lob
+    @Column(length = 1024)
     private String          MPC;
 }
 

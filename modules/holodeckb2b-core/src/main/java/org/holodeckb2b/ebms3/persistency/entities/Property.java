@@ -17,7 +17,9 @@
 package org.holodeckb2b.ebms3.persistency.entities;
 
 import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.Lob;
 import org.holodeckb2b.interfaces.general.IProperty;
 
 /**
@@ -96,10 +98,16 @@ public class Property implements Serializable, IProperty {
      * NOTE: The JPA @Column annotation is not used so the attribute names are 
      * used as column names. Therefor the attribute names are in CAPITAL.
      */
+    @Lob
+    @Column(length = 1024)
     private String  NAME;
     
+    @Lob
+    @Column(length = 1024)
     private String  VALUE;
     
+    @Lob
+    @Column(length = 1024)
     private String  TYPE;    
     
 }

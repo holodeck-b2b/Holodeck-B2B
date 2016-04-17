@@ -139,11 +139,11 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
             org.holodeckb2b.ebms3.packaging.PayloadInfo.createElement(usrMsgElement, mmd.getPayloads());
         }
         
-        String msgFilePath = Utils.preventDuplicateFileName(directory + "message-" 
-                                                    + mmd.getMessageId().replaceAll("[^a-zA-Z0-9.-]", "_") 
-                                                    + ".xml");
-        log.debug("Message meta data complete, start writing this to file " + msgFilePath);
         try {
+            String msgFilePath = Utils.preventDuplicateFileName(directory + "message-" 
+                                                        + mmd.getMessageId().replaceAll("[^a-zA-Z0-9.-]", "_") 
+                                                        + ".xml");
+            log.debug("Message meta data complete, start writing this to file " + msgFilePath);
             FileWriter fw = new FileWriter(msgFilePath);
             XMLStreamWriter xmlWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(fw);
             log.debug("Write the meta data to file");

@@ -17,7 +17,9 @@
 package org.holodeckb2b.ebms3.persistency.entities;
 
 import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.Lob;
 import org.holodeckb2b.interfaces.general.IPartyId;
 
 /**
@@ -86,10 +88,14 @@ public class PartyId implements Serializable, IPartyId {
     /*
      * The party id itself, REQUIRED
      */
+    @Lob
+    @Column(length = 1024)
     private String  P_ID;
     
     /*
      * Type of the party id
      */
+    @Lob
+    @Column(length = 1024)
     private String  P_TYPE;
 }

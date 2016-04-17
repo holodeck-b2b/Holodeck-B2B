@@ -23,12 +23,14 @@ import java.util.List;
 import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.MapKeyEnumerated;
 import javax.persistence.NamedQueries;
@@ -187,6 +189,8 @@ public class UserMessage extends MessageUnit implements org.holodeckb2b.interfac
     /**
      * If no specific MPC is assigned to the user message the default MPC is assumed.
      */
+    @Lob
+    @Column(length = 1024)
     private String              MPC = EbMSConstants.DEFAULT_MPC;
 
     /**

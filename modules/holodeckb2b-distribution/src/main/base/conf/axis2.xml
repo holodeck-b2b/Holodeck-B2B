@@ -127,8 +127,6 @@
                                   note that no such threads can exist with default unbounded request queue
             threadKeepAliveTimeUnit:  TimeUnit of value in threadKeepAliveTime (default SECONDS)                    (default SECONDS)
         -->
-        <!-- <parameter name="hostname">http://www.myApp.com/ws</parameter> -->
-        <!-- <parameter name="originServer">My-Server/1.1</parameter>           -->
         <!-- <parameter name="requestTimeout">10000</parameter>                   -->
         <!-- <parameter name="requestTcpNoDelay">false</parameter>                   -->
         <!-- <parameter name="requestCoreThreadPoolSize">50</parameter>                      -->
@@ -371,7 +369,9 @@
     <phaseOrder type="OutFlow">
         <phase name="ebms3OutPhase"/>
         <phase name="Security"/>
-        <phase name="MessageOut"/>
+        <phase name="MessageOut">
+            <handler name="HB2BDispatcher" class="org.holodeckb2b.ebms3.handlers.outflow.HTTPProductIdentifier"/>
+        </phase>
     </phaseOrder>
     <phaseOrder type="InFaultFlow">
         <!--  System predefined phases       -->

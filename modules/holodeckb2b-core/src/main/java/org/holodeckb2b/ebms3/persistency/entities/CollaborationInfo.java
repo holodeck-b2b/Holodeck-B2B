@@ -17,8 +17,10 @@
 package org.holodeckb2b.ebms3.persistency.entities;
 
 import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
+import javax.persistence.Lob;
 import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
@@ -122,8 +124,12 @@ public class CollaborationInfo implements Serializable, ICollaborationInfo {
     /*
      * Because ACTION is a SQL-99 reserved word it is prefixed here
      */
+    @Lob
+    @Column(length = 1024)
     private String              CI_ACTION;
     
+    @Lob
+    @Column(length = 1024)
     private String              CONVERSATION_ID;
     
     @Embedded
