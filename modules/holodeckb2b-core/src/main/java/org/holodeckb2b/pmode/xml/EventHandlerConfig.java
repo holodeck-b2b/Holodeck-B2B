@@ -73,7 +73,7 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration 
         XSD_MU_NAMES_2_CLASS.put("PullRequest", IPullRequest.class);
     }
     
-    @Element(name = "HandlerClass", required = true)
+    @Element(name = "HandlerFactoryClass", required = true)
     private String  handlerFactoryClass = null;
     
     @ElementList(entry = "HandledEvent", required = false, inline = true)

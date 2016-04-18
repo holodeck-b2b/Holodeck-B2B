@@ -822,7 +822,7 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
     </xs:complexType>
     <xs:complexType name="EventHandlerConfiguration">
         <xs:sequence>
-            <xs:element name="HandlerClass" type="tns:non-empty-string"/>
+            <xs:element name="HandlerFactoryClass" type="tns:non-empty-string"/>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="HandledEvent"
                 type="tns:non-empty-string"/>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="ForMessageUnit">

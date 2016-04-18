@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EventHandler>
-    <HandlerClass>org.holodeckb2b.pmode.xml.events.EventHandlerFactory</HandlerClass>
+    <HandlerFactoryClass>org.holodeckb2b.pmode.xml.events.EventHandlerFactory</HandlerFactoryClass>
     <HandledEvent>org.holodeckb2b.pmode.xml.events.TestEvent1</HandledEvent>
     <HandledEvent>org.holodeckb2b.pmode.xml.events.TestEvent2</HandledEvent>
     <ForMessageUnit>UserMessage</ForMessageUnit>
