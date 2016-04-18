@@ -368,8 +368,9 @@
         <phase name="ebms3OutPhase"/>
         <phase name="Security"/>
         <phase name="MessageOut">
-            <handler name="HB2BDispatcher" class="org.holodeckb2b.ebms3.handlers.outflow.HTTPProductIdentifier"/>
+            <handler name="HB2BIdentifier" class="org.holodeckb2b.ebms3.handlers.outflow.HTTPProductIdentifier"/>
         </phase>
+        <phase name="Logging"/>
     </phaseOrder>
     <phaseOrder type="InFaultFlow">
         <phase name="Transport"/>      
@@ -385,7 +386,9 @@
     <phaseOrder type="OutFaultFlow">
         <phase name="ebms3OutPhase"/>
         <phase name="Security"/>
-        <phase name="MessageOut"/>
+        <phase name="MessageOut">
+            <handler name="HB2BIdentifier" class="org.holodeckb2b.ebms3.handlers.outflow.HTTPProductIdentifier"/>
+        </phase>
         <phase name="Logging"/>
     </phaseOrder>         
 </axisconfig>
