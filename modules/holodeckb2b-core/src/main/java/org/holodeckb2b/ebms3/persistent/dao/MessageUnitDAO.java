@@ -57,6 +57,7 @@ import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 
@@ -268,18 +269,17 @@ public class MessageUnitDAO {
     }
 
     /**
-     * Creates and stores a new Pull Request Signal message unit.
-     * <p>Because Pull Request messages are only created when they are sent, the processing state of the new pull 
-     * request message unit is set to {@link ProcessingStates#PROCESSING} to indicate that it is processed directly.
+     * Creates and stores a new Pull Request Signal message unit based on the provided pull request meta-data.
+     * <p>Because Pull Request messages are now also <i>submitted</i> to the Core and not necessarily send directly, 
+     * the processing state of the new pull request message unit is set to {@link ProcessingStates#READY_TO_PUSH} to 
+     * indicate that it can be sent.
      *
-     * @param pmodeId   The id of the PMode that defines the processing of the new Pull Request signal.
-     * @param mpc       The MPC that the pull operation will apply to. If not specified the <i>default MPC</i> will be
-     *                  used for the new Pull Request
+     * @param   prData  The meta-data on the Pull Request that should be sent, this MUST include the P-Mode id and MPC
      * @return          A new {@link EntityProxy} object for the new Pull Request signal message unit if it could be 
      *                  created and stored in the database
      * @throws DatabaseException If an error occurs when saving the new message unit to the database
      */
-    public static EntityProxy<PullRequest> createOutgoingPullRequest(String pmodeId, String mpc) 
+    public static EntityProxy<PullRequest> createOutgoingPullRequest(final IPullRequest prData) 
                                                                                         throws DatabaseException {
         EntityManager em = JPAUtil.getEntityManager();
         try {
@@ -292,10 +292,10 @@ public class MessageUnitDAO {
             persistentPullReqMU.setTimestamp(new Date());
             persistentPullReqMU.setDirection(MessageUnit.Direction.OUT);
             // Set P-Mode id
-            persistentPullReqMU.setPMode(pmodeId);
+            persistentPullReqMU.setPMode(prData.getPModeId());
             // Set MPC, use default if not provided
-            if (!Utils.isNullOrEmpty(mpc)) {
-                persistentPullReqMU.setMPC(mpc);
+            if (!Utils.isNullOrEmpty(prData.getMPC())) {
+                persistentPullReqMU.setMPC(prData.getMPC());
             } else {
                 persistentPullReqMU.setMPC(EbMSConstants.DEFAULT_MPC);
             }
@@ -303,8 +303,8 @@ public class MessageUnitDAO {
             // Add CREATED to signal PullRequest was made
             ProcessingState procstate = new ProcessingState(ProcessingStates.CREATED);
             persistentPullReqMU.setProcessingState(procstate);
-            // and immediately change state to PROCESSING to indicate it is being send
-            procstate = new ProcessingState(ProcessingStates.PROCESSING);
+            // and immediately change state to READY_TO_PUSH to indicate it is ready to send
+            procstate = new ProcessingState(ProcessingStates.READY_TO_PUSH);
             persistentPullReqMU.setProcessingState(procstate);
 
             // Persist the new message unit

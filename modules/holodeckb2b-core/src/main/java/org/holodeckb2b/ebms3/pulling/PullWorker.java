@@ -18,21 +18,20 @@ package org.holodeckb2b.ebms3.pulling;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.ebms.axis2.Axis2Sender;
 import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.interfaces.submit.MessageSubmitException;
 import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
@@ -149,9 +148,8 @@ public class PullWorker implements IWorkerTask {
     }
     
     /**
-     * Looks for message units that are for sending and kicks off the send process for each of them. To prevent a
-     * message from being send twice the send process is only started if the processing state can be successfully
-     * changed.
+     * Looks for which P-Modes a Pull Request must be executed and submits the Pull Request signal messages to the 
+     * Holodeck B2B Core for triggering the pull.
      */
     @Override
     public void run() {
@@ -184,12 +182,11 @@ public class PullWorker implements IWorkerTask {
                 
                 try {
                     log.debug("Create the PullRequest signal");
-                    EntityProxy<PullRequest> pullRequest = MessageUnitDAO.createOutgoingPullRequest(p.getId(), mpc);
-                    log.debug("PullRequest created [" + pullRequest.entity.getMessageId() 
-                                + "] for P-Mode [" + p.getId() + "] and MPC=" + mpc);
-                    Axis2Sender.sendMessage(pullRequest, log);
-                } catch (DatabaseException ex) {
-                    log.error("Could not create PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
+                    String messageId = HolodeckB2BCoreInterface.getMessageSubmitter()
+                                                                    .submitMessage(new PullRequestData(p.getId(), mpc));
+                    log.info("PullRequest created [" + messageId + "] for P-Mode [" + p.getId() + "] and MPC=" + mpc);
+                } catch (MessageSubmitException ex) {
+                    log.error("Could not submit PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
                 }
             }
     }
@@ -242,4 +239,44 @@ public class PullWorker implements IWorkerTask {
         
         return pmodesToPull;
     }    
+    
+    /** 
+     * Inner class to provide the meta-data on the Pull Request to the Holodeck B2B Core. Only supports passing of the
+     * PMode id and MPC.
+     */
+    private class PullRequestData implements IPullRequest {
+
+        String pModeId;
+        String mpc;
+
+        PullRequestData(final String pmodeId, final String mpc) {
+            this.pModeId = pmodeId;
+            this.mpc = mpc;
+        }
+        
+        @Override
+        public String getMPC() {
+            return mpc;
+        }
+
+        @Override
+        public Date getTimestamp() {
+            return null;
+        }
+
+        @Override
+        public String getMessageId() {
+            return null;
+        }
+
+        @Override
+        public String getRefToMessageId() {
+            return null; 
+        }
+
+        @Override
+        public String getPModeId() {
+            return pModeId;
+        }    
+    }
 }
