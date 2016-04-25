@@ -80,6 +80,10 @@ public final class EbMSConstants {
      * URI identifying a Two-Way MEP using Pull on the first and Push on the second leg
      */
     public static final String TWO_WAY_PULL_PUSH = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pullAndPush";
+    /**
+     * URI identifying a Two-Way MEP using Pull on both legs (very uncommon)
+     */
+    public static final String TWO_WAY_PULL_PULL = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pullAndPull";
 
     /*
      * This class is just a place holder for constants and should not be
