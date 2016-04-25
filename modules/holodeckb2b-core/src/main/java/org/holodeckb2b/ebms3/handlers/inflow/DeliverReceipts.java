@@ -135,7 +135,7 @@ public class DeliverReceipts extends BaseHandler {
     protected IDeliverySpecification getReceiptDelivery(final Receipt receipt) {
         IDeliverySpecification deliverySpec = null;
         
-        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(receipt.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(receipt.getPModeId());
         ILeg leg = pmode.getLegs().iterator().next(); // Currently only One-Way MEPS supports, so only one leg 
         IReceiptConfiguration rcptConfig = leg.getReceiptConfiguration();
         

@@ -197,13 +197,13 @@ public class DeliverErrors extends BaseHandler {
         IDeliverySpecification deliverySpec = null;
         MessageUnit entity = refdMU.entity;
                 
-        if (Utils.isNullOrEmpty(entity.getPMode()))
+        if (Utils.isNullOrEmpty(entity.getPModeId()))
             return null; // Referenced message unit without P-Mode, can not determine delivery
         
-        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(entity.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(entity.getPModeId());
         if (pmode == null) {
             log.warn("Sent message unit [" + entity.getMessageId() +"] does not reference valid P-Mode [" 
-                        + entity.getPMode() + "]!");
+                        + entity.getPModeId() + "]!");
             return null;
         }
         // First get the delivery specification for errors related to the user message as this will also be the fall

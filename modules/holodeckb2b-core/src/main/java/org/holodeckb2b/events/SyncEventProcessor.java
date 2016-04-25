@@ -85,7 +85,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
                 return;
             }
             MessageUnit subject = (MessageUnit) event.getSubject();
-            String pmodeId = subject.getPMode();
+            String pmodeId = subject.getPModeId();
             if (Utils.isNullOrEmpty(pmodeId)) {
                 // No P-Mode available for this message unit => no handler config
                 log.warn(msgUnitType + " with msgId=[" + messageId + "] has no P-Mode assigned. Can not handle event!");

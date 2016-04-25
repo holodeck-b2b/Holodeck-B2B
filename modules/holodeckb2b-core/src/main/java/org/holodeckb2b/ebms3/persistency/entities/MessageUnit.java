@@ -147,7 +147,8 @@ public abstract class MessageUnit implements Serializable, org.holodeckb2b.inter
      * 
      * @return The id of the P-Mode 
      */
-    public String getPMode() {
+    @Override
+    public String getPModeId() {
         return PMODE_ID;
     }
     

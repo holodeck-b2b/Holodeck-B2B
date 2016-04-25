@@ -183,7 +183,7 @@ public class FindPModes extends BaseHandler {
                 // Ignore here, we probably be thrown again quickly after
             }
             if (refdMsgUnit != null) {
-                pmode = HolodeckB2BCoreInterface.getPModeSet().get(refdMsgUnit.entity.getPMode());
+                pmode = HolodeckB2BCoreInterface.getPModeSet().get(refdMsgUnit.entity.getPModeId());
             }
         }   
         

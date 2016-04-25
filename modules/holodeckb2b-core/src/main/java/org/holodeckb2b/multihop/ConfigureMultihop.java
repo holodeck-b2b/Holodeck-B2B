@@ -82,7 +82,7 @@ public class ConfigureMultihop extends BaseHandler {
         if (primMU instanceof UserMessage) {
             // Whether the user message is sent using multi-hop is defined by P-Mode parameter 
             // PMode[1].Protocol.AddActorOrRoleAttribute
-            IProtocol prot = HolodeckB2BCoreInterface.getPModeSet().get(primMU.getPMode())
+            IProtocol prot = HolodeckB2BCoreInterface.getPModeSet().get(primMU.getPModeId())
                                                                    .getLegs().iterator().next().getProtocol();            
             if (prot == null || !prot.shouldAddActorOrRoleAttribute()) 
                 log.debug("Primary message is a non multi-hop UserMessage");

@@ -94,11 +94,11 @@ public class CreateReceipt extends AbstractUserMessageHandler {
             UserMessage um = umProxy.entity;
             log.debug("User message was succesfully delivered, check if Receipt is needed");
             
-            IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode());
+            IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
             if (pmode == null) {
                 // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
                 // is needed
-                log.error("P-Mode " + um.getPMode() + " not found in current P-Mode set!" 
+                log.error("P-Mode " + um.getPModeId() + " not found in current P-Mode set!" 
                             + "Unable to determine if receipt is needed for message [msgId=" + um.getMessageId() + "]");
                 return InvocationResponse.CONTINUE;
             }
@@ -116,7 +116,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
             Receipt rcptData = new Receipt();
             // Copy some meta-data to receipt
             rcptData.setRefToMessageId(um.getMessageId());
-            rcptData.setPMode(um.getPMode());
+            rcptData.setPMode(um.getPModeId());
             
             log.debug("Determine type of Receipt that should be sent");
             // Check if message was signed, done by checking if Signature info was available in default WS-Sec header

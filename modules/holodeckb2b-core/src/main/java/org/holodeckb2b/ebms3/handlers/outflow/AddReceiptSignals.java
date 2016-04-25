@@ -132,7 +132,7 @@ public class AddReceiptSignals extends BaseHandler {
         
         log.debug("Get the destination URL of the message");
         String destURL = null;
-        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.entity.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.entity.getPModeId());
 
         if (primaryMU.entity instanceof UserMessage ||  primaryMU.entity instanceof PullRequest) {
             destURL = pmode.getLegs().iterator().next().getProtocol().getAddress();

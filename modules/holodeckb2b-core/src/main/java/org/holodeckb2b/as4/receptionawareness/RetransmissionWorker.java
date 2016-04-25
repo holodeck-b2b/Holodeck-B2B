@@ -81,7 +81,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                 // Extract the entity object from the proxy
                 UserMessage um = umProxy.entity;
                 try {
-                    log.debug("Get retry configuration from P-Mode [" + um.getPMode() + "]");
+                    log.debug("Get retry configuration from P-Mode [" + um.getPModeId() + "]");
                     // Retry information is contained in Leg, and as we only have One-way it is always the first 
                     // and because retries is part of AS4 reception awareness feature leg should be instance of 
                     // ILegAS4, if it is not we can not retransmit
@@ -89,17 +89,17 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                     IReceptionAwareness raConfig = null;
                     try {
                         leg = (IAS4Leg) HolodeckB2BCoreInterface.getPModeSet().
-                                                            get(um.getPMode()).getLegs().iterator().next();
+                                                            get(um.getPModeId()).getLegs().iterator().next();
                         raConfig = leg.getReceptionAwareness();
                     } catch (Exception e) {
                         // Could not get configuration for retries, maybe P-Mode configuration was deleted?
                         log.error("Message [" + um.getMessageId() + "] can not be resent due to missing P-Mode ["
-                                    + um.getPMode() + "]");   
+                                    + um.getPModeId() + "]");   
                     } 
                     if (raConfig == null) {
                         // Not an ILegAS4 instance or no RA config available, can't determine if and how to resend. 
                         log.error("Message [" + um.getMessageId() + "] can not be resent due to missing Reception"
-                                    + " Awareness configuration in P-Mode [" + um.getPMode() + "]");
+                                    + " Awareness configuration in P-Mode [" + um.getPModeId() + "]");
                         // Because we don't know how to process this message further the only thing we can do is set
                         // the processing to failed
                         MessageUnitDAO.setFailed(umProxy);
@@ -170,7 +170,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
      *              <code>false</code> otherwise (i.e. the message should be pushed)
      */
     private boolean isPulled(UserMessage um) {
-        return EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode()).getMepBinding());
+        return EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId()).getMepBinding());
     }
     
     /**
@@ -226,7 +226,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                 if (deliverySpec == null) {
                     // No possibility to deliver error as not delivery specs are available, log error
                     log.error("No delivery specification available for notification of MissingReceipt!" 
-                                + " P-Mode=" + um.getPMode());
+                                + " P-Mode=" + um.getPModeId());
                     // Indicate delivery failure
                     MessageUnitDAO.setFailed(errorSignal);
                 } else {

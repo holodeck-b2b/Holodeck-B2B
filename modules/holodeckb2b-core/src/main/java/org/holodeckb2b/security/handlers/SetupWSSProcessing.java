@@ -94,7 +94,7 @@ public class SetupWSSProcessing extends BaseHandler {
                                                                         + " with msg-id=" + primaryMU.getMessageId());
         
         // 2. Get the security settings
-        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.getPModeId());
         
         // It is possible that we can not find a PMode when the primary message unit is a signal. In that case there
         // is no special configuration needed

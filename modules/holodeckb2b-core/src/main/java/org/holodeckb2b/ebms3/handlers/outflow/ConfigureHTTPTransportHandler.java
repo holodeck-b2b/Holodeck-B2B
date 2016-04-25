@@ -87,7 +87,7 @@ public class ConfigureHTTPTransportHandler extends BaseHandler {
         if (primaryMU != null) {
             log.debug("Get P-Mode configuration for primary MU");
             IPModeSet pmSet = HolodeckB2BCoreInterface.getPModeSet();
-            IPMode pmode = pmSet.get(primaryMU.getPMode());
+            IPMode pmode = pmSet.get(primaryMU.getPModeId());
             // For response error messages the P-Mode may be unknown, so no special HTTP configuration
             if (pmode == null) {
                 log.debug("No P-Mode given for primary message unit, using default HTTP configuration");
