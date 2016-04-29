@@ -17,6 +17,7 @@
 package org.holodeckb2b.pmode;
 
 import java.util.List;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
@@ -43,18 +44,15 @@ public class PModeUtils {
     }
     
     /**
-     * Checks if a P-Mode contains a specific configuration for a MPC in case Holodeck B2B is the sender of the Pull 
+     * Checks if a P-Mode contains a specific pulling configuration in case Holodeck B2B is the sender of the Pull 
      * Request. 
      * 
      * @param pmode     The P-Mode to check
-     * @param mpc       The MPC to check
-     * @return          The {@link IPullRequestFlow} containing the configuration specific for this MPC, or<br>
-     *                  <code>null</code> if no specific configuration is given for this MPC
+     * @return          The {@link IPullRequestFlow} containing the pull specific configuration, or<br>
+     *                  <code>null</code> if no specific configuration is given
      */
-    public static IPullRequestFlow getOutPullRequestFlow(final IPMode pmode, final String mpc) {        
-        IPullRequestFlow    pullRequestFlow = null;
-        
-        // First we ne to get the leg that configures the sending of the Pull Request
+    public static IPullRequestFlow getOutPullRequestFlow(final IPMode pmode) {        
+        // First we need to get the leg that configures the sending of the Pull Request
         List<? extends ILeg> legs = pmode.getLegs();
         ILeg   pullLeg = null;
         String mepBinding = pmode.getMepBinding();        
@@ -71,13 +69,11 @@ public class PModeUtils {
                     pullLeg = doesHolodeckB2BTrigger(legs.get(i)) ? legs.get(i) : null;
         }
 
-        // And then check if that leg contains specific PullRequestFlow for given MPC
-        if (pullLeg != null) {
-            for (IPullRequestFlow pf : pullLeg.getPullRequestFlows()) 
-                pullRequestFlow = mpc.equals(pf.getMPC()) ? pf : pullRequestFlow;                    
-        }
-        
-        return pullRequestFlow;
+        // And then check if that leg contains specific PullRequestFlow 
+        if (pullLeg != null && !Utils.isNullOrEmpty(pullLeg.getPullRequestFlows())) 
+            return pullLeg.getPullRequestFlows().iterator().next();
+        else
+            return null;
     }
     
     /**

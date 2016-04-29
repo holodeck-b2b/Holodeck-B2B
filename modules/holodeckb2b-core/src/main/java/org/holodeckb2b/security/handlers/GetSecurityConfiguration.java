@@ -90,7 +90,7 @@ public class GetSecurityConfiguration extends BaseHandler {
             */
             log.debug("Primary message unit is PullRequest, always initiator");
             initiator = true;            
-            IPullRequestFlow prf = PModeUtils.getOutPullRequestFlow(pmode, ((PullRequest) primaryMU).getMPC());
+            IPullRequestFlow prf = PModeUtils.getOutPullRequestFlow(pmode);
             pullReqSecConfig = prf != null ? prf.getSecurityConfiguration() : null;
         } else {
             /* If this message unit is an user message Holodeck B2B acts as the initiator when the http message is a
