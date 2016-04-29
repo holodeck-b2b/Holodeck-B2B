@@ -12,12 +12,18 @@ processing. See package org.holodeckb2b.interface.events for the new interfaces.
 * Event for creation of a Receipt (see `org.holodeckb2b.interfaces.events.types.IReceiptCreatedEvent`)
 * A _"trust store"_ to hold the certificates of trusted Certificate Authorities that are used to validate the certificates
 used for signing a message. This _trust store_ should be used for certificates not directly related to a trading partner
+* Possibility to configure the _Pull Worker Pool_ from outside the Holodeck B2B Core through the new 
+  `HolodeckB2BCoreInterface.setPullWorkerPoolConfiguration` method 
 
 ### Changed
 * The addition of the event framework resulted in changes to the Holodeck B2B Core and P-Modes interfaces to get access 
     to the _event processor_ and enable configuration of _event handlers_.
 * The XML P-Mode implementation was changed to add the event handler configuration, see the new version of the schema in 
     **pmode.xsd**
+* Pull Requests are now also _submitted_ to the Core and sent using the same _Sender worker_ as other message units. This 
+  required a change in the `IMessageSubmitter` interface that now also accepts `IPullRequest` objects for submission.
+  Together with the new ability to configure the _pull worker pool_ it allows extensions to set-up a custom mechanism 
+  for triggering the pulling.
 
 ### Deprecated 
 

@@ -49,6 +49,7 @@ import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitterFactory;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.pmode.InMemoryPModeSet;
 
 /**
@@ -323,16 +324,6 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     }
     
     /**
-     * Gets the pull worker pool. 
-     * <p>This method SHOULD only be called by the {@link PullConfigurationWatcher} to (re)configure the pull workers!
-     * 
-     * @return The pull worker pool
-     */
-    public static WorkerPool getPullWorkerPool() {
-        return pullWorkers;
-    }
-    
-    /**
      * Gets the set of currently configured P-Modes.
      * <p>The P-Modes define how Holodeck B2B should process the messages. The set of P-Modes is therefor the most 
      * important configuration item in Holodeck B2B, without P-Modes it will not be possible to send and receive 
@@ -358,5 +349,34 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     @Override
     public IMessageProcessingEventProcessor getEventProcessor() {
         return eventProcessor;
+    }
+    
+    /**
+     * Sets the configuration of the <i>pull worker pool</i> which contains the <i>Workers</i> that are responsible for
+     * sending the Pull Request signal messages.
+     * <p>If no new configuration is provided the worker pool will be stopped. NOTE that this will also stop Holodeck 
+     * B2B from pulling for User Messages (unless some other worker(s) in the regular worker pool take over, which is
+     * <b>not recommended</b>).
+     * 
+     * @param pullConfiguration             The new pool configuration to use. If <code>null</code> the worker pool
+     *                                      will be stopped.
+     * @throws TaskConfigurationException   When the provided configuration could not be activated. This is probably
+     *                                      caused by an issue in the configuration of the workers but it can also be
+     *                                      that the worker pool itself could not be started correctly.
+     * @since 2.1.0
+     */
+    @Override
+    public void setPullWorkerPoolConfiguration(IWorkerPoolConfiguration pullConfiguration) 
+                                                                                    throws TaskConfigurationException {
+        log.debug("New pull worker configuration provided, reconfiguring Pull Worker Pool");        
+        if (pullConfiguration == null) {
+            log.debug("Configuration is removed, stop worker pool");
+            pullWorkers.stop(0);
+            log.warn("Pull Worker Pool stopped due to removal of configuration!");
+        } else {
+            log.debug("New configuration provided, reconfigure the worker pool");
+            pullWorkers.setConfiguration(pullConfiguration);
+            log.info("Pull configuration succesfully changed");
+        }
     }
 }
