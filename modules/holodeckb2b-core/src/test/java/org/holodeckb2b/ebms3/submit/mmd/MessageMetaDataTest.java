@@ -143,7 +143,7 @@ public class MessageMetaDataTest {
             assertEquals("CC", pid.getType());
             
             assertNotNull(mmd.getReceiver());
-            assertEquals("T4omv4", mmd.getReceiver().getRole());
+            assertNull(mmd.getReceiver().getRole());
             assertEquals(2, mmd.getReceiver().getPartyIds().size());
             
             Iterator<IPartyId> it = mmd.getReceiver().getPartyIds().iterator();

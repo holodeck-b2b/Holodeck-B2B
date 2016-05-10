@@ -111,9 +111,11 @@ In the P-Mode model described in the ebMS specification a leg can be identified 
     </xs:complexType>
     <xs:complexType name="TradingPartner">
         <xs:annotation>
-            <xs:documentation><p>The trading partner configuration MUST contain one or more party ids that identify the trading partner. If multiple <code>PartyId</code> elements are included all party ids will be included in the message and used to find the P-Mode. The business role the trading partner is acting in is OPTIONAL and can be provided when the message is submitted.</p>
+            <xs:documentation><p>The trading partner configuration MUST contain at least the identification of the trading partner or the security settings to use. If only the security configuration is set, the <i>PartyId</i>(s) to use in the message MUST be specified when a User Message is submitted.</p>
 
-<p>Additionally settings for signing, encryption and/or usernametokens can be specified in the <code>SecurityConfiguration</code> child element. This is different from the ebMS specification where the security parameters are defined on the leg level (or maybe even finer grained per message, but that is not really clear). Within Holodeck B2B we assume however that security settings are determined by the trading partners involved in the message exchange. Therefor the security configuration is part of the trading partner configuration in the P-Mode.</p>
+<p>If multiple <code>PartyId</code> elements are included all party ids will be included in the message and used to find the P-Mode. The business role the trading partner is acting in is OPTIONAL and can be provided when the message is submitted.</p>
+
+<p>The settings for signing, encryption and/or usernametokens can be specified in the <code>SecurityConfiguration</code> child element. This is different from the ebMS specification where the security parameters are defined on the leg level (or maybe even finer grained per message, but that is not really clear). Within Holodeck B2B we assume however that security settings are determined by the trading partners involved in the message exchange. Therefor the security configuration is part of the trading partner configuration in the P-Mode.</p>
 
 <p>The security configuration contains the settings that are specific to this trading partner; the settings related to signing define how this trading partner will sign it messages, and the encryption settings define how messages to this trading partner must be encrypted.<br/>
 This means that the security configuration of trading partner for which Holodeck B2B is the MSH contains the <b>private keys</b> and that the security configuration for the other partner contains the <b>public keys</b>.</p>
@@ -121,7 +123,7 @@ This means that the security configuration of trading partner for which Holodeck
 <p>NOTE: Specifying security configuration implies that also a party id must be specified (as <code>PartyId</code> is a required child element). Because the security configuration applies to a certain organisation we assume that a party id will be known as well.</p>  </xs:documentation>
         </xs:annotation>
         <xs:sequence>
-            <xs:element maxOccurs="unbounded" name="PartyId" type="tns:PartyId">
+            <xs:element maxOccurs="unbounded" name="PartyId" type="tns:PartyId" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation><p>Identification of the trading partner. The identification of the partner can consist of the id itself and the identification of the naming scheme to which the id belongs. This naming scheme or domain is specified in the <code>@type</code> attribute.<br/>
 The ebMS specification requires that the <code>PartyId</code> value MUST be an URI when no <code>@type</code> attribute is specified (see section 5.2.2.4 of ebMS Core Specification).</p>

@@ -119,12 +119,12 @@ Also REQUIRED when submitting a message is the P-Mode id in the AgreementRef chi
         <xs:sequence>
             <xs:element minOccurs="0" name="From" type="tns:TradingPartner">
                 <xs:annotation>
-                    <xs:documentation>Contains information about the dentification of the party that is the [intended] receiver of the user message, i.e. this is the MSH acting in the Receiving role.</xs:documentation>
+                    <xs:documentation>Contains information about the dentification of the party that is the [intended] sender of the user message, i.e. this is the MSH acting in the Sending role.</xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element minOccurs="0" name="To" type="tns:TradingPartner">
                 <xs:annotation>
-                    <xs:documentation>Contains information about the dentification of the party that is the sender of the user message, i.e. this is the MSH acting in the Sending role.</xs:documentation>
+                    <xs:documentation>Contains information about the dentification of the party that is the receiver of the user message, i.e. this is the MSH acting in the Receiving role.</xs:documentation>
                 </xs:annotation>
             </xs:element>
         </xs:sequence>
@@ -137,7 +137,7 @@ Also REQUIRED when submitting a message is the P-Mode id in the AgreementRef chi
 If this element occurs multiple all instances MUST identify the same business partner. This element can not be used for multi-cast.</xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element minOccurs="1" name="Role" type="tns:non-empty-string">
+            <xs:element minOccurs="0" name="Role" type="tns:non-empty-string">
                 <xs:annotation>
                     <xs:documentation>A identification of the business role the party acts in. This is (probably) different from the ebMS role (Sending/Receiving) the party acts in.</xs:documentation>
                 </xs:annotation>
