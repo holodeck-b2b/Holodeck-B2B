@@ -9,7 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 and therefore also requires a database change for the corresponding `MSG_UNIT` table. 
 * Event framework to enable additional notification to external components about events that occur during message 
 processing. See package org.holodeckb2b.interface.events for the new interfaces. 
-* Event for creation of a Receipt (see `org.holodeckb2b.interfaces.events.types.IReceiptCreatedEvent`)
+* Events for creation of a Receipt (see `org.holodeckb2b.interfaces.events.types.IReceiptCreatedEvent`) and creation of
+ a signature for a User Message (see `org.holodeckb2b.interfaces.events.types.ISignatureCreatedEvent`)
 * A _"trust store"_ to hold the certificates of trusted Certificate Authorities that are used to validate the certificates
 used for signing a message. This _trust store_ should be used for certificates not directly related to a trading partner
 * Possibility to configure the _Pull Worker Pool_ from outside the Holodeck B2B Core through the new 

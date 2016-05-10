@@ -329,7 +329,10 @@
         <handler name="CreateSecurityHeaders" class="org.holodeckb2b.security.handlers.CreateWSSHeaders">
             <order phase="Security" after="GetSecuritySettings"/>      
         </handler>
-
+        <handler name="RaiseSignatureEvent" class="org.holodeckb2b.security.handlers.RaiseSignatureCreatedEvent">
+            <order phase="Security" after="CreateSecurityHeaders"/>      
+        </handler>
+        
         <!-- Handlers responsible for configuration and checking of message transport -->
         <handler name="ConfigureHTTP" 
             class="org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler">
