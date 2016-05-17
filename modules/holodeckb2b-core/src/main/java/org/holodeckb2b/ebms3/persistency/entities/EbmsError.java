@@ -17,6 +17,8 @@
 package org.holodeckb2b.ebms3.persistency.entities;
 
 import java.io.Serializable;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
@@ -161,5 +163,9 @@ public class EbmsError implements Serializable, IEbmsError {
     private IEbmsError.Severity SEVERITY;
         
     @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "language", column = @Column(name = "DESCRIPTION_LANG")),
+        @AttributeOverride(name = "text", column = @Column(name = "DESCRIPTION_TXT", length = 10000))
+    })
     private Description     longDescription;
 }
