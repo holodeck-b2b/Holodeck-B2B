@@ -28,8 +28,9 @@ import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
  * <p>In the ebMS specification the security parameters are defined on the leg level (or maybe even finer grained per 
  * message, but that is not really clear). Within Holodeck B2B we assume however that security settings are determined 
  * by the trading partners involved in the message exchange. Therefor the security configuration is part of the trading
- * partner configuration in the P-Mode.
- * 
+ * partner configuration in the P-Mode. 
+ * <p>As it however should be possible to specify the <i>PartyId</i>s to use in the message unit on submission the 
+ * trading partner configuration in the P-Mode can exist of only the security configuration. 
  * <p>The security configuration contains the settings that are specific to this trading partner; the settings related 
  * to signing define how this trading partner will sign it messages, and the encryption settings define how messages to
  * this trading partner must be encrypted.<br>

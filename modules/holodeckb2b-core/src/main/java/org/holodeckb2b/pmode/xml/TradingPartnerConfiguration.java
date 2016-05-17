@@ -19,12 +19,15 @@ package org.holodeckb2b.pmode.xml;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
+import org.simpleframework.xml.core.PersistenceException;
+import org.simpleframework.xml.core.Validate;
 
 /**
  * Contains the P-Mode parameters for the trading partners involved in the message exchange. In the P-Mode XML document
@@ -40,9 +43,10 @@ import org.simpleframework.xml.Root;
 public class TradingPartnerConfiguration implements ITradingPartnerConfiguration {
     
     /*
-     * When used there must be at least one PartyId child element 
+     * The list of PartyIds that identify this trading partner. When used all PartyIds from the child elements will be
+     * included the User Message. If the submitter should be able to set the PartyId, don't include this element 
      */
-    @ElementList(entry = "PartyId", type = PartyId.class , required = true, inline = true)
+    @ElementList(entry = "PartyId", type = PartyId.class , required = false, inline = true)
     private ArrayList<IPartyId> partyIds;
     
     /*
@@ -56,6 +60,18 @@ public class TradingPartnerConfiguration implements ITradingPartnerConfiguration
      */
     @Element(name="SecurityConfiguration", required = false)
     private SecurityConfiguration   securityConfig;
+
+    /**
+     * Checks that the trading partner configuration included in the P-Mode XML document includes at least a PartyId or
+     * security configuration.
+     * 
+     * @throws PersistenceException     When neither PartyId or security configuration is included in the XML document
+     */
+    @Validate
+    public void validate() throws PersistenceException {
+        if (Utils.isNullOrEmpty(partyIds) && securityConfig == null)
+            throw new PersistenceException("Either one or more PartyIds or the security configuration must be included");
+    }
     
     /**
      * Get the TradingPartner party id's.

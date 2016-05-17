@@ -35,7 +35,6 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
-import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
@@ -129,7 +128,7 @@ public class DeliverErrors extends BaseHandler {
      *                                  prevented successful delivery
      * @throws DatabaseException    When an error occurs retrieving the message unit referenced by the Error Signal
      */
-    private void checkAndDeliver(final IErrorMessage errorSignal, final MessageContext mc) 
+    private void checkAndDeliver(final ErrorMessage errorSignal, final MessageContext mc) 
             throws MessageDeliveryException, DatabaseException {
         IDeliverySpecification deliverySpec = null;
         
@@ -157,7 +156,9 @@ public class DeliverErrors extends BaseHandler {
             Collection<EntityProxy>  reqMUs = MessageContextUtils.getSentMessageUnits(mc);
             if (reqMUs.size() == 1) {
                 log.debug("Request contained one message unit, assuming error applies to it");
-                deliverySpec = getErrorDelivery(reqMUs.iterator().next());
+                EntityProxy<MessageUnit> refdMU = reqMUs.iterator().next();
+                refToMsgId = refdMU.entity.getMessageId();
+                deliverySpec = getErrorDelivery(refdMU);
             }
         }
         
@@ -167,6 +168,9 @@ public class DeliverErrors extends BaseHandler {
             log.debug("Get deliverer from Core");
             IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec);
             log.debug("Delivering the error using deliverer");
+            // Because the reference to the message in error may be derived, set it explicitly on signal meta-data
+            // See issue #12 
+            errorSignal.setRefToMessageId(refToMsgId);
             deliverer.deliver(errorSignal);
             log.debug("Error successfully delivered!");
         } else

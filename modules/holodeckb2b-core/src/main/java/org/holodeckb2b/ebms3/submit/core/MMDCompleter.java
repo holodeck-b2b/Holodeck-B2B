@@ -24,8 +24,10 @@ import org.holodeckb2b.ebms3.mmd.xml.AgreementReference;
 import org.holodeckb2b.ebms3.mmd.xml.CollaborationInfo;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.mmd.xml.Service;
+import org.holodeckb2b.ebms3.mmd.xml.TradingPartner;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IAgreement;
+import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
@@ -125,24 +127,54 @@ final class MMDCompleter {
      *                                P-Mode or when the sender information in submitted meta-data and P-Mode conflicts
      */
     private void completeSender() throws MessageSubmitException {
-        ITradingPartner ms = cd.getSender(); // sender from MMD
-        ITradingPartner ps = null; // sender from PMode
+        // Get sender info from MMD
+        ITradingPartner ms = cd.getSender(); 
+        Collection<IPartyId> sPartyIds = null;
+        String  sRole = null;
+        if (ms != null) {
+            sPartyIds = ms.getPartyIds();
+            sRole = ms.getRole();
+        }
+        // Get sender info from P-Mode
+        ITradingPartner ps = null; 
         // When pulling is used the responder is sending the message!
         if (pmode.getMepBinding().equals(EbMSConstants.ONE_WAY_PUSH))
             ps = pmode.getInitiator();
         else
-            ps = pmode.getResponder();
+            ps = pmode.getResponder();        
+        Collection<IPartyId> pmPartyIds = null;
+        String  pmRole = null;
+        if (ps != null) {
+            pmPartyIds = ps.getPartyIds();
+            pmRole = ps.getRole();
+        }
         
-        if (ms == null && ps == null)
-            throw new MessageSubmitException("Missing required information on the sender of the message");
-        else if (ms == null) 
-            // Take P-Mode info
+        // Check PartyId(s)
+        if (Utils.isNullOrEmpty(sPartyIds) && Utils.isNullOrEmpty(pmPartyIds))
+            throw new MessageSubmitException("Missing PartyId information for Sender of the message!");
+        else if (Utils.isNullOrEmpty(sPartyIds))
+            // PartyId(s) specified in P-Mode
             cd.setSender(ps);
-        else if (ps != null) {
-            // Both P-Mode and submitted MMD contain sender, ensure they are equal
-            if (!CompareUtils.areEqual(ms, ps))
-                throw new MessageSubmitException("Different values given for sender configuration!");
-        }        
+        else if (!Utils.isNullOrEmpty(pmPartyIds))
+            // Both submission and P-Mode specify PartyId(s) => must be equal
+            if (!CompareUtils.areEqual(sPartyIds, pmPartyIds))
+                throw new MessageSubmitException("PartyId(s) for Sender in submission differ from ones in selected P-Mode!");
+        // else // Only submission contained PartyId(s), already included
+        
+        // Check Role
+        if (Utils.isNullOrEmpty(sRole) && Utils.isNullOrEmpty(pmRole))
+            throw new MessageSubmitException("Missing Role information for Sender of the message!");
+        else if (Utils.isNullOrEmpty(sRole))
+            // Role specified in P-Mode
+            ((TradingPartner) cd.getSender()).setRole(pmRole);
+        else if (!Utils.isNullOrEmpty(pmRole)) {
+            // Both submission and P-Mode specify Role => must be equal
+            if (!pmRole.equals(sRole))
+                throw new MessageSubmitException("Role of Sender in submission differs from one in selected P-Mode!");
+        } else 
+            // Only submission contains Role, but since sender info may be overriden because P-Mode specified the 
+            // PartyId(s), set it again 
+            ((TradingPartner) cd.getSender()).setRole(sRole);
     }
     
     /**
@@ -155,24 +187,54 @@ final class MMDCompleter {
      *                                conflicts
      */
     private void completeReceiver() throws MessageSubmitException {
-        ITradingPartner mr = cd.getReceiver(); // receiver from MMD
-        ITradingPartner pr = null; // receiver from PMode
-        // When pulling is used the initiator is receiving the message!
+        // Get receiver info from MMD
+        ITradingPartner mr = cd.getReceiver(); 
+        Collection<IPartyId> sPartyIds = null;
+        String  sRole = null;
+        if (mr != null) {
+            sPartyIds = mr.getPartyIds();
+            sRole = mr.getRole();
+        }
+        // Get receiver info from P-Mode
+        ITradingPartner pr = null; 
+        // When pulling is used the intiator is receiving the message!
         if (pmode.getMepBinding().equals(EbMSConstants.ONE_WAY_PUSH))
             pr = pmode.getResponder();
         else
-            pr = pmode.getInitiator();
+            pr = pmode.getInitiator();        
+        Collection<IPartyId> pmPartyIds = null;
+        String  pmRole = null;
+        if (pr != null) {
+            pmPartyIds = pr.getPartyIds();
+            pmRole = pr.getRole();
+        }
         
-        if (mr == null && pr == null)
-            throw new MessageSubmitException("Missing required information on the receiver of the message");
-        else if (mr == null) 
-            // Take P-Mode info
+        // Check PartyId(s)
+        if (Utils.isNullOrEmpty(sPartyIds) && Utils.isNullOrEmpty(pmPartyIds))
+            throw new MessageSubmitException("Missing PartyId information for Receiver of the message!");
+        else if (Utils.isNullOrEmpty(sPartyIds))
+            // PartyId(s) specified in P-Mode
             cd.setReceiver(pr);
-        else if (pr != null) {
-            // Both P-Mode and submitted MMD contain receiver, ensure they are equal
-            if (!CompareUtils.areEqual(mr, pr))
-                throw new MessageSubmitException("Different values given for receiver configuration!");
-        }        
+        else if (!Utils.isNullOrEmpty(pmPartyIds))
+            // Both submission and P-Mode specify PartyId(s) => must be equal
+            if (!CompareUtils.areEqual(sPartyIds, pmPartyIds))
+                throw new MessageSubmitException("PartyId(s) for Receiver in submission differ from ones in selected P-Mode!");
+        // else // Only submission contained PartyId(s), already included
+        
+        // Check Role
+        if (Utils.isNullOrEmpty(sRole) && Utils.isNullOrEmpty(pmRole))
+            throw new MessageSubmitException("Missing Role information for Receiver of the message!");
+        else if (Utils.isNullOrEmpty(sRole))
+            // Role specified in P-Mode
+            ((TradingPartner) cd.getReceiver()).setRole(pmRole);
+        else if (!Utils.isNullOrEmpty(pmRole)) {
+            // Both submission and P-Mode specify Role => must be equal
+            if (!pmRole.equals(sRole))
+                throw new MessageSubmitException("Role for Receiver in submission differs from one in selected P-Mode!");
+        } else 
+            // Only submission contains Role, but since sender info may be overriden because P-Mode specified the 
+            // PartyId(s), set it again 
+            ((TradingPartner) cd.getReceiver()).setRole(sRole);
     }
     
     /**

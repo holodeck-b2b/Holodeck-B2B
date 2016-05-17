@@ -38,6 +38,14 @@ version.
 
 ### Security
 
+## 2.0.2
+### Added
+* Include derived _refToMessageId_ in Error signal when notifying business application about the error [#12](https://github.com/holodeck-b2b/Holodeck-B2B/issues/12)
+
+### Fixed 
+* PartyId can not be set on submission when security is used [#13](https://github.com/holodeck-b2b/Holodeck-B2B/issues/13)
+* Long error descriptions can not be stored in the database [#14](https://github.com/holodeck-b2b/Holodeck-B2B/issues/14)
+
 ## 2.0.1
 ### Added
 * Identification of Holodeck B2B in _User-Agent_ and _Server_ HTTP headers
