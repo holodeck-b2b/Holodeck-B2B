@@ -53,7 +53,7 @@ public final class EventUtils {
         if (!Utils.isNullOrEmpty(handledEvents)) {
             boolean appliesTo = false;
             for (Class cls : handledEvents)
-                appliesTo |= cls.isAssignableFrom(subject.getClass());                    
+                appliesTo |= cls.isAssignableFrom(event.getClass());                    
             shouldHandle &= appliesTo;            
         }
         // And to the message unit type? Here we can't just check if the refd message unit class is contained
