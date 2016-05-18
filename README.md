@@ -20,20 +20,20 @@ You will find a [step-by-step guide to setting up Holodeck B2B](http://holodeck-
 We’re using the simplified Github workflow to accept modifications which means you’ll have to:
 * create an issue related to the problem you want to fix or the function you want to add (good for traceability and cross-reference)
 * fork the repository
-* create a branch (optionally with the reference to the issue in the name)
+* create a branch (optionally with a reference to the issue in the name)
 * write your code 
 * commit incrementally with readable and detailed commit messages
 * submit a pull-request against the master branch of this repository
 
 ### Submitting bugs
 You can report issues directly on the [project Issue Tracker](https://github.com/holodeck-b2b/Holodeck-B2B/issues)  
-Please document as much as possible the steps to reproduce your problem (and if needed and possible include screenshots).
+Please document the steps to reproduce your problem as detailed as possible (and if needed and possible include screenshots).
 
 ## Versioning
 Version numbering follows the [Semantic versioning](http://semver.org/) approach.
 
 ##Licensing
-Holodeck B2B itself is licensed under the General Public License V3 which is included in the license.txt in the root of the project. 
+Holodeck B2B itself is licensed under the General Public License V3, included in the license.txt in the root of the project. 
 This means you are not allowed to integrate Holodeck B2B in a closed source product. You can however use Holodeck B2B together with your closed source product as long as you only use the provided interfaces to communicate with the Holodeck B2B core. 
 Therefore the interfaces module is licensed under the Lesser General Public License V3.
 
