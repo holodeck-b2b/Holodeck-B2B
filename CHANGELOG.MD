@@ -39,7 +39,7 @@ version.
 ### Security
 
 
-## [2.0.2] - 2016-05-17
+## 2.0.2 - 2016-05-17
 ### Added
 * Include derived _refToMessageId_ in Error signal when notifying business application about the error [#12](https://github.com/holodeck-b2b/Holodeck-B2B/issues/12)
 
@@ -48,7 +48,7 @@ version.
 * Long error descriptions can not be stored in the database [#14](https://github.com/holodeck-b2b/Holodeck-B2B/issues/14)
 
 
-## [2.0.1] - 2016-04-18
+## 2.0.1 - 2016-04-18
 ### Added
 * Identification of Holodeck B2B in _User-Agent_ and _Server_ HTTP headers
 
