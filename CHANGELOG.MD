@@ -15,6 +15,8 @@ processing. See package org.holodeckb2b.interface.events for the new interfaces.
 used for signing a message. This _trust store_ should be used for certificates not directly related to a trading partner
 * Possibility to configure the _Pull Worker Pool_ from outside the Holodeck B2B Core through the new 
   `HolodeckB2BCoreInterface.setPullWorkerPoolConfiguration` method 
+* When a received Error signal does not reference a sent message unit a _ValueInconsistent_ error is generated. Note that
+  this can be caused by either an invalid or missing reference in the Error signal 
 
 ### Changed
 * The addition of the event framework resulted in changes to the Holodeck B2B Core and P-Modes interfaces to get access 
@@ -24,7 +26,9 @@ used for signing a message. This _trust store_ should be used for certificates n
 * Pull Requests are now also _submitted_ to the Core and sent using the same _Sender worker_ as other message units. This 
   required a change in the `IMessageSubmitter` interface that now also accepts `IPullRequest` objects for submission.
   Together with the new ability to configure the _pull worker pool_ it allows extensions to set-up a custom mechanism 
-  for triggering the pulling.
+  for triggering the pulling. 
+ * Received ebMS Error signals are now logged to the special error log `org.holodeckb2b.msgproc.errors.received` regardless
+   whether they can be processed completely or need to be notified to the _Producer_ application
 
 ### Deprecated 
 

@@ -18,8 +18,6 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -57,13 +55,7 @@ import org.holodeckb2b.pmode.PModeUtils;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class DeliverErrors extends BaseHandler {
-    
-    /**
-     * Errors will always be logged to a special error log. Using the logging configuration users can decide if this 
-     * logging should be enabled and how errors should be logged.
-     */
-    private Log     errorLog = LogFactory.getLog("org.holodeckb2b.msgproc.errors.received");
-    
+        
     @Override
     protected byte inFlows() {
         return IN_FLOW | IN_FAULT_FLOW;
@@ -93,9 +85,6 @@ public class DeliverErrors extends BaseHandler {
                         
             if(readyForDelivery) {
                 // Errors in this signal can be delivered to business application
-                // Always log the error signal, even if it does not need to be delivered to the business application
-                log.debug("Write error signal to error log");
-                errorLog.error(errorSig);                
                 log.debug("Start delivery of Error signal [" + errorSig.getMessageId() + "]");
                 // We deliver each error in the signal separately because they can reference different
                 // messages and therefor have different delivery specs
