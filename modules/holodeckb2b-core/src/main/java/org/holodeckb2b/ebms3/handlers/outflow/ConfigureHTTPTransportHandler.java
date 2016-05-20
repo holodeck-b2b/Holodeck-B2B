@@ -20,8 +20,8 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
-import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
@@ -147,6 +147,12 @@ public class ConfigureHTTPTransportHandler extends BaseHandler {
                 options.setProperty(HTTPConstants.CHUNKED, Boolean.FALSE);                
             }
             
+            // If the message does not contain any attachments we can disable SwA
+            if (mc.getAttachmentMap().getContentIDSet().isEmpty()) {
+                log.debug("Disable SwA as message does not contain attachments");
+                options.setProperty(Constants.Configuration.ENABLE_SWA, Boolean.FALSE);
+            }
+                    
             log.debug("HTTP configuration done");
         } else
             log.debug("Message does not contain ebMS message unit, nothing to do");

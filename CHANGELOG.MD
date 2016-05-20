@@ -16,7 +16,8 @@ used for signing a message. This _trust store_ should be used for certificates n
 * Possibility to configure the _Pull Worker Pool_ from outside the Holodeck B2B Core through the new 
   `HolodeckB2BCoreInterface.setPullWorkerPoolConfiguration` method 
 * When a received Error signal does not reference a sent message unit a _ValueInconsistent_ error is generated. Note that
-  this can be caused by either an invalid or missing reference in the Error signal 
+  this can be caused by either an invalid or missing reference in the Error signal
+* Messages without attachments are now sent as single part messages, i.e. not using the SOAP with Attachments feature
 
 ### Changed
 * The addition of the event framework resulted in changes to the Holodeck B2B Core and P-Modes interfaces to get access 
