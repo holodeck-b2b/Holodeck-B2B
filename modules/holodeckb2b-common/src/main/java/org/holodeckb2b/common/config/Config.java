@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,24 +19,35 @@ package org.holodeckb2b.common.config;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.description.AxisModule;
-import org.apache.axis2.description.Parameter;
+import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.interfaces.config.IConfiguration;
 
 /**
  * Contains the configuration of the Holodeck B2B Core.
+ * <p>The Holodeck B2B configuration is located in the <code><b>«HB2B_HOME»</b>/conf</code> directory where 
+ * <b>HB2B_HOME</b> is the directory where Holodeck B2B is installed or the system property <i>"holodeckb2b.home"</i>.
+ * <p>The structure of the config file is defined by the XML Schema Definition 
+ * <code>http://holodeck-b2b.org/schemas/2015/10/config</code> which can be found in <code>
+ * src/main/resources/xsd/hb2b-xsd</code>.
+ * <p>NOTE: Current implementation does not encrypt the keystore passwords! Therefore access to the config file 
+ * SHOULD be limited to the account that is used to run Holodeck B2B.
+ * @todo Encryption of keystore passwords
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class Config {
-    
-    /*
-     * Singleton pattern is used for configuration as we only need it once for
-     * each instance
-     */
-    private static Config   config = null;
+public class Config implements IConfiguration {
 
+    /*
+     * The Holodeck B2B home directory
+     */
+    private String holodeckHome = null;
+    
     /*
      * Name of the JPA persistency unit to get database access
      */
@@ -58,9 +69,9 @@ public class Config {
     private String  tempDir = null;
     
     /*
-     * Indication whether more extensive bundling of message units is allowed
+     * Indication whether bundling of signals is allowed
      */
-    private boolean bundling = false;
+    private boolean allowSignalBundling = false;
     
     /*
      * Default setting whether errors on errors should be reported to sender or not
@@ -73,90 +84,166 @@ public class Config {
     private boolean defaultReportErrorOnReceipt = false;
     
     /*
+     * Indication whether the strict error reference check from the spec should be used
+     */
+    private boolean useStrictErrorReferencesCheck = false;
+    
+    /*
+     * The path to the keystore holding the private keys and certificates
+    */
+    private String privKeyStorePath = null;
+    
+    /*
+     * The password of the keystore that holds the certificates with the private keys
+     */
+    private String  privKeyStorePassword = null;
+    
+    /*
+     * The path to the keystore holding the public keys and certificates
+    */
+    private String pubKeyStorePath = null;
+    
+    /*
+     * The password of the keystore that holds the certificates with the public keys
+     */
+    private String  pubKeyStorePassword = null;    
+    
+    /*
+     * Default setting whether the revocation of a certificate should be checked 
+     */
+    private boolean defaultRevocationCheck = false;
+    
+    /*
      * The Axis2 configuration context that is used to process the messages
      */
     private ConfigurationContext    axisCfgCtx = null;
     
+    private boolean isTrue (String s) {
+      return "on".equalsIgnoreCase(s) || "true".equalsIgnoreCase(s) || "1".equalsIgnoreCase(s);
+    }
+    
     /**
-     * Initializes the configuration based on the Holodeck B2B module configuration.
+     * Initializes the configuration object using the Holodeck B2B configuration file located in <code>
+     * «HB2B_HOME»/conf/holodeckb2b.xml</code> where <b>HB2B_HOME</b> is the directory where Holodeck B2B is installed 
+     * or the system property <i>"holodeckb2b.home"</i>.
      * 
-     * @param configContext     The Axis2 configuration context
-     * @param module            The module configuration
+     * @param configCtx     The Axis2 configuration context containing the Axis2 settings
+     * @throws Exception    When the configuration can not be initialized
      */
-    public static void init(ConfigurationContext configContext, AxisModule module) {
-        // Alway start with a new and empty configuration
-        config = new Config();
-        
+    public Config(ConfigurationContext configCtx) throws Exception {        
         // The Axis2 configuration context
-        config.axisCfgCtx = configContext;
+        axisCfgCtx = configCtx;
+
+        // Detect the Holodeck B2B home directory
+        this.holodeckHome = detectHomeDir(configCtx);
+        
+        // Read the configuration file
+        ConfigXmlFile configFile = ConfigXmlFile.loadFromFile(
+                                                        Paths.get(holodeckHome, "conf", "holodeckb2b.xml").toString());
         
         // The JPA persistency unit to get database access
         //@TODO: REQUIRED, check and throw exception when not available!
-        config.persistencyUnit = readModuleParameter(module, "PersistencyUnit");
+        persistencyUnit = configFile.getParameter("PersistencyUnit");
         
         // The hostname to use in message processing
-        String hostName = readModuleParameter(module, "ExternalHostName");
-        if (hostName == null || hostName.isEmpty()) {
+        hostName = configFile.getParameter("ExternalHostName");
+        if (Utils.isNullOrEmpty(hostName)) {
             try {
                 hostName = InetAddress.getLocalHost().getCanonicalHostName();
             } catch (UnknownHostException e) {}
         
-            if (hostName == null || hostName.isEmpty()) {
+            if (Utils.isNullOrEmpty(hostName)) {
                 // If we still have no hostname, we just generate a random hex number to use as hostname
                 Random r = new Random();
                 hostName = Long.toHexString((long) r.nextInt() * (long) r.nextInt()) + ".generated";
             }
         }
-        config.hostName = hostName;
         
         /* The configuration of the workerpool. By default the "workers.xml" in the
          * conf directory is used. But it is possible to specify another location
          * using the "WorkerConfig" parameter
          */  
-        String workerCfgFile = readModuleParameter(module, "WorkerConfig");
+        String workerCfgFile = configFile.getParameter("WorkerConfig");
         if (workerCfgFile == null || workerCfgFile.isEmpty())
             // Not specified, use default
-            workerCfgFile = configContext.getRealPath("../conf/workers.xml").getAbsolutePath();
+            workerCfgFile = holodeckHome + "/conf/workers.xml";
         
-        config.workerConfigFile = workerCfgFile;
+        workerConfigFile = workerCfgFile;
     
         // The temp dir
-        String tempDir = readModuleParameter(module, "TempDir");
-        if (tempDir == null || tempDir.isEmpty())
+        tempDir = configFile.getParameter("TempDir");
+        if (Utils.isNullOrEmpty(tempDir))
             // Not specified, use default
-            // @todo: Use system temp as default
-            tempDir = configContext.getRealPath("/temp/").getAbsolutePath();
+            tempDir = holodeckHome + "/temp/";
         
         // Ensure the path ends with a folder separator
-        config.tempDir = (tempDir.endsWith(FileSystems.getDefault().getSeparator()) ? tempDir 
+        tempDir = (tempDir.endsWith(FileSystems.getDefault().getSeparator()) ? tempDir 
                             : tempDir + FileSystems.getDefault().getSeparator());
         
-        // Option to enable bundling feature
-        String bundling = readModuleParameter(module, "BundlingFeature");
-        config.bundling = "on".equalsIgnoreCase(bundling) || "true".equalsIgnoreCase(bundling) || "1".equalsIgnoreCase(bundling);        
+        // Option to enable signal bundling
+        String bundling = configFile.getParameter("AllowSignalBundling");
+        allowSignalBundling = isTrue (bundling);        
 
         // Default setting for reporting Errors on Errors
-        String defErrReporting = readModuleParameter(module, "ReportErrorOnError");
-        config.defaultReportErrorOnError = "on".equalsIgnoreCase(defErrReporting) 
-                                            || "true".equalsIgnoreCase(defErrReporting) 
-                                            || "1".equalsIgnoreCase(defErrReporting);        
+        String defErrReporting = configFile.getParameter("ReportErrorOnError");
+        defaultReportErrorOnError = isTrue(defErrReporting);        
         // Default setting for reporting Errors on Receipts
-        defErrReporting = readModuleParameter(module, "ReportErrorOnReceipt");
-        config.defaultReportErrorOnReceipt = "on".equalsIgnoreCase(defErrReporting) 
-                                            || "true".equalsIgnoreCase(defErrReporting) 
-                                            || "1".equalsIgnoreCase(defErrReporting);        
+        defErrReporting = configFile.getParameter("ReportErrorOnReceipt");
+        defaultReportErrorOnReceipt = isTrue(defErrReporting);        
         
+        // Option to use strict error references check 
+        String strictErrorRefCheck = configFile.getParameter("StrictErrorReferencesCheck");
+        useStrictErrorReferencesCheck = isTrue(strictErrorRefCheck);        
+        
+        // The location of the keystore holding the private keys, if not provided the default location «HB2B_HOME»/
+        // repository/certs/privatekeys.jks is used
+        privKeyStorePath = configFile.getParameter("PrivateKeyStorePath");
+        if (Utils.isNullOrEmpty(privKeyStorePath))
+            privKeyStorePath = holodeckHome + "/repository/certs/privatekeys.jks";        
+        
+        // The password for the keystore holding the private keys
+        privKeyStorePassword = configFile.getParameter("PrivateKeyStorePassword");
+        
+        // The location of the keystore holding the certificate (public keys), if not provided the default location 
+        // «HB2B_HOME»/repository/certs/publickeys.jks is used
+        pubKeyStorePath = configFile.getParameter("PublicKeyStorePath");
+        if (Utils.isNullOrEmpty(pubKeyStorePath))
+            pubKeyStorePath = holodeckHome + "/repository/certs/publickeys.jks";        
+        
+        // The password for the keystore holding the public keys
+        pubKeyStorePassword = configFile.getParameter("PublicKeyStorePassword");
+        
+        // Default setting for certificate revocation check
+        String certRevocationCheck = configFile.getParameter("CertificateRevocationCheck");
+        defaultRevocationCheck = isTrue(certRevocationCheck);                
     }
+
+    /**
+     * Helper method to detect what the Holodeck B2B home directory is. 
+     * 
+     * @param configContext     The Axis2 <code>ConfigurationContext</code> in which Holodeck B2B operates
+     * @return                  The Holodeck B2B home directory
+     */
+    private String detectHomeDir(ConfigurationContext configContext) {
+        String hb2b_home_dir = System.getProperty("holodeckb2b.home");
+        if (!Utils.isNullOrEmpty(hb2b_home_dir) && !Files.isDirectory(Paths.get(hb2b_home_dir))) {
+            Logger.getLogger(Config.class.getName())
+                        .log(Level.WARNING, "Specified Holodeck B2B HOME does not exists, reverting to default home");
+            hb2b_home_dir = null;
+        } 
+        
+        return Utils.isNullOrEmpty(hb2b_home_dir) ? configContext.getRealPath("").getParent()
+                                                               : hb2b_home_dir;
+    }
+
     
     /**
      * Gets the Axis2 configuration context. This context is used for processing messages.
      * 
      * @return The Axis2 configuration context.
      */
-    public static ConfigurationContext getAxisConfigurationContext() {
-        assertInitialized();
-        
-        return config.axisCfgCtx;
+    public ConfigurationContext getAxisConfigurationContext() {
+        return axisCfgCtx;
     }
     
     /**
@@ -164,10 +251,8 @@ public class Config {
      * 
      * @return The name of the persistency unit
      */
-    public static String getPersistencyUnit() {
-        assertInitialized();
-        
-        return config.persistencyUnit;
+    public String getPersistencyUnit() {
+        return persistencyUnit;
     }
     
     /**
@@ -181,10 +266,17 @@ public class Config {
      * 
      * @return  The host name
      */
-    public static String getHostName () {
-        assertInitialized();
-        
-        return config.hostName;
+    public String getHostName () {
+        return hostName;
+    }
+
+    /**
+     * Gets the Holodeck B2B home directory.
+     * 
+     * @return  The Holodeck B2B home directory.
+     */
+    public String getHolodeckB2BHome () {
+        return holodeckHome;
     }
     
     /**
@@ -195,10 +287,8 @@ public class Config {
      * 
      * @return The absolute path to the worker pool configuration file.
      */
-    public static String getWorkerPoolCfgFile() {
-        assertInitialized();
-        
-        return config.workerConfigFile;
+    public String getWorkerPoolCfgFile() {
+        return workerConfigFile;
     }
     
     /**
@@ -212,25 +302,21 @@ public class Config {
      * @return  The absolute path to the temp directory. Ends with a directory
      *          separator.
      */
-    public static String getTempDirectory() {
-        assertInitialized();
-        
-        return config.tempDir;
+    public String getTempDirectory() {
+        return tempDir;
     }
     
     /**
-     * Indicates whether more extensive bundling of message units is allowed. When enabled Holodeck B2B
-     * will add message units in one ebMS message when it detects they are for the same destination MSH.
+     * Indicates whether bundling of signal message units in a response message is allowed. When enabled Holodeck B2B
+     * can add multiple signal message units generated during the processing of the request message to the response. 
      * This however will create ebMS messages that DO NOT conform to the ebMS v3 Core Spec and AS4 profile.
-     * <p>The default setting is not to use extensive bundling to ensure Core Spec and AS4 compliant ebMS 
-     * messages. To enable the feature set the <i>BundlingFeature</i> to "on" or "true".
+     * <p>The default setting is not to allow this bundling to ensure Core Spec and AS4 compliant ebMS messages. To 
+     * enable the feature set the <i>AllowSignalBundling</i> to "on" or "true".
      * 
-     * @return Indication whether bundling feature is enabled to allow for more extensive bundling
+     * @return Indication whether bundling of signals in a response is allowed
      */    
-    public static boolean isBundlingFeatureEnabled() {
-        assertInitialized();
-        
-        return config.bundling;
+    public boolean allowSignalBundling() {
+        return allowSignalBundling;
     }
 
     /**
@@ -242,9 +328,8 @@ public class Config {
      * @return <code>true</code> if generated errors on errors should by default be reported to the sender,<br>
      *         <code>false</code> otherwise 
      */
-    public static boolean shouldReportErrorOnError() {
-        assertInitialized();        
-        return config.defaultReportErrorOnError;
+    public boolean shouldReportErrorOnError() {
+        return defaultReportErrorOnError;
     }
 
     /**
@@ -256,33 +341,73 @@ public class Config {
      * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
      *         <code>false</code> otherwise 
      */
-    public static boolean shouldReportErrorOnReceipt() {
-        assertInitialized();        
-        return config.defaultReportErrorOnReceipt;
+    public boolean shouldReportErrorOnReceipt() {
+        return defaultReportErrorOnReceipt;
     }
     
     /**
-     * Checks if the configuration object was correctly initialized
+     * Indicates if the references in an Error signal message unit should be checked using the strict requirements 
+     * defined in the Core Specification (all references equal) or if a bit more relaxed check can be used (signal level
+     * reference empty, but individual errors have the same reference).
+     * <p>Default the more relaxed check is used. To change this set the value of the <i>StrictErrorReferencesCheck<i>
+     * parameter to <i>"true"</i>.
+     * 
+     * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
+     *         <code>false</code> otherwise 
      */
-    protected static void assertInitialized() {
-        if (config == null)
-            throw new IllegalStateException("Configuration should be initialized first.");
+    public boolean useStrictErrorRefCheck() {
+        return useStrictErrorReferencesCheck;
+    }
+
+    /**
+     * Gets the path to the keystore containing the private keys and related certificates that are used for signing
+     * and decryption of messages.
+     * 
+     * @return The path to the <i>"private"</i> keystore.
+     */
+    public String getPrivateKeyStorePath() {
+        return privKeyStorePath;
     }
     
-    /*
-     * Helper to read a parameter from the module.xml
+    /**
+     * Gets the password for the keystore that holds the certificates with the private keys. 
+     * 
+     * @return  The password for accessing the keystore with the private keys
      */
-    protected static String readModuleParameter(AxisModule m, String n) {
-        Parameter p = m.getParameter(n);
-        
-        if (p == null)
-            return null;
-        else {
-            Object v = p.getValue();
-            if (v == null)
-                return null;
-            else
-                return v.toString();
-        }
+    public String getPrivateKeyStorePassword() {
+        return privKeyStorePassword;
+    }
+    
+    /**
+     * Gets the path to the keystore containing the certificates (i.e. public keys) that are used for encrypting 
+     * messages and verification of a signed messages.
+     * 
+     * @return The path to the <i>"public"</i> keystore.
+     */
+    public String getPublicKeyStorePath() {
+        return pubKeyStorePath;
+    }
+
+    /**
+     * Gets the password for the keystore that holds the certificates with the public keys. 
+     * 
+     * @return  The password for accessing the keystore with the public keys
+     */
+    public String getPublicKeyStorePassword() {
+        return pubKeyStorePassword;
+    }
+
+    /**
+     * Gets the global setting whether Holodeck B2B should check if a certificate is revoked. As an error that occurs 
+     * during the revocation check will result in rejection of the complete ebMS message the default value is <i>false
+     * </i>. If required the revocation check can be enable in the P-Mode configuration.
+     * <p>To change the default setting for the revocation check change the value of the <i>CertificateRevocationCheck
+     * </i> parameter to <i>"true"</i>.
+     * 
+     * @return <code>true</code> if the revocation of certificates should by default be checked,<br>
+     *         <code>false</code> otherwise 
+     */
+    public boolean shouldCheckCertificateRevocation() {
+        return defaultRevocationCheck;
     }
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.testhelpers;
 
 import java.io.StringReader;
@@ -24,8 +23,8 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistent.message.Receipt;
-import org.holodeckb2b.ebms3.persistent.processing.ProcessingState;
+import org.holodeckb2b.ebms3.persistency.entities.Receipt;
+import org.holodeckb2b.ebms3.persistency.entities.ProcessingState;
 import org.holodeckb2b.ebms3.util.JPAUtil;
 
 /**

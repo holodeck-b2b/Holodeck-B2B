@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,16 @@ package org.holodeckb2b.ebms3.mmd.xml;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.holodeckb2b.common.general.IDescription;
-import org.holodeckb2b.common.general.IProperty;
-import org.holodeckb2b.common.general.ISchemaReference;
-import org.holodeckb2b.common.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.general.IDescription;
+import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.general.ISchemaReference;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.core.PersistenceException;
+import org.simpleframework.xml.core.Validate;
 
 /**
  * Represents the <code>PartInfo</code> element from the MMD document. This element
@@ -35,7 +38,7 @@ import org.simpleframework.xml.ElementList;
  * external, referenced by an URL. When the payload is a XML document it can also 
  * be included in the SOAP body of the ebMS message. Whether a payload should be 
  * included in the message, as attachment or in the SOAP body, or is external is 
- * indicated by the <code>containment</code> attribute. Its default value is false.
+ * indicated by the <code>containment</code> attribute. Its default value is as attachment.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -59,7 +62,7 @@ public class PartInfo implements IPayload {
     @Attribute(name="mimeType", required=false)
     private String  mimeType;
     
-    @Attribute(name="location")
+    @Attribute(name="location", required=false)
     private String  location;
     
     /**
@@ -83,16 +86,28 @@ public class PartInfo implements IPayload {
         setProperties(data.getProperties());
     }
     
+    /**
+     * Validates the read data for the <code>PartInfo</code> element.
+     * <p>If the payload is or should be contained in the SOAP body or as an attachment the location of the payload
+     * document must be specified.
+     * 
+     * @throws PersistenceException When the payload is contained in either SOAP body or attachment but no location is
+     *                              specified
+     */
+    @Validate
+    public void validate() throws PersistenceException {
+        if (!"external".equalsIgnoreCase(this.containment) && (location == null || location.isEmpty()))
+            throw new PersistenceException("location attributed is required for containment type " + containment, null);            
+    }
+    
     @Override
     public Containment getContainment() {
-        if (this.containment != null) {
-            if( "body".equals(this.containment.toLowerCase()))
-                return Containment.BODY;
-            else if( "external".equals(this.containment.toLowerCase()))
-                return Containment.EXTERNAL;
-        } 
-        
-        return Containment.ATTACHMENT;
+        if( "body".equalsIgnoreCase(this.containment))
+            return Containment.BODY;
+        else if( "external".equalsIgnoreCase(this.containment))
+            return Containment.EXTERNAL;
+        else
+            return Containment.ATTACHMENT;
     }
 
     public void setContainment(Containment containment) {

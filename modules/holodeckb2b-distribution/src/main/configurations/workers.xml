@@ -8,7 +8,7 @@
     part of the default implementation for P-Mode configuration that
     uses XML files to define the P-Modes with one file per P-Mode. For
     more information about configuring a P-Mode see the XSD that defines 
-    the P-Mode file (<<namespace of PMode xsd here>>). 
+    the P-Mode file (http://holodeck-b2b.org/schemas/2014/10/pmode). 
     
     If you want to have a fixed set of P-Modes set the interval 
     attribute to 0 (zero) so the P-Modes are read only when Holodeck B2B
@@ -17,27 +17,32 @@
     to process messages!
     =============================================================== -->
     <worker name="pmodeWatcher" interval="20" activate="true"
-        workerClass="org.holodeckb2b.pmode.impl.PModeWatcher">
+        workerClass="org.holodeckb2b.pmode.xml.PModeWatcher">
         <parameter name="watchPath">conf/pmodes</parameter>
-    <parameter name="extension">xml</parameter>
     </worker>
 
     <!-- ==============================================================
     This worker is responsible for starting the message send process.
-    De-activating this worker will stop message sending!
+    Because the P-Modes need to be loaded before messages can be sent
+    the start of the worker is delayed with 5 seconds to allow loading
+    the P-Modes.
+    NOTE that de-activating this worker will stop message sending!
     =============================================================== -->
-    <worker name="senderWorker" interval="10" activate="true"
+    <worker name="senderWorker" interval="10" activate="true" delay="5"
         workerClass="org.holodeckb2b.ebms3.workers.SenderWorker"/>
 
     <!-- ==============================================================
     This worker is responsible for checking whether a user message
     must be retransmitted because there was no timely Receipt.
+    Because the P-Modes need to be loaded before messages can be retried
+    the start of the worker is delayed with 10 seconds to allow loading
+    the P-Modes.
     
     De-activating this worker will stop the retransmission function
-    and therefore kill the Reception Awareness feature.
+    and therefore kill the AS4 Reception Awareness feature.
     =============================================================== -->
-    <worker name="retransmissionWorker" interval="10" activate="true"
-        workerClass="org.holodeckb2b.as4.workers.RetransmissionWorker"/>
+    <worker name="retransmissionWorker" interval="30" activate="true" delay="10"
+        workerClass="org.holodeckb2b.as4.receptionawareness.RetransmissionWorker"/>
 
     <!-- ==============================================================
     This worker checks the pulling configuration and configure a
@@ -70,8 +75,13 @@
     processing the extenction will be changed to ".processed". If an
     error occurs an new file with the same name but ".error" extension
     will be written with information about the error.
+    
+    Because the P-Modes need to be loaded before messages can be 
+    submitted the start of the worker is delayed with 5 seconds to 
+    allow loading the P-Modes.
     =============================================================== -->
     <worker name="submitFromFileWorker" interval="10" activate="true"
+        delay="5"
         workerClass="org.holodeckb2b.ebms3.workers.SubmitFromFile">
         <parameter name="watchPath">data/msg_out</parameter>
     </worker>

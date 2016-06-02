@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,16 +20,18 @@ import java.util.Iterator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.packaging.Receipt;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
 
 /**
  * Is the handler that checks if this message contains one or more Receipt signals, i.e. contains one or more 
@@ -37,6 +39,9 @@ import org.holodeckb2b.ebms3.util.MessageContextUtils;
  * from the message into a array of {@link Receipt} objects and stored in both database and message context (under key 
  * {@link MessageContextProperties#IN_RECEIPTS}). The processing state of the new receipts will be set to {@link 
  * ProcessingStates#RECEIVED}.
+ * <p>The Receipt signal only has value if it refers to another message unit, therefor it must contain a <code> 
+ * eb:RefToMessageId</code> element in the ebMS message header (see section 5.2.3.3 of the ebMS V3 Core Specification). 
+ * If missing a <i>InvalidHeader</i> error is generated and processing of the Receipt is stopped.
  * <p><b>NOTE: </b>This handler will process all receipt signals that are in the message although the ebMS Core 
  * Specification does not allow more than one.
  * 
@@ -50,39 +55,40 @@ public class ReadReceipt extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) {
+    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
         // First get the ebMS header block, that is the eb:Messaging element
         SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
         
         if (messaging != null) {
             // Check if there are Receipt signals
             log.debug("Check for Receipt elements to determine if message contains one or more receipts");
-            Iterator rcpts = Receipt.getElements(messaging);
+            Iterator<OMElement> rcpts = Receipt.getElements(messaging);
             
-            if (rcpts != null) {
+            if (!Utils.isNullOrEmpty(rcpts)) {
                 log.debug("Receipt(s) found, read information from message");
                 
                 while (rcpts.hasNext()) {
-                    OMElement rcptElem = (OMElement) rcpts.next();
-                    org.holodeckb2b.ebms3.persistent.message.Receipt receipt = null;
+                    OMElement rcptElem = rcpts.next();
+                    org.holodeckb2b.ebms3.persistency.entities.Receipt receipt = null;
                     try {
                         // Read information into Receipt object
                         receipt = Receipt.readElement(rcptElem);
 
                         // And store in database and message context for further processing
                         log.debug("Store Receipt in database");
-                        MessageUnitDAO.storeReceivedMessageUnit(receipt);
+                        EntityProxy<org.holodeckb2b.ebms3.persistency.entities.Receipt> rcptProxy = 
+                                MessageUnitDAO.storeReceivedMessageUnit(receipt);
                         
                         String refToMsgId = receipt.getRefToMessageId();
-                        if (refToMsgId == null || refToMsgId.isEmpty()) {
+                        if (Utils.isNullOrEmpty(refToMsgId)) {
                             log.info("Received receipt [msgId=" + receipt.getMessageId() 
                                                             + "] does not contain reference");
                             // The receipt can not be processed if we don't know for which message it is intended!
-                            MessageUnitDAO.setFailed(receipt);
+                            MessageUnitDAO.setFailed(rcptProxy);
                             // Create error and add to message context
                             createInvalidHeaderError(mc, rcptElem, "Missing required refToMessageId");
                         } else {
-                            MessageContextUtils.addRcvdReceipt(mc, receipt);
+                            MessageContextUtils.addRcvdReceipt(mc, rcptProxy);
                             log.info("Receipt [msgId=" + receipt.getMessageId() + "] received for message with id:" 
                                             + receipt.getRefToMessageId());
                         }
@@ -90,12 +96,7 @@ public class ReadReceipt extends BaseHandler {
                         log.error("Received receipt could not read from message! Details: " + ex.getMessage());
                         // Create error and add to message context
                         createInvalidHeaderError(mc, rcptElem, ex.getMessage());
-                    } catch (DatabaseException ex) {
-                        // Ai, something went wrong when storing the receipt
-                        log.error("An error occurred when saving the Receipt to the database. Details: " 
-                                + ex.getMessage());
-                        // Although the receipt could not be stored, other processing may finish succesfully
-                    }
+                    } 
                 }
             } else
                 log.debug("ebMS message does not contain Receipt(s)");
@@ -115,7 +116,7 @@ public class ReadReceipt extends BaseHandler {
      */
     private void createInvalidHeaderError(MessageContext mc, OMElement element, String msg) {
         InvalidHeader   invalidHdrError = new InvalidHeader();
-        invalidHdrError.setMessage(msg);
+        invalidHdrError.setShortDescription(msg);
         invalidHdrError.setErrorDetail("Source of header containing the error:" + element.toString());
         MessageContextUtils.addGeneratedError(mc, invalidHdrError);                    
     }

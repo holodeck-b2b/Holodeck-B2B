@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 
 /**
  * Is a helper class for handling the ebMS PayloadInfo element in the ebMS SOAP 
@@ -37,7 +37,7 @@ public class PayloadInfo {
     /**
      * The fully qualified name of the element as an {@see QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PayloadInfo");
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "PayloadInfo");
 
     /**
      * Creates a <code>PayloadInfo</code> element and adds it to the given <code>UserMessage</code> element. 
@@ -79,7 +79,7 @@ public class PayloadInfo {
     
     /**
      * Reads the meta data on the payloads from the <code>PartInfo</code> child
-     * elements and returns them as a collection of {@link org.holodeckb2b.ebms3.persistent.message.Payload}
+     * elements and returns them as a collection of {@link org.holodeckb2b.ebms3.persistency.entities.Payload}
      * entity objects.
      * <p><b>NOTE:</b> The entity objects in the collection are not persisted by 
      * this method! It is the responsibility of the caller to store it.
@@ -87,19 +87,19 @@ public class PayloadInfo {
      * @param piElement             The <code>PayloadInfo</code> element that contains
      *                              the <code>PartInfo</code> element to read the 
      *                              meta data from
-     * @return                      A new collection of {@link org.holodeckb2b.ebms3.persistent.message.Payload} 
+     * @return                      A new collection of {@link org.holodeckb2b.ebms3.persistency.entities.Payload} 
      *                              objects 
      * @throws PackagingException   When the given element is not a valid
      *                              <code>PayloadInfo</code> element.
      */
-    public static Collection<org.holodeckb2b.ebms3.persistent.message.Payload> readElement(OMElement piElement) throws PackagingException {
+    public static Collection<org.holodeckb2b.ebms3.persistency.entities.Payload> readElement(OMElement piElement) throws PackagingException {
         if (piElement == null)
             return null;
         
         // Create new collection
-        ArrayList<org.holodeckb2b.ebms3.persistent.message.Payload> payloads = new ArrayList<org.holodeckb2b.ebms3.persistent.message.Payload>();
+        ArrayList<org.holodeckb2b.ebms3.persistency.entities.Payload> payloads = new ArrayList<org.holodeckb2b.ebms3.persistency.entities.Payload>();
         // Get all child elements containing the properties
-        Iterator it = piElement.getChildrenWithName(PartInfo.Q_ELEMENT_NAME);
+        Iterator<?> it = piElement.getChildrenWithName(PartInfo.Q_ELEMENT_NAME);
         // Read each property element and add it info to the collection
         while (it.hasNext())
             payloads.add(PartInfo.readElement((OMElement) it.next()));

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.deliverymethod.file;
 
 import java.io.FileInputStream;
@@ -29,17 +28,17 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.util.base64.Base64EncodingWriterOutputStream;
-import org.holodeckb2b.common.delivery.IMessageDeliverer;
-import org.holodeckb2b.common.delivery.MessageDeliveryException;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.IMessageUnit;
-import org.holodeckb2b.common.messagemodel.IPayload;
-import org.holodeckb2b.common.messagemodel.IUserMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.mmd.xml.PartInfo;
 import org.holodeckb2b.ebms3.mmd.xml.Property;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
  * Is an {@link IMessageDeliverer} implementation that delivers the message unit to the business application by writing
@@ -88,7 +87,7 @@ import org.holodeckb2b.ebms3.packaging.UserMessage;
 }</pre>
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
- * @see AbstractFileDeliverer
+ * @see FileDeliveryFactory
  */
 public class SingleXMLDeliverer extends SimpleFileDeliverer {
 
@@ -121,50 +120,51 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
     
         OMFactory   f = OMAbstractFactory.getOMFactory();
         OMElement    container = f.createOMElement(XML_ROOT_NAME);
-        container.declareNamespace(Constants.EBMS3_NS_URI, "eb");
+        container.declareNamespace(EbMSConstants.EBMS3_NS_URI, "eb");
             
         log.debug("Add general message info to XML container");
         // Add the information on the user message to the container
         OMElement  usrMsgElement = UserMessage.createElement(container, mmd);
-            
-        log.debug("Add payload meta info to XML container");        
-        // Generate a element id and set this a reference in payload property
-        int i = 1;
-        for (IPayload p : mmd.getPayloads()) {
-            Property refProp = new Property();
-            refProp.setName("org:holodeckb2b:ref");
-            refProp.setValue("pl-" + i++);
-            ((PartInfo) p).getProperties().add(refProp);
-        }  
-        org.holodeckb2b.ebms3.packaging.PayloadInfo.createElement(usrMsgElement, mmd.getPayloads());
         
-        log.debug("Now add payload contents to XML container");
-        OMElement plContainer = f.createOMElement(new QName("Payloads"), container);
+        if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
+            log.debug("Add payload meta info to XML container");        
+            // Generate a element id and set this a reference in payload property
+            int i = 1;
+            for (IPayload p : mmd.getPayloads()) {
+                Property refProp = new Property();
+                refProp.setName("org:holodeckb2b:ref");
+                refProp.setValue("pl-" + i++);
+                ((PartInfo) p).getProperties().add(refProp);
+            }  
+            org.holodeckb2b.ebms3.packaging.PayloadInfo.createElement(usrMsgElement, mmd.getPayloads());
+        }
         
-        String msgFilePath = Utils.preventDuplicateFileName(directory + "message-" 
-                                                    + mmd.getMessageId().replaceAll("[^a-zA-Z0-9.-]", "_") 
-                                                    + ".xml");
-        log.debug("Message meta data complete, start writing this to file " + msgFilePath);
         try {
+            String msgFilePath = Utils.preventDuplicateFileName(directory + "message-" 
+                                                        + mmd.getMessageId().replaceAll("[^a-zA-Z0-9.-]", "_") 
+                                                        + ".xml");
+            log.debug("Message meta data complete, start writing this to file " + msgFilePath);
             FileWriter fw = new FileWriter(msgFilePath);
             XMLStreamWriter xmlWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(fw);
             log.debug("Write the meta data to file");
             xmlWriter.writeStartElement(XML_ROOT_NAME.getLocalPart());
             usrMsgElement.serialize(xmlWriter);
             xmlWriter.flush();
-
-            log.debug("Meta data writen to file, included the payload contents");
-            // Write start tag of Payloads container
-            fw.write("<Payloads>");
-            i = 1;
-            for(IPayload p : mmd.getPayloads()) {
-                log.debug("Create <Payload> element");
-                fw.write("<Payload xml:id=\"pl-" + i++ + "\">");
-                writeEncodedPayload(p.getContentLocation(), fw);
-                fw.write("</Payload>");
+            log.debug("Meta data writen to file");
+            if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
+                log.debug("Write payload contents");
+                fw.write("<Payloads>");
+                int i = 1;
+                for(IPayload p : mmd.getPayloads()) {
+                    log.debug("Create <Payload> element");
+                    fw.write("<Payload xml:id=\"pl-" + i++ + "\">");
+                    writeEncodedPayload(p.getContentLocation(), fw);
+                    fw.write("</Payload>\n");
+                }
+                log.debug("Close the <Payloads> element");
+                fw.write("</Payloads>\n");
             }
-            log.debug("Close the payloads and overall container");
-            fw.write("</Payloads>\n</" + XML_ROOT_NAME.getLocalPart() + ">");
+            fw.write("</" + XML_ROOT_NAME.getLocalPart() + ">");
             fw.close();        
             log.info("User message with msgID=" + mmd.getMessageId() + " successfully delivered");
         } catch (IOException | XMLStreamException ex) {

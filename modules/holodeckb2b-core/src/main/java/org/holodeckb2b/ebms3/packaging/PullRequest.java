@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.holodeckb2b.common.general.Constants;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 
 /**
  * Is a helper class for handling the ebMS PullRequest signal message elements 
@@ -35,7 +35,7 @@ public class PullRequest {
     /**
      * The fully qualified name of the element as an {@see QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "PullRequest");
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "PullRequest");
     
     /**
      * The local name of the mpc attribute
@@ -59,9 +59,9 @@ public class PullRequest {
      *                              ebMS specification and can therefor not be
      *                              read completely
      */
-    public static org.holodeckb2b.ebms3.persistent.message.PullRequest readElement(OMElement prElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.PullRequest readElement(OMElement prElement) throws PackagingException {
         // Create a new PullRequest entity object to store the information in
-        org.holodeckb2b.ebms3.persistent.message.PullRequest prData = new org.holodeckb2b.ebms3.persistent.message.PullRequest();
+        org.holodeckb2b.ebms3.persistency.entities.PullRequest prData = new org.holodeckb2b.ebms3.persistency.entities.PullRequest();
         
         // The PullRequest itself only contains the [optional] mpc attribute
         String  mpc = prElement.getAttributeValue(new QName(MPC_ATTR));
@@ -69,7 +69,7 @@ public class PullRequest {
         // If there was no mpc attribute or it was empty (which formally is 
         // illegal because the mpc should be a valid URI) it is set to the default MPC
         if (mpc == null || mpc.isEmpty())
-            mpc = Constants.DEFAULT_MPC;
+            mpc = EbMSConstants.DEFAULT_MPC;
         prData.setMPC(mpc);
 
         // Beside the PullRequest element also the MessageInfo sibling should be 
@@ -95,7 +95,7 @@ public class PullRequest {
         // Before we can get the PullRequest element we first have to get the parent
         //  SignalMessage element. Because a ebMS message can contain multiple signals
         //  we have to check each for the PullRequest
-        Iterator signals = org.holodeckb2b.ebms3.packaging.SignalMessage.getElements(messaging);
+        Iterator<?> signals = org.holodeckb2b.ebms3.packaging.SignalMessage.getElements(messaging);
         
         // Search for the first PullRequest as there may only be one in an ebMS message
         OMElement pullReq = null;
@@ -112,7 +112,7 @@ public class PullRequest {
      * @param receipt       The information to include in the pull request signal
      * @return              The new element representing the pull request signal
      */
-    public static OMElement createElement(OMElement messaging, org.holodeckb2b.ebms3.persistent.message.PullRequest pullRequest) {
+    public static OMElement createElement(OMElement messaging, org.holodeckb2b.ebms3.persistency.entities.PullRequest pullRequest) {
         // First create the SignalMessage element that is the placeholder for
         // the Receipt element containing the receipt info
         OMElement signalmessage = SignalMessage.createElement(messaging);

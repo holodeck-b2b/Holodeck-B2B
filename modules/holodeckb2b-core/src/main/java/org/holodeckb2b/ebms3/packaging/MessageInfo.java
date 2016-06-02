@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,10 @@ package org.holodeckb2b.ebms3.packaging;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.IMessageUnit;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
  * Is a helper class for handling the ebMS MessageInfo element in the ebMS SOAP 
@@ -36,22 +36,22 @@ public class MessageInfo {
     /**
      * The fully qualified name of the element as an {@see QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "MessageInfo");
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "MessageInfo");
     
     /**
      * The fully qualified name of the Timestamp element as an {@see QName}
      */
-    private static final QName  Q_TIMESTAMP = new QName(Constants.EBMS3_NS_URI, "Timestamp");
+    private static final QName  Q_TIMESTAMP = new QName(EbMSConstants.EBMS3_NS_URI, "Timestamp");
     
     /**
      * The fully qualified name of the MessageId element as an {@see QName}
      */
-    private static final QName  Q_MESSAGEID = new QName(Constants.EBMS3_NS_URI, "MessageId");
+    private static final QName  Q_MESSAGEID = new QName(EbMSConstants.EBMS3_NS_URI, "MessageId");
     
     /**
      * The fully qualified name of the RefToMessageId element as an {@see QName}
      */
-    private static final QName  Q_REFTO_MESSAGEID = new QName(Constants.EBMS3_NS_URI, "RefToMessageId");
+    private static final QName  Q_REFTO_MESSAGEID = new QName(EbMSConstants.EBMS3_NS_URI, "RefToMessageId");
     
     /**
      * Creates a <code>eb:MessageInfo</code> element for the given {@see IMessageUnit} 
@@ -107,7 +107,7 @@ public class MessageInfo {
      * @param mu            The {@link MessageUnit} where information should be
      *                      stored in
      * @throws PackagingException   When the given element does not conform to
-     *                              ebMS specification and can therefor not be
+     *                              ebMS specification and can therefore not be
      *                              read completely
      */
     public static void readElement(OMElement miElement, MessageUnit mu) throws PackagingException {

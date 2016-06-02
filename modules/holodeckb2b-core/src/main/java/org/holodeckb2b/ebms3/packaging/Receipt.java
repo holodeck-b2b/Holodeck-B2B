@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.holodeckb2b.common.general.Constants;
-import org.holodeckb2b.common.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 
 /**
  * Is a helper class for handling the ebMS Receipt signals in the ebMS SOAP header. 
@@ -30,7 +30,7 @@ import org.holodeckb2b.common.messagemodel.IReceipt;
  * this means we do not know what the actual XML content will be so it has to be supplied 
  * when constructing the element. Similar when reading the element the XML content is returned.
  * Because this information is not exchanged with the business application it is not included
- * in the {@link IReceipt} interface. Therefor the internal {@link org.holodeckb2b.ebms3.persistent.message.Receipt} 
+ * in the {@link IReceipt} interface. Therefor the internal {@link org.holodeckb2b.ebms3.persistency.entities.Receipt} 
  * entity object is used as parameter for the {@link #createElement(org.apache.axiom.om.OMElement, org.holodeckb2b.ebms3.persistent.message.Receipt)} 
  * method.
  * <p>The Receipt signal message unit is specified in section 5.2.3.3 of the ebMS 3 Core specification.
@@ -40,9 +40,9 @@ import org.holodeckb2b.common.messagemodel.IReceipt;
 public class Receipt {
     
     /**
-     * The fully qualified name of the element as an {@see QName}
+     * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "Receipt");
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Receipt");
     
     /**
      * Creates a new <code>eb:SignalMessage</code> for an <i>Receipt</i> signal.
@@ -51,7 +51,7 @@ public class Receipt {
      * @param receipt       The information to include in the receipt signal
      * @return              The new element representing the receipt signal
      */
-    public static OMElement createElement(OMElement messaging, org.holodeckb2b.ebms3.persistent.message.Receipt receipt) {
+    public static OMElement createElement(OMElement messaging, org.holodeckb2b.ebms3.persistency.entities.Receipt receipt) {
         // First create the SignalMessage element that is the placeholder for
         // the Receipt element containing the receipt info
         OMElement signalmessage = SignalMessage.createElement(messaging);
@@ -71,42 +71,44 @@ public class Receipt {
     
     /**
      * Reads the information from a <code>eb:SignalMessage</code> and its child elements that contain the Receipt signal 
-     * message unit and stores it a {@link org.holodeckb2b.ebms3.persistent.message.Receipt} object. 
+     * message unit and stores it a {@link org.holodeckb2b.ebms3.persistency.entities.Receipt} object. 
      * <p><b>NOTE:</b> The information is stored in an entity object, but this method will NOT persist the object.
      * 
      * @param sigElement    The parent <code>eb:SignalMessage</code> element that contains the <code>eb:Receipt</code> element 
-     * @return              The {@link org.holodeckb2b.ebms3.persistent.message.Receipt} object containing the information
+     * @return              The {@link org.holodeckb2b.ebms3.persistency.entities.Receipt} object containing the information
      *                      on the receipt
+     * @throws PackagingException   When the given element does not conform to
+     *                              ebMS specification and can therefore not be
+     *                              read completely
      */
-    public static org.holodeckb2b.ebms3.persistent.message.Receipt readElement(OMElement sigElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.Receipt readElement(OMElement sigElement) throws PackagingException {
         // Create a new Receipt entity object to store the information in
-        org.holodeckb2b.ebms3.persistent.message.Receipt rcptData = new org.holodeckb2b.ebms3.persistent.message.Receipt();
+        org.holodeckb2b.ebms3.persistency.entities.Receipt rcptData = new org.holodeckb2b.ebms3.persistency.entities.Receipt();
         
         // First read general information from the MessageInfo child 
         MessageInfo.readElement(MessageInfo.getElement(sigElement), rcptData);
         
         // Because the content of the Receipt is not predefined read and store all child elements of the Receipt element
-        //  which is the first child of the SignalMessage element
-        rcptData.setContent(sigElement.getFirstElement().getChildElements());
+        rcptData.setContent(sigElement.getFirstChildWithName(Q_ELEMENT_NAME).getChildElements());
         
         return rcptData;
     }
     
     /**
-     * Gets an {@see Iterator} for all <code>eb:SignalMessage</code> elements 
+     * Gets an {@link Iterator} for all <code>eb:SignalMessage</code> elements 
      * from the given ebMS 3 Messaging header in the SOAP message that represent
      * <i>Receipt</i> signals.
      * 
      * @param messaging   The SOAP Header block that contains the ebMS header,
      *                    i.e. the <code>eb:Messaging</code> element
-     * @return      An {@see Iterator} for all {@see OMElement}s representing a 
+     * @return      An {@link Iterator} for all {@link OMElement}s representing a 
      *              <code>eb:SignalMessage</code> element that contains an 
      *              Error signal, i.e. has one or more <code>eb:Receipt</code> 
      *              child elements  
      */
-    public static Iterator getElements(SOAPHeaderBlock messaging) {
+    public static Iterator<OMElement> getElements(SOAPHeaderBlock messaging) {
         // Check all SignalMessage elements in the header
-        Iterator signals = org.holodeckb2b.ebms3.packaging.SignalMessage.getElements(messaging);
+        Iterator<?> signals = org.holodeckb2b.ebms3.packaging.SignalMessage.getElements(messaging);
         
         ArrayList<OMElement>  receipts = new ArrayList<OMElement>();
         while(signals.hasNext()) {

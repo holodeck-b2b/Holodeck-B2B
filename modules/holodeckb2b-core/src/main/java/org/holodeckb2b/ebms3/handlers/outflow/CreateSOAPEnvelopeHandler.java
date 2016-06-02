@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,14 +22,14 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.wsdl.WSDLConstants;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.pmode.ILeg;
-import org.holodeckb2b.common.pmode.IPMode;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.persistent.message.MessageUnit;
-import org.holodeckb2b.ebms3.util.MessageContextUtils;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
  * Is the Holodeck B2B handler in the out flow that creates an empty ebMS message, i.e. a SOAP Envelope containing 
@@ -42,7 +42,7 @@ public class CreateSOAPEnvelopeHandler extends BaseHandler {
 
     @Override
     protected byte inFlows() {
-        return OUT_FLOW;
+        return OUT_FLOW | OUT_FAULT_FLOW;
     }
 
     @Override
@@ -57,12 +57,12 @@ public class CreateSOAPEnvelopeHandler extends BaseHandler {
             SOAPEnv.SOAPVersion version;
             if (isInFlow(INITIATOR)) {
                 log.debug("Use P-Mode of primary message unit to get SOAP version");
-                MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+                MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
                 if (primaryMU == null) {
                     log.debug("No message unit in this response, no envelope needed");
                     return InvocationResponse.CONTINUE;
                 }               
-                IPMode pmode = HolodeckB2BCore.getPModeSet().get(primaryMU.getPMode());
+                IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.getPMode());
                 // Currently only One-Way MEPs are supported, so always on first leg
                 ILeg leg = pmode.getLegs().iterator().next();
                 version = leg.getProtocol() != null && "1.1".equals(leg.getProtocol().getSOAPVersion()) ? 
@@ -85,6 +85,9 @@ public class CreateSOAPEnvelopeHandler extends BaseHandler {
                 throw new AxisFault("Could not add the SOAP envelope to the message!");
             }
             log.debug("Added SOAP envelope to message context");
+        } else {
+            log.debug("Check that ebMS namespace is declared on the SOAP envelope");
+            SOAPEnv.declareNamespaces(env); 
         }
         
         log.debug("Add empty eb3:Messaging element");

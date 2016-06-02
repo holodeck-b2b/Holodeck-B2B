@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,22 +18,23 @@ package org.holodeckb2b.common.workerpool.xml;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.holodeckb2b.common.util.Interval;
-import org.holodeckb2b.common.workerpool.IWorkerConfiguration;
+import org.holodeckb2b.interfaces.general.Interval;
+import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Root;
 
 /**
- * Implements the configuration of a Worker as defined by {@see IWorkerConfiguration} using XML. 
+ * Implements the configuration of a Worker as defined by {@link IWorkerConfiguration} using XML. 
  * 
  * <p>The XML element containing the configuration is shown here:
  * <pre>
  *      &lt;worker
  *          name=<i>String : Name of this worker</i>
  *          activate=<i>boolean : Should this worker be active?</i>
+ *          delay=<i>integer : The delay in seconds before starting the worker. Optional parameter, default = 0 (start immediately)</li></i>
  *          workerClass=<i>string : Name of the class that implements the workers functionality</i>
- *          concurrent=<i>integer : The number of concurrent executions</i>
+ *          concurrent=<i>integer : The number of concurrent executions. Optional parameter, default = 1</i>
  *          interval=<i>integer : If the worker should run repeatedly, the delay between executions in seconds</i>
  *      &gt;
  *          &lt;-- <i>The worker may need some configuration settings. These can be supplied by adding one or more param child elements</i>--&gt;
@@ -51,6 +52,9 @@ public class XMLWorkerConfig implements IWorkerConfiguration {
     
     @Attribute
     private boolean activate;
+    
+    @Attribute(required=false)
+    private int delay = 0;
     
     @Attribute
     private String workerClass;
@@ -87,13 +91,19 @@ public class XMLWorkerConfig implements IWorkerConfiguration {
     }
 
     @Override
+    public int getDelay() {
+        // delay specified in XML is in seconds, but return value must be milliseconds!
+        return delay * 1000; 
+    }
+    
+    @Override
     public int getConcurrentExecutions() {
         return concurrent;
     }
 
     @Override
     public Interval getInterval() {
-        if (xmlInterval > 0 && interval == null) //@todo: Is this check OKAY? What if reconfigured?
+        if (xmlInterval > 0 && interval == null) 
             interval = new Interval(xmlInterval, TimeUnit.SECONDS);
         
         return interval;
@@ -117,6 +127,7 @@ public class XMLWorkerConfig implements IWorkerConfiguration {
 
     public void setXmlInterval(int xmlInterval) {
         this.xmlInterval = xmlInterval;
+        interval = new Interval(xmlInterval, TimeUnit.SECONDS);
     }
 
     public void setParameters(Map<String, String> parameters) {

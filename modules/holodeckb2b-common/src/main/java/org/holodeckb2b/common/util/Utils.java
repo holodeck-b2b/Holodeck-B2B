@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +23,20 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import org.apache.tika.Tika;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
@@ -50,7 +56,7 @@ public final class Utils {
     private static Tika    mimeTypeDetector;
     
     /** 
-     * Transform a {@see Date} object to a {@see String} formatted according to
+     * Transform a {@link Date} object to a {@link String} formatted according to
      * the specification of the <code>dateTime</code> datatype of XML schema.<br>
      * See <a href="http://www.w3.org/TR/xmlschema-2/#dateTime">section 3.2.7 of the XML
      * Specification</a> for details.
@@ -63,18 +69,18 @@ public final class Utils {
         if (date == null)
             return null;
         
-        String formatted = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-            .format(date);
-        return formatted.substring(0, 26) + ":" + formatted.substring(26);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXX");
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return formatter.format(date);
     }
 
     /** 
-     * Parses a {@see String} for XML dateTime (see <a href="http://www.w3.org/TR/xmlschema-2/#dateTime">section 3.2.7 
-     * of the XML Specification</a>) and return a {@see Date} object when a valid date is found.
+     * Parses a {@link String} for XML dateTime (see <a href="http://www.w3.org/TR/xmlschema-2/#dateTime">section 3.2.7 
+     * of the XML Specification</a>) and return a {@link Date} object when a valid date is found.
      * 
      * @param   xmlDateTimeString   The String that should contain the <code>xs:dateTime</code> formatted date
-     * @return  A {@see Date} object for the parsed date
-     * @throws  ParseException
+     * @return  A {@link Date} object for the parsed date
+     * @throws  ParseException on date time parsing error
      */
     public static Date fromXMLDateTime(final String xmlDateTimeString)
             throws ParseException {
@@ -178,9 +184,9 @@ public final class Utils {
         if (obj == null)
             return null;
         
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutput out = new ObjectOutputStream(bos);
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             ObjectOutput out = new ObjectOutputStream(bos))
+        {
             out.writeObject(obj);
             out.close();
             return bos.toByteArray();
@@ -220,8 +226,9 @@ public final class Utils {
      * 
      * @param baseName      The file name to check for possible duplicates.
      * @return              The base name added with a numerical suffix if necessary to prevent duplicates
+     * @throws IOException  When a parent directory does not exist (anymore)
      */
-    public static String preventDuplicateFileName(final String baseName) {
+    public static String preventDuplicateFileName(final String baseName) throws IOException {
         if (baseName == null || baseName.isEmpty())
             return null;
         
@@ -235,9 +242,15 @@ public final class Utils {
         }
         
         Path targetPath = Paths.get(baseName);
-        int i = 1;
-        while (Files.exists(targetPath))
-            targetPath = Paths.get(nameOnly + "-" + i++ + ext);
+        File f = null; int i = 1;
+        while (f == null) {
+            try {
+                f = Files.createFile(targetPath).toFile();                
+            } catch (FileAlreadyExistsException faee) {
+                // Okay, the file already exists, try with increased sequence number
+                targetPath = Paths.get(nameOnly + "-" + i++ + ext);
+            }
+        }
         
         return targetPath.toString();
     }
@@ -322,5 +335,122 @@ public final class Utils {
             }
         }
         return null;
+    }
+
+    /**
+     * Compares two strings
+     *
+     * @param s     The first input string
+     * @param p     The second input string
+     * @return      -2 when both strings are non-empty and their values are different,<br>
+     *              -1 when both strings are empty,<br>
+     *              0  when both strings are non-empty but equal,<br>
+     *              1  when only the first string is non-empty,<br>
+     *              2  when only the second string is non-empty
+     */
+    public static int compareStrings(final String s, final String p) {
+        if (s == null || s.isEmpty()) {
+            if (p != null && !p.isEmpty()) {
+                return 2;
+            } else {
+                return -1;
+            }
+        } else if (p != null) {
+            if (s.equals(p)) {
+                return 0;
+            } else {
+                return -2;
+            }
+        } else {
+            return 1;
+        }
+    }
+    
+    /**
+     * Check whether the given String is non-empty and returns its value if true, otherwise the supplied default will
+     * be returned. 
+     * 
+     * @param value         The String to check
+     * @param defaultValue  The default value to use if the given string is <code>null</code> or empty
+     * @return      <code>value</code> if it is a non-empty string,<br>
+     *              <code>defaultValue</code> otherwise
+     */
+    public static String getValue(final String value, final String defaultValue) {
+        return (value != null && !value.isEmpty() ? value : defaultValue);
+    }
+
+    /**
+     * Checks whether the given String is <code>null</code> or is an empty string, i.e. does not contain any other
+     * characters then whitespace.
+     * 
+     * @param s     The string to check
+     * @return      <code>true</code> if <code>s == null || s.trim().isEmpty() == true</code>,<br>
+     *              <code>false</code> otherwise
+     */
+    public static boolean isNullOrEmpty(final String s) {
+        return s == null || s.trim().isEmpty();
+    }
+
+    /**
+     * Checks whether the given Collection is <code>null</code> or is empty.
+     * 
+     * @param c     The Collection to check
+     * @return      <code>true</code> if <code>c == null || c.isEmpty() == true</code>,<br>
+     *              <code>false</code> otherwise
+     */
+    public static boolean isNullOrEmpty(final Collection<?> c) {
+        return c == null || c.isEmpty();
+    }
+
+    /**
+     * Checks whether the given Map is <code>null</code> or is empty.
+     * 
+     * @param m     The Map to check
+     * @return      <code>true</code> if <code>m == null || m.isEmpty() == true</code>,<br>
+     *              <code>false</code> otherwise
+     */
+    public static boolean isNullOrEmpty(final Map<?,?> m) {
+        return m == null || m.isEmpty();
+    }
+
+    /**
+     * Checks whether the given Iterator is <code>null</code> or does not contain any more objects.
+     * 
+     * @param i     The Iterator to check
+     * @return      <code>true</code> if <code>i == null || i.hasNext() == true</code>,<br>
+     *              <code>false</code> otherwise
+     */
+    public static boolean isNullOrEmpty(final Iterator<?> i) {
+        return i == null || !i.hasNext();
+    }
+
+    /**
+     * Gets the root cause of the exception by traversing the exception stack and returning the
+     * last available exception in it.
+     * 
+     * @param t     The {@link Throwable} object to get the root cause for 
+     * @return      The root cause (note that this can be the throwable itself)
+     */
+    public static Throwable getRootCause(final Throwable t) {
+        List<Throwable> exceptionStack = getCauses(t);
+        return exceptionStack.get(exceptionStack.size() - 1);
+    }
+    
+    /**
+     * Gets the exception stack of an exception, i.e. the list of all exception that where registered as causes.
+     * 
+     * @param t     The {@link Throwable} object to get the exception stack for
+     * @return      A list of {@link Throwable} object with the first item being the exception itself and the last
+     *              item the root cause.
+     */
+    public static List<Throwable> getCauses(final Throwable t) {
+        ArrayList<Throwable> exceptionStack = new ArrayList<Throwable>();
+        Throwable i = t;
+        while (i != null) {
+            exceptionStack.add(i);
+            i = i.getCause();
+        } 
+        
+        return exceptionStack;
     }
 } 

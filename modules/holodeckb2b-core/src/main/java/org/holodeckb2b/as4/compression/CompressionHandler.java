@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,21 +21,23 @@ import java.util.Collection;
 import javax.activation.DataHandler;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.as4.pmode.IPayloadProfileAS4;
-import org.holodeckb2b.common.general.IProperty;
-import org.holodeckb2b.common.messagemodel.IPayload;
-import org.holodeckb2b.common.pmode.IFlow;
-import org.holodeckb2b.common.pmode.IPayloadProfile;
-import org.holodeckb2b.ebms3.persistent.general.Property;
-import org.holodeckb2b.ebms3.persistent.message.UserMessage;
+import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.ebms3.persistency.entities.Property;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.as4.pmode.IAS4PayloadProfile;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.pmode.IPayloadProfile;
+import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 
 /**
  * Is the <i>OUT_FLOW</i> handler part of the AS4 Compression Feature responsible for the compression of the payload
  * data. Whether this feature should be used is indicated by the <code>PMode[1].PayloadService.CompressionType</code>
  * P-Mode parameter (defined in section 3.1 of the AS4 profile). This P-Mode parameter is represented by {@link 
- * IPayloadProfileAS4#getCompressionType()}. 
+ * IAS4PayloadProfile#getCompressionType()}. 
  * <p>When payloads should be compressed two <code>eb:Property</code> elements must be added to the 
  * <code>eb:PartProperties</code> of the payload meta data in the ebMS header:<ol>
  * <li><code>@name = <i>"CompressionType"</i></code> and fixed value <i>"application/gzip"</i>;</li>
@@ -52,15 +54,21 @@ public class CompressionHandler extends AbstractUserMessageHandler {
 
     
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, UserMessage um) throws AxisFault {
+    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> umProxy) throws AxisFault {
+        // Extract the entity object from the proxy
+        UserMessage um = umProxy.entity;
+        
+        // First check if this message contains payloads at all
+        if (Utils.isNullOrEmpty(um.getPayloads()))
+            return InvocationResponse.CONTINUE;
         
         log.debug("Check P-Mode configuration if AS4 compression must be used");
-        IFlow flow = HolodeckB2BCore.getPModeSet().get(um.getPMode()).getLegs().iterator().next().getUserMessageFlow();
+        IUserMessageFlow flow = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode())
+                                                                    .getLegs().iterator().next().getUserMessageFlow();
         IPayloadProfile plProfile = (flow != null ? flow.getPayloadProfile() : null);
         
-        if ((plProfile instanceof IPayloadProfileAS4) &&
-                CompressionFeature.COMPRESSED_CONTENT_TYPE.equalsIgnoreCase(
-                                                            ((IPayloadProfileAS4) plProfile).getCompressionType())) {
+        if ((plProfile instanceof IAS4PayloadProfile) &&
+                CompressionFeature.COMPRESSED_CONTENT_TYPE.equalsIgnoreCase(((IAS4PayloadProfile) plProfile).getCompressionType())) {
             log.debug("AS4 Compression feature is used");
             // enable compression by decorating DataHandler and setting payload properties
             for (IPayload p : um.getPayloads())
@@ -87,7 +95,7 @@ public class CompressionHandler extends AbstractUserMessageHandler {
         String cid = p.getPayloadURI();
         DataHandler source = mc.getAttachment(cid);
         mc.addAttachment(cid, new CompressionDataHandler(source));
-        log.debug("Replaced DataHandler to enable decompression");
+        log.debug("Replaced DataHandler to enable compression");
 
         // Set the part properties to indicate AS4 Compression feature was used and original MIME Type
         // First ensure that there do not exists properties with this name

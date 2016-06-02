@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.common.general.Constants;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 
 /**
  * Is a helper class for handling the ebMS <code>eb:SignalMessage</code> element
@@ -31,9 +31,9 @@ import org.holodeckb2b.common.general.Constants;
 public class SignalMessage {
     
     /**
-     * The fully qualified name of the element as an {@see QName}
+     * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(Constants.EBMS3_NS_URI, "SignalMessage");
+    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "SignalMessage");
     
     
     /**
@@ -52,15 +52,15 @@ public class SignalMessage {
     }    
     
     /**
-     * Gets an {@see Iterator} for the <code>eb:SignalMessage</code> elements 
+     * Gets an {@link Iterator} for the <code>eb:SignalMessage</code> elements 
      * from the given ebMS 3 Messaging header in the SOAP message.
      * 
      * @param messaging   The SOAP Header block that contains the ebMS header,
      *                    i.e. the <code>eb:Messaging</code> element
-     * @return      An {@see Iterator} for all {@see OMElement}s representing a 
+     * @return      An {@link Iterator} for all {@link OMElement}s representing a 
      *              <code>eb:SignalMessage</code> element in the given header
      */
-    public static Iterator getElements(OMElement messaging) {
+    public static Iterator<?> getElements(OMElement messaging) {
         return messaging.getChildrenWithName(Q_ELEMENT_NAME);
     }
 }

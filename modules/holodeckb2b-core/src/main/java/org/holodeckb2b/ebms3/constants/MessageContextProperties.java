@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Holodeck B2B Team, Sander Fieten
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,10 @@
  */
 package org.holodeckb2b.ebms3.constants;
 
-import org.holodeckb2b.common.delivery.IMessageDeliverer;
-import org.holodeckb2b.ebms3.persistent.message.PullRequest;
-import org.holodeckb2b.ebms3.persistent.message.Receipt;
+import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
+import org.holodeckb2b.ebms3.persistency.entities.Receipt;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 
 /**
  * Defines constants for {@link MessageContext} properties that Holodeck B2B 
@@ -67,14 +68,14 @@ public class MessageContextProperties {
     public static final String RESPONSE_REQUIRED = "org:holodeckb2b:response-req";
     
     /**
-     * Holds an array of {@link org.holodeckb2b.ebms3.persistent.message.EbmsError} 
+     * Holds an array of {@link org.holodeckb2b.ebms3.persistency.entities.EbmsError} 
      * objects that contain information on errors that occurred during message 
      * processing
      */
     public static final String GENERATED_ERRORS = "org:holodeckb2b:gen-errors";
     
     /**
-     * Holds an array of {@link org.holodeckb2b.ebms3.persistent.message.ErrorMessage} 
+     * Holds an array of {@link org.holodeckb2b.ebms3.persistency.entities.ErrorMessage} 
      * objects that contain error signals that should be sent.
      */
     public static final String OUT_ERROR_SIGNALS = "org:holodeckb2b:send-errors";

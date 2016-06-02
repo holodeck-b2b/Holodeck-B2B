@@ -1,10 +1,25 @@
+/**
+ * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package org.holodeckb2b.common.workers;
 
-import org.holodeckb2b.common.workers.DirWatcher;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -12,13 +27,12 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
-import org.holodeckb2b.common.workerpool.TaskConfigurationException;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.junit.After;
-import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -92,8 +106,6 @@ public class DirWatcherTest {
     /**
      * Second test, add a file
      */
-    // TODO test failed, correct and add comment
-    /*
     @Test
     public void testAddToEnd() {
         
@@ -114,7 +126,6 @@ public class DirWatcherTest {
         instance.run();
         assertEquals(1, instance.c);               
     }
-    */
 
     /**
      * Delete first
@@ -138,8 +149,6 @@ public class DirWatcherTest {
     /**
      * Delete second, add to end
      */
-    // TODO test failed, correct and add comment
-    /*
     @Test
     public void testDeleteAndAdd() {
         
@@ -163,16 +172,17 @@ public class DirWatcherTest {
         instance.run();
         assertEquals(2, instance.c);               
     }    
-    */
     
     public class DirWatcherImpl extends DirWatcher {
         public int c = 0;
         
+        @Override
         public void run() {
             c = 0;
             super.run();
         }
         
+        @Override
         public void onChange(File f, Event event) {
             System.out.println("Change [" + event.name() + "] reported for " + f.getAbsolutePath());
             c++;

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,18 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.holodeckb2b.common.workers;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.holodeckb2b.common.workerpool.TaskConfigurationException;
-import static org.junit.Assert.*;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 
