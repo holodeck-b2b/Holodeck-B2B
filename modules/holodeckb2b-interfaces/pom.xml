@@ -50,7 +50,6 @@
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-kernel</artifactId>
-            <type>jar</type>
         </dependency>
     </dependencies>
 </project>

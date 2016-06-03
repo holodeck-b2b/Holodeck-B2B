@@ -27,7 +27,6 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.holodeckb2b</groupId>
     <artifactId>holodeckb2b-core</artifactId>
     <packaging>jar</packaging>
     <name>Holodeck B2B - Core</name>
@@ -114,13 +113,11 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
-            <version>10.9.1.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
