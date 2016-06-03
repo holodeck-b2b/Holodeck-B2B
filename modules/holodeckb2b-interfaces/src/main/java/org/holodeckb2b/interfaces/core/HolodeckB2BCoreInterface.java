@@ -81,7 +81,7 @@ public class HolodeckB2BCoreInterface {
      * messages.
      * 
      * @return  The current set of P-Modes as a {@link IPModeSet}
-     * @see IPMode
+     * @see IPModeSet
      */
     public static IPModeSet getPModeSet() {
         assertInitialized();
