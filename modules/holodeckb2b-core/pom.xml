@@ -95,7 +95,6 @@
                     see http://gitlab.chasquis-consulting.com/gitlabadmin/holodeck-b2b/issues/55
             @todo: Remove when fixed version available
             -->
-            <scope>provided</scope>
         </dependency>
         
         
@@ -123,4 +122,20 @@
     </dependencies>
 
   
+  <build>
+    <plugins>
+      <!-- Run like this:
+      mvn clean install org.apache.axis2:axis2-mar-maven-plugin:1.7.3:mar
+       -->
+      <plugin>
+        <groupId>org.apache.axis2</groupId>
+        <artifactId>axis2-mar-maven-plugin</artifactId>
+        <version>1.7.3</version>
+        <configuration>
+          <moduleXmlFile>../holodeckb2b-distribution/src/main/configurations/module.xml</moduleXmlFile>
+          <includeDependencies>true</includeDependencies>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

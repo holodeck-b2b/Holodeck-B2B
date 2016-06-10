@@ -17,14 +17,12 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import javax.xml.namespace.QName;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.engine.AbstractDispatcher;
-import org.holodeckb2b.ebms3.packaging.Messaging;
 
 /**
  * Is an Axis2 <i>Dispatcher</i> that directs message to the MSH service.

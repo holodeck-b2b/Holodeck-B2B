@@ -44,6 +44,7 @@
     <modules>
         <module>modules/holodeckb2b-interfaces</module>
         <module>modules/holodeckb2b-common</module>
+        <module>modules/holodeckb2b-axis2</module>
         <module>modules/holodeckb2b-core</module>
         <module>modules/holodeckb2b-distribution</module>
     </modules>
@@ -68,6 +69,11 @@
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
                 <artifactId>holodeckb2b-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.holodeckb2b</groupId>
+                <artifactId>holodeckb2b-axis2</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
