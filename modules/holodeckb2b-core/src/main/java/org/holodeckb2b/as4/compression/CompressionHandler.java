@@ -63,7 +63,7 @@ public class CompressionHandler extends AbstractUserMessageHandler {
             return InvocationResponse.CONTINUE;
         
         log.debug("Check P-Mode configuration if AS4 compression must be used");
-        IUserMessageFlow flow = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode())
+        IUserMessageFlow flow = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId())
                                                                     .getLegs().iterator().next().getUserMessageFlow();
         IPayloadProfile plProfile = (flow != null ? flow.getPayloadProfile() : null);
         

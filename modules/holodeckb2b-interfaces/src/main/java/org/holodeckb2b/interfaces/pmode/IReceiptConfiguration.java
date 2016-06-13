@@ -72,7 +72,7 @@ public interface IReceiptConfiguration {
      * these situations separately.
      * <p>Also note that for detecting a missing receipt an interval to wait for a Receipt has to be specified. This
      * is however part of the AS4 Reception Awareness feature and therefore also part of its configuration ({@link
-     * IReceptionAwareness}).
+     * org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness}).
      * <p>Notifying the business application about receipts is done using a standard <i>message delivery mechanism</i> 
      * which is configured by a {@link IDeliverySpecification}. If needed a specific delivery can be configured for 
      * receipt notifications by providing it through {@link #getReceiptDelivery()}. 

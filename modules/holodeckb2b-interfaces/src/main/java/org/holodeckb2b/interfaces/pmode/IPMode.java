@@ -19,6 +19,7 @@ package org.holodeckb2b.interfaces.pmode;
 
 
 import java.util.List;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IAgreement;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 
@@ -89,8 +90,8 @@ public interface IPMode {
      * <p>NOTE: Holodeck B2B currently only support the One-Way MEP!
      * 
      * @return  The URI defined in the Core Specification that defines the MEP used by this P-Mode.
-     * @see Constants#ONE_WAY_MEP
-     * @see Constants#TWO_WAY_MEP
+     * @see org.holodeckb2b.interfaces.general.EbMSConstants#ONE_WAY_MEP
+     * @see org.holodeckb2b.interfaces.general.EbMSConstants#TWO_WAY_MEP
      */
     public String getMep();
     
@@ -99,11 +100,11 @@ public interface IPMode {
      * <p>NOTE: As Holodeck B2B only support One-Way MEPs only binding for One-Way MEP are allowed!
      * 
      * @return  The URI defined in the Core Specification that defines the MEP binding used by this P-Mode.
-     * @see Constants#ONE_WAY_PULL
-     * @see Constants#ONE_WAY_PUSH
-     * @see Constants#TWO_WAY_PUSH_PUSH
-     * @see Constants#TWO_WAY_PUSH_PULL
-     * @see Constants#TWO_WAY_PULL_PUSH
+     * @see org.holodeckb2b.interfaces.general.EbMSConstants#ONE_WAY_PULL
+     * @see org.holodeckb2b.interfaces.general.EbMSConstants#ONE_WAY_PUSH
+     * @see org.holodeckb2b.interfaces.general.EbMSConstants#TWO_WAY_PUSH_PUSH
+     * @see org.holodeckb2b.interfaces.general.EbMSConstants#TWO_WAY_PUSH_PULL
+     * @see org.holodeckb2b.interfaces.general.EbMSConstants#TWO_WAY_PULL_PUSH
      */
     public String getMepBinding();
 

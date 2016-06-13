@@ -51,7 +51,8 @@ public class SecurityUtils {
      */
     public enum CertType { 
         pub, 
-        priv 
+        priv,
+        trust
     }
 
     
@@ -126,15 +127,17 @@ public class SecurityUtils {
     /**
      * Creates the set of properties to configure the Crypto provider for signing or encryption.  
      * 
-     * @param   certType    Indicates for which type of certificate (public or private) the Crypto provider must be 
-     *                      set up. 
+     * @param   certType    Indicates for which type of certificate (public, private or trust) the Crypto provider must 
+     *                      be set up. 
      * @return  The Crypto configuration for the requested certificate type
+     * @since 2.1.0     Added option to create config for trust keystore
      */
     public static Properties createCryptoConfig(CertType certType) {
         IConfiguration config = HolodeckB2BCoreInterface.getConfiguration();
         Properties cryptoProperties = new Properties();
         String     keyStoreFile = null;
         String     keyStorePwd = null;
+        String     keyStoreType = "keystore";
         
         switch (certType) {
             case pub  : 
@@ -145,13 +148,18 @@ public class SecurityUtils {
                 keyStoreFile = config.getPrivateKeyStorePath();
                 keyStorePwd = config.getPrivateKeyStorePassword();                
                 break;   
+            case trust :
+                keyStoreType = "truststore";
+                keyStoreFile = config.getTrustKeyStorePath();
+                keyStorePwd = config.getTrustKeyStorePassword();                
+                break;                   
         }
         
         cryptoProperties.setProperty("org.apache.wss4j.crypto.provider", "org.apache.wss4j.common.crypto.Merlin");
         
-        cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.file", keyStoreFile);
-        cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.type", "jks");
-        cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.password", keyStorePwd);
+        cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin." + keyStoreType + ".file", keyStoreFile);
+        cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin." + keyStoreType + ".type", "jks");
+        cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin." + keyStoreType + ".password", keyStorePwd);
         
         return cryptoProperties;
     }

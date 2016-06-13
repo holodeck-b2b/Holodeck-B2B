@@ -1,0 +1,7 @@
+<Protocol>
+    <Address>http://www.oxygenxml.com/</Address>
+    <AddActorOrRoleAttribute>true</AddActorOrRoleAttribute>
+    <SoapVersion>1.1</SoapVersion>
+    <UseChunking>0</UseChunking>
+    <UseHTTPCompression>false</UseHTTPCompression>
+</Protocol>

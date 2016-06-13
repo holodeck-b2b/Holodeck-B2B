@@ -49,8 +49,8 @@ import org.holodeckb2b.interfaces.general.ReplyPattern;
  * <p>Not specified in the ebMS V3 or AS4 specifications is whether errors generated for received error or receipts 
  * should be reported back to the sender of the message in error. In most cases the problem with such errors will be 
  * that they can not be correctly related to an existing message resulting in unknown P-Mode for that error. Therefor 
- * error reporting on such errors is configured globally (see {@link Config#shouldReportErrorOnError()} and 
- * {@link Config#shouldReportErrorOnReceipt()}). But it is possible to overwrite these global settings using the P-Mode.
+ * error reporting on such errors is configured globally (see {@link org.holodeckb2b.interfaces.config.IConfiguration#shouldReportErrorOnError()} and 
+ * {@link org.holodeckb2b.interfaces.config.IConfiguration#shouldReportErrorOnReceipt()}). But it is possible to overwrite these global settings using the P-Mode.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */

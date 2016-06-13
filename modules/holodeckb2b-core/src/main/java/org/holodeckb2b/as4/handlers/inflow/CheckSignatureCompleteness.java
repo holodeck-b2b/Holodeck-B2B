@@ -64,11 +64,11 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
         UserMessage um = umProxy.entity;
         
         // First check if this message needs a Receipt and is signed 
-        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
         if (pmode == null) {
             // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
             // is needed
-            log.error("P-Mode " + um.getPMode() + " not found in current P-Mode set!"
+            log.error("P-Mode " + um.getPModeId() + " not found in current P-Mode set!"
                     + "Unable to determine if receipt is needed for message [msgId=" + um.getMessageId() + "]");
             return InvocationResponse.CONTINUE;
         }

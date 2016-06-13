@@ -57,6 +57,7 @@ import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 
@@ -268,18 +269,17 @@ public class MessageUnitDAO {
     }
 
     /**
-     * Creates and stores a new Pull Request Signal message unit.
-     * <p>Because Pull Request messages are only created when they are sent, the processing state of the new pull 
-     * request message unit is set to {@link ProcessingStates#PROCESSING} to indicate that it is processed directly.
+     * Creates and stores a new Pull Request Signal message unit based on the provided pull request meta-data.
+     * <p>Because Pull Request messages are now also <i>submitted</i> to the Core and not necessarily send directly, 
+     * the processing state of the new pull request message unit is set to {@link ProcessingStates#READY_TO_PUSH} to 
+     * indicate that it can be sent.
      *
-     * @param pmodeId   The id of the PMode that defines the processing of the new Pull Request signal.
-     * @param mpc       The MPC that the pull operation will apply to. If not specified the <i>default MPC</i> will be
-     *                  used for the new Pull Request
+     * @param   prData  The meta-data on the Pull Request that should be sent, this MUST include the P-Mode id and MPC
      * @return          A new {@link EntityProxy} object for the new Pull Request signal message unit if it could be 
      *                  created and stored in the database
      * @throws DatabaseException If an error occurs when saving the new message unit to the database
      */
-    public static EntityProxy<PullRequest> createOutgoingPullRequest(String pmodeId, String mpc) 
+    public static EntityProxy<PullRequest> createOutgoingPullRequest(final IPullRequest prData) 
                                                                                         throws DatabaseException {
         EntityManager em = JPAUtil.getEntityManager();
         try {
@@ -292,10 +292,10 @@ public class MessageUnitDAO {
             persistentPullReqMU.setTimestamp(new Date());
             persistentPullReqMU.setDirection(MessageUnit.Direction.OUT);
             // Set P-Mode id
-            persistentPullReqMU.setPMode(pmodeId);
+            persistentPullReqMU.setPMode(prData.getPModeId());
             // Set MPC, use default if not provided
-            if (!Utils.isNullOrEmpty(mpc)) {
-                persistentPullReqMU.setMPC(mpc);
+            if (!Utils.isNullOrEmpty(prData.getMPC())) {
+                persistentPullReqMU.setMPC(prData.getMPC());
             } else {
                 persistentPullReqMU.setMPC(EbMSConstants.DEFAULT_MPC);
             }
@@ -303,8 +303,8 @@ public class MessageUnitDAO {
             // Add CREATED to signal PullRequest was made
             ProcessingState procstate = new ProcessingState(ProcessingStates.CREATED);
             persistentPullReqMU.setProcessingState(procstate);
-            // and immediately change state to PROCESSING to indicate it is being send
-            procstate = new ProcessingState(ProcessingStates.PROCESSING);
+            // and immediately change state to READY_TO_PUSH to indicate it is ready to send
+            procstate = new ProcessingState(ProcessingStates.READY_TO_PUSH);
             persistentPullReqMU.setProcessingState(procstate);
 
             // Persist the new message unit
@@ -352,10 +352,11 @@ public class MessageUnitDAO {
             // Set state to CREATED
             ProcessingState procstate = new ProcessingState(ProcessingStates.CREATED);
             receipt.setProcessingState(procstate);
-            // If Receipt is reported as response, directly set state to processing
+
+            // If error is reported as response, directly set state to processing
             if (asResponse)
                 receipt.setProcessingState(new ProcessingState(ProcessingStates.PROCESSING));
-            
+
             // Persist the new message unit
             em.persist(receipt);
             // Commit changes to DB
@@ -947,8 +948,60 @@ public class MessageUnitDAO {
         }
         return createProxyResultList(result);
     }    
-
     
+    /**
+     * Updates the multi-hop indicator of the message unit.
+     * 
+     * @param mu        The {@link EntityProxy} for the {@link MessageUnit} which multi-hop indicator should be set
+     * @param multihop  The indicator whether this message unit uses multi-hop
+     * @throws DatabaseException When a database error occurs
+     * @todo Set version number, only update multi hop, like P-Mode id
+     * @since
+     */
+    public static void setMultiHop(EntityProxy<MessageUnit> mu, boolean multihop) throws DatabaseException {       
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            MessageUnit actualMU = refreshMessageUnit(mu.entity, em);
+            actualMU.setMultiHop(multihop);
+            em.merge(actualMU);
+            em.getTransaction().commit();
+            
+            // Update the EntityProxy with new entity
+            mu.entity = actualMU;
+        } catch (Exception e) {
+            // The update somehow failed: rollback and rethrow
+            em.getTransaction().rollback();
+            throw new DatabaseException("Setting multihop indicator for MessageUnit failed!", e);
+        } finally {
+            em.close();
+        }
+    }
+    
+    /**
+     * Loads all meta-data for a message unit from the database.
+     * <p>The "query" methods of this class return lists of {@link EntityProxy} objects that only have the basic info
+     * loaded. This method should be used to get all meta-data for a message unit. 
+     * <p>NOTE: This methods reloads the complete message unit, so any change applied to it will be lost!
+     * 
+     * @param mu    The {@link EntityProxy} for the {@link MessageUnit} that needs to be loaded
+     * @throws DatabaseException When an error occurs while loading the message units meta-data
+     */
+    public static <T extends MessageUnit> void loadCompletely(EntityProxy<T> mu) throws DatabaseException {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            // Update the EntityProxy with new entity
+            mu.entity = refreshMessageUnit(mu.entity, em);
+            em.getTransaction().commit();            
+        } catch (Exception e) {
+            // The update somehow failed: rollback and rethrow
+            em.getTransaction().rollback();
+            throw new DatabaseException("Error while getting the message unit from database!", e);
+        } finally {
+            em.close();
+        }        
+    }
     /**
      * Helper method to convert a result list of entity objects into a list of {@link EntityProxy} objects.
      * 
@@ -1038,7 +1091,7 @@ public class MessageUnitDAO {
      * @param em    The entity manager to use for accessing the database
      * @return      A new {@link TradingPartner} entity object containing the provided information
      */
-    public static TradingPartner createTradingPartner(ITradingPartner tp, EntityManager em) {
+    private static TradingPartner createTradingPartner(ITradingPartner tp, EntityManager em) {
         if (tp == null)
             return null; // nothing to create if no information given
         

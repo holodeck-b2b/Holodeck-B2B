@@ -69,7 +69,7 @@ public interface IPayload {
      * <p><b>NOTE 2:</b> It is not necessary to include the <i>"cid:"</i> or <i>"#"</i> prefix for references to 
      * payloads contained in as an attachment or in the SOAP body. Holodeck B2B will not include these prefixes when
      * delivering messages to the business application, i.e. in the message data provided in {@link 
-     * IMessageDeliverer#deliver(org.holodeckb2b.common.messagemodel.IMessageUnit)}. 
+     * IMessageDeliverer#deliver(IMessageUnit)}. 
      * <p><b>NOTE 3:</b> When the payloads <i>containment</i> is {@link Containment#EXTERNAL} the content of this payload 
      * is not contained in the ebMS message itself and MUST be retrieved from or made available at this URI <b>by the 
      * business application</b>.

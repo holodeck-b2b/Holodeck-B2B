@@ -17,7 +17,10 @@
 package org.holodeckb2b.interfaces.pmode;
 
 import java.util.Collection;
+import java.util.List;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventConfiguration;
 
 /**
  * Represents the P-Mode parameters of one leg, i.e. the exchange of a user message, in a message exchange.
@@ -75,7 +78,7 @@ public interface ILeg {
      *         be <code>null</code> for the receiving side. Can be <code>null</code> on the sending side when errors
      *         and receipts responses do not need to be delivered to the business application or use their own 
      *         delivery specification
-     * @see    org.holodeckb2b.common.delivery
+     * @see    IDeliverySpecification
      */
     public IDeliverySpecification getDefaultDelivery();
     
@@ -100,9 +103,23 @@ public interface ILeg {
     
     /**
      * Returns the configuration of the user message processing.
-     * <p>As target of the leg is to exchange a user message this flow must always be available. 
+     * <p>As target of the leg is to exchange a user message this flow should be available. 
      * 
      * @return An {@link IUserMessageFlow} object containing the configuration of the user message
      */
     public IUserMessageFlow getUserMessageFlow();
+    
+    /**
+     * Returns the configuration for handling <i>"events"</i> that occur during the processing of message units on this
+     * leg. These <i>message processing events</i> are used to provide additional information to the business 
+     * application about the processing of a message unit in addition to the formally specified <i>Submit</i>, 
+     * <i>Deliver</i> and <i>Notify</i> operations. An example of an event is that a message unit has been (re)sent. 
+     * 
+     * @return A {@link List} of {@link IMessageProcessingEventConfiguration}s that specify which event handlers should
+     *         be used for events that occur while processing message units of this leg. 
+     * @see IMessageProcessingEvent
+     * @see org.holodeckb2b.interfaces.events.types 
+     * @since 2.1.0
+     */
+    public List<IMessageProcessingEventConfiguration> getMessageProcessingEventConfiguration();
 }

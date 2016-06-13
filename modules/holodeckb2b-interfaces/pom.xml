@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>2.0.2</version>
+        <version>2.1.0-SNAPSHOT-5</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>holodeckb2b-interfaces</artifactId>
@@ -50,7 +50,6 @@
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-kernel</artifactId>
-            <type>jar</type>
         </dependency>
     </dependencies>
 </project>

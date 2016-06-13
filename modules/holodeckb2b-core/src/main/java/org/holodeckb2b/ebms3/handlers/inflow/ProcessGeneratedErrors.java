@@ -128,7 +128,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
                         } else {
                             log.debug("Get P-Mode information to determine how new signal must be processed");
                             // Errorhandling config is contained in flow 
-                            String pmodeId = muInError.getPMode();
+                            String pmodeId = muInError.getPModeId();
                             IUserMessageFlow flow = (pmodeId != null ? HolodeckB2BCoreInterface.getPModeSet().get(pmodeId)
                                                                     .getLegs().iterator().next().getUserMessageFlow()
                                                             : null);
@@ -161,7 +161,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
                                 EntityProxy<ErrorMessage> errorMU = 
                                                     MessageUnitDAO.createOutgoingErrorMessageUnit(errForMsg, 
                                                                                                   refToMsgId, 
-                                                                                                  muInError.getPMode(), 
+                                                                                                  muInError.getPModeId(), 
                                                                                                   addSOAPFault,
                                                                                                   asResponse);
                                 log.debug("Error signal stored in database");

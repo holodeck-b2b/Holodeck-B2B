@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<tns:tLeg xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+label="REQUEST">
+    <Protocol>
+    </Protocol>
+    <Receipt>
+    </Receipt>
+    <ReceptionAwareness>
+    </ReceptionAwareness>
+    <DefaultDelivery>
+        <DeliveryMethod>
+        </DeliveryMethod>
+    </DefaultDelivery>
+    <PullRequestFlow>
+        <Mpc>
+        </Mpc>
+    </PullRequestFlow>
+    <UserMessageFlow>
+    </UserMessageFlow>
+    <EventHandlers>
+        <EventHandler>
+            <HandlerFactoryClass>org.holodeckb2b.pmode.xml.events.EventHandlerFactory</HandlerFactoryClass>
+        </EventHandler>
+        <EventHandler>
+            <HandlerFactoryClass>org.holodeckb2b.pmode.xml.events.EventHandlerFactory</HandlerFactoryClass>
+            <HandledEvent>org.holodeckb2b.pmode.xml.events.TestEvent1</HandledEvent>
+            <HandledEvent>org.holodeckb2b.pmode.xml.events.TestEvent2</HandledEvent>
+            <ForMessageUnit>UserMessage</ForMessageUnit>
+            <ForMessageUnit>SignalMessage</ForMessageUnit>
+            <Parameter>
+                <name>p1</name>
+                <value>value1</value>
+            </Parameter>
+            <Parameter>
+                <name>p2</name>
+                <value>value2</value>
+            </Parameter>
+        </EventHandler>        
+    </EventHandlers>
+</tns:tLeg>

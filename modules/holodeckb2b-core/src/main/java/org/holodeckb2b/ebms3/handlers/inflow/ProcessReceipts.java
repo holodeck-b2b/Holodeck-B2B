@@ -108,7 +108,7 @@ public class ProcessReceipts extends BaseHandler {
                                                                             rcptProxy.entity.getMessageId()));  
         } else {
             // Check if the found message unit expects a receipt 
-            String pmodeId = refdMsg.entity.getPMode();
+            String pmodeId = refdMsg.entity.getPModeId();
             if (pmodeId != null) {
                 IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(pmodeId);
                 if (pmode == null || pmode.getLegs().iterator().next().getReceiptConfiguration() == null) {

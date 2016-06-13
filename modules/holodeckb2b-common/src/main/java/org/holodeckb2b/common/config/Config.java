@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import org.apache.axis2.context.ConfigurationContext;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 
 /**
  * Contains the configuration of the Holodeck B2B Core.
@@ -109,6 +110,16 @@ public class Config implements IConfiguration {
     private String  pubKeyStorePassword = null;    
     
     /*
+     * The path to the keystore holding the trusted certificates
+    */
+    private String trustKeyStorePath = null;
+    
+    /*
+     * The password of the keystore that holds the trusted certificates
+     */
+    private String  trustKeyStorePassword = null;    
+
+    /*
      * Default setting whether the revocation of a certificate should be checked 
      */
     private boolean defaultRevocationCheck = false;
@@ -118,6 +129,12 @@ public class Config implements IConfiguration {
      */
     private ConfigurationContext    axisCfgCtx = null;
     
+    /*
+     * The class name of the event processor that is to be used for handling message processing events
+     * @since 2.1.0
+     */
+    private String messageProcessingEventProcessorClass = null;
+            
     private boolean isTrue (String s) {
       return "on".equalsIgnoreCase(s) || "true".equalsIgnoreCase(s) || "1".equalsIgnoreCase(s);
     }
@@ -213,9 +230,21 @@ public class Config implements IConfiguration {
         // The password for the keystore holding the public keys
         pubKeyStorePassword = configFile.getParameter("PublicKeyStorePassword");
         
+        // The location of the keystore holding the trusted certificate, if not provided the default location 
+        // «HB2B_HOME»/repository/certs/trustedcerts.jks is used
+        trustKeyStorePath = configFile.getParameter("TrustKeyStorePath");
+        if (Utils.isNullOrEmpty(trustKeyStorePath))
+            trustKeyStorePath = holodeckHome + "/repository/certs/trustedcerts.jks";        
+        
+        // The password for the keystore holding the public keys
+        trustKeyStorePassword = configFile.getParameter("TrustKeyStorePassword");
+        
         // Default setting for certificate revocation check
         String certRevocationCheck = configFile.getParameter("CertificateRevocationCheck");
-        defaultRevocationCheck = isTrue(certRevocationCheck);                
+        defaultRevocationCheck = isTrue(certRevocationCheck);     
+        
+        // The class name of the event processor
+        messageProcessingEventProcessorClass = configFile.getParameter("MessageProcessingEventProcessor");
     }
 
     /**
@@ -398,6 +427,31 @@ public class Config implements IConfiguration {
     }
 
     /**
+     * Gets the path to the keystore containing the CA certificates that should be trusted when validating the 
+     * certificate that was used for signing a received message.
+     * <p>This "trust" keystore should be used to store certificates that are not directly related to a specific trading 
+     * partner but are needed to validate the trading partners certificate. By using the trust store the trading 
+     * partners certificate doesn't need to be registered in Holodeck B2B but can be included in the message itself 
+     * using a <code>BinarySecurityToken</code> element.
+     * 
+     * @return The path to the <i>"trust"</i> keystore.
+     * @since 2.1.0
+     */
+    public String getTrustKeyStorePath() {
+        return trustKeyStorePath;
+    }
+
+    /**
+     * Gets the password for the keystore that holds the trusted CA certificates.
+     * 
+     * @return  The password for accessing the keystore with the trusted certificates.
+     * @since 2.1.0
+     */
+    public String getTrustKeyStorePassword() {
+        return trustKeyStorePassword;
+    }
+
+    /**
      * Gets the global setting whether Holodeck B2B should check if a certificate is revoked. As an error that occurs 
      * during the revocation check will result in rejection of the complete ebMS message the default value is <i>false
      * </i>. If required the revocation check can be enable in the P-Mode configuration.
@@ -409,5 +463,18 @@ public class Config implements IConfiguration {
      */
     public boolean shouldCheckCertificateRevocation() {
         return defaultRevocationCheck;
+    }
+    
+    /**
+     * Gets the configured class name of the component that is responsible for the processing of event that are raised 
+     * during the message processing. This is an optional configuration parameter and when not set the Holodeck B2B Core 
+     * will use a default implementation. To use a custom implementation set class name in the 
+     * <i>MessageProcessingEventProcessor</i> parameter
+     * 
+     * @return String containing the class name of the {@link IMessageProcessingEventProcessor} implementation to 
+     * @since 2.1.0
+     */
+    public String getMessageProcessingEventProcessor() {
+        return messageProcessingEventProcessorClass;
     }
 }

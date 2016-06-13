@@ -31,14 +31,15 @@ import org.holodeckb2b.ebms3.persistency.entities.Payload;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.util.PModeFinder;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.submit.MessageSubmitException;
+import org.holodeckb2b.pmode.PModeFinder;
 
 /**
  * Is the default implementation of {@see IMessageSubmitter}.
@@ -55,8 +56,27 @@ public class MessageSubmitter implements IMessageSubmitter {
         return submitMessage(um, false);
     }
     
+    /**
+     * Submits the specified <b>User Message</b> to Holodeck B2B for sending. 
+     * <p>Whether the message will be sent immediately depends on the P-Mode that applies and the MEP being specified 
+     * therein. If the MEP is Push the Holodeck B2B will try to send the message immediately. When the MEP is Pull the 
+     * message is stored for retrieval by the receiving MSH.
+     * <p><b>NOTE:</b> This method MAY return before the message is actually sent to the receiver. Successful return 
+     * ONLY GUARANTEES that the message CAN be sent to the receiver and that Holodeck B2B will try to do so. 
+     * <p>It is NOT REQUIRED that the meta data contains a reference to the P-Mode that should be used to handle the 
+     * message. The first action of a <i>MessageSubmitter</i> is to find the correct P-Mode for the user message. It is
+     * however RECOMMENDED to include the P-Mode id to prevent mismatches.
+     * 
+     * @param um                    The meta data on the user message to be sent to the other trading partner.
+     * @param movePayloads          Indicator whether the files containing the payload data must be deleted or not
+     * @return                      The ebMS message-id assigned to the user message. 
+     * @throws MessageSubmitException   When the user message can not be submitted successfully. Reasons for failure can 
+     *                                  be that no P-Mode can be found to handle the message or the given P-Mode 
+     *                                  conflicts with supplied meta-data.
+     */
     @Override
     public String submitMessage(IUserMessage um, boolean movePayloads) throws MessageSubmitException {
+        log.trace("Start submission of new User Message");
         
         try {
             log.debug("Find the P-Mode for the message");
@@ -94,7 +114,7 @@ public class MessageSubmitter implements IMessageSubmitter {
                 MessageUnitDAO.setReadyToPush(newUM);
             }
             
-            log.info("Message succesfully submitted");
+            log.info("User Message succesfully submitted");
             return newUM.entity.getMessageId();
             
         } catch (DatabaseException dbe) {
@@ -103,6 +123,43 @@ public class MessageSubmitter implements IMessageSubmitter {
         }
     }
 
+    /**
+     * Submits the specified <b>Pull Request</b> to Holodeck B2B for sending. 
+     * <p>With this submission the business application that expects to receive a User Message, i.e. the <i>Consumer</i>
+     * in ebMS specification terminology, can control the moments when the pull operation must be performed. Holodeck
+     * B2B will try to send the message directly.
+     * <p>The meta-data for the Pull Request MUST contain both the MPC and P-Mode [id]. A messageId MAY be included in
+     * the submission, but is NOT RECOMMENDED to include one and let Holodeck B2B generate one.
+     * 
+     * @param pullRequest    The meta-data on the pull request that should be sent.
+     * @return               The ebMS message-id assigned to the pull request. 
+     * @throws MessageSubmitException   When the pull request can not be submitted successfully. Reasons for failure can 
+     *                                  be that the P-Mode can not be found or the given P-Mode and MPC conflict.
+     * @since  2.1.0
+     */
+    @Override
+    public String submitMessage(final IPullRequest pullRequest) throws MessageSubmitException {
+        log.trace("Start submission of new Pull Request");
+        
+        // Check if P-Mode id and MPC are specified
+        if (Utils.isNullOrEmpty(pullRequest.getPModeId()))
+            throw new MessageSubmitException("P-Mode Id is missing");
+        if (Utils.isNullOrEmpty(pullRequest.getMPC()))
+            throw new MessageSubmitException("MPC is missing");
+        
+        String prMessageId = null;
+        try {
+            log.debug("Create and add PullRequest to database");
+            prMessageId = MessageUnitDAO.createOutgoingPullRequest(pullRequest).entity.getMessageId();            
+            log.info("Submitted PullRequest, assigned messageId=" + prMessageId);
+        } catch (DatabaseException ex) {
+            log.error("Could not create the PullRequest because a error occurred in the database! Details: " 
+                        + ex.getMessage());            
+        }
+        
+        return prMessageId;
+    }
+    
     /**
      * Helper method to check availability of the payloads.
      * @todo: Also check compliance with payload profile of PMode!

@@ -71,11 +71,11 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
         log.debug("Check if duplicate check must be executed");
         
         // Get P-Mode configuration
-        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
         if (pmode == null) {
             // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
             // is needed
-            log.error("P-Mode " + um.getPMode() + " not found in current P-Mode set!" 
+            log.error("P-Mode " + um.getPModeId() + " not found in current P-Mode set!" 
                         + "Unable to determine if receipt is needed for message [msgId=" + um.getMessageId() + "]");
             return InvocationResponse.CONTINUE;
         }

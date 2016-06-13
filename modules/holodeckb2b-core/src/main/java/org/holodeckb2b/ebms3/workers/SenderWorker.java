@@ -72,6 +72,9 @@ public class SenderWorker extends AbstractWorkerTask {
         } catch (DatabaseException dbError) {
             log.error("Could not process message because a database error occurred. Details:" 
                         + dbError.toString() + "\n");
+        } 
+        catch (final Throwable t) {
+            log.error ("Internal error in SenderWorker", t);
         }
     }
 

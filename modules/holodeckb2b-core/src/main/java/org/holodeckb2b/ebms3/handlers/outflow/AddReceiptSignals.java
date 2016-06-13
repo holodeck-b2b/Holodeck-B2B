@@ -31,12 +31,17 @@ import org.holodeckb2b.ebms3.persistency.entities.Receipt;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.util.PModeFinder;
+import org.holodeckb2b.pmode.PModeFinder;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
- * Is the <i>OUT_FLOW</i> handler responsible for adding <i>Receipt signals</i> that are waiting to be sent to the 
+ * <b>THIS HANDLER IS DEPRECATED!</b>
+ * <p>Bundling should be handled by specific P-Mode parameters because in a multi-hop context the destination URL does 
+ * not guarantee that the ultimate receiver is the same for all message units!
+ * ============================
+ * 
+ * <p>Is the <i>OUT_FLOW</i> handler responsible for adding <i>Receipt signals</i> that are waiting to be sent to the 
  * outgoing message.
  * <p>Currently receipt signals will only be added to messages that initiate a message exchange, i.e. that are sent
  * as a request. This allows for an easy bundling rule as the destination URL can be used as selector. Adding receipts
@@ -47,6 +52,7 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
+@Deprecated
 public class AddReceiptSignals extends BaseHandler {
 
     /**
@@ -126,7 +132,7 @@ public class AddReceiptSignals extends BaseHandler {
         
         log.debug("Get the destination URL of the message");
         String destURL = null;
-        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.entity.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.entity.getPModeId());
 
         if (primaryMU.entity instanceof UserMessage ||  primaryMU.entity instanceof PullRequest) {
             destURL = pmode.getLegs().iterator().next().getProtocol().getAddress();
