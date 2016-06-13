@@ -297,4 +297,16 @@ public class MessageMetaData implements IUserMessage {
             messageInfo = new MessageInfo();
         messageInfo.setRefToMessageId(refId);
     }
+    
+    @Override
+    public String getPModeId() {
+        // If given, the P-Mode id is contained in CollaborationInfo/AgreementRef/
+        String pmodeId = null;
+        try {
+            pmodeId = getCollaborationInfo().getAgreement().getPModeId();
+        } finally {
+            // If some part of configuration is not there, a NPE would occur which we ignore and just return null
+            return pmodeId;
+        }        
+    }
 }

@@ -33,7 +33,7 @@ import org.holodeckb2b.ebms3.persistency.entities.Receipt;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.ebms3.util.PModeFinder;
+import org.holodeckb2b.pmode.PModeFinder;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 
@@ -183,7 +183,7 @@ public class FindPModes extends BaseHandler {
                 // Ignore here, we probably be thrown again quickly after
             }
             if (refdMsgUnit != null) {
-                pmode = HolodeckB2BCoreInterface.getPModeSet().get(refdMsgUnit.entity.getPMode());
+                pmode = HolodeckB2BCoreInterface.getPModeSet().get(refdMsgUnit.entity.getPModeId());
             }
         }   
         

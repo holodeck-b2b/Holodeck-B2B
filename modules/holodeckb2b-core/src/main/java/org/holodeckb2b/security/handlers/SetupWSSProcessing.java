@@ -19,8 +19,8 @@ package org.holodeckb2b.security.handlers;
 import java.util.Properties;
 import org.apache.axis2.context.MessageContext;
 import org.apache.wss4j.dom.handler.WSHandlerConstants;
-import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -37,14 +37,18 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * Is the <i>IN_FLOW</i> handler that sets up the message context for processing the WS-Security headers. This consists
  * of preparing the configuration of the <code>Crypto</code> engine used for decryption and validation of the signature
  * and setting the detection of replay attacks.
- * <p>Part of signature validation is checking if the Certificate used for creating the signature is still valid and not
- * revoked. Not all PKI's might however use CRL. Therefor the revocation check is optional. There is a global default 
- * setting, but if needed this can be overridden by the P-Mode.
- * <p><b>NOTE:</b> Replay attack detection is currently not supported! Both the ebMS V3 Core Specification and the AS4
- * profile do not mention replay attack detection, so this does not influence conformance.
+ * <p>If the certificate used for signing the message is included in the message (using a <i>BinarySecurityToken</i>)
+ * and is issued by a CA, it does not need to be in the <i>public keystore</i> to be validated as long as the issuing CA
+ * is in the <i>trust store</i>.
+ * <p>Part of signature verification is checking if the Certificate used for creating the signature is still valid and 
+ * not revoked. Not all PKI's might however use CRL. Therefor the revocation check is optional. There is a global 
+ * default  setting, but if needed this can be overridden by the P-Mode. 
+ * <p><b>NOTE:</b> Replay attack detection (for Username Tokens) is currently not supported! Both the ebMS V3 Core 
+ * Specification and the AS4 profile do not mention replay attack detection, so this does not influence conformance.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @since 2.1.0 Use of separate <i>trust store</i> for certificates of trusted CA's.
  */
 public class SetupWSSProcessing extends BaseHandler {
 
@@ -57,9 +61,11 @@ public class SetupWSSProcessing extends BaseHandler {
     protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
         
         log.debug("Set up Crypto engine configuration");
-        Properties sigProperties = SecurityUtils.createCryptoConfig(SecurityUtils.CertType.pub);
-        mc.setProperty(WSHandlerConstants.SIG_PROP_REF_ID, "" + sigProperties.hashCode());
-        mc.setProperty("" + sigProperties.hashCode(), sigProperties);
+        Properties sigVerificationProperties = SecurityUtils.createCryptoConfig(SecurityUtils.CertType.pub);
+        // For signature verification, also add the trusted CA's
+        sigVerificationProperties.putAll(SecurityUtils.createCryptoConfig(SecurityUtils.CertType.trust));
+        mc.setProperty(WSHandlerConstants.SIG_VER_PROP_REF_ID, "" + sigVerificationProperties.hashCode());
+        mc.setProperty("" + sigVerificationProperties.hashCode(), sigVerificationProperties);
         Properties decProperties = SecurityUtils.createCryptoConfig(SecurityUtils.CertType.priv);
         mc.setProperty(WSHandlerConstants.DEC_PROP_REF_ID, "" + decProperties.hashCode());
         mc.setProperty("" + decProperties.hashCode(), decProperties);
@@ -88,7 +94,7 @@ public class SetupWSSProcessing extends BaseHandler {
                                                                         + " with msg-id=" + primaryMU.getMessageId());
         
         // 2. Get the security settings
-        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.getPModeId());
         
         // It is possible that we can not find a PMode when the primary message unit is a signal. In that case there
         // is no special configuration needed

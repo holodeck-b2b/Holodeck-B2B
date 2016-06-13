@@ -27,6 +27,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.persistency.entities.Receipt;
@@ -34,6 +35,7 @@ import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
+import org.holodeckb2b.events.ReceiptCreatedEvent;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.pmode.ILeg;
@@ -92,11 +94,11 @@ public class CreateReceipt extends AbstractUserMessageHandler {
             UserMessage um = umProxy.entity;
             log.debug("User message was succesfully delivered, check if Receipt is needed");
             
-            IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode());
+            IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
             if (pmode == null) {
                 // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
                 // is needed
-                log.error("P-Mode " + um.getPMode() + " not found in current P-Mode set!" 
+                log.error("P-Mode " + um.getPModeId() + " not found in current P-Mode set!" 
                             + "Unable to determine if receipt is needed for message [msgId=" + um.getMessageId() + "]");
                 return InvocationResponse.CONTINUE;
             }
@@ -114,7 +116,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
             Receipt rcptData = new Receipt();
             // Copy some meta-data to receipt
             rcptData.setRefToMessageId(um.getMessageId());
-            rcptData.setPMode(um.getPMode());
+            rcptData.setPMode(um.getPModeId());
             
             log.debug("Determine type of Receipt that should be sent");
             // Check if message was signed, done by checking if Signature info was available in default WS-Sec header
@@ -148,6 +150,11 @@ public class CreateReceipt extends AbstractUserMessageHandler {
                     }
                 }
                 log.debug("Receipt for message [msgId=" + um.getMessageId() + "] created successfully");
+                // Trigger event to signal that the event was created
+                HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(
+                   new ReceiptCreatedEvent(um, receipt.entity, 
+                                           um.getCurrentProcessingState().getName().equals(ProcessingStates.DUPLICATE)), 
+                   mc);
             } catch (DatabaseException ex) {
                 // Storing the new Receipt signal failed! This is a severe problem, but it does not
                 // need to stop processing because the user message is already delivered. The receipt

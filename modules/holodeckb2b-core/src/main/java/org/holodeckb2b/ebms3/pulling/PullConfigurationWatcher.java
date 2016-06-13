@@ -19,7 +19,8 @@ package org.holodeckb2b.ebms3.pulling;
 import java.io.File;
 import org.holodeckb2b.common.workerpool.WorkerPool;
 import org.holodeckb2b.common.workers.FileWatcher;
-import org.holodeckb2b.module.HolodeckB2BCoreImpl;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
  * Is responsible for the configuration of the pull worker pool. The workers in this pull send out the pull request
@@ -43,18 +44,26 @@ public class PullConfigurationWatcher extends FileWatcher {
     @Override
     protected void onChange(File f, Event event) {
         
-        log.debug("The pull configuration changed, reconfiguring");        
+        log.debug("The pull configuration file changed, reconfiguring");        
         if (event == Event.REMOVED) {
             log.debug("Configuration file is removed, stop worker pool");
-            HolodeckB2BCoreImpl.getPullWorkerPool().stop(0);
-            log.warn("Pull workers stopped due to removal of configuration!");
+            try {
+                HolodeckB2BCoreInterface.setPullWorkerPoolConfiguration(null);
+                log.warn("Pull workers stopped due to removal of configuration!");
+            } catch (TaskConfigurationException ex) {
+                log.error("An error occurred when stopping the Pull Worker Pool. Details: " + ex.getMessage());
+            }            
         } else {
             log.debug("Configuration file changed, read new configuration from file");
             PullConfiguration poolCfg = PullConfiguration.loadFromFile(f.getAbsolutePath());
             if (poolCfg != null) {
                 log.debug("Read new configuration, reconfigure the worker pool");
-                HolodeckB2BCoreImpl.getPullWorkerPool().setConfiguration(poolCfg);
-                log.info("Pull configuration succesfully changed");
+                try {
+                    HolodeckB2BCoreInterface.setPullWorkerPoolConfiguration(poolCfg);
+                    log.info("Pull configuration succesfully changed");
+                } catch (TaskConfigurationException ex) {
+                    log.error("An error occurred when reconfiguring the Pull Worker Pool. Details: " + ex.getMessage());
+                }
             } else {
                 log.error("The changed configuration in " + f.getAbsolutePath() + " could not be read!");
                 // Leave the current pool as is

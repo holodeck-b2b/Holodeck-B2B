@@ -17,10 +17,14 @@
 package org.holodeckb2b.interfaces.pmode;
 
 /**
- * Defines the settings for the SOAP and transport protocol used for exchanging the messages. Currently limited to the
- * URL where the other MSH can be found, the SOAP version to use and whether HTTP compression and/or chunking must be
- * used.
- * <p>
+ * Defines the settings for the SOAP and transport protocol used for exchanging the messages. 
+ * <p>Consists of the URL where the other MSH can be found, the SOAP version to use and whether HTTP compression and/or 
+ * chunking must be used. If the exchange uses AS4 multi-hop the URL is of the intermediary and not the endpoint. The
+ * message must include routing information to enable the intermediaries in the I-Cloud to find the destination (see 
+ * <a href="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/part2/201004/cs01/ebms-v3.0-part2-cs01.html#__RefHeading__34462446">
+ * section 2 of the ebMS 3 Part 2 Adv. Features spec</a>). To indicate that the routing information must be added the
+ * P-Mode parameter <b>AddActorOrRoleAttribute</b> is introduced. It indicates if the ebMS message header 
+ * (<code>eb:Messaging</code> element) must be targeted to a specific SOAP target role/actor.  
  * 
  * @author Bram Bakx <bram at holodeck-b2b.org>
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -33,6 +37,17 @@ public interface IProtocol {
      * @return The destination address
      */
     public String getAddress();
+    
+    /**
+     * Indicates whether the ebMS message header, i.e. the <code>eb:Messaging</code> element, must be targeted to the
+     * <i>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/part2/200811/nextmsh</i> SOAP target role/actor.
+     * 
+     * @return  <code>true</code> if the SOAP target role/actor must be added to the ebMS message header,<br>
+     *          <code>false</code> if the default target should be used.
+     * @todo: Set version number
+     * @since
+     */
+    public boolean shouldAddActorOrRoleAttribute();
     
     /**
      * Gets the SOAP version to use for packaging the ebMS message.

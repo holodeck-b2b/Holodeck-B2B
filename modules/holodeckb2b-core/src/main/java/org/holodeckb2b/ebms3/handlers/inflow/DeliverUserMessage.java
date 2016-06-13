@@ -61,7 +61,7 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
             log.debug("Start delivery of user message");
             try {
                 // Get the delivery specification from the P-Mode
-                IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode());
+                IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
                 // For now we just have one leg, so we get the delivery spec of the first leg
                 IDeliverySpecification deliveryMethod = pmode.getLegs().iterator().next().getDefaultDelivery();
                 IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliveryMethod);

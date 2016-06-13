@@ -111,7 +111,7 @@ public class CheckSentResult extends BaseHandler {
                         } else {
                             log.debug("User Message is sent, check P-Mode if Receipt is expected");
                             // Because we only support One-Way the first leg determines
-                            ILeg leg = HolodeckB2BCoreInterface.getPModeSet().get(mu.entity.getPMode()).getLegs()
+                            ILeg leg = HolodeckB2BCoreInterface.getPModeSet().get(mu.entity.getPModeId()).getLegs()
                                             .iterator().next();
                             if (leg.getReceiptConfiguration() != null)
                                 MessageUnitDAO.setWaitForReceipt(mu);

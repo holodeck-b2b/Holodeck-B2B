@@ -75,7 +75,7 @@ public class AuthorizeMessage extends BaseHandler {
         }
         
         log.debug("Get the P-Mode for the primary message unit and check if authorization is used");
-        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(mu.entity.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(mu.entity.getPModeId());
         
         if (pmode == null) {
             // This can happen for general Error signals that do not have a RefToMessageId and can not be linked to

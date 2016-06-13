@@ -62,7 +62,7 @@ public class CreateSOAPEnvelopeHandler extends BaseHandler {
                     log.debug("No message unit in this response, no envelope needed");
                     return InvocationResponse.CONTINUE;
                 }               
-                IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.getPMode());
+                IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.getPModeId());
                 // Currently only One-Way MEPs are supported, so always on first leg
                 ILeg leg = pmode.getLegs().iterator().next();
                 version = leg.getProtocol() != null && "1.1".equals(leg.getProtocol().getSOAPVersion()) ? 

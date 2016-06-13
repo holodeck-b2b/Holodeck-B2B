@@ -140,6 +140,27 @@ public interface IConfiguration {
      * @return  The password for accessing the keystore with the public keys
      */
     public String getPublicKeyStorePassword();
+    
+    /**
+     * Gets the path to the keystore containing the CA certificates that should be trusted when validating the 
+     * certificate that was used for signing a received message.
+     * <p>This "trust" keystore should be used to store certificates that are not directly related to a specific trading 
+     * partner but are needed to validate the trading partners certificate. By using the trust store the trading 
+     * partners certificate doesn't need to be registered in Holodeck B2B but can be included in the message itself 
+     * using a <code>BinarySecurityToken</code> element.
+     * 
+     * @return The path to the <i>"trust"</i> keystore.
+     * @since 2.1.0
+     */
+    public String getTrustKeyStorePath();
+
+    /**
+     * Gets the password for the keystore that holds the trusted CA certificates.
+     * 
+     * @return  The password for accessing the keystore with the trusted certificates.
+     * @since 2.1.0
+     */
+    public String getTrustKeyStorePassword();
 
     /**
      * Gets the global setting whether Holodeck B2B should check if a certificate is revoked. As an error that occurs 

@@ -17,10 +17,7 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
-import java.util.Iterator;
 import org.apache.axis2.context.MessageContext;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -41,6 +38,7 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for checking if error message should be delivered to the business 
@@ -57,13 +55,7 @@ import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class DeliverErrors extends BaseHandler {
-    
-    /**
-     * Errors will always be logged to a special error log. Using the logging configuration users can decide if this 
-     * logging should be enabled and how errors should be logged.
-     */
-    private Log     errorLog = LogFactory.getLog("org.holodeckb2b.msgproc.errors.received");
-    
+        
     @Override
     protected byte inFlows() {
         return IN_FLOW | IN_FAULT_FLOW;
@@ -93,9 +85,6 @@ public class DeliverErrors extends BaseHandler {
                         
             if(readyForDelivery) {
                 // Errors in this signal can be delivered to business application
-                // Always log the error signal, even if it does not need to be delivered to the business application
-                log.debug("Write error signal to error log");
-                errorLog.error(errorSig);                
                 log.debug("Start delivery of Error signal [" + errorSig.getMessageId() + "]");
                 // We deliver each error in the signal separately because they can reference different
                 // messages and therefor have different delivery specs
@@ -201,13 +190,13 @@ public class DeliverErrors extends BaseHandler {
         IDeliverySpecification deliverySpec = null;
         MessageUnit entity = refdMU.entity;
                 
-        if (Utils.isNullOrEmpty(entity.getPMode()))
+        if (Utils.isNullOrEmpty(entity.getPModeId()))
             return null; // Referenced message unit without P-Mode, can not determine delivery
         
-        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(entity.getPMode());
+        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(entity.getPModeId());
         if (pmode == null) {
             log.warn("Sent message unit [" + entity.getMessageId() +"] does not reference valid P-Mode [" 
-                        + entity.getPMode() + "]!");
+                        + entity.getPModeId() + "]!");
             return null;
         }
         // First get the delivery specification for errors related to the user message as this will also be the fall
@@ -215,27 +204,20 @@ public class DeliverErrors extends BaseHandler {
         ILeg leg = pmode.getLegs().iterator().next(); // Currently only One-Way MEPS supports, so only one leg
         IUserMessageFlow umFlow = leg.getUserMessageFlow();
         IErrorHandling errHandling = umFlow != null ? umFlow.getErrorHandlingConfiguration() : null;
+        
+        if (entity instanceof PullRequest) {
+            // Check if the pull request have their own error handling
+            IPullRequestFlow prFlow = PModeUtils.getOutPullRequestFlow(pmode);
+            errHandling = prFlow != null && prFlow.getErrorHandlingConfiguration() != null ?
+                                                                   prFlow.getErrorHandlingConfiguration() : errHandling;
+        }
+
         if (errHandling != null) 
             deliverySpec = errHandling.getErrorDelivery();
         if (deliverySpec == null)
             deliverySpec = leg.getDefaultDelivery();                            
         
-        
-        if (entity instanceof PullRequest) {
-            PullRequest pr = (PullRequest) entity;
-            // Check if errors for pull requests must be delivered at all and if they have their own delivery spec
-            errHandling = null;
-            // Check each sub channel
-            for(Iterator<IPullRequestFlow> flows = leg.getPullRequestFlows().iterator();
-                                                                            flows.hasNext() && errHandling == null;) {
-                IPullRequestFlow f = flows.next();
-                errHandling = pr.getMPC().equals(f.getMPC()) ? f.getErrorHandlingConfiguration() : null;
-            }
-            if (errHandling != null && errHandling.getErrorDelivery() != null)
-                deliverySpec = errHandling.getErrorDelivery();
-        }
-        
-        if(errHandling != null && errHandling.shouldNotifyErrorToBusinessApplication()) 
+        if (errHandling != null && errHandling.shouldNotifyErrorToBusinessApplication()) 
             return deliverySpec;
         else 
             return null;

@@ -30,6 +30,7 @@ import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.WorkerPool;
 import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
 import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
@@ -37,6 +38,7 @@ import org.holodeckb2b.ebms3.pulling.PullConfiguration;
 import org.holodeckb2b.ebms3.pulling.PullConfigurationWatcher;
 import org.holodeckb2b.ebms3.pulling.PullWorker;
 import org.holodeckb2b.ebms3.submit.core.MessageSubmitterFactory;
+import org.holodeckb2b.events.SyncEventProcessor;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
@@ -44,11 +46,13 @@ import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitterFactory;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.pmode.InMemoryPModeSet;
 
 /**
@@ -102,10 +106,17 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      */
     private static Map<String, IMessageDelivererFactory>    msgDeliveryFactories = null;
     
-    /*
-     * The configured set of P-Modes.
+    /**
+     * The configured set of P-Modes at this instance.
      */
     private static IPModeSet pmodeSet = null;
+    
+    /**
+     * The component responsible for processing of events that occur while processing a message. The processor will 
+     * pass the events on to the configured event handlers.     * 
+     * @since 2.1.0
+     */
+    private static IMessageProcessingEventProcessor eventProcessor = null;
     
     /**
      * Initializes the Holodeck B2B Core module.
@@ -138,6 +149,20 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         log.debug("Create the P-Mode set");
         //@todo: Make the implementation configurable, for now just in memory
         this.pmodeSet = new InMemoryPModeSet();
+        
+        log.debug("Create the processor for message processing events");
+        String eventProcessorClassname = instanceConfiguration.getMessageProcessingEventProcessor();        
+        if (!Utils.isNullOrEmpty(eventProcessorClassname)) {
+            try {
+               eventProcessor = (IMessageProcessingEventProcessor) Class.forName(eventProcessorClassname).newInstance();
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
+               // Could not create the specified event processor, fall back to default implementation
+               log.error("Could not load the specified event processor: " + eventProcessorClassname 
+                        + ". Using default implementation instead.");
+            }
+        } else
+            eventProcessor = new SyncEventProcessor();
+        log.debug("Created " + eventProcessor.getClass().getSimpleName() + " event processor");
         
         // From this point on external components can be started which need access to the Core
         log.debug("Make Core available to outside world");
@@ -316,16 +341,6 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     }
     
     /**
-     * Gets the pull worker pool. 
-     * <p>This method SHOULD only be called by the {@link PullConfigurationWatcher} to (re)configure the pull workers!
-     * 
-     * @return The pull worker pool
-     */
-    public static WorkerPool getPullWorkerPool() {
-        return pullWorkers;
-    }
-    
-    /**
      * Gets the set of currently configured P-Modes.
      * <p>The P-Modes define how Holodeck B2B should process the messages. The set of P-Modes is therefor the most 
      * important configuration item in Holodeck B2B, without P-Modes it will not be possible to send and receive 
@@ -336,5 +351,49 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      */
     public IPModeSet getPModeSet() {
         return pmodeSet;
+    }
+
+    /**
+     * Gets the core component that is responsible for processing <i>"events"</i> that are raised while processing a 
+     * message unit. 
+     * <p>By default the {@link SyncEventProcessor} implementation is used for processing events, but the processor to
+     * use can be configured by setting the <i>"MessageProcessingEventProcessor"</i> parameter in the Holodeck B2B 
+     * configuration file.
+     * 
+     * @return  The {@link IMessageProcessingEventProcessor} managing the event processing
+     * @since 2.1.0
+     */
+    @Override
+    public IMessageProcessingEventProcessor getEventProcessor() {
+        return eventProcessor;
+    }
+    
+    /**
+     * Sets the configuration of the <i>pull worker pool</i> which contains the <i>Workers</i> that are responsible for
+     * sending the Pull Request signal messages.
+     * <p>If no new configuration is provided the worker pool will be stopped. NOTE that this will also stop Holodeck 
+     * B2B from pulling for User Messages (unless some other worker(s) in the regular worker pool take over, which is
+     * <b>not recommended</b>).
+     * 
+     * @param pullConfiguration             The new pool configuration to use. If <code>null</code> the worker pool
+     *                                      will be stopped.
+     * @throws TaskConfigurationException   When the provided configuration could not be activated. This is probably
+     *                                      caused by an issue in the configuration of the workers but it can also be
+     *                                      that the worker pool itself could not be started correctly.
+     * @since 2.1.0
+     */
+    @Override
+    public void setPullWorkerPoolConfiguration(IWorkerPoolConfiguration pullConfiguration) 
+                                                                                    throws TaskConfigurationException {
+        log.debug("New pull worker configuration provided, reconfiguring Pull Worker Pool");        
+        if (pullConfiguration == null) {
+            log.debug("Configuration is removed, stop worker pool");
+            pullWorkers.stop(0);
+            log.warn("Pull Worker Pool stopped due to removal of configuration!");
+        } else {
+            log.debug("New configuration provided, reconfigure the worker pool");
+            pullWorkers.setConfiguration(pullConfiguration);
+            log.info("Pull configuration succesfully changed");
+        }
     }
 }

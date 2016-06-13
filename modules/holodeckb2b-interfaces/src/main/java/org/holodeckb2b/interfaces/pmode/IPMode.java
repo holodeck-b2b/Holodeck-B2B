@@ -19,6 +19,7 @@ package org.holodeckb2b.interfaces.pmode;
 
 
 import java.util.List;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IAgreement;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 

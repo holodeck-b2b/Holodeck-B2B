@@ -678,7 +678,7 @@ public class UserMessageTest {
     }
     
     /**
-     * Test of getPMode method inherited from MessageUnit
+     * Test of getPModeId method inherited from MessageUnit
      */
     @Test
     public void test27_GetPMode() {
@@ -689,7 +689,7 @@ public class UserMessageTest {
         assertTrue(tps.size() == 1);
         instance = tps.get(0);
         
-        assertEquals(T_PMODE_ID, instance.getPMode());
+        assertEquals(T_PMODE_ID, instance.getPModeId());
         
         em.getTransaction().commit();         
     }

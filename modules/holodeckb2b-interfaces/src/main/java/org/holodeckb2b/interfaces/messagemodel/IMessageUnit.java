@@ -22,13 +22,14 @@ import java.util.Date;
 /**
  * Is a general representation for all types of ebMS message units and defines methods to access the information
  * available to all ebMS message units. This is the information contained in the <code>eb:MessageInfo</code> and child
- * elements of the ebMS messaging header. See ebMS Core specification, section 5 for more information on the message
- * model. Extension of this base interface define how information specific for a type of message unit can be accessed.
- * <p>This interface and its "<i>subclasses</i>" are used in Holodeck B2B to define the interfaces between the core 
- * modules and the external <i>business</i> applications. This decoupling allows for more easy extension of both the core 
- * as the external functionality.
- * <p><b>NOTE:</b> The information that is available at  depends on the context of processing! If for example a user 
- * message is submitted to Holodeck B2B as a response of a Two-Way MEP, only the <i>RefToMessageId</i> might be known.
+ * elements of the ebMS messaging header. See ebMS V3 Core specification, section 5 for more information on the message
+ * header. Added is the relation to the P-Mode that governs the processing of the message unit. 
+ * <p>Descendants of this base interface define how information specific for a type of message unit can be accessed.
+ * Together they are used in Holodeck B2B to define the interfaces between the Core and the external <i>business</i> 
+ * applications. This decoupling allows for more easy extension of both the Core as the external functionality.
+ * <p><b>NOTE:</b> The information that is available at some point during runtime depends on the context of processing! 
+ * If for example a user message is submitted to Holodeck B2B as a response of a Two-Way MEP, only the 
+ * <i>RefToMessageId</i> might be known.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see IUserMessage
@@ -65,4 +66,15 @@ public interface IMessageUnit {
      * @return  The message id of the message this message unit is a response to
      */
     public String getRefToMessageId();
+    
+    /**
+     * Gets the identifier of the P-Mode that governs the processing of this message unit.
+     * <p>Note that the P-Mode may not always be known, for example when a signal message unit is received which can not 
+     * be related to a sent message.
+     * 
+     * @return  If known, the identifier of the P-Mode that governs processing of this message unit,<br>
+     *          otherwise <code>null</code>
+     * @since   2.1.0
+     */
+    public String getPModeId();
 }
