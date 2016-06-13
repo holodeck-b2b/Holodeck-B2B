@@ -78,7 +78,7 @@ public interface ILeg {
      *         be <code>null</code> for the receiving side. Can be <code>null</code> on the sending side when errors
      *         and receipts responses do not need to be delivered to the business application or use their own 
      *         delivery specification
-     * @see    org.holodeckb2b.common.delivery
+     * @see    IDeliverySpecification
      */
     public IDeliverySpecification getDefaultDelivery();
     

@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
  * message unit to the business application. 
  * <p>It is the responsibility of the <i>message deliverer</i> to correctly deliver the message unit to the business 
  * application. Holodeck B2B has no knowledge of the protocol being used to communicate with the business application.
- * The assumption is that that a successful execution of the {@link #deliver(org.holodeckb2b.common.messagemodel.IMessageUnit)} 
+ * The assumption is that that a successful execution of the {@link #deliver(IMessageUnit)} 
  * method means that the message unit is successfully delivered to the business application. 
  * <p>This decoupling of internal and external interface makes it easy to implement different protocols for message 
  * delivery. Each protocol probably has its own set of configuration parameters and optimal connection usage. Therefor
