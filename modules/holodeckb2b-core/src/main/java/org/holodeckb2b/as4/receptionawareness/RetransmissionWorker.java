@@ -72,6 +72,10 @@ public class RetransmissionWorker extends AbstractWorkerTask {
             log.error("An error occurred while retrieving message units from the database! Details: " + ex.getMessage());
             return;
         }
+        catch (final Throwable t) {
+            log.error ("Internal error in RetransmissionWorker", t);
+            return;
+        }
         
         if (!Utils.isNullOrEmpty(waitingForRcpt)) {
             log.debug(waitingForRcpt.size() + " messages may be waiting for a Receipt");
