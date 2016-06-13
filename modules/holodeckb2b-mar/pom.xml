@@ -36,6 +36,10 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+        </dependency>
     </dependencies>
 
   
@@ -52,8 +56,9 @@
           <moduleXmlFile>../holodeckb2b-distribution/src/main/configurations/module.xml</moduleXmlFile>
           <includeDependencies>true</includeDependencies>
           <marName>holodeckb2b</marName>
-          <fileSets>
             <!-- Add persistence.xml -->
+            <!-- 
+          <fileSets>
             <fileSet>
               <directory>../holodeckb2b-distribution/src/main/configurations</directory>
               <outputDirectory>META-INF</outputDirectory>
@@ -62,6 +67,7 @@
               </includes>
             </fileSet>
           </fileSets>
+           -->
         </configuration>
       </plugin>
     </plugins>
