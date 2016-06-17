@@ -88,7 +88,8 @@ public final class EventUtils {
                 // Get all the generic interface implemented by the factory class
                 Type[]  interfaces = factoryClass.getGenericInterfaces();            
                 for (Type intf : interfaces) {
-                    if (intf.getTypeName().startsWith(IMessageProcessingEventHandlerFactory.class.getTypeName())) {
+                    if (intf instanceof ParameterizedType 
+                      && ((ParameterizedType) intf).getRawType().equals(IMessageProcessingEventHandlerFactory.class)) {
                         // This the IMessageProcessingEventHandlerFactory interface, check the actual handler type 
                         return (Class<? extends IMessageProcessingEventHandler>) 
                                                                 ((ParameterizedType) intf).getActualTypeArguments()[0];
