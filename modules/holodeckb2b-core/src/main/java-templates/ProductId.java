@@ -24,8 +24,9 @@ package org.holodeckb2b.ebms3.constants;
  */
 public interface ProductId {
     
-    public static final String FULL_NAME = "Holodeck B2B";   
-    public static final String MAJOR_VERSION = "2";
-    public static final String MINOR_VERSION = "0";
-    public static final String PATCH_VERSION = "1";
+    public static final String FULL_NAME = "Holodeck B2B";  
+    
+    public static final String MAJOR_VERSION = "${hb2b.majorVersion}";
+    public static final String MINOR_VERSION = "${hb2b.minorVersion}";
+    public static final String PATCH_VERSION = "${hb2b.incrementalVersion}";
 }

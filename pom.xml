@@ -188,44 +188,62 @@
     </dependencyManagement>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
-                <configuration>
-                    <!-- all javadoc of common and core together, so use aggregate -->
-                    <aggregate>true</aggregate>
-                </configuration>
-                <executions>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                  <groupId>org.codehaus.mojo</groupId>
+                  <artifactId>build-helper-maven-plugin</artifactId>
+                  <version>1.10</version>
+                  <executions>
                     <execution>
-                        <id>aggregate</id>
-                        <goals>
-                            <goal>aggregate</goal>
-                        </goals>
-                        <phase>site</phase>
+                      <id>parse-version</id>
+                      <goals>
+                        <goal>parse-version</goal>
+                      </goals>
+                      <configuration>
+                          <propertyPrefix>hb2b</propertyPrefix>
+                      </configuration>
                     </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-        </plugins>
+                  </executions>
+                </plugin>                
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.10.3</version>
+                    <configuration>
+                        <!-- all javadoc of common and core together, so use aggregate -->
+                        <aggregate>true</aggregate>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>aggregate</id>
+                            <goals>
+                                <goal>aggregate</goal>
+                            </goals>
+                            <phase>site</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>2.7</version>
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.3</version>
+                    <configuration>
+                        <source>1.7</source>
+                        <target>1.7</target>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
 </project>
