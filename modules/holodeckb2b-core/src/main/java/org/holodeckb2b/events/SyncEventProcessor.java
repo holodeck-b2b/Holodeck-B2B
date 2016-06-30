@@ -113,7 +113,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
             for (IMessageProcessingEventConfiguration c : eventHandlers) {
                 boolean shouldHandle = EventUtils.shouldHandleEvent(c, event);
                 String handlerClassname = EventUtils.getConfiguredHandler(c).getSimpleName();
-                log.debug(handlerClassname + (shouldHandle ? " should" : "does not") + " handle " + eventType + " for " 
+                log.debug(handlerClassname + (shouldHandle ? " should" : " does not") + " handle " + eventType + " for " 
                           + msgUnitType + " with msgId=[" + messageId + "]");
                 if (shouldHandle) {
                     // Create the factory class
