@@ -23,7 +23,7 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.ebms.axis2.MessageContextUtils;
+import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;

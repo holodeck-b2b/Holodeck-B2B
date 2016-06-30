@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms.axis2.MessageContextUtils;
+import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;

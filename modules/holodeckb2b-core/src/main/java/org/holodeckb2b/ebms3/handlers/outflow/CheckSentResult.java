@@ -19,7 +19,7 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import java.util.Collection;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.ebms.axis2.MessageContextUtils;
+import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;

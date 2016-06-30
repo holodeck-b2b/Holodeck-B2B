@@ -19,7 +19,7 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import java.util.Collection;
 import java.util.Map;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.ebms.axis2.MessageContextUtils;
+import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;

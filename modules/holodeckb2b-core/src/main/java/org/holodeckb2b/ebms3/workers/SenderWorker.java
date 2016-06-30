@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
-import org.holodeckb2b.ebms.axis2.Axis2Sender;
+import org.holodeckb2b.ebms3.axis2.Axis2Sender;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;

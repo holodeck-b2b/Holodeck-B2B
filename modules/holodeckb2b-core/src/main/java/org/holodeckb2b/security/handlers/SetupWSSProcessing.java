@@ -20,7 +20,7 @@ import java.util.Properties;
 import org.apache.axis2.context.MessageContext;
 import org.apache.wss4j.dom.handler.WSHandlerConstants;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.ebms.axis2.MessageContextUtils;
+import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
