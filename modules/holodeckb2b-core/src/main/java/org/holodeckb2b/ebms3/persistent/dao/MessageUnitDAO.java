@@ -631,6 +631,30 @@ public class MessageUnitDAO {
     }
     
     /**
+     * Removes the {@link MessageUnit} contained in the {@link EntityProxy} from the database.
+     * 
+     * @param mu    The entity proxy containing the message unit to be removed 
+     * @throws DatabaseException When a problem occurs while removing the message unit from the database. In this case
+     *                           the transaction, if active, is rolled back. 
+     * @since 2.1.0
+     */
+    public static <T extends MessageUnit> void deleteMessageUnit(EntityProxy<T> mu) throws DatabaseException {
+        EntityManager em = JPAUtil.getEntityManager();
+        em.getTransaction().begin();
+        try {
+            T actual = (T) em.find(mu.entity.getClass(), mu.entity.getOID());        
+            em.remove(actual);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            // An error occured when removing the message unit. Rollback and rethrow as DatabaseException
+            em.getTransaction().rollback();
+            throw new DatabaseException("An error occurred while removing the message unit!", e);            
+        }finally {
+            em.close();
+        }
+    }
+    
+    /**
      * Helper method to change the processing state of the given message unit to the given state. Sometimes it is 
      * required that the message unit is in a certain current state before changing the processing state, for example
      * to prevent parallel processing, so this can be specified.
@@ -830,6 +854,35 @@ public class MessageUnitDAO {
             result = em.createNamedQuery("MessageUnit.findWithMessageIdInDirection", MessageUnit.class)
                     .setParameter("msgId", messageId)
                     .setParameter("direction", direction)
+                    .getResultList();
+        } catch (NoResultException nothingFound) {
+            result = null;
+        } catch (Exception e) {
+            // Something went wrong during query execution
+            throw new DatabaseException("Could not execute query", e);
+        } finally {
+            em.close();
+        }
+        return createProxyResultList(result);
+    }
+
+    /**
+     * Retrieves all Message Units of which the last processing state change occurred before the given date.
+     * <p><b>NOTE:</b> The entity objects in the resulting list are not completely loaded! Before a message unit is 
+     * going to be processed it must be loaded completely.
+     *
+     * @param   maxLastChangeDate   The latest date of a processing state change that is to be included in the result 
+     * @return          List of {@link EntityProxy} objects to the {@link MessageUnit} objects that had their last
+     *                  processing state change at latest at the given date
+     * @throws DatabaseException If an error occurs while executing the query
+     */
+    public static List<EntityProxy<MessageUnit>> getMessageUnitsLastChangedBefore(final Date maxLastChangeDate)
+                                                                            throws DatabaseException {
+        List<MessageUnit> result = null;
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            result = em.createNamedQuery("MessageUnit.findWithLastStateChangeBefore", MessageUnit.class)
+                    .setParameter("beforeDate", maxLastChangeDate) 
                     .getResultList();
         } catch (NoResultException nothingFound) {
             result = null;

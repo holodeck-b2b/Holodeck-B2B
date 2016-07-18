@@ -16,19 +16,34 @@
  */
 package org.holodeckb2b.ebms3.workers;
 
-import java.util.Collections;
-import java.util.HashSet;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.ebms3.persistency.entities.Payload;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.events.MessageUnitPurgedEvent;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.events.types.IMessageUnitPurgedEvent;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 
 /**
- * Is responsible for cleaning up information on old and processed messages, i.e. remove the information from the 
- * database and delete associated payloads from the file system (if not done already by another process).
+ * Is the default <i>purge worker</i> responsible for cleaning up information on old and processed messages, i.e. remove 
+ * the meta-data information from the database and delete associated payloads from the file system. 
  * <p>Currently only the number of days after which the message information should be removed can be configured. This is
  * done through the optional <i>purgeAfterDays</i> parameter. If not specified 30 days is used as the default setting.
+ * <p>This implementation will trigger {@link IMessageUnitPurgedEvent}s only for <i>User Message</i> message units and
+ * it will only provide the meta-data to the event handler. The payload data associated with the User Message message 
+ * unit will already be deleted by the worker.
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -41,25 +56,66 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
     public static final String P_PURGE_AFTER_DAYS = "purgeAfterDays";
     
     /**
-     * The set of processing states that are considered "final", i.e. indicate when message processing has been 
-     * completed and message information can be safely removed.
-     */
-    private static Set<String>   FINAL_STATES;
-    static {
-        Set<String> aSet = new HashSet<String>();
-        aSet.add(ProcessingStates.DELIVERED);
-        aSet.add(ProcessingStates.FAILURE);
-        FINAL_STATES = Collections.unmodifiableSet(aSet);
-    }
-
-    /**
      * The number of days after which message information will be purged
      */
     private int purgeAfterDays;        
     
     @Override
     public void doProcessing() throws InterruptedException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        List<EntityProxy<MessageUnit>> experidMsgUnits = null;
+
+        Calendar expirationDate = Calendar.getInstance();
+        expirationDate.add(Calendar.DAY_OF_YEAR, -purgeAfterDays);
+        String expDateString = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:SS.sss").format(expirationDate.getTime());
+        
+        try {
+            log.debug("Get all message units that changed state before " + expDateString);
+             experidMsgUnits = MessageUnitDAO.getMessageUnitsLastChangedBefore(expirationDate.getTime());
+        } catch (DatabaseException dbe) {
+            log.error("Could not get the list of expired message units from database! Error details: " 
+                     + dbe.getMessage());
+        }             
+        if (Utils.isNullOrEmpty(experidMsgUnits)) {
+            log.debug("No expired message unist found, nothing to do");
+            return;
+        }
+        
+        log.debug("Removing " + experidMsgUnits + " expired message units.");
+        for(EntityProxy<MessageUnit> p : experidMsgUnits) {
+            MessageUnit mu = p.entity;
+            log.debug("Removing " + MessageUnitUtils.getMessageUnitName(mu) + " with msgId: " + mu.getMessageId());
+            try {
+                if (mu instanceof UserMessage) {
+                    log.debug("Delete the payload data of the User Message");
+                    // Complete loading is needed as it is not done when querying
+                    MessageUnitDAO.loadCompletely(p);
+                    Collection<IPayload> payloads = ((UserMessage) p.entity).getPayloads();
+                    if (!Utils.isNullOrEmpty(payloads)) {
+                        for (IPayload pl : payloads) {
+                            File plFile = new File(pl.getContentLocation());
+                            if (plFile.exists() && plFile.delete()) {
+                                log.debug("Removed payload data file " + pl.getContentLocation());                                
+                                // Clear the payload location
+                                ((Payload) pl).setContentLocation(null);
+                            }  else if (plFile.exists())
+                                log.error("Could not remove payload data file " + pl.getContentLocation() 
+                                            + ". Remove manually");
+                        }
+                    } else
+                        log.debug("User Message [" + mu.getMessageId() + "] has no payloads");
+                }    
+                // Remove meta-data from database
+                MessageUnitDAO.deleteMessageUnit(p);
+                log.info(MessageUnitUtils.getMessageUnitName(mu) + " [msgId=" + mu.getMessageId() + "] is removed");
+                
+                // Raise event so extension can process purge actions (for User Messages only) 
+                if (mu instanceof UserMessage)
+                    HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new MessageUnitPurgedEvent(mu), null);
+            } catch (DatabaseException dbe) {
+                log.error("Could not remove the meta-data of " + MessageUnitUtils.getMessageUnitName(mu) 
+                        + " [msgId=" + mu.getMessageId() + "]. Error details: " + dbe.getMessage());
+            } 
+        }
     }
 
     /**
