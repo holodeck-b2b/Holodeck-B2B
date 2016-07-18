@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.holodeckb2b.ebms3.persistent.wrappers.ECollaborationInfo;
-import org.holodeckb2b.ebms3.util.JPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;

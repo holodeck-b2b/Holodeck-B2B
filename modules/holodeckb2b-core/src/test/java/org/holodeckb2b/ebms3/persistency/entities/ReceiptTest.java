@@ -25,7 +25,7 @@ import javax.persistence.EntityManager;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
-import org.holodeckb2b.ebms3.util.JPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;

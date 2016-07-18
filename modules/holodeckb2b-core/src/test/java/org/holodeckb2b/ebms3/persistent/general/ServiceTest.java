@@ -20,7 +20,7 @@ import org.holodeckb2b.ebms3.persistency.entities.Service;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.holodeckb2b.ebms3.persistent.wrappers.EService;
-import org.holodeckb2b.ebms3.util.JPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

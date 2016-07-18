@@ -20,7 +20,7 @@ import org.holodeckb2b.ebms3.persistency.entities.PartyId;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.holodeckb2b.ebms3.persistent.wrappers.EPartyId;
-import org.holodeckb2b.ebms3.util.JPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

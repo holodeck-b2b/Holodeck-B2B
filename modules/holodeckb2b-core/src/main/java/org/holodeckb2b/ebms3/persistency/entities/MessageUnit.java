@@ -63,7 +63,13 @@ import org.holodeckb2b.interfaces.pmode.ILeg.Label;
                     "WHERE mu.MESSAGE_ID = :msgId " +
                     "AND mu.DIRECTION = :direction " +
                     "ORDER BY mu.MU_TIMESTAMP DESC"
-            )}
+            ),
+        @NamedQuery(name="MessageUnit.findWithLastStateChangeBefore",
+            query = "SELECT mu " +
+                    "FROM MessageUnit mu JOIN FETCH mu.states s1 " +    
+                    "WHERE s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) " +
+                    "AND   s1.START <= :beforeDate" 
+            )}      
 )
 public abstract class MessageUnit implements Serializable, org.holodeckb2b.interfaces.messagemodel.IMessageUnit {
 
