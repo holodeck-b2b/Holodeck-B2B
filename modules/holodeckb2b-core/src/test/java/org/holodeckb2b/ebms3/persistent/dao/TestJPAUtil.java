@@ -22,24 +22,24 @@ import javax.persistence.Persistence;
 
 /**
  * A very simple utility class for getting a JPA EntityManager
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class TestJPAUtil {
 
     private static EntityManagerFactory emf = null;
-    
+
     public static EntityManager getEntityManager() {
         if (emf == null)
             emf = Persistence.createEntityManagerFactory("holodeckb2b-core-test");
-            
+
         return emf.createEntityManager();
     }
-    
+
     public static EntityManager getEntityManagerToAlpha() {
         if (emf == null)
             emf = Persistence.createEntityManagerFactory("holodeckb2b-alpha");
-            
+
         return emf.createEntityManager();
     }
 }

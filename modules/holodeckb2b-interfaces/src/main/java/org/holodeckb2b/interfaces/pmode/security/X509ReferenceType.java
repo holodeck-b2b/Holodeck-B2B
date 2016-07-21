@@ -17,23 +17,23 @@
 package org.holodeckb2b.interfaces.pmode.security;
 
 /**
- * Enumerates the methods to reference an X.509 certificate in the WS-Security header in a SOAP message. The allowed 
+ * Enumerates the methods to reference an X.509 certificate in the WS-Security header in a SOAP message. The allowed
  * methods are defined in the WS-Security X.509 Certificate Token Profile Version 1.1.1 specification, section 3.2.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public enum X509ReferenceType {
- 
+
     /**
      * Reference to an X.509 Subject Key Identifier
      */
     KeyIdentifier,
-    
+
     /**
      * Reference to a Security Token
      */
     BSTReference,
-    
+
     /**
      * Reference to an Issuer and Serial Number
      */

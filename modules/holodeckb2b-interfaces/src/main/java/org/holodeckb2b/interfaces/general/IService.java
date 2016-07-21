@@ -17,28 +17,28 @@
 package org.holodeckb2b.interfaces.general;
 
 /**
- * Represents a <i>business service</i>, i.e. a service of the business application, that will process a message. 
- * Holodeck B2B itself will not use this information to determine message processing other than that it might be used 
- * to find the correct P-Mode. Corresponds with the information contained in the <code>eb:Service</code> element in the 
+ * Represents a <i>business service</i>, i.e. a service of the business application, that will process a message.
+ * Holodeck B2B itself will not use this information to determine message processing other than that it might be used
+ * to find the correct P-Mode. Corresponds with the information contained in the <code>eb:Service</code> element in the
  * ebMS message header. See also section 5.2.2.8 of the ebMS Core Specification.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface IService {
-    
+
     /**
      * Gets the service name.
      * <p>Corresponds to the content of the <code>eb:Service</code> element in the ebMS message header.
-     * 
+     *
      * @return  The service name
      */
     public String getName();
-    
+
     /**
      * Gets the service type
-     * <p>Corresponds to the <code>type</code> attribute of the <code>eb:Service</code> element in the ebMS message 
+     * <p>Corresponds to the <code>type</code> attribute of the <code>eb:Service</code> element in the ebMS message
      * header.
-     * 
+     *
      * @return The service type
      */
     public String getType();

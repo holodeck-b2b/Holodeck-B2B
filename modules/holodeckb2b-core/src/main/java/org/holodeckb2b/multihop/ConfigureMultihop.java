@@ -18,6 +18,7 @@ package org.holodeckb2b.multihop;
 
 import java.util.Collection;
 import java.util.List;
+
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.addressing.EndpointReference;
@@ -45,10 +46,10 @@ import org.holodeckb2b.interfaces.pmode.IProtocol;
  * Is the <i>OUT_FLOW</i> handler responsible for adding the necessary WS-Addressing headers to the message to sent it
  * using AS4 multi-hop.
  * <p>
- * AS4 Multi-hop is a profiled version of the ebMS V3 multi-hop feature defined in part 2 of the specifications. Where 
+ * AS4 Multi-hop is a profiled version of the ebMS V3 multi-hop feature defined in part 2 of the specifications. Where
  * the complete feature from part 2 has many parameters the AS4 multi-hop profile is very restricted and much simpler.
  * For details see section 4 of the AS4 Profile.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class ConfigureMultihop extends BaseHandler {
@@ -56,9 +57,9 @@ public class ConfigureMultihop extends BaseHandler {
     // Ensure that the I-Cloud URI that is set in the wsa:To header is interpreted as anonymous by the Axis2 addressing
     // module
     static {
-        EndpointReference.addAnonymousEquivalentURI(MultiHopConstants.WSA_TO_ICLOUD);    
+        EndpointReference.addAnonymousEquivalentURI(MultiHopConstants.WSA_TO_ICLOUD);
     }
-    
+
     @Override
     protected byte inFlows() {
         return OUT_FLOW | OUT_FAULT_FLOW;
@@ -71,25 +72,25 @@ public class ConfigureMultihop extends BaseHandler {
      * that the signal is a response to. See section 4.4 of the AS4 profile how the WS-A headers are constructed.
      */
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws Exception {
         // For routing signals through the I-Cloud WS-A headers are used. We use the Axis2 addressing module to create
         // the headers. But this only needed for signals, so we disable the module by default
         mc.setProperty(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES, Boolean.TRUE);
-        
+
         // If the primary message unit is a user message it can be multi-hop in itself. Receipt and/or Error signals
         // depends on whether the original message was sent using multi-hop.
-        MessageUnit primMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
+        final MessageUnit primMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
         if (primMU instanceof UserMessage) {
-            // Whether the user message is sent using multi-hop is defined by P-Mode parameter 
+            // Whether the user message is sent using multi-hop is defined by P-Mode parameter
             // PMode[1].Protocol.AddActorOrRoleAttribute
-            IProtocol prot = HolodeckB2BCoreInterface.getPModeSet().get(primMU.getPModeId())
-                                                                   .getLegs().iterator().next().getProtocol();            
-            if (prot == null || !prot.shouldAddActorOrRoleAttribute()) 
+            final IProtocol prot = HolodeckB2BCoreInterface.getPModeSet().get(primMU.getPModeId())
+                                                                   .getLegs().iterator().next().getProtocol();
+            if (prot == null || !prot.shouldAddActorOrRoleAttribute())
                 log.debug("Primary message is a non multi-hop UserMessage");
             else {
                 // This is a multi-hop message, set the multi-hop target on the eb:Messaging element
                 log.debug("Primary message is a multi-hop UserMessage -> set multi-hop target");
-                SOAPHeaderBlock ebHeader = Messaging.getElement(mc.getEnvelope());
+                final SOAPHeaderBlock ebHeader = Messaging.getElement(mc.getEnvelope());
                 ebHeader.setRole(MultiHopConstants.NEXT_MSH_TARGET);
             }
         } else if (primMU instanceof PullRequest) {
@@ -99,57 +100,57 @@ public class ConfigureMultihop extends BaseHandler {
         } else {
             // If the primary message unit is a Receipt or Error signal additional WS-A headers must be provided with
             // the necessary routing info. This info is retrieved from the UserMessage the signal is a response to.
-            UserMessage usrMessage = getReferencedUserMsg((SignalMessage) primMU);
-            
+            final UserMessage usrMessage = getReferencedUserMsg((SignalMessage) primMU);
+
             // Check if the user message was received over multi-hop
             if (usrMessage != null && usrMessage.usesMultiHop()) {
                 log.debug("Primary message unit is response signal to multi-hop User Message -> add routing info");
                 addRoutingInfo(mc, usrMessage, (SignalMessage) primMU);
             } else
-                log.debug("Primary message unit is response signal to non (multi-hop) User Message");            
+                log.debug("Primary message unit is response signal to non (multi-hop) User Message");
         }
-        
+
         return InvocationResponse.CONTINUE;
     }
-    
+
     /**
-     * Gets the UserMessage that is referenced by a signal message. 
+     * Gets the UserMessage that is referenced by a signal message.
      * <p>The reference will be retrieved from the signal message unit itself or when in case of an Error signal that
      * does not directly reference a message the first error contained in the signal.
-     * 
+     *
      * @param signal    The signal message unit to get the reference user message for
      * @return          The referenced {@link UserMessage} or <code>null</code> if no unique referenced user message
      *                  can be found
      */
-    private UserMessage getReferencedUserMsg(SignalMessage signal) {
+    private UserMessage getReferencedUserMsg(final SignalMessage signal) {
         UserMessage refdUM = null;
         String refToMsgId = signal.getRefToMessageId();
-        
+
         if ((refToMsgId == null || refToMsgId.isEmpty()) && signal instanceof ErrorMessage) {
             // For errors the reference can also be included in the Error element
-            Collection<IEbmsError> errors = ((ErrorMessage) signal).getErrors();
+            final Collection<IEbmsError> errors = ((ErrorMessage) signal).getErrors();
             refToMsgId = errors.isEmpty() ? null : errors.iterator().next().getRefToMessageInError();
         }
-        
+
         if (refToMsgId != null && !refToMsgId.isEmpty()) {
             List<EntityProxy<MessageUnit>> refdMessages = null;
             try {
                 refdMessages = MessageUnitDAO.getReceivedMessageUnitsWithId(refToMsgId);
                 if (!Utils.isNullOrEmpty(refdMessages)) {
                     // Signal refers to one other message unit, check that it is a User Message
-                    EntityProxy<MessageUnit> refdMU = refdMessages.get(0);
+                    final EntityProxy<MessageUnit> refdMU = refdMessages.get(0);
                     if (refdMU.entity instanceof UserMessage) {
                         // Load all meta-data for the user message
-                        MessageUnitDAO.loadCompletely(refdMU);  
+                        MessageUnitDAO.loadCompletely(refdMU);
                         refdUM = (UserMessage) refdMU.entity;
                     } else
-                        log.warn("Multi-hop signal on signal is not supported!");                                            
+                        log.warn("Multi-hop signal on signal is not supported!");
                 } else
                    log.debug("Signal message refers to no or multiple message units in database");
-            } catch (DatabaseException dbe) {};           
-        } else 
+            } catch (final DatabaseException dbe) {};
+        } else
             log.debug("Signal message did not reference another message!");
-            
+
         return refdUM;
     }
 
@@ -157,23 +158,23 @@ public class ConfigureMultihop extends BaseHandler {
      * Adds the required routing information to the message by adding the <code>wsa:To</code>, <code>wsa:Action</code>
      * and <code>ebint:RoutingInput</code> EPR parameter WS-A headers to the message.
      * <p>NOTE: The actual elements are added to the SOAP envelop later by the WS-A module.
-     * 
+     *
      * @param mc            The current message context
      * @param usrMessage    The User Message the routing input has to be deferred from
      * @param signal        The Signal message for which the routing input must be added
      */
-    private void addRoutingInfo(MessageContext mc, UserMessage usrMessage, SignalMessage signal) {
-    
+    private void addRoutingInfo(final MessageContext mc, final UserMessage usrMessage, final SignalMessage signal) {
+
         // wsa:To
-        EndpointReference toEpr = new EndpointReference(MultiHopConstants.WSA_TO_ICLOUD);        
-        
+        final EndpointReference toEpr = new EndpointReference(MultiHopConstants.WSA_TO_ICLOUD);
+
         /* ebint:RoutingInput EPR parameter
         *  The info is the same as contained in the referenced user message but with the To and From swapped and the
-        *  MPC and Action extended. 
+        *  MPC and Action extended.
         *  To create this parameter we first create a MessageMetaData object based on the UserMessage and then change
         *  the required fields
         */
-        MessageMetaData tmpMMD = new MessageMetaData(usrMessage);
+        final MessageMetaData tmpMMD = new MessageMetaData(usrMessage);
         // Swap To and From
         tmpMMD.setReceiver(usrMessage.getSender());
         tmpMMD.setSender(usrMessage.getReceiver());
@@ -185,22 +186,22 @@ public class ConfigureMultihop extends BaseHandler {
             tmpMMD.setMPC(usrMessage.getMPC() + MultiHopConstants.RECEIPT_SUFFIX);
         else
             tmpMMD.setMPC(usrMessage.getMPC() + MultiHopConstants.ERROR_SUFFIX);
-        
+
         // Create the ebint:RoutingInput element and add it as reference parameter to the To EPR
         toEpr.addReferenceParameter(RoutingInput.createElement(mc.getEnvelope(), tmpMMD));
 
         mc.setTo(toEpr);
-        
+
         // wsa:Action header
         if (signal instanceof IReceipt)
             mc.getOptions().setAction(MultiHopConstants.ONE_WAY_ACTION + MultiHopConstants.RECEIPT_SUFFIX);
-        else 
+        else
             mc.getOptions().setAction(MultiHopConstants.ONE_WAY_ACTION + MultiHopConstants.ERROR_SUFFIX);
-                
+
         // Set nextMSH as target for the WS-A headers
         mc.setProperty(AddressingConstants.SOAP_ROLE_FOR_ADDRESSING_HEADERS, MultiHopConstants.NEXT_MSH_TARGET);
-                
-        // Enable use of WS-A, but prevent optional WS-A headers to be added 
+
+        // Enable use of WS-A, but prevent optional WS-A headers to be added
         mc.setProperty(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES, Boolean.FALSE);
         mc.setProperty(AddressingConstants.INCLUDE_OPTIONAL_HEADERS, Boolean.FALSE);
     }

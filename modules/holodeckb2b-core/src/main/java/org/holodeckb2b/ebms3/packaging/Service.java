@@ -17,97 +17,98 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IService;
 
 /**
- * Is a helper class for handling the ebMS Service element in the ebMS SOAP 
+ * Is a helper class for handling the ebMS Service element in the ebMS SOAP
  * header.
  * <p>This element is specified in section 5.2.2.8 of the ebMS 3 Core specification.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class Service {
-    
+
     /**
      * The fully qualified name of the element as an {@link QName}
      */
     static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Service");
-    
+
     // The local name of the type attribute
     private static final String LN_ATTR_TYPE = "type";
-    
+
     /**
-     * Creates a <code>Service</code> element and adds it to the given <code>CollaborationInfo</code> element. 
-     * 
+     * Creates a <code>Service</code> element and adds it to the given <code>CollaborationInfo</code> element.
+     *
      * @param ciElement     The <code>CollaborationInfo</code> element this element should be added to
      * @param data          The data to include in the element
      * @return  The new element
      */
-    public static OMElement createElement(OMElement ciElement, IService data) {
-        OMFactory f = ciElement.getOMFactory();
-        
+    public static OMElement createElement(final OMElement ciElement, final IService data) {
+        final OMFactory f = ciElement.getOMFactory();
+
         // Create the element
-        OMElement service = f.createOMElement(Q_ELEMENT_NAME, ciElement);
-        
+        final OMElement service = f.createOMElement(Q_ELEMENT_NAME, ciElement);
+
         // Fill it based on the given data
         service.setText(data.getName());
-        
+
         // Set attributes if data is specified for it
-        String type = data.getType();
+        final String type = data.getType();
         if ( type != null && !type.isEmpty())
             service.addAttribute(LN_ATTR_TYPE, type, null);
-        
+
         return service;
     }
-    
+
     /**
-     * Gets the {@link OMElement} object that represent the <code>Service</code> 
+     * Gets the {@link OMElement} object that represent the <code>Service</code>
      * child element of the <code>CollaborationInfo</code> element.
-     * 
-     * @param ciElement     The parent <code>CollaborationInfo</code> element 
+     *
+     * @param ciElement     The parent <code>CollaborationInfo</code> element
      * @return              The {@link OMElement} object representing the requested element
      *                      or <code>null</code> when the requested element is not found as
      *                      child of the given element.
      */
-    public static OMElement getElement(OMElement ciElement) {
+    public static OMElement getElement(final OMElement ciElement) {
         return ciElement.getFirstChildWithName(Q_ELEMENT_NAME);
-    }    
-    
+    }
+
     /**
      * Reads the information from the <code>Service</code> object and returns it
      * in a new {@link org.holodeckb2b.ebms3.persistency.entities.Service} entity
      * object.
      * <p><b>NOTE:</b> The entity object is not persisted by this method! It is
      * the responsibility of the caller to store it.
-     * 
+     *
      * @param svcElement             The <code>Service</code> element to read the
      *                               info from
-     * @return                       A new {@link org.holodeckb2b.ebms3.persistency.entities.Service} 
+     * @return                       A new {@link org.holodeckb2b.ebms3.persistency.entities.Service}
      *                               object containing the service info from the
      *                               element
      * @throws PackagingException    When the given element does not contain a valid
      *                               <code>Service</code> element.
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.Service readElement(OMElement svcElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.Service readElement(final OMElement svcElement) throws PackagingException {
         if (svcElement == null)
             return null;
-        
+
         // Read service name
-        String svcName = svcElement.getText();
-        
+        final String svcName = svcElement.getText();
+
         if (svcName == null || svcName.isEmpty())
             // Service name is required!
             throw new PackagingException("Service name is missing from Service element");
-        
+
         // Create the entity object
-        org.holodeckb2b.ebms3.persistency.entities.Service svcData = new org.holodeckb2b.ebms3.persistency.entities.Service(svcName);
-        
+        final org.holodeckb2b.ebms3.persistency.entities.Service svcData = new org.holodeckb2b.ebms3.persistency.entities.Service(svcName);
+
         // Read the optional service type
         svcData.setType(svcElement.getAttributeValue(new QName(LN_ATTR_TYPE)));
-        
+
         return svcData;
     }
 }

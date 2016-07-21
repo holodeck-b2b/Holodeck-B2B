@@ -27,11 +27,11 @@ import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandler;
  */
 public class EventHandler implements IMessageProcessingEventHandler {
 
-    private Log log = LogFactory.getLog(EventHandler.class);
-    
+    private final Log log = LogFactory.getLog(EventHandler.class);
+
     @Override
-    public void handleEvent(IMessageProcessingEvent event) throws IllegalArgumentException {
+    public void handleEvent(final IMessageProcessingEvent event) throws IllegalArgumentException {
         log.info("Handling a " + event.getClass().getSimpleName() + " with id=" + event.getId());
     }
-    
+
 }

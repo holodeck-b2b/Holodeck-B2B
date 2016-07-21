@@ -18,24 +18,25 @@ package org.holodeckb2b.pmode.xml.events;
 
 import java.util.Date;
 import java.util.UUID;
+
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
  * A {@link IMessageProcessingEvent} implementation for testing configuration of event configuration.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class TestEvent1 implements IMessageProcessingEvent {
 
     private IMessageUnit msgUnit = null;
-    
-    public TestEvent1() {};
-    
-    public TestEvent1(IMessageUnit mu) {
+
+    public TestEvent1() {}
+
+    public TestEvent1(final IMessageUnit mu) {
         msgUnit = mu;
     }
-    
+
     @Override
     public String getId() {
         return UUID.randomUUID().toString();
@@ -55,5 +56,5 @@ public class TestEvent1 implements IMessageProcessingEvent {
     public IMessageUnit getSubject() {
         return msgUnit;
     }
-    
+
 }

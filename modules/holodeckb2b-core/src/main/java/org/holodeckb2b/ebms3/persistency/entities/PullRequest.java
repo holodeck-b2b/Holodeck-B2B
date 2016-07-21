@@ -21,12 +21,13 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 
 /**
- * Is the JPA entity class representing a <b>PullRequest Signal</b> message unit that is processed by Holodeck B2B. 
- * <p>Extends {@link MessageUnit} and adds the meta-data specific to the PullRequest, which is the MPC to be pulled. 
- * 
+ * Is the JPA entity class representing a <b>PullRequest Signal</b> message unit that is processed by Holodeck B2B.
+ * <p>Extends {@link MessageUnit} and adds the meta-data specific to the PullRequest, which is the MPC to be pulled.
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 @Entity
@@ -42,18 +43,18 @@ public class PullRequest extends SignalMessage implements IPullRequest {
         return MPC;
     }
 
-    public void setMPC(String newMPC) {
+    public void setMPC(final String newMPC) {
         this.MPC = newMPC;
     }
-    
+
     /*
      * Fields
-     * 
-     * NOTES: 
-     * 1) The JPA @Column annotation is not used so the attribute names are 
+     *
+     * NOTES:
+     * 1) The JPA @Column annotation is not used so the attribute names are
      * used as column names. Therefor the attribute names are in CAPITAL.
      * 2) The primary key field is inherited from super class
-     */    
+     */
     @Lob
     @Column(length = 1024)
     private String          MPC;

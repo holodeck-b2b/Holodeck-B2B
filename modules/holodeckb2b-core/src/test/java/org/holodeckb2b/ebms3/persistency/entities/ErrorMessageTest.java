@@ -16,18 +16,19 @@
  */
 package org.holodeckb2b.ebms3.persistency.entities;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -36,7 +37,7 @@ import org.junit.runners.MethodSorters;
 
 /**
  * Test for class ErrorMessage
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -46,12 +47,12 @@ public class ErrorMessageTest {
     private static EbmsError   T_ERROR_2;
     private static EbmsError   T_ERROR_3;
     private static EbmsError   T_ERROR_4;
-    
+
     EntityManager       em;
 
     public ErrorMessageTest() {
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
         // Create some errors
@@ -59,13 +60,13 @@ public class ErrorMessageTest {
         T_ERROR_1.setCategory("error-category-1");
         T_ERROR_1.setErrorCode("error-code-1");
         T_ERROR_1.setDescription(new Description("Lorem ipsum dolor sit amet", "lang-1"));
-        
+
         T_ERROR_2 = new EbmsError();
         T_ERROR_2.setCategory("error-category-2");
         T_ERROR_2.setErrorCode("error-code-2");
         T_ERROR_2.setRefToMessageInError("error-2");
         T_ERROR_2.setDescription(new Description("Lorem ipsum dolor sit amet", "lang-2"));
-        
+
         T_ERROR_3 = new EbmsError();
         T_ERROR_3.setCategory("error-category-3");
         T_ERROR_3.setErrorCode("error-code-3");
@@ -78,25 +79,25 @@ public class ErrorMessageTest {
         T_ERROR_4.setRefToMessageInError("error-4");
         T_ERROR_4.setDescription(new Description("Lorem ipsum dolor sit amet", "lang-4"));
     }
-    
+
     @AfterClass
-    public static void cleanup() throws DatabaseException {
-        EntityManager em = TestJPAUtil.getEntityManager();
-        
+    public static void cleanup() {
+        final EntityManager em = TestJPAUtil.getEntityManager();
+
         em.getTransaction().begin();
-        Collection<ErrorMessage> tps = em.createQuery("from ErrorMessage", ErrorMessage.class).getResultList();
-        
-        for(ErrorMessage o : tps)
+        final Collection<ErrorMessage> tps = em.createQuery("from ErrorMessage", ErrorMessage.class).getResultList();
+
+        for(final ErrorMessage o : tps)
             em.remove(o);
-        
+
         em.getTransaction().commit();
     }
-    
+
     @Before
-    public void setUp() throws DatabaseException {
+    public void setUp() {
         em = TestJPAUtil.getEntityManager();
     }
-    
+
     @After
     public void tearDown() {
         em.close();
@@ -104,16 +105,16 @@ public class ErrorMessageTest {
 
     @Test
     public void test01_SetErrors() {
-        ErrorMessage instance = new ErrorMessage();
-        
-        HashSet<EbmsError>  errorList = new HashSet<EbmsError>();
+        final ErrorMessage instance = new ErrorMessage();
+
+        final HashSet<EbmsError>  errorList = new HashSet<>();
         errorList.add(T_ERROR_1);
         errorList.add(T_ERROR_2);
         errorList.add(T_ERROR_3);
-        
+
         instance.setErrors(errorList);
         instance.setRefToMessageId("signal-reference");
-        
+
         em.getTransaction().begin();
         em.persist(instance);
         em.getTransaction().commit();
@@ -121,17 +122,17 @@ public class ErrorMessageTest {
 
     @Test
     public void test02_GetErrors() {
-        
-        List<ErrorMessage> tps = em.createQuery("from ErrorMessage", ErrorMessage.class).getResultList();
-        
+
+        final List<ErrorMessage> tps = em.createQuery("from ErrorMessage", ErrorMessage.class).getResultList();
+
         assertTrue(tps.size() == 1);
-        
-        Collection<IEbmsError> errors = tps.get(0).getErrors();
-        
+
+        final Collection<IEbmsError> errors = tps.get(0).getErrors();
+
         assertTrue(errors.size() == 3);
-        
-        for(IEbmsError e : errors) {
-            String cat = e.getCategory();
+
+        for(final IEbmsError e : errors) {
+            final String cat = e.getCategory();
             if (T_ERROR_1.getCategory().equals(cat)) {
                 assertEquals(T_ERROR_1.getErrorCode(), e.getErrorCode());
                 assertEquals(T_ERROR_1.getDescription().getLanguage(), e.getDescription().getLanguage());
@@ -141,62 +142,62 @@ public class ErrorMessageTest {
             } else if (T_ERROR_3.getCategory().equals(cat)) {
                 assertEquals(T_ERROR_3.getErrorCode(), e.getErrorCode());
                 assertEquals(T_ERROR_3.getDescription().getLanguage(), e.getDescription().getLanguage());
-            } 
-        }        
+            }
+        }
     }
 
     @Test
-    public void test03_AddError() throws DatabaseException {
+    public void test03_AddError() {
         em.getTransaction().begin();
 
         List<ErrorMessage> tps = em.createQuery("from ErrorMessage", ErrorMessage.class).getResultList();
         assertTrue(tps.size() == 1);
         Collection<IEbmsError> errors = tps.get(0).getErrors();
         assertTrue(errors.size() == 3);
-        
+
         tps.get(0).addError(T_ERROR_4);
-        
+
         em.getTransaction().commit();
-        
+
         em.close();
-        
+
         tps = null;
         errors = null;
-        
+
         em = TestJPAUtil.getEntityManager();
-        
+
         tps = em.createQuery("from ErrorMessage", ErrorMessage.class).getResultList();
         assertTrue(tps.size() == 1);
         errors = tps.get(0).getErrors();
         assertTrue(errors.size() == 4);
-        
-        for(IEbmsError e : errors) {
-            String cat = e.getCategory();
+
+        for(final IEbmsError e : errors) {
+            final String cat = e.getCategory();
             if (T_ERROR_4.getCategory().equals(cat)) {
                 assertEquals(T_ERROR_4.getErrorCode(), e.getErrorCode());
                 assertEquals(T_ERROR_4.getDescription().getLanguage(), e.getDescription().getLanguage());
             }
         }
     }
-    
+
     @Test
     public void test04_findResponseQuery() {
         em.getTransaction().begin();
-        
-        HashSet<EbmsError>  errorList = new HashSet<EbmsError>();
+
+        final HashSet<EbmsError>  errorList = new HashSet<>();
         errorList.add(T_ERROR_4);
-        
-        ErrorMessage instance = new ErrorMessage();
+
+        final ErrorMessage instance = new ErrorMessage();
         instance.setMessageId("ref-result");
         instance.setErrors(errorList);
-        
+
         em.persist(instance);
         em.getTransaction().commit();
-        
+
         Collection<ErrorMessage> result = em.createNamedQuery("ErrorMessage.findResponsesTo",
                 ErrorMessage.class)
                 .setParameter("refToMsgId", "error-4")
-                .getResultList();      
+                .getResultList();
 
         assertEquals(1, result.size());
         assertEquals("ref-result", result.iterator().next().getMessageId());
@@ -204,16 +205,16 @@ public class ErrorMessageTest {
         result = em.createNamedQuery("ErrorMessage.findResponsesTo",
                 ErrorMessage.class)
                 .setParameter("refToMsgId", "error-2")
-                .getResultList();      
+                .getResultList();
 
         assertEquals(0, result.size());
-            
+
         result = em.createNamedQuery("ErrorMessage.findResponsesTo",
                 ErrorMessage.class)
                 .setParameter("refToMsgId", "signal-reference")
-                .getResultList();      
+                .getResultList();
 
         assertEquals(1, result.size());
     }
-    
+
 }

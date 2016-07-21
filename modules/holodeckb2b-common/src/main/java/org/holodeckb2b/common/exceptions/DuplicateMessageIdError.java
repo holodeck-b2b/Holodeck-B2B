@@ -18,15 +18,15 @@ package org.holodeckb2b.common.exceptions;
 
 /**
  * Signals that a duplicate message id is detected in the database. As specified in the ebMS Core Specifications section
- * 5.2.2.1 message id must be globally unique. This constraint is only checked for messages that should be sent by 
+ * 5.2.2.1 message id must be globally unique. This constraint is only checked for messages that should be sent by
  * Holodeck B2B and not for received messages. It will be raised when a business application submits a message to with
  * a message id that already exists in the message database.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class DuplicateMessageIdError extends DatabaseException {
-    
-    public DuplicateMessageIdError(String dupId) {
+
+    public DuplicateMessageIdError(final String dupId) {
         super("Duplicate messageId [" + dupId + " detected in database!");
     }
 }

@@ -16,12 +16,13 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.pmode.xml.PMode;
-import java.io.File;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.io.File;
+
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -31,94 +32,94 @@ import org.simpleframework.xml.core.Persister;
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 public class PModeIdTest {
-    
+
     public PModeIdTest() {
-        
+
     }
-    
+
     /**
      * Create an PMode from file.
-     * 
+     *
      * @param fName The filename for the PMode
      * @return PMode or NULL in case of an error
      */
-    public PMode createFromFile(String fName) {
+    public PMode createFromFile(final String fName) {
 
         try {
             // retrieve the resource from the pmodetest directory.
-            File f = new File(this.getClass().getClassLoader().getResource("pmodetest/pmodeid/" + fName).getPath());
+            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/pmodeid/" + fName).getPath());
 
-            Serializer  serializer = new Persister();
+            final Serializer  serializer = new Persister();
             return serializer.read(PMode.class, f);
         }
-        catch (Exception ex) {
+        catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             return null;
         }
     }
-    
+
     /**
      * Test for PMode ID.
      */
     @Test
     public void testPModeID() {
-        
+
         try {
-            PMode pmode = createFromFile("minimalPModeID1.xml");
-            
+            final PMode pmode = createFromFile("minimalPModeID1.xml");
+
             // Check PMode ID object
             assertNotNull(pmode.getId());
             assertEquals("id0", pmode.getId());
-            
-        } catch (Exception ex) {
+
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
         }
-        
-    }    
 
-    
+    }
+
+
     /**
      * Test for existing include attribute with PModeID.
      */
     @Test
     public void testPModeIDInclude() {
-        
+
         try {
-            PMode pmode = createFromFile("minimalPModeID1.xml");
-            
+            final PMode pmode = createFromFile("minimalPModeID1.xml");
+
             // Check PMode ID
             assertNotNull(pmode.getId());
             assertEquals("id0", pmode.getId());
-            
+
             // check the PMode include parameter
             assertTrue("true", pmode.includeId());
-            
-        } catch (Exception ex) {
+
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
         }
-        
-    }    
+
+    }
 
     /**
      * Test for non-existing include attribute with PModeID.
      */
     @Test
     public void testPModeIDNoInclude() {
-        
+
         try {
-            PMode pmode = createFromFile("minimalPModeID2.xml");
-            
+            final PMode pmode = createFromFile("minimalPModeID2.xml");
+
             // Check PMode ID
             assertNotNull(pmode.getId());
             assertEquals("id0", pmode.getId());
-            
-        } catch (Exception ex) {
+
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
         }
-        
-    }    
-    
+
+    }
+
 }

@@ -16,13 +16,15 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import java.io.File;
-import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.io.File;
+
+import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -32,20 +34,20 @@ import org.simpleframework.xml.core.Persister;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class SignatureConfigurationTest {
-    
+
     public SignatureConfigurationTest() {
     }
-    
-    private SignatureConfiguration createFromFile(String fName) throws Exception {
-    
+
+    private SignatureConfiguration createFromFile(final String fName) throws Exception {
+
         try {
             // retrieve the resource from the pmodetest directory.
-            File f = new File(this.getClass().getClassLoader().getResource("pmodetest/sig/" + fName).getPath());
-            
-            Serializer  serializer = new Persister();
+            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/sig/" + fName).getPath());
+
+            final Serializer  serializer = new Persister();
             return serializer.read(SignatureConfiguration.class, f);
         }
-        catch (Exception ex) {
+        catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             return null;
         }
@@ -57,57 +59,57 @@ public class SignatureConfigurationTest {
     @Test
     public void testCompleteConfig1() {
         try {
-            SignatureConfiguration sigCfg = createFromFile("completeCfg1.xml");
+            final SignatureConfiguration sigCfg = createFromFile("completeCfg1.xml");
             assertEquals("KeystoreAlias0", sigCfg.getKeystoreAlias());
             assertFalse(sigCfg.enableRevocationCheck());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             fail();
         }
     }
 
     /**
-     * Test of minimal configuration for validation 
+     * Test of minimal configuration for validation
      */
     @Test
     public void testMinimalConfig1() {
         try {
-            SignatureConfiguration sigCfg = createFromFile("minimalCfg1.xml");
+            final SignatureConfiguration sigCfg = createFromFile("minimalCfg1.xml");
             assertEquals("KeystoreAlias1", sigCfg.getKeystoreAlias());
             assertNull(sigCfg.enableRevocationCheck());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             fail();
-        }       
+        }
     }
-    
+
     /**
      * Test complete configuration for signing
      */
     @Test
     public void testCompleteConfig2() {
         try {
-            SignatureConfiguration sigCfg = createFromFile("completeCfg2.xml");
+            final SignatureConfiguration sigCfg = createFromFile("completeCfg2.xml");
             assertEquals("KeystoreAlias2", sigCfg.getKeystoreAlias());
             assertEquals("keypwd2$%'s;:@#$:!", sigCfg.getCertificatePassword());
-            
+
             assertNull(sigCfg.enableRevocationCheck());
-            
+
             assertEquals(X509ReferenceType.BSTReference, sigCfg.getKeyReferenceMethod());
             assertTrue(sigCfg.includeCertificatePath());
             assertEquals("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", sigCfg.getSignatureAlgorithm());
             assertEquals("http://www.w3.org/2001/04/xmldsig-more#sha384", sigCfg.getHashFunction());
-            
-        } catch (Exception e) {
+
+        } catch (final Exception e) {
             fail();
         }
     }
 
     /**
-     * Test of minimal configuration for siging 
+     * Test of minimal configuration for siging
      */
     @Test
     public void testMinimalConfig2() {
         try {
-            SignatureConfiguration sigCfg = createFromFile("minimalCfg2.xml");
+            final SignatureConfiguration sigCfg = createFromFile("minimalCfg2.xml");
             assertEquals("KeystoreAlias3", sigCfg.getKeystoreAlias());
             assertEquals("727dhjkvdjk%%#^&%dgg", sigCfg.getCertificatePassword());
 
@@ -116,23 +118,23 @@ public class SignatureConfigurationTest {
             assertNull(sigCfg.includeCertificatePath());
             assertNull(sigCfg.getSignatureAlgorithm());
             assertNull(sigCfg.getHashFunction());
-            
-        } catch (Exception e) {
+
+        } catch (final Exception e) {
             fail();
-        }       
-    }    
-    
+        }
+    }
+
     /**
      * Test of incorrect configuration missing keystore alias
      */
     @Test
     public void testMissingAliasConfig() {
         try {
-            SignatureConfiguration sigCfg = createFromFile("missingAlias.xml");
-            
-            assertNull(sigCfg);            
-        } catch (Exception e) {
+            final SignatureConfiguration sigCfg = createFromFile("missingAlias.xml");
+
+            assertNull(sigCfg);
+        } catch (final Exception e) {
             fail();
-        }       
+        }
     }
 }

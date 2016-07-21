@@ -18,20 +18,20 @@ package org.holodeckb2b.common.exceptions;
 
 /**
  * Signals errors that occur while trying to access information in the database.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class DatabaseException extends Exception {
-    
+
     public DatabaseException() {
         super();
     }
-    
-    public DatabaseException(String msg) {
+
+    public DatabaseException(final String msg) {
         super(msg);
     }
-    
-    public DatabaseException(String msg, Exception cause) {
+
+    public DatabaseException(final String msg, final Exception cause) {
         super(msg, cause);
     }
 }

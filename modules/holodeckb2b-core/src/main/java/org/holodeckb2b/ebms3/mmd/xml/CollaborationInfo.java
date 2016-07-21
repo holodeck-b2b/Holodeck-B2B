@@ -23,46 +23,46 @@ import org.simpleframework.xml.Element;
 
 /**
  * Represents the <code>CollaborationInfo</code> element from the MMD document.
- * <p>This element contains meta data about the message exchange context, 
- * i.e. the business collaboration. There is one <b>REQUIRED</b> child element, 
- * <code>ConversationId</code>, which must be supplied when submitting a message 
- * to Holodeck B2B. This element is used to identify related message exchanges 
+ * <p>This element contains meta data about the message exchange context,
+ * i.e. the business collaboration. There is one <b>REQUIRED</b> child element,
+ * <code>ConversationId</code>, which must be supplied when submitting a message
+ * to Holodeck B2B. This element is used to identify related message exchanges
  * within one business conversation.
  * <p>When submitting a message it is RECOMMENDED to supply the P-Mode, in the
- * <code>pmode</code> attribute of the <code>AgreementRef</code> child element, 
- * so Holodeck B2B can unambiguously determine the P-Mode to use for processing 
- * the message. 
- * 
+ * <code>pmode</code> attribute of the <code>AgreementRef</code> child element,
+ * so Holodeck B2B can unambiguously determine the P-Mode to use for processing
+ * the message.
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class CollaborationInfo implements ICollaborationInfo {
-    
+
     @Element(name = "AgreementRef", required = false)
     private AgreementReference  agreementRef;
-    
+
     @Element(name = "Service", required = false)
     private Service             service;
-    
+
     @Element(name = "Action", required = false)
     private String              action;
-    
+
     @Element(name = "ConversationId")
     private String              convId;
-    
+
     /**
      * Default constructor
      */
     public CollaborationInfo() {}
-    
+
     /**
      * Creates an <code>CollaborationInfo</code> object based on the given data
-     * 
+     *
      * @param ci    The data to use
      */
-    public CollaborationInfo(ICollaborationInfo ci) {
+    public CollaborationInfo(final ICollaborationInfo ci) {
         this.action = ci.getAction();
         this.convId = ci.getConversationId();
-        
+
         setService(ci.getService());
         setAgreement(ci.getAgreement());
     }
@@ -72,40 +72,40 @@ public class CollaborationInfo implements ICollaborationInfo {
         return service;
     }
 
-    public void setService(IService svc) {
+    public void setService(final IService svc) {
         if (svc != null)
             this.service = new Service(svc);
         else
             this.service = null;
     }
-    
+
     @Override
     public String getAction() {
         return action;
     }
-    
-    public void setAction(String action) {
+
+    public void setAction(final String action) {
         this.action = action;
     }
-            
+
     @Override
     public String getConversationId() {
         return convId;
     }
 
-    public void setConversationId(String convId) {
+    public void setConversationId(final String convId) {
         this.convId = convId;
     }
-            
+
     @Override
     public IAgreementReference getAgreement() {
         return agreementRef;
     }
-    
-    public void setAgreement(IAgreementReference agreeRef) {
+
+    public void setAgreement(final IAgreementReference agreeRef) {
         if(agreeRef != null)
             this.agreementRef = new AgreementReference(agreeRef);
         else
             this.agreementRef = null;
-    }    
+    }
 }

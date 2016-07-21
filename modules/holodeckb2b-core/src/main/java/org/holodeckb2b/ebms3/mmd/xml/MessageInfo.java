@@ -18,27 +18,28 @@ package org.holodeckb2b.ebms3.mmd.xml;
 
 import java.text.ParseException;
 import java.util.Date;
+
 import org.holodeckb2b.common.util.Utils;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 
 /**
  * Represents the <code>MessageInfo</code> element from a MMD document.
- * <p><code>MessageInfo</code> contains some technical details that are used to 
- * identify the user message unit and its possible relation to another user 
+ * <p><code>MessageInfo</code> contains some technical details that are used to
+ * identify the user message unit and its possible relation to another user
  * message unit.
- * <p>When submitting a message the timestamp <b>SHOULD NOT</b> be used as the 
- * timestamp is set by Holodeck B2B (as required by ebMS spec, see 5.2.2.1).<br> 
- * If the submitted message relates to another message the RefToMessageId <b>MUST</b> 
- * be set by the submitter, Holodeck B2B will not try to detect message relations.<br> 
- * The submitter <b>MAY</b> set the MessageId if needed and <b>MUST</b> ensure that the 
- * supplied value is a globally unique identifier conforming to <i>MessageId</i> 
+ * <p>When submitting a message the timestamp <b>SHOULD NOT</b> be used as the
+ * timestamp is set by Holodeck B2B (as required by ebMS spec, see 5.2.2.1).<br>
+ * If the submitted message relates to another message the RefToMessageId <b>MUST</b>
+ * be set by the submitter, Holodeck B2B will not try to detect message relations.<br>
+ * The submitter <b>MAY</b> set the MessageId if needed and <b>MUST</b> ensure that the
+ * supplied value is a globally unique identifier conforming to <i>MessageId</i>
  * as defined in [RFC2822].
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class MessageInfo {
-    
+
     /*
      * NOTE: The schema for the MMD document (see <code>/src/main/resources/xsd/messagemetadata.xsd</code>)
      * defines the <code>Timestamp</code> as <i>xs:dateTime</i>. Simple XML however does not parse these
@@ -47,35 +48,35 @@ public class MessageInfo {
      */
     @Element(name = "Timestamp", required = false)
     private String  timestamp;
-    
+
     @Element(name = "MessageId", required = false)
     private String  messageId;
-    
+
     @Element(name = "RefToMessageId", required = false)
     private String  refToMessageId;
 
     @Attribute(name = "mpc", required = false)
     private String  mpc;
-    
+
     /**
      * @return the timestamp
      */
     public Date getTimestamp() {
         Date result = null;
-        
+
         try {
             result = Utils.fromXMLDateTime(timestamp);
-        } catch (ParseException ex) {
+        } catch (final ParseException ex) {
             // If date could not be parsed, no date will be available
          }
-        
+
         return result;
     }
 
     /**
      * @param timestamp the timestamp to set
      */
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(final Date timestamp) {
         this.timestamp = Utils.toXMLDateTime(timestamp);
     }
 
@@ -89,7 +90,7 @@ public class MessageInfo {
     /**
      * @param messageId the messageId to set
      */
-    public void setMessageId(String messageId) {
+    public void setMessageId(final String messageId) {
         this.messageId = messageId;
     }
 
@@ -103,7 +104,7 @@ public class MessageInfo {
     /**
      * @param refToMessageId the refToMessageId to set
      */
-    public void setRefToMessageId(String refToMessageId) {
+    public void setRefToMessageId(final String refToMessageId) {
         this.refToMessageId = refToMessageId;
     }
 
@@ -117,8 +118,8 @@ public class MessageInfo {
     /**
      * @param mpc the mpc to set
      */
-    public void setMpc(String mpc) {
+    public void setMpc(final String mpc) {
         this.mpc = mpc;
     }
-    
+
 }

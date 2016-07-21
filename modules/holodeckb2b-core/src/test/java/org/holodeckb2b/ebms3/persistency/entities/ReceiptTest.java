@@ -16,22 +16,23 @@
  */
 package org.holodeckb2b.ebms3.persistency.entities;
 
-import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.ebms3.persistency.entities.Receipt;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import javax.persistence.EntityManager;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
 import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -39,53 +40,53 @@ import org.junit.runners.MethodSorters;
 
 /**
  * Test for the Receipt persistency object
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ReceiptTest {
-        
+
     EntityManager   em;
-    
+
     private static final String T_CONTENT_1 =   "<content>" +
                                                 "<confirmation>\n" +
                                                 "    <from>Party_X</from>\n" +
                                                 "    <message>Success</message>\n" +
                                                 "</confirmation>\n" +
                                                 "</content>";
-    private static final String T_CONTENT_2 =   "<content xmlns:e=\"http://sample.ns/test\">" + 
+    private static final String T_CONTENT_2 =   "<content xmlns:e=\"http://sample.ns/test\">" +
                                                 "<confirmation>\n" +
                                                 "    <e:from>Party_X</e:from>\n" +
                                                 "    <message>Success</message>\n" +
-                                                "</confirmation>" + 
+                                                "</confirmation>" +
                                                 "<confirmation>\n" +
                                                 "    <e:from>Party_X</e:from>\n" +
                                                 "    <message>Success</message>\n" +
                                                 "</confirmation>\n" +
                                                 "</content>";
-    
-    
+
+
     public ReceiptTest() {
     }
 
     @AfterClass
-    public static void cleanup() throws DatabaseException {
-        EntityManager em = TestJPAUtil.getEntityManager();
-        
+    public static void cleanup() {
+        final EntityManager em = TestJPAUtil.getEntityManager();
+
         em.getTransaction().begin();
-        Collection<Receipt> tps = em.createQuery("from Receipt", Receipt.class).getResultList();
-        
-        for(Receipt r : tps)
+        final Collection<Receipt> tps = em.createQuery("from Receipt", Receipt.class).getResultList();
+
+        for(final Receipt r : tps)
             em.remove(r);
-        
+
         em.getTransaction().commit();
     }
-    
+
     @Before
-    public void setUp() throws DatabaseException {
+    public void setUp() {
         em = TestJPAUtil.getEntityManager();
     }
-    
+
     @After
     public void tearDown() {
         em.close();
@@ -97,17 +98,17 @@ public class ReceiptTest {
      */
     @Test
     public void test01_SetContent() {
-        Receipt instance = new Receipt();
-        
-        OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new StringReader(T_CONTENT_1));
+        final Receipt instance = new Receipt();
+
+        final OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new StringReader(T_CONTENT_1));
         // Parse document and get root element
-        OMElement contentElement = builder.getDocumentElement();
+        final OMElement contentElement = builder.getDocumentElement();
 
         instance.setContent(contentElement.getChildElements());
-        
+
         em.getTransaction().begin();
         em.persist(instance);
-        em.getTransaction().commit();        
+        em.getTransaction().commit();
     }
 
     /**
@@ -116,18 +117,18 @@ public class ReceiptTest {
     @Test
     public void test02_GetContent() {
         em.getTransaction().begin();
-        List<Receipt> tps = em.createQuery("from Receipt", Receipt.class).getResultList();
-        
+        final List<Receipt> tps = em.createQuery("from Receipt", Receipt.class).getResultList();
+
         assertTrue(tps.size() == 1);
-        
-        ArrayList<OMElement> content = tps.get(0).getContent();
-        
+
+        final ArrayList<OMElement> content = tps.get(0).getContent();
+
         assertTrue(content.size() == 1);
         assertEquals(content.get(0).getLocalName(), "confirmation");
         assertNull(content.get(0).getNamespaceURI());
-        
+
         em.remove(tps.get(0));
-        em.getTransaction().commit();        
+        em.getTransaction().commit();
     }
 
     /**
@@ -135,17 +136,17 @@ public class ReceiptTest {
      */
     @Test
     public void test03_SetContent() {
-        Receipt instance = new Receipt();
-        
-        OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new StringReader(T_CONTENT_2));
+        final Receipt instance = new Receipt();
+
+        final OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new StringReader(T_CONTENT_2));
         // Parse document and get root element
-        OMElement contentElement = builder.getDocumentElement();
+        final OMElement contentElement = builder.getDocumentElement();
 
         instance.setContent(contentElement.getChildElements());
-        
+
         em.getTransaction().begin();
         em.persist(instance);
-        em.getTransaction().commit();        
+        em.getTransaction().commit();
     }
 
     /**
@@ -154,20 +155,20 @@ public class ReceiptTest {
     @Test
     public void test04_GetContent() {
         em.getTransaction().begin();
-        List<Receipt> tps = em.createQuery("from Receipt", Receipt.class).getResultList();
-        
+        final List<Receipt> tps = em.createQuery("from Receipt", Receipt.class).getResultList();
+
         assertTrue(tps.size() == 1);
-        
-        ArrayList<OMElement> content = tps.get(0).getContent();
-        
+
+        final ArrayList<OMElement> content = tps.get(0).getContent();
+
         assertTrue(content.size() == 2);
         assertEquals(content.get(0).getLocalName(), "confirmation");
         assertNull(content.get(0).getNamespaceURI());
-        
+
         assertEquals(content.get(0).getFirstElement().getLocalName(), "from");
         assertEquals(content.get(0).getFirstElement().getNamespaceURI(), "http://sample.ns/test");
-        
-        em.getTransaction().commit();        
+
+        em.getTransaction().commit();
     }
 
 

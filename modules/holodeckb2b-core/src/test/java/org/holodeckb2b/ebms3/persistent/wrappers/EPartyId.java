@@ -17,16 +17,18 @@
 package org.holodeckb2b.ebms3.persistent.wrappers;
 
 import java.io.Serializable;
+
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
 import org.holodeckb2b.ebms3.persistency.entities.PartyId;
 
 /**
  * JPA Entity wrapper for testing {@see PartyId}
- * 
+ *
  * @author Sander Fieten <sander at holodeckb2b.org>
  */
 @Entity
@@ -39,7 +41,7 @@ public class EPartyId implements Serializable {
 
     @Embedded
     public PartyId  ePartyId;
-    
+
     public EPartyId() {
         ePartyId = new PartyId();
     }

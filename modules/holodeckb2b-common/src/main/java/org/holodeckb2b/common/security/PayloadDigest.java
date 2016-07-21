@@ -17,28 +17,29 @@
 package org.holodeckb2b.common.security;
 
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.holodeckb2b.interfaces.security.IPayloadDigest;
 
 /**
  * Implements {@link IPayloadDigest} and contains information about the digest that was calculated for a payload of a
- * User Message. The information on the digest must be supplied when the object is created and can not be modified 
+ * User Message. The information on the digest must be supplied when the object is created and can not be modified
  * afterwards.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since 2.1.0
  */
 public class PayloadDigest implements IPayloadDigest {
 
     private static final String DSIG_NAMESPACE_URI = "http://www.w3.org/2000/09/xmldsig#";
-    
+
     private final String  uri;
     private final String  value;
-    private final String  algorithm;    
-    
+    private final String  algorithm;
+
     /**
      * Creates a new <code>PayloadDigest</code> object with the provided information on the digest.
-     * 
+     *
      * @param uri               The reference to the payload this digest applies to as an URI
      * @param digestValue       The digest value that was calculated for this payload
      * @param digestAlgorithm   The algorithm used to calculate the digest value
@@ -48,30 +49,30 @@ public class PayloadDigest implements IPayloadDigest {
         this.value = digestValue;
         this.algorithm = digestAlgorithm;
     }
-    
+
     /**
      * Creates a new <code>PayloadDigest</code> object with the information on the digest provided in the <code>
      * ds:Reference</code> element.
-     * 
+     *
      * @param reference     The {@link OMElement} object representing the <code>ds:Reference</code> element
      */
     public PayloadDigest(final OMElement reference) {
         // Only a ds:Reference element canbe used to create a PayloadDigest object
-        if(!"Reference".equals(reference.getLocalName()) 
+        if(!"Reference".equals(reference.getLocalName())
            || !DSIG_NAMESPACE_URI.equals(reference.getNamespaceURI()))
             throw new IllegalArgumentException("Argument must be a ds:Reference element!");
-        
+
         this.uri = reference.getAttributeValue(new QName("URI"));
         try {
             this.value = reference.getFirstChildWithName(new QName(DSIG_NAMESPACE_URI, "DigestValue")).getText();
             this.algorithm = reference.getFirstChildWithName(new QName(DSIG_NAMESPACE_URI, "DigestMethod"))
                                       .getAttributeValue(new QName("Algorithm"));
-        } catch (NullPointerException npe) {
+        } catch (final NullPointerException npe) {
             // A NPE indicates that a required element or attribute was not available => illegal argumen
             throw new IllegalArgumentException("The passed ds:Reference element is invalid!");
-        }        
+        }
     }
-    
+
     @Override
     public String getURI() {
         return uri;
@@ -85,5 +86,5 @@ public class PayloadDigest implements IPayloadDigest {
     @Override
     public String getDigestAlgorithm() {
         return algorithm;
-    }    
+    }
 }

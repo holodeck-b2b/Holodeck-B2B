@@ -28,8 +28,8 @@ import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:PullRequest</code> element in the ebMS messaging
  * header if a pull request signal should be sent.
- * <p>Whether a Pull Request signal must be sent is determined by the existence of the 
- * {@link MessageContextProperties#OUT_PULL_REQUEST} property. It contains the <code>EntityProxy</code> for the  
+ * <p>Whether a Pull Request signal must be sent is determined by the existence of the
+ * {@link MessageContextProperties#OUT_PULL_REQUEST} property. It contains the <code>EntityProxy</code> for the
  * {@link PullRequest} object containing the data on the pull request signal to include.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -45,28 +45,28 @@ public class PackagePullRequestSignal extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) throws AxisFault {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws AxisFault {
         // First check if there is a pull request to include
         EntityProxy<PullRequest> pullReq = null;
-        
+
         try {
             pullReq = (EntityProxy<PullRequest>) mc.getProperty(MessageContextProperties.OUT_PULL_REQUEST);
-        } catch (ClassCastException cce) {
-            log.fatal("Illegal state of processing! MessageContext contained a " 
+        } catch (final ClassCastException cce) {
+            log.fatal("Illegal state of processing! MessageContext contained a "
                         + pullReq.getClass().getName() + " object as PullRequest!");
             return InvocationResponse.ABORT;
         }
 
-        if (pullReq == null) 
+        if (pullReq == null)
             // No pull request in this message, continue processing
             return InvocationResponse.CONTINUE;
-        
+
         // There is a pull request signal to be sent, add to the message
         log.debug("Adding pull request signal to the message");
 
         log.debug("Get the eb:Messaging header from the message");
-        SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
-        
+        final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
+
         log.debug("Add eb:SignalMessage element to the existing eb:Messaging header");
         org.holodeckb2b.ebms3.packaging.PullRequest.createElement(messaging, pullReq.entity);
         log.debug("eb:SignalMessage element succesfully added to header");

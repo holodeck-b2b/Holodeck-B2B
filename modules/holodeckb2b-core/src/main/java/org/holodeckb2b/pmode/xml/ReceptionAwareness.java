@@ -17,6 +17,7 @@
 package org.holodeckb2b.pmode.xml;
 
 import java.util.concurrent.TimeUnit;
+
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.general.Interval;
 import org.simpleframework.xml.Element;
@@ -28,30 +29,30 @@ import org.simpleframework.xml.core.ValueRequiredException;
 /**
  * Represents the <code>ReceptionAwareness<code> element from the P-Mode document. Contains the configuration settings
  * for the reception awareness feature.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @author Bram Bakx <bram at holodeck-b2b.org>
- * 
+ *
  * @see IReceptionAwareness
  */
 public class ReceptionAwareness implements IReceptionAwareness {
 
     @Element(name = "MaxRetries", required = false)
-    private int maxRetries = -1;
-    
+    private final int maxRetries = -1;
+
     @Element(name = "RetryInterval", required = false)
-    private long retryIntervalDuration = -1;
-    
+    private final long retryIntervalDuration = -1;
+
     @Element(name = "UseDuplicateElimination", required = false)
-    private Boolean useDupElimination = Boolean.TRUE;
-    
+    private final Boolean useDupElimination = Boolean.TRUE;
+
     @Transient
     private Interval retryInterval;
-    
+
     /**
-     * Validates the data read from the XML document by checking that when <code>MaxRetries</code> is supplied 
+     * Validates the data read from the XML document by checking that when <code>MaxRetries</code> is supplied
      * <code>RetryInterval</code> contains positive non zero value;</li></ol>
-     * 
+     *
      * @throws Exception When the read XML is not valid
      */
     @Validate
@@ -60,7 +61,7 @@ public class ReceptionAwareness implements IReceptionAwareness {
             if (retryIntervalDuration <= 0)
                 throw new ValueRequiredException("ReceptionAwareness/RetryInterval must have positive non zero value");
     }
-    
+
     /**
      * Is a helper to construct the {@link Interval} object. Uses the commit function of the Simple framework.
      */
@@ -68,7 +69,7 @@ public class ReceptionAwareness implements IReceptionAwareness {
     public void calculateInterval() {
         retryInterval = new Interval(retryIntervalDuration, TimeUnit.SECONDS);
     }
-    
+
     @Override
     public int getMaxRetries() {
         return maxRetries;

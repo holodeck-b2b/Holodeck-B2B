@@ -16,16 +16,17 @@
  */
 package org.holodeckb2b.ebms3.persistency.entities;
 
-import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Collection;
 import java.util.List;
+
 import javax.persistence.EntityManager;
+
 import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -33,39 +34,39 @@ import org.junit.runners.MethodSorters;
 
 /**
  * Test for the PullRequest persistency object
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class PullRequestTest {
-        
+
     EntityManager   em;
-    
-    
+
+
     private static final String T_MPC_1 = "http://holodeck-b2b.org/test/pull/mpc1";
-    
-    
+
+
     public PullRequestTest() {
     }
-    
+
     @AfterClass
-    public static void cleanup() throws DatabaseException {
-        EntityManager em = TestJPAUtil.getEntityManager();
-        
+    public static void cleanup() {
+        final EntityManager em = TestJPAUtil.getEntityManager();
+
         em.getTransaction().begin();
-        Collection<PullRequest> tps = em.createQuery("from PullRequest", PullRequest.class).getResultList();
-        
-        for(PullRequest p : tps)
+        final Collection<PullRequest> tps = em.createQuery("from PullRequest", PullRequest.class).getResultList();
+
+        for(final PullRequest p : tps)
             em.remove(p);
-        
+
         em.getTransaction().commit();
     }
-    
+
     @Before
-    public void setUp() throws DatabaseException {
+    public void setUp() {
         em = TestJPAUtil.getEntityManager();
     }
-    
+
     @After
     public void tearDown() {
         em.close();
@@ -77,13 +78,13 @@ public class PullRequestTest {
      */
     @Test
     public void test01_SetMPC() {
-        PullRequest instance = new PullRequest();
-        
+        final PullRequest instance = new PullRequest();
+
         instance.setMPC(T_MPC_1);
-        
+
         em.getTransaction().begin();
         em.persist(instance);
-        em.getTransaction().commit();        
+        em.getTransaction().commit();
     }
 
     /**
@@ -92,12 +93,12 @@ public class PullRequestTest {
     @Test
     public void test02_GetMPC() {
         em.getTransaction().begin();
-        List<PullRequest> tps = em.createQuery("from PullRequest", PullRequest.class).getResultList();
-        
+        final List<PullRequest> tps = em.createQuery("from PullRequest", PullRequest.class).getResultList();
+
         assertTrue(tps.size() == 1);
         assertEquals(T_MPC_1, tps.get(0).getMPC());
-        
-        em.getTransaction().commit();        
+
+        em.getTransaction().commit();
     }
 
 

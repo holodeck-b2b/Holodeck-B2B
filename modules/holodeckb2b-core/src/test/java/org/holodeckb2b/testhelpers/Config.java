@@ -13,28 +13,28 @@ import org.holodeckb2b.interfaces.config.IConfiguration;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class Config implements IConfiguration {
- 
-    private String  hb2b_home;
-    
-    Config(String homeDir) {
+
+    private final String  hb2b_home;
+
+    Config(final String homeDir) {
         hb2b_home = homeDir;
     }
-    
+
     @Override
     public String getHolodeckB2BHome() {
         return hb2b_home;
     }
-    
+
     @Override
     public String getPublicKeyStorePath() {
         return getHolodeckB2BHome() + "/publickeystore.jks";
     }
-    
+
     @Override
     public String getPublicKeyStorePassword() {
         return "nosecrets";
     }
-    
+
     @Override
     public String getHostName() {
         return "test.holodeckb2b.org";
@@ -44,7 +44,7 @@ public class Config implements IConfiguration {
     public ConfigurationContext getAxisConfigurationContext() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
     public String getWorkerPoolCfgFile() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

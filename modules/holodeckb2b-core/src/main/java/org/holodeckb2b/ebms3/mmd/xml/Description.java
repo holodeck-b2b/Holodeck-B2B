@@ -24,30 +24,30 @@ import org.simpleframework.xml.Text;
 /**
  * Represents the <code>Description</code> element from a MMD document. The information
  * contained in this element may be used by the business applications that
- * handle the payload. It is not used by Holodeck B2B in processing the message. 
+ * handle the payload. It is not used by Holodeck B2B in processing the message.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class Description implements IDescription {
-    
+
     @Text
     private String  text;
-    
+
     @Attribute(name="lang",required = false)
     @Namespace(prefix = "xml", reference = "http://www.w3.org/XML/1998/namespace")
     private String  lang;
-    
+
     /**
      * Default constructor
      */
     public Description() {}
-    
+
     /**
      * Creates a new <code>Description</code> object based on the given data
-     * 
+     *
      * @param data  The description data to use
      */
-    public Description(IDescription data) {
+    public Description(final IDescription data) {
         this.lang = data.getLanguage();
         this.text = data.getText();
     }
@@ -63,7 +63,7 @@ public class Description implements IDescription {
     /**
      * @param text the text to set
      */
-    public void setText(String text) {
+    public void setText(final String text) {
         this.text = text;
     }
 
@@ -78,9 +78,9 @@ public class Description implements IDescription {
     /**
      * @param lang the lang to set
      */
-    public void setLanguage(String lang) {
+    public void setLanguage(final String lang) {
         this.lang = lang;
     }
-    
-    
+
+
 }

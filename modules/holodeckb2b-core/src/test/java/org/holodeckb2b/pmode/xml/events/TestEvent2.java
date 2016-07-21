@@ -23,5 +23,5 @@ import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface TestEvent2 extends IMessageProcessingEvent {
-    
+
 }

@@ -18,25 +18,25 @@ package org.holodeckb2b.interfaces.delivery;
 
 /**
  * Indicates a problem that occurred in the delivery of a message unit to the business application. This exception can
- * be thrown because a delivery method can not be successfully instantiated, i.e. the factory class can not be 
+ * be thrown because a delivery method can not be successfully instantiated, i.e. the factory class can not be
  * initialized or during the actual delivery of a message.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see IMessageDeliverer
  * @see IMessageDelivererFactory
  */
 public class MessageDeliveryException extends Exception {
- 
+
     public MessageDeliveryException() {
         super();
     }
-    
-    public MessageDeliveryException(String message) {
+
+    public MessageDeliveryException(final String message) {
         super(message);
     }
-    
-    public MessageDeliveryException(String message, Exception cause) {
+
+    public MessageDeliveryException(final String message, final Exception cause) {
         super(message, cause);
     }
-    
+
 }

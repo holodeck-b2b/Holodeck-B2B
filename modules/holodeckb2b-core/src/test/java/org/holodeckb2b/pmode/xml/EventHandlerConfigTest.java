@@ -16,31 +16,33 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import java.io.File;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+
+import java.io.File;
+
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
 /**
  * Test the <code>EventHanlder</code> from P-Mode
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class EventHandlerConfigTest {
-    
-    public EventHandlerConfig createFromFile(String fName)  {
+
+    public EventHandlerConfig createFromFile(final String fName)  {
 
         try {
             // retrieve the resource from the pmodetest directory.
-            File f = new File(this.getClass().getClassLoader().getResource("pmodetest/events/" + fName).getPath());
+            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/events/" + fName).getPath());
 
-            Serializer  serializer = new Persister();
+            final Serializer  serializer = new Persister();
             return serializer.read(EventHandlerConfig.class, f);
         }
-        catch (Exception ex) {
+        catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             return null;
         }
@@ -48,47 +50,47 @@ public class EventHandlerConfigTest {
 
     @Test
     public void testInvalidHandlerFactoryClass() {
-        EventHandlerConfig conf = createFromFile("noHandlerClass.xml");       
+        EventHandlerConfig conf = createFromFile("noHandlerClass.xml");
         assertNull(conf);
         conf = createFromFile("invalidHandler.xml");
-        assertNull(conf);        
+        assertNull(conf);
     }
-    
+
     @Test
     public void testMinimalConfig() {
-        EventHandlerConfig conf = createFromFile("minimal.xml");
-        
+        final EventHandlerConfig conf = createFromFile("minimal.xml");
+
         assertNotNull(conf);
         assertNull(conf.getHandledEvents());
         assertNull(conf.appliesTo());
         assertNull(conf.getHandlerSettings());
     }
-    
+
     @Test
     public void testInvalidHandledEvent() {
-        EventHandlerConfig conf = createFromFile("unknownEvent.xml");       
+        EventHandlerConfig conf = createFromFile("unknownEvent.xml");
         assertNull(conf);
         conf = createFromFile("invalidEvent.xml");
-        assertNull(conf);                
+        assertNull(conf);
     }
-    
+
     @Test
     public void testInvalidMsgUnitType() {
-        EventHandlerConfig conf = createFromFile("invalidMsgType.xml");       
-        assertNull(conf);        
+        final EventHandlerConfig conf = createFromFile("invalidMsgType.xml");
+        assertNull(conf);
     }
-    
+
     @Test
     public void testAllMsgUnitType() {
-        EventHandlerConfig conf = createFromFile("allMsgTypes.xml");       
-        assertNotNull(conf);        
+        final EventHandlerConfig conf = createFromFile("allMsgTypes.xml");
+        assertNotNull(conf);
         assertEquals(conf.appliesTo().size(), 5);
     }
-    
+
     @Test
     public void testFullConfig() {
-        EventHandlerConfig conf = createFromFile("fullConfig.xml");       
-        assertNotNull(conf);        
+        final EventHandlerConfig conf = createFromFile("fullConfig.xml");
+        assertNotNull(conf);
         assertEquals(2, conf.getHandledEvents().size());
         assertEquals("TestEvent1", conf.getHandledEvents().get(0).getSimpleName());
         assertEquals("TestEvent2", conf.getHandledEvents().get(1).getSimpleName());
@@ -99,5 +101,5 @@ public class EventHandlerConfigTest {
         assertEquals("value1", conf.getHandlerSettings().get("p1"));
         assertEquals("value2", conf.getHandlerSettings().get("p2"));
     }
-    
+
 }

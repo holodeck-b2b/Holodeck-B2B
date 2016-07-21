@@ -24,68 +24,68 @@ import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
  * <p>As this class is a child class of {@see EbmsError} it can be saved directly
  * to the database. When retrieved from the database again it is however a "normal"
  * <code>EbmsError</code> as this class is not defined as an JPA class.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class ConnectionFailure extends EbmsError {
-    
+
     /**
      * The error code as defined in the core specification
      */
     private static final String ERROR_CODE = "EBMS:0005";
-    
+
     /**
      * The default severity of the error as defined in the core specification.
      */
     private static final Severity ERROR_SEVERITY = Severity.FAILURE;
-    
+
     /**
      * The origin of this error is normally the ebms module
      */
     private static final String ERROR_ORIGIN = "ebms";
-    
+
     /**
      * The default category as specified in the core specification
      */
     private static final String ERROR_CATEGORY = "Communication";
-    
+
     /**
      * The default error message
      */
     private static final String ERROR_SHORT_DESCRIPTION = "ConnectionFailure";
-    
+
     /**
      * Constructs a new <i>ConnectionFailure</i> error with the default values.
      */
     public ConnectionFailure() {
         super();
-        
+
         setErrorCode(ERROR_CODE);
         setSeverity(ERROR_SEVERITY);
         setOrigin(ERROR_ORIGIN);
-        setCategory(ERROR_CATEGORY);        
+        setCategory(ERROR_CATEGORY);
         setShortDescription(ERROR_SHORT_DESCRIPTION);
     }
-    
+
      /**
-     * Constructs a new <i>ConnectionFailure</i> error with specified detail message 
-     * 
+     * Constructs a new <i>ConnectionFailure</i> error with specified detail message
+     *
      * @param errorDetail       A more detailed description of the error
      */
     public ConnectionFailure(final String errorDetail) {
-        this();        
+        this();
         setErrorDetail(errorDetail);
     }
-    
+
    /**
-     * Constructs a new <i>ConnectionFailure</i> error with specified detail message and that refers to the given 
+     * Constructs a new <i>ConnectionFailure</i> error with specified detail message and that refers to the given
      * message id
-     * 
+     *
      * @param errorDetail       A more detailed description of the error
      * @param refToMessageId    The message id of the message unit for which this error is created
      */
     public ConnectionFailure(final String errorDetail, final String refToMessageId) {
-        this();        
+        this();
         setErrorDetail(errorDetail);
         setRefToMessageInError(refToMessageId);
     }

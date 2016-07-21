@@ -20,9 +20,9 @@ import org.apache.wss4j.common.principal.UsernameTokenPrincipal;
 import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 
 /**
- * Is used to represent a WSS UsernameToken that is included in the security header of the message as an 
+ * Is used to represent a WSS UsernameToken that is included in the security header of the message as an
  * {@link IAuthenticationInfo} so it can be used for the authentication of the sender of the message.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class UsernameToken implements IAuthenticationInfo {
@@ -36,22 +36,22 @@ public class UsernameToken implements IAuthenticationInfo {
     /**
      * Creates a new <code>UsernameToken</code> based on a WSS4J {@link UsernameTokenPrincipal} that is read from
      * the SOAP message.
-     * 
+     *
      * @param principal     The data to construct the UsernameToken
      */
-    public UsernameToken(UsernameTokenPrincipal principal) {
+    public UsernameToken(final UsernameTokenPrincipal principal) {
         this.username = principal.getName();
         this.password = principal.getPassword();
-        
+
         if (IUsernameTokenConfiguration.PWD_TYPE_DIGEST_URI.equalsIgnoreCase(principal.getPasswordType()))
             this.passwordType = IUsernameTokenConfiguration.PasswordType.DIGEST;
-        else 
+        else
             this.passwordType = IUsernameTokenConfiguration.PasswordType.TEXT;
-        
+
         this.nonce = org.apache.commons.codec.binary.Base64.encodeBase64String(principal.getNonce());
-        this.created = principal.getCreatedTime();               
+        this.created = principal.getCreatedTime();
     }
-    
+
     /**
      * @return The username included in the username token.
      */
@@ -63,7 +63,7 @@ public class UsernameToken implements IAuthenticationInfo {
      * The actual value of the password included in the username token. Depending on the type of password the value may
      * be clear text (password type equals {@link IUsernameTokenConfiguration#PasswordType.TEXT} or a digest. In the
      * latter case you will have to recreate the digest for comparing the password a stored [clear text] value.
-     * 
+     *
      * @return The actual password value
      */
     public String getPassword() {
@@ -79,30 +79,30 @@ public class UsernameToken implements IAuthenticationInfo {
     }
 
     /**
-     * The nonce that is included with the username token. This value is needed if you want to check the the digested 
+     * The nonce that is included with the username token. This value is needed if you want to check the the digested
      * password as you will need to recreate the digest based with this nonce and the original (clear text) password.
-     * 
+     *
      * @return  The String value of the <code>wsse:Nonce</code> child element of the <code>wsse:UsernameToken</code>
      *          element
      */
     public String getNonce() {
         return nonce;
     }
-    
+
     /**
      * The timestamp that indicates when the username token was created. This value is needed if you want to check the
      * the digested password as you will need to recreate the digest based with this timestamp and the original (clear
      * text) password.
-     * 
+     *
      * @return  The String value of the <code>wsu:Created</code> child element of the <code>wsse:UsernameToken</code>
      *          element
      */
     public String getCreated() {
         return created;
     }
-    
+
     /**
-     * @return  <code>true</code> if the <code>wsse:UsernameToken</code> element included a <code>wsse:Nonce</code> 
+     * @return  <code>true</code> if the <code>wsse:UsernameToken</code> element included a <code>wsse:Nonce</code>
      *          child element, <br>
      *          <code>false</code> if not.
      */
@@ -111,11 +111,11 @@ public class UsernameToken implements IAuthenticationInfo {
     }
 
     /**
-     * @return  <code>true</code> if the <code>wsse:UsernameToken</code> element included a <code>wsu:Created</code> 
+     * @return  <code>true</code> if the <code>wsse:UsernameToken</code> element included a <code>wsu:Created</code>
      *          child element, <br>
      *          <code>false</code> if not.
      */
     public boolean includesCreated() {
         return (created != null && !created.isEmpty());
-    }    
+    }
 }

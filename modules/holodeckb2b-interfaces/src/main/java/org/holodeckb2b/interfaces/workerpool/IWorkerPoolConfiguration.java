@@ -19,26 +19,25 @@ package org.holodeckb2b.interfaces.workerpool;
 import java.util.List;
 
 /**
- * Defines the interface for the configuration of a worker pool. Holodeck B2B uses worker pools for running daemon like 
- * threads that manage messaging (re-)sending, pulling, etc. The functionality of these workers is provided by worker 
+ * Defines the interface for the configuration of a worker pool. Holodeck B2B uses worker pools for running daemon like
+ * threads that manage messaging (re-)sending, pulling, etc. The functionality of these workers is provided by worker
  * tasks.
  * <p>The configuration of a worker pool consists of a name of the pool and the workers managed by it. Each worker in
- * the pool has its own configuration specifying which task must be executed and how it should be scheduled. 
- * 
+ * the pool has its own configuration specifying which task must be executed and how it should be scheduled.
+ *
  * @author Sander Fieten
- * @see WorkerPool
  * @see IWorkerTask
  * @see IWorkerConfiguration
  */
 public interface IWorkerPoolConfiguration {
-    
+
     /**
      * @return The name of the worker pool
      */
     public String getName();
-    
+
     /**
-     * @return  The list of worker configurations contained in this pool 
+     * @return  The list of worker configurations contained in this pool
      */
     public List<IWorkerConfiguration>   getWorkers();
 }

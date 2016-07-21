@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
@@ -35,106 +36,106 @@ import org.simpleframework.xml.core.Persister;
 /**
  * Is an implementation of {@link IPMode} that uses XML documents to persist the P-Mode.
  * <p>This P-Mode implementation supports the parameters needed for the extensions defined in the AS4 Profile like
- * Reception Awareness, compression and multi-hop. The structure of the XML documents is defined in the 
- * <a href="http://holodeck-b2b.org/schemas/2014/10/pmode">http://holodeck-b2b.org/schemas/2014/10/pmode</a> XSD which 
+ * Reception Awareness, compression and multi-hop. The structure of the XML documents is defined in the
+ * <a href="http://holodeck-b2b.org/schemas/2014/10/pmode">http://holodeck-b2b.org/schemas/2014/10/pmode</a> XSD which
  * is contained in <code>pmode.xsd</code>.
- * 
+ *
  * @author Bram Bakx <bram at holodeck-b2b.org>
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see IPMode
  */
 @Root (name="PMode", strict=false)
 public class PMode implements IPMode {
-    
+
     @Element (name = "id", required = true)
     private PModeId pmodeId;
-    
+
     @Element (name = "mep", required = true)
     private String mep;
-    
+
     @Element (name = "mepBinding", required = true)
     private String mepBinding;
-    
+
     @Element (name = "Initiator", required = false)
     private TradingPartnerConfiguration initiator;
-    
+
     @Element (name = "Responder", required = false)
     private TradingPartnerConfiguration responder;
-    
+
     @Element (name = "Agreement", required = false)
     private Agreement agreement;
-    
+
     @ElementList (entry = "Leg", type = Leg.class , required = true, inline = true)
     private ArrayList<Leg> legs;
-    
-    
+
+
     /**
      * Is responsible for solving dependencies child elements/objects may have on the P-Mode id. Currently this applies
-     * to the identification of the delivery specifications included in the P-Mode. Because the Holodeck B2B Core 
+     * to the identification of the delivery specifications included in the P-Mode. Because the Holodeck B2B Core
      * requires each delivery specification to have a unique id to enable reuse each delivery specification included in
-     * the P-Mode is given an id combined of the P-Mode id, current time and type of delivery, for example the default 
+     * the P-Mode is given an id combined of the P-Mode id, current time and type of delivery, for example the default
      * delivery specification defined on the Leg will have «P-Mode id»+"-"+«hhmmss» +"-defaultDelivery" as id.
      * <p>The objects containing the {@link DeliverySpecification}s are responsible for including these in the given
      * <code>Map</code> using the type of delivery as key and the object as value.
-     * 
-     * @param dependencies  A <code>Map</code> containing all {@link DeliverySpecification} objects that have to be 
+     *
+     * @param dependencies  A <code>Map</code> containing all {@link DeliverySpecification} objects that have to be
      *                      assigned an id. The key of the entry MUST be a <code>String</code> containing the type
      *                      of delivery, e.g. "defaultDelivery".
      */
     @Commit
-    public void solveDepencies(Map dependencies) {
+    public void solveDepencies(final Map dependencies) {
         if (dependencies == null)
             return;
-        
-        for(Object k : dependencies.keySet()) {
-            Object dep = dependencies.get(k);
+
+        for(final Object k : dependencies.keySet()) {
+            final Object dep = dependencies.get(k);
             if (k instanceof String && dep != null && dep instanceof DeliverySpecification)
-                ((DeliverySpecification) dep).setId(this.pmodeId.id 
-                                                    + "-" + new SimpleDateFormat("HHmmss").format(new Date()) 
+                ((DeliverySpecification) dep).setId(this.pmodeId.id
+                                                    + "-" + new SimpleDateFormat("HHmmss").format(new Date())
                                                     + "-" + k);
         }
     }
-    
+
     /**
      * Gets the P-Mode <code>id</code>.
-     * 
+     *
      * @return The PMode <code>id</code>
      */
     @Override
     public String getId() {
         return pmodeId.id;
     }
-    
+
     /**
      * Gets the P-Mode <code>id</code> include parameter.
-     * 
+     *
      * @return The PMode <code>id</code> include parameter.
      */
     @Override
     public Boolean includeId() {
         return pmodeId.include;
     }
-    
+
     /**
      * Gets the PMode <code>mep</code>.
-     * 
+     *
      * @return The PMode <code>mep</code>.
      */
     @Override
     public String getMep() {
         return mep;
     }
-    
+
     /**
      * Gets the PMode <code>mepBinding</code>.
-     * 
+     *
      * @return The PMode <code>mepBinding</code>.
      */
     @Override
     public String getMepBinding() {
         return mepBinding;
     }
-    
+
     /**
      * Gets the PMode <code>legs</code>.
      * @return The PMode <code>legs</code>.
@@ -143,28 +144,28 @@ public class PMode implements IPMode {
     public ArrayList<Leg> getLegs() {
         return this.legs;
     }
-    
+
     /**
      * Gets the leg with the specified label from the P-Mode.
      * <p>Note that the requested leg can be found directly based on its assigned label <b>or</b> if the legs have not
      * been assigned labels on their sequence in the list, with the first being the <i>REQUEST</i> leg and the second
      * the <i>REPLY</i>.
-     * 
+     *
      * @return  The specified leg if it exists in the P-Mode, or<br>
      *          <code>null</code> if there is no leg with the given label
      */
     @Override
-    public ILeg getLeg(Label label) {
+    public ILeg getLeg(final Label label) {
         if (Utils.isNullOrEmpty(legs))
             return null;
-        
+
         ILeg    leg = null;
-        for(ILeg l : legs) {
+        for(final ILeg l : legs) {
             if (l.getLabel() == label) {
                 leg = l; break;
             }
         }
-        
+
         if (leg == null) {
             // Leg not found based on label, get based on sequence
             if (label == Label.REQUEST)
@@ -172,64 +173,64 @@ public class PMode implements IPMode {
             else if (legs.size() > 1)
                 leg = legs.get(1);
         }
-        
+
         return leg;
     }
-    
+
     /**
-     * 
-     * @return The PMode <code>initiator</code> 
+     *
+     * @return The PMode <code>initiator</code>
      */
     @Override
     public TradingPartnerConfiguration getInitiator() {
         return this.initiator;
     }
-    
-    
+
+
     /**
-     * 
-     * @return The PMode <code>responder</code> 
+     *
+     * @return The PMode <code>responder</code>
      */
     @Override
     public TradingPartnerConfiguration getResponder() {
         return this.responder;
-    }    
-    
-    
+    }
+
+
     /**
-     * 
-     * @return The PMode <code>agreement</code> 
+     *
+     * @return The PMode <code>agreement</code>
      */
     @Override
     public Agreement getAgreement() {
         return this.agreement;
     }
-    
-    
+
+
     /**
-     * Creates a new <code>PMode</code> object based from a XML Document in the given file. The XML document in the 
+     * Creates a new <code>PMode</code> object based from a XML Document in the given file. The XML document in the
      * file must conform to the XML schema definition given in <code>pmode.xsd</code>
-     * 
+     *
      * @param  xsdFile      A handle to file that contains the meta data
      * @return              A <code>PMode</code> for the message meta
      *                      data contained in the given file
      * @throws Exception    When the specified file is not found, readable or
      *                      does not contain a valid P-Mode XML document.
      */
-    public static PMode createFromFile(File xmlFile) throws Exception {
+    public static PMode createFromFile(final File xmlFile) throws Exception {
         if( !xmlFile.exists() || !xmlFile.canRead())
             // Given file must exist and be readable to be able to read PMode
-            throw new Exception("Specified XML file '" + xmlFile.getAbsolutePath() 
+            throw new Exception("Specified XML file '" + xmlFile.getAbsolutePath()
                                     + "' not found or no permission to read!");
-        
+
         // When the P-Mode can not be read from the file the Persister.read() may throw a InvocationTargetException
         // that will contain a PersistenceException exception that describes the actual error. Therefor we catch
         // InvocationTargetException and only throw the PersistenceException
         try {
-            return new Persister().read(PMode.class, xmlFile);            
-        } catch (InvocationTargetException ex) {
+            return new Persister().read(PMode.class, xmlFile);
+        } catch (final InvocationTargetException ex) {
             // Only throw the target exception when it really is an exception
-            Throwable t = ex.getTargetException();
+            final Throwable t = ex.getTargetException();
             if (t != null && t instanceof Exception)
                 throw (Exception) t;
             else

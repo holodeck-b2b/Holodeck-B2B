@@ -22,23 +22,23 @@ package org.holodeckb2b.interfaces.general;
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 public interface IAgreement {
-    
+
     /**
      * Gets the agreement name.
-     * 
+     *
      * @return The agreement name
      */
     public String getName();
-    
+
     /**
      * Gets the agreement type.
-     * 
+     *
      * @return The agreement type
      */
     public String getType();
-   
+
     public void setName(String name);
-    
+
     public void setType(String type);
-    
+
 }

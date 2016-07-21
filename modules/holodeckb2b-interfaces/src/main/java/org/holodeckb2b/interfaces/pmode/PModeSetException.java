@@ -18,16 +18,16 @@ package org.holodeckb2b.interfaces.pmode;
 
 /**
  * Is an exception that signals an issue when an operation is performed on a {@link IPModeSet}.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class PModeSetException extends Exception {
-    
+
     public PModeSetException() {
         super();
     }
-    
-    public PModeSetException(String message) {
+
+    public PModeSetException(final String message) {
         super(message);
     }
 }

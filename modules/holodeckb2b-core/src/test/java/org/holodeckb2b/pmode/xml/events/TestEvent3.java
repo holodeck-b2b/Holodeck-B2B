@@ -18,6 +18,7 @@ package org.holodeckb2b.pmode.xml.events;
 
 import java.util.Date;
 import java.util.UUID;
+
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
@@ -25,15 +26,15 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class TestEvent3 implements TestEvent2 {
-    
+
     private IMessageUnit msgUnit = null;
-    
-    public TestEvent3() {};
-    
-    public TestEvent3(IMessageUnit mu) {
+
+    public TestEvent3() {}
+
+    public TestEvent3(final IMessageUnit mu) {
         msgUnit = mu;
     }
-    
+
     @Override
     public String getId() {
         return UUID.randomUUID().toString();
@@ -53,5 +54,5 @@ public class TestEvent3 implements TestEvent2 {
     public IMessageUnit getSubject() {
         return msgUnit;
     }
-    
+
 }

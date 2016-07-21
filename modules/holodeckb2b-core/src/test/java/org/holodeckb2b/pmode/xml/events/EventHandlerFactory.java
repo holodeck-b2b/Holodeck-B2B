@@ -17,6 +17,7 @@
 package org.holodeckb2b.pmode.xml.events;
 
 import java.util.Map;
+
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandlerFactory;
 
 /**
@@ -26,7 +27,7 @@ import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandlerFactory;
 public class EventHandlerFactory implements IMessageProcessingEventHandlerFactory<EventHandler>{
 
     @Override
-    public void init(Map<String, ?> settings) {
+    public void init(final Map<String, ?> settings) {
         // Ignored no settings needed
     }
 
@@ -34,5 +35,5 @@ public class EventHandlerFactory implements IMessageProcessingEventHandlerFactor
     public EventHandler createHandler() {
         return new EventHandler();
     }
-    
+
 }

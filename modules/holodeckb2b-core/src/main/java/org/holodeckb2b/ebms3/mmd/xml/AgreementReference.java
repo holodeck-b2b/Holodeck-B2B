@@ -22,17 +22,17 @@ import org.simpleframework.xml.Text;
 
 /**
  * Represents the <code>AgreementRef</code> element from the MMD document.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class AgreementReference implements IAgreementReference {
-   
+
     @Text(required = false)
     private String      name;
-    
+
     @Attribute(name = "type", required = false)
     private String      type;
-    
+
     @Attribute(name = "pmode", required = false)
     private String      pmode;
 
@@ -40,42 +40,42 @@ public class AgreementReference implements IAgreementReference {
      * Default constructor
      */
     public AgreementReference() {}
-    
+
     /**
      * Creates an AgreementReference object with the given data
-     * 
+     *
      * @param agreeRef  The data to use
      */
-    public AgreementReference(IAgreementReference agreeRef) {
+    public AgreementReference(final IAgreementReference agreeRef) {
         this.name = agreeRef.getName();
         this.type = agreeRef.getType();
         this.pmode = agreeRef.getPModeId();
     }
-    
+
     @Override
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
-    
+
     @Override
     public String getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(final String type) {
         this.type = type;
     }
-    
+
     @Override
     public String getPModeId() {
         return pmode;
     }
-    
-    public void setPModeId(String pmode) {
+
+    public void setPModeId(final String pmode) {
         this.pmode = pmode;
     }
 }

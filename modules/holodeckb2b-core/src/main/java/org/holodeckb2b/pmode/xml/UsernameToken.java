@@ -17,19 +17,18 @@
 package org.holodeckb2b.pmode.xml;
 
 import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration.PasswordType;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Text;
 
 /**
- * Represents the <code>UsernameToken</code> element in the P-Mode XML document that contains the P-Mode parameters for 
- * including a WSS username token in the message. Required elements are the username and password. The other parameters 
+ * Represents the <code>UsernameToken</code> element in the P-Mode XML document that contains the P-Mode parameters for
+ * including a WSS username token in the message. Required elements are the username and password. The other parameters
  * are optional and will use the most secure values as default: digested password including nonce and created elements.
- * <p>The XML element also contains a <code>target</code> attribute that identifies the target of WSS header in which 
+ * <p>The XML element also contains a <code>target</code> attribute that identifies the target of WSS header in which
  * the username token should be added.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 @Root
@@ -37,10 +36,10 @@ public class UsernameToken implements IUsernameTokenConfiguration {
 
     @Attribute(name = "target", required = false)
     String target;
-    
+
     @Element (name = "username")
     private String username;
-    
+
     /**
      *  Represents the password element with type attribute
      */
@@ -49,18 +48,18 @@ public class UsernameToken implements IUsernameTokenConfiguration {
         private String value;
 
         @Attribute(required = false)
-        private String type = "Digest";
+        private final String type = "Digest";
     }
-    
+
     @Element (name = "password")
     private Password password;
-    
+
     @Element (name = "includeNonce", required = false)
-    private Boolean includeNonce = Boolean.TRUE;
-    
+    private final Boolean includeNonce = Boolean.TRUE;
+
     @Element (name = "includeCreated", required = false)
-    private Boolean includeCreated = Boolean.TRUE;
-    
+    private final Boolean includeCreated = Boolean.TRUE;
+
     @Override
     public String getUsername() {
         return username;
@@ -85,5 +84,5 @@ public class UsernameToken implements IUsernameTokenConfiguration {
     public boolean includeCreated() {
         return includeCreated;
     }
-       
+
 }

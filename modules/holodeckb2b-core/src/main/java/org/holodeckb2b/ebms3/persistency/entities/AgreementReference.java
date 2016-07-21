@@ -17,15 +17,17 @@
 package org.holodeckb2b.ebms3.persistency.entities;
 
 import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Lob;
+
 import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 
 /**
  * Is an <i>embeddable</i> persistency class containing a reference to the agreement
  * for a message exchange between trading partners.
- * 
+ *
  * @author Sander Fieten <sander at holodeckb2b.org>
  */
 @Embeddable
@@ -39,16 +41,16 @@ public class AgreementReference implements Serializable, IAgreementReference {
         return A_NAME;
     }
 
-    public void setName(String agreementName) {
+    public void setName(final String agreementName) {
         A_NAME = agreementName;
     }
-    
+
     @Override
     public String getType() {
         return A_TYPE;
     }
-    
-    public void setType(String agreementType) {
+
+    public void setType(final String agreementType) {
         A_TYPE = agreementType;
     }
 
@@ -56,37 +58,37 @@ public class AgreementReference implements Serializable, IAgreementReference {
     public String getPModeId() {
         return P_MODE_ID;
     }
-    
-    public void setPModeId(String pmodeId) {
-        P_MODE_ID = pmodeId;
-    }
-    
-    /*
-     * Constructore
-     */
-    
-    public AgreementReference() {}
-    
-    /**
-     * Creates a new agreement reference that only refers to an agreement but not a Pmode
-     */
-    public AgreementReference(String name, String type) {
-        A_NAME = name;
-        A_TYPE = type;
-    }
-    
-    /**
-     * Creates a new agreement reference that only has a P-Mode reference
-     */
-    public AgreementReference(String pmodeId) {
+
+    public void setPModeId(final String pmodeId) {
         P_MODE_ID = pmodeId;
     }
 
-    
+    /*
+     * Constructore
+     */
+
+    public AgreementReference() {}
+
+    /**
+     * Creates a new agreement reference that only refers to an agreement but not a Pmode
+     */
+    public AgreementReference(final String name, final String type) {
+        A_NAME = name;
+        A_TYPE = type;
+    }
+
+    /**
+     * Creates a new agreement reference that only has a P-Mode reference
+     */
+    public AgreementReference(final String pmodeId) {
+        P_MODE_ID = pmodeId;
+    }
+
+
     /*
      * Fields
-     * 
-     * NOTE: The JPA @Column annotation is not used so the attribute names are 
+     *
+     * NOTE: The JPA @Column annotation is not used so the attribute names are
      * used as column names. Therefor the attribute names are in CAPITAL.
      */
     @Lob
@@ -96,5 +98,5 @@ public class AgreementReference implements Serializable, IAgreementReference {
     @Column(length = 1024)
     private String  A_TYPE;
     private String  P_MODE_ID;
-    
+
 }

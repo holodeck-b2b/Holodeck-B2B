@@ -18,6 +18,7 @@ package org.holodeckb2b.pmode.xml;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.pmode.IBusinessInfo;
 import org.simpleframework.xml.Element;
@@ -28,66 +29,66 @@ import org.simpleframework.xml.ElementList;
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 public class BusinessInfo implements IBusinessInfo {
-    
-    
+
+
     @Element (name = "Action", required = false)
     private String action;
-    
+
     @Element (name = "Mpc", required = false)
     private String mpc;
-    
+
     @Element (name = "Service", required = false)
     private Service service;
-    
+
     @ElementList (entry = "Property", type = Property.class , required = false, inline = true)
     private ArrayList<IProperty> properties;
-    
+
     /**
      * Gets the action
-     * 
+     *
      * @return The action
      */
-    
+
     @Override
     public String getAction() {
         return this.action;
     }
-    
-    
+
+
     /**
      * Gets the Mpc
-     * 
+     *
      * @return The Mpc
      */
     @Override
     public String getMpc() {
         return this.mpc;
     }
-    
+
     /**
      * Gets the service
-     * 
+     *
      * @return The service
      */
-    
+
     @Override
     public Service getService() {
         return this.service;
     }
-    
+
     /**
      * Gets the property
-     * 
+     *
      * @return The property
      */
     @Override
     public Collection<IProperty> getProperties() {
         return this.properties;
     }
-    
+
     /*
      * Constructor
      */
     public BusinessInfo() {}
-    
+
 }

@@ -20,71 +20,71 @@ import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
 
 /**
  * Represent the standard <i>FailedAuthentication</i> error as defined in section 6.7 of the Core specification.
- * <p>As this class is a child class of {@see EbmsError} it can be saved directly to the database. When retrieved from 
+ * <p>As this class is a child class of {@see EbmsError} it can be saved directly to the database. When retrieved from
  * the database again it is however a "normal" <code>EbmsError</code> as this class is not defined as an JPA class.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class FailedAuthentication extends EbmsError {
-    
+
     /**
      * The error code as defined in the core specification
      */
     private static final String ERROR_CODE = "EBMS:0101";
-    
+
     /**
      * The default severity of the error as defined in the core specification.
      */
     private static final Severity ERROR_SEVERITY = Severity.FAILURE;
-    
+
     /**
      * The origin of this error is normally the security module
      */
     private static final String ERROR_ORIGIN = "security";
-    
+
     /**
      * The default category as specified in the core specification
      */
     private static final String ERROR_CATEGORY = "Processing";
-    
+
     /**
      * The default error message
      */
     private static final String ERROR_SHORT_DESCRIPTION = "FailedAuthentication";
-    
+
     /**
      * Constructs a new <i>ConnectionFailure</i> error with the default values.
      */
     public FailedAuthentication() {
         super();
-        
+
         setErrorCode(ERROR_CODE);
         setSeverity(ERROR_SEVERITY);
         setOrigin(ERROR_ORIGIN);
-        setCategory(ERROR_CATEGORY);        
+        setCategory(ERROR_CATEGORY);
         setShortDescription(ERROR_SHORT_DESCRIPTION);
     }
-        
+
     /**
-     * Constructs a new <i>FailedAuthentication</i> error with specified detail message 
-     * 
+     * Constructs a new <i>FailedAuthentication</i> error with specified detail message
+     *
      * @param errorDetail       A more detailed description of the error
      */
     public FailedAuthentication(final String errorDetail) {
-        this();        
+        this();
         setErrorDetail(errorDetail);
     }
-    
+
    /**
-     * Constructs a new <i>FailedAuthentication</i> error with specified detail message and that refers to the given 
+     * Constructs a new <i>FailedAuthentication</i> error with specified detail message and that refers to the given
      * message id
-     * 
+     *
      * @param errorDetail       A more detailed description of the error
      * @param refToMessageId    The message id of the message unit for which this error is created
      */
     public FailedAuthentication(final String errorDetail, final String refToMessageId) {
-        this();        
+        this();
         setErrorDetail(errorDetail);
         setRefToMessageInError(refToMessageId);
-    } 
+    }
 }

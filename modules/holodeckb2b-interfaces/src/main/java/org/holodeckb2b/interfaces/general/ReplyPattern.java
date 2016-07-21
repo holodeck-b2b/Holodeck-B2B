@@ -19,7 +19,7 @@ package org.holodeckb2b.interfaces.general;
 
 /**
  * Is an enumeration that defines constants for the reply patterns that can be used.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public enum ReplyPattern {

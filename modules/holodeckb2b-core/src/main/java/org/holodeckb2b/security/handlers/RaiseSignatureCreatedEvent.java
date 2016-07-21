@@ -18,7 +18,9 @@ package org.holodeckb2b.security.handlers;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.security.PayloadDigest;
@@ -36,7 +38,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
 /**
  * Is the <i>OUT_FLOW</i> handler that will create and raise the {@link ISignatureCreatedEvent} message processing event
  * when the sent User Message is signed.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since 2.1.0
  */
@@ -48,47 +50,47 @@ public class RaiseSignatureCreatedEvent extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> um) throws Exception {
-        
+    protected InvocationResponse doProcessing(final MessageContext mc, final EntityProxy<UserMessage> um) throws Exception {
+
         // First check if the message should have been signed
         if (mc.getProperty(SecurityConstants.SIGNATURE) == null) {
             log.debug("Message was not signed, nothing to do");
             return InvocationResponse.CONTINUE;
-        } 
-            
+        }
+
         log.debug("Message should have been signed, get ds:References from the signature");
-        Collection<OMElement>   sigReferences = SecurityUtils.getSignatureReferences(mc);        
-        
+        final Collection<OMElement>   sigReferences = SecurityUtils.getSignatureReferences(mc);
+
         if (Utils.isNullOrEmpty(sigReferences)) {
-            // There are no ds:Reference elements found in the message. This is clearly an error, but we assume here 
+            // There are no ds:Reference elements found in the message. This is clearly an error, but we assume here
             // this error will be handled elsewhere
-            log.warn("No ds:Reference elements found in message [msgId=" + um.entity.getMessageId() 
+            log.warn("No ds:Reference elements found in message [msgId=" + um.entity.getMessageId()
                         + "] that should have been signed!");
             return InvocationResponse.CONTINUE;
         }
-        
+
         log.debug("Convert the OMElements into PayloadDigest objects");
-        Collection<PayloadDigest>  plDigests = new ArrayList<>();  
-        String soapBodyId = mc.getEnvelope().getBody().getAttributeValue(SecurityConstants.QNAME_WSU_ID);
-        for(OMElement ref : sigReferences) 
+        final Collection<PayloadDigest>  plDigests = new ArrayList<>();
+        final String soapBodyId = mc.getEnvelope().getBody().getAttributeValue(SecurityConstants.QNAME_WSU_ID);
+        for(final OMElement ref : sigReferences)
                 if (isReferenceToPayload(ref, um.entity, soapBodyId))
-                    plDigests.add(new PayloadDigest(ref));            
-        
+                    plDigests.add(new PayloadDigest(ref));
+
         log.debug(plDigests.size() + " references to pyaloads were found");
-        
+
         // Create and raise the SignatureCreatedEvent
-        SignatureCreatedEvent event = new SignatureCreatedEvent(um.entity, plDigests);
+        final SignatureCreatedEvent event = new SignatureCreatedEvent(um.entity, plDigests);
         log.debug("Raising new SignatureCreatedEvent [id=" + event.getId() + "]");
         HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(event, mc);
-        log.info("Raised SignatureCreatedEvent [id=" + event.getId() + "] for UserMessage with msgId=" 
+        log.info("Raised SignatureCreatedEvent [id=" + event.getId() + "] for UserMessage with msgId="
                    + um.entity.getMessageId());
-        
+
         return InvocationResponse.CONTINUE;
-    }    
+    }
 
     /**
      * Helper method to check whether the given <code>ds:Reference</code> element applies to a payload.
-     * 
+     *
      * @param ref           The {@link OMElement} representing the <code>ds:Reference</code> element
      * @param um            The {@link UserMessage} for which the signature was created
      * @param soapBodyId    The <i>id</i> of the SOAP Body element. Needed to check if reference applies to payload in
@@ -96,22 +98,22 @@ public class RaiseSignatureCreatedEvent extends AbstractUserMessageHandler {
      * @return              <code>true</code> if this reference applies to a payload of the message,<br>
      *                      <code>false</code> otherwise
      */
-    private boolean isReferenceToPayload(OMElement ref, UserMessage um, String soapBodyId) {
+    private boolean isReferenceToPayload(final OMElement ref, final UserMessage um, final String soapBodyId) {
         boolean isPlRef = false;
         boolean hasBodyPl = false;
-        String refURI = ref.getAttributeValue(new QName("URI"));
-        
+        final String refURI = ref.getAttributeValue(new QName("URI"));
+
         // First check if the uri directly equals a payload URI
-        for (IPayload pl : um.getPayloads()) {
-            String plURI = pl.getPayloadURI();
+        for (final IPayload pl : um.getPayloads()) {
+            final String plURI = pl.getPayloadURI();
             // Because the reference in payload object does not contain prefix, use endsWith instead of equals
             isPlRef |= plURI != null && refURI.endsWith(plURI);
             hasBodyPl |= pl.getContainment() == IPayload.Containment.BODY;
-        }        
+        }
         // If not it can still refer to the payload in the SOAP body. The URI from the reference should then be equal
         // to the wsu:Id (but again ref URI has '#' prefix, so use endsWith)
         isPlRef |= hasBodyPl && refURI.endsWith(soapBodyId);
-        
+
         log.debug(refURI + " does" + (isPlRef ? " " : " not ") + "reference a payload");
         return isPlRef;
     }

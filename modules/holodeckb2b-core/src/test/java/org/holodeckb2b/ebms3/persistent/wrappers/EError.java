@@ -17,6 +17,7 @@
 package org.holodeckb2b.ebms3.persistent.wrappers;
 
 import java.io.Serializable;
+
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -25,7 +26,7 @@ import javax.persistence.Table;
 
 /**
  * JPA Entity wrapper for testing {@see PartyId}
- * 
+ *
  * @author Sander Fieten <sander at holodeckb2b.org>
  */
 @Entity
@@ -37,8 +38,8 @@ public class EError implements Serializable {
     private long id;
 
     @Embedded
-    public org.holodeckb2b.ebms3.persistency.entities.EbmsError  eError;    
-    
+    public org.holodeckb2b.ebms3.persistency.entities.EbmsError  eError;
+
     public EError() {
         eError = new org.holodeckb2b.ebms3.persistency.entities.EbmsError();
     }

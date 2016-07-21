@@ -23,14 +23,14 @@ import java.util.Date;
  * Is a general representation for all types of ebMS message units and defines methods to access the information
  * available to all ebMS message units. This is the information contained in the <code>eb:MessageInfo</code> and child
  * elements of the ebMS messaging header. See ebMS V3 Core specification, section 5 for more information on the message
- * header. Added is the relation to the P-Mode that governs the processing of the message unit. 
+ * header. Added is the relation to the P-Mode that governs the processing of the message unit.
  * <p>Descendants of this base interface define how information specific for a type of message unit can be accessed.
- * Together they are used in Holodeck B2B to define the interfaces between the Core and the external <i>business</i> 
+ * Together they are used in Holodeck B2B to define the interfaces between the Core and the external <i>business</i>
  * applications. This decoupling allows for more easy extension of both the Core as the external functionality.
- * <p><b>NOTE:</b> The information that is available at some point during runtime depends on the context of processing! 
- * If for example a user message is submitted to Holodeck B2B as a response of a Two-Way MEP, only the 
+ * <p><b>NOTE:</b> The information that is available at some point during runtime depends on the context of processing!
+ * If for example a user message is submitted to Holodeck B2B as a response of a Two-Way MEP, only the
  * <i>RefToMessageId</i> might be known.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see IUserMessage
  * @see ISignalMessage
@@ -39,39 +39,39 @@ import java.util.Date;
  * @see IReceipt
  */
 public interface IMessageUnit {
-    
+
     /**
-     * Gets the timestamp when the message unit was created. 
-     * <p>Corresponds to the <code>MessageInfo/Timestamp</code> element. See section 5.2.2.1 of the ebMS Core 
+     * Gets the timestamp when the message unit was created.
+     * <p>Corresponds to the <code>MessageInfo/Timestamp</code> element. See section 5.2.2.1 of the ebMS Core
      * specification.
-     * 
+     *
      * @return  The timestamp when the message unit was created as a {@link Date}
      */
     public Date getTimestamp();
-    
+
     /**
      * Gets the message id of the message unit.
-     * <p>Corresponds to the <code>MessageInfo/MessageId</code> element. See section 5.2.2.1 of the ebMS Core 
+     * <p>Corresponds to the <code>MessageInfo/MessageId</code> element. See section 5.2.2.1 of the ebMS Core
      * specification.
      *
-     * @return  The message id as a globally unique identifier conforming to RFC2822. 
+     * @return  The message id as a globally unique identifier conforming to RFC2822.
      */
     public String getMessageId();
-    
+
     /**
      * Get the message id of the message unit to which this message unit is a response.
-     * <p>Corresponds to the <code>MessageInfo/RefToMessageId</code> element. See section 5.2.2.1 of the ebMS Core 
+     * <p>Corresponds to the <code>MessageInfo/RefToMessageId</code> element. See section 5.2.2.1 of the ebMS Core
      * specification.
-     * 
+     *
      * @return  The message id of the message this message unit is a response to
      */
     public String getRefToMessageId();
-    
+
     /**
      * Gets the identifier of the P-Mode that governs the processing of this message unit.
-     * <p>Note that the P-Mode may not always be known, for example when a signal message unit is received which can not 
+     * <p>Note that the P-Mode may not always be known, for example when a signal message unit is received which can not
      * be related to a sent message.
-     * 
+     *
      * @return  If known, the identifier of the P-Mode that governs processing of this message unit,<br>
      *          otherwise <code>null</code>
      * @since   2.1.0
