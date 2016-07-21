@@ -67,7 +67,9 @@ public class RetransmissionWorker extends AbstractWorkerTask {
         try {
             waitingForRcpt = MessageUnitDAO.getMessageUnitsInState(UserMessage.class,
                                                             new String[] {ProcessingStates.AWAITING_RECEIPT, 
-                                                                          ProcessingStates.TRANSPORT_FAILURE});
+                                                                          ProcessingStates.TRANSPORT_FAILURE,
+                                                                          ProcessingStates.PROC_WITH_WARNING
+                                                                         });
         } catch (DatabaseException ex) {
             log.error("An error occurred while retrieving message units from the database! Details: " + ex.getMessage());
             return;
