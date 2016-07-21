@@ -18,6 +18,7 @@ package org.holodeckb2b.module;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisDescription;
@@ -31,6 +32,7 @@ import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.WorkerPool;
 import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
+import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
 import org.holodeckb2b.ebms3.pulling.PullConfiguration;
 import org.holodeckb2b.ebms3.pulling.PullConfigurationWatcher;
 import org.holodeckb2b.ebms3.pulling.PullWorker;
@@ -165,6 +167,22 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         log.debug("Make Core available to outside world");
         HolodeckB2BCoreInterface.setImplementation(this);
                 
+                // Special ClassLoader required for correct Hibernate init!
+        {
+          ClassLoader aOldCL = Thread.currentThread ().getContextClassLoader ();
+          Thread.currentThread ().setContextClassLoader (JPAUtil.class.getClassLoader ());
+          try
+          {
+            JPAUtil.getEntityManager ();
+          }
+          catch (Exception ex)
+          {}
+          finally
+          {
+            Thread.currentThread ().setContextClassLoader (aOldCL);
+          }
+        }
+        
         log.debug("Initialize worker pool");
         IWorkerPoolConfiguration poolCfg = 
                                         XMLWorkerPoolConfig.loadFromFile(instanceConfiguration.getWorkerPoolCfgFile());
