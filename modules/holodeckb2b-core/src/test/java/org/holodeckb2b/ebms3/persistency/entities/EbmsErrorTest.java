@@ -16,12 +16,13 @@
  */
 package org.holodeckb2b.ebms3.persistency.entities;
 
+import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistency.entities.Description;
 import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.holodeckb2b.ebms3.persistent.wrappers.EError;
-import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -125,8 +126,8 @@ public class EbmsErrorTest {
     }
 
     @AfterClass
-    public static void cleanup() {
-        EntityManager em = JPAUtil.getEntityManager();
+    public static void cleanup() throws DatabaseException {
+        EntityManager em = TestJPAUtil.getEntityManager();
         
         em.getTransaction().begin();
         Collection<EError> tps = em.createQuery("from EError", EError.class).getResultList();
@@ -138,8 +139,8 @@ public class EbmsErrorTest {
     }       
     
     @Before
-    public void setUp() {
-        em = JPAUtil.getEntityManager();
+    public void setUp() throws DatabaseException {
+        em = TestJPAUtil.getEntityManager();
     }
     
     @After

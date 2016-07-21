@@ -20,9 +20,11 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.common.workerpool.WorkerPool;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
@@ -121,9 +123,14 @@ public abstract class PathWatcher extends AbstractWorkerTask {
             log.error("Unable to configure task: Missing required parameter \"watchPath\"");
             throw new TaskConfigurationException("Missing required parameter \"watchPath\"");
         } else {
-            watchPath = dir;
+            String sHome = null;
+            if (HolodeckB2BCoreInterface.isInitialized ())
+                sHome = HolodeckB2BCoreInterface.getConfiguration ().getHolodeckB2BHome ();
+            if (sHome != null)
+                watchPath = new File (sHome, dir).getAbsolutePath ();
+            else
+                watchPath = new File (dir).getAbsolutePath ();
         }
-        
     }
 
     /**

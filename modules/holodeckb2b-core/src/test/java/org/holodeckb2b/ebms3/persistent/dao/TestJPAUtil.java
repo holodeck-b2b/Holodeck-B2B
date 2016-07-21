@@ -25,7 +25,7 @@ import javax.persistence.Persistence;
  * 
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class JPAUtil {
+public class TestJPAUtil {
 
     private static EntityManagerFactory emf = null;
     

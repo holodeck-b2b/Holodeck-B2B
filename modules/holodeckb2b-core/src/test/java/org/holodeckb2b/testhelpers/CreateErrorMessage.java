@@ -22,7 +22,7 @@ import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.ebms3.persistency.entities.ProcessingState;
-import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 
 /**
@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 public class CreateErrorMessage {
     
     public static void main(String args[]) {
-        EntityManager   em = JPAUtil.getEntityManagerToAlpha();
+        EntityManager   em = TestJPAUtil.getEntityManagerToAlpha();
         
         ErrorMessage    newErrorMsg = new ErrorMessage();
         newErrorMsg.setMessageId("this-is-not-a-real-msg-id@just.for.test.holodeck");

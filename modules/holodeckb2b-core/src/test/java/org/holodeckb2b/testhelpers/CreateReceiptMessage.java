@@ -25,7 +25,7 @@ import org.apache.axiom.om.OMXMLParserWrapper;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistency.entities.Receipt;
 import org.holodeckb2b.ebms3.persistency.entities.ProcessingState;
-import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 
 /**
  *
@@ -34,7 +34,7 @@ import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
 public class CreateReceiptMessage {
     
     public static void main(String args[]) {
-        EntityManager   em = JPAUtil.getEntityManagerToAlpha();
+        EntityManager   em = TestJPAUtil.getEntityManagerToAlpha();
         
         Receipt    newRcptMsg = new Receipt();
         newRcptMsg.setMessageId("this-is-not-a-real-msg-id@just.for.test.holodeck");
