@@ -31,6 +31,10 @@ import org.holodeckb2b.interfaces.general.ITradingPartner;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public final class CompareUtils {
+  
+    private static <T> boolean _nullSafeEqual (final T o1, final T o2) {
+        return o1 == null ? o2 == null : o1.equals (o2);
+    }
 
     /**
      * Checks if two {@link ITradingPartner} objects are equal. Two <code>ITradingPartner</code> objects are equal
@@ -42,17 +46,8 @@ public final class CompareUtils {
      *              <code>false</code> otherwise
      */
     public static boolean areEqual(final ITradingPartner tp1, final ITradingPartner tp2) {
-        boolean equal = true;
-
-        final String r1 = tp1.getRole(), r2 = tp2.getRole();
-        equal = (r1 == null ? r2 == null : r1.equals(r2));
-
-        if (equal) {
-            // Evaluate only if the roles are identical
-            equal = CompareUtils.areEqual(tp1.getPartyIds(), tp2.getPartyIds());
-        }
-
-        return equal;
+        return _nullSafeEqual (tp1.getRole (), tp2.getRole ()) &&
+               areEqual(tp1.getPartyIds(), tp2.getPartyIds());
     }
 
     /**
@@ -106,6 +101,7 @@ public final class CompareUtils {
 
         return equal;
     }
+    
 
     /**
      * Checks if two {@link IPartyId} objects are equal. Two <code>IPartyId</code> object are equal when there values
@@ -117,16 +113,8 @@ public final class CompareUtils {
      *          <code>false</code> otherwise
      */
     public static boolean areEqual(final IPartyId id1, final IPartyId id2) {
-        boolean equal = true;
-
-        final String v1 = id1.getId(), v2 = id2.getId();
-        equal = (v1 == null ? v2 == null : v1.equals(v2));
-        if (equal) {
-          // Evaluate only if the roles are identical
-          final String t1 = id1.getType(), t2 = id2.getType();
-          equal = (t1 == null ? t2 == null : t1.equals(t2));
-        }
-        return equal;
+        return _nullSafeEqual (id1.getId(), id2.getId()) &&
+               _nullSafeEqual (id1.getType(), id2.getType());
     }
 
     /**
@@ -139,21 +127,9 @@ public final class CompareUtils {
      *          <code>false</code> otherwise
      */
     public static boolean areEqual(final IProperty p1, final IProperty p2) {
-        boolean equal = true;
-
-        final String n1 = p1.getName(), n2 = p2.getName();
-        final String v1 = p1.getValue(), v2 = p2.getValue();
-        final String t1 = p1.getType(), t2 = p2.getType();
-
-        equal = (n1 == null ? n2 == null : n1.equals(n2));
-        if (equal) {
-          // Evaluate only if the roles are identical
-          equal = (v1 == null ? v2 == null : v1.equals(v2));
-          if (equal)
-            equal = (t1 == null ? t2 == null : t1.equals(t2));
-        }
-
-        return equal;
+      return _nullSafeEqual (p1.getName(), p2.getName()) &&
+             _nullSafeEqual (p1.getValue(), p2.getValue()) &&
+             _nullSafeEqual (p1.getType(), p2.getType());
     }
 
     /**
@@ -166,15 +142,8 @@ public final class CompareUtils {
      *          <code>false</code> otherwise
      */
     public static boolean areEqual(final IService svc1, final IService svc2) {
-        boolean equal = true;
-        final String n1 = svc1.getName(), n2 = svc2.getName();
-        final String t1 = svc1.getType(), t2 = svc2.getType();
-
-        equal = (n1 == null ? n2 == null : n1.equals(n2));
-        if (equal)
-          equal = (t1 == null ? t2 == null : t1.equals(t2));
-
-        return equal;
+      return _nullSafeEqual (svc1.getName(), svc2.getName()) &&
+             _nullSafeEqual (svc1.getType(), svc2.getType());
     }
 
     /*
