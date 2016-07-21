@@ -139,8 +139,6 @@ public abstract class BaseHandler extends AbstractHandler {
         //   then check whether message is initiated by Holodeck B2B or response)
         if (!runningInCorrectFlow()) {
             // This is handler is not supposed to run in the current flow
-            LogFactory.getLog(BaseHandler.class.getName())
-                        .debug("Handler " + this.getClass().getName() + " runs in unsupported " + currentFlowName + "!");
             return InvocationResponse.CONTINUE;
         } 
             
