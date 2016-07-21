@@ -123,7 +123,9 @@ public abstract class PathWatcher extends AbstractWorkerTask {
             log.error("Unable to configure task: Missing required parameter \"watchPath\"");
             throw new TaskConfigurationException("Missing required parameter \"watchPath\"");
         } else {
-            String sHome = HolodeckB2BCoreInterface.getConfiguration ().getHolodeckB2BHome ();
+            String sHome = null;
+            if (HolodeckB2BCoreInterface.isInitialized ())
+                sHome = HolodeckB2BCoreInterface.getConfiguration ().getHolodeckB2BHome ();
             if (sHome != null)
                 watchPath = new File (sHome, dir).getAbsolutePath ();
             else

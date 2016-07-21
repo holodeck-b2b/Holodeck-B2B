@@ -39,6 +39,13 @@ public class HolodeckB2BCoreInterface {
      * The Holodeck B2B Core implementation
      */
     private static IHolodeckB2BCore     coreImplementation;
+    
+    /**
+     * @return <code>true</code> if this class is initialized, <code>false</code> otherwise.
+     */
+    public static boolean isInitialized () {
+        return coreImplementation != null; 
+    }
 
     /**
      * Returns the current configuration of this Holodeck B2B instance. The configuration parameters can be used
@@ -84,7 +91,7 @@ public class HolodeckB2BCoreInterface {
      * messages.
      * 
      * @return  The current set of P-Modes as a {@link IPModeSet}
-     * @see IPMode
+     * @see IPModeSet
      */
     public static IPModeSet getPModeSet() {
         assertInitialized();
