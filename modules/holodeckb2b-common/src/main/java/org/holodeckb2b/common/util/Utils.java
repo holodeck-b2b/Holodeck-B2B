@@ -30,7 +30,9 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -255,6 +257,14 @@ public final class Utils {
 
         return targetPath.toString();
     }
+    
+    private static final class ComparatorFileName implements Comparator <File>
+    {
+      public int compare (File aO1, File aO2)
+      {
+        return aO1.getName ().compareTo (aO2.getName ());
+      }
+    }
 
     /**
      * Sorts an array of files so that the filenames are in alphabetical order. The sort operational is done in the
@@ -264,7 +274,10 @@ public final class Utils {
      */
     public static void sortFiles(final File array[]) {
         if (array != null && array.length > 1)
-            sortFiles(array, 0, array.length - 1);
+            if (true)
+                Arrays.sort (array, new ComparatorFileName ());
+            else
+                sortFiles(array, 0, array.length - 1);
     }
 
     /**
@@ -313,8 +326,8 @@ public final class Utils {
         }
     }
 
-    private static void swap(final File array[], final int i, final int j) {
-        final File f = array[i];
+    private static <T> void swap(final T[] array, final int i, final int j) {
+        final T f = array[i];
         array[i] = array[j];
         array[j] = f;
     }
@@ -445,7 +458,7 @@ public final class Utils {
      *              item the root cause.
      */
     public static List<Throwable> getCauses(final Throwable t) {
-        final ArrayList<Throwable> exceptionStack = new ArrayList<>();
+        final List<Throwable> exceptionStack = new ArrayList<>();
         Throwable i = t;
         while (i != null) {
             exceptionStack.add(i);
