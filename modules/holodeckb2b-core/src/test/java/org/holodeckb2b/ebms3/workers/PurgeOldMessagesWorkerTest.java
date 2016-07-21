@@ -32,13 +32,14 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.Payload;
 import org.holodeckb2b.ebms3.persistency.entities.ProcessingState;
 import org.holodeckb2b.ebms3.persistency.entities.Receipt;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
@@ -81,9 +82,9 @@ public class PurgeOldMessagesWorkerTest {
     
     
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass() throws DatabaseException {
         try {
-            EntityManager em = JPAUtil.getEntityManager();
+            EntityManager em = TestJPAUtil.getEntityManager();
             
             em.getTransaction().begin();
             
@@ -190,7 +191,7 @@ public class PurgeOldMessagesWorkerTest {
     }
     
     @Test
-    public void test0_NothingToPurge() {
+    public void test0_NothingToPurge() throws DatabaseException {
         PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
         
         worker.setParameters(null);
@@ -201,14 +202,14 @@ public class PurgeOldMessagesWorkerTest {
             fail("Exception during processing");
         }
         
-        EntityManager em = JPAUtil.getEntityManager();
+        EntityManager em = TestJPAUtil.getEntityManager();
         List<MessageUnit> muInDB = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
         
         assertEquals(6, muInDB.size());
     }
     
     @Test
-    public void test1_OneToPurge() {
+    public void test1_OneToPurge() throws DatabaseException {
         PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
         
         HashMap<String, Object> parameters = new HashMap<>();
@@ -232,7 +233,7 @@ public class PurgeOldMessagesWorkerTest {
             fail("Exception during processing");
         }
       
-        EntityManager em = JPAUtil.getEntityManager();
+        EntityManager em = TestJPAUtil.getEntityManager();
         List<MessageUnit> muInDB = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
         
         assertEquals(5, muInDB.size());
@@ -247,7 +248,7 @@ public class PurgeOldMessagesWorkerTest {
     }
     
     @Test
-    public void test2_PayloadAlreadyRemoved() {
+    public void test2_PayloadAlreadyRemoved() throws DatabaseException {
         PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
         
         HashMap<String, Object> parameters = new HashMap<>();
@@ -271,7 +272,7 @@ public class PurgeOldMessagesWorkerTest {
             fail("Exception during processing");
         }
       
-        EntityManager em = JPAUtil.getEntityManager();
+        EntityManager em = TestJPAUtil.getEntityManager();
         List<MessageUnit> muInDB = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
         
         assertEquals(4, muInDB.size());
@@ -284,7 +285,7 @@ public class PurgeOldMessagesWorkerTest {
     }
     
     @Test
-    public void test3_EventsOnlyForUserMsg() {
+    public void test3_EventsOnlyForUserMsg() throws DatabaseException {
         PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
         
         HashMap<String, Object> parameters = new HashMap<>();
@@ -308,7 +309,7 @@ public class PurgeOldMessagesWorkerTest {
             fail("Exception during processing");
         }
       
-        EntityManager em = JPAUtil.getEntityManager();
+        EntityManager em = TestJPAUtil.getEntityManager();
         List<MessageUnit> muInDB = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
         
         assertEquals(2, muInDB.size());

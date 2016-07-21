@@ -22,8 +22,9 @@ import javax.persistence.EntityManager;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
+import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -69,8 +70,8 @@ public class MessageUnitQueriesTest {
     }
     
     @BeforeClass
-    public static void setUpClass() {
-        EntityManager em = JPAUtil.getEntityManager();
+    public static void setUpClass() throws DatabaseException {
+        EntityManager em = TestJPAUtil.getEntityManager();
 
         
         em.getTransaction().begin();
@@ -159,8 +160,8 @@ public class MessageUnitQueriesTest {
     }
     
     @AfterClass
-    public static void cleanup() {
-        EntityManager em = JPAUtil.getEntityManager();
+    public static void cleanup() throws DatabaseException {
+        EntityManager em = TestJPAUtil.getEntityManager();
         
         em.getTransaction().begin();
         Collection<MessageUnit> tps = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
@@ -172,8 +173,8 @@ public class MessageUnitQueriesTest {
     }
     
     @Before
-    public void setUp() {
-        em = JPAUtil.getEntityManager();
+    public void setUp() throws DatabaseException {
+        em = TestJPAUtil.getEntityManager();
     }
     
     @After

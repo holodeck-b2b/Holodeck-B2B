@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.ebms3.persistency.entities;
 
+import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistency.entities.AgreementReference;
 import org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo;
 import org.holodeckb2b.ebms3.persistency.entities.Service;
@@ -23,7 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.holodeckb2b.ebms3.persistent.wrappers.ECollaborationInfo;
-import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -69,8 +70,8 @@ public class CollaborationInfoTest {
     }
 
     @AfterClass
-    public static void cleanup() {
-        EntityManager em = JPAUtil.getEntityManager();
+    public static void cleanup() throws DatabaseException {
+        EntityManager em = TestJPAUtil.getEntityManager();
         
         em.getTransaction().begin();
         Collection<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
@@ -82,8 +83,8 @@ public class CollaborationInfoTest {
     }    
     
     @Before
-    public void setUp() {
-        em = JPAUtil.getEntityManager();
+    public void setUp() throws DatabaseException {
+        em = TestJPAUtil.getEntityManager();
     }
     
     @After

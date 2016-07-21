@@ -20,7 +20,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
-import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
+
+import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -48,8 +50,8 @@ public class ProcessingStateTest {
     EntityManager       em;
 
     @AfterClass
-    public static void cleanup() {
-        EntityManager em = JPAUtil.getEntityManager();
+    public static void cleanup() throws DatabaseException {
+        EntityManager em = TestJPAUtil.getEntityManager();
         
         em.getTransaction().begin();
         Collection<ProcessingState> tps = em.createQuery("from ProcessingState", ProcessingState.class).getResultList();
@@ -61,8 +63,8 @@ public class ProcessingStateTest {
     }       
     
     @Before
-    public void setUp() {
-        em = JPAUtil.getEntityManager();
+    public void setUp() throws DatabaseException {
+        em = TestJPAUtil.getEntityManager();
     }
     
     @After

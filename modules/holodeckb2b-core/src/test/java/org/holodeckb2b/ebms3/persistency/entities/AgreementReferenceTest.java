@@ -16,12 +16,13 @@
  */
 package org.holodeckb2b.ebms3.persistency.entities;
 
+import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistency.entities.AgreementReference;
 import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.holodeckb2b.ebms3.persistent.wrappers.EAgreementReference;
-import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -60,8 +61,8 @@ public class AgreementReferenceTest {
     }
 
     @AfterClass
-    public static void cleanup() {
-        EntityManager em = JPAUtil.getEntityManager();
+    public static void cleanup() throws DatabaseException {
+        EntityManager em = TestJPAUtil.getEntityManager();
         
         em.getTransaction().begin();
         Collection<EAgreementReference> tps = em.createQuery("from EAgreementReference", EAgreementReference.class).getResultList();
@@ -73,8 +74,8 @@ public class AgreementReferenceTest {
     }      
     
     @Before
-    public void setUp() {
-        em = JPAUtil.getEntityManager();
+    public void setUp() throws DatabaseException {
+        em = TestJPAUtil.getEntityManager();
     }
     
     @After

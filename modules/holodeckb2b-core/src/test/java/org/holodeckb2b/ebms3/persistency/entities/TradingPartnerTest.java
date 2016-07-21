@@ -16,13 +16,14 @@
  */
 package org.holodeckb2b.ebms3.persistency.entities;
 
+import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistency.entities.PartyId;
 import org.holodeckb2b.ebms3.persistency.entities.TradingPartner;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import javax.persistence.EntityManager;
-import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -54,8 +55,8 @@ public class TradingPartnerTest {
     }
 
     @AfterClass
-    public static void cleanup() {
-        EntityManager em = JPAUtil.getEntityManager();
+    public static void cleanup() throws DatabaseException {
+        EntityManager em = TestJPAUtil.getEntityManager();
         
         em.getTransaction().begin();
         Collection<TradingPartner> tps = em.createQuery("from TradingPartner", TradingPartner.class).getResultList();
@@ -67,8 +68,8 @@ public class TradingPartnerTest {
     }
     
     @Before
-    public void setUp() {
-        em = JPAUtil.getEntityManager();
+    public void setUp() throws DatabaseException {
+        em = TestJPAUtil.getEntityManager();
     }
     
     @After
@@ -81,7 +82,7 @@ public class TradingPartnerTest {
      * object to the database
      */
     @Test
-    public void test1_SetRole() {
+    public void test1_SetRole() throws DatabaseException {
         cleanup(); // remove left over items from database before starting test
         System.out.println("setRole");
         TradingPartner instance = new TradingPartner();

@@ -20,7 +20,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import javax.persistence.EntityManager;
-import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
+
+import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -78,8 +80,8 @@ public class ErrorMessageTest {
     }
     
     @AfterClass
-    public static void cleanup() {
-        EntityManager em = JPAUtil.getEntityManager();
+    public static void cleanup() throws DatabaseException {
+        EntityManager em = TestJPAUtil.getEntityManager();
         
         em.getTransaction().begin();
         Collection<ErrorMessage> tps = em.createQuery("from ErrorMessage", ErrorMessage.class).getResultList();
@@ -91,8 +93,8 @@ public class ErrorMessageTest {
     }
     
     @Before
-    public void setUp() {
-        em = JPAUtil.getEntityManager();
+    public void setUp() throws DatabaseException {
+        em = TestJPAUtil.getEntityManager();
     }
     
     @After
@@ -144,7 +146,7 @@ public class ErrorMessageTest {
     }
 
     @Test
-    public void test03_AddError() {
+    public void test03_AddError() throws DatabaseException {
         em.getTransaction().begin();
 
         List<ErrorMessage> tps = em.createQuery("from ErrorMessage", ErrorMessage.class).getResultList();
@@ -161,7 +163,7 @@ public class ErrorMessageTest {
         tps = null;
         errors = null;
         
-        em = JPAUtil.getEntityManager();
+        em = TestJPAUtil.getEntityManager();
         
         tps = em.createQuery("from ErrorMessage", ErrorMessage.class).getResultList();
         assertTrue(tps.size() == 1);

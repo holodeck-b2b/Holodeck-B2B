@@ -16,11 +16,12 @@
  */
 package org.holodeckb2b.ebms3.persistency.entities;
 
+import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
 import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
-import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -48,8 +49,8 @@ public class PullRequestTest {
     }
     
     @AfterClass
-    public static void cleanup() {
-        EntityManager em = JPAUtil.getEntityManager();
+    public static void cleanup() throws DatabaseException {
+        EntityManager em = TestJPAUtil.getEntityManager();
         
         em.getTransaction().begin();
         Collection<PullRequest> tps = em.createQuery("from PullRequest", PullRequest.class).getResultList();
@@ -61,8 +62,8 @@ public class PullRequestTest {
     }
     
     @Before
-    public void setUp() {
-        em = JPAUtil.getEntityManager();
+    public void setUp() throws DatabaseException {
+        em = TestJPAUtil.getEntityManager();
     }
     
     @After

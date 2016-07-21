@@ -20,7 +20,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import javax.persistence.EntityManager;
-import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
+
+import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
@@ -71,8 +73,8 @@ public class PayloadTest {
     }
     
     @AfterClass
-    public static void cleanup() {
-        EntityManager em = JPAUtil.getEntityManager();
+    public static void cleanup() throws DatabaseException {
+        EntityManager em = TestJPAUtil.getEntityManager();
         
         em.getTransaction().begin();
         Collection<Payload> tps = em.createQuery("from Payload", Payload.class).getResultList();
@@ -84,8 +86,8 @@ public class PayloadTest {
     }
     
     @Before
-    public void setUp() {
-        em = JPAUtil.getEntityManager();
+    public void setUp() throws DatabaseException {
+        em = TestJPAUtil.getEntityManager();
     }
     
     @After
