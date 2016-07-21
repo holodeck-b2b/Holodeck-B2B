@@ -67,7 +67,25 @@ public final class CompareUtils {
         boolean equal = pids1.size() == pids2.size();
 
         if (equal)
-        {
+        { 
+            if (true) {
+            // New version
+            for (final IPartyId p1 : pids1)
+            {
+              boolean bFoundP1inP2 = false;
+              for (final IPartyId p2 : pids2)
+                if (areEqual (p1, p2)) {
+                  bFoundP1inP2 = true;
+                  break;
+                }
+              if (!bFoundP1inP2) {
+                equal = false;
+                break;
+              }
+            }
+            } else {
+            // old version
+              
             // Evaluate only if the roles are identical
             // Check every areEqual from the first collection to exist in the second and ensure all id's from the second
             // collection have been checked
@@ -77,12 +95,13 @@ public final class CompareUtils {
                 // Check if this areEqual exists in the second collection
                 final Iterator<IPartyId> it2 = pids2.iterator(); int i = 0;
                 for(; equal && it2.hasNext() ; i++)
-                    if (equal = CompareUtils.areEqual(pi1, it2.next()))
+                    if (equal = areEqual(pi1, it2.next()))
                         checked[i] = true; // This item in the second collection is successfully compared
             }
             // Check that every id in second collection was found in first collection
             for(final boolean b : checked)
                 equal &= b;
+            }
         }
 
         return equal;
@@ -101,11 +120,10 @@ public final class CompareUtils {
         boolean equal = true;
 
         final String v1 = id1.getId(), v2 = id2.getId();
-        final String t1 = id1.getType(), t2 = id2.getType();
-
         equal = (v1 == null ? v2 == null : v1.equals(v2));
         if (equal) {
           // Evaluate only if the roles are identical
+          final String t1 = id1.getType(), t2 = id2.getType();
           equal = (t1 == null ? t2 == null : t1.equals(t2));
         }
         return equal;
