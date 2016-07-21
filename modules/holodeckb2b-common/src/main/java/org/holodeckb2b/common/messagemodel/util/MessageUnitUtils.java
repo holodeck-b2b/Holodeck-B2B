@@ -23,17 +23,17 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
- * Is a container class for helper methods around message units. 
- * 
+ * Is a container class for helper methods around message units.
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since 2.1.0
  */
 public class MessageUnitUtils {
-    
+
     /**
-     * Returns the type of the given message unit. This is the name as described in the ebMS V3 Specification and not 
+     * Returns the type of the given message unit. This is the name as described in the ebMS V3 Specification and not
      * the Java class/interface type.
-     * 
+     *
      * @param msgUnit   The message unit to get the type name for
      * @return          Descriptive name of the message unit's type
      */
@@ -47,6 +47,6 @@ public class MessageUnitUtils {
         else if (msgUnit instanceof IErrorMessage)
             return "Error Message";
         else
-            return "Unknown message type ";        
+            return "Unknown message type ";
     }
 }

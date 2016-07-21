@@ -18,7 +18,7 @@ package org.holodeckb2b.ebms3.packaging;
 
 /**
  * Is an exception to signal a problem while un-/packaging the SOAP message.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class PackagingException extends Exception {
@@ -26,12 +26,12 @@ public class PackagingException extends Exception {
     public PackagingException() {
         super();
     }
-    
-    public PackagingException(String msg) {
+
+    public PackagingException(final String msg) {
         super(msg);
     }
-    
-    public PackagingException(String msg, Exception cause) {
+
+    public PackagingException(final String msg, final Exception cause) {
         super(msg, cause);
-    }    
+    }
 }

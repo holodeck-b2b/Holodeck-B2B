@@ -16,6 +16,10 @@
  */
 package org.holodeckb2b.as4.compression;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,11 +28,9 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
+
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -38,28 +40,28 @@ import org.junit.Test;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class GZIPCompressingInputStreamTest {
-    
+
     public GZIPCompressingInputStreamTest() {
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() {
         try {
-            File out = new File(this.getClass().getClassLoader().getResource("compression/compressed.gz").getPath());
-            if (out.exists())   
+            final File out = new File(this.getClass().getClassLoader().getResource("compression/compressed.gz").getPath());
+            if (out.exists())
                 out.delete();
-        } catch (Exception e) 
+        } catch (final Exception e)
         {}
     }
-    
+
     @After
     public void tearDown() {
     }
@@ -68,55 +70,55 @@ public class GZIPCompressingInputStreamTest {
     public void testCompression() {
         GZIPCompressingInputStream cfis = null;
         GZIPInputStream decfis = null;
-        
+
         FileOutputStream fos = null;
         FileInputStream fis1 = null;
         FileInputStream fis2 = null;
 
-        File comF = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "compressed.gz");
-        File decF = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "decompressed.xml");
+        final File comF = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "compressed.gz");
+        final File decF = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "decompressed.xml");
 
         try {
-            File uncF = new File(this.getClass().getClassLoader().getResource("compression/uncompressed.xml").getPath());
-            
+            final File uncF = new File(this.getClass().getClassLoader().getResource("compression/uncompressed.xml").getPath());
+
             //Compress
-            cfis = new GZIPCompressingInputStream(new FileInputStream(uncF));            
-            fos = new FileOutputStream(comF);            
-            byte[] buffer = new byte[512];
+            cfis = new GZIPCompressingInputStream(new FileInputStream(uncF));
+            fos = new FileOutputStream(comF);
+            final byte[] buffer = new byte[512];
             int r = 0;
             while ( (r = cfis.read(buffer, 0, 512)) > 0 ) {
                 fos.write(buffer, 0, r);
             }
             fos.close();
-            
+
             // Decompress
-            decfis = new GZIPInputStream(new FileInputStream(comF));            
-            fos = new FileOutputStream(decF);            
+            decfis = new GZIPInputStream(new FileInputStream(comF));
+            fos = new FileOutputStream(decF);
             r = 0;
             while ( (r = decfis.read(buffer, 0, 512)) > 0 ) {
                 fos.write(buffer, 0, r);
             }
             fos.close();
-            
+
             //Compare
             fis1 = new FileInputStream(uncF);
             fis2 = new FileInputStream(decF);
-            
-            byte[] buffer2 = new byte[512];
+
+            final byte[] buffer2 = new byte[512];
             int r2 = 0;
             while ( ((r = fis1.read(buffer, 0, 512)) > 0) & ((r2 = fis2.read(buffer2, 0, 512)) > 0)) {
                 assertEquals(r, r2);
                 assertArrayEquals(buffer, buffer2);
             }
-            
+
             assertEquals(r, r2);
-            
+
             fis1.close(); fis2.close();
-            
-        } catch (FileNotFoundException ex) {
+
+        } catch (final FileNotFoundException ex) {
             Logger.getLogger(GZIPCompressingInputStreamTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             Logger.getLogger(GZIPCompressingInputStreamTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         } finally {
@@ -125,16 +127,16 @@ public class GZIPCompressingInputStreamTest {
                 fos.close();
                 fis1.close();
                 fis2.close();
-                
+
                 if (comF.exists())
                     comF.delete();
                 if (decF.exists())
                     decF.delete();
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 Logger.getLogger(GZIPCompressingInputStreamTest.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        
-        
+
+
     }
 }

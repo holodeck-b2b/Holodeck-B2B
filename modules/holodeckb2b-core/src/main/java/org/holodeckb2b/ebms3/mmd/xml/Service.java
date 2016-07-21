@@ -22,47 +22,47 @@ import org.simpleframework.xml.Text;
 
 /**
  * Represents the <code>Service</code> element from the MMD document.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class Service implements IService {
-    
+
     @Text
     private String      name;
 
     @Attribute(name = "type", required = false)
     private String      type;
-    
+
     /**
      * Default constructor
      */
     public Service() {}
-    
+
     /**
      * Creates a <code>Service</code> object based on the given data
-     * 
+     *
      * @param svc   The data to use
      */
-    public Service(IService svc) {
+    public Service(final IService svc) {
         this.name = svc.getName();
         this.type = svc.getType();
     }
-    
+
     @Override
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
-    
+
     @Override
     public String getType() {
         return type;
     }
-    
-    public void setType(String type) {
+
+    public void setType(final String type) {
         this.type = type;
     }
 }

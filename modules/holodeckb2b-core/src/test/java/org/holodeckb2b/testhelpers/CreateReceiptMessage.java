@@ -18,13 +18,15 @@ package org.holodeckb2b.testhelpers;
 
 import java.io.StringReader;
 import java.util.Date;
+
 import javax.persistence.EntityManager;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistency.entities.Receipt;
 import org.holodeckb2b.ebms3.persistency.entities.ProcessingState;
+import org.holodeckb2b.ebms3.persistency.entities.Receipt;
 import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 
 /**
@@ -32,35 +34,35 @@ import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class CreateReceiptMessage {
-    
-    public static void main(String args[]) {
-        EntityManager   em = TestJPAUtil.getEntityManagerToAlpha();
-        
-        Receipt    newRcptMsg = new Receipt();
+
+    public static void main(final String args[]) {
+        final EntityManager   em = TestJPAUtil.getEntityManagerToAlpha();
+
+        final Receipt    newRcptMsg = new Receipt();
         newRcptMsg.setMessageId("this-is-not-a-real-msg-id@just.for.test.holodeck");
         newRcptMsg.setRefToMessageId("this-is-a-fake-refto-msg-id@just.for.test.holodeck");
         newRcptMsg.setTimestamp(new Date());
         newRcptMsg.setPMode("PMODE-JUST-FOR-TEST-RECEIPT-BUNDLING");
-        
-        String content = "<content>" +
+
+        final String content = "<content>" +
                             "<confirmation>\n" +
                             "    <from>Party_X</from>\n" +
                             "    <message>Success</message>\n" +
                             "</confirmation>\n" +
-                         "</content>";        
-        OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new StringReader(content));
+                         "</content>";
+        final OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new StringReader(content));
         // Parse document and get root element
-        OMElement contentElement = builder.getDocumentElement();
+        final OMElement contentElement = builder.getDocumentElement();
 
         newRcptMsg.setContent(contentElement.getChildElements());
-            
-        ProcessingState state = new ProcessingState(ProcessingStates.CREATED);
+
+        final ProcessingState state = new ProcessingState(ProcessingStates.CREATED);
         newRcptMsg.setProcessingState(state);
-        
+
         em.getTransaction().begin();
         em.persist(newRcptMsg);
         em.getTransaction().commit();
-        
+
         System.out.println("Added receipt message to database!");
     }
 }

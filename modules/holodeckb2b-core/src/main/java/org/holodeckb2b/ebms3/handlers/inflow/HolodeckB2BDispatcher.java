@@ -17,33 +17,34 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import javax.xml.namespace.QName;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.engine.AbstractDispatcher;
-import org.holodeckb2b.ebms3.packaging.Messaging;
 
 /**
  * Is an Axis2 <i>Dispatcher</i> that directs message to the MSH service.
- * 
+ *
  * @author Sander Fieten
  */
 public class HolodeckB2BDispatcher extends AbstractDispatcher
 {
-  public AxisOperation findOperation(AxisService service, MessageContext msgCtx)
+  @Override
+  public AxisOperation findOperation(final AxisService service, final MessageContext msgCtx)
                        throws AxisFault
   {
     return service.getOperation(new QName("ebms"));
   }
 
-  public AxisService findService(MessageContext msgCtx) throws AxisFault
+  @Override
+  public AxisService findService(final MessageContext msgCtx) throws AxisFault
   {
 
     return msgCtx.getConfigurationContext().getAxisConfiguration().getService("msh");
   }
 
+  @Override
   public void initDispatcher() {}
 }

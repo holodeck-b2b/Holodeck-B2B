@@ -29,7 +29,7 @@ import org.simpleframework.xml.Root;
  */
 @Root (name = "PullRequestFlow", strict = false)
 public class PullRequestFlow implements IPullRequestFlow {
-    
+
     @Element (name = "Mpc", required = true)
     private String mpc;
 
@@ -38,18 +38,18 @@ public class PullRequestFlow implements IPullRequestFlow {
 
     @Element (name = "SecurityConfiguration", required = false)
     private PullSecurityConfiguration securityCfg;
-    
+
     /**
-     * Gets the MPC for this pull request operation. If none is specified in the XML document the default MPC is 
+     * Gets the MPC for this pull request operation. If none is specified in the XML document the default MPC is
      * returned.
-     * 
+     *
      * @return The MPC for this pull request
      */
     @Override
     public String getMPC() {
         return (mpc == null || mpc.isEmpty() ? EbMSConstants.DEFAULT_MPC : mpc);
     }
-    
+
     @Override
     public ErrorHandling getErrorHandlingConfiguration() {
         return errorHandling;
@@ -59,5 +59,5 @@ public class PullRequestFlow implements IPullRequestFlow {
     public ISecurityConfiguration getSecurityConfiguration() {
         return securityCfg;
     }
-      
+
 }

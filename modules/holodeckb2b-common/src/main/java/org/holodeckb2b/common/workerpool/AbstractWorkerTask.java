@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
  * Is a base implementation of {@link IWorkerTask} providing basic functionality for a worker task. It provides default
  * naming of the task, a logging facility and exception management to prevent the task to halt further execution due to
  * an unexpected exception during execution.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public abstract class AbstractWorkerTask implements IWorkerTask {
@@ -33,43 +33,43 @@ public abstract class AbstractWorkerTask implements IWorkerTask {
      * The name of this task, will default to the class name
      */
     protected   String  name;
-    
+
     /**
      * Logging facility, will create a log named like the class name
      */
     protected   Log     log;
-    
+
     /**
      * Default constructor. Initializes the log.
      */
     public AbstractWorkerTask() {
         name = this.getClass().getName();
         log = LogFactory.getLog(this.getClass().getName());
-    }    
-    
+    }
+
     /**
      * Sets the name of this worker task.
-     * 
+     *
      * @param name The name to use for the worker task
      */
     @Override
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
     /**
      * Gets the name of this worker task.
-     * 
+     *
      * @return The name of the worker task. If no name was set, the class name will be used.
      */
     @Override
     public String getName() {
         if (name == null || name.isEmpty())
             name = this.getClass().getName();
-        
+
         return name;
     }
-   
+
     /**
      * Executes the functionality of the task by calling {@link #doProcessing()} and by catching all exceptions prevents
      * the task from halting further executing.
@@ -78,17 +78,17 @@ public abstract class AbstractWorkerTask implements IWorkerTask {
     public void run() {
         try {
             doProcessing();
-        } catch (InterruptedException interrupted) {
+        } catch (final InterruptedException interrupted) {
             log.warn("Task is interrupted!");
             Thread.currentThread().interrupt();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Exception occurred during execution! Details: " + e.getMessage());
         }
     }
-    
+
     /**
      * Implements the functionality of the task.
-     * 
+     *
      *  @throws InterruptedException In case processing gets interrupted
      */
     public abstract void doProcessing() throws InterruptedException;

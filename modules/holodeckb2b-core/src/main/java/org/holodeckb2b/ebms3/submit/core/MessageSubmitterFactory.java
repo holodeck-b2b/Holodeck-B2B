@@ -23,7 +23,7 @@ import org.holodeckb2b.interfaces.submit.IMessageSubmitterFactory;
  * Is an implementation of {@see IMessageSubmitterFactory} to create instances of
  * {@see MessageSubmitter} which can be used to submit user messages to the Holodeck B2B
  * core engine.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class MessageSubmitterFactory implements IMessageSubmitterFactory {
@@ -31,12 +31,12 @@ public class MessageSubmitterFactory implements IMessageSubmitterFactory {
     /**
      * Returns an instance of {@see MessageSubmitter} that can be used to submit
      * an user message to Holodeck B2B.
-     * 
+     *
      * @return      The MessageSubmitter instance to use for submission
      */
     @Override
     public IMessageSubmitter createMessageSubmitter() {
         return new MessageSubmitter();
     }
-    
+
 }

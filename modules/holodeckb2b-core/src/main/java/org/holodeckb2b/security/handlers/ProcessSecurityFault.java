@@ -17,11 +17,12 @@
 package org.holodeckb2b.security.handlers;
 
 import java.util.Collection;
+
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.KeyValuePair;
+import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.errors.FailedAuthentication;
 import org.holodeckb2b.ebms3.errors.FailedDecryption;
@@ -33,13 +34,13 @@ import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 /**
  * Is the <i>IN_FLOW</i> handler that checks for faults that occurred during processing of the WS-Security headers. If
  * processing of the WS-Security header fails on elements used for ebMS processing, i.e. encryption, signature and
- * username tokens, the message must not be processed. Therefor the processing state of all message units contained in 
+ * username tokens, the message must not be processed. Therefor the processing state of all message units contained in
  * the message must be set to <i>FAILED</i> and ebMS Errors must be generated.
- * <p>The ebMS error to be generated depends on the WS-Security element that caused the problem. Problems in the 
- * signature or username token will result in a <i>FailedAuthentication</i>; problems with decryption in a 
+ * <p>The ebMS error to be generated depends on the WS-Security element that caused the problem. Problems in the
+ * signature or username token will result in a <i>FailedAuthentication</i>; problems with decryption in a
  * <i>FailedDecryption<i>. If the problem is caused by another element in the header it is ignored because this element
  * is irrelevant for the ebMS processing.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class ProcessSecurityFault extends BaseHandler {
@@ -50,27 +51,27 @@ public class ProcessSecurityFault extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws Exception {
         log.debug("Check for problems with processing WS-Security header(s)");
-        
+
         // First check problems with the default header
-        KeyValuePair failure =  (KeyValuePair) mc.getProperty(SecurityConstants.INVALID_DEFAULT_HEADER);        
-        
+        KeyValuePair failure =  (KeyValuePair) mc.getProperty(SecurityConstants.INVALID_DEFAULT_HEADER);
+
         if (failure != null) {
             switch ((SecurityConstants.WSS_FAILURES) failure.getKey()) {
-                case DECRYPTION :                     
+                case DECRYPTION :
                     handleDecryptionFailure(mc);
-                    break;                
+                    break;
                 case SIGNATURE :
-                case UT : 
+                case UT :
                     handleAuthenticationFailure(mc);
-                    break;                                    
-                case UNKNOWN : 
+                    break;
+                case UNKNOWN :
                     handleOtherFailure(mc);
-            }                             
+            }
         } else {
-            log.debug("There was no default WS-Security header or it was succesfully validated");            
-            
+            log.debug("There was no default WS-Security header or it was succesfully validated");
+
             // Check the header targeted to ebms role
             failure = (KeyValuePair) mc.getProperty(SecurityConstants.INVALID_EBMS_HEADER);
             // The only error that should occur is for the username token as there should be no other element in this
@@ -82,92 +83,92 @@ public class ProcessSecurityFault extends BaseHandler {
                 // we generate an InvalidHeader error
                 handleInvalidHeader(mc);
             } else
-                log.debug("There was no \"ebms\" WS-Security header or it was succesfully validated");            
+                log.debug("There was no \"ebms\" WS-Security header or it was succesfully validated");
         }
-        
-        log.debug("Check of WS-Security headers completed");        
+
+        log.debug("Check of WS-Security headers completed");
         return InvocationResponse.CONTINUE;
     }
-    
+
     /**
      * Handles a WS-Security failure cause by an error in decryption of the message.
      * <p>Because the message header is not encrypted, the information on the message units is read so we can generate
      * specific errors and update their processing state.
-     * 
+     *
      * @param mc    The current message context
      */
-    private void handleDecryptionFailure(MessageContext mc) throws DatabaseException {
-        Collection<EntityProxy> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc); 
+    private void handleDecryptionFailure(final MessageContext mc) throws DatabaseException {
+        final Collection<EntityProxy> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
         if (rcvdMsgUnits != null && !rcvdMsgUnits.isEmpty()) {
-            for (EntityProxy mu : rcvdMsgUnits) {        
-                FailedDecryption authError = new FailedDecryption();
+            for (final EntityProxy mu : rcvdMsgUnits) {
+                final FailedDecryption authError = new FailedDecryption();
                 authError.setRefToMessageInError(mu.entity.getMessageId());
                 authError.setErrorDetail("Decryption of the message [unit] failed!");
                 MessageContextUtils.addGeneratedError(mc, authError);
                 // Set the processing state of the message unit to FAILED
-                MessageUnitDAO.setFailed(mu); 
-            }        
+                MessageUnitDAO.setFailed(mu);
+            }
         } else {
             // No message units read from message, generate generic error
-            FailedDecryption authError = new FailedDecryption();
+            final FailedDecryption authError = new FailedDecryption();
             authError.setErrorDetail("Decryption of the message failed!");
-            MessageContextUtils.addGeneratedError(mc, authError);            
+            MessageContextUtils.addGeneratedError(mc, authError);
         }
     }
 
     /**
      * Handles a WS-Security failure cause by an error in the signature or the username token. As described in the ebMS
      * specification both errors result in an authentication failure.
-     * 
+     *
      * @param mc    The current message context
      */
-    private void handleAuthenticationFailure(MessageContext mc) throws DatabaseException {
-        Collection<EntityProxy> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);        
-        for (EntityProxy mu : rcvdMsgUnits) {        
-            FailedAuthentication authError = new FailedAuthentication();
+    private void handleAuthenticationFailure(final MessageContext mc) throws DatabaseException {
+        final Collection<EntityProxy> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
+        for (final EntityProxy mu : rcvdMsgUnits) {
+            final FailedAuthentication authError = new FailedAuthentication();
             authError.setRefToMessageInError(mu.entity.getMessageId());
             authError.setErrorDetail("Authentication of message unit failed!");
             MessageContextUtils.addGeneratedError(mc, authError);
             // Set the processing state of the message unit to FAILED
-            MessageUnitDAO.setFailed(mu); 
+            MessageUnitDAO.setFailed(mu);
         }
     }
 
     /**
      * Handles a WS-Security failure cause by an error in the signature or the username token. As described in the ebMS
      * specification both errors result in an authentication failure.
-     * 
+     *
      * @param mc    The current message context
      */
-    private void handleInvalidHeader(MessageContext mc) throws DatabaseException {
-        InvalidHeader invalidHdrErr = new InvalidHeader();
+    private void handleInvalidHeader(final MessageContext mc) throws DatabaseException {
+        final InvalidHeader invalidHdrErr = new InvalidHeader();
         invalidHdrErr.setErrorDetail("Message contains non allowed element in WS-Security header!");
         MessageContextUtils.addGeneratedError(mc, invalidHdrErr);
 
         // Set the processing state of all message units in message to FAILED
-        Collection<EntityProxy> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);        
-        for (EntityProxy mu : rcvdMsgUnits) {        
-            MessageUnitDAO.setFailed(mu); 
+        final Collection<EntityProxy> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
+        for (final EntityProxy mu : rcvdMsgUnits) {
+            MessageUnitDAO.setFailed(mu);
         }
     }
-    
+
     /**
-     * Handles a WS-Security failure cause by a general error in processing the header or in processing an element not 
-     * used for processing the ebMS message, e.g. the Timestamp element. 
+     * Handles a WS-Security failure cause by a general error in processing the header or in processing an element not
+     * used for processing the ebMS message, e.g. the Timestamp element.
      * <p>Because the error does not relate to a specific security function (authentication or encryption) a general
-     * <i>Other</i> error is returned. 
-     * 
+     * <i>Other</i> error is returned.
+     *
      * @param mc    The current message context
      */
-    private void handleOtherFailure(MessageContext mc) throws DatabaseException{
-        OtherContentError otherErr = new OtherContentError();
+    private void handleOtherFailure(final MessageContext mc) throws DatabaseException{
+        final OtherContentError otherErr = new OtherContentError();
         otherErr.setErrorDetail("The WS-Security header(s) of the message could not be processed!");
         MessageContextUtils.addGeneratedError(mc, otherErr);
 
         // Set the processing state of all message units in message to FAILED
-        Collection<EntityProxy> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);        
-        for (EntityProxy mu : rcvdMsgUnits) {        
-            MessageUnitDAO.setFailed(mu); 
+        final Collection<EntityProxy> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
+        for (final EntityProxy mu : rcvdMsgUnits) {
+            MessageUnitDAO.setFailed(mu);
         }
     }
 }

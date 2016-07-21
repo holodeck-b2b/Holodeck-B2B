@@ -23,18 +23,20 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.zip.ZipException;
+
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.as4.compression.DeCompressionFailure;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.FailedDecryption;
 import org.holodeckb2b.ebms3.errors.MimeInconsistency;
@@ -50,13 +52,13 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 
 /**
- * Is the <i>IN_FLOW</i> handler responsible for reading the payload content from the SOAP message. The payloads are 
+ * Is the <i>IN_FLOW</i> handler responsible for reading the payload content from the SOAP message. The payloads are
  * stored temporarily on the file system.
- * <p>Once the payloads are successfully read the UserMessage is ready for delivery to the business application. So this 
+ * <p>Once the payloads are successfully read the UserMessage is ready for delivery to the business application. So this
  * handler changes the processing state to {@link ProcessingStates#READY_FOR_DELIVERY}.
- * <p>As this handler is only useful when a {@link UserMessage} object is already available in the message context this 
+ * <p>As this handler is only useful when a {@link UserMessage} object is already available in the message context this
  * handler extends from {@link AbstractUserMessageHandler} to ensure it only runs when a UserMessage is available.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
@@ -65,7 +67,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      * The name of the directory used for temporarily storing payloads
      */
     private static final String PAYLOAD_DIR = "plcin";
-    
+
     @Override
     protected byte inFlows() {
         return IN_FLOW;
@@ -73,40 +75,40 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
 
     /**
      * Saves the payload contents to file
-     * 
-     * @throws AxisFault    When the directory or a file for temporarily storing the payload contents is not available 
+     *
+     * @throws AxisFault    When the directory or a file for temporarily storing the payload contents is not available
      *                      and can not be created
      * @throws DatabaseException When a database problem occurs when changing the processing state of the message unit
      */
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> um) 
+    protected InvocationResponse doProcessing(final MessageContext mc, final EntityProxy<UserMessage> um)
                                                                             throws AxisFault, DatabaseException {
-        
-        Collection<IPayload> payloads = um.entity.getPayloads();        
+
+        final Collection<IPayload> payloads = um.entity.getPayloads();
         // If there are no payloads in the UserMessage directly continue processing
         if (Utils.isNullOrEmpty(payloads)) {
             log.debug("UserMessage contains no payloads.");
             MessageUnitDAO.setReadyForDelivery(um);
             return InvocationResponse.CONTINUE;
         }
-        
+
         log.debug("UserMessage contains " + payloads.size() + " payloads.");
         try {
             // Get the directory where to store the payloads from the configuration
-            File tmpPayloadDir = getTempDir();
+            final File tmpPayloadDir = getTempDir();
             log.debug("Payloads will be stored in " + tmpPayloadDir.getAbsolutePath());
-            
+
             // Save each payload to a file
-            for(IPayload ip : payloads) {
+            for(final IPayload ip : payloads) {
                 // Convert to Payload entity object so we can set properties
-                Payload p = (Payload) ip;
-                
+                final Payload p = (Payload) ip;
+
                 // Create a unique filename for temporarily storing the payload
-                File plFile = File.createTempFile("pl-", null, tmpPayloadDir);
+                final File plFile = File.createTempFile("pl-", null, tmpPayloadDir);
 
                 log.debug("Check containment of payload");
                 // The reference defines how the payload is contained in the message
-                String plRef = p.getPayloadURI();
+                final String plRef = p.getPayloadURI();
 
                 switch (p.getContainment()) {
                     case BODY:
@@ -118,7 +120,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                         } else {
                             log.debug("Payload is element with id " + plRef + " of SOAP body");
                             plElement = getPayloadFromBody(mc.getEnvelope().getBody(), plRef);
-                        }   
+                        }
                         if (plElement == null) {
                             // The reference is invalid as no element exists in the body. This makes this an
                             // invalid UserMessage! Create an ValueInconsistent error and store it in the MessageContext
@@ -131,39 +133,39 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                             log.debug("Payload saved to temporary file, set content location in meta data");
                             p.setMimeType("application/xml");
                             p.setContentLocation(plFile.getAbsolutePath());
-                        }   
+                        }
                         break;
                     case ATTACHMENT:
                         log.debug("Payload is contained in attachment with MIME Content-id= " + plRef);
                         // Get access to the actual content
                         log.debug("Get DataHandler for attachment");
-                        DataHandler dh = mc.getAttachment(plRef);
+                        final DataHandler dh = mc.getAttachment(plRef);
                         if (dh == null) {
                             // The reference is invalid as no element exists in the body with the given id. This makes
-                            // this an invalid UserMessage! Create an ValueInconsistent error and store it in the 
+                            // this an invalid UserMessage! Create an ValueInconsistent error and store it in the
                             // MessageContext
                             createInconsistentError(mc, um, plRef);
                             return InvocationResponse.CONTINUE;
                         } else {
                             try {
                                 dh.writeTo(new FileOutputStream(plFile));
-                            } catch (ZipException decompressError) {
-                                log.error("Payload [" + plRef + "] in message [" + um.entity.getMessageId() 
+                            } catch (final ZipException decompressError) {
+                                log.error("Payload [" + plRef + "] in message [" + um.entity.getMessageId()
                                             + "] could not be decompressed! Details: " + decompressError.getMessage());
-                                DeCompressionFailure decompressFailure = new DeCompressionFailure(
-                                        "Payload [" + plRef + "] in message could not be decompressed!", 
+                                final DeCompressionFailure decompressFailure = new DeCompressionFailure(
+                                        "Payload [" + plRef + "] in message could not be decompressed!",
                                         um.entity.getMessageId());
                                 MessageContextUtils.addGeneratedError(mc, decompressFailure);
                                 log.debug("Error generated and stored in MC, change processing state of user message");
                                 MessageUnitDAO.setFailed(um);
-                            } catch (IOException readException) {
+                            } catch (final IOException readException) {
                                 // Check if this IO exception is caused by decryption failure
-                                if (Utils.getRootCause(readException) 
+                                if (Utils.getRootCause(readException)
                                                                 instanceof java.security.GeneralSecurityException) {
-                                    log.error("Payload [" + plRef + "] in message [" + um.entity.getMessageId() 
-                                                + "] could not be decompressed! Details: " 
+                                    log.error("Payload [" + plRef + "] in message [" + um.entity.getMessageId()
+                                                + "] could not be decompressed! Details: "
                                                 + Utils.getRootCause(readException).getMessage());
-                                    FailedDecryption decryptFailure = new FailedDecryption(
+                                    final FailedDecryption decryptFailure = new FailedDecryption(
                                             "Payload [" + plRef + "] in message could not be decrypted!",
                                             um.entity.getMessageId());
                                     MessageContextUtils.addGeneratedError(mc, decryptFailure);
@@ -175,14 +177,14 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                             log.debug("Payload saved to temporary file, set content location in meta data");
                             p.setContentLocation(plFile.getAbsolutePath());
                             p.setMimeType(dh.getContentType());
-                        }   
+                        }
                         break;
                     default:
                         log.debug("Payload is not contained in message but located at " + plRef);
                         // External payload are not processed by Holodeck B2B, the URI is just passed to business app
                 }
             }
-            
+
             log.debug("All payloads saved to temp file");
             // Update the message meta data in data base and change the processing state of the
             // message to indicate it is now ready for delivery to the business application
@@ -193,22 +195,22 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
             MessageUnitDAO.setFailed(um);
             // Stop processing as content can not be saved. Send error to sender of message
             throw new AxisFault("Unable to create file for temporarily storing payload content", ex);
-        } 
-        
+        }
+
         return InvocationResponse.CONTINUE;
     }
 
     /**
      * Helper method to get the directory where the payload contents can be stored.
-     * 
+     *
      * @todo Consider moving this to util class!
-     * 
+     *
      * @return              {@link File} handler to the directory that must be used for storing payload content
      * @throws IOException   When the specified directory does not exist and can not be created.
      */
-    private File getTempDir() throws IOException {        
-        String tmpPayloadDirPath = HolodeckB2BCoreInterface.getConfiguration().getTempDirectory() + PAYLOAD_DIR;
-        File tmpPayloadDir = new File(tmpPayloadDirPath);
+    private File getTempDir() throws IOException {
+        final String tmpPayloadDirPath = HolodeckB2BCoreInterface.getConfiguration().getTempDirectory() + PAYLOAD_DIR;
+        final File tmpPayloadDir = new File(tmpPayloadDirPath);
         if (!tmpPayloadDir.exists()) {
             log.debug("Temp directory for payloads does not exist");
             if(tmpPayloadDir.mkdirs())
@@ -226,15 +228,15 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
     /**
      * Searches for and returns the element in the SOAP body with the given id.
      * <p>This method only looks for the <code>xml:id</code> attribute of the elements.
-     * 
+     *
      * @param body  {@link SOAPBody} to search through
      * @param id    id to search for
      * @return      The first element with the given id,
      *              <code>null</code> if no element is found with the given id.
      */
-    private OMElement getPayloadFromBody(SOAPBody body, String id) {
+    private OMElement getPayloadFromBody(final SOAPBody body, final String id) {
         // Search all children in the SOAP body for an element with given id
-        Iterator<?> bodyElements = body.getChildElements();
+        final Iterator<?> bodyElements = body.getChildElements();
         OMElement e = null; boolean f = false;
         while (bodyElements.hasNext() && !f) {
             e = (OMElement) bodyElements.next();
@@ -242,22 +244,22 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
         }
         return (f ? e : null);
     }
-    
+
     /**
-     * Creates a <i>ValueInconsistent</i> or <i>MimeInconsistency</i> ebMS error as the reference in the user message 
-     * is invalid. Also changes the processing state of the user message to {@link ProcessingStates#FAILURE} to 
+     * Creates a <i>ValueInconsistent</i> or <i>MimeInconsistency</i> ebMS error as the reference in the user message
+     * is invalid. Also changes the processing state of the user message to {@link ProcessingStates#FAILURE} to
      * indicate the message can not be processed.
-     * 
+     *
      * @param mc            The current message context
      * @param um            The user message containing the invalid reference
      * @param invalidRef    The invalid payload reference, can be <code>null</code> if the body payload is missing
      * @throws DatabaseException When updating the processing state fails.
      */
-    private void createInconsistentError(MessageContext mc, EntityProxy<UserMessage> um, String invalidRef) 
+    private void createInconsistentError(final MessageContext mc, final EntityProxy<UserMessage> um, final String invalidRef)
                                                                                         throws DatabaseException {
-        log.warn("UserMessage with id " + um.entity.getMessageId() + 
-                 " can not be processed because payload" 
-                 + (invalidRef != null ? " with href=" + invalidRef  : "") 
+        log.warn("UserMessage with id " + um.entity.getMessageId() +
+                 " can not be processed because payload"
+                 + (invalidRef != null ? " with href=" + invalidRef  : "")
                  + " is not included in message");
         EbmsError error = null;
         if(invalidRef == null || invalidRef.startsWith("#"))
@@ -265,27 +267,27 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
         else
             error = new MimeInconsistency();
         error.setRefToMessageInError(um.entity.getMessageId());
-        error.setErrorDetail("The payload" + (invalidRef != null ? " with href=" + invalidRef  : "") 
+        error.setErrorDetail("The payload" + (invalidRef != null ? " with href=" + invalidRef  : "")
                                            + " could not be found in the message!");
         MessageContextUtils.addGeneratedError(mc, error);
         log.debug("Error stored in message context for further processing");
-        
+
         log.debug("Change processing state of the user message");
         MessageUnitDAO.setFailed(um);
     }
-    
-    
+
+
     /**
      * Saves the XML contained in the given element to the specified file.
-     * 
+     *
      * @param e     The {@link OMElement} to save
      * @param f     {@link File} handle for the file where content should be saved
-     * @throws IOException          
+     * @throws IOException
      * @throws XMLStreamException
      */
     private void saveXMLPayload(final OMElement e, final File f) throws XMLStreamException, IOException {
         final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(new FileWriter(f));
-        e.serialize(writer); 
+        e.serialize(writer);
         writer.flush();
     }
 }

@@ -22,14 +22,14 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
  * Is a specialized configuration for a leg that includes the AS4 <i>reception awareness feature</i>. The reception
  * awareness feature defines how the ebMS Receipt signal can be used for reliable messaging. See sections 3.2 and 3.4
  * of the AS4 profile for more information on this feature.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface IAS4Leg extends ILeg {
-   
+
     /**
-     * Gets the P-Mode parameters for the reception awareness feature. 
-     * 
+     * Gets the P-Mode parameters for the reception awareness feature.
+     *
      * @return  An {@link IReceptionAwareness} object containing the reception awareness parameters, or<br>
      *          <code>null</code> if reception awareness is not used on this leg.
      */

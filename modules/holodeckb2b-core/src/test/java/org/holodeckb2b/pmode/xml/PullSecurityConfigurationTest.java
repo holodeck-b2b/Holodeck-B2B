@@ -16,15 +16,17 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import java.io.File;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+
+import java.io.File;
+
+import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -34,107 +36,107 @@ import org.simpleframework.xml.core.Persister;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class PullSecurityConfigurationTest {
-    
+
     public PullSecurityConfigurationTest() {
     }
-    
-    private PullSecurityConfiguration createFromFile(String fName) throws Exception {
-    
+
+    private PullSecurityConfiguration createFromFile(final String fName) throws Exception {
+
         try {
             // retrieve the resource from the pmodetest directory.
-            File f = new File(this.getClass().getClassLoader().getResource("pmodetest/pullsec/" + fName).getPath());
-            
-            Serializer  serializer = new Persister();
+            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/pullsec/" + fName).getPath());
+
+            final Serializer  serializer = new Persister();
             return serializer.read(PullSecurityConfiguration.class, f);
         }
-        catch (Exception ex) {
+        catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             return null;
         }
     }
-    
+
     @Test
     public void testCompleteConfig() {
         try {
-            SecurityConfiguration sc = createFromFile("full_SC.xml");
-        
+            final SecurityConfiguration sc = createFromFile("full_SC.xml");
+
             assertNotNull(sc);
-           
+
             // Check the ebms UT
-            IUsernameTokenConfiguration ebmsUT = 
+            final IUsernameTokenConfiguration ebmsUT =
                                 sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS);
-            assertNotNull(ebmsUT);            
+            assertNotNull(ebmsUT);
             assertEquals("DmTnJLxXFgEsuQX", ebmsUT.getUsername());
             assertEquals("ymjl8hCo0BdTvcRf", ebmsUT.getPassword());
             assertEquals(IUsernameTokenConfiguration.PasswordType.TEXT, ebmsUT.getPasswordType());
             assertFalse(ebmsUT.includeNonce());
-            assertFalse(ebmsUT.includeCreated());            
-            
+            assertFalse(ebmsUT.includeCreated());
+
             // Check the Signature config
-            ISigningConfiguration signatureCfg = sc.getSignatureConfiguration();
+            final ISigningConfiguration signatureCfg = sc.getSignatureConfiguration();
             assertNotNull(signatureCfg);
             assertEquals("KeystoreAlias2" ,signatureCfg.getKeystoreAlias());
             assertEquals("http://www.w3.org/2001/04/xmldsig-more#sha384", signatureCfg.getHashFunction());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             fail();
-        }              
-        
+        }
+
     }
-    
-    @Test 
+
+    @Test
     public void testMoreThanOneUT() {
         try {
-            SecurityConfiguration sc = createFromFile("twoUT_SC.xml");
-            
+            final SecurityConfiguration sc = createFromFile("twoUT_SC.xml");
+
             assertNull(sc);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             fail();
-        }          
+        }
     }
-    
+
     @Test
     public void testOnlyUT() {
         try {
-            SecurityConfiguration sc = createFromFile("onlyUT_SC.xml");
-        
+            final SecurityConfiguration sc = createFromFile("onlyUT_SC.xml");
+
             assertNotNull(sc);
-           
+
             // Check the ebms UT
-            IUsernameTokenConfiguration ebmsUT = 
+            final IUsernameTokenConfiguration ebmsUT =
                                 sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS);
-            assertNotNull(ebmsUT);            
+            assertNotNull(ebmsUT);
             assertEquals("DmTnJLxXFgEsuQX", ebmsUT.getUsername());
             assertEquals("ymjl8hCo0BdTvcRf", ebmsUT.getPassword());
             assertEquals(IUsernameTokenConfiguration.PasswordType.TEXT, ebmsUT.getPasswordType());
             assertFalse(ebmsUT.includeNonce());
-            assertFalse(ebmsUT.includeCreated());            
-            
+            assertFalse(ebmsUT.includeCreated());
+
             // Check no signing
             assertNull(sc.getSignatureConfiguration());
-            
-        } catch (Exception e) {
+
+        } catch (final Exception e) {
             fail();
-        }                      
+        }
     }
-    
+
     @Test
     public void testSignatureOnly() {
         try {
-            SecurityConfiguration sc = createFromFile("signatureOnlySC.xml");
-        
+            final SecurityConfiguration sc = createFromFile("signatureOnlySC.xml");
+
             assertNotNull(sc);
-           
+
             // Check that there are no UT
             assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS));
             assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.DEFAULT));
-            
+
             // Check the Signature config
-            ISigningConfiguration signatureCfg = sc.getSignatureConfiguration();
+            final ISigningConfiguration signatureCfg = sc.getSignatureConfiguration();
             assertNotNull(signatureCfg);
             assertEquals("KeystoreAlias3" ,signatureCfg.getKeystoreAlias());
             assertEquals("http://www.w3.org/2001/04/xmldsig-more#sha384", signatureCfg.getHashFunction());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             fail();
-        }          
+        }
     }
 }

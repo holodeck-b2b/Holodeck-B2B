@@ -18,7 +18,9 @@ package org.holodeckb2b.ebms3.packaging;
 
 import java.util.Collection;
 import java.util.Iterator;
+
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -26,44 +28,44 @@ import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
- * Is a helper class for handling the ebMS UserMessage element in the ebMS SOAP 
+ * Is a helper class for handling the ebMS UserMessage element in the ebMS SOAP
  * header.
  * <p>This element is specified in section 5.2.2 of the ebMS 3 Core specification.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class UserMessage {
-    
+
     /**
      * The fully qualified name of the element as an {@link QName}
      */
     static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "UserMessage");
-    
+
     /**
      * The local name of the mpc attribute
      */
     private static final String MPC_ATTR = "mpc";
-    
+
     /**
-     * Creates a <code>UserMessage</code> element and adds it to the given <code>Messaging</code> element. 
-     * 
+     * Creates a <code>UserMessage</code> element and adds it to the given <code>Messaging</code> element.
+     *
      * @param messaging     The <code>Messaging</code> element this element should be added to
      * @param data          The data to include in the element
      * @return  The new element
      */
-    public static OMElement createElement(OMElement messaging, IUserMessage data) {
-        OMFactory f = messaging.getOMFactory();
-        
+    public static OMElement createElement(final OMElement messaging, final IUserMessage data) {
+        final OMFactory f = messaging.getOMFactory();
+
         // Create the element
-        OMElement usermessage = f.createOMElement(Q_ELEMENT_NAME, messaging);
-        
+        final OMElement usermessage = f.createOMElement(Q_ELEMENT_NAME, messaging);
+
         // Fill it based on the given data
-        
+
         // MPC attribute only set when not default
-        String mpc = data.getMPC();
+        final String mpc = data.getMPC();
         if (mpc != null && !mpc.equals(EbMSConstants.DEFAULT_MPC))
             usermessage.addAttribute(MPC_ATTR, mpc, null);
-        
+
         // Create the MessageInfo element
         MessageInfo.createElement(usermessage, data);
         // Create the PartyInfo element
@@ -71,52 +73,52 @@ public class UserMessage {
         // Create the CollaborationInfo element
         CollaborationInfo.createElement(usermessage, data.getCollaborationInfo());
         // Create the MessageProperties element (if there are message properties)
-        Collection<IProperty> msgProps = data.getMessageProperties();
+        final Collection<IProperty> msgProps = data.getMessageProperties();
         if (msgProps != null && msgProps.size() > 0)
             MessageProperties.createElement(usermessage, msgProps);
-        
+
         // Create the eb:PayloadInfo element (if there are payloads)
         PayloadInfo.createElement(usermessage, data.getPayloads());
-        
+
         return usermessage;
     }
-    
+
     /**
-     * Gets an {@link Iterator} for the <code>eb:UserMessage</code> elements 
+     * Gets an {@link Iterator} for the <code>eb:UserMessage</code> elements
      * from the given ebMS 3 Messaging header in the SOAP message.
-     * 
+     *
      * @param messaging   The SOAP Header block that contains the ebMS header,
      *                    i.e. the <code>eb:Messaging</code> element
-     * @return      An {@link Iterator} for all {@link OMElement}s representing a 
+     * @return      An {@link Iterator} for all {@link OMElement}s representing a
      *              <code>eb:UserMessage</code> element in the given header
      */
-    public static Iterator<?> getElements(OMElement messaging) {
+    public static Iterator<?> getElements(final OMElement messaging) {
         return messaging.getChildrenWithName(Q_ELEMENT_NAME);
     }
-    
+
     /**
-     * Reads the meta data of a User Message message unit from the <code>eb:UserMessage</code> 
+     * Reads the meta data of a User Message message unit from the <code>eb:UserMessage</code>
      * element and return it as a {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage}
      * entity object.
-     * <p><b>NOTE 1:</b> The entity object is not persisted by this method! It 
+     * <p><b>NOTE 1:</b> The entity object is not persisted by this method! It
      * is the responsibility of the caller to store it.
-     * <p><b>NOTE 2:</b> 
-     * 
+     * <p><b>NOTE 2:</b>
+     *
      * @param   umElement           The <code>UserMessage</code> element that contains
      *                              the meta data to read
-     * @return                      A new {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage} 
-     *                              object 
+     * @return                      A new {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage}
+     *                              object
      * @throws PackagingException   When the given element is not a valid
      *                              <code>UserMessage</code> element.
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.UserMessage readElement(OMElement umElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.UserMessage readElement(final OMElement umElement) throws PackagingException {
         // Create a new PullRequest entity object to store the information in
-        org.holodeckb2b.ebms3.persistency.entities.UserMessage umData = new org.holodeckb2b.ebms3.persistency.entities.UserMessage();
-        
+        final org.holodeckb2b.ebms3.persistency.entities.UserMessage umData = new org.holodeckb2b.ebms3.persistency.entities.UserMessage();
+
         // The PullRequest itself only contains the [optional] mpc attribute
         String  mpc = umElement.getAttributeValue(new QName(MPC_ATTR));
-        
-        // If there was no mpc attribute or it was empty (which formally is 
+
+        // If there was no mpc attribute or it was empty (which formally is
         // illegal because the mpc should be a valid URI) it is set to the default MPC
         if (mpc == null || mpc.isEmpty())
             mpc = EbMSConstants.DEFAULT_MPC;
@@ -129,7 +131,7 @@ public class UserMessage {
             throw new PackagingException("Missing MessageInfo element in UserMessage");
         // Read the MessageInfo element
         MessageInfo.readElement(child, umData);
-        
+
         // Get the PartyInfo element
         child = PartyInfo.getElement(umElement);
         if (child == null)
@@ -137,7 +139,7 @@ public class UserMessage {
             throw new PackagingException("Missing PartyInfo element in UserMessage");
         // Read the PartyInfo element
         PartyInfo.readElement(child, umData);
-        
+
         // Get the CollaborationInfo element
         child = CollaborationInfo.getElement(umElement);
         if (child == null)
@@ -145,18 +147,18 @@ public class UserMessage {
             throw new PackagingException("Missing CollaborationInfo element in UserMessage");
         // Read the CollaborationInfo element
         umData.setCollaborationInfo(CollaborationInfo.readElement(child));
-        
+
         // Get the MessageProperties element and process it when available
         child = MessageProperties.getElement(umElement);
         if (child != null)
             umData.setMessageProperties(MessageProperties.readElement(child));
-        
+
         // Get the PayloadInfo element and process it when available
         child = PayloadInfo.getElement(umElement);
         if (child != null)
             umData.setPayloads(PayloadInfo.readElement(child));
-        
+
         return umData;
     }
-    
+
 }

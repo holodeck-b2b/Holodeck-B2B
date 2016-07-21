@@ -22,18 +22,18 @@ import org.apache.wss4j.dom.validate.Credential;
 import org.apache.wss4j.dom.validate.Validator;
 
 /**
- * Is a special implementation of {@link Validator} that does not validate the credential during security processing 
+ * Is a special implementation of {@link Validator} that does not validate the credential during security processing
  * but just returns the credential so validation can be done later in the processing chain.
  * <p>This validator is used to prevent the validation of username token passwords. These passwords are configured in
- * the P-Mode. The P-Mode however is not known at the time of processing the security header so the validation is 
+ * the P-Mode. The P-Mode however is not known at the time of processing the security header so the validation is
  * skipped and executed later.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class NoOpValidator implements Validator {
-    
+
     @Override
-    public Credential validate(Credential credential, RequestData data) throws WSSecurityException {
+    public Credential validate(final Credential credential, final RequestData data) throws WSSecurityException {
         return credential;
     }
 }

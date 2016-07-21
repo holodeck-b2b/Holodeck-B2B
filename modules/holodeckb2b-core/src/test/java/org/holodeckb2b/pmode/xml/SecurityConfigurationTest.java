@@ -16,17 +16,19 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import java.io.File;
-import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.io.File;
+
+import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -37,209 +39,209 @@ import org.simpleframework.xml.core.Persister;
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 public class SecurityConfigurationTest {
-    
+
     public SecurityConfigurationTest() {
     }
-    
+
     /**
      * Create an SecurityConfiguration from file.
-     * 
+     *
      * @param fName The filename for the SecurityConfiguration
      * @return SecurityConfiguration or NULL in case of an error
-     * @throws Exception 
+     * @throws Exception
      */
-    private SecurityConfiguration createFromFile(String fName) throws Exception {
-    
+    private SecurityConfiguration createFromFile(final String fName) throws Exception {
+
         try {
             // retrieve the resource from the pmodetest directory.
-            File f = new File(this.getClass().getClassLoader().getResource("pmodetest/sec/" + fName).getPath());
-            
-            Serializer  serializer = new Persister();
+            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/sec/" + fName).getPath());
+
+            final Serializer  serializer = new Persister();
             return serializer.read(SecurityConfiguration.class, f);
         }
-        catch (Exception ex) {
+        catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             return null;
         }
     }
-    
+
     @Test
     public void testCompleteConfig() {
         try {
-            SecurityConfiguration sc = createFromFile("full_SC.xml");
-        
+            final SecurityConfiguration sc = createFromFile("full_SC.xml");
+
             assertNotNull(sc);
-           
+
             // Check the default UT
-            IUsernameTokenConfiguration defUT = 
+            final IUsernameTokenConfiguration defUT =
                                 sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.DEFAULT);
-            assertNotNull(defUT);            
+            assertNotNull(defUT);
             assertEquals("FBXBcTNKQugmw4HyW0.aM", defUT.getUsername());
             assertEquals("q2TxAH81QeG", defUT.getPassword());
             assertEquals(IUsernameTokenConfiguration.PasswordType.DIGEST, defUT.getPasswordType());
             assertTrue(defUT.includeNonce());
-            assertTrue(defUT.includeCreated());            
-            
+            assertTrue(defUT.includeCreated());
+
             // Check the ebms UT
-            IUsernameTokenConfiguration ebmsUT = 
+            final IUsernameTokenConfiguration ebmsUT =
                                 sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS);
-            assertNotNull(ebmsUT);            
+            assertNotNull(ebmsUT);
             assertEquals("DmTnJLxXFgEsuQX", ebmsUT.getUsername());
             assertEquals("ymjl8hCo0BdTvcRf", ebmsUT.getPassword());
             assertEquals(IUsernameTokenConfiguration.PasswordType.TEXT, ebmsUT.getPasswordType());
             assertFalse(ebmsUT.includeNonce());
-            assertFalse(ebmsUT.includeCreated());            
-            
+            assertFalse(ebmsUT.includeCreated());
+
             // Check the Signature config
-            ISigningConfiguration signatureCfg = sc.getSignatureConfiguration();
+            final ISigningConfiguration signatureCfg = sc.getSignatureConfiguration();
             assertNotNull(signatureCfg);
             assertEquals("KeystoreAlias2" ,signatureCfg.getKeystoreAlias());
             assertEquals("http://www.w3.org/2001/04/xmldsig-more#sha384", signatureCfg.getHashFunction());
-            
-        } catch (Exception ex) {
+
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
-        }              
-        
+        }
+
     }
-    
-    @Test 
+
+    @Test
     public void testMoreThanTwoUT() {
         try {
-            SecurityConfiguration sc = createFromFile("threeUT_SC.xml");
-            
+            final SecurityConfiguration sc = createFromFile("threeUT_SC.xml");
+
             assertNull(sc);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
-        }          
+        }
     }
-    
-    @Test 
+
+    @Test
     public void testSameTargetUTs() {
         try {
-            SecurityConfiguration sc = createFromFile("sameTargetUT_SC.xml");
-            
+            final SecurityConfiguration sc = createFromFile("sameTargetUT_SC.xml");
+
             assertNull(sc);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
-        }          
+        }
     }
-    
+
     @Test
     public void testOnlyEbMSUT() {
         try {
-            SecurityConfiguration sc = createFromFile("onlyEbmsUT_SC.xml");
-        
+            final SecurityConfiguration sc = createFromFile("onlyEbmsUT_SC.xml");
+
             assertNotNull(sc);
-           
+
             // Check the default UT
-            IUsernameTokenConfiguration defUT = 
+            final IUsernameTokenConfiguration defUT =
                                 sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.DEFAULT);
-            assertNull(defUT);            
-            
+            assertNull(defUT);
+
             // Check the ebms UT
-            IUsernameTokenConfiguration ebmsUT = 
+            final IUsernameTokenConfiguration ebmsUT =
                                 sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS);
-            assertNotNull(ebmsUT);            
+            assertNotNull(ebmsUT);
             assertEquals("DmTnJLxXFgEsuQX", ebmsUT.getUsername());
             assertEquals("ymjl8hCo0BdTvcRf", ebmsUT.getPassword());
             assertEquals(IUsernameTokenConfiguration.PasswordType.TEXT, ebmsUT.getPasswordType());
             assertFalse(ebmsUT.includeNonce());
-            assertFalse(ebmsUT.includeCreated());            
-                        
-        } catch (Exception ex) {
+            assertFalse(ebmsUT.includeCreated());
+
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
-        }                      
+        }
     }
-    
+
     @Test
     public void testSignatureOnly() {
         try {
-            SecurityConfiguration sc = createFromFile("signatureOnlySC.xml");
-        
+            final SecurityConfiguration sc = createFromFile("signatureOnlySC.xml");
+
             assertNotNull(sc);
-           
+
             // Check that there are no UT
             assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS));
             assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.DEFAULT));
-            
+
             // Check the Signature config
-            ISigningConfiguration signatureCfg = sc.getSignatureConfiguration();
+            final ISigningConfiguration signatureCfg = sc.getSignatureConfiguration();
             assertNotNull(signatureCfg);
             assertEquals("KeystoreAlias3" ,signatureCfg.getKeystoreAlias());
             assertEquals("http://www.w3.org/2001/04/xmldsig-more#sha384", signatureCfg.getHashFunction());
-            
-        } catch (Exception ex) {
+
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
-        }          
+        }
     }
-    
+
     @Test
     public void testEncryptionOnly() {
         try {
-            SecurityConfiguration sc = createFromFile("encryptionOnlySC.xml");
-        
+            final SecurityConfiguration sc = createFromFile("encryptionOnlySC.xml");
+
             assertNotNull(sc);
-           
+
             // Check that there are no UT
             assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS));
             assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.DEFAULT));
-            
+
             // Check the Encryption config
-            IEncryptionConfiguration encryptionCfg = sc.getEncryptionConfiguration();
+            final IEncryptionConfiguration encryptionCfg = sc.getEncryptionConfiguration();
             assertNotNull(encryptionCfg);
-            
+
             assertEquals("partyc", encryptionCfg.getKeystoreAlias());
             assertEquals("ExampleC", encryptionCfg.getCertificatePassword());
             assertEquals("http://www.w3.org/2001/04/xmlenc#aes128-cbc", encryptionCfg.getAlgorithm() );
-            
+
             assertEquals("http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p", encryptionCfg.getKeyTransport().getAlgorithm());
             assertEquals("http://www.w3.org/2009/xmlenc11#mgf1sha1", encryptionCfg.getKeyTransport().getMGFAlgorithm());
             assertEquals("http://www.w3.org/2001/04/xmlenc#sha256", encryptionCfg.getKeyTransport().getDigestAlgorithm());
-            
-        } catch (Exception ex) {
+
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
-        }          
+        }
     }
-    
-    
+
+
     @Test
     public void testSignatureAndEncryption() {
         try {
-            SecurityConfiguration sc = createFromFile("signatureAndEncryptionSC.xml");
-        
+            final SecurityConfiguration sc = createFromFile("signatureAndEncryptionSC.xml");
+
             assertNotNull(sc);
-           
+
             // Check that there are no UT
             assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS));
             assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.DEFAULT));
-            
+
             // Check the Signature config
-            ISigningConfiguration signatureCfg = sc.getSignatureConfiguration();
+            final ISigningConfiguration signatureCfg = sc.getSignatureConfiguration();
             assertNotNull(signatureCfg);
             assertEquals("KeystoreAlias3" ,signatureCfg.getKeystoreAlias());
             assertEquals("http://www.w3.org/2001/04/xmldsig-more#sha384", signatureCfg.getHashFunction());
-            
+
             // Check the Encryption config
-            IEncryptionConfiguration encryptionCfg = sc.getEncryptionConfiguration();
+            final IEncryptionConfiguration encryptionCfg = sc.getEncryptionConfiguration();
             assertNotNull(encryptionCfg);
-            
+
             assertEquals("partyc", encryptionCfg.getKeystoreAlias());
             assertEquals("ExampleC", encryptionCfg.getCertificatePassword());
             assertEquals("http://www.w3.org/2001/04/xmlenc#aes128-cbc", encryptionCfg.getAlgorithm() );
-            
+
             assertEquals("http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p", encryptionCfg.getKeyTransport().getAlgorithm());
             assertEquals("http://www.w3.org/2009/xmlenc11#mgf1sha1", encryptionCfg.getKeyTransport().getMGFAlgorithm());
             assertEquals("http://www.w3.org/2001/04/xmlenc#sha256", encryptionCfg.getKeyTransport().getDigestAlgorithm());
-            
-        } catch (Exception ex) {
+
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
-        }          
+        }
     }
 }

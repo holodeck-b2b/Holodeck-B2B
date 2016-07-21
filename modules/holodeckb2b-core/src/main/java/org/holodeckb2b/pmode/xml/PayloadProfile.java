@@ -28,21 +28,21 @@ import org.simpleframework.xml.Root;
 
 @Root (name="PayloadProfile", strict=false)
 public class PayloadProfile implements IAS4PayloadProfile {
-    
+
     @Element (name = "UseAS4Compression", required = false)
-    private Boolean useAS4Compression = Boolean.FALSE;
-    
+    private final Boolean useAS4Compression = Boolean.FALSE;
+
     /**
      * Returns if compression is turned on for the payload.
      * @return <i>"application/gzip"</i> when payloads should be compressed,<br>
      *         <code>null</code> if compression is not used
-     * 
+     *
      */
     @Override
     public String getCompressionType () {
         return useAS4Compression ? CompressionFeature.COMPRESSED_CONTENT_TYPE : null;
     }
-    
-    
+
+
 }
 

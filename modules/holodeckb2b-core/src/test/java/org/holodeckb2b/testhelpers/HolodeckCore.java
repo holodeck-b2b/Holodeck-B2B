@@ -18,30 +18,30 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.pmode.InMemoryPModeSet;
 
 /**
- * Is utility class for testing the e-SENS connector that simulates the Holodeck B2B Core. 
- * 
+ * Is utility class for testing the e-SENS connector that simulates the Holodeck B2B Core.
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class HolodeckCore implements IHolodeckB2BCore {
 
-    private Config  config;
-    
-    private InMemoryPModeSet pmodeSet;    
-    
+    private final Config  config;
+
+    private final InMemoryPModeSet pmodeSet;
+
     private IMessageProcessingEventProcessor eventProcessor;
-    
-    public HolodeckCore(String homeDir) {
+
+    public HolodeckCore(final String homeDir) {
         config = new Config(homeDir);
         pmodeSet = new InMemoryPModeSet();
     }
-    
+
     @Override
     public IConfiguration getConfiguration() {
         return config;
     }
 
     @Override
-    public IMessageDeliverer getMessageDeliverer(IDeliverySpecification deliverySpec) throws MessageDeliveryException {
+    public IMessageDeliverer getMessageDeliverer(final IDeliverySpecification deliverySpec) throws MessageDeliveryException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -55,18 +55,18 @@ public class HolodeckCore implements IHolodeckB2BCore {
         return pmodeSet;
     }
 
-    public void setEventProcessor(IMessageProcessingEventProcessor processor) {
+    public void setEventProcessor(final IMessageProcessingEventProcessor processor) {
         eventProcessor = processor;
     }
-    
+
     @Override
     public IMessageProcessingEventProcessor getEventProcessor() {
         return eventProcessor;
     }
 
     @Override
-    public void setPullWorkerPoolConfiguration(IWorkerPoolConfiguration pullConfiguration) throws TaskConfigurationException {
+    public void setPullWorkerPoolConfiguration(final IWorkerPoolConfiguration pullConfiguration) throws TaskConfigurationException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
 }

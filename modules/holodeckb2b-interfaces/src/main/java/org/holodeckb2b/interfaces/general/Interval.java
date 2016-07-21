@@ -22,16 +22,16 @@ import java.util.concurrent.TimeUnit;
 /**
  * Represents a time interval defined by the length of the interval and the unit of time
  * the length is specified in.
- * 
+ *
  * @author Sander Fieten <sander@holodeck-b2b.org>
  */
 public class Interval {
-    
+
     /**
      * The unit of time the interval is specified in
      */
     private TimeUnit  unit;
-    
+
     /**
      * The length of the interval
      */
@@ -39,18 +39,18 @@ public class Interval {
 
     /**
      * Create an Interval with specified length
-     * 
+     *
      * @param length the length to set
      * @param unit the unit to set
      */
-    public Interval(long length, TimeUnit unit) {
+    public Interval(final long length, final TimeUnit unit) {
         this.length = length;
         this.unit = unit;
     }
-        
+
     /**
      * Gets the unit of time the interval is specified in
-     * 
+     *
      * @return the unit
      */
     public TimeUnit getUnit() {
@@ -59,16 +59,16 @@ public class Interval {
 
     /**
      * Sets the unit of time the interval is specified in
-     * 
+     *
      * @param unit the unit to set
      */
-    public void setUnit(TimeUnit unit) {
+    public void setUnit(final TimeUnit unit) {
         this.unit = unit;
     }
 
     /**
      * Gets the length of the interval
-     * 
+     *
      * @return the length
      */
     public long getLength() {
@@ -77,29 +77,29 @@ public class Interval {
 
     /**
      * Sets the length of the interval
-     * 
+     *
      * @param length the length to set
      */
-    public void setLength(long length) {
+    public void setLength(final long length) {
         this.length = length;
     }
-    
+
     /**
      * Determines if two <code>Interval</code> objects are equal, i.e. last the same amount of time.
      * <p>NOTE: Currently both the length of the interval and time unit must be equal. The intervals
      * are not recalculated to a common unit of time!
-     * 
-     * @param   o   The object to compare with, should be an instance of {@link Interval} 
+     *
+     * @param   o   The object to compare with, should be an instance of {@link Interval}
      * @return      <code>true</code> if <code>this.length == i.length && this.unit == i.unit</code>,<br>
      *              <code>false</code> otherwise
      */
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (o == this)
           return true;
         if (o == null || !getClass ().equals (o.getClass ()))
           return false;
-        Interval rhs = (Interval) o;
+        final Interval rhs = (Interval) o;
         return this.length == rhs.length && this.unit == rhs.unit;
     }
 

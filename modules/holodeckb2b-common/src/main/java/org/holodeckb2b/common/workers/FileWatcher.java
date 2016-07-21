@@ -23,27 +23,27 @@ import java.io.File;
  * <p>Whenever a change is detected {@link #onChange(java.io.File, org.holodeckb2b.common.workers.PathWatcher.Event)}
  * is called. Descendants must implement this method to do the actual processing.
  * <p>This worker has one parameter: <i>watchedPath</i>, the path to the file to watch for changes.
- * 
+ *
  * @see PathWatcher
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public abstract class FileWatcher extends PathWatcher {
 
     /**
-     * Returns the file that should be checked for changes. 
-     * 
+     * Returns the file that should be checked for changes.
+     *
      * @return  {@link File} handle to the file located at the given path
      */
     @Override
     protected File[] getFileList() {
-        File    file = new File(watchPath);
-        
+        final File    file = new File(watchPath);
+
         if (!file.exists() || file.isDirectory()) {
             log.warn("Watched file [" + watchPath + "] does not exist or is a directory!");
             return null;
         }
-        
+
         return new File[] { file };
     }
-    
+
 }

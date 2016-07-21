@@ -17,7 +17,9 @@
 package org.holodeckb2b.testhelpers;
 
 import java.util.Date;
+
 import javax.persistence.EntityManager;
+
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
@@ -30,29 +32,29 @@ import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class CreateErrorMessage {
-    
-    public static void main(String args[]) {
-        EntityManager   em = TestJPAUtil.getEntityManagerToAlpha();
-        
-        ErrorMessage    newErrorMsg = new ErrorMessage();
+
+    public static void main(final String args[]) {
+        final EntityManager   em = TestJPAUtil.getEntityManagerToAlpha();
+
+        final ErrorMessage    newErrorMsg = new ErrorMessage();
         newErrorMsg.setMessageId("this-is-not-a-real-msg-id@just.for.test.holodeck");
         newErrorMsg.setRefToMessageId("this-is-a-fake-refto-msg-id@just.for.test.holodeck");
         newErrorMsg.setTimestamp(new Date());
         newErrorMsg.setPMode("PMODE-JUST-FOR-TEST-ERROR-BUNDLING");
-        
-        EbmsError       newError = new EbmsError();
+
+        final EbmsError       newError = new EbmsError();
         newError.setSeverity(IEbmsError.Severity.WARNING);
         newError.setCategory("test");
         newError.setErrorCode("EBMS:xxxx");
         newErrorMsg.addError(newError);
-        
-        ProcessingState state = new ProcessingState(ProcessingStates.CREATED);
+
+        final ProcessingState state = new ProcessingState(ProcessingStates.CREATED);
         newErrorMsg.setProcessingState(state);
-        
+
         em.getTransaction().begin();
         em.persist(newErrorMsg);
         em.getTransaction().commit();
-        
+
         System.out.println("Added error message to database!");
     }
 }

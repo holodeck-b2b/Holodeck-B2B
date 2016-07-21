@@ -16,21 +16,22 @@
  */
 package org.holodeckb2b.ebms3.persistency.entities;
 
-import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.ebms3.persistency.entities.PartyId;
-import org.holodeckb2b.ebms3.persistency.entities.TradingPartner;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import javax.persistence.EntityManager;
-import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
-import org.holodeckb2b.interfaces.general.IPartyId;
-import org.junit.After;
-import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
+import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
+import org.holodeckb2b.interfaces.general.IPartyId;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -43,35 +44,35 @@ import org.junit.runners.MethodSorters;
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TradingPartnerTest {
-    
+
     private static final String TEST_ROLE = "testRole";
-    
+
     private static final String TEST_PID = "TrdPrtnr";
     private static final String TEST_PID_TYPE = "TP_type";
-    
+
     EntityManager   em;
-    
+
     public TradingPartnerTest() {
     }
 
     @AfterClass
     public static void cleanup() throws DatabaseException {
-        EntityManager em = TestJPAUtil.getEntityManager();
-        
+        final EntityManager em = TestJPAUtil.getEntityManager();
+
         em.getTransaction().begin();
-        Collection<TradingPartner> tps = em.createQuery("from TradingPartner", TradingPartner.class).getResultList();
-        
-        for(TradingPartner o : tps)
+        final Collection<TradingPartner> tps = em.createQuery("from TradingPartner", TradingPartner.class).getResultList();
+
+        for(final TradingPartner o : tps)
             em.remove(o);
-        
+
         em.getTransaction().commit();
     }
-    
+
     @Before
     public void setUp() throws DatabaseException {
         em = TestJPAUtil.getEntityManager();
     }
-    
+
     @After
     public void tearDown() {
         em.close();
@@ -85,10 +86,10 @@ public class TradingPartnerTest {
     public void test1_SetRole() throws DatabaseException {
         cleanup(); // remove left over items from database before starting test
         System.out.println("setRole");
-        TradingPartner instance = new TradingPartner();
-        
+        final TradingPartner instance = new TradingPartner();
+
         instance.setRole(TEST_ROLE);
-        
+
         em.getTransaction().begin();
         em.persist(instance);
         em.getTransaction().commit();
@@ -101,75 +102,75 @@ public class TradingPartnerTest {
     @Test
     public void test2_GetRole() {
         System.out.println("getRole");
-        
+
         em.getTransaction().begin();
-        List<TradingPartner> tps = em.createQuery("from TradingPartner", TradingPartner.class).getResultList();
-        
+        final List<TradingPartner> tps = em.createQuery("from TradingPartner", TradingPartner.class).getResultList();
+
         assertTrue(tps.size() == 1);
         assertEquals(TEST_ROLE, tps.get(0).getRole());
-        
+
         em.getTransaction().commit();
     }
- 
+
     /**
-     * Test of addPartyId method, of class TradingPartner. Adds two partyids to a trading 
+     * Test of addPartyId method, of class TradingPartner. Adds two partyids to a trading
      * partner, one with and one without a type
      */
     @Test
     public void test3_AddPartyId() {
         System.out.println("addPartyId");
-        
+
         em.getTransaction().begin();
-        List<TradingPartner> tps = em.createQuery("from TradingPartner", TradingPartner.class).getResultList();
-        
+        final List<TradingPartner> tps = em.createQuery("from TradingPartner", TradingPartner.class).getResultList();
+
         TradingPartner instance;
         if (tps.size() == 1)
            instance = tps.get(0);
         else
            instance = new TradingPartner();
-        
-        PartyId pid0 = new PartyId(); pid0.setId(TEST_PID+"0");
-        PartyId pid1 = new PartyId(); pid1.setId(TEST_PID+"1"); pid1.setType(TEST_PID_TYPE);
-        
+
+        final PartyId pid0 = new PartyId(); pid0.setId(TEST_PID+"0");
+        final PartyId pid1 = new PartyId(); pid1.setId(TEST_PID+"1"); pid1.setType(TEST_PID_TYPE);
+
         instance.addPartyId(pid0);
         assertTrue(instance.getPartyIds().size() == 1);
-        
+
         instance.addPartyId(pid1);
         assertTrue(instance.getPartyIds().size() == 2);
-        
+
         em.persist(instance);
-        
+
         em.getTransaction().commit();
     }
-    
- 
+
+
     /**
      * Test of getPartyIds method, of class TradingPartner.
      */
     @Test
     public void test4_GetPartyIds() {
         System.out.println("getPartyId");
-        
+
         em.getTransaction().begin();
-        List<TradingPartner> tps = em.createQuery("from TradingPartner", TradingPartner.class).getResultList();
-        
+        final List<TradingPartner> tps = em.createQuery("from TradingPartner", TradingPartner.class).getResultList();
+
         assertTrue(tps.size() == 1);
-        
-        Collection<IPartyId> pids = tps.get(0).getPartyIds();
-        
+
+        final Collection<IPartyId> pids = tps.get(0).getPartyIds();
+
         assertTrue(pids.size() == 2);
-        
-        for(IPartyId pid : pids) {
+
+        for(final IPartyId pid : pids) {
             if( pid.getId().equals(TEST_PID+"0"))
                 assertNull(pid.getType());
             else if (pid.getId().equals(TEST_PID+"1"))
                 assertEquals(TEST_PID_TYPE, pid.getType());
             else
-                fail("Unexpected PartId in collection" + pid.getId());            
+                fail("Unexpected PartId in collection" + pid.getId());
         }
-                    
+
         em.getTransaction().commit();
-    }    
+    }
 
     /**
      * Test of non default constructor with untyped PartyId
@@ -177,54 +178,54 @@ public class TradingPartnerTest {
     @Test
     public void test5_ConstructorWithUnTypedPartyId() {
         System.out.println("TradingPartner(String partyId, String role)");
-        TradingPartner instance = new TradingPartner(TEST_PID+"str", TEST_ROLE+"str");
-        
+        final TradingPartner instance = new TradingPartner(TEST_PID+"str", TEST_ROLE+"str");
+
         em.getTransaction().begin();
         em.persist(instance);
         em.getTransaction().commit();
-        
+
         em.getTransaction().begin();
-        List<TradingPartner> tps = em.createQuery("from TradingPartner", TradingPartner.class).getResultList();
-        
+        final List<TradingPartner> tps = em.createQuery("from TradingPartner", TradingPartner.class).getResultList();
+
         assertTrue(tps.size() == 2);
         assertEquals(TEST_ROLE+"str", tps.get(1).getRole());
-        
-        Collection<IPartyId> pids = tps.get(1).getPartyIds();
+
+        final Collection<IPartyId> pids = tps.get(1).getPartyIds();
         assertTrue(pids.size() == 1);
-        Iterator<IPartyId> it = pids.iterator();
-        IPartyId pid = it.next();
+        final Iterator<IPartyId> it = pids.iterator();
+        final IPartyId pid = it.next();
         assertEquals(TEST_PID+"str", pid.getId());
         assertNull(pid.getType());
-                    
+
         em.getTransaction().commit();
     }
-    
+
     /**
      * Test of non default constructor with typed PartyId
      */
     @Test
     public void test6_ConstructorWithTypedPartyId() {
         System.out.println("TradingPartner(IPartyId partyId, String role)");
-        TradingPartner instance = new TradingPartner(new PartyId(TEST_PID+"typed", TEST_PID_TYPE+"typed"), TEST_ROLE+"typed");
-        
+        final TradingPartner instance = new TradingPartner(new PartyId(TEST_PID+"typed", TEST_PID_TYPE+"typed"), TEST_ROLE+"typed");
+
         em.getTransaction().begin();
         em.persist(instance);
         em.getTransaction().commit();
-        
+
         em.getTransaction().begin();
-        List<TradingPartner> tps = em.createQuery("from TradingPartner", TradingPartner.class).getResultList();
-        
+        final List<TradingPartner> tps = em.createQuery("from TradingPartner", TradingPartner.class).getResultList();
+
         assertTrue(tps.size() == 3);
         assertEquals(TEST_ROLE+"typed", tps.get(2).getRole());
-        
-        Collection<IPartyId> pids = tps.get(2).getPartyIds();
+
+        final Collection<IPartyId> pids = tps.get(2).getPartyIds();
         assertTrue(pids.size() == 1);
-        Iterator<IPartyId> it = pids.iterator();
-        IPartyId pid = it.next();
+        final Iterator<IPartyId> it = pids.iterator();
+        final IPartyId pid = it.next();
         assertEquals(TEST_PID+"typed", pid.getId());
         assertEquals(TEST_PID_TYPE+"typed", pid.getType());
-                    
+
         em.getTransaction().commit();
-    }    
+    }
 
 }

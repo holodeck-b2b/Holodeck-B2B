@@ -20,11 +20,11 @@ package org.holodeckb2b.security.tokens;
  * Represents the authentication info that can be included in an ebMS message and should be used to authorize the sender
  * of the message.
  * <p>Note that this information is provided for the complete message and applies to all message units contained in the
- * message. It is therefor important that the P-Modes that configure the processing of the individual message units in 
+ * message. It is therefor important that the P-Modes that configure the processing of the individual message units in
  * the message share the same settings to avoid conflicts.
- * <p>Because the format for transferring this info is not specified in detail by the ebMS specifications this interface 
+ * <p>Because the format for transferring this info is not specified in detail by the ebMS specifications this interface
  * is just a placeholder to indicate such information can / should be available.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface IAuthenticationInfo  {

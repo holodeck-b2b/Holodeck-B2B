@@ -16,11 +16,13 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import java.io.File;
-import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+
+import java.io.File;
+
+import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -29,28 +31,28 @@ import org.simpleframework.xml.core.Persister;
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 public class KeyTransportTest {
-    
+
     public KeyTransportTest() {
     }
-    
-    
+
+
     /**
      * Create an KeyTransport configuration from file.
-     * 
+     *
      * @param fName The filename for the EncryptionConfiguration
      * @return EncryptionConfiguration or NULL in case of an error
-     * @throws Exception 
+     * @throws Exception
      */
-    private KeyTransport createFromFile(String fName) throws Exception {
-    
+    private KeyTransport createFromFile(final String fName) throws Exception {
+
         try {
             // retrieve the resource from the pmodetest directory.
-            File f = new File(this.getClass().getClassLoader().getResource("pmodetest/kt/" + fName).getPath());
-            
-            Serializer  serializer = new Persister();
+            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/kt/" + fName).getPath());
+
+            final Serializer  serializer = new Persister();
             return serializer.read(KeyTransport.class, f);
         }
-        catch (Exception ex) {
+        catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             return null;
         }
@@ -62,16 +64,16 @@ public class KeyTransportTest {
     @Test
     public void testKeyTransportComplete() {
         try {
-            KeyTransport kt = createFromFile("keytransportComplete.xml");
-        
+            final KeyTransport kt = createFromFile("keytransportComplete.xml");
+
             assertEquals("http://www.w3.org/2001/04/xmlenc#rsa-oaep", kt.getAlgorithm() );
             assertEquals("http://www.w3.org/2009/xmlenc11#mgf1sha256", kt.getMGFAlgorithm());
             assertEquals("http://www.w3.org/2001/04/xmlenc#sha512", kt.getDigestAlgorithm());
             assertEquals(X509ReferenceType.BSTReference, kt.getKeyReferenceMethod());
-           
-        } catch (Exception e) {
+
+        } catch (final Exception e) {
             fail();
-        }            
+        }
     }
 
     /**
@@ -80,70 +82,69 @@ public class KeyTransportTest {
     @Test
     public void testKTAtLeastOneChild() {
         try {
-            KeyTransport kt = createFromFile("keytransportNoChild.xml");
-            
+            final KeyTransport kt = createFromFile("keytransportNoChild.xml");
+
             assertNull(kt);
-           
-        } catch (Exception e) {
-            
-        }            
+
+        } catch (final Exception e) {
+
+        }
     }
-    
+
     /**
      * Test MGF required for RSA-OAEP
      */
     @Test
     public void testKTMGFRequired() {
         try {
-            KeyTransport kt = createFromFile("keytransportNoMGF_RSAOAEP.xml");
-            
-            assertNull(kt);
-           
-        } catch (Exception e) {
+            final KeyTransport kt = createFromFile("keytransportNoMGF_RSAOAEP.xml");
 
-        }            
+            assertNull(kt);
+
+        } catch (final Exception e) {
+
+        }
     }
-    
+
     /**
      * Test with only KT algorithm specified
      */
     @Test
     public void testKTAlgoOnly() {
         try {
-            KeyTransport kt = createFromFile("keytransportAlgoOnly.xml");
-        
+            final KeyTransport kt = createFromFile("keytransportAlgoOnly.xml");
+
             assertEquals("http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p", kt.getAlgorithm() );
             assertNull(kt.getMGFAlgorithm());
             assertNull(kt.getDigestAlgorithm());
             assertNull(kt.getKeyReferenceMethod());
-            
-        } catch (Exception e) {
+
+        } catch (final Exception e) {
             fail();
-        }            
+        }
     }
-    
+
     /**
      * Test with only KT algorithm specified
      */
     @Test
     public void testKTRefMethodOnly() {
         try {
-            KeyTransport kt = createFromFile("keytransportRefMethodOnly.xml");
-        
+            final KeyTransport kt = createFromFile("keytransportRefMethodOnly.xml");
+
             assertNull(kt.getAlgorithm() );
             assertNull(kt.getMGFAlgorithm());
             assertNull(kt.getDigestAlgorithm());
             assertEquals(X509ReferenceType.KeyIdentifier, kt.getKeyReferenceMethod());
-            
-        } catch (Exception e) {
+
+        } catch (final Exception e) {
             fail();
-        }            
+        }
     }
-    
-    
+
+
 }
 
 
 
-    
-    
+

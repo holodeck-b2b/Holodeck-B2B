@@ -19,6 +19,7 @@ package org.holodeckb2b.ebms3.mmd.xml;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
 import org.simpleframework.xml.Element;
@@ -28,17 +29,17 @@ import org.simpleframework.xml.ElementList;
  * Represents the <i>From</i> and <i>To</i> elements in the MMD document. The
  * element name to use is defined in {@see PartyInfo} which is the representation
  * of the parent element.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class TradingPartner implements ITradingPartner {
-    
+
     /*
-     * When used there must be at least one PartyId child element 
+     * When used there must be at least one PartyId child element
      */
     @ElementList(entry = "PartyId", type = PartyId.class , required = true, inline = true)
     private ArrayList<IPartyId>   partyIds;
-    
+
     /*
      * Optionally a <i>role</i> might be provided
      */
@@ -49,32 +50,32 @@ public class TradingPartner implements ITradingPartner {
      * Default constructor
      */
     public TradingPartner() {}
-    
+
     /**
      * Creates a <code>TradingPartner</code> object with the given data.
-     * 
+     *
      * @param tp    The data to use
      */
-    public TradingPartner(ITradingPartner tp) {
+    public TradingPartner(final ITradingPartner tp) {
         this.setPartyIds(tp.getPartyIds());
         this.role = tp.getRole();
     }
-    
+
     @Override
     public Collection<IPartyId> getPartyIds() {
         return partyIds;
     }
 
-    public void setPartyIds(Collection<IPartyId> pids) {
+    public void setPartyIds(final Collection<IPartyId> pids) {
         // Copy to list of PartyId object
         if (pids != null && pids.size() > 0) {
-            partyIds = new ArrayList<IPartyId>(pids.size());
-            for (IPartyId p : pids) 
-                partyIds.add(new org.holodeckb2b.ebms3.mmd.xml.PartyId(p));            
+            partyIds = new ArrayList<>(pids.size());
+            for (final IPartyId p : pids)
+                partyIds.add(new org.holodeckb2b.ebms3.mmd.xml.PartyId(p));
         } else
             partyIds = null;
     }
-    
+
     /**
      * @return the role
      */
@@ -86,11 +87,11 @@ public class TradingPartner implements ITradingPartner {
     /**
      * @param role the role to set
      */
-    public void setRole(String role) {
+    public void setRole(final String role) {
         this.role = role;
     }
 
-    
-    
-    
+
+
+
 }

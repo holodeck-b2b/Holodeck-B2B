@@ -18,6 +18,7 @@ package org.holodeckb2b.common.workerpool.xml;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 import org.holodeckb2b.interfaces.general.Interval;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.simpleframework.xml.Attribute;
@@ -25,8 +26,8 @@ import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Root;
 
 /**
- * Implements the configuration of a Worker as defined by {@link IWorkerConfiguration} using XML. 
- * 
+ * Implements the configuration of a Worker as defined by {@link IWorkerConfiguration} using XML.
+ *
  * <p>The XML element containing the configuration is shown here:
  * <pre>
  *      &lt;worker
@@ -41,32 +42,32 @@ import org.simpleframework.xml.Root;
  *          &lt;parameter name=<i>string : Name of the parameter</i>&gt;Value of the parameter&lt;/parameter&gt;
  *      &lt;/worker&gt;<br>
  * </pre>
- * 
+ *
  * @author Sander Fieten <sander@holodeck-b2b.org>
  */
 @Root (name="worker")
 public class XMLWorkerConfig implements IWorkerConfiguration {
-    
+
     @Attribute
     private String name;
-    
+
     @Attribute
     private boolean activate;
-    
+
     @Attribute(required=false)
-    private int delay = 0;
-    
+    private final int delay = 0;
+
     @Attribute
     private String workerClass;
-    
+
     @Attribute(required=false)
     private int concurrent;
-    
+
     @Attribute(name="interval", required=false)
     private int xmlInterval;
-    
+
     private Interval    interval;
-    
+
     @ElementMap(entry="parameter", key="name", attribute=true, inline=true, required=false)
     private Map<String, String> parameters;
 
@@ -93,9 +94,9 @@ public class XMLWorkerConfig implements IWorkerConfiguration {
     @Override
     public int getDelay() {
         // delay specified in XML is in seconds, but return value must be milliseconds!
-        return delay * 1000; 
+        return delay * 1000;
     }
-    
+
     @Override
     public int getConcurrentExecutions() {
         return concurrent;
@@ -103,35 +104,35 @@ public class XMLWorkerConfig implements IWorkerConfiguration {
 
     @Override
     public Interval getInterval() {
-        if (xmlInterval > 0 && interval == null) 
+        if (xmlInterval > 0 && interval == null)
             interval = new Interval(xmlInterval, TimeUnit.SECONDS);
-        
+
         return interval;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
-    public void setActivate(boolean activate) {
+    public void setActivate(final boolean activate) {
         this.activate = activate;
     }
 
-    public void setWorkerClass(String workerClass) {
+    public void setWorkerClass(final String workerClass) {
         this.workerClass = workerClass;
     }
 
-    public void setConcurrent(int concurrent) {
+    public void setConcurrent(final int concurrent) {
         this.concurrent = concurrent;
     }
 
-    public void setXmlInterval(int xmlInterval) {
+    public void setXmlInterval(final int xmlInterval) {
         this.xmlInterval = xmlInterval;
         interval = new Interval(xmlInterval, TimeUnit.SECONDS);
     }
 
-    public void setParameters(Map<String, String> parameters) {
+    public void setParameters(final Map<String, String> parameters) {
         this.parameters = parameters;
     }
-    
+
 }

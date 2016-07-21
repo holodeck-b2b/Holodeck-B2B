@@ -22,22 +22,22 @@ import org.holodeckb2b.ebms3.persistency.entities.Receipt;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 
 /**
- * Defines constants for {@link MessageContext} properties that Holodeck B2B 
+ * Defines constants for {@link MessageContext} properties that Holodeck B2B
  * uses to store information about the processed ebMS message.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class MessageContextProperties {
-    
+
     /**
-     * Holds the <i>primary</i> outgoing user message. The P-Mode of this 
+     * Holds the <i>primary</i> outgoing user message. The P-Mode of this
      * message unit determines the configuration that is used for sending the
      * complete message.
      */
     public static final String OUT_USER_MESSAGE = "org:holodeckb2b:out-user-msg";
 
     /**
-     * Holds the received user message. 
+     * Holds the received user message.
      */
     public static final String IN_USER_MESSAGE = "org:holodeckb2b:in-user-msg";
 
@@ -45,37 +45,37 @@ public class MessageContextProperties {
      * Holds information on the received pull request as {@link PullRequest}
      */
     public static final String IN_PULL_REQUEST = "org:holodeckb2b:in-pullrequest";
-    
+
     /**
-     * Holds the meta-data on the received Receipts 
+     * Holds the meta-data on the received Receipts
      */
     public static final String IN_RECEIPTS = "org:holodeckb2b:in-receipts";
 
     /**
-     * Holds the meta-data on the received Errors 
+     * Holds the meta-data on the received Errors
      */
     public static final String IN_ERRORS = "org:holodeckb2b:in-errors";
-    
+
     /**
      * Holds the list of PModes a received PullRequest is authorized for
      */
     public static final String PULL_AUTH_PMODES = "org:holodeckb2b:pull-from-pmodes";
-   
+
     /**
-     * Holds the signal to the Holodeck B2B message receiver that a direct 
+     * Holds the signal to the Holodeck B2B message receiver that a direct
      * response should be sent back
      */
     public static final String RESPONSE_REQUIRED = "org:holodeckb2b:response-req";
-    
+
     /**
-     * Holds an array of {@link org.holodeckb2b.ebms3.persistency.entities.EbmsError} 
-     * objects that contain information on errors that occurred during message 
+     * Holds an array of {@link org.holodeckb2b.ebms3.persistency.entities.EbmsError}
+     * objects that contain information on errors that occurred during message
      * processing
      */
     public static final String GENERATED_ERRORS = "org:holodeckb2b:gen-errors";
-    
+
     /**
-     * Holds an array of {@link org.holodeckb2b.ebms3.persistency.entities.ErrorMessage} 
+     * Holds an array of {@link org.holodeckb2b.ebms3.persistency.entities.ErrorMessage}
      * objects that contain error signals that should be sent.
      */
     public static final String OUT_ERROR_SIGNALS = "org:holodeckb2b:send-errors";
@@ -93,16 +93,16 @@ public class MessageContextProperties {
      * @see  Receipt
      */
     public static final String OUT_RECEIPTS = "org:holodeckb2b:out-receipts";
-        
+
     /**
      * Holds the PullRequest signal data that must be sent.
      *
      * @see  PullRequest
      */
     public static final String OUT_PULL_REQUEST = "org:holodeckb2b:out-pullrequest";
-    
+
     /**
-     * Holds the indicator whether the received user message message unit was successfully delivered 
+     * Holds the indicator whether the received user message message unit was successfully delivered
      * to the business application, i.e. the {@link IMessageDeliverer} did throw an exception.
      */
     public static final String DELIVERED_USER_MSG = "org:holodeckb2b:usrmsg-delivered";

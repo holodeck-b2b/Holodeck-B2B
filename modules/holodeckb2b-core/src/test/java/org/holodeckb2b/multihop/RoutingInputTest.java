@@ -16,55 +16,57 @@
  */
 package org.holodeckb2b.multihop;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.util.Iterator;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.Test;
 
 /**
  * Test if correct ebint:RoutingInput element is created
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class RoutingInputTest {
-    
+
     public RoutingInputTest() {
     }
 
     @Test
     public void testFullUserMessageHeader() {
         // Use filled mmd document for testing
-        String mmdPath = this.getClass().getClassLoader().getResource("multihop/ri/full_mmd.xml").getPath();
-        File   f = new File(mmdPath);
+        final String mmdPath = this.getClass().getClassLoader().getResource("multihop/ri/full_mmd.xml").getPath();
+        final File   f = new File(mmdPath);
         MessageMetaData mmd = null;
         try {
             mmd = MessageMetaData.createFromFile(f);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             fail("Unable to test because MMD could not be read correctly!");
         }
-        
-        // Create a SOAP envelope that should contain the RoutingInput element 
-        SOAPEnvelope    env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        
-        OMElement ri = RoutingInput.createElement(env, mmd);
-        
+
+        // Create a SOAP envelope that should contain the RoutingInput element
+        final SOAPEnvelope    env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+
+        final OMElement ri = RoutingInput.createElement(env, mmd);
+
         assertEquals(MultiHopConstants.ROUTING_INPUT_NS_URI, ri.getNamespaceURI());
-        Iterator umChilds = ri.getChildrenWithLocalName("UserMessage");
+        final Iterator umChilds = ri.getChildrenWithLocalName("UserMessage");
         assertTrue(umChilds.hasNext());
-        OMElement umChild = (OMElement) umChilds.next();
+        final OMElement umChild = (OMElement) umChilds.next();
         assertEquals(MultiHopConstants.ROUTING_INPUT_NS_URI, umChild.getNamespaceURI());
-        
-        Iterator ciChilds = umChild.getChildrenWithLocalName("CollaborationInfo");
+
+        final Iterator ciChilds = umChild.getChildrenWithLocalName("CollaborationInfo");
         assertTrue(ciChilds.hasNext());
-        OMElement ciChild = (OMElement) ciChilds.next();
+        final OMElement ciChild = (OMElement) ciChilds.next();
         assertEquals(EbMSConstants.EBMS3_NS_URI, ciChild.getNamespaceURI());
     }
-    
+
 }

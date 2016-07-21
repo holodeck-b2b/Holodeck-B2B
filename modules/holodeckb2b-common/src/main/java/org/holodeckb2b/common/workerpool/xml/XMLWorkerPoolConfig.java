@@ -19,6 +19,7 @@ package org.holodeckb2b.common.workerpool.xml;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
@@ -30,11 +31,11 @@ import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
 /**
- * Implements the configuration of a WorkerPool as defined by {@link IWorkerPoolConfiguration} using XML. 
+ * Implements the configuration of a WorkerPool as defined by {@link IWorkerPoolConfiguration} using XML.
  * <p>The pool configuration is expressed by a simple XML document with a <code>workers</code> root element
- * and one or more <code>worker</code> child that specify the workers to be in the pool. 
- * 
- * @see XMLWorkerConfig 
+ * and one or more <code>worker</code> child that specify the workers to be in the pool.
+ *
+ * @see XMLWorkerConfig
  * @author Sander Fieten <sander@holodeck-b2b.org>
  */
 @Root(name = "workers", strict=false)
@@ -42,10 +43,10 @@ public class XMLWorkerPoolConfig implements IWorkerPoolConfiguration {
 
     @Attribute(name="poolName", required=false)
     private String  name;
-    
+
     @ElementList(entry="worker", type=XMLWorkerConfig.class, inline=true, required=false)
-    private List<IWorkerConfiguration> workers = new ArrayList<IWorkerConfiguration>();
-    
+    private final List<IWorkerConfiguration> workers = new ArrayList<>();
+
     @Override
     public String getName() {
         return name;
@@ -55,36 +56,36 @@ public class XMLWorkerPoolConfig implements IWorkerPoolConfiguration {
     public List<IWorkerConfiguration> getWorkers() {
         return workers;
     }
-    
+
     /**
-     * Loads the worker pool configuration from file. 
-     * 
+     * Loads the worker pool configuration from file.
+     *
      * @param path      Path to the XML document containing the pool's configuration
      * @return          The worker pool configuration if succesfully loaded, null otherwise
      */
-    public static IWorkerPoolConfiguration  loadFromFile(String  path) {
-        Log log = LogFactory.getLog(XMLWorkerPoolConfig.class);
+    public static IWorkerPoolConfiguration  loadFromFile(final String  path) {
+        final Log log = LogFactory.getLog(XMLWorkerPoolConfig.class);
         XMLWorkerPoolConfig    poolCfg = null;
-        
+
         log.debug("Loading worker pool configuration from XML document in " + path);
-        
-        File f = new File(path);
-        
+
+        final File f = new File(path);
+
         if (f.exists() && f.canRead()) {
-            Serializer serializer = new Persister();
+            final Serializer serializer = new Persister();
             try {
                 poolCfg = serializer.read(XMLWorkerPoolConfig.class, f);
                 // If config file does not set pool name, set it here to file name
                 if (poolCfg.getName() == null || poolCfg.getName().isEmpty())
                     poolCfg.name = f.getName().substring(0, f.getName().indexOf("."));
                 log.debug("Loaded configuration");
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 log.error("Error while reading configuration from " + path + "! Details: " + ex.getMessage());
             }
          } else
             log.error("Unable to access configuration file" + path + "!");
 
-        
+
         return poolCfg;
     }
 }

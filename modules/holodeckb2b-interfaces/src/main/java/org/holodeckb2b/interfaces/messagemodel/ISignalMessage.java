@@ -18,16 +18,16 @@ package org.holodeckb2b.interfaces.messagemodel;
 
 
 /**
- * Represents an ebMS Signal Message message unit. Because the information about an actual signal message depends on the 
- * type of signal message this interface does not define any methods. Although it does not define any methods to 
- * implement the interface is defined to closely align the object structure with the message structure as defined in the 
+ * Represents an ebMS Signal Message message unit. Because the information about an actual signal message depends on the
+ * type of signal message this interface does not define any methods. Although it does not define any methods to
+ * implement the interface is defined to closely align the object structure with the message structure as defined in the
  * ebMS specification.
  * <p>The type of a signal message is determined by the child element(s) of the <code>eb:SignalMessage</code> element.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see IErrorMessage
  * @see IPullRequest
  * @see IReceipt
  */
-public interface ISignalMessage extends IMessageUnit {   
+public interface ISignalMessage extends IMessageUnit {
 }

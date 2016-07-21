@@ -17,6 +17,7 @@
 package org.holodeckb2b.axis2;
 
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
@@ -51,26 +52,24 @@ import org.apache.commons.logging.LogFactory;
  * message. This implementation is create because the default Axis2 implementation for the OutIn MEP throws an AxisFault
  * if no response is received. In an ebMS exchange however it can not be guaranteed that there is a response a replies
  * may be sent asynchronously.
- * <p>This class extends {@link OutInAxisOperation} to return a different {@link OperationClient} implementation. 
+ * <p>This class extends {@link OutInAxisOperation} to return a different {@link OperationClient} implementation.
  * Although there is just one method that changes in the <code>OperationClient</code> it must be copied from the super
  * class a an inner class can not be extended.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class OutOptInAxisOperation extends OutInAxisOperation {
 
-    private static Log log = LogFactory.getLog(OutOptInAxisOperation.class);
-
     /**
      * Create a new instance of the OutOptInAxisOperation
      */
-    public OutOptInAxisOperation(QName name) {
+    public OutOptInAxisOperation(final QName name) {
         super(name);
         setMessageExchangePattern(WSDL2Constants.MEP_URI_OUT_IN);
     }
-    
+
     /**
-     * Returns the MEP client for an Out-IN operation that accepts an empty response. To use the client, you must call 
+     * Returns the MEP client for an Out-IN operation that accepts an empty response. To use the client, you must call
      * addMessageContext() with a message context and then call execute() to execute the client.
      *
      * @param sc      The service context for this client to live within. Cannot be
@@ -79,19 +78,20 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
      *                set specifically on the client then those override options
      *                here.
      */
-    public OperationClient createClient(ServiceContext sc, Options options) {
+    @Override
+    public OperationClient createClient(final ServiceContext sc, final Options options) {
         return new OutOptInAxisOperationClient(this, sc, options);
     }
-    
+
     /**
      * The client to handle the MEP. This is a copy of <code>OutInAxisOperationClient<code> inner class of {@link
      * OutInAxisOperation} with an adjusted {@link #handleResponse()} method.
      */
     class OutOptInAxisOperationClient extends OperationClient {
 
-        private Log log = LogFactory.getLog(OutOptInAxisOperationClient.class);
-        
-        OutOptInAxisOperationClient(OutInAxisOperation axisOp, ServiceContext sc, Options options) {
+        private final Log log = LogFactory.getLog(OutOptInAxisOperationClient.class);
+
+        OutOptInAxisOperationClient(final OutInAxisOperation axisOp, final ServiceContext sc, final Options options) {
             super(axisOp, sc, options);
         }
 
@@ -102,7 +102,8 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
          * @param msgContext the MessageContext to add
          * @throws AxisFault
          */
-        public void addMessageContext(MessageContext msgContext) throws AxisFault {
+        @Override
+        public void addMessageContext(final MessageContext msgContext) throws AxisFault {
             msgContext.setServiceContext(sc);
             if (msgContext.getMessageID() == null) {
                 setMessageID(msgContext);
@@ -117,13 +118,14 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
          * @return Returns MessageContext.
          * @throws AxisFault
          */
-        public MessageContext getMessageContext(String messageLabel)
+        @Override
+        public MessageContext getMessageContext(final String messageLabel)
                 throws AxisFault {
             return oc.getMessageContext(messageLabel);
         }
 
         @Override
-        public void setCallback(Callback clbck) {
+        public void setCallback(final Callback clbck) {
             throw new UnsupportedOperationException("Not supported, this method is deprecated!");
         }
 
@@ -137,17 +139,18 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
          * function of the specific MEP client. IGNORED BY THIS MEP CLIENT.
          * @throws AxisFault if something goes wrong during the execution of the MEP.
          */
-        public void executeImpl(boolean block) throws AxisFault {
+        @Override
+        public void executeImpl(final boolean block) throws AxisFault {
             if (log.isDebugEnabled()) {
                 log.debug("Entry: OutOptInAxisOperationClient::execute, " + block);
             }
             if (completed) {
                 throw new AxisFault(Messages.getMessage("mepiscomplted"));
             }
-            ConfigurationContext cc = sc.getConfigurationContext();
+            final ConfigurationContext cc = sc.getConfigurationContext();
 
             // copy interesting info from options to message context.
-            MessageContext mc = oc.getMessageContext(WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
+            final MessageContext mc = oc.getMessageContext(WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
             if (mc == null) {
                 throw new AxisFault(Messages.getMessage("outmsgctxnull"));
             }
@@ -166,7 +169,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
              */
             boolean useAsync = false;
             if (!mc.getOptions().isUseSeparateListener()) {
-                Boolean useAsyncOption
+                final Boolean useAsyncOption
                         = (Boolean) mc.getProperty(Constants.Configuration.USE_ASYNC_OPERATIONS);
                 if (log.isDebugEnabled()) {
                     log.debug("OutInAxisOperationClient: useAsyncOption " + useAsyncOption);
@@ -176,14 +179,14 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
                 }
             }
 
-            EndpointReference replyTo = mc.getReplyTo();
+            final EndpointReference replyTo = mc.getReplyTo();
             if (replyTo != null) {
                 if (replyTo.isWSAddressingAnonymous()
                         && replyTo.getAllReferenceParameters() != null) {
                     mc.setProperty(AddressingConstants.INCLUDE_OPTIONAL_HEADERS, Boolean.TRUE);
                 }
 
-                String customReplyTo = (String) options.getProperty(Options.CUSTOM_REPLYTO_ADDRESS);
+                final String customReplyTo = (String) options.getProperty(Options.CUSTOM_REPLYTO_ADDRESS);
                 if (!(Options.CUSTOM_REPLYTO_ADDRESS_TRUE.equals(customReplyTo))) {
                     if (!replyTo.hasAnonymousAddress()) {
                         useAsync = true;
@@ -205,7 +208,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
             }
         }
 
-        private void sendAsync(boolean useAsync, MessageContext mc)
+        private void sendAsync(final boolean useAsync, final MessageContext mc)
                 throws AxisFault {
             if (log.isDebugEnabled()) {
                 log.debug("useAsync=" + useAsync + ", seperateListener="
@@ -216,7 +219,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
              * whole MEP is complete, as they have no other way to get their reply message.
              */
         // THREADSAFE issue: Multiple threads could be trying to initialize the callback receiver
-            // so it is synchronized.  It is not done within the else clause to avoid the 
+            // so it is synchronized.  It is not done within the else clause to avoid the
             // double-checked lock antipattern.
             CallbackReceiver callbackReceiver;
             synchronized (axisOp) {
@@ -268,9 +271,9 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
                 useCustomListener = Boolean.TRUE;
             }
             if (useCustomListener == null || !useCustomListener.booleanValue()) {
-                EndpointReference replyTo = mc.getReplyTo();
+                final EndpointReference replyTo = mc.getReplyTo();
                 if (replyTo == null || replyTo.hasAnonymousAddress()) {
-                    EndpointReference replyToFromTransport
+                    final EndpointReference replyToFromTransport
                             = mc.getConfigurationContext().getListenerManager().
                             getEPRforService(sc.getAxisService().getName(),
                                     axisOp.getName().getLocalPart(), mc
@@ -309,21 +312,21 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
          * @param responseMessageContext the active response MessageContext
          * @throws AxisFault if something went wrong
          */
-        protected void handleResponse(MessageContext responseMessageContext) throws AxisFault {
+        protected void handleResponse(final MessageContext responseMessageContext) throws AxisFault {
         // Options object reused above so soapAction needs to be removed so
             // that soapAction+wsa:Action on response don't conflict
             responseMessageContext.setSoapAction(null);
 
             if (responseMessageContext.getEnvelope() == null) {
                 try {
-                    SOAPEnvelope resenvelope = TransportUtils.createSOAPMessage(responseMessageContext);
+                    final SOAPEnvelope resenvelope = TransportUtils.createSOAPMessage(responseMessageContext);
                     if (resenvelope != null)
                         responseMessageContext.setEnvelope(resenvelope);
-                } catch (AxisFault af) {
-                    // This AxisFault indicates that there was no response received. Because this is allowd in ebMS 
+                } catch (final AxisFault af) {
+                    // This AxisFault indicates that there was no response received. Because this is allowd in ebMS
                     // exchanges we just ignore this.
                 }
-                
+
             }
             SOAPEnvelope resenvelope = responseMessageContext.getEnvelope();
             if (resenvelope != null) {
@@ -352,10 +355,10 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
          * @return Returns MessageContext.
          * @throws AxisFault Sends the message using a two way transport and waits for a response
          */
-        protected MessageContext send(MessageContext msgContext) throws AxisFault {
+        protected MessageContext send(final MessageContext msgContext) throws AxisFault {
 
         // create the responseMessageContext
-            MessageContext responseMessageContext
+            final MessageContext responseMessageContext
                     = msgContext.getConfigurationContext().createMessageContext();
 
             responseMessageContext.setServerSide(false);
@@ -392,14 +395,14 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
          */
         private class NonBlockingInvocationWorker implements Runnable {
 
-            private Callback callback;
+            private final Callback callback;
 
-            private MessageContext msgctx;
-            private AxisCallback axisCallback;
+            private final MessageContext msgctx;
+            private final AxisCallback axisCallback;
 
-            public NonBlockingInvocationWorker(Callback callback,
-                    MessageContext msgctx,
-                    AxisCallback axisCallback) {
+            public NonBlockingInvocationWorker(final Callback callback,
+                    final MessageContext msgctx,
+                    final AxisCallback axisCallback) {
                 this.callback = callback;
                 this.msgctx = msgctx;
                 this.axisCallback = axisCallback;
@@ -408,16 +411,16 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
             public void run() {
                 try {
                     // send the request and wait for response
-                    MessageContext response = send(msgctx);
+                    final MessageContext response = send(msgctx);
                     // call the callback
                     if (response != null) {
-                        SOAPEnvelope resenvelope = response.getEnvelope();
+                        final SOAPEnvelope resenvelope = response.getEnvelope();
 
                         if (resenvelope.hasFault()) {
-                            SOAPBody body = resenvelope.getBody();
+                            final SOAPBody body = resenvelope.getBody();
                         // If a fault was found, create an AxisFault with a MessageContext so that
                             // other programming models can deserialize the fault to an alternative form.
-                            AxisFault fault = new AxisFault(body.getFault(), response);
+                            final AxisFault fault = new AxisFault(body.getFault(), response);
                             if (callback != null) {
                                 callback.onError(fault);
                             } else if (axisCallback != null) {
@@ -430,7 +433,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
 
                         } else {
                             if (callback != null) {
-                                AsyncResult asyncResult = new AsyncResult(response);
+                                final AsyncResult asyncResult = new AsyncResult(response);
                                 callback.onComplete(asyncResult);
                             } else if (axisCallback != null) {
                                 axisCallback.onMessage(response);
@@ -439,7 +442,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
                         }
                     }
 
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     if (callback != null) {
                         callback.onError(e);
                     } else if (axisCallback != null) {
@@ -464,7 +467,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
             boolean complete;
             boolean receivedFault;
 
-            public boolean waitForCompletion(long timeout) throws AxisFault {
+            public boolean waitForCompletion(final long timeout) throws AxisFault {
                 synchronized (this) {
                     try {
                         if (complete) {
@@ -475,7 +478,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
                             // We timed out!
                             throw new AxisFault(Messages.getMessage("responseTimeOut"));
                         }
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                         // Something interrupted our wait!
                         error = e;
                     }
@@ -493,7 +496,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
              *
              * @param msgContext the (response) MessageContext
              */
-            public void onMessage(MessageContext msgContext) {
+            public void onMessage(final MessageContext msgContext) {
             // Transport input stream gets closed after calling setComplete
                 // method. Have to build the whole envelope including the
                 // attachments at this stage. Data might get lost if the input
@@ -509,7 +512,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
              *
              * @param msgContext the MessageContext containing the fault.
              */
-            public void onFault(MessageContext msgContext) {
+            public void onFault(final MessageContext msgContext) {
                 error = Utils.getInboundFaultFromMessageContext(msgContext);
             }
 
@@ -525,7 +528,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
 
             private Exception error;
 
-            public void onError(Exception e) {
+            public void onError(final Exception e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Entry: OutInAxisOperationClient$SyncCallBack::onError, " + e);
                 }

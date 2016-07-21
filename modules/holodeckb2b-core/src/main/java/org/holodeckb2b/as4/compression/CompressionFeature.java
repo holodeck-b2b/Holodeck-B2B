@@ -18,26 +18,26 @@ package org.holodeckb2b.as4.compression;
 
 /**
  * Holds constants for AS4 Compression Feature.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public final class CompressionFeature {
-    
+
     /**
      * Name of the <i>part property</i> that indicates the feature is used for the payload
      */
     public static final String FEATURE_PROPERTY_NAME = "CompressionType";
-  
+
     /**
      * Name of the <i>part property</i> that indicates the MIME Type of the origin data
      */
     public static final String MIME_TYPE_PROPERTY_NAME = "MimeType";
-      
+
     /**
-     * The content type of the compressed data, also used as value of the <i>part property</i> that indicates the 
+     * The content type of the compressed data, also used as value of the <i>part property</i> that indicates the
      * feature is used for the payload
      */
     public static final String COMPRESSED_CONTENT_TYPE = "application/gzip";
-   
+
     private CompressionFeature() {}
 }

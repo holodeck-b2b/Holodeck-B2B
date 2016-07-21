@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 import org.holodeckb2b.interfaces.general.Interval;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.simpleframework.xml.Attribute;
@@ -30,21 +31,21 @@ import org.simpleframework.xml.Root;
 
 /**
  * Is an implementation of {@link IWorkerConfiguration} specifically for the configuration of a {@link PullWorker} that
- * is part of the pull worker pool. These workers are responsible for sending out the pull requests. 
+ * is part of the pull worker pool. These workers are responsible for sending out the pull requests.
  * <p>There are two type of pull workers: one specific for a set of P-Modes and a default one responsible for all other
  * P-Modes. Both type share this configuration which includes a list of P-Modes which for the specific worker indicates
  * the P-Modes for which to send the pull requests and for the default worker which P-Modes to exclude.
- * <p>The configuration is read from an XML document defined by the schema 
- * <code>http://holodeck-b2b.org/schemas/2014/05/pullconfiguration</code>. This class handles the 
+ * <p>The configuration is read from an XML document defined by the schema
+ * <code>http://holodeck-b2b.org/schemas/2014/05/pullconfiguration</code>. This class handles the
  * <code>genericPullerType</code>. The overall configuration document is handled by {@link PullConfiguration}.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 @Root
 public class PullerConfig implements IWorkerConfiguration {
 
     /**
-     * Represents the <code>pmode</code> element in the XML document for the pulling configuration 
+     * Represents the <code>pmode</code> element in the XML document for the pulling configuration
      */
     @Root
     static class PMode {
@@ -59,19 +60,19 @@ public class PullerConfig implements IWorkerConfiguration {
     List<PMode> pmodes;
 
     /**
-     * The name to assign to this <i>pull worker</i>. Is not read from the XML configuration but assigned at runtime 
-     * by the pool configuration 
-     * 
+     * The name to assign to this <i>pull worker</i>. Is not read from the XML configuration but assigned at runtime
+     * by the pool configuration
+     *
      * @see PullConfiguration
      */
     String  name;
-    
+
     /**
      * Indicator whether the pull operation should (value = <code>true</code>) or should not (value = <code>false</code>)
-     * be executed for the given P-Modes. 
+     * be executed for the given P-Modes.
      */
     boolean inclusive = true;
-    
+
     @Override
     public String getName() {
         return PullWorker.class.getName() + "." + name;
@@ -86,22 +87,22 @@ public class PullerConfig implements IWorkerConfiguration {
     }
 
     /**
-     * Gets the parameters for the <i>pull worker</i> which are a list of P-Mode ids (parameter defined by 
-     * {@link PullWorker#PARAM_PMODES}} and an indication (parameter defined by {@link PullWorker#PARAM_INCLUDE}} 
+     * Gets the parameters for the <i>pull worker</i> which are a list of P-Mode ids (parameter defined by
+     * {@link PullWorker#PARAM_PMODES}} and an indication (parameter defined by {@link PullWorker#PARAM_INCLUDE}}
      * whether pulling should or should not be executed for these P-Modes.
-     * 
+     *
      * @return  The parameters for the pull worker
      */
     @Override
     public Map<String, Object> getTaskParameters() {
-        Map<String, Object> params = new HashMap<String, Object>();
-        Collection<String> pmodeIds = new ArrayList<String>();
-        for(PMode p : pmodes) 
+        final Map<String, Object> params = new HashMap<>();
+        final Collection<String> pmodeIds = new ArrayList<>();
+        for(final PMode p : pmodes)
             pmodeIds.add(p.id);
-        
+
         params.put(PullWorker.PARAM_PMODES, pmodeIds);
         params.put(PullWorker.PARAM_INCLUDE, inclusive);
-        
+
         return params;
     }
 
@@ -112,9 +113,9 @@ public class PullerConfig implements IWorkerConfiguration {
     public boolean activate() {
         return interval > 0;
     }
-    
+
     /**
-     * @return The 
+     * @return The
      */
     public int getDelay() {
         // Return value is in millieseconds, interval is spec'd in seconds

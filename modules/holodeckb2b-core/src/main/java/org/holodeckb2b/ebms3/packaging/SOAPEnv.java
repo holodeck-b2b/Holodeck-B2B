@@ -24,8 +24,8 @@ import org.apache.axiom.soap.SOAPFactory;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 
 /**
- * Is a helper class for handling a SOAPEnv for an ebMS V3 message. 
- * <p>Note: This class is named SOAPEnv to avoid confusion with the SOAPEnvelope 
+ * Is a helper class for handling a SOAPEnv for an ebMS V3 message.
+ * <p>Note: This class is named SOAPEnv to avoid confusion with the SOAPEnvelope
  * class of the Axis2/Axiom framework.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -41,15 +41,15 @@ public class SOAPEnv {
      * The prefix of the ebMS header block elements.
      */
     private static final String EBMS3_NS_PREFIX = "eb3";
-    
+
     /**
      * Creates a new SOAP Envelope for sending an ebMS 3 message. The created SOAP
      * envelop will already contain a declaration of the ebMS 3 namespace.
-     * 
+     *
      * @param   v       The SOAP version to use
      * @return  The newly created SOAP envelope
      */
-    public static org.apache.axiom.soap.SOAPEnvelope createEnvelope(SOAPVersion v) {
+    public static org.apache.axiom.soap.SOAPEnvelope createEnvelope(final SOAPVersion v) {
         SOAPFactory omFactory = null;
 
         // Check which SOAP version to use
@@ -58,51 +58,51 @@ public class SOAPEnv {
         } else if (v == SOAPVersion.SOAP_12) {
             omFactory = OMAbstractFactory.getSOAP12Factory();
         }
-        
-        org.apache.axiom.soap.SOAPEnvelope envelope = omFactory.getDefaultEnvelope();
-        
+
+        final org.apache.axiom.soap.SOAPEnvelope envelope = omFactory.getDefaultEnvelope();
+
         declareNamespaces(envelope);
-        
+
         return envelope;
     }
-    
+
     /**
-     * Ensures that the requires namespaces are declared on the SOAP envelope element. 
-     * 
+     * Ensures that the requires namespaces are declared on the SOAP envelope element.
+     *
      * @param envelope  The SOAP envelope element to add the namespace declarations to
      */
-    public static void declareNamespaces(SOAPEnvelope envelope) {
+    public static void declareNamespaces(final SOAPEnvelope envelope) {
         // Declare all namespaces that are needed by default
         envelope.declareNamespace("http://www.w3.org/1999/XMLSchema-instance/", "xsi");
         envelope.declareNamespace("http://www.w3.org/1999/XMLSchema", "xsd");
         envelope.declareNamespace(EbMSConstants.EBMS3_NS_URI, EBMS3_NS_PREFIX);
     }
 
-    
+
     /**
      * Gets an {@link OMNamespace} object for the ebMS 3 namespace for the SOAP
      * envelope the given element is contained in.
-     * 
+     *
      * @param   e     The element that is contained in the SOAP envelop
-     * @return  The {@link OMNamespace} object for the ebMS 3 namespace if it was 
+     * @return  The {@link OMNamespace} object for the ebMS 3 namespace if it was
      *          declared in this SOAP message;
      *          <code>null</code> if there is no namespace declared for ebMS 3
      */
-    public static OMNamespace getEbms3Namespace(OMElement e) {
+    public static OMNamespace getEbms3Namespace(final OMElement e) {
         return e.findNamespace(EbMSConstants.EBMS3_NS_URI, null);
     }
-    
+
     /**
      * Checks whether this SOAP message is an ebMS V3 message. A SOAP message
      * is an ebMS V3 message when it contains the ebMS header element <code>eb:Messaging</code>
-     * 
+     *
      * @param   env     The SOAP Envelope of the SOAP message to check
-     * @return          <code>true</code> when this is an ebMS V3 message, 
+     * @return          <code>true</code> when this is an ebMS V3 message,
      *                  <code>false</code> if not.
      */
-    public static boolean isEbms3Message(SOAPEnvelope env) {
+    public static boolean isEbms3Message(final SOAPEnvelope env) {
         // Try to get the ebMS header from the SOAP envelope
-        OMElement ebMessagingHeader = Messaging.getElement(env);
+        final OMElement ebMessagingHeader = Messaging.getElement(env);
         // If it returned a object, this is an ebMS message, otherwise it is not
         return (ebMessagingHeader != null);
     }

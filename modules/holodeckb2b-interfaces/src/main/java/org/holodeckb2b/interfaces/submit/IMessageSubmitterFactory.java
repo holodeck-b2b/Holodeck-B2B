@@ -18,16 +18,16 @@ package org.holodeckb2b.interfaces.submit;
 
 /**
  * Describes the interface of the factory class to create instances of {@link IMessageSubmitter}
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface IMessageSubmitterFactory {
-    
+
     /**
-     * Creates a {@link IMessageSubmitter} that can be used to submit a user 
+     * Creates a {@link IMessageSubmitter} that can be used to submit a user
      * message message unit.
-     * 
-     * @return  The {@link IMessageSubmitter} to use for submission of the 
+     *
+     * @return  The {@link IMessageSubmitter} to use for submission of the
      *          user message
      */
     public IMessageSubmitter createMessageSubmitter();

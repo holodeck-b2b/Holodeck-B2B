@@ -17,6 +17,7 @@
 package org.holodeckb2b.interfaces.pmode;
 
 import java.util.Collection;
+
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.IService;
 
@@ -25,44 +26,44 @@ import org.holodeckb2b.interfaces.general.IService;
  * is part of. This meta-data can be used by the business application to determine how the message should be processed.
  * This information is also used by Holodeck B2B to determine which P-Mode defines the processing of a received message,
  * especially if they do not contain the P-Mode id.
- * 
+ *
  * @author Bram Bakx <bram at holodeck-b2b.org>
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface IBusinessInfo {
- 
+
     /**
      * Gets the business level operation/activity requested to be executed.
-     * 
+     *
      * @return The name of the business level operation to handle the message.
      */
     public String getAction();
-    
+
     /**
-     * Gets the message partition channel the user message to sent or pull is assigned to. As described in the ebMS Core 
+     * Gets the message partition channel the user message to sent or pull is assigned to. As described in the ebMS Core
      * Specification it is not required to specify the MPC. If no MPC is given in either the P-Mode or when the message
-     * is submitted it assumed to be assigned to the default MPC. 
-     * 
+     * is submitted it assumed to be assigned to the default MPC.
+     *
      * @return The URI identifying the MPC that the message to sent or pull is assigned to.
      */
     public String getMpc();
-    
+
     /**
      * Gets the business service that is [supposed] to handle the user message.
-     * 
+     *
      * @return An {@link IService} object containing the meta-data on the service
      */
     public IService getService();
-    
+
     /**
      * Gets the set of additional meta-data properties required to handle the message.
-     * <p>Note that properties defined in the P-Mode will be included in all user messages. If properties depend on the 
-     * actual content of the message they should be supplied when the message is submitted. To enable specifying both 
-     * generic and specific properties Holodeck B2B will combine the property sets from P-Mode and submission when 
-     * processing a message. If both sets contain a property with the same name, the value given at message submission 
+     * <p>Note that properties defined in the P-Mode will be included in all user messages. If properties depend on the
+     * actual content of the message they should be supplied when the message is submitted. To enable specifying both
+     * generic and specific properties Holodeck B2B will combine the property sets from P-Mode and submission when
+     * processing a message. If both sets contain a property with the same name, the value given at message submission
      * will be used.
-     * 
+     *
      * @return The set of user defined meta-data properties
      */
-    public Collection<IProperty> getProperties();    
+    public Collection<IProperty> getProperties();
 }

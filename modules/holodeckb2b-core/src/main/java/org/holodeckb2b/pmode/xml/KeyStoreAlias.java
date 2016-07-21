@@ -23,14 +23,14 @@ import org.simpleframework.xml.Text;
  * Represents a <code>KeystoreAlias</code> element in the P-Mode XML document that contains a reference to a certificate
  * in one of the keystores. The reference consists of at least the alias that is used to identify the certificate in the
  * keystore and optionally a password to access the private key from the certificate.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 class KeystoreAlias {
 
     @Text
     String  name = null;
-    
+
     @Attribute(required = false)
     String  password = null;
 }

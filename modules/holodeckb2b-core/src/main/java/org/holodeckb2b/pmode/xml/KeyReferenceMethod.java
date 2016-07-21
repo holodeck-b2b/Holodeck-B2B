@@ -20,9 +20,9 @@ import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
 import org.simpleframework.xml.Text;
 
 /**
- * Represents an element in the P-Mode XML document with type <code>KeyReferenceMethods</code>. Converts the strings 
+ * Represents an element in the P-Mode XML document with type <code>KeyReferenceMethods</code>. Converts the strings
  * used in the XML document to equivalent value of {@link X509ReferenceType} enumeration.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 class KeyReferenceMethod {
@@ -30,10 +30,10 @@ class KeyReferenceMethod {
     private static final String ISSUER_SERIAL = "IssuerSerial";
     private static final String BST_REFERENCE = "BSTReference";
     private static final String SKI = "KeyIdentifier";
-    
+
     @Text
     String  referenceMethod = null;
-    
+
     X509ReferenceType   getRefMethod() {
         if (BST_REFERENCE.equals(referenceMethod))
             return X509ReferenceType.BSTReference;
@@ -41,6 +41,6 @@ class KeyReferenceMethod {
             return X509ReferenceType.KeyIdentifier;
         else
             return X509ReferenceType.IssuerAndSerial;
-    }                        
-    
+    }
+
 }

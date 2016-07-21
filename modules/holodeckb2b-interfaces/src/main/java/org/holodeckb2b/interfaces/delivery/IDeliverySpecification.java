@@ -20,16 +20,16 @@ package org.holodeckb2b.interfaces.delivery;
 import java.util.Map;
 
 /**
- * Is used to specify how a message unit should be delivered to the business application.      
- * <p>Holodeck B2B itself does not deliver the message unit, the actual delivery is done through 
+ * Is used to specify how a message unit should be delivered to the business application.
+ * <p>Holodeck B2B itself does not deliver the message unit, the actual delivery is done through
  * {@link IMessageDeliverer}s. The delivery specification tells Holodeck B2B how to construct the correct deliverer.
  * <p>The delivery specification consists of the {@link IMessageDelivererFactory} that should be used to create the
- * actual {@link IMessageDeliverer} and the settings needed to configure them. 
- * <p>The delivery specification is part of the P-Mode that governs the message exchange.For each delivery specification 
- * Holodeck B2B will create a factory with the given settings. To allow reuse of a delivery method instance (i.e. a 
- * configured delivered method) the [optional] id of a delivery specification will be used by Holodeck B2B to determine 
+ * actual {@link IMessageDeliverer} and the settings needed to configure them.
+ * <p>The delivery specification is part of the P-Mode that governs the message exchange.For each delivery specification
+ * Holodeck B2B will create a factory with the given settings. To allow reuse of a delivery method instance (i.e. a
+ * configured delivered method) the [optional] id of a delivery specification will be used by Holodeck B2B to determine
  * if it can reuse an existing factory.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see IMessageDelivererFactory
  * @see IMessageDeliverer
@@ -37,29 +37,29 @@ import java.util.Map;
 public interface IDeliverySpecification {
 
     /**
-     * Returns the id of this delivery specification. This id is used by Holodeck B2B to determine whether it must 
+     * Returns the id of this delivery specification. This id is used by Holodeck B2B to determine whether it must
      * create and configure a new {@link IMessageDelivererFactory}. If no id is returned Holodeck B2B will always create
      * a new factory.
      * <p><b>NOTE: </b>Configurations should take care of uniquely identifying delivery specifications as Holodeck B2B
      * will only use the id to check for equivalence.
-     * 
+     *
      * @return  The id of this delivery specification or <code>null</code> if this specification has no id.
      */
     String getId();
-    
+
     /**
-     * Gets the class name of the {@link IMessageDelivererFactory} implementation that should be used to create actual 
+     * Gets the class name of the {@link IMessageDelivererFactory} implementation that should be used to create actual
      * {@link IMessageDeliverer} objects.
-     * 
+     *
      * @return  Class name of the {@link IMessageDelivererFactory} implementation to use for creating actual message
      *          deliverers
      */
     String getFactory();
-    
+
     /**
      * Returns the settings that should be used to configure the message delivery.
      * Holodeck B2B will not process the settings and just pass them to the factory class.
-     * 
+     *
      * @return The settings to use for this specific delivery
      */
     Map<String, ?> getSettings();

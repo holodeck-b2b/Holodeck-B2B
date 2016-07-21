@@ -31,14 +31,14 @@ import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
- * Is the <i>IN_FLOW</i> handler responsible for the delivery of the User message message unit to the business 
- * application. 
- * <p>To prevent that the message unit is delivered twice in parallel delivery only takes place when the processing 
- * state can be successfully changed from {@link ProcessingStates#READY_FOR_DELIVERY} to 
+ * Is the <i>IN_FLOW</i> handler responsible for the delivery of the User message message unit to the business
+ * application.
+ * <p>To prevent that the message unit is delivered twice in parallel delivery only takes place when the processing
+ * state can be successfully changed from {@link ProcessingStates#READY_FOR_DELIVERY} to
  * {@link ProcessingStates#OUT_FOR_DELIVERY}.
- * <p>NOTE: The actual delivery to the business application is done through a <i>DeliveryMethod</i> which is specified 
+ * <p>NOTE: The actual delivery to the business application is done through a <i>DeliveryMethod</i> which is specified
  * in the P-Mode for this message unit.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class DeliverUserMessage extends AbstractUserMessageHandler {
@@ -49,11 +49,11 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> umProxy) throws DatabaseException {
+    protected InvocationResponse doProcessing(final MessageContext mc, final EntityProxy<UserMessage> umProxy) throws DatabaseException {
         // Extract the entity object
-        UserMessage um = umProxy.entity;
-        
-        // Prepare message for delivery by checking it is still ready for delivery and then 
+        final UserMessage um = umProxy.entity;
+
+        // Prepare message for delivery by checking it is still ready for delivery and then
         // change its processing state to "out for delivery"
         log.debug("Prepare message [" + um.getMessageId() + "] for delivery");
         if(MessageUnitDAO.startDeliveryOfMessageUnit(umProxy)) {
@@ -61,20 +61,20 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
             log.debug("Start delivery of user message");
             try {
                 // Get the delivery specification from the P-Mode
-                IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
+                final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
                 // For now we just have one leg, so we get the delivery spec of the first leg
-                IDeliverySpecification deliveryMethod = pmode.getLegs().iterator().next().getDefaultDelivery();
-                IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliveryMethod);
+                final IDeliverySpecification deliveryMethod = pmode.getLegs().iterator().next().getDefaultDelivery();
+                final IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliveryMethod);
                 log.debug("Delivering the message using delivery specification: " + deliveryMethod.getId());
                 deliverer.deliver(um);
                 // Indicate that message is delivered so receipt can be created
                 mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);
                 log.info("Successfully delivered user message [msgId=" + um.getMessageId() +"]");
-                log.debug("Set the processing state to delivered");            
-                MessageUnitDAO.setDelivered(umProxy);                
-            } catch (MessageDeliveryException ex) {
-                log.error("Could not deliver the user message [msgId=" + um.getMessageId() 
-                            + "] using specified delivery method!" 
+                log.debug("Set the processing state to delivered");
+                MessageUnitDAO.setDelivered(umProxy);
+            } catch (final MessageDeliveryException ex) {
+                log.error("Could not deliver the user message [msgId=" + um.getMessageId()
+                            + "] using specified delivery method!"
                             + "\n\tError details: " + ex.getMessage());
                 // Indicate failure in processing state
                 MessageUnitDAO.setDeliveryFailure(umProxy);

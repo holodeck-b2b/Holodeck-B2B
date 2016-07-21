@@ -29,12 +29,12 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
  * Is a base class for checking file system changes. Extends {@link AbstractWorkerTask} so it can be run as part of a
- * Holodeck B2B worker pool. 
+ * Holodeck B2B worker pool.
  * <p>This worker takes one <code>String</code> parameter named <i>watchedPath</i> indicating the path to watch for
  * changes. Sub classes are responsible for getting the file list to check by implementing {@link #getFileList()}.
  * <p><b>NOTE:</b> When comparing files for changes the timestamp of the file system is used. This can lead to problems
  * if the file system does not handle these timestamps in milliseconds and changes occur very quickly.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see WorkerPool
  */
@@ -45,22 +45,22 @@ public abstract class PathWatcher extends AbstractWorkerTask {
      */
     protected class FileListing {
 
-        public FileListing(String path, long lastModified) {
+        public FileListing(final String path, final long lastModified) {
             this.path = path;
             this.lastModified = lastModified;
         }
-        
+
         String  path;
         long    lastModified;
     }
-            
+
     /**
      * Enumeration of the events that can happen
      */
     public enum Event {
         ADDED, CHANGED, REMOVED
-    } 
-    
+    }
+
     /**
      * The watched directory
      */
@@ -69,13 +69,13 @@ public abstract class PathWatcher extends AbstractWorkerTask {
     /**
      * File listing of last check
      */
-    private List<FileListing> lastListing = new LinkedList<FileListing>();
-        
+    private List<FileListing> lastListing = new LinkedList<>();
+
     /**
-     * Is called before processing of changes in the file list starts. 
-     * <p>This method can be used by implementations to prepare for handling the changes.  
+     * Is called before processing of changes in the file list starts.
+     * <p>This method can be used by implementations to prepare for handling the changes.
      */
-    protected void doPreProcessing() {}    
+    protected void doPreProcessing() {}
 
     /**
      * Should handle a change in the watched path. This <b>abstract</b> method is
@@ -85,23 +85,23 @@ public abstract class PathWatcher extends AbstractWorkerTask {
      * @param  event    The event that occurred
      */
     protected abstract void onChange(File f, Event event);
-    
+
     /**
-     * Is called after processing of changes in the file list starts. 
-     * <p>This method can be used by implementations to finalize the processing of changes.  
+     * Is called after processing of changes in the file list starts.
+     * <p>This method can be used by implementations to finalize the processing of changes.
      */
-    protected void doPostProcessing() {}    
-    
+    protected void doPostProcessing() {}
+
     /**
      * Should return the current list of files on the given path.
-     * 
+     *
      * @return An array of {@link File} handles to the files currently on the path
      */
     protected abstract File[] getFileList();
-    
+
     /**
      * Sets the parameters of the watcher.
-     * <p>This base class handles setting of just one parameter: <b>watchPath</b>, the path to watch for changes. Sub 
+     * <p>This base class handles setting of just one parameter: <b>watchPath</b>, the path to watch for changes. Sub
      * class can override this method if they need additional parameters, but MUST always call this method to ensure
      * correct initialization.
      *
@@ -110,7 +110,7 @@ public abstract class PathWatcher extends AbstractWorkerTask {
      *                                      based on the supplied parameters
      */
     @Override
-    public void setParameters(Map<String, ?> parameters) throws TaskConfigurationException {
+    public void setParameters(final Map<String, ?> parameters) throws TaskConfigurationException {
         if (log == null) {
             log = LogFactory.getLog(this.getClass());
         }
@@ -118,7 +118,7 @@ public abstract class PathWatcher extends AbstractWorkerTask {
             log.error("Unable to configure task: Missing required parameter \"watchPath\"");
             throw new TaskConfigurationException("Missing required parameter \"watchPath\"");
         }
-        String dir = (String) parameters.get("watchPath");
+        final String dir = (String) parameters.get("watchPath");
         if (dir == null || dir.isEmpty()) {
             log.error("Unable to configure task: Missing required parameter \"watchPath\"");
             throw new TaskConfigurationException("Missing required parameter \"watchPath\"");
@@ -134,45 +134,45 @@ public abstract class PathWatcher extends AbstractWorkerTask {
     }
 
     /**
-     * Checks if there were changes on the given path. The actual file list to compare is determined by the sub class 
-     * in method <code>getFileList()</code>. 
-     * <p>For each detected change {@link #onChange(java.io.File, org.holodeckb2b.common.workers.PathWatcher.Event)} is 
-     * called. Before reporting the changes <code>doPreProcessing()</code> is called to allow a subclass to prepare for 
-     * handling changed files. And after all changes are reported <code>doPostProcessing()</code> is called to finalize 
+     * Checks if there were changes on the given path. The actual file list to compare is determined by the sub class
+     * in method <code>getFileList()</code>.
+     * <p>For each detected change {@link #onChange(java.io.File, org.holodeckb2b.common.workers.PathWatcher.Event)} is
+     * called. Before reporting the changes <code>doPreProcessing()</code> is called to allow a subclass to prepare for
+     * handling changed files. And after all changes are reported <code>doPostProcessing()</code> is called to finalize
      * processing.
-     * 
-     * @see #getFileList() 
+     *
+     * @see #getFileList()
      * @see #doPreProcessing()
-     * @see #doPostProcessing() 
+     * @see #doPostProcessing()
      */
     @Override
     public void doProcessing() {
         doPreProcessing();
-        
+
         log.debug("Scanning path [" + watchPath + "] for changes");
-        
+
         // Get the current file listing
-        File[] N = getFileList(); 
+        File[] N = getFileList();
         if (N == null)
             N = new File[0];
-        
+
         // Convert the last listing to simply accessible array
-        FileListing[] O = lastListing.toArray(new FileListing[0]);
+        final FileListing[] O = lastListing.toArray(new FileListing[0]);
         // While going through the listing we build a new list of meta data on current files
-        List<FileListing> C = new LinkedList<FileListing>();
+        final List<FileListing> C = new LinkedList<>();
         // i, j are indexes for going through both array. r,c and n count then number of removals, changes and new files
         int i = 0, j = 0, r = 0, c = 0, n = 0;
         while ( i < O.length || j < N.length) {
             if (j == N.length || (i < O.length && O[i].path.compareTo(N[j].getAbsolutePath()) < 0)) {
                 try { onChange(new File(O[i].path), Event.REMOVED); }
-                catch (Exception e) 
+                catch (final Exception e)
                     { log.error("Unhandled exception while processing changed file. Details: " + e.getMessage()); }
                 finally { i++; r++; }
-            } 
+            }
             else if (i == O.length) {
                 C.add(new FileListing(N[j].getAbsolutePath(), N[j].lastModified()));
                 try { onChange(N[j], Event.ADDED); }
-                catch (Exception e) 
+                catch (final Exception e)
                     { log.error("Unhandled exception while processing changed file. Details: " + e.getMessage()); }
                 finally { j++; n++; }
             }
@@ -180,7 +180,7 @@ public abstract class PathWatcher extends AbstractWorkerTask {
                 C.add(new FileListing(N[j].getAbsolutePath(), N[j].lastModified()));
                 if (O[i].lastModified < N[j].lastModified()) {
                     try { onChange(N[j], Event.CHANGED); }
-                    catch (Exception e) 
+                    catch (final Exception e)
                         { log.error("Unhandled exception while processing changed file. Details: " + e.getMessage()); }
                     finally { c++; }
                 }
@@ -188,20 +188,20 @@ public abstract class PathWatcher extends AbstractWorkerTask {
             }
             else if (O[i].path.compareTo(N[j].getAbsolutePath()) > 0) {
                 C.add(new FileListing(N[j].getAbsolutePath(), N[j].lastModified()));
-                try { onChange(N[j], Event.ADDED); } 
-                catch (Exception e) 
+                try { onChange(N[j], Event.ADDED); }
+                catch (final Exception e)
                     { log.error("Unhandled exception while processing changed file. Details: " + e.getMessage()); }
                 finally { j++; n++; }
-            }           
+            }
         }
-        
-        log.debug("Scanned " + watchPath + ", " + (r+c+n) + " changes: " + r + " files removed, " 
+
+        log.debug("Scanned " + watchPath + ", " + (r+c+n) + " changes: " + r + " files removed, "
                     + n + " files added and " + c + " files modified.");
         lastListing = C;
-        
+
         doPostProcessing();
     }
-    
 
-    
+
+
 }

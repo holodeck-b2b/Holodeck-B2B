@@ -17,12 +17,13 @@
 package org.holodeckb2b.ebms3.constants;
 
 import javax.xml.namespace.QName;
+
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.WSSecurityEngineResult;
 
 /**
- * EbMSConstants used in the security related processing of the messages. 
- * 
+ * EbMSConstants used in the security related processing of the messages.
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public final class SecurityConstants {
@@ -32,52 +33,52 @@ public final class SecurityConstants {
      * context properties
      */
     private static final String PREFIX = "hb2b-sec:";
-    
+
     /**
      * The WS-Security namespace URI
      */
-    public static final String WSS_NAMESPACE_URI = 
+    public static final String WSS_NAMESPACE_URI =
                                 "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
-    
+
     /**
      * The WS-Security utilities namespace URI
      */
-    public static final String WSU_NAMESPACE_URI = 
-                                "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";    
-    
+    public static final String WSU_NAMESPACE_URI =
+                                "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
+
     /**
      * The QName for the wsu:Id attribute defined in the WS-Security spec
      */
     public static final QName  QNAME_WSU_ID = new QName(WSU_NAMESPACE_URI, "Id");
-    
+
     /**
      * The namespace URI for XML Signatures
      */
     public static final String DSIG_NAMESPACE_URI = "http://www.w3.org/2000/09/xmldsig#";
-    
+
     /**
      * Identifier for the default WSS header (without actor/role attribute). Used to indicate in which security header
-     * tokens were found 
+     * tokens were found
      */
     public static final String DEFAULT_WSS_HEADER = "wsse";
-    
+
     /**
-     * Identifier for the WSS header targeted to "ebms" actor/role. Used to indicate in which security header tokens 
-     * were found 
+     * Identifier for the WSS header targeted to "ebms" actor/role. Used to indicate in which security header tokens
+     * were found
      */
     public static final String EBMS_WSS_HEADER = "ebms";
-    
+
     /**
-     * Indicator whether security headers must be added to this message. 
+     * Indicator whether security headers must be added to this message.
      */
     public static final String ADD_SECURITY_HEADERS = PREFIX + "create-headers";
-    
+
     /**
      * Key for including the {@link WSSecurityException} in the {@link WSSecurityEngineResult} when the processing of
      * an element in the header fails.
      */
     public static final String WSS_PROCESSING_FAILURE = PREFIX + "wss4j-exception";
-    
+
     /**
      * Identifier for the MessageContext property that indicates that default WS-Sec header was invalid. The value of
      * the property indicates what caused the problem.
@@ -85,42 +86,42 @@ public final class SecurityConstants {
     public static final String INVALID_DEFAULT_HEADER = PREFIX + "invalid:" + DEFAULT_WSS_HEADER;
 
     /**
-     * Identifier for the MessageContext property that indicates that WS-Sec header targeted to the "ebms" role was 
+     * Identifier for the MessageContext property that indicates that WS-Sec header targeted to the "ebms" role was
      * invalid. The value of the property indicates what caused the problem. Note that currently the only fault cause
      * can be the Username Token.
      */
     public static final String INVALID_EBMS_HEADER = PREFIX + "invalid:" + EBMS_WSS_HEADER;
-    
+
     /**
-     * Enumeration of fault causes in processing the WS-Security header.  
+     * Enumeration of fault causes in processing the WS-Security header.
      */
     public static enum WSS_FAILURES { DECRYPTION, SIGNATURE, UT, UNKNOWN }
-    
+
     /**
      * Identifier for the MessageContext property that holds all authentication information for the current message.
      */
     public static final String MC_AUTHENTICATION_INFO = PREFIX + "authinfo";
-    
+
     /**
-     * Identifier for the WSS UsernameToken included in the default WSS header. 
+     * Identifier for the WSS UsernameToken included in the default WSS header.
      */
     public static final String DEFAULT_USERNAMETOKEN = PREFIX + DEFAULT_WSS_HEADER + ":UsernameToken";
-    
+
     /**
      * Identifier for the WSS UsernameToken included in the WSS header targeted to the "ebms" role.
      */
     public static final String EBMS_USERNAMETOKEN = PREFIX + EBMS_WSS_HEADER + ":UsernameToken";
-    
+
     /**
      * Identifier for the WSS Signature info included in the WSS header
      */
     public static final String SIGNATURE = PREFIX + "Signature";
-    
+
     /**
      * Identifier for the WSS encryption info included in the WSS header
      */
     public static final String ENCRYPTION = PREFIX + "Encryption";
-    
+
     /**
      * Identifier for the indicator whether the SOAP Body should be encrypted
      */

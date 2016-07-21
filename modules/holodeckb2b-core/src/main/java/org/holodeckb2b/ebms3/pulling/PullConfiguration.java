@@ -20,7 +20,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.persistence.PersistenceException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.workerpool.WorkerPool;
@@ -37,12 +39,12 @@ import org.simpleframework.xml.core.Validate;
 /**
  * Is a implementation of {@link IWorkerPoolConfiguration} specifically for creating a pool of <i>pull workers</i> that
  * send out the pull requests.
- * <p>The pull worker pool exists of one default pull worker and zero or more specific pull workers. The specific 
+ * <p>The pull worker pool exists of one default pull worker and zero or more specific pull workers. The specific
  * pull workers handle the pulling for a given set of P-Modes. The default pull worker will handle all other pulling.
  * For each worker an interval is specified to wait between sending of the pull request. If the interval equals 0 the
- * pull worker will not be activated and pulling will be disabled. 
+ * pull worker will not be activated and pulling will be disabled.
  * <p>The configuration of the pool is read from an XML document defined by the schema <code>http://holodeck-b2b.org/schemas/2014/05/pullconfiguration</code>
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see WorkerPool
  * @see PullWorker
@@ -56,10 +58,10 @@ public class PullConfiguration implements IWorkerPoolConfiguration {
      * The name of the worker pool that contains the workers that execute the PullRequests
      */
     public static final String PULL_WORKER_POOL_NAME = "holodeckb2b:pullers";
-    
+
     @Element(name = "default")
     private PullerConfig  defaultPuller;
-    
+
     @ElementList(entry = "pull", inline = true, required = false)
     private List<PullerConfig>  pullers;
 
@@ -71,7 +73,7 @@ public class PullConfiguration implements IWorkerPoolConfiguration {
      * <li>There are no referenced P-Modes for the default puller</li>
      * <li>There is at least one reference P-Mode for each specific puller</li>
      * </ol>
-     * 
+     *
      * @throws PersistenceException When the read XML fails one of the checks
      */
     @Validate
@@ -79,16 +81,16 @@ public class PullConfiguration implements IWorkerPoolConfiguration {
         // Default puller should have no PModes associated with it
         if(defaultPuller.pmodes != null && !defaultPuller.pmodes.isEmpty())
             throw new PersistenceException("The default puller should not specify specific PModes!");
-        
+
         // A specific puller must specifiy at least one PMode
         if(pullers != null) {
-            for(PullerConfig p : pullers)
+            for(final PullerConfig p : pullers)
                 if(p.pmodes == null || p.pmodes.isEmpty())
                     throw new PersistenceException("Specific puller must reference at least one PMode!");
         }
     }
 
-    
+
     /**
      * @return The name of this worker pool is fixed and defined by {@link HolodeckB2BCore#PULL_WORKER_POOL_NAME}.
      */
@@ -98,20 +100,20 @@ public class PullConfiguration implements IWorkerPoolConfiguration {
     }
 
     /**
-     * Converts the different pull options defined in the XML configuration to a list {@link IWorkerConfiguration} 
+     * Converts the different pull options defined in the XML configuration to a list {@link IWorkerConfiguration}
      * objects needed for the configuration of the worker pool.
-     * 
+     *
      * @return The configurations for the pull workers part of the worker pool based on the XML configuration.
-     * @see    WorkerPool 
+     * @see    WorkerPool
      */
     @Override
     public List<IWorkerConfiguration> getWorkers() {
-        ArrayList<IWorkerConfiguration> pullWorkers = new ArrayList<IWorkerConfiguration>();
+        final ArrayList<IWorkerConfiguration> pullWorkers = new ArrayList<>();
         // The P-Modes that have a specific pull worker should not be included in the default one, so collect them
-        ArrayList<PullerConfig.PMode>   notDefault = new ArrayList<PullerConfig.PMode>();
-       
+        final ArrayList<PullerConfig.PMode>   notDefault = new ArrayList<>();
+
         for (int i = 0; pullers != null && i < pullers.size(); i++) {
-            PullerConfig p = pullers.get(i);
+            final PullerConfig p = pullers.get(i);
             // Set a unique name for each puller worker
             p.name = "p" + (new Date()).getTime() + i;
             pullWorkers.add(p);
@@ -127,33 +129,33 @@ public class PullConfiguration implements IWorkerPoolConfiguration {
 
         return pullWorkers;
     }
-    
+
     /**
-     * Loads the pulling configuration from file. 
-     * 
+     * Loads the pulling configuration from file.
+     *
      * @param path      Path to the XML document containing the pulling configuration
      * @return          The pulling configuration if successfully loaded, null otherwise
      */
-    public static PullConfiguration  loadFromFile(String  path) {
-        Log log = LogFactory.getLog(PullConfiguration.class);
+    public static PullConfiguration  loadFromFile(final String  path) {
+        final Log log = LogFactory.getLog(PullConfiguration.class);
         PullConfiguration    pullCfg = null;
-        
+
         log.debug("Loading pulling configuration from XML document in " + path);
-        
-        File f = new File(path);
-        
+
+        final File f = new File(path);
+
         if (f.exists() && f.canRead()) {
-            Serializer serializer = new Persister();
+            final Serializer serializer = new Persister();
             try {
                 pullCfg = serializer.read(PullConfiguration.class, f);
                 log.debug("Loaded configuration");
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 log.error("Error while reading configuration from " + path + "! Details: " + ex.getMessage());
             }
          } else
             log.error("Unable to access configuration file" + path + "!");
-        
-        
+
+
         return pullCfg;
-    }        
+    }
 }

@@ -23,15 +23,15 @@ import org.simpleframework.xml.Text;
 
 /**
  * Represents a <code>PartyId</code> element in the MMD document.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 @Root
 public class PartyId implements IPartyId {
-    
+
     @Text
     private String  id;
-    
+
     @Attribute(required = false)
     private String  type;
 
@@ -39,13 +39,13 @@ public class PartyId implements IPartyId {
      * Default constructor
      */
     public PartyId() {}
-    
+
     /**
      * Creates a <code>PartyId</code> with given data
-     * 
+     *
      * @param pid   The PartyId data to use
      */
-    public PartyId(IPartyId pid) {
+    public PartyId(final IPartyId pid) {
         this.id = pid.getId();
         this.type = pid.getType();
     }
@@ -60,7 +60,7 @@ public class PartyId implements IPartyId {
     /**
      * @param id the id to set
      */
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
@@ -75,8 +75,8 @@ public class PartyId implements IPartyId {
     /**
      * @param type the type to set
      */
-    public void setType(String type) {
+    public void setType(final String type) {
         this.type = type;
     }
-    
+
 }

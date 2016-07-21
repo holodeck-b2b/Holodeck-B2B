@@ -20,37 +20,37 @@ package org.holodeckb2b.interfaces.general;
 import javax.xml.namespace.QName;
 
 /**
- * Is a placeholder for constants holding values defined in or directly related to the ebMS Specifications. 
- * 
+ * Is a placeholder for constants holding values defined in or directly related to the ebMS Specifications.
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public final class EbMSConstants {
-    
+
     /**
      * The fully qualified name of the xml:id attribute as specified in http://www.w3.org/TR/xml-id/
      */
     public static final QName QNAME_XMLID = new QName("http://www.w3.org/XML/1998/namespace", "id");
-    
+
     /**
      * The URI of the ebMS namespace for the XSD that defines the ebMS message header
      */
     public static final String EBMS3_NS_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/";
-    
+
     /**
      * The default namespace prefix to use for the ebMS namespace
      */
     public static final String EBMS3_NS_PREFIX = "eb3";
-    
+
     /**
      * The default MPC, see section 3.4.1 of the ebMS 3 Core Specification
      */
     public static final String DEFAULT_MPC = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC";
-    
+
     /**
      * The default role, see section 5.2.2.3 of the ebMS 3 Core Specification
      */
     public static final String DEFAULT_ROLE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultRole";
-    
+
     /**
      * URI identifying a One-Way MEP
      */
@@ -88,6 +88,6 @@ public final class EbMSConstants {
     /*
      * This class is just a place holder for constants and should not be
      * instantiated! Therefore the default constructor is made private.
-     */        
+     */
     private EbMSConstants() {}
 }

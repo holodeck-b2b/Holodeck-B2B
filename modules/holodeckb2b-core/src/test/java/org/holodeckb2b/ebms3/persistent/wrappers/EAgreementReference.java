@@ -17,29 +17,31 @@
 package org.holodeckb2b.ebms3.persistent.wrappers;
 
 import java.io.Serializable;
+
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
 import org.holodeckb2b.ebms3.persistency.entities.AgreementReference;
 
 /**
  * JPA Entity wrapper for testing {@see AgreementReference}
- * 
+ *
  * @author Sander Fieten <sander at holodeckb2b.org>
  */
 @Entity
 @Table(name="T_AGREEMENTREF")
 public class EAgreementReference implements Serializable {
-    
+
     @Id
     @GeneratedValue
     private long id;
-    
+
     @Embedded
     public AgreementReference   eAgreement;
-    
+
     public EAgreementReference() {
         eAgreement = new AgreementReference();
     }

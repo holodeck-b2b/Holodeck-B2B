@@ -19,44 +19,44 @@ package org.holodeckb2b.interfaces.pmode.security;
 /**
  * Defines the configuration of a WSS UsernameToken contained in the security header of the ebMS message. Depending on
  * the direction (incoming or outgoing) of the message the information is used to set or validate the UsernameToken in
- * the WSS header. 
+ * the WSS header.
  * <p>As specified in section 7 of the Core Specification there can exist two <code>wsse:UsernameToken</code> elements
  * in the SOAP header, one targeted at the "default" actor/role and one at a specific "ebms" actor/role. The latter
- * can be used for message authorization (see section 7.10 and 7.11). Which element an instance of this interface 
- * configures is determined by the parent class. 
- * <p>Depending on the target (default or ebms) this interface corresponds with the P-Mode parameter groups 
+ * can be used for message authorization (see section 7.10 and 7.11). Which element an instance of this interface
+ * configures is determined by the parent class.
+ * <p>Depending on the target (default or ebms) this interface corresponds with the P-Mode parameter groups
  * <b>PMode.[Initiator|Responder].Authorization</b> ("ebms") or <b>PMode[1].Security.UsernameToken</b> (default).
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface IUsernameTokenConfiguration {
-    
+
     /**
      * Gets the username that should be (included) in the token.
-     * 
+     *
      * @return The username as String
      */
     public String getUsername();
-    
+
     /**
-     * Gets the password that should be (included) in the token. 
-     * <p>The password must be returned in clear text for processing by Holodeck B2B. Implementations MUST take care of 
+     * Gets the password that should be (included) in the token.
+     * <p>The password must be returned in clear text for processing by Holodeck B2B. Implementations MUST take care of
      * proper protection of the password.
-     * 
+     *
      * @return String containing the plain text password
      */
     public String getPassword();
-    
+
     /**
-     * Enumeration defining the supported password types as defined in the Web Services Security Username Token Profile 
+     * Enumeration defining the supported password types as defined in the Web Services Security Username Token Profile
      * Version 1.1.1, section 3.1
      */
-    public enum PasswordType { 
+    public enum PasswordType {
         /**
          * Indicates the password is included in clear text. NOT RECOMMENDED!
-         */ 
+         */
         TEXT,
-        
+
         /**
          * Indicates the password is included as a digest, optionally including nonce and/or creation timestamp
          */
@@ -66,48 +66,48 @@ public interface IUsernameTokenConfiguration {
     /**
      * Constant for the URI used to identify the clear text password type in the WSSE UsernameToken element.
      */
-    public static final String PWD_TYPE_TEXT_URI = 
+    public static final String PWD_TYPE_TEXT_URI =
                 "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText";
-    
+
     /**
      * Constant for the URI used to identify the digested password type in the WSSE UsernameToken element.
      */
-    public static final String PWD_TYPE_DIGEST_URI = 
+    public static final String PWD_TYPE_DIGEST_URI =
                 "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest";
-    
-    
+
+
     /**
      * Gets how the password should be included in the token as defined in the <i>WSS UsernameToken Profile</i>.
      * <p>Currently supported are the types defined in version 1.1.1 of the profile: plain text and digest as defined
      * in the enumeration above.
-     * 
+     *
      * @return The {@link PasswordType} to use for including the password in the username token
      */
     public PasswordType getPasswordType();
-    
+
     /**
-     * Returns indication whether the <code>wsse:Nonce</code> element should be (when sending the message) or is 
-     * included (when receiving the message) in the UsernameToken. 
+     * Returns indication whether the <code>wsse:Nonce</code> element should be (when sending the message) or is
+     * included (when receiving the message) in the UsernameToken.
      * <p>This element is used for protecting the password and preventing replay attacks. It is RECOMMENDED to include
      * it in the username token.
-     * 
-     * @return  <code>true</code> if Nonce element must be included. This means that when validating an incoming 
+     *
+     * @return  <code>true</code> if Nonce element must be included. This means that when validating an incoming
      *          request a <code>wsse:Nonce</code> MUST be present and is used for detection of replay attacks.
-     *          <code>false</code> otherwise. In this case there is no validation performed on the existence of the 
+     *          <code>false</code> otherwise. In this case there is no validation performed on the existence of the
      *          <code>wsse:Nonce</code> element. It MAY occur in the UsernameToken and if it does it will be used to
      *          prevent replay attacks.
      */
     public boolean includeNonce();
-    
+
     /**
-     * Returns indication whether the <code>wsu:Created</code> element should be (when sending the message) or is 
-     * included (when receiving the message) in the UsernameToken. 
+     * Returns indication whether the <code>wsu:Created</code> element should be (when sending the message) or is
+     * included (when receiving the message) in the UsernameToken.
      * <p>This element contains the timestamp when the username token is created. It is used to protect the password
      * and prevent replay attacks.
-     * 
-     * @return  <code>true</code> if Created element must be included. This means that when validating an incoming 
+     *
+     * @return  <code>true</code> if Created element must be included. This means that when validating an incoming
      *          request a <code>wsu:Created</code> MUST be present and is also used for detection of replay attacks.
-     *          <code>false</code> otherwise. In this case there is no validation performed on the existence of the 
+     *          <code>false</code> otherwise. In this case there is no validation performed on the existence of the
      *          <code>wsu:Created</code> element. It MAY occur in the UsernameToken and if it does it will be used to
      *          prevent replay attacks.
      */

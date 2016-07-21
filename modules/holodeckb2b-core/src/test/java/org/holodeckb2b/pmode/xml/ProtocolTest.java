@@ -16,12 +16,14 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import java.io.File;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -31,37 +33,37 @@ import org.simpleframework.xml.core.Persister;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class ProtocolTest {
-    
+
     public ProtocolTest() {
-    }    
-    
+    }
+
     /**
      * Create an Protocol from file.
-     * 
+     *
      * @param fName The filename for the Protocol
      * @return Protocol or NULL in case of an error
      */
-    public Protocol createFromFile(String fName) {
+    public Protocol createFromFile(final String fName) {
 
         try {
             // retrieve the resource from the pmodetest directory.
-            File f = new File(this.getClass().getClassLoader().getResource("pmodetest/prot/" + fName).getPath());
-            
-            Serializer  serializer = new Persister();
+            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/prot/" + fName).getPath());
+
+            final Serializer  serializer = new Persister();
             return serializer.read(Protocol.class, f);
         }
-        catch (Exception ex) {
+        catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             return null;
         }
     }
-    
+
     @Test
     public void testCompleteProtocol() {
-        Protocol p = createFromFile("complete.xml");
-        
+        final Protocol p = createFromFile("complete.xml");
+
         assertNotNull(p);
-        
+
         assertEquals("http://www.oxygenxml.com/" ,p.getAddress());
         assertTrue(p.shouldAddActorOrRoleAttribute());
         assertEquals("1.1", p.getSOAPVersion());
@@ -71,61 +73,61 @@ public class ProtocolTest {
 
     @Test
     public void testAddressOnly() {
-        Protocol p = createFromFile("addrOnly.xml");
-        
+        final Protocol p = createFromFile("addrOnly.xml");
+
         assertNotNull(p);
-        
+
         assertEquals("http://www.oxygenxml.com/address" ,p.getAddress());
-        
+
         assertFalse(p.shouldAddActorOrRoleAttribute());
         assertEquals("1.2", p.getSOAPVersion());
         assertFalse(p.useChunking());
         assertFalse(p.useHTTPCompression());
     }
-    
+
     @Test
     public void testChunkingOnly() {
-        Protocol p = createFromFile("chunkOnly.xml");
-        
+        final Protocol p = createFromFile("chunkOnly.xml");
+
         assertNotNull(p);
-        
-        assertNull(p.getAddress());        
+
+        assertNull(p.getAddress());
         assertFalse(p.shouldAddActorOrRoleAttribute());
         assertEquals("1.2", p.getSOAPVersion());
         assertTrue(p.useChunking());
-        assertFalse(p.useHTTPCompression());    
+        assertFalse(p.useHTTPCompression());
     }
-    
+
     @Test
     public void testSoapVersionOnly() {
-        Protocol p = createFromFile("soapOnly.xml");
-        
+        final Protocol p = createFromFile("soapOnly.xml");
+
         assertNotNull(p);
-        
-        assertNull(p.getAddress());        
+
+        assertNull(p.getAddress());
         assertFalse(p.shouldAddActorOrRoleAttribute());
         assertEquals("1.1", p.getSOAPVersion());
         assertFalse(p.useChunking());
-        assertFalse(p.useHTTPCompression());    
+        assertFalse(p.useHTTPCompression());
     }
-    
+
     @Test
     public void testHttpCompressionOnly() {
-        Protocol p = createFromFile("httpCompressionOnly.xml");
-        
+        final Protocol p = createFromFile("httpCompressionOnly.xml");
+
         assertNotNull(p);
-        
-        assertNull(p.getAddress());        
+
+        assertNull(p.getAddress());
         assertFalse(p.shouldAddActorOrRoleAttribute());
         assertEquals("1.2", p.getSOAPVersion());
         assertFalse(p.useChunking());
-        assertTrue(p.useHTTPCompression());    
+        assertTrue(p.useHTTPCompression());
     }
-    
+
     @Test
     public void testAddActorOnly() {
-        Protocol p = createFromFile("multihopOnly.xml");
-        
+        final Protocol p = createFromFile("multihopOnly.xml");
+
         // Because the multi-hop actor is only useful when sending there must also be an address
         assertNull(p);
     }

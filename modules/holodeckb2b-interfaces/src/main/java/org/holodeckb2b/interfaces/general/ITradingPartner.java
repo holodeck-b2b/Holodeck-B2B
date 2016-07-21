@@ -20,26 +20,26 @@ package org.holodeckb2b.interfaces.general;
 import java.util.Collection;
 
 /**
- * Represents a business partner involved in a message exchange. The partner is identified by one or more party ids and 
+ * Represents a business partner involved in a message exchange. The partner is identified by one or more party ids and
  * the business role the partner is acting in. Corresponds with the information contained in the <code>eb:From</code>
  * and <code>eb:To</code> elements in the ebMS message header. See also sections 5.2.2.3 and 5.2.2.4 of the ebMS Core
  * Specification.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface ITradingPartner {
-    
+
     /**
      * Gets the list of party ids used to identify the trading partner
-     * 
+     *
      * @return A collection of {@link IPartyId} objects representing the party ids that identify the partner
      */
     public Collection<IPartyId> getPartyIds();
-    
+
     /**
      * Gets the <i>business</i> role the trading partner is acting in. The role is defined in a business level agreement
      * and probably different from the role the MSH that processes the message is acting in.
-     * 
+     *
      * @return The business role the trading partner is playing
      */
     public String getRole();
