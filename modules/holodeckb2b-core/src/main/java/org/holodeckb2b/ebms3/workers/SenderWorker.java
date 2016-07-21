@@ -45,7 +45,7 @@ public class SenderWorker extends AbstractWorkerTask {
     /**
      * Looks for message units that are for sending and kicks off the send process
      * for each of them. To prevent a message from being send twice the send process
-     * is only started if the processing state can be succesfully changed.
+     * is only started if the processing state can be successfully changed.
      */
     @Override
     public void doProcessing() {
@@ -72,6 +72,10 @@ public class SenderWorker extends AbstractWorkerTask {
         } catch (DatabaseException dbError) {
             log.error("Could not process message because a database error occurred. Details:" 
                         + dbError.toString() + "\n");
+        }
+        catch (final Throwable t) {
+            log.error ("Internal error in SenderWorker", t);
+            return;
         }
     }
 
