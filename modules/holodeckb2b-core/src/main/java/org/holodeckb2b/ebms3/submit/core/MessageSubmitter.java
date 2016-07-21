@@ -39,7 +39,6 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.submit.MessageSubmitException;
-import org.holodeckb2b.pmode.PModeFinder;
 
 /**
  * Is the default implementation of {@see IMessageSubmitter}.
@@ -79,8 +78,8 @@ public class MessageSubmitter implements IMessageSubmitter {
         log.trace("Start submission of new User Message");
         
         try {
-            log.debug("Find the P-Mode for the message");
-            IPMode  pmode = PModeFinder.forSubmitted(um);
+            log.debug("Get the P-Mode for the message");
+            IPMode  pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
             
             if (pmode == null) {
                 log.warn("No P-Mode found for submitted message, rejecting message!");
