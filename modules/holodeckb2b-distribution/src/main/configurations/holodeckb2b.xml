@@ -62,7 +62,7 @@
     
     <!-- ====================================================================
     - The path of the Java keystore holding the private keys and related 
-    - certifictes used for signing and decrypting a messsage. A relative 
+    - certificates used for signing and decrypting a messsage. A relative 
     - path will start at the Holodeck B2B home directory. If this parameter 
     - is not specified the default value of "repository/certs/privatekeys.jks"
     ===================================================================== -->
