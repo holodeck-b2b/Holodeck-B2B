@@ -24,7 +24,6 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistency.entities.Service;
 import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.holodeckb2b.ebms3.persistent.wrappers.EService;
@@ -57,7 +56,7 @@ public class ServiceTest {
     }
 
     @Before
-    public void setUp() throws DatabaseException {
+    public void setUp() {
         em = TestJPAUtil.getEntityManager();
     }
 

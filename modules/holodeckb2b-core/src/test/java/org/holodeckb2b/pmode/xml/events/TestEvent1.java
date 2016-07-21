@@ -31,7 +31,7 @@ public class TestEvent1 implements IMessageProcessingEvent {
 
     private IMessageUnit msgUnit = null;
 
-    public TestEvent1() {};
+    public TestEvent1() {}
 
     public TestEvent1(final IMessageUnit mu) {
         msgUnit = mu;

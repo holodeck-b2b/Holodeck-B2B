@@ -27,7 +27,6 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.junit.After;
@@ -56,7 +55,7 @@ public class TradingPartnerTest {
     }
 
     @AfterClass
-    public static void cleanup() throws DatabaseException {
+    public static void cleanup() {
         final EntityManager em = TestJPAUtil.getEntityManager();
 
         em.getTransaction().begin();
@@ -69,7 +68,7 @@ public class TradingPartnerTest {
     }
 
     @Before
-    public void setUp() throws DatabaseException {
+    public void setUp() {
         em = TestJPAUtil.getEntityManager();
     }
 
@@ -83,7 +82,7 @@ public class TradingPartnerTest {
      * object to the database
      */
     @Test
-    public void test1_SetRole() throws DatabaseException {
+    public void test1_SetRole() {
         cleanup(); // remove left over items from database before starting test
         System.out.println("setRole");
         final TradingPartner instance = new TradingPartner();

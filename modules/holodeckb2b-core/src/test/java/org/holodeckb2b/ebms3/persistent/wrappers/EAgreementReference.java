@@ -27,7 +27,7 @@ import javax.persistence.Table;
 import org.holodeckb2b.ebms3.persistency.entities.AgreementReference;
 
 /**
- * JPA Entity wrapper for testing {@see AgreementReference}
+ * JPA Entity wrapper for testing {@link AgreementReference}
  *
  * @author Sander Fieten <sander at holodeckb2b.org>
  */

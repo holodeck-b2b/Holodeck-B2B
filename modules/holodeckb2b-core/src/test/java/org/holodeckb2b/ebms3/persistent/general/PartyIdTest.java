@@ -24,7 +24,6 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistency.entities.PartyId;
 import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.holodeckb2b.ebms3.persistent.wrappers.EPartyId;
@@ -58,7 +57,7 @@ public class PartyIdTest {
     }
 
     @Before
-    public void setUp() throws DatabaseException {
+    public void setUp() {
         em = TestJPAUtil.getEntityManager();
     }
 

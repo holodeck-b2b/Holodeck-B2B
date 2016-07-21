@@ -58,12 +58,12 @@ public class RoutingInputTest {
         final OMElement ri = RoutingInput.createElement(env, mmd);
 
         assertEquals(MultiHopConstants.ROUTING_INPUT_NS_URI, ri.getNamespaceURI());
-        final Iterator umChilds = ri.getChildrenWithLocalName("UserMessage");
+        final Iterator<?> umChilds = ri.getChildrenWithLocalName("UserMessage");
         assertTrue(umChilds.hasNext());
         final OMElement umChild = (OMElement) umChilds.next();
         assertEquals(MultiHopConstants.ROUTING_INPUT_NS_URI, umChild.getNamespaceURI());
 
-        final Iterator ciChilds = umChild.getChildrenWithLocalName("CollaborationInfo");
+        final Iterator<?> ciChilds = umChild.getChildrenWithLocalName("CollaborationInfo");
         assertTrue(ciChilds.hasNext());
         final OMElement ciChild = (OMElement) ciChilds.next();
         assertEquals(EbMSConstants.EBMS3_NS_URI, ciChild.getNamespaceURI());

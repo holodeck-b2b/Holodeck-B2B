@@ -25,7 +25,6 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.junit.After;
@@ -82,7 +81,7 @@ public class ErrorMessageTest {
     }
 
     @AfterClass
-    public static void cleanup() throws DatabaseException {
+    public static void cleanup() {
         final EntityManager em = TestJPAUtil.getEntityManager();
 
         em.getTransaction().begin();
@@ -95,7 +94,7 @@ public class ErrorMessageTest {
     }
 
     @Before
-    public void setUp() throws DatabaseException {
+    public void setUp() {
         em = TestJPAUtil.getEntityManager();
     }
 
@@ -148,7 +147,7 @@ public class ErrorMessageTest {
     }
 
     @Test
-    public void test03_AddError() throws DatabaseException {
+    public void test03_AddError() {
         em.getTransaction().begin();
 
         List<ErrorMessage> tps = em.createQuery("from ErrorMessage", ErrorMessage.class).getResultList();

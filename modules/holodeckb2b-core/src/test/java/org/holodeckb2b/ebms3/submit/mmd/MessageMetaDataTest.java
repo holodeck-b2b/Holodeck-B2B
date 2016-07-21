@@ -99,6 +99,7 @@ public class MessageMetaDataTest {
      * Test of createFromFile method with minimal MMD content. Note that this MMD file can not
      * be used for submitting message because it contains too few information to determine the PMode
      * to use.
+     * @throws Exception In case of an error
      */
     @Test
     public void test_Minimal() throws Exception {
@@ -122,6 +123,7 @@ public class MessageMetaDataTest {
 
     /**
      * Test of createFromFile method with full MMD content.
+     * @throws Exception In case of an error
      */
     @Test
     public void test_CreateFromFile() throws Exception {
@@ -223,8 +225,9 @@ public class MessageMetaDataTest {
         }
     }
 
-        /**
+    /**
      * Test of createFromFile method with full MMD content.
+     * @throws Exception In case of an error
      */
     @Test
     public void test_DeleteIndicator() throws Exception {
@@ -261,8 +264,8 @@ public class MessageMetaDataTest {
 
     /**
      * Test of constructor to create a MMD document for the user message described by
-     * an {@see IUserMessage} object.
-     * For this test we use a {@see UserMessage} object from the persistency package.
+     * an {@link IUserMessage} object.
+     * For this test we use a {@link UserMessage} object from the persistency package.
      */
     @Test
     public void test_CreateFromObject() {

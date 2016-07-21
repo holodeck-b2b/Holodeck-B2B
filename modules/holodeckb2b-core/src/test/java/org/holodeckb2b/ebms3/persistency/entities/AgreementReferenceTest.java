@@ -25,7 +25,6 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.holodeckb2b.ebms3.persistent.wrappers.EAgreementReference;
 import org.junit.After;
@@ -63,7 +62,7 @@ public class AgreementReferenceTest {
     }
 
     @AfterClass
-    public static void cleanup() throws DatabaseException {
+    public static void cleanup() {
         final EntityManager em = TestJPAUtil.getEntityManager();
 
         em.getTransaction().begin();
@@ -76,7 +75,7 @@ public class AgreementReferenceTest {
     }
 
     @Before
-    public void setUp() throws DatabaseException {
+    public void setUp() {
         em = TestJPAUtil.getEntityManager();
     }
 

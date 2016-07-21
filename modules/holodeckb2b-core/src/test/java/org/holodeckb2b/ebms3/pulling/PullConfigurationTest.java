@@ -23,7 +23,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +55,6 @@ public class PullConfigurationTest {
     @Test
     public void testLoad_DefaultOnly() {
         final String path = this.getClass().getClassLoader().getResource("pulltest/pullcfg1.xml").getPath();
-        final File   f = new File(path);
 
         try {
             final PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);
@@ -76,10 +74,10 @@ public class PullConfigurationTest {
     /**
      *
      */
+    @SuppressWarnings ("unchecked")
     @Test
     public void testLoad_CompleteConfig() {
         final String path = this.getClass().getClassLoader().getResource("pulltest/pullcfg2.xml").getPath();
-        final File   f = new File(path);
 
         try {
             final PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);
@@ -127,7 +125,6 @@ public class PullConfigurationTest {
     @Test
     public void testLoad_ErrorConfig() {
         final String path = this.getClass().getClassLoader().getResource("pulltest/pullcfg3.xml").getPath();
-        final File   f = new File(path);
 
         try {
             final PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);

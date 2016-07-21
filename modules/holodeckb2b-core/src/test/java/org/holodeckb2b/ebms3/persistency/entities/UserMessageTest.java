@@ -31,7 +31,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
 import org.holodeckb2b.interfaces.general.IPartyId;
@@ -102,7 +101,7 @@ public class UserMessageTest {
     }
 
     @AfterClass
-    public static void cleanup() throws DatabaseException {
+    public static void cleanup() {
         final EntityManager em = TestJPAUtil.getEntityManager();
 
         em.getTransaction().begin();
@@ -115,7 +114,7 @@ public class UserMessageTest {
     }
 
     @Before
-    public void setUp() throws DatabaseException {
+    public void setUp() {
         em = TestJPAUtil.getEntityManager();
     }
 

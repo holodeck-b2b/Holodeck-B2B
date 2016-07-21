@@ -40,7 +40,6 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.Payload;
@@ -85,7 +84,7 @@ public class PurgeOldMessagesWorkerTest {
 
 
     @BeforeClass
-    public static void setUpClass() throws DatabaseException {
+    public static void setUpClass() {
         try {
             final EntityManager em = TestJPAUtil.getEntityManager();
 
@@ -194,7 +193,7 @@ public class PurgeOldMessagesWorkerTest {
     }
 
     @Test
-    public void test0_NothingToPurge() throws DatabaseException {
+    public void test0_NothingToPurge() {
         final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
         worker.setParameters(null);
@@ -212,7 +211,7 @@ public class PurgeOldMessagesWorkerTest {
     }
 
     @Test
-    public void test1_OneToPurge() throws DatabaseException {
+    public void test1_OneToPurge() {
         final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
         final HashMap<String, Object> parameters = new HashMap<>();
@@ -251,7 +250,7 @@ public class PurgeOldMessagesWorkerTest {
     }
 
     @Test
-    public void test2_PayloadAlreadyRemoved() throws DatabaseException {
+    public void test2_PayloadAlreadyRemoved() {
         final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
         final HashMap<String, Object> parameters = new HashMap<>();
@@ -288,7 +287,7 @@ public class PurgeOldMessagesWorkerTest {
     }
 
     @Test
-    public void test3_EventsOnlyForUserMsg() throws DatabaseException {
+    public void test3_EventsOnlyForUserMsg() {
         final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
         final HashMap<String, Object> parameters = new HashMap<>();
@@ -336,7 +335,8 @@ public class PurgeOldMessagesWorkerTest {
 
         @Override
         public void raiseEvent(final IMessageProcessingEvent event, final MessageContext msgContext) {
-            if (allPurgeEvents = event instanceof IMessageUnitPurgedEvent) {
+            allPurgeEvents = event instanceof IMessageUnitPurgedEvent;
+            if (allPurgeEvents) {
                 assertNotNull(event.getSubject());
                 msgIdsPurged.add(event.getSubject().getMessageId());
             }

@@ -29,7 +29,7 @@ public class TestEvent3 implements TestEvent2 {
 
     private IMessageUnit msgUnit = null;
 
-    public TestEvent3() {};
+    public TestEvent3() {}
 
     public TestEvent3(final IMessageUnit mu) {
         msgUnit = mu;
