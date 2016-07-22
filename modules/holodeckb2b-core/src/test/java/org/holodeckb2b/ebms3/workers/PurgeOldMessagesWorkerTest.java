@@ -16,13 +16,7 @@
  */
 package org.holodeckb2b.ebms3.workers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,25 +27,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.persistence.EntityManager;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.Payload;
 import org.holodeckb2b.ebms3.persistency.entities.ProcessingState;
 import org.holodeckb2b.ebms3.persistency.entities.Receipt;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.events.types.IMessageUnitPurgedEvent;
 import org.holodeckb2b.testhelpers.HolodeckCore;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -86,7 +84,7 @@ public class PurgeOldMessagesWorkerTest {
     @BeforeClass
     public static void setUpClass() {
         try {
-            final EntityManager em = TestJPAUtil.getEntityManager();
+            final EntityManager em = JPAUtil.getEntityManager();
 
             em.getTransaction().begin();
 
@@ -94,6 +92,9 @@ public class PurgeOldMessagesWorkerTest {
             Path targetPath;
             ProcessingState state;
             Calendar stateTime = Calendar.getInstance();
+
+            // Ensure tmp directory is available
+            new File(basePath + "tmp").mkdir();
 
             um = new UserMessage();
             um.setMessageId(MSGID_1);
@@ -173,7 +174,7 @@ public class PurgeOldMessagesWorkerTest {
             assertEquals(6, muInDB.size());
 
             em.close();
-        } catch (final IOException ex) {
+        } catch (final Exception ex) {
             Logger.getLogger(PurgeOldMessagesWorkerTest.class.getName()).log(Level.SEVERE, "Could not setup test", ex);
             fail("Test could not be prepared!");
         }
@@ -193,7 +194,7 @@ public class PurgeOldMessagesWorkerTest {
     }
 
     @Test
-    public void test0_NothingToPurge() {
+    public void test0_NothingToPurge() throws DatabaseException {
         final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
         worker.setParameters(null);
@@ -204,14 +205,14 @@ public class PurgeOldMessagesWorkerTest {
             fail("Exception during processing");
         }
 
-        final EntityManager em = TestJPAUtil.getEntityManager();
+        final EntityManager em = JPAUtil.getEntityManager();
         final List<MessageUnit> muInDB = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
 
         assertEquals(6, muInDB.size());
     }
 
     @Test
-    public void test1_OneToPurge() {
+    public void test1_OneToPurge() throws DatabaseException {
         final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
         final HashMap<String, Object> parameters = new HashMap<>();
@@ -235,7 +236,7 @@ public class PurgeOldMessagesWorkerTest {
             fail("Exception during processing");
         }
 
-        final EntityManager em = TestJPAUtil.getEntityManager();
+        final EntityManager em = JPAUtil.getEntityManager();
         final List<MessageUnit> muInDB = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
 
         assertEquals(5, muInDB.size());
@@ -250,7 +251,7 @@ public class PurgeOldMessagesWorkerTest {
     }
 
     @Test
-    public void test2_PayloadAlreadyRemoved() {
+    public void test2_PayloadAlreadyRemoved() throws DatabaseException {
         final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
         final HashMap<String, Object> parameters = new HashMap<>();
@@ -274,7 +275,7 @@ public class PurgeOldMessagesWorkerTest {
             fail("Exception during processing");
         }
 
-        final EntityManager em = TestJPAUtil.getEntityManager();
+        final EntityManager em = JPAUtil.getEntityManager();
         final List<MessageUnit> muInDB = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
 
         assertEquals(4, muInDB.size());
@@ -287,7 +288,7 @@ public class PurgeOldMessagesWorkerTest {
     }
 
     @Test
-    public void test3_EventsOnlyForUserMsg() {
+    public void test3_EventsOnlyForUserMsg() throws DatabaseException {
         final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
         final HashMap<String, Object> parameters = new HashMap<>();
@@ -311,7 +312,7 @@ public class PurgeOldMessagesWorkerTest {
             fail("Exception during processing");
         }
 
-        final EntityManager em = TestJPAUtil.getEntityManager();
+        final EntityManager em = JPAUtil.getEntityManager();
         final List<MessageUnit> muInDB = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
 
         assertEquals(2, muInDB.size());

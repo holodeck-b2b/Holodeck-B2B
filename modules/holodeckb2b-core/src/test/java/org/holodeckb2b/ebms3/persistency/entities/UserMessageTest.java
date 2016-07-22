@@ -16,10 +16,6 @@
  */
 package org.holodeckb2b.ebms3.persistency.entities;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,18 +23,24 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-
+import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -100,9 +102,14 @@ public class UserMessageTest {
     public UserMessageTest() {
     }
 
+    @BeforeClass
+    public static void setupClass() {
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(null));
+    }
+
     @AfterClass
-    public static void cleanup() {
-        final EntityManager em = TestJPAUtil.getEntityManager();
+    public static void cleanup() throws DatabaseException {
+        final EntityManager em = JPAUtil.getEntityManager();
 
         em.getTransaction().begin();
         final Collection<UserMessage> tps = em.createQuery("from UserMessage", UserMessage.class).getResultList();
@@ -114,8 +121,8 @@ public class UserMessageTest {
     }
 
     @Before
-    public void setUp() {
-        em = TestJPAUtil.getEntityManager();
+    public void setUp() throws DatabaseException {
+        em = JPAUtil.getEntityManager();
     }
 
     @After

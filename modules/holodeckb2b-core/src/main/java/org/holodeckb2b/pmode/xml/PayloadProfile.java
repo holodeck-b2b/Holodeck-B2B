@@ -30,7 +30,7 @@ import org.simpleframework.xml.Root;
 public class PayloadProfile implements IAS4PayloadProfile {
 
     @Element (name = "UseAS4Compression", required = false)
-    private final Boolean useAS4Compression = Boolean.FALSE;
+    private Boolean useAS4Compression = Boolean.FALSE;
 
     /**
      * Returns if compression is turned on for the payload.

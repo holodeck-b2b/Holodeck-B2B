@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventConfiguration;
@@ -75,13 +74,13 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration 
     }
 
     @Element(name = "HandlerFactoryClass", required = true)
-    private final String  handlerFactoryClass = null;
+    private String  handlerFactoryClass = null;
 
     @ElementList(entry = "HandledEvent", required = false, inline = true)
-    private final List<String>    handledEventNames = null;
+    private List<String>    handledEventNames = null;
 
     @ElementList(entry = "ForMessageUnit", required = false, inline = true)
-    private final List<String>    messageUnitNames = null;
+    private List<String>    messageUnitNames = null;
 
     @ElementList(entry = "Parameter", inline = true, required = false)
     private Collection<Property>    parameters;

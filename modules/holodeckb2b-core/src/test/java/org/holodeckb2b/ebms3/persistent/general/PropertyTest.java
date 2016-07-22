@@ -16,18 +16,20 @@
  */
 package org.holodeckb2b.ebms3.persistent.general;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.List;
-
 import javax.persistence.EntityManager;
-
+import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.persistency.entities.Property;
-import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
+import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
 import org.holodeckb2b.ebms3.persistent.wrappers.EProperty;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.After;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -56,9 +58,14 @@ public class PropertyTest {
     public PropertyTest() {
     }
 
+    @BeforeClass
+    public static void setupClass() {
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(null));
+    }
+
     @Before
-    public void setUp() {
-        em = TestJPAUtil.getEntityManager();
+    public void setUp() throws DatabaseException {
+        em = JPAUtil.getEntityManager();
     }
 
     @After

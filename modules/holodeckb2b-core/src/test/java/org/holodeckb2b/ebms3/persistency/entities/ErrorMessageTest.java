@@ -16,19 +16,20 @@
  */
 package org.holodeckb2b.ebms3.persistency.entities;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-
 import javax.persistence.EntityManager;
-
-import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
+import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -55,6 +56,9 @@ public class ErrorMessageTest {
 
     @BeforeClass
     public static void setUpClass() {
+
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(null));
+
         // Create some errors
         T_ERROR_1 = new EbmsError();
         T_ERROR_1.setCategory("error-category-1");
@@ -81,8 +85,8 @@ public class ErrorMessageTest {
     }
 
     @AfterClass
-    public static void cleanup() {
-        final EntityManager em = TestJPAUtil.getEntityManager();
+    public static void cleanup() throws DatabaseException {
+        final EntityManager em = JPAUtil.getEntityManager();
 
         em.getTransaction().begin();
         final Collection<ErrorMessage> tps = em.createQuery("from ErrorMessage", ErrorMessage.class).getResultList();
@@ -94,8 +98,8 @@ public class ErrorMessageTest {
     }
 
     @Before
-    public void setUp() {
-        em = TestJPAUtil.getEntityManager();
+    public void setUp() throws DatabaseException {
+        em = JPAUtil.getEntityManager();
     }
 
     @After
@@ -147,7 +151,7 @@ public class ErrorMessageTest {
     }
 
     @Test
-    public void test03_AddError() {
+    public void test03_AddError() throws DatabaseException {
         em.getTransaction().begin();
 
         List<ErrorMessage> tps = em.createQuery("from ErrorMessage", ErrorMessage.class).getResultList();
@@ -164,7 +168,7 @@ public class ErrorMessageTest {
         tps = null;
         errors = null;
 
-        em = TestJPAUtil.getEntityManager();
+        em = JPAUtil.getEntityManager();
 
         tps = em.createQuery("from ErrorMessage", ErrorMessage.class).getResultList();
         assertTrue(tps.size() == 1);

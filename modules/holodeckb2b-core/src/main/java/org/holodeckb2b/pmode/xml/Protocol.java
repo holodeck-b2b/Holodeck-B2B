@@ -34,13 +34,13 @@ public class Protocol implements IProtocol {
     private Boolean shouldshouldAddActorOrRoleAttribute;
 
     @Element (name = "UseChunking" , required = false)
-    private final Boolean chunked = false;
+    private Boolean chunked = false;
 
     @Element (name = "SoapVersion", required = false)
-    private final String soapVersion = "1.2";
+    private String soapVersion = "1.2";
 
     @Element (name = "UseHTTPCompression", required = false)
-    private final Boolean useHTTPCompression = false;
+    private Boolean useHTTPCompression = false;
 
 
     /**

@@ -17,7 +17,6 @@
 package org.holodeckb2b.pmode.xml;
 
 import java.util.Map;
-
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
@@ -40,22 +39,22 @@ import org.simpleframework.xml.core.Validate;
 public class ErrorHandling implements IErrorHandling {
 
     @Element (name = "ReplyPattern", required = false)
-    private final String replyPattern = "";
+    private String replyPattern = "";
 
     @Element (name = "ReceiverErrorsTo", required = false)
-    private final String to = null;
+    private String to = null;
 
     @Element (name = "AddSOAPFault", required = false)
-    private final Boolean addSOAPFault = Boolean.FALSE;
+    private Boolean addSOAPFault = Boolean.FALSE;
 
     @Element (name = "ReportErrorOnError", required = false)
-    private final Boolean reportOnError = null;
+    private Boolean reportOnError = null;
 
     @Element (name = "ReportErrorOnReceipt", required = false)
-    private final Boolean reportOnReceipt = null;
+    private Boolean reportOnReceipt = null;
 
     @Element (name = "NotifyErrorToBusinessApplication", required = false)
-    private final Boolean notifyBusinessApplication = Boolean.FALSE;
+    private Boolean notifyBusinessApplication = Boolean.FALSE;
 
     @Element ( name = "ErrorDelivery", required = false)
     private DeliverySpecification errorDelivery;

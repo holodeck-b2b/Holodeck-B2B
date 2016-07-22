@@ -18,7 +18,6 @@ package org.holodeckb2b.module;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisDescription;
@@ -29,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.holodeckb2b.common.config.Config;
+import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.WorkerPool;
 import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
@@ -76,7 +76,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     /**
      * The configuration of this Holodeck B2B instance
      */
-    private static  Config          instanceConfiguration = null;
+    private static  InternalConfiguration  instanceConfiguration = null;
 
     /**
      * Pool of worker threads that handle recurring tasks like message sending and
@@ -326,19 +326,6 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
 
         log.debug("Get and return deliverer from the factory");
         return mdf.createMessageDeliverer();
-    }
-
-    /**
-     * Get the JPA persistency unit name to get access to the Holodeck B2B Core database.
-     *
-     * @return The name of the JPA persistency unit to get access to the Holodeck B2B database
-     */
-    public static String getPersistencyUnit() {
-        if (instanceConfiguration == null) {
-            log.fatal("Missing configuration for this Holodeck B2B instance!");
-            throw new IllegalStateException("Missing configuration for this Holodeck B2B instance!");
-        } else
-            return instanceConfiguration.getPersistencyUnit();
     }
 
     /**

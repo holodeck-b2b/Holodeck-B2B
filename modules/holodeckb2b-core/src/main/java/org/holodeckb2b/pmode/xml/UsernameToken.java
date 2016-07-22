@@ -48,17 +48,17 @@ public class UsernameToken implements IUsernameTokenConfiguration {
         private String value;
 
         @Attribute(required = false)
-        private final String type = "Digest";
+        private String type = "Digest";
     }
 
     @Element (name = "password")
     private Password password;
 
     @Element (name = "includeNonce", required = false)
-    private final Boolean includeNonce = Boolean.TRUE;
+    private Boolean includeNonce = Boolean.TRUE;
 
     @Element (name = "includeCreated", required = false)
-    private final Boolean includeCreated = Boolean.TRUE;
+    private Boolean includeCreated = Boolean.TRUE;
 
     @Override
     public String getUsername() {
