@@ -35,19 +35,19 @@ public class SignatureConfiguration implements ISigningConfiguration {
     private KeystoreAlias keyStoreRef;
 
     @Element(name = "enableRevocationCheck", required = false)
-    private final Boolean enableRevocation = null;
+    private Boolean enableRevocation = null;
 
     @Element(name = "KeyReferenceMethod", required = false)
     private KeyReferenceMethod keyReferenceMethod;
 
     @Element(name = "IncludeCertificatePath", required = false)
-    private final Boolean includeCertPath = null;
+    private Boolean includeCertPath = null;
 
     @Element(name = "Algorithm", required = false)
-    private final String signatureAlgorithm = null;
+    private String signatureAlgorithm = null;
 
     @Element(name = "HashFunction", required = false)
-    private final String hashFunction = null;
+    private String hashFunction = null;
 
     @Override
     public String getKeystoreAlias() {

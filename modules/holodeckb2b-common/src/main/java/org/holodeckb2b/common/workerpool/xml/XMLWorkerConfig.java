@@ -18,7 +18,6 @@ package org.holodeckb2b.common.workerpool.xml;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import org.holodeckb2b.interfaces.general.Interval;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.simpleframework.xml.Attribute;
@@ -55,7 +54,7 @@ public class XMLWorkerConfig implements IWorkerConfiguration {
     private boolean activate;
 
     @Attribute(required=false)
-    private final int delay = 0;
+    private int delay = 0;
 
     @Attribute
     private String workerClass;
@@ -109,30 +108,4 @@ public class XMLWorkerConfig implements IWorkerConfiguration {
 
         return interval;
     }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public void setActivate(final boolean activate) {
-        this.activate = activate;
-    }
-
-    public void setWorkerClass(final String workerClass) {
-        this.workerClass = workerClass;
-    }
-
-    public void setConcurrent(final int concurrent) {
-        this.concurrent = concurrent;
-    }
-
-    public void setXmlInterval(final int xmlInterval) {
-        this.xmlInterval = xmlInterval;
-        interval = new Interval(xmlInterval, TimeUnit.SECONDS);
-    }
-
-    public void setParameters(final Map<String, String> parameters) {
-        this.parameters = parameters;
-    }
-
 }

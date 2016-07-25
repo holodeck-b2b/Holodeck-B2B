@@ -6,13 +6,13 @@
 package org.holodeckb2b.testhelpers;
 
 import org.apache.axis2.context.ConfigurationContext;
-import org.holodeckb2b.interfaces.config.IConfiguration;
+import org.holodeckb2b.common.config.InternalConfiguration;
 
 /**
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class Config implements IConfiguration {
+public class Config implements InternalConfiguration {
 
     private final String  hb2b_home;
 
@@ -97,5 +97,15 @@ public class Config implements IConfiguration {
     @Override
     public String getTrustKeyStorePassword() {
         return "trusted";
+    }
+
+    @Override
+    public String getPersistencyUnit() {
+        return "holodeckb2b-core-test";
+    }
+
+    @Override
+    public String getMessageProcessingEventProcessor() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

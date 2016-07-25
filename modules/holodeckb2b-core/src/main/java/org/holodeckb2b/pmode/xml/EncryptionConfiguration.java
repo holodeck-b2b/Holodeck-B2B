@@ -34,10 +34,10 @@ public class EncryptionConfiguration implements IEncryptionConfiguration {
 
     // encryption algorithm
     @Element(name = "Algorithm", required = false)
-    private final String algorithm = null;
+    private String algorithm = null;
 
     @Element(name = "KeyTransport", required = false)
-    private final KeyTransport keyTransport = null;
+    private KeyTransport keyTransport = null;
 
 
     @Override

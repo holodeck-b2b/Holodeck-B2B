@@ -17,7 +17,6 @@
 package org.holodeckb2b.pmode.xml;
 
 import java.util.Map;
-
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
@@ -38,7 +37,7 @@ public class ReceiptConfiguration implements IReceiptConfiguration{
     private String to;
 
     @Element (name = "NotifyReceiptToBusinessApplication", required = false)
-    private final Boolean notifyReceiptToBusinessApp = Boolean.FALSE;
+    private Boolean notifyReceiptToBusinessApp = Boolean.FALSE;
 
     @Element (name = "ReceiptDelivery", required = false)
     private DeliverySpecification receiptDelivery;

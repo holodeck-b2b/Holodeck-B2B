@@ -17,7 +17,6 @@
 package org.holodeckb2b.pmode.xml;
 
 import java.util.concurrent.TimeUnit;
-
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.general.Interval;
 import org.simpleframework.xml.Element;
@@ -38,13 +37,13 @@ import org.simpleframework.xml.core.ValueRequiredException;
 public class ReceptionAwareness implements IReceptionAwareness {
 
     @Element(name = "MaxRetries", required = false)
-    private final int maxRetries = -1;
+    private int maxRetries = -1;
 
     @Element(name = "RetryInterval", required = false)
-    private final long retryIntervalDuration = -1;
+    private long retryIntervalDuration = -1;
 
     @Element(name = "UseDuplicateElimination", required = false)
-    private final Boolean useDupElimination = Boolean.TRUE;
+    private Boolean useDupElimination = Boolean.TRUE;
 
     @Transient
     private Interval retryInterval;

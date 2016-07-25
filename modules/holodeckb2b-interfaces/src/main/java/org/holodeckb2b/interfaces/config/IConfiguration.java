@@ -30,6 +30,7 @@ public interface IConfiguration {
      * Gets the Axis2 configuration context. This context is used for processing messages.
      *
      * @return The Axis2 configuration context.
+     * @deprecated This method is intended for <b>internal use only</b>.
      */
     public ConfigurationContext getAxisConfigurationContext();
 

@@ -24,10 +24,8 @@ import java.nio.file.Paths;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.apache.axis2.context.ConfigurationContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 
 /**
@@ -43,7 +41,7 @@ import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class Config implements IConfiguration {
+public class Config implements InternalConfiguration {
 
     /*
      * The Holodeck B2B home directory
@@ -272,6 +270,7 @@ public class Config implements IConfiguration {
      *
      * @return The Axis2 configuration context.
      */
+    @Override
     public ConfigurationContext getAxisConfigurationContext() {
         return axisCfgCtx;
     }
@@ -281,6 +280,7 @@ public class Config implements IConfiguration {
      *
      * @return The name of the persistency unit
      */
+    @Override
     public String getPersistencyUnit() {
         return persistencyUnit;
     }
@@ -296,6 +296,7 @@ public class Config implements IConfiguration {
      *
      * @return  The host name
      */
+    @Override
     public String getHostName () {
         return hostName;
     }
@@ -305,6 +306,7 @@ public class Config implements IConfiguration {
      *
      * @return  The Holodeck B2B home directory.
      */
+    @Override
     public String getHolodeckB2BHome () {
         return holodeckHome;
     }
@@ -317,6 +319,7 @@ public class Config implements IConfiguration {
      *
      * @return The absolute path to the worker pool configuration file.
      */
+    @Override
     public String getWorkerPoolCfgFile() {
         return workerConfigFile;
     }
@@ -332,6 +335,7 @@ public class Config implements IConfiguration {
      * @return  The absolute path to the temp directory. Ends with a directory
      *          separator.
      */
+    @Override
     public String getTempDirectory() {
         return tempDir;
     }
@@ -345,6 +349,7 @@ public class Config implements IConfiguration {
      *
      * @return Indication whether bundling of signals in a response is allowed
      */
+    @Override
     public boolean allowSignalBundling() {
         return allowSignalBundling;
     }
@@ -358,6 +363,7 @@ public class Config implements IConfiguration {
      * @return <code>true</code> if generated errors on errors should by default be reported to the sender,<br>
      *         <code>false</code> otherwise
      */
+    @Override
     public boolean shouldReportErrorOnError() {
         return defaultReportErrorOnError;
     }
@@ -371,6 +377,7 @@ public class Config implements IConfiguration {
      * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
      *         <code>false</code> otherwise
      */
+    @Override
     public boolean shouldReportErrorOnReceipt() {
         return defaultReportErrorOnReceipt;
     }
@@ -385,6 +392,7 @@ public class Config implements IConfiguration {
      * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
      *         <code>false</code> otherwise
      */
+    @Override
     public boolean useStrictErrorRefCheck() {
         return useStrictErrorReferencesCheck;
     }
@@ -395,6 +403,7 @@ public class Config implements IConfiguration {
      *
      * @return The path to the <i>"private"</i> keystore.
      */
+    @Override
     public String getPrivateKeyStorePath() {
         return privKeyStorePath;
     }
@@ -404,6 +413,7 @@ public class Config implements IConfiguration {
      *
      * @return  The password for accessing the keystore with the private keys
      */
+    @Override
     public String getPrivateKeyStorePassword() {
         return privKeyStorePassword;
     }
@@ -414,6 +424,7 @@ public class Config implements IConfiguration {
      *
      * @return The path to the <i>"public"</i> keystore.
      */
+    @Override
     public String getPublicKeyStorePath() {
         return pubKeyStorePath;
     }
@@ -423,6 +434,7 @@ public class Config implements IConfiguration {
      *
      * @return  The password for accessing the keystore with the public keys
      */
+    @Override
     public String getPublicKeyStorePassword() {
         return pubKeyStorePassword;
     }
@@ -438,6 +450,7 @@ public class Config implements IConfiguration {
      * @return The path to the <i>"trust"</i> keystore.
      * @since 2.1.0
      */
+    @Override
     public String getTrustKeyStorePath() {
         return trustKeyStorePath;
     }
@@ -448,6 +461,7 @@ public class Config implements IConfiguration {
      * @return  The password for accessing the keystore with the trusted certificates.
      * @since 2.1.0
      */
+    @Override
     public String getTrustKeyStorePassword() {
         return trustKeyStorePassword;
     }
@@ -462,6 +476,7 @@ public class Config implements IConfiguration {
      * @return <code>true</code> if the revocation of certificates should by default be checked,<br>
      *         <code>false</code> otherwise
      */
+    @Override
     public boolean shouldCheckCertificateRevocation() {
         return defaultRevocationCheck;
     }
@@ -475,6 +490,7 @@ public class Config implements IConfiguration {
      * @return String containing the class name of the {@link IMessageProcessingEventProcessor} implementation to
      * @since 2.1.0
      */
+    @Override
     public String getMessageProcessingEventProcessor() {
         return messageProcessingEventProcessorClass;
     }

@@ -16,20 +16,22 @@
  */
 package org.holodeckb2b.ebms3.persistency.entities;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 import java.util.List;
-
 import javax.persistence.EntityManager;
-
-import org.holodeckb2b.ebms3.persistent.dao.TestJPAUtil;
+import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
 import org.holodeckb2b.ebms3.persistent.wrappers.EError;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -126,9 +128,14 @@ public class EbmsErrorTest {
     public EbmsErrorTest() {
     }
 
+    @BeforeClass
+    public static void setupClass() {
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(null));
+    }
+
     @AfterClass
-    public static void cleanup() {
-        final EntityManager em = TestJPAUtil.getEntityManager();
+    public static void cleanup() throws DatabaseException {
+        final EntityManager em = JPAUtil.getEntityManager();
 
         em.getTransaction().begin();
         final Collection<EError> tps = em.createQuery("from EError", EError.class).getResultList();
@@ -140,8 +147,8 @@ public class EbmsErrorTest {
     }
 
     @Before
-    public void setUp() {
-        em = TestJPAUtil.getEntityManager();
+    public void setUp() throws DatabaseException {
+        em = JPAUtil.getEntityManager();
     }
 
     @After
