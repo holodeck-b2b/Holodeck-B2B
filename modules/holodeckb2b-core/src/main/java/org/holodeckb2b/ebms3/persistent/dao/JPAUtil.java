@@ -63,7 +63,7 @@ public class JPAUtil {
        return em;
     }
 
-    private static synchronized EntityManagerFactory getEntityManagerFactory() throws DatabaseException {
+    private static synchronized EntityManagerFactory getEntityManagerFactory() {
         if (emf != null)
             return emf;
         else

@@ -97,7 +97,7 @@ public class PartInfo implements IPayload {
     @Validate
     public void validate() throws PersistenceException {
         if (!"external".equalsIgnoreCase(this.containment) && (location == null || location.isEmpty()))
-            throw new PersistenceException("location attributed is required for containment type " + containment, null);
+            throw new PersistenceException("location attributed is required for containment type " + containment, (Object[]) null);
     }
 
     @Override
@@ -139,6 +139,7 @@ public class PartInfo implements IPayload {
     }
 
     @Override
+    @Deprecated
     public IDescription getDescription() {
         return description;
     }

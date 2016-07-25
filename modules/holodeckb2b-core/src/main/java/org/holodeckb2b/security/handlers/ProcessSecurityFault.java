@@ -28,6 +28,7 @@ import org.holodeckb2b.ebms3.errors.FailedAuthentication;
 import org.holodeckb2b.ebms3.errors.FailedDecryption;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
 import org.holodeckb2b.ebms3.errors.OtherContentError;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 
@@ -98,9 +99,9 @@ public class ProcessSecurityFault extends BaseHandler {
      * @param mc    The current message context
      */
     private void handleDecryptionFailure(final MessageContext mc) throws DatabaseException {
-        final Collection<EntityProxy> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
+        final Collection<EntityProxy<MessageUnit>> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
         if (rcvdMsgUnits != null && !rcvdMsgUnits.isEmpty()) {
-            for (final EntityProxy mu : rcvdMsgUnits) {
+            for (final EntityProxy<MessageUnit> mu : rcvdMsgUnits) {
                 final FailedDecryption authError = new FailedDecryption();
                 authError.setRefToMessageInError(mu.entity.getMessageId());
                 authError.setErrorDetail("Decryption of the message [unit] failed!");
@@ -123,8 +124,8 @@ public class ProcessSecurityFault extends BaseHandler {
      * @param mc    The current message context
      */
     private void handleAuthenticationFailure(final MessageContext mc) throws DatabaseException {
-        final Collection<EntityProxy> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
-        for (final EntityProxy mu : rcvdMsgUnits) {
+        final Collection<EntityProxy<MessageUnit>> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
+        for (final EntityProxy<MessageUnit> mu : rcvdMsgUnits) {
             final FailedAuthentication authError = new FailedAuthentication();
             authError.setRefToMessageInError(mu.entity.getMessageId());
             authError.setErrorDetail("Authentication of message unit failed!");
@@ -146,8 +147,8 @@ public class ProcessSecurityFault extends BaseHandler {
         MessageContextUtils.addGeneratedError(mc, invalidHdrErr);
 
         // Set the processing state of all message units in message to FAILED
-        final Collection<EntityProxy> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
-        for (final EntityProxy mu : rcvdMsgUnits) {
+        final Collection<EntityProxy<MessageUnit>> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
+        for (final EntityProxy<MessageUnit> mu : rcvdMsgUnits) {
             MessageUnitDAO.setFailed(mu);
         }
     }
@@ -166,8 +167,8 @@ public class ProcessSecurityFault extends BaseHandler {
         MessageContextUtils.addGeneratedError(mc, otherErr);
 
         // Set the processing state of all message units in message to FAILED
-        final Collection<EntityProxy> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
-        for (final EntityProxy mu : rcvdMsgUnits) {
+        final Collection<EntityProxy<MessageUnit>> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
+        for (final EntityProxy<MessageUnit> mu : rcvdMsgUnits) {
             MessageUnitDAO.setFailed(mu);
         }
     }

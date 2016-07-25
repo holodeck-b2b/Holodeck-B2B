@@ -155,7 +155,7 @@ public class FindPModes extends BaseHandler {
         // If there is no referenced message unit and the error is received as a response to a single message unit
         //  we sent out we still have a reference
         if (Utils.isNullOrEmpty(refToMessageId) && isInFlow(INITIATOR)) {
-            final Collection<EntityProxy>  reqMUs = MessageContextUtils.getSentMessageUnits(mc);
+            final Collection<EntityProxy<MessageUnit>>  reqMUs = MessageContextUtils.getSentMessageUnits(mc);
             if (reqMUs.size() == 1) {
                 // Request contained one message unit, assuming error applies to it
                 refToMessageId = reqMUs.iterator().next().entity.getMessageId();

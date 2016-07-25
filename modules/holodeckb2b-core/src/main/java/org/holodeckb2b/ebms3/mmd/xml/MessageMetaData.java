@@ -305,9 +305,9 @@ public class MessageMetaData implements IUserMessage {
         String pmodeId = null;
         try {
             pmodeId = getCollaborationInfo().getAgreement().getPModeId();
-        } finally {
+        } catch (final Throwable t) {
             // If some part of configuration is not there, a NPE would occur which we ignore and just return null
-            return pmodeId;
         }
+        return pmodeId;
     }
 }
