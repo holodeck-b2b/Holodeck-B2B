@@ -257,14 +257,6 @@ public final class Utils {
 
         return targetPath.toString();
     }
-    
-    private static final class ComparatorFileName implements Comparator <File>
-    {
-      public int compare (File aO1, File aO2)
-      {
-        return aO1.getName ().compareTo (aO2.getName ());
-      }
-    }
 
     /**
      * Sorts an array of files so that the filenames are in alphabetical order. The sort operational is done in the
@@ -274,62 +266,11 @@ public final class Utils {
      */
     public static void sortFiles(final File array[]) {
         if (array != null && array.length > 1)
-            if (true)
-                Arrays.sort (array, new ComparatorFileName ());
-            else
-                sortFiles(array, 0, array.length - 1);
-    }
-
-    /**
-     * Is an implementation of the <i>quicksort</i> algorithm to sort [part of] an array of files.
-     *
-     * @param array     The array to be [partly] sorted
-     * @param low       The index that delimits the start of the array part that must be sorted
-     * @param high      The index that delimits the end of the array part that must be sorted
-     */
-    private static void sortFiles(final File array[], final int low, final int high) {
-        int i = low, j = high;
-
-        // Get the pivot element from the middle of the list
-        final String pivot = array[low + (high - low) / 2].getName();
-
-        // Divide into two lists
-        while (i <= j) {
-            // If the current value from the left list is smaller then the pivot
-            // element then get the next element from the left list
-            while (array[i].getName().compareTo(pivot) < 0) {
-                i++;
-            }
-            // If the current value from the right list is larger then the pivot
-            // element then get the next element from the right list
-            while (array[j].getName().compareTo(pivot) > 0) {
-                j--;
-            }
-
-            // If we have found a values in the left list which is larger then
-            // the pivot element and if we have found a value in the right list
-            // which is smaller then the pivot element then we exchange the
-            // values.
-            // As we are done we can increase i and j
-            if (i <= j) {
-                swap(array, i, j);
-                i++;
-                j--;
-            }
-        }
-        // Recursion
-        if (low < j) {
-            sortFiles(array, low, j);
-        }
-        if (i < high) {
-            sortFiles(array, i, high);
-        }
-    }
-
-    private static <T> void swap(final T[] array, final int i, final int j) {
-        final T f = array[i];
-        array[i] = array[j];
-        array[j] = f;
+            Arrays.sort (array, new Comparator <File>(){
+                public int compare (File aO1, File aO2) {
+                    return aO1.getName ().compareTo (aO2.getName ());
+                }
+            });
     }
 
     /**
