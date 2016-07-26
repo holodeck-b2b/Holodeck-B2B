@@ -31,7 +31,20 @@ import org.holodeckb2b.interfaces.general.ITradingPartner;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public final class CompareUtils {
-  
+    /**
+     * Compare any 2 objects in a <code>null</code> safe manner. If both passed
+     * objects are <code>null</code> they are interpreted as being equal. If only
+     * one object is <code>null</code> they are different. If both objects are
+     * non-<code>null</code> than the {@link #equals(Object)} method is invoked on
+     * them.
+     * 
+     * @param o1
+     *        First object. May be <code>null</code>.
+     * @param o2
+     *        Second object. May be <code>null</code>.
+     * @return <code>true</code> if both are <code>null</code> or if both are
+     *         equal.
+     */
     private static <T> boolean _nullSafeEqual (final T o1, final T o2) {
         return o1 == null ? o2 == null : o1.equals (o2);
     }
