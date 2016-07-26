@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.zip.ZipException;
@@ -147,8 +149,9 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                             createInconsistentError(mc, um, plRef);
                             return InvocationResponse.CONTINUE;
                         } else {
-                            try {
-                                dh.writeTo(new FileOutputStream(plFile));
+                            try (final OutputStream aOS = new FileOutputStream(plFile)) 
+                            {
+                                dh.writeTo(aOS);
                             } catch (final ZipException decompressError) {
                                 log.error("Payload [" + plRef + "] in message [" + um.entity.getMessageId()
                                             + "] could not be decompressed! Details: " + decompressError.getMessage());
@@ -286,8 +289,11 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      * @throws XMLStreamException
      */
     private void saveXMLPayload(final OMElement e, final File f) throws XMLStreamException, IOException {
-        final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(new FileWriter(f));
-        e.serialize(writer);
-        writer.flush();
+        try (final Writer w = new FileWriter(f))
+        {
+            final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(w);
+            e.serialize(writer);
+            writer.flush();
+        }
     }
 }
