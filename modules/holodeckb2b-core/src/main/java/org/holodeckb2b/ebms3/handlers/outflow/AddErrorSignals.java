@@ -74,7 +74,7 @@ public class AddErrorSignals extends BaseHandler {
         try {
             errorSigs = (Collection<EntityProxy<ErrorMessage>>) mc.getProperty(MessageContextProperties.OUT_ERROR_SIGNALS);
         } catch(final ClassCastException cce) {
-            log.fatal("Illegal state of processing! MessageContext contained a " + errorSigs.getClass().getName()
+            log.fatal("Illegal state of processing! MessageContext contained a " + mc.getProperty(MessageContextProperties.OUT_ERROR_SIGNALS).getClass().getName()
                         + " object as collection of error signals!");
             return InvocationResponse.ABORT;
         }

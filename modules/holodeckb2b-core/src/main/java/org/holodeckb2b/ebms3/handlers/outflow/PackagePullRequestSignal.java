@@ -53,7 +53,7 @@ public class PackagePullRequestSignal extends BaseHandler {
             pullReq = (EntityProxy<PullRequest>) mc.getProperty(MessageContextProperties.OUT_PULL_REQUEST);
         } catch (final ClassCastException cce) {
             log.fatal("Illegal state of processing! MessageContext contained a "
-                        + pullReq.getClass().getName() + " object as PullRequest!");
+                        + mc.getProperty(MessageContextProperties.OUT_PULL_REQUEST).getClass().getName() + " object as PullRequest!");
             return InvocationResponse.ABORT;
         }
 
