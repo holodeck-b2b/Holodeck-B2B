@@ -106,7 +106,7 @@ public class ProcessErrors extends BaseHandler {
         errorLog.error(errSignalProxy.entity);
 
         log.debug("Get referenced message unit(s)");
-        final ArrayList<EntityProxy> refdMessages = new ArrayList<>(1);
+        final ArrayList<EntityProxy<MessageUnit>> refdMessages = new ArrayList<>(1);
 
         // There may not be a refToMessageId in the error itself, in that case the message units from the request are
         // assumed to be referenced
@@ -114,7 +114,7 @@ public class ProcessErrors extends BaseHandler {
         if (!Utils.isNullOrEmpty(refToMessageId)) {
             log.debug("Error message [" + errSignalProxy.entity.getMessageId() + "] references messageId: "
                         + refToMessageId);
-            final EntityProxy mu = MessageUnitDAO.getSentMessageUnitWithId(refToMessageId);
+            final EntityProxy<MessageUnit> mu = MessageUnitDAO.getSentMessageUnitWithId(refToMessageId);
             if (mu != null)
                 refdMessages.add(mu);
         } else if (isInFlow(INITIATOR)) {

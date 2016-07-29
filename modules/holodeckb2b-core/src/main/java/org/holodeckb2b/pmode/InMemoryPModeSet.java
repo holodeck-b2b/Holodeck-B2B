@@ -80,9 +80,6 @@ public class InMemoryPModeSet implements IPModeSet {
         }
 
         synchronized (this.pmodeSet) {
-            if (pmodeSet == null)
-                pmodeSet = new HashMap<>();
-
             // Ensure that the P-Mode id is unique and does not already exist
             if (pmodeSet.containsKey(pmodeId))
                 throw new PModeSetException("A P-Mode with id " + pmodeId + " already exists!");

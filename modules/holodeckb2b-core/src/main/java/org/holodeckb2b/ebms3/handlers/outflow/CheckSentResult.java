@@ -25,6 +25,7 @@ import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.SignalMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
@@ -64,9 +65,9 @@ public class CheckSentResult extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) throws DatabaseException {
         // Get all message units in this message
-        final Collection<EntityProxy> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
+        final Collection<EntityProxy<MessageUnit>> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
         // And change their processing state
-        for (final EntityProxy mu : msgUnits) {
+        for (final EntityProxy<MessageUnit> mu : msgUnits) {
             MessageUnitDAO.setSending(mu);
             log.info(mu.entity.getClass().getSimpleName() + " with msg-id ["
                                                                     + mu.entity.getMessageId() + "] is being sent");
@@ -98,9 +99,9 @@ public class CheckSentResult extends BaseHandler {
             log.debug("The sent operation was " + (success ? "" : "not ") + "successfull");
 
             //Change processing state of all message units in the message accordingly
-            final Collection<EntityProxy> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
+            final Collection<EntityProxy<MessageUnit>> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
 
-            for (final EntityProxy mu : msgUnits) {
+            for (final EntityProxy<MessageUnit> mu : msgUnits) {
                 try {
                     if (!success) {
                         MessageUnitDAO.setTransportFailure(mu);

@@ -66,7 +66,7 @@ public class PartyInfo {
         if (receiver != null)
             this.receiver = new TradingPartner(receiver);
         else
-            receiver = null;
+            this.receiver = null;
     }
 
 }

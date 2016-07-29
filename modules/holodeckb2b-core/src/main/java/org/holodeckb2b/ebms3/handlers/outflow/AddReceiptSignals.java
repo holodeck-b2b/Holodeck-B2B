@@ -75,7 +75,7 @@ public class AddReceiptSignals extends BaseHandler {
             rcptSigs = (Collection<EntityProxy<Receipt>>) mc.getProperty(MessageContextProperties.OUT_RECEIPTS);
         } catch(final ClassCastException cce) {
             log.fatal("Illegal state of processing! MessageContext contained a "
-                        + rcptSigs.getClass().getName() + " object as collection of error signals!");
+                        + mc.getProperty(MessageContextProperties.OUT_RECEIPTS).getClass().getName() + " object as collection of error signals!");
             return InvocationResponse.ABORT;
         }
 

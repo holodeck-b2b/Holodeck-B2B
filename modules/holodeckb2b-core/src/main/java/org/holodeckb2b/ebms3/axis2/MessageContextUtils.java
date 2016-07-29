@@ -227,22 +227,22 @@ public class MessageContextUtils {
      * @param mc    The current message context
      * @return      {@link Collection} of {@link MessageUnit} objects for the message units that were sent.
      */
-    public static Collection<EntityProxy> getSentMessageUnits(final MessageContext mc) {
-        final Collection<EntityProxy>   reqMUs = new ArrayList<>();
+    public static Collection<EntityProxy<MessageUnit>> getSentMessageUnits(final MessageContext mc) {
+        final Collection<EntityProxy<MessageUnit>>   reqMUs = new ArrayList<>();
 
-        final EntityProxy userMsg = (EntityProxy)
+        final EntityProxy<MessageUnit> userMsg = (EntityProxy<MessageUnit>)
                 getPropertyFromOutMsgCtx(mc, MessageContextProperties.OUT_USER_MESSAGE);
         if (userMsg != null)
             reqMUs.add(userMsg);
-        final EntityProxy pullReq = (EntityProxy)
+        final EntityProxy<MessageUnit> pullReq = (EntityProxy<MessageUnit>)
                 getPropertyFromOutMsgCtx(mc, MessageContextProperties.OUT_PULL_REQUEST);
         if (pullReq != null)
             reqMUs.add(pullReq);
-        final Collection<EntityProxy> receipts = (ArrayList<EntityProxy>)
+        final Collection<EntityProxy<MessageUnit>> receipts = (Collection<EntityProxy<MessageUnit>>)
                 getPropertyFromOutMsgCtx(mc, MessageContextProperties.OUT_RECEIPTS);
         if (receipts != null && !receipts.isEmpty())
             reqMUs.addAll(receipts);
-        final Collection<EntityProxy> errors = (ArrayList<EntityProxy>)
+        final Collection<EntityProxy<MessageUnit>> errors = (Collection<EntityProxy<MessageUnit>>)
                 getPropertyFromOutMsgCtx(mc, MessageContextProperties.OUT_ERROR_SIGNALS);
         if (errors != null && !errors.isEmpty())
             reqMUs.addAll(errors);
@@ -255,19 +255,19 @@ public class MessageContextUtils {
      * @param mc    The in flow message context
      * @return      {@link Collection} of {@link EntityProxy} objects for the message units in the received message.
      */
-    public static Collection<EntityProxy> getRcvdMessageUnits(final MessageContext mc) {
-        final Collection<EntityProxy>   reqMUs = new ArrayList<>();
+    public static Collection<EntityProxy<MessageUnit>> getRcvdMessageUnits(final MessageContext mc) {
+        final Collection<EntityProxy<MessageUnit>>   reqMUs = new ArrayList<>();
 
-        final EntityProxy userMsg = (EntityProxy) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
+        final EntityProxy<MessageUnit> userMsg = (EntityProxy<MessageUnit>) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
         if (userMsg != null)
             reqMUs.add(userMsg);
-        final EntityProxy pullReq = (EntityProxy) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
+        final EntityProxy<MessageUnit> pullReq = (EntityProxy<MessageUnit>) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
         if (pullReq != null)
             reqMUs.add(pullReq);
-        final Collection<EntityProxy> receipts = (Collection<EntityProxy>) mc.getProperty(MessageContextProperties.IN_RECEIPTS);
+        final Collection<EntityProxy<MessageUnit>> receipts = (Collection<EntityProxy<MessageUnit>>) mc.getProperty(MessageContextProperties.IN_RECEIPTS);
         if (!Utils.isNullOrEmpty(receipts))
             reqMUs.addAll(receipts);
-        final Collection<EntityProxy> errors = (Collection<EntityProxy>) mc.getProperty(MessageContextProperties.IN_ERRORS);
+        final Collection<EntityProxy<MessageUnit>> errors = (Collection<EntityProxy<MessageUnit>>) mc.getProperty(MessageContextProperties.IN_ERRORS);
         if (!Utils.isNullOrEmpty(errors))
             reqMUs.addAll(errors);
         return reqMUs;

@@ -402,7 +402,7 @@ public class PModeFinder {
 
         // Verify that the expected certificate was used for creating the signature, again start with configuration from
         // PR-flow and fall back to TP
-        ISigningConfiguration expectedSig = pullSecCfg.getSignatureConfiguration();
+        ISigningConfiguration expectedSig = pullSecCfg == null ? null : pullSecCfg.getSignatureConfiguration();
         if (expectedSig == null)
             expectedSig = tpSecCfg == null ? null : tpSecCfg.getSignatureConfiguration();
 

@@ -132,9 +132,9 @@ public class AuthorizeMessage extends BaseHandler {
     protected void failMsgUnits(final MessageContext mc) throws DatabaseException {
 
         log.debug("Get all message units contained in message");
-        final Collection<EntityProxy> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
+        final Collection<EntityProxy<MessageUnit>> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
 
-        for (final EntityProxy proxy : rcvdMsgUnits) {
+        for (final EntityProxy<MessageUnit> proxy : rcvdMsgUnits) {
             final MessageUnit mu = proxy.entity;
             // PullRequest are authenticated seperately, so process only other message unit types
             if (! (mu instanceof PullRequest)) {

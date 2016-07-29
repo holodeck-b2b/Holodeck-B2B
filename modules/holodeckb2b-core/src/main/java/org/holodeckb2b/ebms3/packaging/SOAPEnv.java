@@ -55,7 +55,7 @@ public class SOAPEnv {
         // Check which SOAP version to use
         if (v == SOAPVersion.SOAP_11) {
             omFactory = OMAbstractFactory.getSOAP11Factory();
-        } else if (v == SOAPVersion.SOAP_12) {
+        } else {
             omFactory = OMAbstractFactory.getSOAP12Factory();
         }
 

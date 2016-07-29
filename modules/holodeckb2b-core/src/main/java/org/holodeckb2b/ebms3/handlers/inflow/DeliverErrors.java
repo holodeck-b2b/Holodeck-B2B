@@ -143,7 +143,7 @@ public class DeliverErrors extends BaseHandler {
             log.debug("Error does not directly reference a message unit");
             // If the error is a direct response and there was just on outgoing message unit we still have a
             // reference
-            final Collection<EntityProxy>  reqMUs = MessageContextUtils.getSentMessageUnits(mc);
+            final Collection<EntityProxy<MessageUnit>>  reqMUs = MessageContextUtils.getSentMessageUnits(mc);
             if (reqMUs.size() == 1) {
                 log.debug("Request contained one message unit, assuming error applies to it");
                 final EntityProxy<MessageUnit> refdMU = reqMUs.iterator().next();

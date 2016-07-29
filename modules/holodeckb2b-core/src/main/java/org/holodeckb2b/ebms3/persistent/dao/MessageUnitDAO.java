@@ -439,7 +439,7 @@ public class MessageUnitDAO {
      * @param pmode The {@link IPMode} that defines how the message unit must be processed
      * @throws DatabaseException If an error occurs when saving the object to the database
      */
-    public static void setPMode(final EntityProxy mu, final IPMode pmode) throws DatabaseException {
+    public static <T extends MessageUnit> void setPMode(final EntityProxy<T> mu, final IPMode pmode) throws DatabaseException {
         setPModeId(mu, pmode.getId());
     }
 
@@ -450,11 +450,11 @@ public class MessageUnitDAO {
      * @param pmodeId   The P-Mode id of the P-Mode that defines how the message unit must be processed
      * @throws DatabaseException If an error occurs when saving the object to the database
      */
-    public static void setPModeId(final EntityProxy mu, final String pmodeId) throws DatabaseException {
+    public static <T extends MessageUnit> void setPModeId(final EntityProxy<T> mu, final String pmodeId) throws DatabaseException {
         final EntityManager em = JPAUtil.getEntityManager();
         try {
             em.getTransaction().begin();
-            final MessageUnit actualMU = refreshMessageUnit(mu.entity, em);
+            final T actualMU = refreshMessageUnit(mu.entity, em);
             actualMU.setPMode(pmodeId);
             em.merge(actualMU);
             em.getTransaction().commit();
@@ -496,7 +496,7 @@ public class MessageUnitDAO {
      *              <code>false</code> otherwise.
      * @throws DatabaseException When an the state can be changed but an error occurs while executing the update
      */
-    public static boolean startDeliveryOfMessageUnit(final EntityProxy mu) throws DatabaseException {
+    public static boolean startDeliveryOfMessageUnit(final EntityProxy<? extends MessageUnit> mu) throws DatabaseException {
         return setProcessingState(mu, ProcessingStates.OUT_FOR_DELIVERY, ProcessingStates.READY_FOR_DELIVERY);
     }
 
@@ -507,7 +507,7 @@ public class MessageUnitDAO {
      * @param mu    The {@link EntityProxy} to the message unit that is ready to be pushed
      * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setReadyToPush(final EntityProxy mu) throws DatabaseException {
+    public static <T extends MessageUnit> void setReadyToPush(final EntityProxy<T> mu) throws DatabaseException {
         setProcessingState(mu, ProcessingStates.READY_TO_PUSH, null);
     }
 
@@ -518,7 +518,7 @@ public class MessageUnitDAO {
      * @param mu    The {@link EntityProxy} to the message unit that is ready to be pulled
      * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setWaitForPull(final EntityProxy mu) throws DatabaseException {
+    public static <T extends MessageUnit> void setWaitForPull(final EntityProxy<T> mu) throws DatabaseException {
         setProcessingState(mu, ProcessingStates.AWAITING_PULL, null);
     }
 
@@ -529,7 +529,7 @@ public class MessageUnitDAO {
      * @param um    The {@link EntityProxy} to the {@link UserMessage} that is waiting for a receipt
      * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setWaitForReceipt(final EntityProxy<UserMessage> um) throws DatabaseException {
+    public static <T extends MessageUnit> void setWaitForReceipt(final EntityProxy<T> um) throws DatabaseException {
         setProcessingState(um, ProcessingStates.AWAITING_RECEIPT, null);
     }
 
@@ -540,7 +540,7 @@ public class MessageUnitDAO {
      * @param mu T  The {@link EntityProxy} to the message unit that is delivered successfully
      * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setDelivered(final EntityProxy mu) throws DatabaseException {
+    public static <T extends MessageUnit>void setDelivered(final EntityProxy<T> mu) throws DatabaseException {
         setProcessingState(mu, ProcessingStates.DELIVERED, null);
     }
 
@@ -551,7 +551,7 @@ public class MessageUnitDAO {
      * @param mu    The {@link EntityProxy} to the message unit that failed to process successfully
      * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setFailed(final EntityProxy mu) throws DatabaseException {
+    public static <T extends MessageUnit> void setFailed(final EntityProxy<T> mu) throws DatabaseException {
         setProcessingState(mu, ProcessingStates.FAILURE, null);
     }
 
@@ -562,7 +562,7 @@ public class MessageUnitDAO {
      * @param mu    The {@link EntityProxy} to the message unit that is a duplicate
      * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setReadyForDelivery(final EntityProxy mu) throws DatabaseException {
+    public static <T extends MessageUnit> void setReadyForDelivery(final EntityProxy<T> mu) throws DatabaseException {
         setProcessingState(mu, ProcessingStates.READY_FOR_DELIVERY, null);
     }
 
@@ -584,7 +584,7 @@ public class MessageUnitDAO {
      * @param mu The {@link MessageUnit} that could not be delivered
      * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setDeliveryFailure(final EntityProxy mu) throws DatabaseException {
+    public static <T extends MessageUnit> void setDeliveryFailure(final EntityProxy<T> mu) throws DatabaseException {
         setProcessingState(mu, ProcessingStates.DELIVERY_FAILED, null);
     }
 
@@ -595,7 +595,7 @@ public class MessageUnitDAO {
      * @param mu The {@link EntityProxy} to the message unit that is successfully processed
      * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setDone(final EntityProxy mu) throws DatabaseException {
+    public static <T extends MessageUnit> void setDone(final EntityProxy<T> mu) throws DatabaseException {
         setProcessingState(mu, ProcessingStates.DONE, null);
     }
 
@@ -606,7 +606,7 @@ public class MessageUnitDAO {
      * @param mu The {@link EntityProxy} to the message unit for which the Error was reported
      * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setWarning(final EntityProxy mu) throws DatabaseException {
+    public static <T extends MessageUnit> void setWarning(final EntityProxy<T> mu) throws DatabaseException {
         setProcessingState(mu, ProcessingStates.PROC_WITH_WARNING, null);
     }
 
@@ -617,7 +617,7 @@ public class MessageUnitDAO {
      * @param mu The {@link EntityProxy} to the message unit that could not be sent out successfully
      * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setTransportFailure(final EntityProxy mu) throws DatabaseException {
+    public static <T extends MessageUnit> void setTransportFailure(final EntityProxy<T> mu) throws DatabaseException {
         setProcessingState(mu, ProcessingStates.TRANSPORT_FAILURE, null);
     }
 
@@ -628,7 +628,7 @@ public class MessageUnitDAO {
      * @param mu    The {@link EntityProxy} to the message unit that is being sent out
      * @throws DatabaseException When the processing state can not be updated in the database
      */
-    public static void setSending(final EntityProxy mu) throws DatabaseException {
+    public static <T extends MessageUnit> void setSending(final EntityProxy<T> mu) throws DatabaseException {
         setProcessingState(mu, ProcessingStates.SENDING, null);
     }
 

@@ -29,6 +29,7 @@ import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.Receipt;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
@@ -166,8 +167,8 @@ public class PrepareResponseMessage extends BaseHandler {
     private Map<String, Class<?>> getReceivedMessageUnits(final MessageContext mc) {
         final HashMap<String, Class<?>>   reqMUs = new HashMap<>();
 
-        final Collection<EntityProxy> msgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
-        for (final EntityProxy mu : msgUnits)
+        final Collection<EntityProxy<MessageUnit>> msgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
+        for (final EntityProxy<MessageUnit> mu : msgUnits)
             reqMUs.put(mu.entity.getMessageId(), mu.entity.getClass());
 
         return reqMUs;

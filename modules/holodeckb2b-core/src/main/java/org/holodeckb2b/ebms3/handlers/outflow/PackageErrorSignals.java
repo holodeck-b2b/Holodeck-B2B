@@ -38,6 +38,7 @@ import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 
@@ -128,7 +129,7 @@ public class PackageErrorSignals extends BaseHandler {
     protected boolean isSOAPFaultAllowed(final MessageContext mc) {
         // Check if message contains a non Error Signal message unit
         boolean onlyErrorMU = true;
-        final Iterator<EntityProxy> msgUnitsIt = MessageContextUtils.getSentMessageUnits(mc).iterator();
+        final Iterator<EntityProxy<MessageUnit>> msgUnitsIt = MessageContextUtils.getSentMessageUnits(mc).iterator();
 
         do {
             onlyErrorMU = msgUnitsIt.next().entity instanceof ErrorMessage;

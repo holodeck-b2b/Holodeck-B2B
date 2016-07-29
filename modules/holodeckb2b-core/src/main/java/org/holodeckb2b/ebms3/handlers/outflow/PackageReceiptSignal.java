@@ -59,7 +59,7 @@ public class PackageReceiptSignal extends BaseHandler {
             receipts = (ArrayList<EntityProxy<Receipt>>) mc.getProperty(MessageContextProperties.OUT_RECEIPTS);
         } catch (final ClassCastException e) {
             log.fatal("Illegal state of processing! MessageContext contained a "
-                        + receipts.getClass().getName() + " object as collection of receipts!");
+                        + mc.getProperty(MessageContextProperties.OUT_RECEIPTS).getClass().getName() + " object as collection of receipts!");
             return InvocationResponse.ABORT;
         }
         if (Utils.isNullOrEmpty(receipts))

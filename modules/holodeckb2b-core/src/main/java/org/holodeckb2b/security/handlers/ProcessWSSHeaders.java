@@ -327,7 +327,7 @@ public class ProcessWSSHeaders extends BaseHandler {
 
                 return false;
             } else {
-                log.debug("WSS header targeted to " + role == null ? "default" : role  + " role contained UT");
+                log.debug("WSS header targeted to " + (role == null ? "default" : role)  + " role contained UT");
                 // Transform into non WSS4J related object
                 final UsernameTokenPrincipal principal = (UsernameTokenPrincipal)
                                                             utResult.get(WSSecurityEngineResult.TAG_PRINCIPAL);

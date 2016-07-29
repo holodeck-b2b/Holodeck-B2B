@@ -127,7 +127,7 @@ public class CollaborationInfo {
             throw new PackagingException("Action element is missing from CollaborationInfo");
 
         final String action = child.getText();
-        if (action == null && action.isEmpty())
+        if (action == null || action.isEmpty())
             throw new PackagingException("Action element is empty");
 
         ciData.setAction(action);
@@ -138,7 +138,7 @@ public class CollaborationInfo {
             throw new PackagingException("ConversationId element is missing from CollaborationInfo");
 
         final String convId = child.getText();
-        if (convId == null && convId.isEmpty())
+        if (convId == null || convId.isEmpty())
             throw new PackagingException("ConversationId element is empty");
 
         ciData.setConversationId(convId);
