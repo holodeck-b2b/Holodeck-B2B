@@ -115,9 +115,6 @@ public class GZIPCompressingInputStreamTest {
 
             fis1.close(); fis2.close();
 
-        } catch (final FileNotFoundException ex) {
-            Logger.getLogger(GZIPCompressingInputStreamTest.class.getName()).log(Level.SEVERE, null, ex);
-            fail();
         } catch (final IOException ex) {
             Logger.getLogger(GZIPCompressingInputStreamTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
