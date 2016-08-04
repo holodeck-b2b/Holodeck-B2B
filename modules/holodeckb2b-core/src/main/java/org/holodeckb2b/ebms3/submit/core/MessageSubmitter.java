@@ -27,7 +27,6 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.persistency.entities.Payload;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
@@ -235,7 +234,7 @@ public class MessageSubmitter implements IMessageSubmitter {
                 || p.getContainment() != p1.getContainment() // The containment differs
                     // The containment is attachment, so URI's should be different or both null
                 || (p.getContainment() == IPayload.Containment.ATTACHMENT
-                    && ((r0 == null && r1 == null) || !CompareUtils.nullSafeEqualIgnoreCase (r0, r1)))
+                    && ((r0 == null && r1 == null) || !Utils.nullSafeEqualIgnoreCase (r0, r1)))
                     // The containment is body or external, URI should be different and not null
                 || (r0 != null && r1 != null && !r0.equalsIgnoreCase(r1));
         } while (c && it.hasNext());
