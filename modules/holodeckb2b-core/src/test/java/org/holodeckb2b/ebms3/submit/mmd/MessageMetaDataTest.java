@@ -546,7 +546,7 @@ public class MessageMetaDataTest {
                         final IDescription d1 = p1.getDescription();
                         final IDescription d2 = p2.getDescription();
                         if (m && d1 != null && d2 != null ) {
-                            if (d1.getLanguage() != null && d1.equals(d2.getLanguage()))
+                            if (d1.getLanguage() != null && d1.getLanguage ().equals(d2.getLanguage()))
                                 m &= (d1.getText() != null  ? d1.getText().equals(d2.getText()) : d2.getText() == null);
                         } else
                             m &= (d1 == d2);

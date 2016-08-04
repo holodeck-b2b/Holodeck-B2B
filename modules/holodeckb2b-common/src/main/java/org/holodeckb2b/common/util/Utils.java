@@ -56,7 +56,9 @@ public final class Utils {
     /*
      * Apache Tika mime type detector for detecting the mime type of payloads
      */
-    private static Tika    mimeTypeDetector;
+    private static final class SingletonHolder {
+      static final Tika mimeTypeDetector = new Tika ();
+    }  
 
     /**
      * Transform a {@link Date} object to a {@link String} formatted according to
@@ -142,11 +144,7 @@ public final class Utils {
      * @throws  IOException When the given file can not be accessed for mime type detection
      */
     public static String detectMimeType(final File f) throws IOException {
-        // Check if Tika detector is initialized and if not do so now
-        if (mimeTypeDetector == null)
-            mimeTypeDetector = new Tika();
-
-        return mimeTypeDetector.detect(f).toString();
+        return SingletonHolder.mimeTypeDetector.detect(f).toString();
     }
 
     /**
@@ -187,8 +185,8 @@ public final class Utils {
         if (obj == null)
             return null;
 
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             ObjectOutput out = new ObjectOutputStream(bos))
+        try (final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            final ObjectOutput out = new ObjectOutputStream(bos))
         {
             out.writeObject(obj);
             out.close();
@@ -212,9 +210,9 @@ public final class Utils {
             return null;
 
         Object result = null;
-        final ByteArrayInputStream stream = new ByteArrayInputStream(data);
-        try {
-            final ObjectInputStream is = new ObjectInputStream(stream);
+        try (final ByteArrayInputStream stream = new ByteArrayInputStream(data);
+             final ObjectInputStream is = new ObjectInputStream(stream)) 
+        {
             result = is.readObject();
         } catch (final Exception ex) {
             throw new ObjectSerializationException("Deserializing an object failed!", ex);
@@ -383,7 +381,8 @@ public final class Utils {
      * Gets the root cause of the exception by traversing the exception stack and returning the
      * last available exception in it.
      *
-     * @param t     The {@link Throwable} object to get the root cause for
+     * @param t     The {@link Throwable} object to get the root cause for. May not be <code>null</code>
+     *              because otherwise it crashes with an ArrayIndexOutOfBoundsException
      * @return      The root cause (note that this can be the throwable itself)
      */
     public static Throwable getRootCause(final Throwable t) {
@@ -407,5 +406,41 @@ public final class Utils {
         }
 
         return exceptionStack;
+    }
+
+    /**
+     * Compare any 2 objects in a <code>null</code> safe manner. If both passed
+     * objects are <code>null</code> they are interpreted as being equal. If only
+     * one object is <code>null</code> they are different. If both objects are
+     * non-<code>null</code> than the {@link #equals(Object)} method is invoked on
+     * them.
+     * 
+     * @param o1
+     *        First object. May be <code>null</code>.
+     * @param o2
+     *        Second object. May be <code>null</code>.
+     * @return <code>true</code> if both are <code>null</code> or if both are
+     *         equal.
+     */
+    public static <T> boolean nullSafeEqual (final T o1, final T o2) {
+        return o1 == null ? o2 == null : o1.equals (o2);
+    }
+
+    /**
+     * Compare any 2 {@link String}s in a <code>null</code> safe manner. If both passed
+     * objects are <code>null</code> they are interpreted as being equal. If only
+     * one object is <code>null</code> they are different. If both objects are
+     * non-<code>null</code> than the {@link String#equalsIgnoreCase(String)} method is invoked on
+     * them.
+     * 
+     * @param s1
+     *        First String. May be <code>null</code>.
+     * @param s2
+     *        Second String. May be <code>null</code>.
+     * @return <code>true</code> if both are <code>null</code> or if both are
+     *         equal ignoring the case.
+     */
+    public static boolean nullSafeEqualIgnoreCase (final String s1, final String s2) {
+        return s1 == null ? s2 == null : s1.equalsIgnoreCase (s2);
     }
 }

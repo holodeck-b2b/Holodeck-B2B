@@ -21,6 +21,7 @@ import static java.lang.Thread.sleep;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
@@ -32,16 +33,13 @@ public class WaitingWorker extends AbstractWorkerTask {
 
     public static BlockingQueue<String>     workQueue = new LinkedBlockingQueue<>();
 
-    static String metaphore = "BLOCK";
-    static int instances = 0;
+    static final AtomicInteger instances = new AtomicInteger (0);
 
     int instance;
 
     @Override
     public void setParameters(final Map<String, ?> parameters) throws TaskConfigurationException {
-        synchronized(metaphore) {
-            instance = ++instances;
-        }
+        instance = instances.incrementAndGet ();
     }
 
     @Override
