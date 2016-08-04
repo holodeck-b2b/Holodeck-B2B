@@ -234,8 +234,10 @@ public class MessageSubmitter implements IMessageSubmitter {
                 || p.getContainment() != p1.getContainment() // The containment differs
                     // The containment is attachment, so URI's should be different or both null
                 || (p.getContainment() == IPayload.Containment.ATTACHMENT
+                // TODO Is this "r0 == r1" as a String comparison okay?
                     && (r0 == r1 || !r0.equalsIgnoreCase(r1)))
                     // The containment is body or external, URI should be different and not null
+                // TODO Is this "r0 != r1" as a String comparison okay?
                 || (r0 != r1 && !r0.equalsIgnoreCase(r1));
         } while (c && it.hasNext());
         return c;
