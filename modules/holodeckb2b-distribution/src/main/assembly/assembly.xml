@@ -78,7 +78,7 @@
                 <include>holodeckb2b.xml</include>
                 <include>pulling_configuration.xml</include>
                 <include>workers.xml</include>
-                <include>log4j.properties</include>
+                <include>log4j2.xml</include>
             </includes>
         </fileSet>
         <!-- Persistency configuration -->

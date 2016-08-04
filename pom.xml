@@ -23,7 +23,7 @@
     <groupId>org.holodeckb2b</groupId>
     <artifactId>holodeckb2b</artifactId>
     <packaging>pom</packaging>
-    <version>2.1.0-SNAPSHOT-6</version>
+    <version>2.1.0-SNAPSHOT-7</version>
     <name>Holodeck B2B</name>
     <url>http://www.holodeck-b2b.org/</url>
     <inceptionYear>2015</inceptionYear>    
@@ -41,6 +41,7 @@
         <netbeans.hint.license>gpl30</netbeans.hint.license>
         <hibernate.version>5.0.9.Final</hibernate.version>
         <wss4j.version>2.0.4</wss4j.version>
+        <log4j.version>2.6.2</log4j.version>
     </properties>
     
     <modules>
@@ -156,7 +157,7 @@
                 <scope>runtime</scope>
             </dependency>
             
-             <!--=============================================================== 
+            <!--=============================================================== 
                 Apache Tika is used in Common project to determine MIME Type
             =============================================================== --> 
             <dependency>
@@ -176,14 +177,17 @@
                 <version>2.5</version>
             </dependency>
             
-            <!-- Santuario is used to convert between Axiom and DOM XML -->
+            <!--=============================================================== 
+                Security libraries used to implement signing and encryption
+                of the messages.
+                The WSS4J framework is used to implement WS-Security and 
+                BouncyCastle is included as security provided
+            =============================================================== --> 
             <dependency>
                 <groupId>org.apache.santuario</groupId>
                 <artifactId>xmlsec</artifactId>
                 <version>2.0.5</version>
             </dependency>
-
-            <!-- WS-Security libs -->
             <dependency>
                 <groupId>org.apache.wss4j</groupId>
                 <artifactId>wss4j-ws-security-common</artifactId>
@@ -193,15 +197,50 @@
                 <groupId>org.apache.wss4j</groupId>
                 <artifactId>wss4j-ws-security-dom</artifactId>
                 <version>${wss4j.version}</version>
-            </dependency>
+            </dependency>            
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>1.54</version>
+            </dependency>                          
             
-            <!--  Derby DB -->
+            <!--=============================================================== 
+                For testing and "out of the box" operation Derby is used
+            =============================================================== --> 
             <dependency>
                 <groupId>org.apache.derby</groupId>
                 <artifactId>derby</artifactId>
                 <version>10.12.1.1</version>
             </dependency>
+
+            <!--=============================================================== 
+                Log4j is used for logging in Holodeck B2B
+            =============================================================== -->             
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <!-- Axis2 and currently also Holodeck B2B uses Commons logging, so add log4j binding -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-jcl</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
             
+            <!-- Although we don't use SLF4J directly it is used by libs we're using like WSS4J. So we want to 
+                bind this to log4j as well -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+                        
             <!--=============================================================== 
                 Test dependencies
             =============================================================== -->
@@ -209,12 +248,6 @@
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.12</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>1.2.17</version>
                 <scope>test</scope>
             </dependency>
             

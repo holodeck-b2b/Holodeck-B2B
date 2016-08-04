@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>2.1.0-SNAPSHOT-6</version>
+        <version>2.1.0-SNAPSHOT-7</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -48,30 +48,33 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
         </dependency>
-        <!-- 
-            Add Bouncy Castle crypto provider to enable newer security algorithms
-        -->
+        
+        <!--=============================================================== 
+            Second the runtime only dependencies, not declared in the
+            modules
+        =============================================================== -->       
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.54</version>
             <scope>runtime</scope>
         </dependency>    
-
-        <!-- Logging -->
+        
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.12</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>        
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-jcl</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Database support -->
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
