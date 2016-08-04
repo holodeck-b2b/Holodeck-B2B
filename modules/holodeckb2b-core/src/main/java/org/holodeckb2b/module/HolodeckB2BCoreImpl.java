@@ -62,6 +62,9 @@ import org.holodeckb2b.pmode.InMemoryPModeSet;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
+    private static final class SingletonHolder {
+        static final IMessageSubmitterFactory instance = new MessageSubmitterFactory ();
+    }
 
     /**
      * The name of the Axis2 Module that contains the Holodeck B2B Core implementation
@@ -90,12 +93,6 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * checks the pull configuration for changes and applies them to this pull worker pool.
      */
     private static  WorkerPool      pullWorkers = null;
-
-    /**
-     * Factory for creating {@link IMessageSubmitter} objects that can be used to submit user messages to Holodeck B2B
-     * for sending to another MSH.
-     */
-    private static  IMessageSubmitterFactory msf = null;
 
     /**
      * Collection of active message delivery methods mapped by the <i>id</i> of the {@link IDeliverySpecification} that
@@ -260,10 +257,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * @return  A {@link IMessageSubmitter} object to use for submission of User Messages
      */
     public IMessageSubmitter getMessageSubmitter() {
-        if (msf == null)
-            msf = new MessageSubmitterFactory();
-
-        return msf.createMessageSubmitter();
+        return SingletonHolder.instance.createMessageSubmitter();
     }
 
     /**

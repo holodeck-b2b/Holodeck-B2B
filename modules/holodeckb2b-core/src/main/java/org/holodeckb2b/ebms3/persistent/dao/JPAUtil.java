@@ -33,11 +33,10 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class JPAUtil {
-
-    /*
-     * The EntityManagerFactory to create EntityManagers
-     */
-    private static EntityManagerFactory emf;
+    private static final class SingletonHolder
+    {
+      static final EntityManagerFactory instance = Persistence.createEntityManagerFactory (((InternalConfiguration) HolodeckB2BCoreInterface.getConfiguration()).getPersistencyUnit());
+    }
 
     /**
      * Gets a {@see EntityManager} for the JPA persistency unit named in the configuration.
@@ -46,28 +45,17 @@ public class JPAUtil {
      * @throws  DatabaseException
      */
     public static EntityManager getEntityManager() throws DatabaseException {
-       // Initialize list of EMF's if not already done
-       if (emf == null)
-           emf = getEntityManagerFactory();
-
        // Create an EntityManager using the found factory
        EntityManager em = null;
 
        try {
-           em = emf.createEntityManager();
+           // The class is loaded upon first call
+           em = SingletonHolder.instance.createEntityManager();
        } catch (final Exception e) {
            // Oh oh, something went wrong creating the entity manager
            throw new DatabaseException("Error while creating the EntityManager", e);
        }
 
        return em;
-    }
-
-    private static synchronized EntityManagerFactory getEntityManagerFactory() {
-        if (emf != null)
-            return emf;
-        else
-            return Persistence.createEntityManagerFactory(
-                            ((InternalConfiguration) HolodeckB2BCoreInterface.getConfiguration()).getPersistencyUnit());
     }
 }
