@@ -56,7 +56,9 @@ public final class Utils {
     /*
      * Apache Tika mime type detector for detecting the mime type of payloads
      */
-    private static Tika    mimeTypeDetector;
+    private static final class SingletonHolder {
+      static final Tika mimeTypeDetector = new Tika ();
+    }  
 
     /**
      * Transform a {@link Date} object to a {@link String} formatted according to
@@ -142,11 +144,7 @@ public final class Utils {
      * @throws  IOException When the given file can not be accessed for mime type detection
      */
     public static String detectMimeType(final File f) throws IOException {
-        // Check if Tika detector is initialized and if not do so now
-        if (mimeTypeDetector == null)
-            mimeTypeDetector = new Tika();
-
-        return mimeTypeDetector.detect(f).toString();
+        return SingletonHolder.mimeTypeDetector.detect(f).toString();
     }
 
     /**
