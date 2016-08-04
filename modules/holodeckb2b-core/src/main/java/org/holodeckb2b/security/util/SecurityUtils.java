@@ -157,8 +157,10 @@ public class SecurityUtils {
 
         cryptoProperties.setProperty("org.apache.wss4j.crypto.provider", "org.apache.wss4j.common.crypto.Merlin");
 
+        // TODO This will crash when keyStoreFile is null
         cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin." + keyStoreType + ".file", keyStoreFile);
         cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin." + keyStoreType + ".type", "jks");
+        // TODO This will crash when keyStorePwd is null
         cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin." + keyStoreType + ".password", keyStorePwd);
 
         return cryptoProperties;
