@@ -22,7 +22,6 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -68,72 +67,56 @@ public class GZIPCompressingInputStreamTest {
 
     @Test
     public void testCompression() {
-        GZIPCompressingInputStream cfis = null;
-        GZIPInputStream decfis = null;
-
-        FileOutputStream fos = null;
-        FileInputStream fis1 = null;
-        FileInputStream fis2 = null;
-
         final File comF = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "compressed.gz");
         final File decF = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "decompressed.xml");
 
         try {
             final File uncF = new File(this.getClass().getClassLoader().getResource("compression/uncompressed.xml").getPath());
+            final byte[] buffer = new byte[512];
 
             //Compress
-            cfis = new GZIPCompressingInputStream(new FileInputStream(uncF));
-            fos = new FileOutputStream(comF);
-            final byte[] buffer = new byte[512];
-            int r = 0;
-            while ( (r = cfis.read(buffer, 0, 512)) > 0 ) {
-                fos.write(buffer, 0, r);
+            try (GZIPCompressingInputStream cfis = new GZIPCompressingInputStream(new FileInputStream(uncF));
+                 FileOutputStream fos = new FileOutputStream(comF))
+            {
+              int r = 0;
+              while ( (r = cfis.read(buffer, 0, 512)) > 0 ) {
+                  fos.write(buffer, 0, r);
+              }
             }
-            fos.close();
 
             // Decompress
-            decfis = new GZIPInputStream(new FileInputStream(comF));
-            fos = new FileOutputStream(decF);
-            r = 0;
-            while ( (r = decfis.read(buffer, 0, 512)) > 0 ) {
-                fos.write(buffer, 0, r);
+            try (GZIPInputStream decfis = new GZIPInputStream(new FileInputStream(comF));
+                 FileOutputStream fos = new FileOutputStream(decF))
+            {
+              int r = 0;
+              while ( (r = decfis.read(buffer, 0, 512)) > 0 ) {
+                  fos.write(buffer, 0, r);
+              }
             }
-            fos.close();
 
             //Compare
-            fis1 = new FileInputStream(uncF);
-            fis2 = new FileInputStream(decF);
-
-            final byte[] buffer2 = new byte[512];
-            int r2 = 0;
-            while ( ((r = fis1.read(buffer, 0, 512)) > 0) & ((r2 = fis2.read(buffer2, 0, 512)) > 0)) {
-                assertEquals(r, r2);
-                assertArrayEquals(buffer, buffer2);
+            try (FileInputStream fis1 = new FileInputStream(uncF);
+                FileInputStream fis2 = new FileInputStream(decF))
+            {
+              final byte[] buffer2 = new byte[512];
+              int r = 0;
+              int r2 = 0;
+              while ( ((r = fis1.read(buffer, 0, 512)) > 0) && ((r2 = fis2.read(buffer2, 0, 512)) > 0)) {
+                  assertEquals(r, r2);
+                  assertArrayEquals(buffer, buffer2);
+              }
+  
+              assertEquals(r, r2);
             }
-
-            assertEquals(r, r2);
-
-            fis1.close(); fis2.close();
 
         } catch (final IOException ex) {
             Logger.getLogger(GZIPCompressingInputStreamTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         } finally {
-            try {
-                cfis.close();
-                fos.close();
-                fis1.close();
-                fis2.close();
-
-                if (comF.exists())
-                    comF.delete();
-                if (decF.exists())
-                    decF.delete();
-            } catch (final IOException ex) {
-                Logger.getLogger(GZIPCompressingInputStreamTest.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            if (comF.exists())
+                comF.delete();
+            if (decF.exists())
+                decF.delete();
         }
-
-
     }
 }
