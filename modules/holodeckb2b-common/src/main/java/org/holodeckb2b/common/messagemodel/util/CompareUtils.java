@@ -31,23 +31,41 @@ import org.holodeckb2b.interfaces.general.ITradingPartner;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public final class CompareUtils {
-    /**
-     * Compare any 2 objects in a <code>null</code> safe manner. If both passed
-     * objects are <code>null</code> they are interpreted as being equal. If only
-     * one object is <code>null</code> they are different. If both objects are
-     * non-<code>null</code> than the {@link #equals(Object)} method is invoked on
-     * them.
-     * 
-     * @param o1
-     *        First object. May be <code>null</code>.
-     * @param o2
-     *        Second object. May be <code>null</code>.
-     * @return <code>true</code> if both are <code>null</code> or if both are
-     *         equal.
-     */
-    private static <T> boolean _nullSafeEqual (final T o1, final T o2) {
-        return o1 == null ? o2 == null : o1.equals (o2);
-    }
+  /**
+   * Compare any 2 objects in a <code>null</code> safe manner. If both passed
+   * objects are <code>null</code> they are interpreted as being equal. If only
+   * one object is <code>null</code> they are different. If both objects are
+   * non-<code>null</code> than the {@link #equals(Object)} method is invoked on
+   * them.
+   * 
+   * @param o1
+   *        First object. May be <code>null</code>.
+   * @param o2
+   *        Second object. May be <code>null</code>.
+   * @return <code>true</code> if both are <code>null</code> or if both are
+   *         equal.
+   */
+  public static <T> boolean nullSafeEqual (final T o1, final T o2) {
+      return o1 == null ? o2 == null : o1.equals (o2);
+  }
+
+  /**
+   * Compare any 2 {@link String}s in a <code>null</code> safe manner. If both passed
+   * objects are <code>null</code> they are interpreted as being equal. If only
+   * one object is <code>null</code> they are different. If both objects are
+   * non-<code>null</code> than the {@link String#equalsIgnoreCase(String)} method is invoked on
+   * them.
+   * 
+   * @param s1
+   *        First String. May be <code>null</code>.
+   * @param s2
+   *        Second String. May be <code>null</code>.
+   * @return <code>true</code> if both are <code>null</code> or if both are
+   *         equal ignoring the case.
+   */
+  public static boolean nullSafeEqualIgnoreCase (final String s1, final String s2) {
+      return s1 == null ? s2 == null : s1.equalsIgnoreCase (s2);
+  }
 
     /**
      * Checks if two {@link ITradingPartner} objects are equal. Two <code>ITradingPartner</code> objects are equal
@@ -59,7 +77,7 @@ public final class CompareUtils {
      *              <code>false</code> otherwise
      */
     public static boolean areEqual(final ITradingPartner tp1, final ITradingPartner tp2) {
-        return _nullSafeEqual (tp1.getRole (), tp2.getRole ()) &&
+        return nullSafeEqual (tp1.getRole (), tp2.getRole ()) &&
                areEqual(tp1.getPartyIds(), tp2.getPartyIds());
     }
 
@@ -108,8 +126,8 @@ public final class CompareUtils {
      *          <code>false</code> otherwise
      */
     public static boolean areEqual(final IPartyId id1, final IPartyId id2) {
-        return _nullSafeEqual (id1.getId(), id2.getId()) &&
-               _nullSafeEqual (id1.getType(), id2.getType());
+        return nullSafeEqual (id1.getId(), id2.getId()) &&
+               nullSafeEqual (id1.getType(), id2.getType());
     }
 
     /**
@@ -122,9 +140,9 @@ public final class CompareUtils {
      *          <code>false</code> otherwise
      */
     public static boolean areEqual(final IProperty p1, final IProperty p2) {
-      return _nullSafeEqual (p1.getName(), p2.getName()) &&
-             _nullSafeEqual (p1.getValue(), p2.getValue()) &&
-             _nullSafeEqual (p1.getType(), p2.getType());
+      return nullSafeEqual (p1.getName(), p2.getName()) &&
+             nullSafeEqual (p1.getValue(), p2.getValue()) &&
+             nullSafeEqual (p1.getType(), p2.getType());
     }
 
     /**
@@ -137,8 +155,8 @@ public final class CompareUtils {
      *          <code>false</code> otherwise
      */
     public static boolean areEqual(final IService svc1, final IService svc2) {
-      return _nullSafeEqual (svc1.getName(), svc2.getName()) &&
-             _nullSafeEqual (svc1.getType(), svc2.getType());
+      return nullSafeEqual (svc1.getName(), svc2.getName()) &&
+             nullSafeEqual (svc1.getType(), svc2.getType());
     }
 
     /*
