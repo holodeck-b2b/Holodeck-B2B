@@ -381,7 +381,8 @@ public final class Utils {
      * Gets the root cause of the exception by traversing the exception stack and returning the
      * last available exception in it.
      *
-     * @param t     The {@link Throwable} object to get the root cause for
+     * @param t     The {@link Throwable} object to get the root cause for. May not be <code>null</code>
+     *              because otherwise it crashes with an ArrayIndexOutOfBoundsException
      * @return      The root cause (note that this can be the throwable itself)
      */
     public static Throwable getRootCause(final Throwable t) {
