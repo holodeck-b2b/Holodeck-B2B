@@ -16,10 +16,6 @@
  */
 package org.holodeckb2b.as4.compression;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -27,9 +23,11 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
-
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -68,10 +66,10 @@ public class GZIPCompressingInputStreamTest {
     @Test
     public void testCompression() {
         final File comF = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "compressed.gz");
-        final File decF = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "decompressed.xml");
+        final File decF = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "decompressed.jpg");
 
         try {
-            final File uncF = new File(this.getClass().getClassLoader().getResource("compression/uncompressed.xml").getPath());
+            final File uncF = new File(this.getClass().getClassLoader().getResource("compression/uncompressed.jpg").getPath());
             final byte[] buffer = new byte[512];
 
             //Compress
@@ -101,11 +99,11 @@ public class GZIPCompressingInputStreamTest {
               final byte[] buffer2 = new byte[512];
               int r = 0;
               int r2 = 0;
-              while ( ((r = fis1.read(buffer, 0, 512)) > 0) && ((r2 = fis2.read(buffer2, 0, 512)) > 0)) {
+              while ( ((r = fis1.read(buffer, 0, 512)) > 0) & ((r2 = fis2.read(buffer2, 0, 512)) > 0)) {
                   assertEquals(r, r2);
                   assertArrayEquals(buffer, buffer2);
               }
-  
+
               assertEquals(r, r2);
             }
 
