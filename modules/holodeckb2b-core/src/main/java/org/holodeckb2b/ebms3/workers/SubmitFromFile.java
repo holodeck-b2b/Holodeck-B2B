@@ -17,11 +17,10 @@
 package org.holodeckb2b.ebms3.workers;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.Map;
-
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workers.DirWatcher;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
@@ -93,17 +92,20 @@ public class SubmitFromFile extends DirWatcher {
                 submitter.submitMessage(mmd, mmd.shouldDeleteFilesAfterSubmit());
                 log.info("User message from " + f.getName() + " succesfully submitted to Holodeck B2B");
                 // Change extension to reflect success
-                new File(tFileName).renameTo(new File(bFileName + ".accepted"));
+                new File(tFileName).renameTo(new File(Utils.preventDuplicateFileName(bFileName + ".accepted")));
             }
         } catch (final Exception e) {
             // Something went wrong on reading the message meta data
             log.error("An error occured when reading message meta data from " + f.getName()
                         + ". Details: " + e.getMessage());
             // Change extension to reflect error and write error information
-            new File(tFileName).renameTo(new File(bFileName + ".rejected"));
-            writeErrorFile(bFileName + ".err", e);
+            try {
+                new File(tFileName).renameTo(new File(Utils.preventDuplicateFileName(bFileName + ".rejected")));
+                writeErrorFile(bFileName + ".err", e);
+            } catch (IOException ex) {
+                // The directory where the file was originally found has gone. Nothing we can do about it, so ignore
+            }
         }
-
     }
 
     /**
@@ -130,7 +132,7 @@ public class SubmitFromFile extends DirWatcher {
      */
     protected void writeErrorFile(final String fileName, final Exception fault) {
         log.debug("Writing submission error to error file: " + fileName);
-        try (PrintWriter errorFile = new PrintWriter(new File(fileName))) {
+        try (PrintWriter errorFile = new PrintWriter(new File(Utils.preventDuplicateFileName(fileName)))) {
 
             errorFile.write("The message could not be submitted to Holodeck B2B due to an error:\n\n");
             errorFile.write("Error type:    " + fault.getClass().getSimpleName() + "\n");
@@ -142,7 +144,7 @@ public class SubmitFromFile extends DirWatcher {
             fault.printStackTrace(errorFile);
 
             log.debug("Error information written to file");
-        } catch (final FileNotFoundException ioe) {
+        } catch (final IOException ioe) {
             log.error("Could not write error information to error file!");
         }
     }
