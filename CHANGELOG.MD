@@ -44,6 +44,8 @@ from the processing flow in the configuration of the Holodeck B2B module. Bundli
 version.
 
 ### Fixed 
+* PathWatcher does not honour system home directory [#19](https://github.com/holodeck-b2b/Holodeck-B2B/issues/19)
+* Problem with renaming mmd file to result extension if there already exists a file with the same name
 
 ### Security
 
