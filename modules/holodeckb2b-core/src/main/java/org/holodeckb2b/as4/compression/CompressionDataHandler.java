@@ -22,7 +22,6 @@ import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipException;
-
 import javax.activation.DataHandler;
 
 /**
@@ -52,6 +51,11 @@ public class CompressionDataHandler extends DataHandler {
     private String      resultContentType = null;
 
     /**
+     * Indicates whether the data handler should compress or decompress the data in the encapsulated data handler
+     */
+    private boolean     compressing;
+
+    /**
      * This constructor should be used to create a facade to a {@link DataHandler} for decompressing the contained data.
      * The specified MIME type is not used by this class itself but only to inform using classes about the expected
      * content.
@@ -63,6 +67,7 @@ public class CompressionDataHandler extends DataHandler {
         super(source.getDataSource());
         this.source = source;
         this.resultContentType = mimeType;
+        this.compressing = false;
     }
 
     /**
@@ -74,6 +79,7 @@ public class CompressionDataHandler extends DataHandler {
         super(source.getDataSource());
         this.source = source;
         this.resultContentType = CompressionFeature.COMPRESSED_CONTENT_TYPE;
+        this.compressing = true;
     }
 
     /**
@@ -119,7 +125,7 @@ public class CompressionDataHandler extends DataHandler {
      */
     @Override
     public void writeTo(final OutputStream out) throws IOException, ZipException {
-        if (CompressionFeature.COMPRESSED_CONTENT_TYPE.equalsIgnoreCase(resultContentType))
+        if (compressing)
             compress(out);
         else
             decompress(out);
@@ -135,7 +141,7 @@ public class CompressionDataHandler extends DataHandler {
      */
     @Override
     public InputStream getInputStream() throws IOException, ZipException {
-        if (CompressionFeature.COMPRESSED_CONTENT_TYPE.equalsIgnoreCase(resultContentType))
+        if (compressing)
             return new GZIPCompressingInputStream(super.getInputStream());
         else
             return new GZIPInputStream(super.getInputStream());

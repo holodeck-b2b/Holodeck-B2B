@@ -46,6 +46,7 @@ version.
 ### Fixed 
 * PathWatcher does not honour system home directory [#19](https://github.com/holodeck-b2b/Holodeck-B2B/issues/19)
 * Problem with renaming mmd file to result extension if there already exists a file with the same name
+* Payload with MIME type "application/gzip" is not decompressed [#24](https://github.com/holodeck-b2b/Holodeck-B2B/issues/24)
 
 ### Security
 
