@@ -37,7 +37,7 @@
         
     <properties>
         <axis2-version>1.6.4</axis2-version>
-        <axiom-version>1.2.19</axiom-version>
+        <axiom-version>1.2.14</axiom-version>
         <netbeans.hint.license>gpl30</netbeans.hint.license>
         <hibernate.version>5.0.9.Final</hibernate.version>
         <wss4j.version>2.0.4</wss4j.version>
