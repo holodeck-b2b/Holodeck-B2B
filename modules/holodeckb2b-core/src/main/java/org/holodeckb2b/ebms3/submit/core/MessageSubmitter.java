@@ -23,7 +23,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.Iterator;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.exceptions.DatabaseException;
@@ -129,7 +128,7 @@ public class MessageSubmitter implements IMessageSubmitter {
      * in ebMS specification terminology, can control the moments when the pull operation must be performed. Holodeck
      * B2B will try to send the message directly.
      * <p>The meta-data for the Pull Request MUST contain both the MPC and P-Mode [id]. A messageId MAY be included in
-     * the submission, but is NOT RECOMMENDED to include one and let Holodeck B2B generate one.
+     * the submission, but is NOT RECOMMENDED to do so and instead let Holodeck B2B generate one.
      *
      * @param pullRequest    The meta-data on the pull request that should be sent.
      * @return               The ebMS message-id assigned to the pull request.
