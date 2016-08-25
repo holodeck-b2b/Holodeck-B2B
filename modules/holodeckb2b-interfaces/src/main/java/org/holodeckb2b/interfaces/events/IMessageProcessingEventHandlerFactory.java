@@ -34,8 +34,10 @@ public interface IMessageProcessingEventHandlerFactory<T extends IMessageProcess
      *
      * @param settings  A {@link Map}<code>&lt;String, ?&gt;</code> with the settings to create the
      *                  {@link IMessageProcessingEventHandler}s
+     * @throws MessageProccesingEventHandlingException When the factory is unable to successfully initialize itself and therefor can
+     *                                  not create event handlers.
      */
-    public void init(Map<String, ?> settings);
+    public void init(Map<String, ?> settings) throws MessageProccesingEventHandlingException;
 
     /**
      * Gets a {@link IMessageProcessingEventHandler} object for handling an event. It is up to the factory
