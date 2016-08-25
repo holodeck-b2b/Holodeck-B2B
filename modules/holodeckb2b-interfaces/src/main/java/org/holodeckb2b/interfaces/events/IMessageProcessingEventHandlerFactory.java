@@ -44,6 +44,7 @@ public interface IMessageProcessingEventHandlerFactory<T extends IMessageProcess
      * implementation to decide whether a new object must be created or that an existing handler object can be reused.
      *
      * @return A instance of class <code>T</code> ready for handling an event.
+     * @throws MessageProccesingEventHandlingException When the factory is unable to to create event handlers.
      */
-    public T createHandler();
+    public T createHandler() throws MessageProccesingEventHandlingException;
 }
