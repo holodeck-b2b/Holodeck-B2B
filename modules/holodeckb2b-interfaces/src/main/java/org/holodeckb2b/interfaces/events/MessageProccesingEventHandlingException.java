@@ -16,16 +16,14 @@
  */
 package org.holodeckb2b.interfaces.events;
 
-import org.holodeckb2b.interfaces.delivery.*;
-
 /**
- * Indicates a problem that occurred in the delivery of a message unit to the business application. This exception can
- * be thrown because a delivery method can not be successfully instantiated, i.e. the factory class can not be
- * initialized or during the actual delivery of a message.
+ * Indicates a problem that occurred in the processing of a {@link IMessageProcessingEvent}.
+ * This exception can be thrown because a event processing handler can not be successfully instantiated, i.e. the factory class can not be
+ * initialized or during the actual handling of the of a processing event.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @see IMessageDeliverer
- * @see IMessageDelivererFactory
+ * @author Jerry Dimitriou <jerouris at unipi.gr>
+ * @see IMessageProcessingEventHandler
+ * @see IMessageProcessingEventHandlerFactory
  */
 public class MessageProccesingEventHandlingException extends Exception {
 
@@ -46,5 +44,4 @@ public class MessageProccesingEventHandlingException extends Exception {
     public MessageProccesingEventHandlingException(final Exception cause) {
         super(cause);
     }
-
 }
