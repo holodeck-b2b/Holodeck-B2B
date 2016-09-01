@@ -19,14 +19,16 @@ package org.holodeckb2b.security.util;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;
-
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
@@ -259,5 +261,82 @@ public class SecurityUtils {
         }
 
         return references;
+    }
+
+    /**
+     * Checks whether the private key referenced by the given alias is available in the private keys keystore.
+     *
+     * @param alias         The alias to retrieve the private key from the keystore
+     * @param keyPassword   The password to access the private key
+     * @return      <code>true</code> if there is a private key in the keystore and it can be accessed using the
+     *              given password,<br> <code>false</code> otherwise
+     * @since HB2B_NEXT_VERSION
+     */
+    public static boolean isPrivateKeyAvailable(final String alias, final String keyPassword) {
+        final   IConfiguration config = HolodeckB2BCoreInterface.getConfiguration();
+
+        try (FileInputStream fis = new java.io.FileInputStream(config.getPrivateKeyStorePath())) {
+            // Get the password for accessing the keystore
+            char[] keystorePwd = config.getPrivateKeyStorePassword().toCharArray();
+            // Create and load the keystore
+            final KeyStore keyStore = KeyStore.getInstance("JKS");
+            keyStore.load(fis, keystorePwd);
+
+            // Check that the alias exists
+            if (keyStore.containsAlias(alias)) {
+                return keyStore.getKey(alias, keyPassword.toCharArray()) != null;
+            } else
+                return false;
+        } catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException |
+                 UnrecoverableKeyException ex) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether the certificate referenced by the given alias is available in the public keys or optionally the
+     * trust keystore.
+     *
+     * @param alias         The alias to retrieve the certificate from the keystore
+     * @param checkTrust    Indicator if the trust store should be check if the certificate is not found in the public
+     *                      keys keystore
+     * @return       <code>true</code> if there is a certificate in the public keys or trust keystore (if <code>
+     *               checkTrust == true</code>,<br> <code>false</code> otherwise
+     * @since HB2B_NEXT_VERSION
+     */
+    public static boolean isCertificateAvailable(final String alias, final boolean checkTrust) {
+        final   IConfiguration config = HolodeckB2BCoreInterface.getConfiguration();
+        boolean found = false;
+
+        try (FileInputStream fis = new java.io.FileInputStream(config.getPublicKeyStorePath())) {
+            // Get the password for accessing the keystore
+            char[] keystorePwd = config.getPublicKeyStorePassword().toCharArray();
+            // Create and load the keystore
+            final KeyStore keyStore = KeyStore.getInstance("JKS");
+            keyStore.load(fis, keystorePwd);
+
+            // Check that the alias exists
+            found = keyStore.containsAlias(alias);
+        } catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException ex) {
+            found = false;
+        }
+
+        // Check the trust store if not found in the public keys keystore
+        if (!found && checkTrust) {
+            try (FileInputStream fis = new java.io.FileInputStream(config.getTrustKeyStorePath())) {
+                // Get the password for accessing the keystore
+                char[] keystorePwd = config.getTrustKeyStorePassword().toCharArray();
+                // Create and load the keystore
+                final KeyStore keyStore = KeyStore.getInstance("JKS");
+                keyStore.load(fis, keystorePwd);
+
+                // Check that the alias exists
+                found = keyStore.containsAlias(alias);
+            } catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException ex) {
+                found = false;
+            }
+        }
+
+        return found;
     }
 }

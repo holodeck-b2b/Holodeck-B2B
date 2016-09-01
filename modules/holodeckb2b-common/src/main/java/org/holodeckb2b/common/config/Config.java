@@ -134,6 +134,18 @@ public class Config implements InternalConfiguration {
      */
     private String messageProcessingEventProcessorClass = null;
 
+    /*
+     * The class name of the component that should be used to validate P-Modes before deploying them
+     * @since HB2B_NEXT_VERSION
+     */
+    private String pmodeValidatorClass = null;
+
+    /*
+     * The class name of the component that should be used to store deployed P-Modes
+     * @since HB2B_NEXT_VERSION
+     */
+    private String pmodeStorageClass = null;
+
     private boolean isTrue (final String s) {
       return "on".equalsIgnoreCase(s) || "true".equalsIgnoreCase(s) || "1".equalsIgnoreCase(s);
     }
@@ -244,6 +256,12 @@ public class Config implements InternalConfiguration {
 
         // The class name of the event processor
         messageProcessingEventProcessorClass = configFile.getParameter("MessageProcessingEventProcessor");
+
+        // The class name of the P-Mode validator
+        pmodeValidatorClass = configFile.getParameter("PModeValidator");
+
+        // The class name of the component to store P-Modes
+        pmodeStorageClass = configFile.getParameter("PModeStorageImplementation");
     }
 
     /**
@@ -487,11 +505,41 @@ public class Config implements InternalConfiguration {
      * will use a default implementation. To use a custom implementation set class name in the
      * <i>MessageProcessingEventProcessor</i> parameter
      *
-     * @return String containing the class name of the {@link IMessageProcessingEventProcessor} implementation to
+     * @return String containing the class name of the {@link IMessageProcessingEventProcessor} implementation to use
      * @since 2.1.0
      */
     @Override
     public String getMessageProcessingEventProcessor() {
         return messageProcessingEventProcessorClass;
+    }
+
+    /**
+     * Gets the class name of the {@link IPModeValidator} implementation that the Holodeck B2B Core's <code>PModeManager
+     * </code> must use to validate P-Modes before they are deployed. This is an optional configuration parameter and
+     * when not set the Holodeck B2B Core will use a default implementation. To use a custom implementation set class
+     * name in the <i>PModeValidator</i> parameter.
+     * <b>NOTE:</b> The configured validator will be used to validate all P-Modes and should therefore only be used if
+     * Holodeck B2B is deployed in a specific domain.
+     *
+     * @return  The class name of the {@link IPModeValidator} implementation
+     * @since  HB2B_NEXT_VERSION
+     */
+    @Override
+    public String getPModeValidatorImplClass() {
+        return pmodeValidatorClass;
+    }
+
+    /**
+     * Gets the class name of the {@link IPModeSet} implementation that the Holodeck B2B Core's <code>PModeManager
+     * </code> must use to store the set of deployed P-Modes. This is an optional configuration parameter and when not
+     * set the Holodeck B2B Core will use a default implementation. To use a custom implementation set class name in
+     * the <i>PModeStorageImplementation</i> parameter.
+     *
+     * @return  The class name of the {@link IPModeSet} implementation to use for storing deployed P-Modes
+     * @since  HB2B_NEXT_VERSION
+     */
+    @Override
+    public String getPModeStorageImplClass() {
+        return pmodeStorageClass;
     }
 }

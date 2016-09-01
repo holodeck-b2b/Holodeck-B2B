@@ -18,6 +18,7 @@ package org.holodeckb2b.common.config;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.holodeckb2b.interfaces.config.IConfiguration;
+import org.holodeckb2b.interfaces.pmode.IPModeSet;
 
 /**
  * Extends the public configuration interface with some settings only to be used by the Holodeck B2B Core itself.
@@ -58,4 +59,22 @@ public interface InternalConfiguration extends IConfiguration {
      * @return String containing the class name of the {@link IMessageProcessingEventProcessor} implementation to use
      */
     public String getMessageProcessingEventProcessor();
+
+    /**
+     * Gets the class name of the {@link IPModeValidator} implementation that the Holodeck B2B Core's <code>PModeManager
+     * </code> must use to validate P-Modes before they are deployed.
+     *
+     * @return  The class name of the {@link IPModeValidator} implementation
+     * @since  HB2B_NEXT_VERSION
+     */
+    public String getPModeValidatorImplClass();
+
+    /**
+     * Gets the class name of the {@link IPModeSet} implementation that the Holodeck B2B Core's <code>PModeManager
+     * </code> must use to store the set of deployed P-Modes.
+     *
+     * @return  The class name of the {@link IPModeSet} implementation to use for storing deployed P-Modes
+     * @since  HB2B_NEXT_VERSION
+     */
+    public String getPModeStorageImplClass();
 }

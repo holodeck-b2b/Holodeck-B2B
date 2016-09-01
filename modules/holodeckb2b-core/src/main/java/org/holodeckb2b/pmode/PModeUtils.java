@@ -17,7 +17,6 @@
 package org.holodeckb2b.pmode;
 
 import java.util.List;
-
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.ILeg;
@@ -86,7 +85,7 @@ public class PModeUtils {
      * @param leg       The leg configuration
      * @return          <code>true</code> when Holodeck B2B is the trigger of this leg,<br><code>false</code> if not
      */
-    private static boolean doesHolodeckB2BTrigger(final ILeg leg) {
+    public static boolean doesHolodeckB2BTrigger(final ILeg leg) {
         return leg.getProtocol() != null && leg.getProtocol().getAddress() != null;
     }
 }

@@ -21,7 +21,11 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
+<<<<<<< cd890713bdb1e7263ed7415e3bcee2df855165f6
         <version>2.1.0-SNAPSHOT-8</version>
+=======
+        <version>2.2-SNAPSHOT-1</version>
+>>>>>>> Added P-Mode validation feature (including basic tests)
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>holodeckb2b-interfaces</artifactId>

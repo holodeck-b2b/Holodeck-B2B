@@ -14,10 +14,23 @@ import org.holodeckb2b.common.config.InternalConfiguration;
  */
 public class Config implements InternalConfiguration {
 
-    private final String  hb2b_home;
+    private String  hb2b_home;
+    private String  pmodeValidatorClass = null;
+    private String  pmodeStorageClass = null;
 
     Config(final String homeDir) {
         hb2b_home = homeDir;
+    }
+
+    Config(final String homeDir, final String pmodeValidatorClass) {
+        hb2b_home = homeDir;
+        this.pmodeValidatorClass = pmodeValidatorClass;
+    }
+
+    Config(final String homeDir, final String pmodeValidatorClass, final String pmodeStorageClass) {
+        hb2b_home = homeDir;
+        this.pmodeValidatorClass = pmodeValidatorClass;
+        this.pmodeStorageClass = pmodeStorageClass;
     }
 
     @Override
@@ -27,7 +40,7 @@ public class Config implements InternalConfiguration {
 
     @Override
     public String getPublicKeyStorePath() {
-        return getHolodeckB2BHome() + "/publickeystore.jks";
+        return getHolodeckB2BHome() + "/publickeys.jks";
     }
 
     @Override
@@ -107,5 +120,15 @@ public class Config implements InternalConfiguration {
     @Override
     public String getMessageProcessingEventProcessor() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getPModeValidatorImplClass() {
+        return pmodeValidatorClass;
+    }
+
+    @Override
+    public String getPModeStorageImplClass() {
+        return pmodeStorageClass;
     }
 }
