@@ -18,12 +18,13 @@ package org.holodeckb2b.interfaces.pmode;
 
 
 import java.util.Collection;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Represents the set of {@link IPMode}s that configure how Holodeck B2B should process the ebMS messages. The set of
  * P-Modes is therefore one of the most important configuration items in Holodeck B2B, without P-Modes it will not be
  * possible to send or receive any message! Within Holodeck B2B there is always just one <code>IPModeSet</code>
- * instance.
+ * instance, which is available through {@link HolodeckB2BCoreInterface#getPModeSet()}.
  * <p>Implementations of this interface MUST ensure that at least the operations that modify the set are thread safe.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>

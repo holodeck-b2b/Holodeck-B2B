@@ -52,7 +52,7 @@ import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitterFactory;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
-import org.holodeckb2b.pmode.InMemoryPModeSet;
+import org.holodeckb2b.pmode.PModeManager;
 
 /**
  * Axis2 module class for the Holodeck B2B Core module.
@@ -103,9 +103,9 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     private static Map<String, IMessageDelivererFactory>    msgDeliveryFactories = null;
 
     /**
-     * The configured set of P-Modes at this instance.
+     * The P-Mode manager that maintains the set of deployed P-Modes
      */
-    private static IPModeSet pmodeSet = null;
+    private static PModeManager pmodeManager = null;
 
     /**
      * The component responsible for processing of events that occur while processing a message. The processor will
@@ -142,9 +142,8 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
             throw new AxisFault("Could not initialize Holodeck B2B module!", ex);
         }
 
-        log.debug("Create the P-Mode set");
-        //@todo: Make the implementation configurable, for now just in memory
-        HolodeckB2BCoreImpl.pmodeSet = new InMemoryPModeSet();
+        log.debug("Initialize the P-Mode manager");
+        HolodeckB2BCoreImpl.pmodeManager = new PModeManager();
 
         log.debug("Create the processor for message processing events");
         final String eventProcessorClassname = instanceConfiguration.getMessageProcessingEventProcessor();
@@ -332,7 +331,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * @see IPMode
      */
     public IPModeSet getPModeSet() {
-        return pmodeSet;
+        return pmodeManager;
     }
 
     /**

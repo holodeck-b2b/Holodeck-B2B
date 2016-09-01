@@ -15,7 +15,7 @@ import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
-import org.holodeckb2b.pmode.InMemoryPModeSet;
+import org.holodeckb2b.pmode.PModeManager;
 
 /**
  * Is utility class for testing the e-SENS connector that simulates the Holodeck B2B Core.
@@ -26,13 +26,20 @@ public class HolodeckCore implements IHolodeckB2BCore {
 
     private final Config  config;
 
-    private final InMemoryPModeSet pmodeSet;
+    private IPModeSet pmodeSet;
 
     private IMessageProcessingEventProcessor eventProcessor;
 
     public HolodeckCore(final String homeDir) {
-        config = new Config(homeDir);
-        pmodeSet = new InMemoryPModeSet();
+        this(homeDir, null, null);
+    }
+
+    public HolodeckCore(final String homeDir, final String pmodeValidatorClass) {
+        this(homeDir, pmodeValidatorClass, null);
+    }
+
+    public HolodeckCore(final String homeDir, final String pmodeValidatorClass, final String pmodeStorageClass) {
+        config = new Config(homeDir, pmodeValidatorClass, pmodeStorageClass);
     }
 
     @Override
@@ -52,6 +59,9 @@ public class HolodeckCore implements IHolodeckB2BCore {
 
     @Override
     public IPModeSet getPModeSet() {
+        if (pmodeSet != null)
+            pmodeSet = new PModeManager();
+
         return pmodeSet;
     }
 
