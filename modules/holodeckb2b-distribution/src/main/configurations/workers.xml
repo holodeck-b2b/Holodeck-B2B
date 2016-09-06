@@ -45,6 +45,17 @@
         workerClass="org.holodeckb2b.as4.receptionawareness.RetransmissionWorker"/>
 
     <!-- ==============================================================
+    This worker is responsible for cleaning up information on old and 
+    processed messages, i.e. remove the meta-data information from the 
+    database and delete associated payloads from the file system.
+    Through the optional "purgeAfterDays" parameter the number of days 
+    after which the message information should be removed can be set. 
+    If not specified 30 days is used as the default setting.
+    =============================================================== -->
+    <worker name="cleanupWorker" interval="3600" activate="true" delay="60"
+        workerClass="org.holodeckb2b.ebms3.workers.PurgeOldMessagesWorker"/>
+
+    <!-- ==============================================================
     This worker checks the pulling configuration and configure a
     separate pool of workers responsible for sending the pull requests.
     See PullWorker, PullConfiguration and PullConfigurationWatcher 
