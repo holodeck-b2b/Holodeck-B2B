@@ -12,7 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ###Removed
 
-####Fixed
+###Fixed
 
 ###Security
 
@@ -48,8 +48,6 @@ used for signing a message. This _trust store_ should be used for certificates n
    whether they can be processed completely or need to be notified to the _Producer_ application.
 * Messages without attachments are now sent as single part messages, i.e. not using the SOAP with Attachments feature.
 
-### Deprecated 
-
 ### Removed 
 * The bundling of Signal Messages is disabled because it can cause problems in multi-hop exchanges and it is also not
 widely interop tested. Disabling the bundling is done by removing the handlers that add the signals to the message
@@ -60,8 +58,6 @@ version.
 * PathWatcher does not honour system home directory [#19](https://github.com/holodeck-b2b/Holodeck-B2B/issues/19). Thanks @[phax](https://github.com/phax).
 * Problem with renaming mmd file to result extension if a file with the same name already exists.
 * Payload with MIME type "application/gzip" is not decompressed [#24](https://github.com/holodeck-b2b/Holodeck-B2B/issues/24).
-
-### Security
 
 ### Thank you
 [Philip Helger](https://github.com/phax) for various general code improvements.
