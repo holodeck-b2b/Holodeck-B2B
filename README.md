@@ -25,6 +25,8 @@ We’re using the simplified Github workflow to accept modifications which means
 * commit incrementally with readable and detailed commit messages
 * submit a pull-request against the master branch of this repository
 
+If your contribution is more than a patch, please contact us beforehand to discuss which branch you can best submit the pull request to.
+
 ### Submitting bugs
 You can report issues directly on the [project Issue Tracker](https://github.com/holodeck-b2b/Holodeck-B2B/issues).  
 Please document the steps to reproduce your problem in as much detail as you can (if needed and possible include screenshots).
@@ -32,13 +34,13 @@ Please document the steps to reproduce your problem in as much detail as you can
 ## Versioning
 Version numbering follows the [Semantic versioning](http://semver.org/) approach.
 
-##Licensing
+##License
 The Holodeck B2B core is licensed under the General Public License V3 (GPLv3) which is included in the license.txt in the root of the project.
-This means you are not allowed to integrate Holodeck B2B in a closed source product. You can however use Holodeck B2B together with your closed source product as long as you only use the provided interfaces to communicate with the Holodeck B2B core. 
+This means you are not allowed to integrate Holodeck B2B in a closed source product. You can however use Holodeck B2B together with your closed source product as long as you only use the provided interfaces (API's) to communicate with the Holodeck B2B core. 
 For this purpose, the interfaces module is licensed under the Lesser General Public License V3 (LGPLv3).
 
 ###3rd party components
-For implementing the cryptographic algorithms Holodeck B2B uses the Bouncy Castle library provided by [The Legion of the Bouncy Castle Inc.](http://www.bouncycastle.org). Please see the bc_license.txt file.
+To implement the cryptographic algorithms Holodeck B2B uses the Bouncy Castle library provided by [The Legion of the Bouncy Castle Inc.](http://www.bouncycastle.org). Please see the bc_license.txt file.
 
 ##Support
 Commercial Holodeck B2B support is provided by Chasquis Consulting. Please visit [Chasquis-Consulting.com](http://chasquis-consulting.com/holodeck-b2b-support/) for more information.
