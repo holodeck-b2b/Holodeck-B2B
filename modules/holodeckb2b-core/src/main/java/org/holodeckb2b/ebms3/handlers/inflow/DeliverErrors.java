@@ -17,7 +17,6 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
-
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
@@ -161,8 +160,19 @@ public class DeliverErrors extends BaseHandler {
             // Because the reference to the message in error may be derived, set it explicitly on signal meta-data
             // See issue #12
             errorSignal.setRefToMessageId(refToMsgId);
-            deliverer.deliver(errorSignal);
-            log.debug("Error successfully delivered!");
+            try {
+                deliverer.deliver(errorSignal);
+                log.debug("Error successfully delivered!");
+            } catch (final MessageDeliveryException ex) {
+                // There was an "normal/expected" issue during delivery, continue as normal
+                throw ex;
+            } catch (final Throwable t) {
+                // Catch of Throwable used for extra safety in case the DeliveryMethod implementation does not
+                // handle all exceptions correctly
+                log.warn(deliverer.getClass().getSimpleName() + " threw " + t.getClass().getSimpleName()
+                         + " instead of MessageDeliveryException!");
+                throw new MessageDeliveryException("Unhandled exception during message delivery", t);
+            }
         } else
             log.debug("Error does not need to (or can not) be delivered");
     }
