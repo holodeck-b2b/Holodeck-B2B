@@ -21,7 +21,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
@@ -58,44 +57,47 @@ public class PModeManager implements IPModeSet {
      * The P-Mode validator in use to check P-Modes before being deployed
      */
     private IPModeValidator validator;
+    private final String pmodeStorageClass;
 
     /**
-     * Creates a new <code>PModeManager</code> which will use the {@link IPModeSet} and {@link IPModeValidator}
-     * implementations if specified by {@link InternalConfiguration} for storing the deployed respectively checking the
-     * P-Modes. If either is not specified by the configuration the default implementations will be used.
+     * Creates a new <code>PModeManager</code> which will use the given {@link IPModeSet} and {@link IPModeValidator}
+     * implementations for storing the deployed respectively checking the P-Modes. If either is not specified the
+     * default implementations will be used.
+     *
+     * @param pmodeValidatorClass   The class name of the {@link IPModeValidator} to use for P-Mode validation.
+     *                              If <code>null</code> the default implementation {@link BasicPModeValidator} will be
+     *                              used
+     * @param pmodeStorageClass     The class name of the {@link IPModeSet} to use for P-Mode storage. If <code>null
+     *                              </code>the default implementation {@link InMemoryPModeSet} will be used
      */
-    public PModeManager() {
+    public PModeManager(final String pmodeValidatorClass, final String pmodeStorageClass) {
         log.trace("Start configuration");
 
-        InternalConfiguration config = (InternalConfiguration) HolodeckB2BCoreInterface.getConfiguration();
-
-        String pmodeValidatorClassName = config.getPModeValidatorImplClass();
-        if (!Utils.isNullOrEmpty(pmodeValidatorClassName)) {
+        if (!Utils.isNullOrEmpty(pmodeValidatorClass)) {
             // A specific P-Mode validator is specified in the configuration, try to load it
             try {
-                log.debug("Loading P-Mode validator specified in configuration: {}", pmodeValidatorClassName);
-                validator = (IPModeValidator) Class.forName(pmodeValidatorClassName).newInstance();
+                log.debug("Loading P-Mode validator specified in configuration: {}", pmodeValidatorClass);
+                validator = (IPModeValidator) Class.forName(pmodeValidatorClass).newInstance();
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
                // Could not create the specified validator, fall back to default implementation
                log.error("Could not load the specified P-Mode validator: {}. Using default implementation instead.",
-                          pmodeValidatorClassName);
+                          pmodeValidatorClass);
                validator = new BasicPModeValidator();
             }
         } else
             // No specific validator, use default one
             validator = new BasicPModeValidator();
 
-        String pmodeStorageClassName = config.getPModeStorageImplClass();
-        if (!Utils.isNullOrEmpty(pmodeStorageClassName)) {
+        if (!Utils.isNullOrEmpty(pmodeStorageClass)) {
             // A specific P-Mode storage implementation is specified in the configuration, try to load it
             try {
                 log.debug("Loading P-Mode storage implementation specified in configuration: {}",
-                           pmodeStorageClassName);
-                deployedPModes = (IPModeSet) Class.forName(pmodeStorageClassName).newInstance();
+                           pmodeStorageClass);
+                deployedPModes = (IPModeSet) Class.forName(pmodeStorageClass).newInstance();
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
                // Could not create the specified storage implementation, fall back to default implementation
                log.error("Could not load the specified P-Mode storage implementation: {}. Using default instead.",
-                          pmodeStorageClassName);
+                          pmodeStorageClass);
                deployedPModes = new InMemoryPModeSet();
             }
         } else
@@ -107,6 +109,7 @@ public class PModeManager implements IPModeSet {
         logMsg.append("\tP-Mode validator    : ").append(validator.getClass().getName()).append('\n')
               .append("\tP-Mode storage impl.: ").append(deployedPModes.getClass().getName()).append('\n');
         log.info(logMsg.toString());
+        this.pmodeStorageClass = pmodeStorageClass;
     }
 
     @Override

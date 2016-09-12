@@ -143,7 +143,8 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         }
 
         log.debug("Initialize the P-Mode manager");
-        HolodeckB2BCoreImpl.pmodeManager = new PModeManager();
+        HolodeckB2BCoreImpl.pmodeManager = new PModeManager(instanceConfiguration.getPModeValidatorImplClass(),
+                                                            instanceConfiguration.getPModeStorageImplClass());
 
         log.debug("Create the processor for message processing events");
         final String eventProcessorClassname = instanceConfiguration.getMessageProcessingEventProcessor();
