@@ -17,7 +17,6 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
-
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
@@ -118,8 +117,19 @@ public class DeliverReceipts extends BaseHandler {
             log.debug("Receipt should be delivered using delivery specification with id:" + deliverySpec.getId());
             final IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec);
             // Deliver the Receipt using deliverer
-            deliverer.deliver(receipt);
-            log.debug("Receipt successfully delivered!");
+            try {
+                deliverer.deliver(receipt);
+                log.debug("Receipt successfully delivered!");
+            } catch (final MessageDeliveryException ex) {
+                // There was an "normal/expected" issue during delivery, continue as normal
+                throw ex;
+            } catch (final Throwable t) {
+                // Catch of Throwable used for extra safety in case the DeliveryMethod implementation does not
+                // handle all exceptions correctly
+                log.warn(deliverer.getClass().getSimpleName() + " threw " + t.getClass().getSimpleName()
+                         + " instead of MessageDeliveryException!");
+                throw new MessageDeliveryException("Unhandled exception during message delivery", t);
+            }
         } else
             log.debug("Receipt does not need to be delivered");
     }
