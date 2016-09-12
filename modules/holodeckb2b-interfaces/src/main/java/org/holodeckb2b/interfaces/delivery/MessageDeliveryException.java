@@ -35,7 +35,7 @@ public class MessageDeliveryException extends Exception {
         super(message);
     }
 
-    public MessageDeliveryException(final String message, final Exception cause) {
+    public MessageDeliveryException(final String message, final Throwable cause) {
         super(message, cause);
     }
 

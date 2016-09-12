@@ -65,8 +65,19 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
                 // For now we just have one leg, so we get the delivery spec of the first leg
                 final IDeliverySpecification deliveryMethod = pmode.getLegs().iterator().next().getDefaultDelivery();
                 final IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliveryMethod);
-                log.debug("Delivering the message using delivery specification: " + deliveryMethod.getId());
-                deliverer.deliver(um);
+                try {
+                    log.debug("Delivering the message using delivery specification: " + deliveryMethod.getId());
+                    deliverer.deliver(um);
+                } catch (final MessageDeliveryException ex) {
+                    // There was an "normal/expected" issue during delivery, continue as normal
+                    throw ex;
+                } catch (final Throwable t) {
+                    // Catch of Throwable used for extra safety in case the DeliveryMethod implementation does not
+                    // handle all exceptions correctly
+                    log.warn(deliverer.getClass().getSimpleName() + " threw " + t.getClass().getSimpleName()
+                             + " instead of MessageDeliveryException!");
+                    throw new MessageDeliveryException("Unhandled exception during message delivery", t);
+                }
                 // Indicate that message is delivered so receipt can be created
                 mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);
                 log.info("Successfully delivered user message [msgId=" + um.getMessageId() +"]");

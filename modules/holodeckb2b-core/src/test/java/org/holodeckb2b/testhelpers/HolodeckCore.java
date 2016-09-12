@@ -60,7 +60,7 @@ public class HolodeckCore implements IHolodeckB2BCore {
     @Override
     public IPModeSet getPModeSet() {
         if (pmodeSet != null)
-            pmodeSet = new PModeManager();
+            pmodeSet = new PModeManager(config.getPModeValidatorImplClass(), config.getPModeStorageImplClass());
 
         return pmodeSet;
     }
