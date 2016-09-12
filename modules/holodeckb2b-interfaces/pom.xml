@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>2.1.0-SNAPSHOT-8</version>
+        <version>next-SNAPSHOT-1</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>holodeckb2b-interfaces</artifactId>
