@@ -132,4 +132,9 @@ public class PMode implements IPMode {
             this.legs.add(leg);
     }
 
+
+    public void removeLegs() {
+        this.legs = null;
+    }
+
 }

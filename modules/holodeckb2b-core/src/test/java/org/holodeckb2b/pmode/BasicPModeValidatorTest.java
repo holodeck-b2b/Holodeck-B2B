@@ -19,19 +19,21 @@ package org.holodeckb2b.pmode;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.pmode.helpers.BusinessInfo;
-import org.holodeckb2b.pmode.helpers.EncryptionConfig;
-import org.holodeckb2b.pmode.helpers.Leg;
-import org.holodeckb2b.pmode.helpers.PMode;
-import org.holodeckb2b.pmode.helpers.PartnerConfig;
-import org.holodeckb2b.pmode.helpers.PullRequestFlow;
-import org.holodeckb2b.pmode.helpers.SecurityConfig;
-import org.holodeckb2b.pmode.helpers.SigningConfig;
-import org.holodeckb2b.pmode.helpers.UserMessageFlow;
+import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.pmode.helpers.*;
+import org.holodeckb2b.security.util.SecurityUtils;
 import org.holodeckb2b.testhelpers.HolodeckCore;
-import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import javax.rmi.CORBA.Util;
+
+import java.util.Collection;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests the {@link BasicPModeValidator}
@@ -44,6 +46,8 @@ public class BasicPModeValidatorTest {
 
     private static BasicPModeValidator validator = new BasicPModeValidator();
 
+    private PMode invalidPMode;
+
     public BasicPModeValidatorTest() {
     }
 
@@ -51,6 +55,16 @@ public class BasicPModeValidatorTest {
     public static void setUpClass() {
         baseDir = BasicPModeValidatorTest.class.getClassLoader().getResource("pmode_validation").getPath();
         HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(baseDir));
+    }
+
+    @Before
+    public void setUp() {
+        invalidPMode = new PMode();
+    }
+
+    @After
+    public void tearDown() {
+        invalidPMode = null;
     }
 
     /**
@@ -85,6 +99,10 @@ public class BasicPModeValidatorTest {
         secConfig.setEncryptionConfiguration(encConfig);
         initiator.setSecurityConfiguration(secConfig);
         validPMode.setInitiator(initiator);
+
+        UsernameTokenConfig tokenConfig = new UsernameTokenConfig();
+        tokenConfig.setUsername("username");
+        tokenConfig.setPassword("secret");
 
         PartnerConfig responder = new PartnerConfig();
         secConfig = new SecurityConfig();
@@ -160,5 +178,127 @@ public class BasicPModeValidatorTest {
         validPMode.addLeg(leg);
 
         assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(validPMode)));
+    }
+
+    @Test
+    public void testInvalidGeneralParameters() {
+        invalidPMode.setMep(EbMSConstants.ONE_WAY_MEP+"/smth"); // wrong mep
+        invalidPMode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
+        invalidPMode.addLeg(new Leg());
+
+        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        invalidPMode.setMep(EbMSConstants.ONE_WAY_MEP);
+        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+
+        invalidPMode.setMepBinding(EbMSConstants.ONE_WAY_PUSH + "/smth"); // wrong mep binding
+
+        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        invalidPMode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
+        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+
+        invalidPMode.addLeg(new Leg()); // adding second leg
+
+        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+
+        invalidPMode.removeLegs();
+        invalidPMode.setMep(EbMSConstants.TWO_WAY_MEP);
+        invalidPMode.addLeg(new Leg()); // adding only one leg into two way mep
+
+        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+    }
+
+    @Test
+    public void testInvalidUsernameTokenParameters() {
+        invalidPMode.setMep(EbMSConstants.ONE_WAY_MEP);
+        invalidPMode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
+        invalidPMode.addLeg(new Leg());
+
+        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+
+        PartnerConfig initiator = new PartnerConfig();
+        SecurityConfig secConfig = new SecurityConfig();
+        SigningConfig sigConfig = new SigningConfig();
+        sigConfig.setKeystoreAlias("exampleca");
+        secConfig.setSignatureConfiguration(sigConfig);
+        EncryptionConfig encConfig = new EncryptionConfig();
+        encConfig.setKeystoreAlias("partya");
+        secConfig.setEncryptionConfiguration(encConfig);
+        initiator.setSecurityConfiguration(secConfig);
+        invalidPMode.setInitiator(initiator);
+
+        UsernameTokenConfig tokenConfig = new UsernameTokenConfig();
+
+        assertTrue(Utils.isNullOrEmpty(tokenConfig.getUsername()));
+
+        // non null empty token with default header
+        secConfig.setUsernameTokenConfiguration(
+                ISecurityConfiguration.WSSHeaderTarget.DEFAULT, tokenConfig);
+
+        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+
+        tokenConfig.setUsername("username");
+        tokenConfig.setPassword("secret");
+
+        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+
+        tokenConfig = new UsernameTokenConfig();
+
+        // non null empty token with EBMS header
+        secConfig.setUsernameTokenConfiguration(
+                ISecurityConfiguration.WSSHeaderTarget.EBMS, tokenConfig);
+
+        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+    }
+
+    @Test
+    public void testInvalidX509Parameters() {
+        invalidPMode.setMep(EbMSConstants.ONE_WAY_MEP);
+        invalidPMode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
+
+        Leg leg = new Leg();
+        Protocol protocolConfig = new Protocol();
+        leg.setProtocol(protocolConfig);
+        invalidPMode.addLeg(leg);
+
+        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+
+        PartnerConfig initiator = new PartnerConfig();
+        SecurityConfig secConfig = new SecurityConfig();
+        SigningConfig sigConfig = new SigningConfig();
+        secConfig.setSignatureConfiguration(sigConfig);
+        EncryptionConfig encConfig = new EncryptionConfig();
+        secConfig.setEncryptionConfiguration(encConfig);
+        initiator.setSecurityConfiguration(secConfig);
+        invalidPMode.setInitiator(initiator);
+
+        assertFalse(PModeUtils.isHolodeckB2BInitiator(invalidPMode));
+        protocolConfig.setAddress("address");
+        assertTrue(PModeUtils.isHolodeckB2BInitiator(invalidPMode));
+        assertTrue(Utils.isNullOrEmpty(sigConfig.getKeystoreAlias()));
+
+        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+
+        encConfig.setKeystoreAlias("partya");
+
+        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+
+        encConfig.setCertificatePassword("ExampleA");
+
+        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+
+        sigConfig.setKeystoreAlias("partyb");
+
+        assertNotNull(sigConfig.getKeystoreAlias());
+
+        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+
+        sigConfig.setCertificatePassword("ExampleB");
+
+        assertTrue(SecurityUtils.isPrivateKeyAvailable(sigConfig.getKeystoreAlias(),
+                sigConfig.getCertificatePassword()));
+
+        assertEquals(sigConfig.getCertificatePassword(), "ExampleB");
+
+        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
     }
 }
