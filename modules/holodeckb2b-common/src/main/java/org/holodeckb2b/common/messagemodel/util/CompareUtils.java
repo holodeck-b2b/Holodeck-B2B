@@ -18,7 +18,6 @@ package org.holodeckb2b.common.messagemodel.util;
 
 import java.util.Collection;
 import java.util.Iterator;
-
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.IProperty;
@@ -57,20 +56,18 @@ public final class CompareUtils {
     public static boolean areEqual(final Collection<IPartyId> pids1, final Collection<IPartyId> pids2) {
         boolean equal = pids1.size() == pids2.size();
 
-        if (equal)
-        { 
-            // Evaluate only if the roles are identical
-            // Check every areEqual from the first collection to exist in the second and ensure all id's from the second
+        if (equal) {
+            // Check every PartyId from the first collection to exist in the second and ensure all id's from the second
             // collection have been checked
             final boolean[] checked = new boolean[pids2.size()]; // have all items in second collection been checked?
             for(final Iterator<IPartyId> it1 = pids1.iterator() ; equal && it1.hasNext() ;) {
                 final IPartyId pi1 = it1.next();
                 // Check if this areEqual exists in the second collection
-                final Iterator<IPartyId> it2 = pids2.iterator(); 
-                int i = 0;
-                for(; equal && it2.hasNext() ; i++)
-                    if (equal = areEqual(pi1, it2.next()))
+                int i = 0; boolean exists = false;
+                for (final Iterator<IPartyId> it2 = pids2.iterator() ; !exists && it2.hasNext() ; i++)
+                    if (exists = areEqual(pi1, it2.next()))
                         checked[i] = true; // This item in the second collection is successfully compared
+                equal &= exists;
             }
             // Check that every id in second collection was found in first collection
             for(final boolean b : checked)
@@ -79,7 +76,7 @@ public final class CompareUtils {
 
         return equal;
     }
-    
+
 
     /**
      * Checks if two {@link IPartyId} objects are equal. Two <code>IPartyId</code> object are equal when there values
