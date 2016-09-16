@@ -1,6 +1,8 @@
 package org.holodeckb2b.common.workers;
 
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -14,11 +16,20 @@ import static org.junit.Assert.*;
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class PathWatcherTest {
+    String baseDir;
+
+    @Before
+    public void setUp() {
+        baseDir = this.getClass().getClassLoader().getResource("workers").getPath();
+    }
+
+    @After
+    public void tearDown() {
+        baseDir = null;
+    }
 
     @Test
     public void testSetParameters() {
-        String baseDir =
-                PathWatcherTest.class.getClassLoader().getResource("workers").getPath();
         PathWatcherImpl watcher = new PathWatcherImpl();
         HashMap<String, Object> params = new HashMap<>();
         params.put("watchPath", baseDir);
