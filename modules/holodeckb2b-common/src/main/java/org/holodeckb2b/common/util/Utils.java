@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
-
 import org.apache.tika.Tika;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
@@ -58,7 +57,7 @@ public final class Utils {
      */
     private static final class SingletonHolder {
       static final Tika mimeTypeDetector = new Tika ();
-    }  
+    }
 
     /**
      * Transform a {@link Date} object to a {@link String} formatted according to
@@ -211,7 +210,7 @@ public final class Utils {
 
         Object result = null;
         try (final ByteArrayInputStream stream = new ByteArrayInputStream(data);
-             final ObjectInputStream is = new ObjectInputStream(stream)) 
+             final ObjectInputStream is = new ObjectInputStream(stream))
         {
             result = is.readObject();
         } catch (final Exception ex) {
@@ -302,13 +301,13 @@ public final class Utils {
      *              2  when only the second string is non-empty
      */
     public static int compareStrings(final String s, final String p) {
-        if (s == null || s.isEmpty()) {
-            if (p != null && !p.isEmpty()) {
+        if (isNullOrEmpty(s)) {
+            if (!isNullOrEmpty(p)) {
                 return 2;
             } else {
                 return -1;
             }
-        } else if (p != null) {
+        } else if (!isNullOrEmpty(p)) {
             if (s.equals(p)) {
                 return 0;
             } else {
@@ -414,7 +413,7 @@ public final class Utils {
      * one object is <code>null</code> they are different. If both objects are
      * non-<code>null</code> than the {@link #equals(Object)} method is invoked on
      * them.
-     * 
+     *
      * @param o1
      *        First object. May be <code>null</code>.
      * @param o2
@@ -432,7 +431,7 @@ public final class Utils {
      * one object is <code>null</code> they are different. If both objects are
      * non-<code>null</code> than the {@link String#equalsIgnoreCase(String)} method is invoked on
      * them.
-     * 
+     *
      * @param s1
      *        First String. May be <code>null</code>.
      * @param s2
