@@ -19,16 +19,6 @@ import static org.junit.Assert.*;
  */
 public class CompareUtilsTest {
 
-    @Before
-    public void setUp() throws Exception {
-
-    }
-
-    @After
-    public void tearDown() throws Exception {
-
-    }
-
     @Test
     public void testCollectionsAreEqual() {
         HashSet<IPartyId> c1 = new HashSet<IPartyId>();
@@ -40,7 +30,7 @@ public class CompareUtilsTest {
         assertTrue(CompareUtils.areEqual(c1, c2));
         c1.add(p2);
         c2.add(p2);
-        assertTrue(CompareUtils.areEqual(c1, c2)); // fails
+        assertTrue(CompareUtils.areEqual(c1, c2));
     }
 
     class PartyIDForTest implements IPartyId {
