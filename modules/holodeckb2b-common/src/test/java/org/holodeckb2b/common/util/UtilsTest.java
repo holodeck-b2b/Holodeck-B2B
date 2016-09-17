@@ -1,5 +1,9 @@
 package org.holodeckb2b.common.util;
 
+import org.apache.tika.mime.MediaType;
+import org.apache.tika.mime.MimeType;
+import org.apache.tika.mime.MimeTypeException;
+import org.apache.tika.mime.MimeTypes;
 import org.holodeckb2b.common.exceptions.ObjectSerializationException;
 import org.junit.After;
 import org.junit.Before;
@@ -8,6 +12,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.SortedSet;
 
 import static org.junit.Assert.*;
 
@@ -32,10 +37,28 @@ public class UtilsTest {
     public void testGetExtension() {
         assertNull(Utils.getExtension(null));
         assertNull(Utils.getExtension(""));
-        assertEquals(".jpg", Utils.getExtension("image/jpeg"));
-        assertEquals(".java", Utils.getExtension("text/x-java-source"));
-        assertEquals(".js", Utils.getExtension("application/javascript"));
-        // add more useful extensions here
+
+        final MimeTypes allTypes = MimeTypes.getDefaultMimeTypes();
+
+        SortedSet<MediaType> mTypes = allTypes.getMediaTypeRegistry().getTypes();
+
+        for(MediaType type : mTypes) {
+            MimeType mimeType = null;
+            String mediaTypeName = type.toString();
+            String mimeTypeName = null;
+            try {
+                mimeType = allTypes.getRegisteredMimeType(mediaTypeName);
+                mimeTypeName = mimeType.getName();
+            } catch (MimeTypeException e) {
+                fail(e.getMessage());
+            }
+
+            assertEquals(mediaTypeName,mimeTypeName);
+
+            String mimeTypeExtension = mimeType.getExtension();
+
+            assertEquals(mimeTypeExtension, Utils.getExtension(mimeTypeName));
+        }
     }
 
     @Test
