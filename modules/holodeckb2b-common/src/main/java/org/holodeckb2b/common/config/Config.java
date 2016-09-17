@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
  * <b>HB2B_HOME</b> is the directory where Holodeck B2B is installed or the system property <i>"holodeckb2b.home"</i>.
  * <p>The structure of the config file is defined by the XML Schema Definition
  * <code>http://holodeck-b2b.org/schemas/2015/10/config</code> which can be found in <code>
- * src/main/resources/xsd/hb2b-xsd</code>.
+ * src/main/resources/xsd/hb2b-config.xsd</code>.
  * <p>NOTE: Current implementation does not encrypt the keystore passwords! Therefore access to the config file
  * SHOULD be limited to the account that is used to run Holodeck B2B.
  * @todo Encryption of keystore passwords
