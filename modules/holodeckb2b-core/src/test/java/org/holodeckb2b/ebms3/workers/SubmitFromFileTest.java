@@ -1,23 +1,16 @@
 package org.holodeckb2b.ebms3.workers;
 
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.pmode.PModeSetException;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
-import org.holodeckb2b.pmode.helpers.Leg;
-import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
 import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Created at 8:04 19.09.16
