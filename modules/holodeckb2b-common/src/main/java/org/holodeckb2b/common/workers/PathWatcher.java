@@ -144,7 +144,6 @@ public abstract class PathWatcher extends AbstractWorkerTask {
     public void doProcessing() {
         doPreProcessing();
 
-        System.out.println("\"Scanning path [\" + watchPath + \"] for changes\"");
         log.debug("Scanning path [" + watchPath + "] for changes");
 
         // Get the current file listing

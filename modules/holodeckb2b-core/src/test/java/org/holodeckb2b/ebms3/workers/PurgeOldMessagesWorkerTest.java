@@ -83,8 +83,6 @@ public class PurgeOldMessagesWorkerTest {
 
     @BeforeClass
     public static void setUpClass() {
-        //HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(basePath));
-
         try {
             final EntityManager em = JPAUtil.getEntityManager();
 
