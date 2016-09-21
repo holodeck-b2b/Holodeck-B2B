@@ -180,6 +180,7 @@ public class CheckFromICloudTest {
             Handler.InvocationResponse response = handler.doProcessing(mc);
             assertNotNull(response);
         } catch (Exception e) {
+            System.out.println("e class: " + e.getClass());
             fail(e.getMessage());
         }
     }
