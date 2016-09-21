@@ -25,6 +25,8 @@ import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 
+import java.util.Collection;
+
 /**
  * Is the <i>IN_FLOW</i> handler that checks whether the received message was sent through the I-Cloud. This is
  * determined by the actor/role set on the <code>eb:Messaging</code> element. If the <i>nextMSH</i> is targeted it is
@@ -52,11 +54,18 @@ public class CheckFromICloud extends BaseHandler {
             // Check if the message was received through I-Cloud, i.e. if eb:Messaging header was targeted to
             // nextMSH SOAP role/actor
             final boolean isMultiHop = MultiHopConstants.NEXT_MSH_TARGET.equalsIgnoreCase(messaging.getRole());
-
+        System.out.println("[1]");
             if (isMultiHop) {
+                System.out.println("[2]");
+                System.out.println("mc: " + mc.getClass().getName());
+                Collection<EntityProxy<MessageUnit>> mu = MessageContextUtils.getRcvdMessageUnits(mc);
+                System.out.println("received mu: " + mu);
                 log.debug("Message received through I-Cloud, update message units");
-                for (final EntityProxy<MessageUnit> mu : MessageContextUtils.getRcvdMessageUnits(mc))
-                    MessageUnitDAO.setMultiHop(mu, isMultiHop);
+//                for (final EntityProxy<MessageUnit> mu : MessageContextUtils.getRcvdMessageUnits(mc)) {
+//                    System.out.println("[3]");
+//                    MessageUnitDAO.setMultiHop(mu, isMultiHop);
+//                }
+                System.out.println("[4]");
             }
         }
 
