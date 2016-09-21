@@ -173,7 +173,7 @@ public class CheckFromICloudTest {
         messaging.setRole(MultiHopConstants.NEXT_MSH_TARGET);
         //System.out.println("messagingHeader2: " + messaging);
 
-        MessageContextUtils.getRcvdMessageUnits(mc);
+//        MessageContextUtils.getRcvdMessageUnits(mc);
 
         try {
             assertNotNull(messaging);
