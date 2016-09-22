@@ -21,31 +21,31 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>2.1.0-SNAPSHOT-11</version>
+        <version>2.1.0-SNAPSHOT-12</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>holodeckb2b-interfaces</artifactId>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <netbeans.hint.license>lgpl30</netbeans.hint.license> 
+        <netbeans.hint.license>lgpl30</netbeans.hint.license>
     </properties>
     <name>Holodeck B2B - Interfaces</name>
     <description>
-        This module contains all the interfaces that are needed to build custom extension to add functionality to the 
-        standard Holodeck B2B implementation. 
+        This module contains all the interfaces that are needed to build custom extension to add functionality to the
+        standard Holodeck B2B implementation.
         NOTE: The license used for this module differs from the other modules that are part of the main Holodeck B2B
         project as this module is licensed under the Lesser GPL v3 license. The reason for the different licensing is
-        to make clear that you develop closed source custom extension for Holodeck B2B as long as you only use the 
+        to make clear that you develop closed source custom extension for Holodeck B2B as long as you only use the
         interfaces as provided in this module.
     </description>
-    <organization><name>The Holodeck B2B Team</name><url>http://www.holodeck-b2b.org/team</url></organization>   
+    <organization><name>The Holodeck B2B Team</name><url>http://www.holodeck-b2b.org/team</url></organization>
     <licenses>
         <license>
             <name>GNU Lesser General Public License v3</name>
             <url>http://www.gnu.org/licenses/lgpl-3.0.html</url>
         </license>
-    </licenses>  
+    </licenses>
     <dependencies>
         <dependency>
             <groupId>org.apache.axis2</groupId>

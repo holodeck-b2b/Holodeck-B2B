@@ -166,16 +166,22 @@ public class CompressionDataHandler extends DataHandler {
      * Writes the uncompressed data to the given output stream.
      *
      * @param out           The {@link OutputStream} to write the uncompressed data to
-     * @throws IOException  When an error occurs while writing the data to the stream
-     * @throws ZipException When the data can not be decompressed because it is corrupted
+     * @throws ZipException When there is an error while decompressing the data. Most probably cause is corrupted data,
+     *                      but also errors writing the decompressed data to the output stream can be cause of this
+     *                      exception
      */
-    private void decompress(final OutputStream out) throws IOException, ZipException {
+    private void decompress(final OutputStream out) throws ZipException {
         try (GZIPInputStream gzInputStream = new GZIPInputStream(source.getInputStream()))
         {
             final byte[]  buffer = new byte[2048];
             int     r = 0;
             while ((r = gzInputStream.read(buffer)) > 0)
                 out.write(buffer, 0, r);
+        } catch (Exception ex) {
+            if (!(ex instanceof ZipException))
+                ex = new ZipException(ex.getClass().getName() + " {" + ex.getMessage()
+                                        + " } occurred during decompression.");
+            throw (ZipException) ex;
         }
     }
 }

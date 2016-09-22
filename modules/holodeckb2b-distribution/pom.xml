@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>2.1.0-SNAPSHOT-11</version>
+        <version>2.1.0-SNAPSHOT-12</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -32,9 +32,9 @@
     <packaging>pom</packaging>
 
     <dependencies>
- 
-        <!--=============================================================== 
-            First the modules of Holodeck itself 
+
+        <!--===============================================================
+            First the modules of Holodeck itself
         =============================================================== -->
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -48,17 +48,17 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
         </dependency>
-        
-        <!--=============================================================== 
+
+        <!--===============================================================
             Second the runtime only dependencies, not declared in the
             modules
-        =============================================================== -->       
+        =============================================================== -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
             <scope>runtime</scope>
-        </dependency>    
-        
+        </dependency>
+
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
@@ -68,7 +68,7 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <scope>runtime</scope>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
@@ -81,7 +81,7 @@
             <scope>runtime</scope>
         </dependency>
     </dependencies>
-      
+
     <build>
         <plugins>
             <plugin>
@@ -104,6 +104,6 @@
             </plugin>
         </plugins>
     </build>
-  
-  
+
+
 </project>
