@@ -5,6 +5,7 @@
  */
 package org.holodeckb2b.testhelpers;
 
+import org.holodeckb2b.ebms3.submit.core.MessageSubmitterFactory;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
@@ -13,8 +14,10 @@ import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
+import org.holodeckb2b.interfaces.submit.IMessageSubmitterFactory;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
+import org.holodeckb2b.pmode.InMemoryPModeSet;
 import org.holodeckb2b.pmode.PModeManager;
 
 /**
@@ -23,6 +26,10 @@ import org.holodeckb2b.pmode.PModeManager;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class HolodeckCore implements IHolodeckB2BCore {
+
+    private static final class SingletonHolder {
+        static final IMessageSubmitterFactory instance = new MessageSubmitterFactory();
+    }
 
     private final Config  config;
 
@@ -40,6 +47,7 @@ public class HolodeckCore implements IHolodeckB2BCore {
 
     public HolodeckCore(final String homeDir, final String pmodeValidatorClass, final String pmodeStorageClass) {
         config = new Config(homeDir, pmodeValidatorClass, pmodeStorageClass);
+        pmodeSet = new InMemoryPModeSet();
     }
 
     @Override
@@ -54,7 +62,7 @@ public class HolodeckCore implements IHolodeckB2BCore {
 
     @Override
     public IMessageSubmitter getMessageSubmitter() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return SingletonHolder.instance.createMessageSubmitter();
     }
 
     @Override

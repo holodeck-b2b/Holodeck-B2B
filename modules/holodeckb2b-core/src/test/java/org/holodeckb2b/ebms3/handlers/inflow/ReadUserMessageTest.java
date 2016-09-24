@@ -11,8 +11,11 @@ import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -26,6 +29,8 @@ import static org.junit.Assert.*;
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class ReadUserMessageTest {
+
+    private static String baseDir;
 
     private static final String ENVELOPE
             = "<?xml version='1.0' encoding='utf-8'?>"
@@ -112,6 +117,12 @@ public class ReadUserMessageTest {
 
     private ReadUserMessage handler;
 
+    @BeforeClass
+    public static void setUpClass() {
+        baseDir = ReadUserMessageTest.class.getClassLoader().getResource("multihop").getPath();
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(baseDir));
+    }
+
     @Before
     public void setUp() throws Exception {
         handler = new ReadUserMessage();
@@ -162,8 +173,6 @@ public class ReadUserMessageTest {
         SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
         System.out.println("messaging: " + messaging);
         assertNotNull(messaging);
-        // Setting Role, as stated in paragraph 4.3 of AS4 profile
-        //messaging.setRole(MultiHopConstants.NEXT_MSH_TARGET);
 
         final Iterator<?> it = UserMessage.getElements(messaging);
 
@@ -176,12 +185,13 @@ public class ReadUserMessageTest {
 
         try {
             assertNotNull(messaging);
-            Handler.InvocationResponse response = handler.doProcessing(mc);
-            assertNotNull(response);
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertNotNull(invokeResp);
+            Handler.InvocationResponse doProcessingResp = handler.doProcessing(mc);
+            assertNotNull(doProcessingResp);
         } catch (Exception e) {
             System.out.println("e class: " + e.getClass());
             fail(e.getMessage());
         }
     }
-
 }
