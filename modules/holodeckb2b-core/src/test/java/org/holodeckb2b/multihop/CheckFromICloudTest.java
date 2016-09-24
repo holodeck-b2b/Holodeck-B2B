@@ -12,12 +12,19 @@ import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.pmode.BasicPModeValidatorTest;
+import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -33,13 +40,15 @@ import static org.junit.Assert.fail;
  */
 public class CheckFromICloudTest {
 
+    private static String baseDir;
+
     private CheckFromICloud handler;
 
     private static final String ENVELOPE
             = "<?xml version='1.0' encoding='utf-8'?>"
             + "<soapenv:Envelope xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\""
             + " xmlns:xsd=\"http://www.w3.org/1999/XMLSchema\""
-            + " xmlns:eb3=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\""
+            + " xmlns:eb3=\""+EbMSConstants.EBMS3_NS_URI+"\""
             + " xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance/\">"
             + "<soapenv:Body/>"
             + "</soapenv:Envelope>";
@@ -48,7 +57,7 @@ public class CheckFromICloudTest {
             = "<?xml version='1.0' encoding='utf-8'?>"
             + "<soapenv:Envelope xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\""
             + " xmlns:xsd=\"http://www.w3.org/1999/XMLSchema\""
-            + " xmlns:eb3=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\""
+            + " xmlns:eb3=\""+EbMSConstants.EBMS3_NS_URI+"\""
             + " xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance/\">"
             + "<soapenv:Header>"
             + "<eb3:Messaging soapenv:mustUnderstand=\"true\"/>"
@@ -96,13 +105,11 @@ public class CheckFromICloudTest {
             + "</eb3:PayloadInfo>"
             + "</eb3:UserMessage>";
 
-//    private static final
-
     private static final String ENVELOPE_WITH_HEADER_MESSAGING_AND_USER_MESSAGE
             = "<?xml version='1.0' encoding='utf-8'?>" 
             + "<soapenv:Envelope xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\""
             + " xmlns:xsd=\"http://www.w3.org/1999/XMLSchema\""
-            + " xmlns:eb3=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\""
+            + " xmlns:eb3=\""+EbMSConstants.EBMS3_NS_URI+"\""
             + " xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance/\">"
             + "<soapenv:Header>"
             + "<eb3:Messaging soapenv:mustUnderstand=\"true\">"
@@ -113,6 +120,11 @@ public class CheckFromICloudTest {
             + "</soapenv:Envelope>";
 
 
+    @BeforeClass
+    public static void setUpClass() {
+        baseDir = CheckFromICloudTest.class.getClassLoader().getResource("multihop").getPath();
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(baseDir));
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -149,17 +161,22 @@ public class CheckFromICloudTest {
         // Adding UserMessage from mmd
         OMElement userMessage = UserMessage.createElement(headerBlock, mmd);
 
-        //assertEquals(USER_MESSAGE, userMessage);
-        //System.out.println("userMessage: " + userMessage);
+        EntityProxy<org.holodeckb2b.ebms3.persistency.entities.UserMessage>
+                userMessageEntityProxy = null;
+        try {
+            userMessageEntityProxy =
+                        MessageUnitDAO.storeReceivedMessageUnit(
+                                UserMessage.readElement(userMessage));
+        } catch (PackagingException e) {
+            e.printStackTrace();
+        }
 
         assertEquals(ENVELOPE_WITH_HEADER_MESSAGING_AND_USER_MESSAGE, env.toString());
 
         MessageContext mc = new MessageContext();
-//        SOAPHeader header = env.getHeader();
-//        System.out.println("header: " + header);
 
         // Setting input message property
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessage);
+        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessageEntityProxy);
         try {
             mc.setEnvelope(env);
         } catch (AxisFault axisFault) {
@@ -167,18 +184,18 @@ public class CheckFromICloudTest {
         }
 
         SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
-        //System.out.println("messaging: " + messaging);
         assertNotNull(messaging);
         // Setting Role, as stated in paragraph 4.3 of AS4 profile
         messaging.setRole(MultiHopConstants.NEXT_MSH_TARGET);
-        //System.out.println("messagingHeader2: " + messaging);
 
-//        MessageContextUtils.getRcvdMessageUnits(mc);
+        assertNotNull(MessageContextUtils.getRcvdMessageUnits(mc));
 
         try {
             assertNotNull(messaging);
-            Handler.InvocationResponse response = handler.doProcessing(mc);
-            assertNotNull(response);
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertNotNull(invokeResp);
+            Handler.InvocationResponse doProcessingResp = handler.doProcessing(mc);
+            assertNotNull(doProcessingResp);
         } catch (Exception e) {
             System.out.println("e class: " + e.getClass());
             fail(e.getMessage());
