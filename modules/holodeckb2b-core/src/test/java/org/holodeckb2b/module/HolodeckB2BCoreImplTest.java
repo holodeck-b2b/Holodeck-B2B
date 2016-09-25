@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.net.URL;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 /**
@@ -42,5 +43,6 @@ public class HolodeckB2BCoreImplTest {
         } catch (AxisFault axisFault) {
             fail(axisFault.getMessage());
         }
+        assertNotNull(coreImpl.getPModeSet());
     }
 }
