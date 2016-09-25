@@ -110,6 +110,7 @@ public abstract class BaseHandler extends AbstractHandler {
      *                      units in an undefined state!
      */
     public final InvocationResponse invoke(final MessageContext mc) throws AxisFault {
+        System.out.println("[BaseHandler.invoke()] mc: " + mc);
         // Determine which flow the handler currently runs is
         if (mc.isServerSide()) {
             // Running serverside means Holodeck B2B acts as responder
@@ -119,6 +120,9 @@ public abstract class BaseHandler extends AbstractHandler {
             currentFlow = INITIATOR;
             currentFlowName = "INITIATOR_";
         }
+
+        System.out.println("mc current flow: " + currentFlow);
+        System.out.println("mc flow: " + mc.getFLOW());
 
         switch (mc.getFLOW()) {
             case MessageContext.IN_FLOW :
@@ -135,9 +139,12 @@ public abstract class BaseHandler extends AbstractHandler {
                 break;
         }
 
+        System.out.println("mc current flow name: " + currentFlowName);
+
         // Check if running in correct flow (check has two parts, first check the for IN or OUT flow,
         //   then check whether message is initiated by Holodeck B2B or response)
         if (!runningInCorrectFlow()) {
+            System.out.println("[Flow is incorrect!]");
             // This is handler is not supposed to run in the current flow
             return InvocationResponse.CONTINUE;
         }
@@ -145,11 +152,14 @@ public abstract class BaseHandler extends AbstractHandler {
         // Running in correct flow, create a logger
         log = LogFactory.getLog("org.holodeckb2b.msgproc." + currentFlowName + "." + this.getClass().getSimpleName());
 
+        System.out.println("log: " + log);
+
         // Do actual processing in implementation
         try {
             log.trace("Start processing");
             final InvocationResponse result = doProcessing(mc);
             log.trace("End processing");
+            System.out.println("[Correct Flow]");
             return result;
         } catch (final Throwable t) {
             // Unhandled exception during processing, should not happen!
