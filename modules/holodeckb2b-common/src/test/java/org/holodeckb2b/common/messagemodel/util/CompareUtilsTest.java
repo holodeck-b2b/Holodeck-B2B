@@ -25,6 +25,7 @@ import org.junit.Test;
 import java.util.Collection;
 import java.util.HashSet;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -53,6 +54,7 @@ public class CompareUtilsTest {
     public void testCollectionsAreEqual() {
         HashSet<IPartyId> c1 = new HashSet<IPartyId>();
         HashSet<IPartyId> c2 = new HashSet<IPartyId>();
+        assertTrue(CompareUtils.areEqual(c1, c2));
         IPartyId p1 = new PartyIDImpl("123", "type");
         IPartyId p2 = new PartyIDImpl("124", "type1");
         c1.add(p1);
@@ -61,6 +63,17 @@ public class CompareUtilsTest {
         c1.add(p2);
         c2.add(p2);
         assertTrue(CompareUtils.areEqual(c1, c2));
+        IPartyId p3 = new PartyIDImpl("124", null);
+        c1.remove(p1);
+        c1.add(p3);
+        assertFalse(CompareUtils.areEqual(c1, c2));
+        IPartyId p4 = new PartyIDImpl(null, "type");
+        c1.remove(p3);
+        c1.add(p4);
+        assertFalse(CompareUtils.areEqual(c1, c2));
+        c1.remove(p4);
+        c1.add(p1);
+        assertTrue(CompareUtils.areEqual(c1, c2));
     }
 
     @Test
@@ -68,6 +81,12 @@ public class CompareUtilsTest {
         IPartyId p1 = new PartyIDImpl("123", "type");
         IPartyId p2 = new PartyIDImpl("123", "type");
         assertTrue(CompareUtils.areEqual(p1, p2));
+        p1 = new PartyIDImpl(null, "type");
+        assertFalse(CompareUtils.areEqual(p1, p2));
+        assertFalse(CompareUtils.areEqual(p2, p1));
+        p1 = new PartyIDImpl("123", null);
+        assertFalse(CompareUtils.areEqual(p1, p2));
+        assertFalse(CompareUtils.areEqual(p2, p1));
     }
 
     @Test
@@ -75,6 +94,15 @@ public class CompareUtilsTest {
         IProperty p1 = new PropertyImpl("cAr", "tEsLA", "S");
         IProperty p2 = new PropertyImpl("cAr", "tEsLA", "S");
         assertTrue(CompareUtils.areEqual(p1, p2));
+        p1 = new PropertyImpl("cAr", "tEsLA", null);
+        assertFalse(CompareUtils.areEqual(p1, p2));
+        assertFalse(CompareUtils.areEqual(p2, p1));
+        p1 = new PropertyImpl("cAr", null, "S");
+        assertFalse(CompareUtils.areEqual(p1, p2));
+        assertFalse(CompareUtils.areEqual(p2, p1));
+        p1 = new PropertyImpl(null, "tEsLA", "S");
+        assertFalse(CompareUtils.areEqual(p1, p2));
+        assertFalse(CompareUtils.areEqual(p2, p1));
     }
 
     @Test
@@ -82,6 +110,12 @@ public class CompareUtilsTest {
         IService s1 = new ServiceImpl("123", "sap");
         IService s2 = new ServiceImpl("123", "sap");
         assertTrue(CompareUtils.areEqual(s1, s2));
+        s1 = new ServiceImpl(null, "sap");
+        assertFalse(CompareUtils.areEqual(s1, s2));
+        assertFalse(CompareUtils.areEqual(s2, s1));
+        s1 = new ServiceImpl("123", null);
+        assertFalse(CompareUtils.areEqual(s1, s2));
+        assertFalse(CompareUtils.areEqual(s2, s1));
     }
 
     class TradingPartnerImpl implements ITradingPartner {
