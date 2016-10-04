@@ -49,6 +49,9 @@ public class UtilsTest {
 
     }
 
+    /**
+     * Checks the presence of Mime Types that are available by means of org.apache.tika api
+     */
     @Test
     public void testGetExtension() {
         assertNull(Utils.getExtension(null));
@@ -77,6 +80,10 @@ public class UtilsTest {
         }
     }
 
+    /**
+     * Test custom serialization
+     * @throws Exception
+     */
     @Test
     public void testSerialization() throws Exception {
         String s = "some data";
@@ -115,7 +122,6 @@ public class UtilsTest {
                     Utils.preventDuplicateFileName(baseDir + "/emptyfile");
             assertNotEquals(newFileName1, newFileName2);
             for (File file : files) {
-                //System.out.println(file.getAbsoluteFile());
                 assertNotEquals(file.getAbsolutePath(), newFileName1);
                 assertNotEquals(file.getAbsolutePath(), newFileName2);
             }
@@ -135,6 +141,9 @@ public class UtilsTest {
         assertEquals("key3", Utils.getKeyByValue(map, "value3"));
     }
 
+    /**
+     * Test possible results of {@link org.holodeckb2b.common.util.Utils#compareStrings(String, String) compareStrings}
+     */
     @Test
     public void testCompareStrings() {
         assertTrue(Utils.compareStrings("a", "b") == -2);
