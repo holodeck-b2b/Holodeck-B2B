@@ -17,13 +17,13 @@
 package org.holodeckb2b.security.handlers;
 
 import java.util.Properties;
-
 import org.apache.axis2.context.MessageContext;
 import org.apache.wss4j.common.ConfigurationConstants;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
@@ -86,11 +86,12 @@ public class SetupWSSProcessing extends BaseHandler {
         mc.setProperty(ConfigurationConstants.ENABLE_TIMESTAMP_CACHE, "false");
 
         log.debug("Get the primary message unit for this message to check specific setting");
-        final MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
-        if (primaryMU == null)
+        final EntityProxy<MessageUnit> primaryMUProxy = MessageContextUtils.getPrimaryMessageUnit(mc);
+        if (primaryMUProxy == null)
             // No primary message => this is probably an empty response
             return InvocationResponse.CONTINUE;
-
+        
+        final MessageUnit primaryMU = primaryMUProxy != null ? primaryMUProxy.entity : null;
         log.debug("The primary message unit is a " + primaryMU.getClass().getSimpleName()
                                                                         + " with msg-id=" + primaryMU.getMessageId());
 
