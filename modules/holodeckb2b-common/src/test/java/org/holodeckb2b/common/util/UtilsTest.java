@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
@@ -98,7 +98,8 @@ public class UtilsTest {
 
     @Test
     public void testPreventDuplicateFileName() {
-        String baseDir = UtilsTest.class.getClassLoader().getResource("utils").getPath();
+        String baseDir =
+                UtilsTest.class.getClassLoader().getResource("utils").getPath();
         try {
             File dir = new File(baseDir);
             assertTrue(dir.isDirectory());

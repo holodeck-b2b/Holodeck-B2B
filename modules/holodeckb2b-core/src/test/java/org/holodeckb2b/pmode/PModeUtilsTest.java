@@ -30,6 +30,10 @@ import static org.junit.Assert.assertNotNull;
  */
 public class PModeUtilsTest {
 
+    /**
+     * Tests the minimal configuration of P-Mode needed to pass the check
+     * in case of One-Way/Pull MEP
+     */
     @Test
     public void testGetOutPullRequestFlow() {
         PMode validPMode = new PMode();
@@ -46,12 +50,108 @@ public class PModeUtilsTest {
         leg.setProtocol(protocolConfig);
 
         PullRequestFlow prFlow = new PullRequestFlow();
-        prFlow.setMPC("MPC");
         leg.addPullRequestFlow(prFlow);
 
         validPMode.addLeg(leg);
 
-        IPullRequestFlow requestFlow = PModeUtils.getOutPullRequestFlow(validPMode);
+        IPullRequestFlow requestFlow =
+                PModeUtils.getOutPullRequestFlow(validPMode);
+
+        assertNotNull(requestFlow);
+    }
+
+    /**
+     * Tests the minimal configuration of P-Mode needed to pass the check
+     * in case of Two-Way/Pull-and-Push MEP
+     */
+    @Test
+    public void testGetOutPullPushRequestFlow() {
+        PMode validPMode = new PMode();
+        validPMode.setMep(EbMSConstants.TWO_WAY_MEP);
+        validPMode.setMepBinding(EbMSConstants.TWO_WAY_PULL_PUSH);
+
+        PartnerConfig initiator = new PartnerConfig();
+        validPMode.setInitiator(initiator);
+
+        Leg leg = new Leg();
+
+        Protocol protocolConfig = new Protocol();
+        protocolConfig.setAddress("address");
+        leg.setProtocol(protocolConfig);
+
+        PullRequestFlow prFlow = new PullRequestFlow();
+        leg.addPullRequestFlow(prFlow);
+
+        validPMode.addLeg(leg);
+
+        IPullRequestFlow requestFlow =
+                PModeUtils.getOutPullRequestFlow(validPMode);
+
+        assertNotNull(requestFlow);
+    }
+
+    /**
+     * Tests the minimal configuration of P-Mode needed to pass the check
+     * in case of Two-Way/Push-and-Pull MEP
+     */
+    @Test
+    public void testGetOutPushPullRequestFlow() {
+        PMode validPMode = new PMode();
+        validPMode.setMep(EbMSConstants.TWO_WAY_MEP);
+        validPMode.setMepBinding(EbMSConstants.TWO_WAY_PUSH_PULL);
+
+        PartnerConfig responder = new PartnerConfig();
+        validPMode.setResponder(responder);
+
+        validPMode.addLeg(new Leg());
+
+        PartnerConfig initiator = new PartnerConfig();
+        validPMode.setInitiator(initiator);
+        Leg leg = new Leg();
+        Protocol protocolConfig = new Protocol();
+        protocolConfig.setAddress("address");
+        leg.setProtocol(protocolConfig);
+
+        PullRequestFlow prFlow = new PullRequestFlow();
+        leg.addPullRequestFlow(prFlow);
+
+        validPMode.addLeg(leg);
+
+        IPullRequestFlow requestFlow =
+                PModeUtils.getOutPullRequestFlow(validPMode);
+
+        assertNotNull(requestFlow);
+    }
+
+    /**
+     * Tests the minimal configuration of P-Mode needed to pass the check
+     * in case of Two-Way/Pull-and-Pull MEP
+     */
+    @Test
+    public void testGetOutPullPullRequestFlow() {
+        PMode validPMode = new PMode();
+        validPMode.setMep(EbMSConstants.TWO_WAY_MEP);
+        validPMode.setMepBinding(EbMSConstants.TWO_WAY_PULL_PULL);
+
+        PartnerConfig responder = new PartnerConfig();
+        validPMode.setResponder(responder);
+
+        validPMode.addLeg(new Leg());
+
+        PartnerConfig initiator = new PartnerConfig();
+        validPMode.setInitiator(initiator);
+        Leg leg = new Leg();
+        Protocol protocolConfig = new Protocol();
+        protocolConfig.setAddress("address");
+        leg.setProtocol(protocolConfig);
+
+        PullRequestFlow prFlow = new PullRequestFlow();
+        leg.addPullRequestFlow(prFlow);
+
+        validPMode.addLeg(leg);
+
+        IPullRequestFlow requestFlow =
+                PModeUtils.getOutPullRequestFlow(validPMode);
 
         assertNotNull(requestFlow);
     }
