@@ -53,7 +53,8 @@ public class ReadUserMessageTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = ReadUserMessageTest.class.getClassLoader().getResource("multihop").getPath();
+        baseDir = ReadUserMessageTest.class.getClassLoader()
+                .getResource("multihop").getPath();
         HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(baseDir));
     }
 
@@ -67,6 +68,10 @@ public class ReadUserMessageTest {
 
     }
 
+    /**
+     * Test construction of the user message to be successfully consumed by
+     * {@link org.holodeckb2b.ebms3.handlers.inflow.ReadUserMessage ReadUserMessage} handler
+     */
     @Test
     public void testProcessing() {
         final String mmdPath =
