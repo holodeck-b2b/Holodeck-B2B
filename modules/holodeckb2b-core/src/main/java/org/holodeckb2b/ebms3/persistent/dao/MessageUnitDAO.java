@@ -21,11 +21,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.OptimisticLockException;
-
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.exceptions.DuplicateMessageIdError;
 import org.holodeckb2b.common.util.MessageIdGenerator;
@@ -733,10 +731,10 @@ public class MessageUnitDAO {
     }
 
     /**
-     * Retrieves all {@link MessageUnit}s of the specified type and that are in one of the given states.
-     * <p>
-     * <b>NOTE:</b> The entity objects in the resulting list are not completely loaded! Before a message unit is going
-     * to be processed it must be loaded completely.
+     * Retrieves all {@link MessageUnit}s of the specified type and that are (to be) sent by Holodeck B2B and which are
+     * in one of the given states.
+     * <p><b>NOTE:</b> The entity objects in the resulting list are not completely loaded! Before a message unit is
+     * going to be processed it must be loaded completely.
      *
      * @param type      The type of message units to retrieve specified by their Class
      * @param states    Array of processing state [names] that the message units to retrieve should be in
@@ -745,7 +743,8 @@ public class MessageUnitDAO {
      *                  are found.
      * @throws DatabaseException When a problem occurs during the retrieval of the message units
      */
-    public static <T extends MessageUnit> List<EntityProxy<T>> getMessageUnitsInState(final Class<T> type, final String[] states)
+    public static <T extends MessageUnit> List<EntityProxy<T>> getSentMessageUnitsInState(final Class<T> type,
+                                                                                          final String[] states)
                                                                             throws DatabaseException {
         List<T> result = null;
         final EntityManager em = JPAUtil.getEntityManager();
@@ -756,7 +755,8 @@ public class MessageUnitDAO {
 
         final String queryString = "SELECT mu " +
                              "FROM " + type.getSimpleName() + " mu JOIN FETCH mu.states s1 " +
-                             "WHERE s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) " +
+                             "WHERE mu.DIRECTION = " + MessageUnit.Direction.OUT.ordinal() + " " +
+                             "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) " +
                              "AND s1.NAME IN :states";
         try {
             result = em.createQuery(queryString, type)
@@ -1066,7 +1066,7 @@ public class MessageUnitDAO {
      */
     private static <T extends MessageUnit> List<EntityProxy<T>> createProxyResultList(final List<T> result) {
         if (Utils.isNullOrEmpty(result))
-            return null;
+            return new ArrayList<EntityProxy<T>>();
 
         final List<EntityProxy<T>> proxies = new ArrayList<>(result.size());
         for(final T e : result)
