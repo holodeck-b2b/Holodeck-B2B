@@ -757,7 +757,8 @@ public class MessageUnitDAO {
                              "FROM " + type.getSimpleName() + " mu JOIN FETCH mu.states s1 " +
                              "WHERE mu.DIRECTION = " + MessageUnit.Direction.OUT.ordinal() + " " +
                              "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) " +
-                             "AND s1.NAME IN :states";
+                             "AND s1.NAME IN :states " +
+                             "ORDER BY mu.MU_TIMESTAMP";
         try {
             result = em.createQuery(queryString, type)
                                     .setParameter("states", pStates)
