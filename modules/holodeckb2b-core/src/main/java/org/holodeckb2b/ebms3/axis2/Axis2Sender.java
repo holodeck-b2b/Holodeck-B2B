@@ -16,16 +16,16 @@
  */
 package org.holodeckb2b.ebms3.axis2;
 
-import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
-
 import java.util.List;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.OperationClient;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
+import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.logging.Log;
 import org.holodeckb2b.axis2.Axis2Utils;
 import org.holodeckb2b.common.util.Utils;
@@ -89,6 +89,7 @@ public class Axis2Sender {
             options.setExceptionToBeThrownOnSOAPFault(false);
             oc.setOptions(options);
 
+            msgCtx.setProperty(HTTPConstants.CACHED_HTTP_CLIENT, new HttpClient());
             log.debug("Axis2 client configured for sending ebMS message");
         } catch (final AxisFault af) {
             // Setting up the Axis environment failed. As it prevents sending the message it is logged as a fatal error
