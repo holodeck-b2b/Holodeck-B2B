@@ -23,7 +23,7 @@
     <groupId>org.holodeckb2b</groupId>
     <artifactId>holodeckb2b</artifactId>
     <packaging>pom</packaging>
-    <version>2.1.0-SNAPSHOT-14</version>
+    <version>2.1.0-SNAPSHOT-16</version>
     <name>Holodeck B2B</name>
     <url>http://www.holodeck-b2b.org/</url>
     <inceptionYear>2015</inceptionYear>
