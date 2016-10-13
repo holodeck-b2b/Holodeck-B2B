@@ -28,30 +28,30 @@ import org.simpleframework.xml.core.ValueRequiredException;
 /**
  * Represents the <code>ReceptionAwareness<code> element from the P-Mode document. Contains the configuration settings
  * for the reception awareness feature.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @author Bram Bakx <bram at holodeck-b2b.org>
- * 
+ *
  * @see IReceptionAwareness
  */
 public class ReceptionAwareness implements IReceptionAwareness {
 
     @Element(name = "MaxRetries", required = false)
     private int maxRetries = -1;
-    
+
     @Element(name = "RetryInterval", required = false)
     private long retryIntervalDuration = -1;
-    
+
     @Element(name = "UseDuplicateElimination", required = false)
     private Boolean useDupElimination = Boolean.TRUE;
-    
+
     @Transient
     private Interval retryInterval;
-    
+
     /**
-     * Validates the data read from the XML document by checking that when <code>MaxRetries</code> is supplied 
+     * Validates the data read from the XML document by checking that when <code>MaxRetries</code> is supplied
      * <code>RetryInterval</code> contains positive non zero value;</li></ol>
-     * 
+     *
      * @throws Exception When the read XML is not valid
      */
     @Validate
@@ -60,7 +60,7 @@ public class ReceptionAwareness implements IReceptionAwareness {
             if (retryIntervalDuration <= 0)
                 throw new ValueRequiredException("ReceptionAwareness/RetryInterval must have positive non zero value");
     }
-    
+
     /**
      * Is a helper to construct the {@link Interval} object. Uses the commit function of the Simple framework.
      */
@@ -68,7 +68,7 @@ public class ReceptionAwareness implements IReceptionAwareness {
     public void calculateInterval() {
         retryInterval = new Interval(retryIntervalDuration, TimeUnit.SECONDS);
     }
-    
+
     @Override
     public int getMaxRetries() {
         return maxRetries;

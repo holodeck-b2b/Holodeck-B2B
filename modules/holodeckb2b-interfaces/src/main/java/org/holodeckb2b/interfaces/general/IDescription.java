@@ -20,21 +20,21 @@ package org.holodeckb2b.interfaces.general;
 /**
  * Represents a description for an item and is used for processing <code>eb:Description</code> elements in the ebMS
  * messaging header. Descriptions are always user specified and not used by Holodeck B2B when processing messages.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface IDescription {
-   
+
     /**
      * Gets the language the description is written in.
-     * 
+     *
      * @return  Identification of the language the description is written in
      */
     public String  getLanguage();
-    
+
     /**
      * Gets the text of description
-     * 
+     *
      * @return  The text of the description
      */
     public String getText();

@@ -19,9 +19,9 @@ package org.holodeckb2b.interfaces.workerpool;
 import java.util.Map;
 
 /**
- * Is an interface defining a task to be executed by a worker in a {@link WorkerPool}.  
+ * Is an interface defining a task to be executed by a worker in a WorkerPool.
  * <p>Tasks implement the functionality that should be executed by a worker. They do not need to manage the execution
- * itself. This is done by the {@link WorkerPool}. By separating thread management and task functionality the worker 
+ * itself. This is done by the WorkerPool. By separating thread management and task functionality the worker
  * task only needs to focus on the task on hand.
  * <p><b>NOTES:</b><ul>
  * <li>Implementations MUST handle interrupts correctly and SHOULD stop processing as soon as possible when an interrupt is received.</li>
@@ -29,28 +29,28 @@ import java.util.Map;
  * <li>When the task should executed more than once implementations SHOULD prevent unhandled exceptions to occur in the
  * {@link #run()} method as these will stop the thread and prevent repeated executing!</li>
  * </ul>
- * 
+ *
  * @author Sander Fieten <sander@holodeck-b2b.org>
  */
 public interface IWorkerTask extends Runnable {
-    
+
     /**
      * Sets the name of this worker task
-     * 
+     *
      * @param name  The name for this task
      */
     public void setName(String name);
-    
+
     /**
      * Gets the name of this worker task
-     * 
+     *
      * @return  The name for this task
      */
-    public String getName();    
-    
+    public String getName();
+
     /**
      * Set the parameters for correctly executing the workers task.
-     * 
+     *
      * @param  parameters    The parameters to configure this worker
      * @throws TaskConfigurationException   When the task can not be configured correctly based on the supplied parameters
      */

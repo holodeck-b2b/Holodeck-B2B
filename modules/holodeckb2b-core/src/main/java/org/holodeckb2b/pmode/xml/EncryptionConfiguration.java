@@ -21,25 +21,25 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
 /**
- * Represents the <code>EncryptionConfiguration</code> element in the P-Mode 
+ * Represents the <code>EncryptionConfiguration</code> element in the P-Mode
  * XML document that contains the P-Mode parameters for message encryption.
- * 
+ *
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 @Root
 public class EncryptionConfiguration implements IEncryptionConfiguration {
-    
+
     @Element(name = "KeystoreAlias")
     private KeystoreAlias keyStoreRef;
-    
+
     // encryption algorithm
     @Element(name = "Algorithm", required = false)
     private String algorithm = null;
-    
+
     @Element(name = "KeyTransport", required = false)
     private KeyTransport keyTransport = null;
-    
-    
+
+
     @Override
     public String getKeystoreAlias() {
         return keyStoreRef.name;
@@ -59,5 +59,5 @@ public class EncryptionConfiguration implements IEncryptionConfiguration {
     public KeyTransport getKeyTransport() {
         return keyTransport;
     }
-    
+
 }

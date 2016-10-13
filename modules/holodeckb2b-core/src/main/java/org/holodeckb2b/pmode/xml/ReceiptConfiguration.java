@@ -29,19 +29,19 @@ import org.simpleframework.xml.core.Commit;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class ReceiptConfiguration implements IReceiptConfiguration{
-  
+
     @Element (name = "ReplyPattern", required = false)
     private String replyPattern;
-    
+
     @Element (name = "To", required = false)
     private String to;
-    
+
     @Element (name = "NotifyReceiptToBusinessApplication", required = false)
     private Boolean notifyReceiptToBusinessApp = Boolean.FALSE;
 
     @Element (name = "ReceiptDelivery", required = false)
     private DeliverySpecification receiptDelivery;
-    
+
     /**
      * This method ensures that the {@link DeliverySpecification} for the receipt delivery method gets an unique id
      * based on the P-Mode id. Because we do not know the P-Mode id here we use the <i>commit</i> functionality of the
@@ -49,29 +49,29 @@ public class ReceiptConfiguration implements IReceiptConfiguration{
      * http://simple.sourceforge.net/download/stream/doc/tutorial/tutorial.php#state</a>). We put the <code>
      * receiptDelivery</code> object in the deserialization session so {@link PMode#solveDepencies(java.util.Map)} can
      * set the id using the P-Mode id.
-     * 
+     *
      * @param dependencies The Simple session object.
      */
     @Commit
-    public void setDepency(Map dependencies) {
+    public void setDepency(final Map dependencies) {
         if (receiptDelivery != null) {
             // Because multiple ReceiptDelivery elements can exist in the P-Mode document when we enable Two-Way MEPs,
             // we make sure it get a unique id
             int i = 0;
             while (dependencies.containsKey("ReceiptDelivery-" + i)) i++;
-            dependencies.put("ReceiptDelivery-"+i, receiptDelivery); 
+            dependencies.put("ReceiptDelivery-"+i, receiptDelivery);
         }
-    }    
-    
+    }
+
     @Override
     public ReplyPattern getPattern() {
-        
+
         ReplyPattern r = null;
-        
+
         if (this.replyPattern != null) {
-        
+
             r = ReplyPattern.valueOf(this.replyPattern.toUpperCase());
-            
+
         }
 
         return r != null ? r : ReplyPattern.RESPONSE;
@@ -81,13 +81,13 @@ public class ReceiptConfiguration implements IReceiptConfiguration{
     public String getTo() {
         return this.to;
     }
-    
+
     @Override
     public boolean shouldNotifyReceiptToBusinessApplication() {
         return notifyReceiptToBusinessApp;
     }
-    
-    
+
+
     @Override
     public IDeliverySpecification getReceiptDelivery() {
         return receiptDelivery;

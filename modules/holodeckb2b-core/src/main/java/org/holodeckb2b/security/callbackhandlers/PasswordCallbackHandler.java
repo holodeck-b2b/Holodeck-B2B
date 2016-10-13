@@ -18,47 +18,49 @@ package org.holodeckb2b.security.callbackhandlers;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
+
 import org.apache.wss4j.common.ext.WSPasswordCallback;
 
 /**
  * Is used to hand over passwords to the WSS4J library. The callback handler does not retrieve the passwords from the
- * configuration itself. Username password combinations should be set before WSS4J starts processing the message. 
- * 
+ * configuration itself. Username password combinations should be set before WSS4J starts processing the message.
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class PasswordCallbackHandler implements CallbackHandler {
-    
+
     /**
      * The list of username, password combinations
      */
-    private Map<String, String>  userPwds = new HashMap<String, String>();
+    private final Map<String, String>  userPwds = new HashMap<>();
 
     /**
      * Add a username, password combination to the callback handler.
-     * 
-     * @param username  
-     * @param password 
+     *
+     * @param username
+     * @param password
      */
-    public void addUser(String username, String password) {
+    public void addUser(final String username, final String password) {
         userPwds.put(username, password);
     }
-    
+
     /**
-     * Handles the callback for the password from the WSS4J library. It will set the password to <code>null</code> if 
+     * Handles the callback for the password from the WSS4J library. It will set the password to <code>null</code> if
      * there is no password registered for the identifier (i.e. username) specified by the callback.
-     * 
+     *
      * @param callbacks     An array of callbacks that should handled. This handler will only process the first callback
      * @throws UnsupportedCallbackException     When this handler is called incorrecty
-     */    
-    public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
- 
+     */
+    public void handle(final Callback[] callbacks) throws UnsupportedCallbackException {
+
         if (!(callbacks[0] instanceof WSPasswordCallback))
             throw new UnsupportedCallbackException(callbacks[0], "Can not handle this type of callback!");
-        
-        WSPasswordCallback pc = (WSPasswordCallback) callbacks[0];
-        pc.setPassword(userPwds.get(pc.getIdentifier()));        
+
+        final WSPasswordCallback pc = (WSPasswordCallback) callbacks[0];
+        pc.setPassword(userPwds.get(pc.getIdentifier()));
     }
 }

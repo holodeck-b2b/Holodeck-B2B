@@ -18,21 +18,21 @@ package org.holodeckb2b.interfaces.submit;
 
 /**
  * Indicates a problem that occurred when a message was submitted to Holodeck B2B.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class MessageSubmitException extends Exception {
- 
+
     public MessageSubmitException() {
         super();
     }
-    
-    public MessageSubmitException(String message) {
+
+    public MessageSubmitException(final String message) {
         super(message);
     }
-    
-    public MessageSubmitException(String message, Exception cause) {
+
+    public MessageSubmitException(final String message, final Exception cause) {
         super(message, cause);
     }
-    
+
 }

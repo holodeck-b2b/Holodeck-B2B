@@ -16,12 +16,14 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import java.io.File;
-import org.holodeckb2b.interfaces.pmode.ILeg;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+
+import java.io.File;
+
+import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -30,109 +32,109 @@ import org.simpleframework.xml.core.Persister;
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 public class LegTest {
-    
+
     public LegTest() {
-        
+
     }
-    
+
    /**
      * Create an Leg from file.
-     * 
+     *
      * @param fName The filename for the leg
      * @return Leg or NULL in case of an error
      */
-    public Leg createFromFile(String fName) {
+    public Leg createFromFile(final String fName) {
 
         try {
             // retrieve the resource from the pmodetest directory.
-            File f = new File(this.getClass().getClassLoader().getResource("pmodetest/leg/" + fName).getPath());
+            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/leg/" + fName).getPath());
 
-            Serializer serializer = new Persister();
+            final Serializer serializer = new Persister();
             return serializer.read(Leg.class, f);
         }
-        catch (Exception ex) {
+        catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             return null;
         }
     }
-    
+
     /**
      * Test leg being present (but can be empty).
      */
     @Test
     public void testLegNotNull() {
-        
+
         try {
-            Leg leg = createFromFile("leg1.xml");
-            
+            final Leg leg = createFromFile("leg1.xml");
+
             // when NULL no leg present
             assertNotNull(leg);
-            
-        } catch (Exception ex) {
+
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
         }
-        
+
     }
-    
+
     /**
      * Test leg with label attribute.
      */
     @Test
     public void testLegWithLabelAttribute() {
-        
+
         try {
-            Leg leg = createFromFile("leg2.xml");
-            
+            final Leg leg = createFromFile("leg2.xml");
+
             assertNotNull(leg);
             assertNotNull(leg.getLabel());
             assertEquals("REQUEST", ILeg.Label.REQUEST.toString());
-            
-        } catch (Exception ex) {
+
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
         }
-        
-    }    
-    
+
+    }
+
     /**
      * Test leg without label attribute.
      */
     @Test
     public void testLegWithoutLabelAttribute() {
-        
+
         try {
-            Leg leg = createFromFile("leg3.xml");
-            
+            final Leg leg = createFromFile("leg3.xml");
+
             assertNotNull(leg);
             // test for missing label attribute
             assertNull(leg.getLabel());
-            
-        } catch (Exception ex) {
+
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
         }
-        
+
     }
-    
+
     /**
      * Test leg WITH:
-     * 
+     *
      * - label (=attribute)
-     * - Protocol 
-     * - Receipt 
-     * - ReceptionAwareness 
-     * - UserMessageFlow 
-     * 
+     * - Protocol
+     * - Receipt
+     * - ReceptionAwareness
+     * - UserMessageFlow
+     *
      * And WITHOUT: DefaultDelivery and PullRequestFlow
-     * 
+     *
      */
     @Test
     public void testLegWithLabelAndElements1() {
-        
+
         try {
-            Leg leg = createFromFile("leg4.xml");
-            
+            final Leg leg = createFromFile("leg4.xml");
+
             assertNotNull(leg);
             assertNotNull(leg.getLabel());
             assertEquals("REQUEST", ILeg.Label.REQUEST.toString());
@@ -140,49 +142,81 @@ public class LegTest {
             assertNotNull(leg.getReceiptConfiguration());
             assertNotNull(leg.getReceptionAwareness());
             assertNotNull(leg.getUserMessageFlow());
-            
-        } catch (Exception ex) {
+
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
         }
-        
-    }    
+
+    }
 
     /**
      * Test leg WITH:
-     * 
+     *
      * - label (=attribute)
-     * - Protocol 
-     * - Receipt 
-     * - ReceptionAwareness 
-     * - UserMessageFlow 
-     * - DefaultDelivery 
+     * - Protocol
+     * - Receipt
+     * - ReceptionAwareness
+     * - UserMessageFlow
+     * - DefaultDelivery
      * - PullRequestFlow
-     * 
+     *
      */
     @Test
     public void testLegWithLabelAndElements2() {
-        
+
         try {
-            Leg leg = createFromFile("leg5.xml");
-            
+            final Leg leg = createFromFile("leg5.xml");
+
             assertNotNull(leg);
             // label is an attribute
             assertNotNull(leg.getLabel());
             assertEquals("REQUEST", ILeg.Label.REQUEST.toString());
-            
+
             assertNotNull(leg.getProtocol());
             assertNotNull(leg.getReceiptConfiguration());
             assertNotNull(leg.getReceptionAwareness());
             assertNotNull(leg.getDefaultDelivery());
             assertNotNull(leg.getPullRequestFlows());
             assertNotNull(leg.getUserMessageFlow());
-            
-        } catch (Exception ex) {
+
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
         }
-        
-    }    
-    
+
+    }
+
+    /**
+     * Test leg WITH:
+     *
+     * - label (=attribute)
+     * - Protocol
+     * - Receipt
+     * - ReceptionAwareness
+     * - UserMessageFlow
+     * - DefaultDelivery
+     * - PullRequestFlow
+     * - EventHandlers
+     *
+     */
+    @Test
+    public void testLegWithEventHandlers() {
+        try {
+            final Leg leg = createFromFile("leg6.xml");
+            assertNotNull(leg);
+
+            assertEquals(2, leg.getMessageProcessingEventConfiguration().size());
+            assertNull(leg.getMessageProcessingEventConfiguration().get(0).getHandledEvents());
+            assertNull(leg.getMessageProcessingEventConfiguration().get(0).appliesTo());
+
+            assertEquals(2, leg.getMessageProcessingEventConfiguration().get(1).getHandledEvents().size());
+            assertEquals(2, leg.getMessageProcessingEventConfiguration().get(1).appliesTo().size());
+        } catch (final Exception ex) {
+            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
+            fail();
+        }
+
+
+    }
 }

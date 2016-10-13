@@ -17,29 +17,31 @@
 package org.holodeckb2b.ebms3.persistent.wrappers;
 
 import java.io.Serializable;
+
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
 import org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo;
 
 /**
  * JPA Entity wrapper for testing {@see CollaborationInfo}
- * 
+ *
  * @author Sander Fieten <sander at holodeckb2b.org>
  */
 @Entity
 @Table(name="T_COLLABINFO")
 public class ECollaborationInfo implements Serializable {
-    
+
     @Id
     @GeneratedValue
     private long id;
-    
+
     @Embedded
     public CollaborationInfo   eCollaborationInfo;
-    
+
     public ECollaborationInfo() {
         eCollaborationInfo = new CollaborationInfo();
     }

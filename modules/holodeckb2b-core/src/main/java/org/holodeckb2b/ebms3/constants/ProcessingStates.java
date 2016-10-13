@@ -18,18 +18,18 @@ package org.holodeckb2b.ebms3.constants;
 
 /**
  * EbMSConstants for describing the processing state of a message.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public final class ProcessingStates {
-    
+
     /**
      * The message unit has been submitted to the Holodeck B2B core. This processing state
      * only applies to user messages as only these can be submitted to the core. Signal messages
      * are <i>created</i> during message processing and therefor start in {@see #CREATED} state.
      */
     public static final String SUBMITTED = "SUBMITTED";
-    
+
     /**
      * The message unit has been created by Holodeck B2B. This processing state only
      * applies to signal messages as these are created by Holodeck B2B in response to
@@ -38,38 +38,38 @@ public final class ProcessingStates {
     public static final String CREATED = "CREATED";
 
     /**
-     * The message unit is waiting to be pulled by another MSH. 
+     * The message unit is waiting to be pulled by another MSH.
      */
     public static final String AWAITING_PULL = "WAITING FOR PULL";
-    
+
     /**
      * The message unit is ready to be pushed to another MSH. Because Holodeck B2B
      * currently first stores messages to the database before starting the send
      * process this is state is introduced.
      */
     public static final String READY_TO_PUSH = "READY TO PUSH";
-    
+
     /**
      * The message unit has just been received by Holodeck B2B and is waiting to
      * be further processed
      */
     public static final String RECEIVED = "RECEIVED";
-    
+
     /**
      * The message unit is currently being processed by Holodeck B2B.
      */
     public static final String PROCESSING = "PROCESSING";
-    
+
     /**
      * The message unit is currently being transferred to the other MSH.
      */
     public static final String SENDING = "SENDING";
-    
+
     /**
      * The user message is waiting for a receipt
      */
     public static final String AWAITING_RECEIPT = "AWAITING RECEIPT";
-    
+
     /**
      * The message unit is successfully delivered
      */
@@ -79,43 +79,43 @@ public final class ProcessingStates {
      * The signal message unit is successfully processed
      */
     public static final String DONE = "DONE";
-    
+
     /**
      * The message unit is processed but an Error with severity <i>warning</i> was reported
      */
     public static final String PROC_WITH_WARNING = "PROCESSED WITH WARNING";
-    
+
     /**
      * The user message is ready to be delivered to the business application
      */
     public static final String READY_FOR_DELIVERY = "READY FOR DELIVERY";
-    
+
     /**
      * The user message is currently being delivered to the business application
      */
     public static final String OUT_FOR_DELIVERY = "OUT FOR DELIVERY";
-    
+
     /**
      * Holodeck B2B has tried to deliver the user message to the business application,
      * but the attempt failed. Now wait for retry or if no retries possible failure.
      */
     public static final String DELIVERY_FAILED = "DELIVERY FAILED";
-   
+
     /**
-     * A problem occurred when the message unit was sent out.  
+     * A problem occurred when the message unit was sent out.
      */
     public static final String TRANSPORT_FAILURE = "TRANSPORT FAILURE";
-    
+
     /**
      * Processing of the message unit failed
      */
     public static final String FAILURE = "FAILURE";
-    
+
     /**
-     * The message unit is a duplicate of an already delivered message unit. 
+     * The message unit is a duplicate of an already delivered message unit.
      */
     public static final String DUPLICATE = "DUPLICATE";
-    
+
     // This class should not be instantiated!
     private ProcessingStates() {}
 }

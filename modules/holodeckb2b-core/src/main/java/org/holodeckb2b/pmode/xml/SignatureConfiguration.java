@@ -22,9 +22,9 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
 /**
- * Represents the <code>SignatureConfiguration</code> element in the P-Mode XML document that contains the P-Mode 
- * parameters for including a WSS signature in the message. 
- * 
+ * Represents the <code>SignatureConfiguration</code> element in the P-Mode XML document that contains the P-Mode
+ * parameters for including a WSS signature in the message.
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
@@ -33,22 +33,22 @@ public class SignatureConfiguration implements ISigningConfiguration {
 
     @Element(name = "KeystoreAlias")
     private KeystoreAlias keyStoreRef;
-    
+
     @Element(name = "enableRevocationCheck", required = false)
     private Boolean enableRevocation = null;
-    
+
     @Element(name = "KeyReferenceMethod", required = false)
     private KeyReferenceMethod keyReferenceMethod;
-    
+
     @Element(name = "IncludeCertificatePath", required = false)
     private Boolean includeCertPath = null;
-    
+
     @Element(name = "Algorithm", required = false)
     private String signatureAlgorithm = null;
-    
+
     @Element(name = "HashFunction", required = false)
     private String hashFunction = null;
-    
+
     @Override
     public String getKeystoreAlias() {
         return keyStoreRef.name;
@@ -68,9 +68,9 @@ public class SignatureConfiguration implements ISigningConfiguration {
     public Boolean includeCertificatePath() {
         return includeCertPath;
     }
-    
+
     @Override
-    public Boolean enableRevocationCheck() {        
+    public Boolean enableRevocationCheck() {
         return enableRevocation;
     }
 
@@ -83,5 +83,5 @@ public class SignatureConfiguration implements ISigningConfiguration {
     public String getHashFunction() {
         return hashFunction;
     }
-    
+
 }

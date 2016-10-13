@@ -16,11 +16,12 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.pmode.xml.UserMessageFlow;
-import java.io.File;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+
+import java.io.File;
+
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -29,73 +30,73 @@ import org.simpleframework.xml.core.Persister;
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 public class UserMessageFlowTest {
-    
+
     public UserMessageFlowTest() {
-        
+
     }
-    
+
         /**
      * Create an UserMessageFlow from file.
-     * 
+     *
      * @param fName The filename for the UserMessageFlow
      * @return UserMessageFlow or NULL in case of an error
      */
-    public UserMessageFlow createFromFile(String fName)  {
+    public UserMessageFlow createFromFile(final String fName)  {
 
         try {
             // retrieve the resource from the pmodetest directory.
-            File f = new File(this.getClass().getClassLoader().getResource("pmodetest/usermessageflow/" + fName).getPath());
+            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/usermessageflow/" + fName).getPath());
 
-            Serializer  serializer = new Persister();
+            final Serializer  serializer = new Persister();
             return serializer.read(UserMessageFlow.class, f);
         }
-        catch (Exception ex) {
+        catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             return null;
         }
     }
-    
+
     /**
      * Test for UserMessageFlow minimal.
      */
     @Test
     public void testUserMessageFlowMinimal() {
-        
+
         try {
-            UserMessageFlow umFlow = createFromFile("userMessageFlowMinimal.xml");
-            
+            final UserMessageFlow umFlow = createFromFile("userMessageFlowMinimal.xml");
+
             // Check UserMessageFlow object
             assertNotNull(umFlow);
-            
-        } catch (Exception ex) {
+
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
         }
-        
-    }    
+
+    }
 
     /**
      * Test for UserMessageFlow full.
      */
     @Test
     public void testUserMessageFlowFull() {
-        
+
         try {
-            UserMessageFlow umFlow = createFromFile("userMessageFlowFull.xml");
-            
+            final UserMessageFlow umFlow = createFromFile("userMessageFlowFull.xml");
+
             // Check UserMessageFlow object
             assertNotNull(umFlow);
             assertNotNull(umFlow.getBusinessInfo());
             assertEquals("StoreMessage", umFlow.getBusinessInfo().getAction());
             assertEquals("Examples", umFlow.getBusinessInfo().getService().getName());
             assertEquals("org:holodeckb2b:services", umFlow.getBusinessInfo().getService().getType());
-            
-        } catch (Exception ex) {
+
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
         }
-        
-    }        
+
+    }
 
 }
 

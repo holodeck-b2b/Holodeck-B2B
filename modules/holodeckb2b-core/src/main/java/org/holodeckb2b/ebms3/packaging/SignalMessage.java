@@ -17,7 +17,9 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import java.util.Iterator;
+
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -25,42 +27,42 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 /**
  * Is a helper class for handling the ebMS <code>eb:SignalMessage</code> element
  * in the ebMS SOAP header.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class SignalMessage {
-    
+
     /**
      * The fully qualified name of the element as an {@link QName}
      */
     static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "SignalMessage");
-    
-    
+
+
     /**
-     * Creates a <code>SignalMessage</code> element and adds it to the given <code>Messaging</code> element. 
-     * 
+     * Creates a <code>SignalMessage</code> element and adds it to the given <code>Messaging</code> element.
+     *
      * @param messaging     The <code>Messaging</code> element this element should be added to
      * @return              The new element
      */
-    public static OMElement createElement(OMElement messaging) {
-        OMFactory f = messaging.getOMFactory();
-        
+    public static OMElement createElement(final OMElement messaging) {
+        final OMFactory f = messaging.getOMFactory();
+
         // Create the element
-        OMElement signalmessage = f.createOMElement(Q_ELEMENT_NAME, messaging);
-        
+        final OMElement signalmessage = f.createOMElement(Q_ELEMENT_NAME, messaging);
+
         return signalmessage;
-    }    
-    
+    }
+
     /**
-     * Gets an {@link Iterator} for the <code>eb:SignalMessage</code> elements 
+     * Gets an {@link Iterator} for the <code>eb:SignalMessage</code> elements
      * from the given ebMS 3 Messaging header in the SOAP message.
-     * 
+     *
      * @param messaging   The SOAP Header block that contains the ebMS header,
      *                    i.e. the <code>eb:Messaging</code> element
-     * @return      An {@link Iterator} for all {@link OMElement}s representing a 
+     * @return      An {@link Iterator} for all {@link OMElement}s representing a
      *              <code>eb:SignalMessage</code> element in the given header
      */
-    public static Iterator<?> getElements(OMElement messaging) {
+    public static Iterator<?> getElements(final OMElement messaging) {
         return messaging.getChildrenWithName(Q_ELEMENT_NAME);
     }
 }

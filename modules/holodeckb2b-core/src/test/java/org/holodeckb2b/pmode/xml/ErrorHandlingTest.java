@@ -16,14 +16,16 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import java.io.File;
-import org.holodeckb2b.interfaces.general.ReplyPattern;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.io.File;
+
+import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -33,20 +35,20 @@ import org.simpleframework.xml.core.Persister;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class ErrorHandlingTest {
-    
+
     public ErrorHandlingTest() {
     }
-    
-    private ErrorHandling createFromFile(String fName) throws Exception {
-    
+
+    private ErrorHandling createFromFile(final String fName) throws Exception {
+
         try {
             // retrieve the resource from the pmodetest directory.
-            File f = new File(this.getClass().getClassLoader().getResource("pmodetest/eh/" + fName).getPath());
-            
-            Serializer  serializer = new Persister();
+            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/eh/" + fName).getPath());
+
+            final Serializer  serializer = new Persister();
             return serializer.read(ErrorHandling.class, f);
         }
-        catch (Exception ex) {
+        catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             return null;
         }
@@ -55,8 +57,8 @@ public class ErrorHandlingTest {
     @Test
     public void testCompleteErrorHandling() {
         try {
-            ErrorHandling eh = createFromFile("completeEH.xml");
-        
+            final ErrorHandling eh = createFromFile("completeEH.xml");
+
             assertNotNull(eh);
             assertEquals(ReplyPattern.CALLBACK, eh.getPattern());
             assertEquals("http://test.holodeck-b2b.org/errors", eh.getReceiverErrorsTo());
@@ -64,20 +66,20 @@ public class ErrorHandlingTest {
             assertTrue(eh.shouldReportErrorOnReceipt());
             assertTrue(eh.shouldAddSOAPFault());
             assertTrue(eh.shouldNotifyErrorToBusinessApplication());
-            
+
             assertNotNull(eh.getErrorDelivery());
             // We do not test for settings of the error delivery as that is already tested separately
-            
-        } catch (Exception e) {
+
+        } catch (final Exception e) {
             fail();
-        }            
+        }
     }
-    
+
     @Test
     public void testEmptyErrorHandling() {
         try {
-            ErrorHandling eh = createFromFile("emptyEH.xml");
-        
+            final ErrorHandling eh = createFromFile("emptyEH.xml");
+
             assertNotNull(eh);
             assertEquals(ReplyPattern.RESPONSE, eh.getPattern());
             assertNull(eh.getReceiverErrorsTo());
@@ -85,29 +87,29 @@ public class ErrorHandlingTest {
             assertNull(eh.shouldReportErrorOnReceipt());
             assertFalse(eh.shouldAddSOAPFault());
             assertFalse(eh.shouldNotifyErrorToBusinessApplication());
-            
-            assertNull(eh.getErrorDelivery());            
-        } catch (Exception e) {
+
+            assertNull(eh.getErrorDelivery());
+        } catch (final Exception e) {
             fail();
-        }            
+        }
     }
-    
+
     @Test
     public void testNoURLForCallback() {
         try {
-            ErrorHandling eh = createFromFile("noURL-callbackEH.xml");
+            final ErrorHandling eh = createFromFile("noURL-callbackEH.xml");
             // Reading the document should fail because there is no reply URL
             assertNull(eh);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             fail();
-        }           
+        }
     }
 
     @Test
     public void testDeliveryOnly() {
         try {
-            ErrorHandling eh = createFromFile("deliveryOnly_EH.xml");
-        
+            final ErrorHandling eh = createFromFile("deliveryOnly_EH.xml");
+
             assertNotNull(eh);
             assertEquals(ReplyPattern.RESPONSE, eh.getPattern());
             assertNull(eh.getReceiverErrorsTo());
@@ -115,10 +117,10 @@ public class ErrorHandlingTest {
             assertNull(eh.shouldReportErrorOnReceipt());
             assertFalse(eh.shouldAddSOAPFault());
             assertFalse(eh.shouldNotifyErrorToBusinessApplication());
-            
-            assertNotNull(eh.getErrorDelivery());            
-        } catch (Exception e) {
+
+            assertNotNull(eh.getErrorDelivery());
+        } catch (final Exception e) {
             fail();
-        }            
+        }
     }
 }

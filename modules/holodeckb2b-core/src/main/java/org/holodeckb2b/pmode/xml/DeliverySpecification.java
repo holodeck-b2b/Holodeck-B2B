@@ -19,6 +19,7 @@ package org.holodeckb2b.pmode.xml;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
@@ -29,16 +30,16 @@ import org.simpleframework.xml.Transient;
 
 /**
  * Represents XML elements in the P-Mode document with type <code>DeliverySpecification</code>. Elements from this type
- * are used to specify how message units must be delivered to the connected business application. The delivery 
- * specification consist of a class name, in element <code>DeliveryMethod</code> that identifies the factory class that 
+ * are used to specify how message units must be delivered to the connected business application. The delivery
+ * specification consist of a class name, in element <code>DeliveryMethod</code> that identifies the factory class that
  * can create the actual deliverers. As the message deliverer may need configuration the delivery specification element
- * may contain one or more <code>Parameter</code> elements. These consist of name value pairs and will be passed to the 
+ * may contain one or more <code>Parameter</code> elements. These consist of name value pairs and will be passed to the
  * factory.
  * <p>Delivery specifications are cached by the Holodeck B2B Core and therefore need to be uniquely identified. For this
  * identification the P-Mode id is used in combination with the delivery type (default, receipt or error). Because the
- * class does not know for which type of delivery it is used the class representing the parent element is responsible 
+ * class does not know for which type of delivery it is used the class representing the parent element is responsible
  * for setting the id.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see IMessageDelivererFactory
  * @see IMessageDeliverer
@@ -47,20 +48,20 @@ public class DeliverySpecification implements IDeliverySpecification {
 
     @Element(name = "DeliveryMethod", required = true)
     private String  delivererFactoryClass;
-    
+
     @ElementList(entry = "Parameter", inline = true, required = false)
     private Collection<Property>    parameters;
-    
+
     // The id of the delivery specification is not from the XML, but set based on the P-Mode id and type of delivery
     @Transient
     private String id;
-    
+
     @Override
     public String getId() {
         return id;
     }
-    
-    public void setId(String newId) {
+
+    public void setId(final String newId) {
         this.id = newId;
     }
 
@@ -72,12 +73,12 @@ public class DeliverySpecification implements IDeliverySpecification {
     @Override
     public Map<String, ?> getSettings() {
         if (!Utils.isNullOrEmpty(parameters)) {
-            HashMap<String, String>  settings = new HashMap<String, String>();
-            for (Property p : parameters)
+            final HashMap<String, String>  settings = new HashMap<>();
+            for (final Property p : parameters)
                 settings.put(p.getName(), p.getValue());
 
             return settings;
         } else
-            return null;        
+            return null;
     }
 }

@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -37,6 +38,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
@@ -45,9 +47,9 @@ import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 
 /**
- * Is the JPA entity class representing an ebMS <b>User Message</b> message unit that is processed by Holodeck B2B. 
+ * Is the JPA entity class representing an ebMS <b>User Message</b> message unit that is processed by Holodeck B2B.
  * <p>Extends {@link MessageUnit} and adds the meta-data specific to the user message. Also four queries are defined:
- * <ul><li><i>UserMessage.isDelivered</i> to check whether a User Message is delivered to the <i>Consumer</i> 
+ * <ul><li><i>UserMessage.isDelivered</i> to check whether a User Message is delivered to the <i>Consumer</i>
  *              application, i.e. its current processing state is {@link ProcessingStates#DELIVERED}</li>
  * <li><i>UserMessage.numOfTransmits</i> to retrieve the number of times the message was sent to the receiving MSH, i.e.
  *              the number of times the {@link ProcessingStates#SENDING} occurs as processing state. The result will
@@ -56,7 +58,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
  *              are processed by one of the given P-Modes</i>
  * <li><i>UserMessage.findResponsesTo</i> finds all User Messages that are a response to another User Message, i.e.
  *              which refer to the given message id.</li></ul>
- *              
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 @Entity
@@ -64,29 +66,29 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
 @DiscriminatorValue("USERMSG")
 @NamedQueries({
         @NamedQuery(name="UserMessage.isDelivered",
-            query = "SELECT 'true' " 
+            query = "SELECT 'true' "
                     + "FROM UserMessage um JOIN um.states s1 "
                     + "WHERE um.MESSAGE_ID = :msgId "
-                    + "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM um.states s2) " 
+                    + "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM um.states s2) "
                     + "AND s1.NAME = '" + ProcessingStates.DELIVERED + "'"
             ),
         @NamedQuery(name="UserMessage.numOfTransmits",
             query = "SELECT COUNT(s1.NAME) "
-                    + "FROM UserMessage um JOIN um.states s1 " 
-                    + "WHERE um.MESSAGE_ID = :msgId " 
+                    + "FROM UserMessage um JOIN um.states s1 "
+                    + "WHERE um.MESSAGE_ID = :msgId "
                     + "AND s1.NAME = '" + ProcessingStates.SENDING + "'"
             ),
         @NamedQuery(name="UserMessage.findResponsesTo",
             query = "SELECT um " +
                     "FROM UserMessage um " +
-                    "WHERE um.REF_TO_MSG_ID = :refToMsgId " 
+                    "WHERE um.REF_TO_MSG_ID = :refToMsgId "
             )
         }
 )
 public class UserMessage extends MessageUnit implements org.holodeckb2b.interfaces.messagemodel.IUserMessage {
-    
+
     private enum PartnerType { SENDER, RECEIVER }
-    
+
     /*
      * Getters and setters
      */
@@ -94,8 +96,8 @@ public class UserMessage extends MessageUnit implements org.holodeckb2b.interfac
     public String getMPC() {
         return MPC;
     }
-    
-    public void setMPC(String mpc) {
+
+    public void setMPC(final String mpc) {
         // If no MPC is given automatically assign the default one
         if (mpc == null || mpc.isEmpty())
             MPC = EbMSConstants.DEFAULT_MPC;
@@ -107,8 +109,8 @@ public class UserMessage extends MessageUnit implements org.holodeckb2b.interfac
     public ITradingPartner getSender() {
         return partners.get(PartnerType.SENDER);
     }
-    
-    public void setSender(TradingPartner sender) {
+
+    public void setSender(final TradingPartner sender) {
         partners.put(PartnerType.SENDER, sender);
     }
 
@@ -117,7 +119,7 @@ public class UserMessage extends MessageUnit implements org.holodeckb2b.interfac
         return partners.get(PartnerType.RECEIVER);
     }
 
-    public void setReceiver(TradingPartner receiver) {
+    public void setReceiver(final TradingPartner receiver) {
         partners.put(PartnerType.RECEIVER, receiver);
     }
 
@@ -125,8 +127,8 @@ public class UserMessage extends MessageUnit implements org.holodeckb2b.interfac
     public ICollaborationInfo getCollaborationInfo() {
         return collaborationInfo;
     }
-    
-    public void setCollaborationInfo(CollaborationInfo info) {
+
+    public void setCollaborationInfo(final CollaborationInfo info) {
         this.collaborationInfo = info;
     }
 
@@ -134,58 +136,58 @@ public class UserMessage extends MessageUnit implements org.holodeckb2b.interfac
     public Collection<IProperty> getMessageProperties() {
         return properties;
     }
-    
-    public void setMessageProperties(Collection<Property> props) {
+
+    public void setMessageProperties(final Collection<Property> props) {
         if ( props == null || props.isEmpty()) {
             properties = null;
         } else {
-            properties = new ArrayList<IProperty>();
+            properties = new ArrayList<>();
             properties.addAll(props);
-        } 
+        }
     }
 
-    public void addMessageProperty(Property p) {
+    public void addMessageProperty(final Property p) {
         if (properties == null)
-            properties = new ArrayList<IProperty>();
+            properties = new ArrayList<>();
         properties.add(p);
     }
-    
+
     @Override
     public Collection<IPayload> getPayloads() {
         return payloads;
     }
-    
-    public void setPayloads(Collection<Payload> pls) {
+
+    public void setPayloads(final Collection<Payload> pls) {
         if (payloads == null)
-            payloads = new ArrayList<IPayload>();
+            payloads = new ArrayList<>();
         payloads.clear();
         payloads.addAll(pls);
     }
-    
-    public void addPayload(Payload p) {
+
+    public void addPayload(final Payload p) {
         if (payloads == null)
-            payloads = new ArrayList<IPayload>();
+            payloads = new ArrayList<>();
         payloads.add(p);
     }
-    
+
     /*
      * Constructors
      */
     public UserMessage() {
         super();
-        
-        this.partners = new HashMap<PartnerType, TradingPartner>();
+
+        this.partners = new HashMap<>();
     }
-            
+
     /*
      * Fields
-     * 
-     * NOTES: 
-     * 1) The JPA @Column annotation is not used so the attribute names are 
+     *
+     * NOTES:
+     * 1) The JPA @Column annotation is not used so the attribute names are
      * used as column names. Therefor the attribute names are in CAPITAL.
      * 2) The primary key field is inherited from super class
      */
-    
+
     /**
      * If no specific MPC is assigned to the user message the default MPC is assumed.
      */
@@ -194,18 +196,18 @@ public class UserMessage extends MessageUnit implements org.holodeckb2b.interfac
     private String              MPC = EbMSConstants.DEFAULT_MPC;
 
     /**
-     * A user message is always associated with two trading partners, one sending and one receiving the message. We use 
+     * A user message is always associated with two trading partners, one sending and one receiving the message. We use
      * a map with an enumeration to identify whether the partner is the sender or receiver.
      */
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name="UM_PARTNERS")
     @MapKeyColumn(name="PARTNERTYPE")
     @MapKeyEnumerated(EnumType.STRING)
-    private Map<PartnerType, TradingPartner>      partners;
-    
+    private final Map<PartnerType, TradingPartner>      partners;
+
     @Embedded
     private CollaborationInfo   collaborationInfo;
-    
+
     /*
      * The business data is exchanged through payloads included in the user message. So
      * normally each user message will contain one or more payload with the business data.
@@ -213,10 +215,10 @@ public class UserMessage extends MessageUnit implements org.holodeckb2b.interfac
      */
     @OneToMany(targetEntity = Payload.class, cascade = CascadeType.ALL)
     private List<IPayload>       payloads;
-    
+
     /*
-     * A user message can contain an unlimited number of properties, but they 
-     * are all specific to one user meesage. 
+     * A user message can contain an unlimited number of properties, but they
+     * are all specific to one user meesage.
      */
     @ElementCollection(targetClass = Property.class)
     @CollectionTable(name="UM_PROPERTIES")

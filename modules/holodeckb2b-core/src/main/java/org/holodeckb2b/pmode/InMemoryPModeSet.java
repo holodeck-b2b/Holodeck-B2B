@@ -20,14 +20,15 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
 
 /**
- * Is the default implementation of {@link IPModeSet} that maintains the set of P-Modes in memory. 
- * 
+ * Is the default implementation of {@link IPModeSet} that maintains the set of P-Modes in memory.
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class InMemoryPModeSet implements IPModeSet {
@@ -35,26 +36,26 @@ public class InMemoryPModeSet implements IPModeSet {
     /**
      * The actual storage of the P-Mode set, for easy access on PMode.id we use a HashMap
      */
-    private HashMap<String, IPMode>     pmodeSet = new HashMap<String, IPMode>();
-    
+    private HashMap<String, IPMode>     pmodeSet = new HashMap<>();
+
     @Override
     @Deprecated
     public String[] listPModeIds() {
-        String[]    pmodeIds = new String[pmodeSet.size()];
-        
+        final String[]    pmodeIds = new String[pmodeSet.size()];
+
         // Copy all ids to an array
         int i = 0;
-        for (String id : pmodeSet.keySet())
+        for (final String id : pmodeSet.keySet())
             pmodeIds[i++] = id;
-        
+
         return pmodeIds;
     }
 
     @Override
-    public IPMode get(String id) {
+    public IPMode get(final String id) {
         if (this.containsId(id))
             return pmodeSet.get(id);
-        else 
+        else
             return null;
     }
 
@@ -64,51 +65,48 @@ public class InMemoryPModeSet implements IPModeSet {
     }
 
     @Override
-    public boolean containsId(String id) {
+    public boolean containsId(final String id) {
         return (pmodeSet.keySet() != null ? pmodeSet.keySet().contains(id) : false);
     }
 
     @Override
-    public String add(IPMode pmode) throws PModeSetException {
+    public String add(final IPMode pmode) throws PModeSetException {
         // Check whether the provided P-Mode has been assigned an id
         String pmodeId = pmode.getId();
-            
+
         if (Utils.isNullOrEmpty(pmodeId)) {
             // No id provided, generate one now
             pmodeId = generatePModeId(pmode);
         }
-        
+
         synchronized (this.pmodeSet) {
-            if (pmodeSet == null)
-                pmodeSet = new HashMap<String, IPMode>();
-            
             // Ensure that the P-Mode id is unique and does not already exist
             if (pmodeSet.containsKey(pmodeId))
                 throw new PModeSetException("A P-Mode with id " + pmodeId + " already exists!");
-            
+
             pmodeSet.put(pmodeId, pmode);
-            
+
             return pmodeId;
-        }        
+        }
     }
 
     @Override
-    public void replace(IPMode pmode) throws PModeSetException {
-        String pmodeId = pmode.getId();
+    public void replace(final IPMode pmode) throws PModeSetException {
+        final String pmodeId = pmode.getId();
         // The given P-Mode must contain an id
         if (Utils.isNullOrEmpty(pmodeId))
             throw new PModeSetException("The P-Mode MUST have an id!");
-            
+
         synchronized (this.pmodeSet) {
-            if (!containsId(pmodeId)) 
+            if (!containsId(pmodeId))
                 throw new PModeSetException("There is no P-Mode with the given id!");
-            
+
             this.pmodeSet.put(pmodeId, pmode);
         }
     }
 
     @Override
-    public void remove(String id) throws PModeSetException {
+    public void remove(final String id) throws PModeSetException {
         if (containsId(id)) {
             synchronized (this.pmodeSet) {
                 this.pmodeSet.remove(id);
@@ -118,27 +116,27 @@ public class InMemoryPModeSet implements IPModeSet {
 
     @Override
     public void removeAll() throws PModeSetException {
-        this.pmodeSet = new HashMap<String, IPMode>();
+        this.pmodeSet = new HashMap<>();
     }
 
     /**
      * Helper method to create a unique P-Mode id when no id is specified when adding a P-Mode
-     * 
+     *
      * @param pmode The P-Mode to generate the id for
      * @return The new id which is guaranteed to be unique in the current set
      */
     private String generatePModeId(final IPMode pmode) {
-        StringBuffer pmodeId = new StringBuffer("pm-");
-        
+        final StringBuffer pmodeId = new StringBuffer("pm-");
+
         // For now we just use an id based on the current time and a sequence number
         pmodeId.append(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()));
-        pmodeId.append('-');                
+        pmodeId.append('-');
         int i = 0;
         while (this.containsId(pmodeId.toString() + i))
-            i += 1;        
+            i += 1;
         pmodeId.append(i);
-            
+
         return pmodeId.toString();
     }
-    
+
 }

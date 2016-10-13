@@ -17,7 +17,9 @@
 package org.holodeckb2b.common.workerpool;
 
 import static java.lang.Thread.sleep;
+
 import java.util.Map;
+
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
@@ -27,20 +29,20 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 public class ProducingWorker extends AbstractWorkerTask {
 
     @Override
-    public void setParameters(Map<String, ?> parameters) throws TaskConfigurationException {
+    public void setParameters(final Map<String, ?> parameters) throws TaskConfigurationException {
         return;
     }
 
     @Override
     public void doProcessing() throws InterruptedException {
-        
+
         for(int i=0; i < 50000;i++) {
             WaitingWorker.workQueue.put("New task " + i + " ready");
 
             sleep(125);
         }
-        
+
     }
-            
-    
+
+
 }

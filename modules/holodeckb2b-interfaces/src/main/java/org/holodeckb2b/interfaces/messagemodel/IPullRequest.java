@@ -18,9 +18,9 @@ package org.holodeckb2b.interfaces.messagemodel;
 
 /**
  * Represents the information available of the PullRequest type of signal message.
- * <p>The only information contained in a PullRequest is the <i>MPC</i> (message partition channel) the message should 
+ * <p>The only information contained in a PullRequest is the <i>MPC</i> (message partition channel) the message should
  * be pulled from. See section 3 of the ebMS Core Specification for more information on the concept of pulling.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see IMessageUnit
  */
@@ -29,7 +29,7 @@ public interface IPullRequest extends ISignalMessage {
     /**
      * Gets the MPC that is included in the <code>PullRequest</code>.
      * <p>Corresponds to the <code>//eb:PullRequest/@mpc</code>. See section 5.2.3.1 of the ebMS Core Specification.
-     * 
+     *
      * @return      The MPC from which a message should be pulled
      */
     String getMPC();

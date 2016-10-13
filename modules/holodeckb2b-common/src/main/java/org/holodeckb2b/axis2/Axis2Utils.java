@@ -16,15 +16,18 @@
  */
 package org.holodeckb2b.axis2;
 
+import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.UUID;
+
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPModelBuilder;
 import org.apache.axis2.AxisFault;
-import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.description.AxisService;
@@ -44,20 +47,20 @@ public final class Axis2Utils {
      * Name for the anonymous AxisService that uses correct Axis2 operation
      */
     private static final String HB2B_ANON_SVC = "hb2b:axis2utils:anon_svc";
-    
+
     /**
      * Creates the {@link MessageContext} for the response to message currently being processed.
      *
      * @param reqContext The MessageContext of the received message
      * @return The MessageContext for the response message
      */
-    public static MessageContext createResponseMessageContext(MessageContext reqContext) {
+    public static MessageContext createResponseMessageContext(final MessageContext reqContext) {
 
         try {
             MessageContext resCtx = null;
 
             // First try to get the context for the response from the OperationContext
-            OperationContext opContext = reqContext.getOperationContext();
+            final OperationContext opContext = reqContext.getOperationContext();
             if (opContext != null) {
                 resCtx = opContext.getMessageContext(WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
             }
@@ -69,7 +72,7 @@ public final class Axis2Utils {
             }
 
             return resCtx;
-        } catch (AxisFault af) {
+        } catch (final AxisFault af) {
             // Somewhere the construction of the new MessageContext failed
             return null;
         }
@@ -82,16 +85,16 @@ public final class Axis2Utils {
      * @return A {@link Document} object that represents to the SOAP envelope element contained in the message, or<br>
      * <code>null</code> when the SOAP envelope can not be converted to a standard DOM representation
      */
-    public static Document convertToDOM(MessageContext mc) {
+    public static Document convertToDOM(final MessageContext mc) {
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             mc.getEnvelope().serialize(baos);
-            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             return factory.newDocumentBuilder().parse(bais);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // If anything goes wrong converting the document, just return null
             return null;
         }
@@ -104,17 +107,17 @@ public final class Axis2Utils {
      * @return An {@link SOAPEnvelope} object containing the Axiom representation of the SOAP envelope, or <br>
      * <code>null</code> if the conversion fails
      */
-    public static SOAPEnvelope convertToAxiom(Document document) {
+    public static SOAPEnvelope convertToAxiom(final Document document) {
         try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            final ByteArrayOutputStream os = new ByteArrayOutputStream();
             XMLUtils.outputDOM(document.getDocumentElement(), os, true);
-            ByteArrayInputStream bais = new ByteArrayInputStream(os.toByteArray());
+            final ByteArrayInputStream bais = new ByteArrayInputStream(os.toByteArray());
 
-            SOAPModelBuilder stAXSOAPModelBuilder = OMXMLBuilderFactory.createSOAPModelBuilder(bais, null);
-            SOAPEnvelope env = stAXSOAPModelBuilder.getSOAPEnvelope();
+            final SOAPModelBuilder stAXSOAPModelBuilder = OMXMLBuilderFactory.createSOAPModelBuilder(bais, null);
+            final SOAPEnvelope env = stAXSOAPModelBuilder.getSOAPEnvelope();
             env.build();
             return env;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // If anything goes wrong converting the document, just return null
             return null;
         }
@@ -126,11 +129,11 @@ public final class Axis2Utils {
      * @return The configured anonymous service
      */
     public static AxisService createAnonymousService() {
-        AxisService axisService = new AxisService(HB2B_ANON_SVC + ":" + UUID.randomUUID());
+        final AxisService axisService = new AxisService(HB2B_ANON_SVC + ":" + UUID.randomUUID());
 
-        OutOptInAxisOperation outInOperation = new OutOptInAxisOperation(ANON_OUT_IN_OP);
+        final OutOptInAxisOperation outInOperation = new OutOptInAxisOperation(ANON_OUT_IN_OP);
         axisService.addOperation(outInOperation);
-        
+
         return axisService;
-    }    
+    }
 }

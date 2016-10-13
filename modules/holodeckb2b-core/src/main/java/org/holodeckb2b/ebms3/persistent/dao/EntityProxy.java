@@ -19,21 +19,21 @@ package org.holodeckb2b.ebms3.persistent.dao;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 
 /**
- * Is a <i>proxy</i> to an JPA entity class for message units as defined in {@link 
+ * Is a <i>proxy</i> to an JPA entity class for message units as defined in {@link
  * org.holodeckb2b.ebms3.persistency.entities}. This proxy class is used to enable one constant object in the <code>
- * MessageContext</code> even when the JPA object changes on updates to the database. 
- * 
+ * MessageContext</code> even when the JPA object changes on updates to the database.
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @param <T>   The {@link MessageUnit} entity class for which the instance is a facade
  */
 public class EntityProxy<T extends MessageUnit> {
-    
+
     /**
      * The JPA entity object itself
      */
     public T   entity;
 
-    EntityProxy(T entityObject) {
+    EntityProxy(final T entityObject) {
         this.entity = entityObject;
     }
 }

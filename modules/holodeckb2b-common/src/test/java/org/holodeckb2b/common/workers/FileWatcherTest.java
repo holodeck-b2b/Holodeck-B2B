@@ -16,16 +16,18 @@
  */
 package org.holodeckb2b.common.workers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,34 +36,34 @@ import org.junit.Test;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class FileWatcherTest {
-    
+
     FileWatcherImpl instance;
-    
+
     String testFile = null;
-    
+
     public FileWatcherTest() {
     }
-    
+
     @Before
     public void setUp() {
         instance = new FileWatcherImpl();
-        String basePath = this.getClass().getClassLoader().getResource("filewatcher").getPath();
+        final String basePath = this.getClass().getClassLoader().getResource("filewatcher").getPath();
         testFile = basePath + "/testfile.tst";
-        
-        Map<String, String> param = new HashMap<String, String>();
+
+        final Map<String, String> param = new HashMap<>();
         param.put("watchPath", testFile);
-        
+
         try {
             instance.setParameters(param);
-        } catch (TaskConfigurationException ex) {
+        } catch (final TaskConfigurationException ex) {
             Logger.getLogger(FileWatcherTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         }
-        
+
         try {
-            File f = new File(testFile);
+            final File f = new File(testFile);
             f.delete();
-        } catch (Exception e ) {
+        } catch (final Exception e ) {
         }
     }
 
@@ -71,7 +73,7 @@ public class FileWatcherTest {
     @Test
     public void testFileNotExisting() {
         instance.run();
-        assertNull(instance.e);        
+        assertNull(instance.e);
     }
 
     /**
@@ -81,24 +83,25 @@ public class FileWatcherTest {
     public void testFileCreated() {
         instance.run();
         assertNull(instance.e);
-        
+
         try {
-            File f = new File(testFile);
-            FileWriter fo = new FileWriter(f);
-            fo.write("Just a test");
-            fo.close();
-            
+            final File f = new File(testFile);
+            try (final FileWriter fo = new FileWriter(f))
+            {
+                 fo.write("Just a test");
+            }
+
             instance.run();
-            
+
             assertEquals(PathWatcher.Event.ADDED, instance.e);
-        
+
             f.delete();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             fail();
         }
     }
-    
+
     /**
      * Test of file deletion
      */
@@ -106,22 +109,23 @@ public class FileWatcherTest {
     public void testFileDeleted() {
         instance.run();
         assertNull(instance.e);
-        
+
         try {
-            File f = new File(testFile);
-            FileWriter fo = new FileWriter(f);
-            fo.write("Just a test");
-            fo.close();
-            
+            final File f = new File(testFile);
+            try (final FileWriter fo = new FileWriter(f))
+            {
+                fo.write("Just a test");
+            }
+
             instance.run();
             assertEquals(PathWatcher.Event.ADDED, instance.e);
-        
+
             f.delete();
-            
+
             instance.run();
             assertEquals(PathWatcher.Event.REMOVED, instance.e);
-        
-        } catch (Exception e) {
+
+        } catch (final Exception e) {
             e.printStackTrace();
             fail();
         }
@@ -134,50 +138,52 @@ public class FileWatcherTest {
     public void testFileChanged() {
         instance.run();
         assertNull(instance.e);
-        
+
         try {
-            File f = new File(testFile);
-            FileWriter fo = new FileWriter(f);
-            fo.write("Just a test");
-            fo.close();
-            
+            final File f = new File(testFile);
+            try (final FileWriter fo = new FileWriter(f))
+            {
+                fo.write("Just a test");
+            }
+
             instance.run();
             assertEquals(PathWatcher.Event.ADDED, instance.e);
-            
+
             Thread.sleep(1000); // This sleep is necessary because changes might otherwise not be detected!
-            
-            fo = new FileWriter(f);
-            fo.write("Just a test 2");
-            fo.close();
-            
+
+            try (final FileWriter fo = new FileWriter(f))
+            {
+                fo.write("Just a test 2");
+            }
+
             instance.run();
             assertEquals(PathWatcher.Event.CHANGED, instance.e);
-        
+
             f.delete();
-            
-        } catch (Exception e) {
+
+        } catch (final Exception e) {
             e.printStackTrace();
             fail();
         }
     }
 
-    
+
     public class FileWatcherImpl extends FileWatcher {
-        
+
         Event   e = null;
-        
+
         @Override
         public void run() {
             e = null;
-            
+
             super.run();
         }
-        
+
         @Override
-        protected void onChange(File f, Event event) {
+        protected void onChange(final File f, final Event event) {
             e = event;
         }
-        
+
     }
-    
+
 }

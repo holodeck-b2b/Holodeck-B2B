@@ -16,12 +16,13 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.pmode.xml.PullRequestFlow;
-import java.io.File;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+
+import java.io.File;
+
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -31,27 +32,27 @@ import org.simpleframework.xml.core.Persister;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class PullRequestFlowTest {
-    
+
     public PullRequestFlowTest() {
     }
 
     /**
      * Create an PullRequestFlow from file.
-     * 
+     *
      * @param fName The filename for the PullRequestFlow
      * @return PullRequestFlow or NULL in case of an error
-     * @throws Exception 
+     * @throws Exception
      */
-    private PullRequestFlow createFromFile(String fName) throws Exception {
-    
+    private PullRequestFlow createFromFile(final String fName) throws Exception {
+
         try {
             // retrieve the resource from the pmodetest directory.
-            File f = new File(this.getClass().getClassLoader().getResource("pmodetest/prf/" + fName).getPath());
-            
-            Serializer  serializer = new Persister();
+            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/prf/" + fName).getPath());
+
+            final Serializer  serializer = new Persister();
             return serializer.read(PullRequestFlow.class, f);
         }
-        catch (Exception ex) {
+        catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             return null;
         }
@@ -60,46 +61,46 @@ public class PullRequestFlowTest {
     @Test
     public void testCompletePullRequestFlow() {
         try {
-            PullRequestFlow prf = createFromFile("complete_PRF.xml");
-        
+            final PullRequestFlow prf = createFromFile("complete_PRF.xml");
+
             assertNotNull(prf);
             assertEquals("http://test.holodeck-b2b.org/mpc/0", prf.getMPC());
-            
+
             // We only check that error handling and security configuration were there, content is tested in separate
             // tests
             assertNotNull(prf.getErrorHandlingConfiguration());
             assertNotNull(prf.getSecurityConfiguration());
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
-        }        
+        }
     }
-    
+
     @Test
     public void testEmptyPullRequestFlow() {
         try {
-            PullRequestFlow prf = createFromFile("empty_PRF.xml");
-        
+            final PullRequestFlow prf = createFromFile("empty_PRF.xml");
+
             assertNull(prf);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
-        }                
+        }
     }
-    
+
     @Test
     public void testMinimalPullRequestFlow() {
         try {
-            PullRequestFlow prf = createFromFile("minimal_PRF.xml");
-        
+            final PullRequestFlow prf = createFromFile("minimal_PRF.xml");
+
             assertNotNull(prf);
             assertEquals("http://test.holodeck-b2b.org/mpc/0", prf.getMPC());
-            
+
             assertNull(prf.getErrorHandlingConfiguration());
             assertNull(prf.getSecurityConfiguration());
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
-        }        
-    }  
+        }
+    }
 }

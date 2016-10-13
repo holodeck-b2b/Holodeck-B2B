@@ -22,42 +22,42 @@ import org.simpleframework.xml.Text;
 
 /**
  * Represents a <code>Property</code> element in the MMD document.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class Property implements IProperty {
-    
+
     @Text
     private String  value;
-            
+
     @Attribute(name = "name", required = true)
     private String  name;
-    
+
     @Attribute(name = "type", required = false)
     private String  type;
-    
+
     /**
      * Default constructor
      */
     public Property() {}
-    
+
     /**
      * Creates a new <code>Property</code> object based on the given data
-     * 
+     *
      * @param p     The property info to use
      */
-    public Property(IProperty p) {
+    public Property(final IProperty p) {
         this.value = p.getValue();
         this.name = p.getName();
-        this.type = p.getType();                
+        this.type = p.getType();
     }
 
     @Override
     public String getName() {
         return name;
     }
-    
-    public void setName(String name) {
+
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -65,8 +65,8 @@ public class Property implements IProperty {
     public String getValue() {
         return value;
     }
-    
-    public void setValue(String value) {
+
+    public void setValue(final String value) {
         this.value = value;
     }
 
@@ -74,8 +74,8 @@ public class Property implements IProperty {
     public String getType() {
         return type;
     }
-    
-    public void setType(String type) {
+
+    public void setType(final String type) {
         this.type = type;
     }
 }

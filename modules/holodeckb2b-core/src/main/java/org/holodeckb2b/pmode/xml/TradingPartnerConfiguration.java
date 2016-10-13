@@ -19,6 +19,7 @@ package org.holodeckb2b.pmode.xml;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
@@ -36,19 +37,19 @@ import org.simpleframework.xml.core.Validate;
  * <p>Although the ebMS specification suggests that the security settings can be specified on the message unit level
  * it is assumed in Holodeck B2B that the security is specified on the trading partner level and that all messages from
  * one trading partner within an exchange use the same security settings.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 @Root
 public class TradingPartnerConfiguration implements ITradingPartnerConfiguration {
-    
+
     /*
      * The list of PartyIds that identify this trading partner. When used all PartyIds from the child elements will be
-     * included the User Message. If the submitter should be able to set the PartyId, don't include this element 
+     * included the User Message. If the submitter should be able to set the PartyId, don't include this element
      */
     @ElementList(entry = "PartyId", type = PartyId.class , required = false, inline = true)
     private ArrayList<IPartyId> partyIds;
-    
+
     /*
      * Optionally a <i>role</i> might be provided
      */
@@ -56,7 +57,7 @@ public class TradingPartnerConfiguration implements ITradingPartnerConfiguration
     private String role;
 
     /**
-     * The security settings used by the trading partner 
+     * The security settings used by the trading partner
      */
     @Element(name="SecurityConfiguration", required = false)
     private SecurityConfiguration   securityConfig;
@@ -64,7 +65,7 @@ public class TradingPartnerConfiguration implements ITradingPartnerConfiguration
     /**
      * Checks that the trading partner configuration included in the P-Mode XML document includes at least a PartyId or
      * security configuration.
-     * 
+     *
      * @throws PersistenceException     When neither PartyId or security configuration is included in the XML document
      */
     @Validate
@@ -72,17 +73,17 @@ public class TradingPartnerConfiguration implements ITradingPartnerConfiguration
         if (Utils.isNullOrEmpty(partyIds) && securityConfig == null)
             throw new PersistenceException("Either one or more PartyIds or the security configuration must be included");
     }
-    
+
     /**
      * Get the TradingPartner party id's.
-     * 
+     *
      * @return  Collection of Part id's.
      */
     @Override
     public Collection<IPartyId> getPartyIds() {
         return partyIds;
     }
-    
+
     /**
      * Get the TradingPartner role.
      * @return String The role of the TradingPartner.

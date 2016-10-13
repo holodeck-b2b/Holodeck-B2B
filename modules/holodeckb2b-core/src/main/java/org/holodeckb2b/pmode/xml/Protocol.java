@@ -18,35 +18,67 @@ package org.holodeckb2b.pmode.xml;
 
 import org.holodeckb2b.interfaces.pmode.IProtocol;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.core.PersistenceException;
+import org.simpleframework.xml.core.Validate;
 
 /**
  *
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 public class Protocol implements IProtocol {
-    
+
     @Element (name = "Address", required = false)
-    private String address = "";
-    
+    private String address;
+
+    @Element (name = "AddActorOrRoleAttribute", required = false)
+    private Boolean shouldshouldAddActorOrRoleAttribute;
+
     @Element (name = "UseChunking" , required = false)
     private Boolean chunked = false;
-    
+
     @Element (name = "SoapVersion", required = false)
     private String soapVersion = "1.2";
 
     @Element (name = "UseHTTPCompression", required = false)
     private Boolean useHTTPCompression = false;
-    
+
+
+    /**
+     * Validates the read XML structure. The only restriction is that <i>Address</i> must be specified when the
+     * </i>AddActorOrRoleAttribute</i> is set.
+     *
+     * @throws PersistenceException     When no URL is provided for <i>Address</i> when the
+     *                                  </i>AddActorOrRoleAttribute</i> is set.
+     */
+    @Validate
+    public void validate() throws PersistenceException {
+        if (shouldshouldAddActorOrRoleAttribute != null
+          && (address == null || address.isEmpty()))
+            throw new PersistenceException("Address must be specified if AddActorOrRoleAttribute is set");
+    }
+
      /**
      * Gets the protocol address
-     * 
+     *
      * @return The protocol address
      */
     @Override
     public String getAddress() {
         return this.address;
     }
-    
+
+    /**
+     * Gets the indication whether the ebMS header must be targeted a SOAP role for multi-hop messaging.
+     *
+     * @return True if header should be targeted, false otherwise
+     */
+    @Override
+    public boolean shouldAddActorOrRoleAttribute() {
+        return (this.shouldshouldAddActorOrRoleAttribute != null ?
+                    this.shouldshouldAddActorOrRoleAttribute.booleanValue() : false);
+    }
+
+
     /**
      * Get the value for the chunking parameter.
      * @return True if the HTTP message is chunked, otherwise false.
@@ -55,17 +87,17 @@ public class Protocol implements IProtocol {
     public boolean useChunking() {
         return this.chunked;
     }
-    
+
     /**
      * Gets the soap version
-     * 
+     *
      * @return The soap version
      */
     @Override
     public String getSOAPVersion() {
         return this.soapVersion;
     }
-   
+
     /**
      * Check if HTTP compression is used.
      * @return  Boolean value indicating if HTTP compression is used or not.
@@ -74,5 +106,5 @@ public class Protocol implements IProtocol {
     public boolean useHTTPCompression() {
         return this.useHTTPCompression;
     }
- 
+
 }

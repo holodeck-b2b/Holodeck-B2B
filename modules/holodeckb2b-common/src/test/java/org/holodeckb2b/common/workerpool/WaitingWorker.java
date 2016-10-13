@@ -17,9 +17,12 @@
 package org.holodeckb2b.common.workerpool;
 
 import static java.lang.Thread.sleep;
+
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
@@ -28,32 +31,29 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  */
 public class WaitingWorker extends AbstractWorkerTask {
 
-    public static BlockingQueue<String>     workQueue = new LinkedBlockingQueue<String>();
-    
-    static String metaphore = "BLOCK";
-    static int instances = 0;
-    
+    public static BlockingQueue<String>     workQueue = new LinkedBlockingQueue<>();
+
+    static final AtomicInteger instances = new AtomicInteger (0);
+
     int instance;
-    
+
     @Override
-    public void setParameters(Map<String, ?> parameters) throws TaskConfigurationException {
-        synchronized(metaphore) {
-            instance = ++instances;
-        }
+    public void setParameters(final Map<String, ?> parameters) throws TaskConfigurationException {
+        instance = instances.incrementAndGet ();
     }
 
     @Override
     public void doProcessing() throws InterruptedException {
-        
+
         while(true) {
-            String newTask = workQueue.take();
+            final String newTask = workQueue.take();
 
             log.debug("[" + instance + "] The new task was: " + newTask);
 
             sleep(1000);
         }
-        
+
     }
-            
-    
+
+
 }

@@ -25,18 +25,18 @@ import org.holodeckb2b.ebms3.constants.ProductId;
 
 /**
  * Is the <i>OUT_FLOW</i> header responsible for setting the HTTP headers that provide information on the application
- * that executes or handles a request, i.e. the <code>Server</code> respectively <code>User-Agent</code> header. The 
+ * that executes or handles a request, i.e. the <code>Server</code> respectively <code>User-Agent</code> header. The
  * value of these header is the string constructed from the information provided in the {@link ProductId} interface.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since 2.0.1
  */
 public class HTTPProductIdentifier extends BaseHandler {
 
     // The value to use in the HTTP header
-    private static final String   HTTP_HDR_VALUE =  ProductId.FULL_NAME.replaceAll(" ","") 
+    private static final String   HTTP_HDR_VALUE =  ProductId.FULL_NAME.replaceAll(" ","")
                                                     + "/" + ProductId.MAJOR_VERSION + "." + ProductId.MINOR_VERSION;
-    
+
     /*
      * This handler runs in all out flows to ensure that the headers are added to all requests and responses
      */
@@ -46,20 +46,20 @@ public class HTTPProductIdentifier extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws Exception {
         // Get current set of options
-        Options options = mc.getOptions();
-        
+        final Options options = mc.getOptions();
+
         if (isInFlow(RESPONDER)) {
-            // Acting as server, add HTTP Server header. Due to a bug in Axis we can't use the MC HTTPConstants.SERVER 
+            // Acting as server, add HTTP Server header. Due to a bug in Axis we can't use the MC HTTPConstants.SERVER
             // Option and must set a response parameter directly
-            AxisHttpResponse resp = (AxisHttpResponse) mc.getProperty(org.apache.axis2.Constants.OUT_TRANSPORT_INFO);
+            final AxisHttpResponse resp = (AxisHttpResponse) mc.getProperty(org.apache.axis2.Constants.OUT_TRANSPORT_INFO);
             resp.setHeader("Server", HTTP_HDR_VALUE);
         } else
             // Acting as client. add HTTP User-Agent header
             options.setProperty(HTTPConstants.USER_AGENT, HTTP_HDR_VALUE);
-                    
+
         return InvocationResponse.CONTINUE;
     }
-    
+
 }

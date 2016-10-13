@@ -16,19 +16,21 @@
  */
 package org.holodeckb2b.ebms3.persistency.entities;
 
-import org.holodeckb2b.ebms3.persistency.entities.AgreementReference;
-import org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo;
-import org.holodeckb2b.ebms3.persistency.entities.Service;
+
 import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
+import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
 import org.holodeckb2b.ebms3.persistent.wrappers.ECollaborationInfo;
-import org.holodeckb2b.ebms3.util.JPAUtil;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -39,16 +41,16 @@ import org.junit.runners.MethodSorters;
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CollaborationInfoTest {
-    
+
     private static final String T_SVC_NAME_1 = "test-service:0";
-    
+
     private static final String T_ACTION_1 = "test-action:0";
-    
+
     private static final String T_AGREEMENT_NAME_1 = "test-agree-1";
     private static final String T_AGREEMENT_TYPE_1 = "test-agree-tp1";
-    
+
     private static final String T_PMODE_1 = "pmode-id0";
-    
+
     private static final String T_SVC_NAME_2 = "test-service:1";
     private static final String T_ACTION_2 = "test-action:1";
     private static final String T_PMODE_2 = "pmode-id1";
@@ -57,54 +59,59 @@ public class CollaborationInfoTest {
     private static final String T_ACTION_3 = "test-action:2";
     private static final String T_AGREEMENT_NAME_3 = "test-agree-2";
     private static final String T_AGREEMENT_TYPE_3 = "test-agree-tp2";
-    
+
     private static final String T_SVC_NAME_4 = "test-service:3";
     private static final String T_ACTION_4 = "test-action:3";
     private static final String T_AGREEMENT_NAME_4 = "test-agree-3";
     private static final String T_AGREEMENT_TYPE_4 = "test-agree-tp3";
-    
+
     EntityManager   em;
-    
+
     public CollaborationInfoTest() {
     }
 
+    @BeforeClass
+    public static void setupClass() {
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(null));
+    }
+
     @AfterClass
-    public static void cleanup() {
-        EntityManager em = JPAUtil.getEntityManager();
-        
+    public static void cleanup() throws DatabaseException {
+        final EntityManager em = JPAUtil.getEntityManager();
+
         em.getTransaction().begin();
-        Collection<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
-        
-        for(ECollaborationInfo mu : tps)
+        final Collection<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
+
+        for(final ECollaborationInfo mu : tps)
             em.remove(mu);
-        
+
         em.getTransaction().commit();
-    }    
-    
+    }
+
     @Before
-    public void setUp() {
+    public void setUp() throws DatabaseException {
         em = JPAUtil.getEntityManager();
     }
-    
+
     @After
     public void tearDown() {
         em.close();
     }
-    
+
     /**
      * Test of setService method, of class CollaborationInfo.
      */
     @Test
     public void test1_SetService() {
         System.out.println("setService");
-        Service service = new Service(T_SVC_NAME_1);
-        
-        ECollaborationInfo instance = new ECollaborationInfo();
+        final Service service = new Service(T_SVC_NAME_1);
+
+        final ECollaborationInfo instance = new ECollaborationInfo();
         instance.eCollaborationInfo.setService(service);
-        
+
         em.getTransaction().begin();
         em.persist(instance);
-        em.getTransaction().commit();                
+        em.getTransaction().commit();
     }
 
     /**
@@ -113,13 +120,13 @@ public class CollaborationInfoTest {
     @Test
     public void test2_GetService() {
         System.out.println("getService");
-        
+
         em.getTransaction().begin();
-        List<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
-        
+        final List<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
+
         assertTrue(tps.size() == 1);
         assertEquals(T_SVC_NAME_1, tps.get(0).eCollaborationInfo.getService().getName());
-        
+
         em.getTransaction().commit();
     }
 
@@ -129,13 +136,13 @@ public class CollaborationInfoTest {
     @Test
     public void test3_SetAction() {
         System.out.println("setAction");
-        
+
         em.getTransaction().begin();
-        List<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
-        
+        final List<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
+
         assertTrue(tps.size() == 1);
         tps.get(0).eCollaborationInfo.setAction(T_ACTION_1);
-        
+
         em.getTransaction().commit();
     }
 
@@ -146,11 +153,11 @@ public class CollaborationInfoTest {
     public void test4_GetAction() {
         System.out.println("getAction");
         em.getTransaction().begin();
-        List<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
-        
+        final List<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
+
         assertTrue(tps.size() == 1);
         assertEquals(T_ACTION_1, tps.get(0).eCollaborationInfo.getAction());
-        
+
         em.getTransaction().commit();
     }
 
@@ -160,11 +167,11 @@ public class CollaborationInfoTest {
     @Test
     public void test5_SetAgreement() {
         System.out.println("setAgreement");
-        AgreementReference ref = new AgreementReference(T_AGREEMENT_NAME_1, T_AGREEMENT_TYPE_1);
-        
+        final AgreementReference ref = new AgreementReference(T_AGREEMENT_NAME_1, T_AGREEMENT_TYPE_1);
+
         em.getTransaction().begin();
-        List<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
-        
+        final List<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
+
         assertTrue(tps.size() == 1);
         tps.get(0).eCollaborationInfo.setAgreement(ref);
         em.getTransaction().commit();
@@ -177,12 +184,12 @@ public class CollaborationInfoTest {
     public void test6_GetAgreement() {
         System.out.println("getAgreement");
         em.getTransaction().begin();
-        List<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
-        
+        final List<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
+
         assertTrue(tps.size() == 1);
         assertEquals(T_AGREEMENT_NAME_1, tps.get(0).eCollaborationInfo.getAgreement().getName());
         assertEquals(T_AGREEMENT_TYPE_1, tps.get(0).eCollaborationInfo.getAgreement().getType());
-        
+
         em.getTransaction().commit();
     }
 
@@ -194,86 +201,86 @@ public class CollaborationInfoTest {
         System.out.println("setPModeId");
         em.getTransaction().begin();
         List<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
-        
+
         assertTrue(tps.size() == 1);
-        
+
         tps.get(0).eCollaborationInfo.setPModeId(T_PMODE_1);
-        
+
         em.persist(tps.get(0));
-        em.getTransaction().commit();        
-        
+        em.getTransaction().commit();
+
         em.getTransaction().begin();
-        
+
         tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
-        
+
         assertTrue(tps.size() == 1);
         assertEquals(T_PMODE_1, tps.get(0).eCollaborationInfo.getAgreement().getPModeId());
-        
+
         assertEquals(T_AGREEMENT_NAME_1, tps.get(0).eCollaborationInfo.getAgreement().getName());
         assertEquals(T_AGREEMENT_TYPE_1, tps.get(0).eCollaborationInfo.getAgreement().getType());
-        
+
         em.getTransaction().commit();
     }
-    
+
     /**
-     * Test of non default constructor with only strings 
+     * Test of non default constructor with only strings
      */
     @Test
     public void test8_StringConstructor() {
         System.out.println("StringConstructor");
         em.getTransaction().begin();
         List<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
-        
+
         assertTrue(tps.size() == 1);
-        
+
         tps.get(0).eCollaborationInfo = new CollaborationInfo(T_SVC_NAME_2, T_ACTION_2, T_PMODE_2);
-        
+
         em.persist(tps.get(0));
-        em.getTransaction().commit();        
-        
+        em.getTransaction().commit();
+
         em.getTransaction().begin();
-        
+
         tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
-        
+
         assertTrue(tps.size() == 1);
         assertEquals(T_SVC_NAME_2, tps.get(0).eCollaborationInfo.getService().getName());
         assertEquals(T_ACTION_2, tps.get(0).eCollaborationInfo.getAction());
         assertEquals(T_PMODE_2, tps.get(0).eCollaborationInfo.getAgreement().getPModeId());
-        
+
         em.getTransaction().commit();
     }
-    
+
     /**
      * Test of non default constructor with service and agreement objects
      */
     @Test
     public void test9_ObjectConstructor() {
         System.out.println("ObjectConstructor");
-        
-        Service svcObj = new Service(T_SVC_NAME_3);
-        AgreementReference refObj = new AgreementReference(T_AGREEMENT_NAME_3, T_AGREEMENT_TYPE_3);
-        
+
+        final Service svcObj = new Service(T_SVC_NAME_3);
+        final AgreementReference refObj = new AgreementReference(T_AGREEMENT_NAME_3, T_AGREEMENT_TYPE_3);
+
         em.getTransaction().begin();
         List<ECollaborationInfo> tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
-        
+
         assertTrue(tps.size() == 1);
-        
+
         tps.get(0).eCollaborationInfo = new CollaborationInfo(svcObj, T_ACTION_3, refObj);
-        
+
         em.persist(tps.get(0));
-        em.getTransaction().commit();        
-        
+        em.getTransaction().commit();
+
         em.getTransaction().begin();
-        
+
         tps = em.createQuery("from ECollaborationInfo", ECollaborationInfo.class).getResultList();
-        
+
         assertTrue(tps.size() == 1);
         assertEquals(T_SVC_NAME_3, tps.get(0).eCollaborationInfo.getService().getName());
         assertEquals(T_ACTION_3, tps.get(0).eCollaborationInfo.getAction());
         assertEquals(T_AGREEMENT_NAME_3, tps.get(0).eCollaborationInfo.getAgreement().getName());
         assertEquals(T_AGREEMENT_TYPE_3, tps.get(0).eCollaborationInfo.getAgreement().getType());
-        
+
         em.getTransaction().commit();
     }
-    
+
 }

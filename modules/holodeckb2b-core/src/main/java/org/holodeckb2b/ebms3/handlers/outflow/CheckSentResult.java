@@ -17,13 +17,15 @@
 package org.holodeckb2b.ebms3.handlers.outflow;
 
 import java.util.Collection;
+
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.SignalMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
@@ -34,11 +36,11 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
  * Is the <i>OUT_FLOW</i> handler responsible for changing the processing state of message units that are and have been
  * sent out in the current SOAP message.
  * <p>When the handler is executed in the flow the processing state of all message units contained in the message is
- * set to {@link ProcessingStates#SENDING}. When {@link #flowComplete(org.apache.axis2.context.MessageContext)} is 
+ * set to {@link ProcessingStates#SENDING}. When {@link #flowComplete(org.apache.axis2.context.MessageContext)} is
  * executed the handler checks if the sent operation was successful and changes the processing state accordingly to
- * either {@link ProcessingStates#TRANSPORT_FAILURE} or {@link ProcessingStates#DELIVERED} / 
+ * either {@link ProcessingStates#TRANSPORT_FAILURE} or {@link ProcessingStates#DELIVERED} /
  * {@link ProcessingStates#AWAITING_RECEIPT} (for User Message that should be acknowledged through a Receipt).
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class CheckSentResult extends BaseHandler {
@@ -53,27 +55,27 @@ public class CheckSentResult extends BaseHandler {
 
     /**
      * This method changes the processing state of the message units to {@link ProcessingStates#SENDING} to indicate
-     * they are being sent to the other MSH. 
-     * 
-     * @param mc            The current message 
+     * they are being sent to the other MSH.
+     *
+     * @param mc            The current message
      * @return              {@link InvocationResponse#CONTINUE} as this handler only needs to run when the message has
      *                      been sent.
      * @throws DatabaseException    When the processing state can not be changed
      */
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws DatabaseException {
         // Get all message units in this message
-        Collection<EntityProxy> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
+        final Collection<EntityProxy<MessageUnit>> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
         // And change their processing state
-        for (EntityProxy mu : msgUnits) {
+        for (final EntityProxy<MessageUnit> mu : msgUnits) {
             MessageUnitDAO.setSending(mu);
-            log.info(mu.entity.getClass().getSimpleName() + " with msg-id [" 
+            log.info(mu.entity.getClass().getSimpleName() + " with msg-id ["
                                                                     + mu.entity.getMessageId() + "] is being sent");
-        }        
-        
+        }
+
         return InvocationResponse.CONTINUE;
     }
- 
+
     /**
      * This method is called after the message was sent out. Depending on the result (success or fault) the processing
      * state of the message units contained in the message is changed. When a fault occurred during sending the state
@@ -81,25 +83,25 @@ public class CheckSentResult extends BaseHandler {
      * depends on the type of message unit:<ul>
      * <li><i>Signal message units</i> : the processing state will be changed to {@link ProcessingStates#DELIVERED}</li>
      * <li><i>User message unit</i> : the new processing state depends on whether a receipt is expected. If a receipt
-     *  is expected, the new state will be {@link ProcessingStates#AWAITING_RECEIPT}, otherwise it will be 
+     *  is expected, the new state will be {@link ProcessingStates#AWAITING_RECEIPT}, otherwise it will be
      *  {@link ProcessingStates#DELIVERED}.</li></ul>
-     * 
+     *
      * @param mc    The current message that was sent out
      */
     @Override
-    public void doFlowComplete(MessageContext mc) {
+    public void doFlowComplete(final MessageContext mc) {
         // First get the ebMS header block, that is the eb:Messaging element
-        SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
-        
+        final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
+
         if (messaging != null) {
             log.debug("Check result of sent operation");
-            boolean   success = (mc.getFailureReason() == null);
+            final boolean   success = (mc.getFailureReason() == null);
             log.debug("The sent operation was " + (success ? "" : "not ") + "successfull");
-            
+
             //Change processing state of all message units in the message accordingly
-            Collection<EntityProxy> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
-            
-            for (EntityProxy mu : msgUnits) {
+            final Collection<EntityProxy<MessageUnit>> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
+
+            for (final EntityProxy<MessageUnit> mu : msgUnits) {
                 try {
                     if (!success) {
                         MessageUnitDAO.setTransportFailure(mu);
@@ -111,21 +113,21 @@ public class CheckSentResult extends BaseHandler {
                         } else {
                             log.debug("User Message is sent, check P-Mode if Receipt is expected");
                             // Because we only support One-Way the first leg determines
-                            ILeg leg = HolodeckB2BCoreInterface.getPModeSet().get(mu.entity.getPMode()).getLegs()
+                            final ILeg leg = HolodeckB2BCoreInterface.getPModeSet().get(mu.entity.getPModeId()).getLegs()
                                             .iterator().next();
                             if (leg.getReceiptConfiguration() != null)
                                 MessageUnitDAO.setWaitForReceipt(mu);
                             else
-                                MessageUnitDAO.setDelivered(mu);                        
+                                MessageUnitDAO.setDelivered(mu);
                         }
                     }
-                    log.debug("Processing state for message unit [" + mu.entity.getMessageId() + "] changed to" 
+                    log.debug("Processing state for message unit [" + mu.entity.getMessageId() + "] changed to"
                                 + mu.entity.getCurrentProcessingState().getName());
-                } catch (DatabaseException databaseException) {
-                    // Ai, something went wrong updating the processing state of the message unit. As the message unit 
+                } catch (final DatabaseException databaseException) {
+                    // Ai, something went wrong updating the processing state of the message unit. As the message unit
                     // is already processed there is nothing we can other than logging the error
                     log.error("A database error occurred while update the processing state of message unit ["
-                                + mu.entity.getMessageId() + "]. Details: " + databaseException.getMessage());                    
+                                + mu.entity.getMessageId() + "]. Details: " + databaseException.getMessage());
                 }
             }
         }

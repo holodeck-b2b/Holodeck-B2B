@@ -22,18 +22,18 @@ import org.simpleframework.xml.Attribute;
 /**
  * Represents the <code>Schema</code> element from a MMD document. The information
  * contained in this element is intended for use by the business applications that
- * handle the payload. It is not used by Holodeck B2B in processing the message. 
- * 
+ * handle the payload. It is not used by Holodeck B2B in processing the message.
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class SchemaReference implements ISchemaReference {
 
     @Attribute(name="namespace", required = false)
     private String  namespace;
-    
+
     @Attribute(name="version", required = false)
     private String  version;
-    
+
     @Attribute(name="location")
     private String  location;
 
@@ -41,25 +41,25 @@ public class SchemaReference implements ISchemaReference {
      * Default constructor
      */
     public SchemaReference() {}
-    
+
     /**
      * Create a new <code>SchemaReference</code> object based on the given schema
      * reference data.
-     * 
+     *
      * @param data  The data to use for the new object
      */
-    public SchemaReference(ISchemaReference data) {
+    public SchemaReference(final ISchemaReference data) {
         this.location = data.getLocation();
         this.version = data.getVersion();
         this.namespace = data.getNamespace();
     }
-    
+
     @Override
     public String getLocation() {
         return location;
     }
-    
-    public void setLocation(String location) {
+
+    public void setLocation(final String location) {
         this.location = location;
     }
 
@@ -67,8 +67,8 @@ public class SchemaReference implements ISchemaReference {
     public String getNamespace() {
         return namespace;
     }
-    
-    public void setNamespace(String namespace) {
+
+    public void setNamespace(final String namespace) {
         this.namespace = namespace;
     }
 
@@ -76,9 +76,9 @@ public class SchemaReference implements ISchemaReference {
     public String getVersion() {
         return version;
     }
-    
-    public void setVersion(String version) {
+
+    public void setVersion(final String version) {
         this.version = version;
     }
-    
+
 }

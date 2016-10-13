@@ -16,19 +16,20 @@
  */
 package org.holodeckb2b.ebms3.pulling;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import org.holodeckb2b.interfaces.general.Interval;
-import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import org.holodeckb2b.interfaces.general.Interval;
+import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.junit.Test;
 
 /**
@@ -36,7 +37,7 @@ import org.junit.Test;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class PullConfigurationTest {
-    
+
     public PullConfigurationTest() {
     }
 
@@ -49,44 +50,43 @@ public class PullConfigurationTest {
 //    }
 
     /**
-     * 
+     *
      */
     @Test
     public void testLoad_DefaultOnly() {
-        String path = this.getClass().getClassLoader().getResource("pulltest/pullcfg1.xml").getPath();
-        File   f = new File(path);
+        final String path = this.getClass().getClassLoader().getResource("pulltest/pullcfg1.xml").getPath();
 
         try {
-            PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);
+            final PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);
 
             assertNotNull(pullCfg);
-            List<IWorkerConfiguration> workers = pullCfg.getWorkers();
-            
+            final List<IWorkerConfiguration> workers = pullCfg.getWorkers();
+
             assertEquals(1, workers.size());
             assertEquals(new Interval(1826646350, TimeUnit.SECONDS), workers.get(0).getInterval());
-            
-        } catch (Exception e) {
+
+        } catch (final Exception e) {
             e.printStackTrace();
             fail();
         }
     }
-    
+
     /**
-     * 
+     *
      */
+    @SuppressWarnings ("unchecked")
     @Test
     public void testLoad_CompleteConfig() {
-        String path = this.getClass().getClassLoader().getResource("pulltest/pullcfg2.xml").getPath();
-        File   f = new File(path);
-        
+        final String path = this.getClass().getClassLoader().getResource("pulltest/pullcfg2.xml").getPath();
+
         try {
-            PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);
-            
+            final PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);
+
             assertNotNull(pullCfg);
-            List<IWorkerConfiguration> workers = pullCfg.getWorkers();
-            
+            final List<IWorkerConfiguration> workers = pullCfg.getWorkers();
+
             assertEquals(3, workers.size());
-            
+
             assertEquals(new Interval(1985496162, TimeUnit.SECONDS), workers.get(0).getInterval());
             Map<String,?> params = workers.get(0).getTaskParameters();
             assertFalse(params.isEmpty());
@@ -94,7 +94,7 @@ public class PullConfigurationTest {
             Collection<String> pmodes = (Collection<String>) params.get(PullWorker.PARAM_PMODES);
             assertEquals(1 , pmodes.size());
             assertTrue(pmodes.contains("LO7.wrubhpHfZ9Kzr3buPpHMVI"));
-            
+
             assertEquals(new Interval(1622097273, TimeUnit.SECONDS), workers.get(1).getInterval());
             params = workers.get(1).getTaskParameters();
             assertFalse(params.isEmpty());
@@ -113,29 +113,28 @@ public class PullConfigurationTest {
             assertTrue(pmodes.contains("INyEfTQuibb8t"));
             assertTrue(pmodes.contains("Qw1hfHh"));
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             fail();
-        }        
+        }
     }
-    
+
     /**
-     * 
+     *
      */
     @Test
     public void testLoad_ErrorConfig() {
-        String path = this.getClass().getClassLoader().getResource("pulltest/pullcfg3.xml").getPath();
-        File   f = new File(path);
-        
+        final String path = this.getClass().getClassLoader().getResource("pulltest/pullcfg3.xml").getPath();
+
         try {
-            PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);
-            
+            final PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);
+
             assertNull(pullCfg);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             fail();
-        }        
+        }
     }
-    
-    
+
+
 }

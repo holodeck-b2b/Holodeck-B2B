@@ -36,14 +36,14 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
 /**
  * Is the <i>IN_FLOW</i> handler responsible for detecting and when requested eliminating duplicate <i>user messages</i>.
  * This functionality is part of the <i>Reception Awareness</i> feature specified in the AS4 profile (see section 3.2).
- * <p>The detection of duplicates is done by checking for an existing {@link UserMessage} with the same 
+ * <p>The detection of duplicates is done by checking for an existing {@link UserMessage} with the same
  * <code>MessageId</code> and which is in {@link ProcessingStates#DELIVERED} state. This means the detection window
  * is determined by the time messages stay in the message log.
  * <p>How a duplicate should be handled is configured by the P-Mode parameter <b>ReceptionAwareness.DuplicateDetection.Eliminate</b>.
  * When set to <code>true</code> the duplicate will not be processed and its processing state set to {@link ProcessingStates#DUPLICATE}.
  * Because the duplicate may be a retry due to a missing Receipt signal a new Receipt will be sent as response. This is
  * done by marking this message unit as delivered.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
@@ -53,77 +53,77 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
      * configuration users can decide if this logging should be enabled and
      * how duplicates should be logged.
      */
-    private Log     duplicateLog = LogFactory.getLog("org.holodeckb2b.msgproc.duplicates");
-    
+    private final Log     duplicateLog = LogFactory.getLog("org.holodeckb2b.msgproc.duplicates");
+
     @Override
     protected byte inFlows() {
         return IN_FLOW;
     }
-    
+
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> umProxy) throws AxisFault {
+    protected InvocationResponse doProcessing(final MessageContext mc, final EntityProxy<UserMessage> umProxy) throws AxisFault {
         // Extract entity object from proxy
-        UserMessage um = umProxy.entity;
-        
-        // First determine if duplicate check must be executed for this UserMessage 
+        final UserMessage um = umProxy.entity;
+
+        // First determine if duplicate check must be executed for this UserMessage
         //
         boolean detectDups = false;
         log.debug("Check if duplicate check must be executed");
-        
+
         // Get P-Mode configuration
-        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPMode());
+        final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
         if (pmode == null) {
             // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
             // is needed
-            log.error("P-Mode " + um.getPMode() + " not found in current P-Mode set!" 
+            log.error("P-Mode " + um.getPModeId() + " not found in current P-Mode set!"
                         + "Unable to determine if receipt is needed for message [msgId=" + um.getMessageId() + "]");
             return InvocationResponse.CONTINUE;
         }
         // Currently we only support one-way MEPs so the leg is always the first one
-        ILeg leg = pmode.getLegs().iterator().next();        
-        
+        final ILeg leg = pmode.getLegs().iterator().next();
+
         // Duplicate detection is part of the AS4 Reception Awareness feature which can only be configured on a leg
         // of type ILegAS4, so check type
-        if (!(leg instanceof IAS4Leg)) 
+        if (!(leg instanceof IAS4Leg))
             // Not an AS4 leg, so no duplicate detection
             detectDups = false;
         else {
             // Get configuration of Reception Awareness feature
-            IReceptionAwareness raConfig = ((IAS4Leg) leg).getReceptionAwareness();
+            final IReceptionAwareness raConfig = ((IAS4Leg) leg).getReceptionAwareness();
             if (raConfig != null)
                 detectDups = raConfig.useDuplicateDetection();
             else
                 detectDups = false;
         }
-        
+
         if (!detectDups) {
             log.debug("Duplicate detection not enabled, skipping check.");
             return InvocationResponse.CONTINUE;
         } else {
-            String msgId = um.getMessageId();
-            log.debug("Duplicate detection enabled. Check if this Usermessage [msgId=" + msgId 
+            final String msgId = um.getMessageId();
+            log.debug("Duplicate detection enabled. Check if this Usermessage [msgId=" + msgId
                         + "] has already been delivered");
-            
+
             boolean isDuplicate = false;
             try {
                 isDuplicate = MessageUnitDAO.isUserMsgDelivered(msgId);
-            
+
                 if (isDuplicate) {
                     log.debug("UserMessage [msgId=" + msgId + "] has already been delivered");
                     // Also log in special duplicate log
-                    duplicateLog.info("UserMessage [msgId=" + msgId 
+                    duplicateLog.info("UserMessage [msgId=" + msgId
                                                 + "] is a duplicate of an already delivered message");
 
                     log.debug("Update processing state to duplicate");
                     MessageUnitDAO.setDuplicate(umProxy);
-                    
+
                     // To prevent repeated delivery but still send a receipt set message as delivered
                     mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);
                 }
-            } catch (DatabaseException ex) {
+            } catch (final DatabaseException ex) {
                 // Oops, something went wrong saving the data
                 log.error("A database error occurred when checking for duplicates. Details: " + ex.getMessage());
-                
+
                 // Continue processing, as other parts of the message may be processed succesfully
             }
 

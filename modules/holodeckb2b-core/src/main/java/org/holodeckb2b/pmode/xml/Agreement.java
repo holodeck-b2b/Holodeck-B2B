@@ -24,32 +24,32 @@ import org.simpleframework.xml.Element;
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 public class Agreement implements IAgreement {
-    
+
     @Element (name = "name", required = true)
     private String name = "";
-    
+
     @Element (name = "type", required = false)
     private String type = "";
-    
-    
+
+
     /**
      * Default constructor.
      */
     public Agreement() {}
-    
+
     /**
      * Gets the agreement name.
-     * 
+     *
      * @return The agreement name
      */
     @Override
     public String getName() {
         return this.name;
     }
-    
+
     /**
      * Gets the agreement type.
-     * 
+     *
      * @return The agreement type
      */
     @Override
@@ -62,17 +62,17 @@ public class Agreement implements IAgreement {
      * @param name The agreement name to set
      */
     @Override
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
-    
+
     /**
      * Set the type of the agreement.
      * @param type The agreement type to set
      */
     @Override
-    public void setType(String type) {
+    public void setType(final String type) {
         this.type = type;
     }
-    
+
 }

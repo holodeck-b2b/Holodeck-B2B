@@ -26,7 +26,7 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 /**
  * Is the handler responsible for checking if a EBMS SOAPHeaderBlock is present
  * and setting it as processed.
- * 
+ *
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 public class ReportHeaderProcessed extends BaseHandler {
@@ -37,17 +37,17 @@ public class ReportHeaderProcessed extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext msgCtx) throws AxisFault {
-        
-        SOAPEnvelope env = msgCtx.getEnvelope();    
+    protected InvocationResponse doProcessing(final MessageContext msgCtx) throws AxisFault {
+
+        final SOAPEnvelope env = msgCtx.getEnvelope();
         if (env != null) {
-            SOAPHeaderBlock messagingHdr = Messaging.getElement(env);
+            final SOAPHeaderBlock messagingHdr = Messaging.getElement(env);
             if (messagingHdr != null) {
                 messagingHdr.setProcessed();
             }
-        } 
- 
+        }
+
         return InvocationResponse.CONTINUE;
     }
-    
+
 }

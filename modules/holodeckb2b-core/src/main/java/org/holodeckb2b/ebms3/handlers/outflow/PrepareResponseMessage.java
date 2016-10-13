@@ -19,15 +19,17 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.ebms.axis2.MessageContextUtils;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.Receipt;
 import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
@@ -39,9 +41,9 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 /**
  * Is the first handler of the out flow and is responsible for preparing a response by checking if the handlers in the
  * in flow prepared message units that should be sent as response. If they did the <code>EntityProxy</code> objects for
- * the message units are copied to the out flow message context to make them available to the other handlers in the out 
+ * the message units are copied to the out flow message context to make them available to the other handlers in the out
  * flow.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class PrepareResponseMessage extends BaseHandler {
@@ -52,11 +54,11 @@ public class PrepareResponseMessage extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) throws AxisFault {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws AxisFault {
         // Check which response message units were set during in flow, starting
         // with user message
         log.debug("Check for response user message unit");
-        EntityProxy<UserMessage> um = (EntityProxy<UserMessage>) MessageContextUtils.getPropertyFromInMsgCtx(mc, 
+        final EntityProxy<UserMessage> um = (EntityProxy<UserMessage>) MessageContextUtils.getPropertyFromInMsgCtx(mc,
                                                                             MessageContextProperties.OUT_USER_MESSAGE);
         if (um != null) {
             log.debug("Response contains an user message unit");
@@ -67,7 +69,7 @@ public class PrepareResponseMessage extends BaseHandler {
 
         // Check if there is a receipt signal messages to be included
         log.debug("Check for receipt signal to be included");
-        EntityProxy<Receipt> receipt = (EntityProxy<Receipt>) MessageContextUtils.getPropertyFromInMsgCtx(mc, 
+        final EntityProxy<Receipt> receipt = (EntityProxy<Receipt>) MessageContextUtils.getPropertyFromInMsgCtx(mc,
                                                                           MessageContextProperties.RESPONSE_RECEIPT);
         if (receipt != null) {
             log.debug("Response contains a receipt signal");
@@ -75,11 +77,11 @@ public class PrepareResponseMessage extends BaseHandler {
             MessageContextUtils.addReceiptToSend(mc, receipt);
         } else
             log.debug("Response does not contain receipt signal");
-        
+
         // Check if there are error signal messages to be included
         log.debug("Check for error signals generated during in flow to be included");
-        Collection<EntityProxy<ErrorMessage>> errors = 
-                (Collection<EntityProxy<ErrorMessage>>) MessageContextUtils.getPropertyFromInMsgCtx(mc, 
+        final Collection<EntityProxy<ErrorMessage>> errors =
+                (Collection<EntityProxy<ErrorMessage>>) MessageContextUtils.getPropertyFromInMsgCtx(mc,
                                                                       MessageContextProperties.OUT_ERROR_SIGNALS);
         if (Utils.isNullOrEmpty(errors))
             log.debug("Response does not contain error signal(s)");
@@ -94,59 +96,59 @@ public class PrepareResponseMessage extends BaseHandler {
             } else {
                 // Bundling not allowed, select one error signal to include
                 log.debug("Bundling is not allowed, select one error to report");
-                EntityProxy<ErrorMessage> include = selectError(errors, mc);
+                final EntityProxy<ErrorMessage> include = selectError(errors, mc);
                 errors.remove(include);
                 // The other errors can not be further processed, so change their state to failed
                 setFailed(errors);
-                log.debug("Include the selected error [msgID/refTo" + include.entity.getMessageId() + "/" 
-                                + include.entity.getRefToMessageId() + "] for processing");                
+                log.debug("Include the selected error [msgID/refTo" + include.entity.getMessageId() + "/"
+                                + include.entity.getRefToMessageId() + "] for processing");
                 MessageContextUtils.addErrorSignalToSend(mc, include);
             }
         } else {
             log.debug("Response does contain one error signal");
             MessageContextUtils.addErrorSignalToSend(mc, errors.iterator().next());
         }
-        
+
         return InvocationResponse.CONTINUE;
-    }    
-    
+    }
+
     /**
-     * Is a helper method to select the error signal that has the highest priority of sending. The priority of error 
+     * Is a helper method to select the error signal that has the highest priority of sending. The priority of error
      * signals is determined by the message unit they reference and as follows:<ol>
-     * <li>no referenced message unit: The error is to the complete message and can not be related to a message unit. 
+     * <li>no referenced message unit: The error is to the complete message and can not be related to a message unit.
      * This indicates a general problem with the message and should be reported;</li>
      * <li>UserMessage</li>
      * <li>PullRequest</li>
      * <li>Error or Receipt</li>
      * </ol>
-     * 
+     *
      * @param errors    The collection of errors that were generated for the received message
      * @param mc        The current [out flow] messsage context
      * @return          The <code>EntityProxy</code> for the {@link ErrorMessage} to include in the response
      */
-    private EntityProxy<ErrorMessage> selectError(Collection<EntityProxy<ErrorMessage>> errors, MessageContext mc) {
-        EntityProxy<ErrorMessage>    r = null;        
+    private EntityProxy<ErrorMessage> selectError(final Collection<EntityProxy<ErrorMessage>> errors, final MessageContext mc) {
+        EntityProxy<ErrorMessage>    r = null;
         int             cp = -1; // The prio of the currently selected err, 0=Error or Receipt, 1=PullReq, 2=UsrMsg
-        
+
         log.debug("Get the messageIds and types of received message units");
-        Map<String, Class<?>>  rcvdMsgs = getReceivedMessageUnits(mc);
+        final Map<String, Class<?>>  rcvdMsgs = getReceivedMessageUnits(mc);
         // Now select the error with highest prio
-        for(EntityProxy<ErrorMessage> e : errors) {
-            String refTo = e.entity.getRefToMessageId();
+        for(final EntityProxy<ErrorMessage> e : errors) {
+            final String refTo = e.entity.getRefToMessageId();
             if (refTo == null || refTo.isEmpty()) {
                 log.debug("Select general error (without refTo)");
                 r = e; // This is the error signal that does not reference a message unit
-                break; 
+                break;
             } else {
                 log.debug("Check which type of MU is referenced by error");
-                Class<?> type = rcvdMsgs.get(refTo);
+                final Class<?> type = rcvdMsgs.get(refTo);
                 if (IUserMessage.class.isAssignableFrom(type)) {
                     log.debug("Select error referencing the UserMessage");
-                    r = e; cp = 2;                    
+                    r = e; cp = 2;
                 } else if (IPullRequest.class.isAssignableFrom(type) && cp < 1) {
                     log.debug("Select error referencing the PullRequest");
                     r = e; cp = 1;
-                } else if (cp == -1) { 
+                } else if (cp == -1) {
                     // Error references either Error or Receipt which have same prio, just select first
                     log.debug("Select error referencing the Error or Receipt");
                     r = e; cp = 0;
@@ -155,38 +157,38 @@ public class PrepareResponseMessage extends BaseHandler {
         }
         return r;
     }
-    
+
     /**
      * Gets all the message units received in the request message and map them on their <i>message id</i>.
-     * 
+     *
      * @param mc    The current [out flow] message context
-     * @return      {@link Map} containing all messageIds and their message unit type 
+     * @return      {@link Map} containing all messageIds and their message unit type
      */
-    private Map<String, Class<?>> getReceivedMessageUnits(MessageContext mc) {
-        HashMap<String, Class<?>>   reqMUs = new HashMap<>();
-        
-        Collection<EntityProxy> msgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
-        for (EntityProxy mu : msgUnits) 
+    private Map<String, Class<?>> getReceivedMessageUnits(final MessageContext mc) {
+        final HashMap<String, Class<?>>   reqMUs = new HashMap<>();
+
+        final Collection<EntityProxy<MessageUnit>> msgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
+        for (final EntityProxy<MessageUnit> mu : msgUnits)
             reqMUs.put(mu.entity.getMessageId(), mu.entity.getClass());
-        
+
         return reqMUs;
     }
-    
+
     /**
      * Helper method to change the processing state of the error signals that can not be included in the response
      * to {@link ProcessingStates#FAILURE}.
-     * 
+     *
      * @param errors    The collection of {@link ErrorMessage}s that can not be included in the response.
      */
-    private void setFailed(Collection<EntityProxy<ErrorMessage>> errors) {
-        for(EntityProxy<ErrorMessage> e : errors) 
+    private void setFailed(final Collection<EntityProxy<ErrorMessage>> errors) {
+        for(final EntityProxy<ErrorMessage> e : errors)
             try {
                 MessageUnitDAO.setFailed(e);
-                log.debug("Changed state of error [" + e.entity.getMessageId() 
-                            + "] to failed as it can not be included in response!");                
-            } catch (DatabaseException dbe) {
+                log.debug("Changed state of error [" + e.entity.getMessageId()
+                            + "] to failed as it can not be included in response!");
+            } catch (final DatabaseException dbe) {
                 // Log and ignore error
-                log.error("An error occured while changing the state of error [" + e.entity.getMessageId() 
+                log.error("An error occured while changing the state of error [" + e.entity.getMessageId()
                             + "]! Details: " + dbe.getMessage());
             }
     }

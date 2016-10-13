@@ -17,6 +17,7 @@
 package org.holodeckb2b.ebms3.persistency.entities;
 
 import java.io.Serializable;
+
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
@@ -25,16 +26,16 @@ import javax.persistence.Embedded;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Lob;
+
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
-import org.holodeckb2b.interfaces.messagemodel.IEbmsError.Severity;
 
 /**
- * Is the JPA embeddable persistency class that represents <b>one</b> error contained in an ebMS Error Signal message 
+ * Is the JPA embeddable persistency class that represents <b>one</b> error contained in an ebMS Error Signal message
  * unit. It contains the details about the error that occurred and which are contained in the <code>eb:Error</code> in
  * the ebMS message header. As an individual error is always part of an Error Signal message unit this class is defined
- * as <i>embeddable</i>. 
- * 
+ * as <i>embeddable</i>.
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 @Embeddable
@@ -47,8 +48,8 @@ public class EbmsError implements Serializable, IEbmsError {
     public String getCategory() {
         return CATEGORY;
     }
-    
-    public void setCategory(String category) {
+
+    public void setCategory(final String category) {
         CATEGORY = category;
     }
 
@@ -57,16 +58,16 @@ public class EbmsError implements Serializable, IEbmsError {
         return REF_TO_MSG_IN_ERROR;
     }
 
-    public void setRefToMessageInError(String refToMsg) {
+    public void setRefToMessageInError(final String refToMsg) {
         REF_TO_MSG_IN_ERROR = refToMsg;
     }
-    
+
     @Override
     public String getErrorCode() {
         return ERROR_CODE;
     }
-    
-    public void setErrorCode(String errorCode) {
+
+    public void setErrorCode(final String errorCode) {
         ERROR_CODE = errorCode;
     }
 
@@ -74,8 +75,8 @@ public class EbmsError implements Serializable, IEbmsError {
     public Severity getSeverity() {
         return SEVERITY;
     }
-    
-    public void setSeverity(IEbmsError.Severity severity) {
+
+    public void setSeverity(final IEbmsError.Severity severity) {
         SEVERITY = severity;
     }
 
@@ -83,8 +84,8 @@ public class EbmsError implements Serializable, IEbmsError {
     public String getMessage() {
         return SHORT_DESCR;
     }
-    
-    public void setShortDescription(String message) {
+
+    public void setShortDescription(final String message) {
         SHORT_DESCR = message;
     }
 
@@ -93,7 +94,7 @@ public class EbmsError implements Serializable, IEbmsError {
         return ERROR_DETAIL;
     }
 
-    public void setErrorDetail(String errorDetail) {
+    public void setErrorDetail(final String errorDetail) {
         ERROR_DETAIL = errorDetail;
     }
 
@@ -101,8 +102,8 @@ public class EbmsError implements Serializable, IEbmsError {
     public String getOrigin() {
         return ORIGIN;
     }
-    
-    public void setOrigin(String origin) {
+
+    public void setOrigin(final String origin) {
         ORIGIN = origin;
     }
 
@@ -110,58 +111,58 @@ public class EbmsError implements Serializable, IEbmsError {
     public IDescription getDescription() {
         return longDescription;
     }
-    
-    public void setDescription(Description description) {
+
+    public void setDescription(final Description description) {
         longDescription = description;
     }
-    
+
     /**
      * Returns a {@see String} representation of the error. This method can be
      * used for easily logging the error to text files, etc.
-     * 
+     *
      * @return {@see String} representation of the error
      */
     @Override
     public String toString() {
         return "ebMS error: " + (REF_TO_MSG_IN_ERROR != null ? "msgId of msg in error= " + REF_TO_MSG_IN_ERROR : "")
-                + "\n\terror code= " + ERROR_CODE + ", " 
+                + "\n\terror code= " + ERROR_CODE + ", "
                 + "\n\tshort description= " + SHORT_DESCR + ", "
                 + "\n\tseverity= " + SEVERITY.toString()
-                + (ORIGIN != null ? "\n\t, origin= " + ORIGIN : "") 
-                + (CATEGORY != null ? "\n\t, category= " + CATEGORY : "") 
-                + (ERROR_DETAIL != null ? "\n\t, details= " + ERROR_DETAIL : "") 
+                + (ORIGIN != null ? "\n\t, origin= " + ORIGIN : "")
+                + (CATEGORY != null ? "\n\t, category= " + CATEGORY : "")
+                + (ERROR_DETAIL != null ? "\n\t, details= " + ERROR_DETAIL : "")
                 + (longDescription != null ? "\n\t, long description= " +
-                        (longDescription.getLanguage() != null ? 
-                                    "[" + longDescription.getLanguage() + "]" : "") 
+                        (longDescription.getLanguage() != null ?
+                                    "[" + longDescription.getLanguage() + "]" : "")
                         + longDescription.getText()
                     : "");
     }
-    
+
     /*
      * Fields
-     * 
-     * NOTE: The JPA @Column annotation is not used so the attribute names are 
+     *
+     * NOTE: The JPA @Column annotation is not used so the attribute names are
      * used as column names. Therefor the attribute names are in CAPITAL.
      */
     private String          CATEGORY;
-    
+
     private String          ERROR_CODE;
-    
+
     @Lob
     @Column(length = 10000)
     private String          ERROR_DETAIL;
 
     private String          ORIGIN;
-    
+
     private String          REF_TO_MSG_IN_ERROR;
-    
+
     @Lob
     @Column(length = 1024)
     private String          SHORT_DESCR;
-   
+
     @Enumerated(EnumType.STRING)
     private IEbmsError.Severity SEVERITY;
-        
+
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "language", column = @Column(name = "DESCRIPTION_LANG")),

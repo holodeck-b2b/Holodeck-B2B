@@ -26,7 +26,7 @@ import org.holodeckb2b.common.handler.BaseHandler;
  * Is a utility handler that logs the <code>SOAP:Envelope</code> element from the current message to a specific log
  * depending whether the message is in or outbound: <i>org.holodeckb2b.msgproc.soapenvlog.</i>(<i>IN|OUT</i>). The
  * log level used is INFO, so the logging can be enabled or disabled by setting the log level.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class SOAPEnvelopeLogger extends BaseHandler {
@@ -37,17 +37,17 @@ public class SOAPEnvelopeLogger extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws Exception {
         // We use a specific log for the SOAP headers so it can easily be enabled or disabled
-        Log soapEnvLog = LogFactory.getLog("org.holodeckb2b.msgproc.soapenvlog." 
+        final Log soapEnvLog = LogFactory.getLog("org.holodeckb2b.msgproc.soapenvlog."
                                             + (isInFlow(IN_FLOW) || isInFlow(IN_FAULT_FLOW) ? "IN" : "OUT"));
-        
+
         // Only do something when logging is enabled
         if (soapEnvLog.isInfoEnabled()) {
-            soapEnvLog.info(mc.getEnvelope().cloneOMElement().toStringWithConsume() + "\n");            
+            soapEnvLog.info(mc.getEnvelope().cloneOMElement().toStringWithConsume() + "\n");
         }
-        
+
         return InvocationResponse.CONTINUE;
     }
-    
+
 }

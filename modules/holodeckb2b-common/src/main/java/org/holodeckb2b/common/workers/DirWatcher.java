@@ -19,6 +19,7 @@ package org.holodeckb2b.common.workers;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Map;
+
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
@@ -31,35 +32,35 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  * <ul><li><i>watchedPath</i>: The path to the directory to watch for changes</li>
  * <li><i>extension</i>: (optional) Only look for changes in files with the specified extension</li>
  * </ul>
- * 
+ *
  * @see PathWatcher
  * @author Sander Fieten <sander@holodeck-b2b.org>
  */
 public abstract class DirWatcher extends PathWatcher {
-    
+
     /**
      * The optional extension filter
      */
-    private String  extensionFilter;           
-    
+    private String  extensionFilter;
+
     /**
      * Sets the extension that should be used to filter the directory listing. This
      * method is defined to allow subclasses to use a specific extension without
      * relying on the configuration file.
-     * 
+     *
      * @param extFilter     The extension to use for filtering the file list
      */
-    protected void setExtension(String extFilter) {
-        this.extensionFilter = (extFilter != null ? extFilter.toLowerCase() : null); 
+    protected void setExtension(final String extFilter) {
+        this.extensionFilter = (extFilter != null ? extFilter.toLowerCase() : null);
     }
-    
+
     /**
      * Sets the parameters.
      * <p>Two parameters can be set:
      * <ul><li><b>watchPath</b>: The path tp the directory to watch for changes</li>
      * <li><b>extension<b>: (optional) Only look for changes in files with the specified extension</li>
      * </ul>
-     * <p>The first parameter is already handled by the super class, this class only reads the <i>extension</i> 
+     * <p>The first parameter is already handled by the super class, this class only reads the <i>extension</i>
      * parameter.
      *
      * @param  parameters    The parameters to configure this worker
@@ -67,39 +68,39 @@ public abstract class DirWatcher extends PathWatcher {
      *                                      based on the supplied parameters
      */
     @Override
-    public void setParameters(Map<String, ?> parameters) throws TaskConfigurationException {
+    public void setParameters(final Map<String, ?> parameters) throws TaskConfigurationException {
         super.setParameters(parameters);
-        
+
         setExtension((String) parameters.get("extension"));
     }
-    
+
     /**
      * Gets the current list of files in the given directory filtered for the given extension.
-     * 
+     *
      * @return The current list of files in the directory that have the given extension
      */
     @Override
     public File[] getFileList() {
         log.debug("Get current fileslisting of [" + watchPath + "]");
-        
-        File    dir = new File(watchPath);
-        
+
+        final File    dir = new File(watchPath);
+
         if (!(dir.exists() && dir.isDirectory())) {
             log.error("Watched directory [" + watchPath + "] does not exist or is not a directory!");
             return null;
         }
-        
+
         final String ext = extensionFilter;
-        File[] fileList = dir.listFiles(new FileFilter() {
+        final File[] fileList = dir.listFiles(new FileFilter() {
                                         @Override
-                                        public boolean accept(File file) {
+                                        public boolean accept(final File file) {
                                             return file.isFile() && (ext != null ? file.getName().toLowerCase().endsWith("." + ext) : true);
                                         }
                                     });
-        
+
         // Sort the retrieved file list
         Utils.sortFiles(fileList);
-        
+
         return fileList;
     }
 }

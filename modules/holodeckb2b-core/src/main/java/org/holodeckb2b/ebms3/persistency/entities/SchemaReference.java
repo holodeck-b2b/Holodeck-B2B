@@ -17,15 +17,17 @@
 package org.holodeckb2b.ebms3.persistency.entities;
 
 import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Lob;
+
 import org.holodeckb2b.interfaces.general.ISchemaReference;
 
 /**
- * Is the JPA persistency class for storing schema reference information about a payload. Because the schema reference 
+ * Is the JPA persistency class for storing schema reference information about a payload. Because the schema reference
  * is always part of the payload meta-data it is defined as <i>embeddable</i>.
- * 
+ *
  * @author Sander Fieten <sander at holodeckb2b.org>
  */
 @Embeddable
@@ -34,13 +36,13 @@ public class SchemaReference implements Serializable, ISchemaReference {
     /*
      * Getters and setters
      */
-    
+
     @Override
     public String getLocation() {
         return LOCATION;
     }
-    
-    public void setLocation(String location) {
+
+    public void setLocation(final String location) {
         LOCATION = location;
     }
 
@@ -49,52 +51,52 @@ public class SchemaReference implements Serializable, ISchemaReference {
         return NAMESPACE;
     }
 
-    public void setNamespace(String namespace) {
+    public void setNamespace(final String namespace) {
         NAMESPACE = namespace;
     }
-    
+
     @Override
     public String getVersion() {
         return VERSION;
     }
-    
-    public void setVersion(String version) {
+
+    public void setVersion(final String version) {
         VERSION = version;
     }
-    
+
     /*
      * Constructors
      */
     public SchemaReference() {}
-    
+
     /**
      * Creates a new SchemaReference object for the given schema
-     * 
+     *
      * @param   location     The location where the schema can be found
      * @param   namespace    The namespace of the schema
      * @param   version      The version of the schema
      */
-    public SchemaReference(String location, String namespace, String version) {
+    public SchemaReference(final String location, final String namespace, final String version) {
         LOCATION = location;
         NAMESPACE = namespace;
         VERSION = version;
     }
-    
+
     /*
      * Fields
-     * 
-     * NOTE: The JPA @Column annotation is not used so the attribute names are 
+     *
+     * NOTE: The JPA @Column annotation is not used so the attribute names are
      * used as column names. Therefor the attribute names are in CAPITAL.
      */
     @Lob
     @Column(length = 1024)
     private String  LOCATION;
-    
+
     @Lob
     @Column(length = 1024)
     private String  NAMESPACE;
-    
+
     @Lob
     @Column(length = 1024)
-    private String  VERSION;    
+    private String  VERSION;
 }

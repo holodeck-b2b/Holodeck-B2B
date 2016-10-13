@@ -18,50 +18,51 @@ package org.holodeckb2b.common.util;
 
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Generates unique identifiers for use in message processing.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class MessageIdGenerator {
-   
+
     /**
      * Generates an unique message id as specified in the ebMS V3 Core Specification.
-     * 
+     *
      * @return A message id conforming to RFC2822
      */
     public static String createMessageId() {
         // Generate a UUID as left part of the msg-id
-        String leftPart = UUID.randomUUID().toString();
-        
+        final String leftPart = UUID.randomUUID().toString();
+
         // Right part of the msg-id is the host name which can be either specified,
         //  retrieved or randomly generated
-        String rightPart = HolodeckB2BCoreInterface.getConfiguration().getHostName();
-        
+        final String rightPart = HolodeckB2BCoreInterface.getConfiguration().getHostName();
+
         return leftPart + '@' + rightPart;
     }
-    
+
     /**
-     * Generates a unique [MIME] content id based on the given message id. 
-     * <p><b>NOTE:</b> If the given message id is <code>null</code> or empty a random 
+     * Generates a unique [MIME] content id based on the given message id.
+     * <p><b>NOTE:</b> If the given message id is <code>null</code> or empty a random
      * content id will be generated.
-     * 
+     *
      * @param msgId     The message id to use as base for the content id
      * @return          A unique content id
      */
-    public static String createContentId(String msgId) {
+    public static String createContentId(final String msgId) {
         String leftPart, rightPart;
-        
+
         if (msgId == null || msgId.isEmpty())
             // Because there is no message id to base the cid on, just create
             // a completely new id which is equivalent to a msg id
             return createMessageId();
         else {
-            // Split msgId in left and right part (including the '@'). When msg 
-            // id does not contain '@' use empty right part 
-            int i = msgId.indexOf("@");
+            // Split msgId in left and right part (including the '@'). When msg
+            // id does not contain '@' use empty right part
+            final int i = msgId.indexOf("@");
             if (i > 0) {
                 leftPart = msgId.substring(0, i - 1);
                 rightPart = msgId.substring(i);
@@ -69,10 +70,10 @@ public class MessageIdGenerator {
                 leftPart = msgId;
                 rightPart = "";
             }
-                    
+
             // Add random number to left part
             leftPart += "-" + String.valueOf(ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
-            
+
             // And return with rightPart added again
             return leftPart + rightPart;
         }

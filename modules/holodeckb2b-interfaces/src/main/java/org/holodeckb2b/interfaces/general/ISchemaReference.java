@@ -18,37 +18,37 @@ package org.holodeckb2b.interfaces.general;
 
 
 /**
- * Represents a <b>reference to</b> a schema that defines the structure of an object/entity. The referred schema can be 
+ * Represents a <b>reference to</b> a schema that defines the structure of an object/entity. The referred schema can be
  * any kind of structure definition, like XML Schema, a database schema, DTD, etc.
  * <p>Corresponds to the information contained in the <code>//eb:UserMessage//eb:PartInfo/eb:Schema</code> element. See
  * section 5.2.2.13 of the ebMS Core Specification for more information.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface ISchemaReference {
-    
+
     /**
      * Gets the location where the schema can be found.
      * <p>Corresponds to the <code>location</code> attribute of the <code>eb:Schema</code> element.
-     * 
-     * @return  The schema location. This is a required property of the reference and therefor this method SHOULD NOT 
+     *
+     * @return  The schema location. This is a required property of the reference and therefor this method SHOULD NOT
      *          return null
      */
     public String   getLocation();
-    
+
     /**
      * Gets the namespace of the schema.
      * <p>Corresponds to the <code>namespace</code> attribute of the <code>eb:Schema</code> element.
-     * 
+     *
      * @return  The namespace of the schema if specified,<br>
      *          <code>null</code> otherwise
      */
     public String   getNamespace();
-    
+
     /**
      * Gets the version of the schema.
      * <p>Corresponds to the <code>version</code> attribute of the <code>eb:Schema</code> element.
-     * 
+     *
      * @return  The version of the schema if specified,<br>
      *          <code>null</code> otherwise
      */

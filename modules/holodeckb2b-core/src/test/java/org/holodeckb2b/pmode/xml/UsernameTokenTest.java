@@ -16,13 +16,15 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import java.io.File;
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
-import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+
+import java.io.File;
+
+import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.junit.Assert;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -32,108 +34,108 @@ import org.simpleframework.xml.core.Persister;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class UsernameTokenTest {
-    
-    
+
+
     public UsernameTokenTest() {
     }
 
-    private UsernameToken createFromFile(String fName) throws Exception {
-    
+    private UsernameToken createFromFile(final String fName) throws Exception {
+
         try {
             // retrieve the resource from the pmodetest directory.
-            File f = new File(this.getClass().getClassLoader().getResource("pmodetest/ut/" + fName).getPath());
-            
-            Serializer  serializer = new Persister();
+            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/ut/" + fName).getPath());
+
+            final Serializer  serializer = new Persister();
             return serializer.read(UsernameToken.class, f);
         }
-        catch (Exception ex) {
+        catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             return null;
         }
     }
-    
+
     @Test
     public void testCompleteUT() {
         try {
-            UsernameToken ut = createFromFile("completeUT.xml");
-        
+            final UsernameToken ut = createFromFile("completeUT.xml");
+
             assertNotNull(ut);
             assertEquals("ebms", ut.target);
             assertEquals("captain", ut.getUsername());
             assertEquals("1234567890", ut.getPassword());
             assertEquals(IUsernameTokenConfiguration.PasswordType.DIGEST, ut.getPasswordType());
             Assert.assertTrue(ut.includeNonce());
-            Assert.assertFalse(ut.includeCreated());            
-            
-        } catch (Exception e) {
+            Assert.assertFalse(ut.includeCreated());
+
+        } catch (final Exception e) {
             fail();
-        }        
+        }
     }
-    
+
     @Test
     public void testDefaultUT() {
         try {
-            UsernameToken ut = createFromFile("defaultUT.xml");
-        
+            final UsernameToken ut = createFromFile("defaultUT.xml");
+
             assertNotNull(ut);
             assertNull(ut.target);
             assertEquals("captain", ut.getUsername());
             assertEquals("0987654321", ut.getPassword());
             assertEquals(IUsernameTokenConfiguration.PasswordType.DIGEST, ut.getPasswordType());
             Assert.assertTrue(ut.includeNonce());
-            Assert.assertTrue(ut.includeCreated());            
-            
-        } catch (Exception e) {
+            Assert.assertTrue(ut.includeCreated());
+
+        } catch (final Exception e) {
             fail();
-        }        
+        }
     }
-    
+
     @Test
     public void testTextPwdUT() {
         try {
-            UsernameToken ut = createFromFile("textPwdUT.xml");
-        
+            final UsernameToken ut = createFromFile("textPwdUT.xml");
+
             assertNotNull(ut);
             assertEquals("captain", ut.getUsername());
             assertEquals("0129384756", ut.getPassword());
             assertEquals(IUsernameTokenConfiguration.PasswordType.TEXT, ut.getPasswordType());
             Assert.assertTrue(ut.includeNonce());
-            Assert.assertTrue(ut.includeCreated());            
-            
-        } catch (Exception e) {
+            Assert.assertTrue(ut.includeCreated());
+
+        } catch (final Exception e) {
             fail();
-        }        
+        }
     }
-    
+
     @Test
     public void testTextPwdOnlyUT() {
         try {
-            UsernameToken ut = createFromFile("textPwdOnlyUT.xml");
-        
+            final UsernameToken ut = createFromFile("textPwdOnlyUT.xml");
+
             assertNotNull(ut);
             assertEquals("captain", ut.getUsername());
             assertEquals("0129384756", ut.getPassword());
             assertEquals(IUsernameTokenConfiguration.PasswordType.TEXT, ut.getPasswordType());
             Assert.assertFalse(ut.includeNonce());
-            Assert.assertFalse(ut.includeCreated());            
-            
-        } catch (Exception e) {
+            Assert.assertFalse(ut.includeCreated());
+
+        } catch (final Exception e) {
             fail();
-        }        
+        }
     }
-    
+
     @Test
     public void testNoPassword() {
         try {
             UsernameToken ut = createFromFile("noPwdUT.xml");
             assertNull(ut);
-            
+
             ut = createFromFile("emptyPwdUT.xml");
             assertNull(ut);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             fail();
         }
     }
-    
-    
+
+
 }

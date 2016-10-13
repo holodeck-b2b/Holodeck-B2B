@@ -19,52 +19,43 @@ package org.holodeckb2b.ebms3.persistent.dao;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import org.holodeckb2b.common.config.InternalConfiguration;
+
 import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.module.HolodeckB2BCoreImpl;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 
 /**
  * Helper class to easily access the database.
  * <p>This class is intended for use by the Holodeck B2B core only. DO NOT USE in
  * custom code!
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class JPAUtil {
-    
-    /*
-     * The EntityManagerFactory to create EntityManagers
-     */
-    private static EntityManagerFactory emf;
-    
+    private static final class SingletonHolder
+    {
+      static final EntityManagerFactory instance = Persistence.createEntityManagerFactory (((InternalConfiguration) HolodeckB2BCoreInterface.getConfiguration()).getPersistencyUnit());
+    }
+
     /**
      * Gets a {@see EntityManager} for the JPA persistency unit named in the configuration.
-     * 
+     *
      * @return  An <code>EntityManager</code> to access the database
-     * @throws  DatabaseException   
+     * @throws  DatabaseException
      */
     public static EntityManager getEntityManager() throws DatabaseException {
-       // Initialize list of EMF's if not already done
-       if (emf == null)
-           emf = getEntityManagerFactory(); 
-      
        // Create an EntityManager using the found factory
        EntityManager em = null;
-       
+
        try {
-           em = emf.createEntityManager();
-       } catch (Exception e) {
+           // The class is loaded upon first call
+           em = SingletonHolder.instance.createEntityManager();
+       } catch (final Exception e) {
            // Oh oh, something went wrong creating the entity manager
            throw new DatabaseException("Error while creating the EntityManager", e);
        }
-       
+
        return em;
-    }
-    
-    private static synchronized EntityManagerFactory getEntityManagerFactory() throws DatabaseException {        
-        if (emf != null)
-            return emf;
-        else
-            return Persistence.createEntityManagerFactory(HolodeckB2BCoreImpl.getPersistencyUnit());
     }
 }

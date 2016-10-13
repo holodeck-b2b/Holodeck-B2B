@@ -17,6 +17,7 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.common.util.Utils;
@@ -25,83 +26,83 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
- * Is a helper class for handling the ebMS MessageInfo element in the ebMS SOAP 
+ * Is a helper class for handling the ebMS MessageInfo element in the ebMS SOAP
  * header.
  * <p>This element is specified in section 5.2.2.1 of the ebMS 3 Core specification.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class MessageInfo {
-    
+
     /**
      * The fully qualified name of the element as an {@see QName}
      */
     static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "MessageInfo");
-    
+
     /**
      * The fully qualified name of the Timestamp element as an {@see QName}
      */
     private static final QName  Q_TIMESTAMP = new QName(EbMSConstants.EBMS3_NS_URI, "Timestamp");
-    
+
     /**
      * The fully qualified name of the MessageId element as an {@see QName}
      */
     private static final QName  Q_MESSAGEID = new QName(EbMSConstants.EBMS3_NS_URI, "MessageId");
-    
+
     /**
      * The fully qualified name of the RefToMessageId element as an {@see QName}
      */
     private static final QName  Q_REFTO_MESSAGEID = new QName(EbMSConstants.EBMS3_NS_URI, "RefToMessageId");
-    
+
     /**
-     * Creates a <code>eb:MessageInfo</code> element for the given {@see IMessageUnit} 
+     * Creates a <code>eb:MessageInfo</code> element for the given {@see IMessageUnit}
      * object. This element is added as a child to the element representing the
      * message unit.
-     * 
+     *
      * @param muElement     The element representing the given message unit
      * @param data          The message unit information as an {@see IMessageUnit}
      * @return              The newly created <code>eb:MessageInfo</code> element.
      */
-    public static OMElement createElement(OMElement muElement, IMessageUnit data) {
-        OMFactory f = muElement.getOMFactory();
-        
+    public static OMElement createElement(final OMElement muElement, final IMessageUnit data) {
+        final OMFactory f = muElement.getOMFactory();
+
         // Create the element
-        OMElement msginfo = f.createOMElement(Q_ELEMENT_NAME, muElement);
-        
+        final OMElement msginfo = f.createOMElement(Q_ELEMENT_NAME, muElement);
+
         // Add content
-        OMElement timestamp = f.createOMElement(Q_TIMESTAMP, msginfo);
+        final OMElement timestamp = f.createOMElement(Q_TIMESTAMP, msginfo);
         timestamp.setText(Utils.toXMLDateTime(data.getTimestamp()));
-        
-        OMElement messageId = f.createOMElement(Q_MESSAGEID, msginfo);
+
+        final OMElement messageId = f.createOMElement(Q_MESSAGEID, msginfo);
         messageId.setText(data.getMessageId());
-        
-        String refMsgId = data.getRefToMessageId();
+
+        final String refMsgId = data.getRefToMessageId();
         if (refMsgId != null && !refMsgId.isEmpty()) {
-            OMElement  refToMsgId = f.createOMElement(Q_REFTO_MESSAGEID, msginfo);
+            final OMElement  refToMsgId = f.createOMElement(Q_REFTO_MESSAGEID, msginfo);
             refToMsgId.setText(refMsgId);
         }
 
         return msginfo;
-    } 
+    }
 
     /**
-     * Gets the {@link OMElement} object that represent the <code>MessageInfo</code> 
-     * child element of the <code>UserMessage</code> or <code>SignalMessage</code> 
+     * Gets the {@link OMElement} object that represent the <code>MessageInfo</code>
+     * child element of the <code>UserMessage</code> or <code>SignalMessage</code>
      * element.
-     * 
+     *
      * @param piElement     The parent element (either <code>UserMessage</code> or <code>SignalMessage</code>)
      * @return              The {@link OMElement} object representing the requested element
      *                      or <code>null</code> when the requested element is not found as
      *                      child of the given element.
      */
-    public static OMElement getElement(OMElement muElement) {
+    public static OMElement getElement(final OMElement muElement) {
         return muElement.getFirstChildWithName(Q_ELEMENT_NAME);
     }
-    
+
     /**
      * Reads the information from the <code>eb:MessageInfo</code> element and
-     * stores it in the given {@see MessageUnit} object. 
-     * 
+     * stores it in the given {@see MessageUnit} object.
+     *
      * @param miElement     The <code>MessageInfo</code> element to read the
      *                      information from
      * @param mu            The {@link MessageUnit} where information should be
@@ -110,22 +111,22 @@ public class MessageInfo {
      *                              ebMS specification and can therefore not be
      *                              read completely
      */
-    public static void readElement(OMElement miElement, MessageUnit mu) throws PackagingException {
+    public static void readElement(final OMElement miElement, final MessageUnit mu) throws PackagingException {
         try {
             mu.setTimestamp(Utils.fromXMLDateTime(miElement.getFirstChildWithName(Q_TIMESTAMP).getText()));
-        } catch (Exception e) {
-            throw new PackagingException("Required element " + Q_TIMESTAMP.getLocalPart() 
+        } catch (final Exception e) {
+            throw new PackagingException("Required element " + Q_TIMESTAMP.getLocalPart()
                                                                     + " is missing or has invalid value");
-        }  
-        
-        OMElement messageId = miElement.getFirstChildWithName(Q_MESSAGEID);
-            
+        }
+
+        final OMElement messageId = miElement.getFirstChildWithName(Q_MESSAGEID);
+
         if (messageId == null || messageId.getText().isEmpty())
-            throw new PackagingException("Required element " + Q_TIMESTAMP.getLocalPart() 
+            throw new PackagingException("Required element " + Q_TIMESTAMP.getLocalPart()
                                                                     + " is missing or has invalid value");
         mu.setMessageId(messageId.getText());
-        
-        OMElement  refToMsgId = miElement.getFirstChildWithName(Q_REFTO_MESSAGEID);
+
+        final OMElement  refToMsgId = miElement.getFirstChildWithName(Q_REFTO_MESSAGEID);
         if (refToMsgId != null && !refToMsgId.getText().isEmpty())
             mu.setRefToMessageId(refToMsgId.getText());
     }

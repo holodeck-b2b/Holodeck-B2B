@@ -17,14 +17,15 @@
 package org.holodeckb2b.ebms3.persistency.entities;
 
 import java.io.Serializable;
+
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 
 /**
- * Represents a general ebMS <b>Signal Message</b> message unit. As each signal message is of a specific type this is an 
+ * Represents a general ebMS <b>Signal Message</b> message unit. As each signal message is of a specific type this is an
  * abstract class and each signal type must have its own child class.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public abstract class SignalMessage extends MessageUnit implements Serializable, ISignalMessage {
-    
+
 }

@@ -18,39 +18,39 @@ package org.holodeckb2b.common.util;
 
 /**
  * Is a simple and write once read many key value pair.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @param <K> Key type
  * @param <V> Value type
  */
 public class KeyValuePair<K, V> {
-    
-    private K   key;
-    private V   value;
-    
+
+    private final K   key;
+    private final V   value;
+
     /**
      * Creates a new <code>KeyValuePair</code>
-     * 
+     *
      * @param key       An object of class K that is the key of the new pair
      * @param value     An object of class V that is the value of the new pair
      */
-    public KeyValuePair(K key, V value) {
+    public KeyValuePair(final K key, final V value) {
         this.key = key;
         this.value = value;
     }
 
     /**
      * Gets the key of this key value pair
-     * 
+     *
      * @return  The key of this pair
      */
     public K getKey() {
         return key;
     }
-    
+
     /**
      * Gets the value of this key value pair
-     * 
+     *
      * @return The value of this pair
      */
     public V getValue() {

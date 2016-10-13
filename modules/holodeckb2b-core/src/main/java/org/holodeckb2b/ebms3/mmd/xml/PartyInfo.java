@@ -24,14 +24,14 @@ import org.simpleframework.xml.Element;
  * contains information on the sender and [intended] receiver of the message.
  * <p>The <code>To</code> and <code>From</code> elements share the same datatype,
  * so there is also one class ({@see TradingPartner}) used to represents these elements.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class PartyInfo {
-    
+
     @Element(name = "From", required = false)
     private TradingPartner      sender;
-    
+
     @Element(name = "To", required = false)
     private TradingPartner      receiver;
 
@@ -45,10 +45,10 @@ public class PartyInfo {
     /**
      * @param sender the sender to set
      */
-    public void setSender(ITradingPartner sender) {
+    public void setSender(final ITradingPartner sender) {
         if (sender != null)
             this.sender = new TradingPartner(sender);
-        else 
+        else
             this.sender = null;
     }
 
@@ -66,7 +66,7 @@ public class PartyInfo {
         if (receiver != null)
             this.receiver = new TradingPartner(receiver);
         else
-            receiver = null;
+            this.receiver = null;
     }
-    
+
 }

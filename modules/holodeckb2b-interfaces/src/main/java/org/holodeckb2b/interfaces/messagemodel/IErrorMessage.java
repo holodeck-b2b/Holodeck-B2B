@@ -21,23 +21,23 @@ package org.holodeckb2b.interfaces.messagemodel;
 import java.util.Collection;
 
 /**
- * Represents the information available of the Error type of signal message. 
+ * Represents the information available of the Error type of signal message.
  * <p>The error signal message unit is used to signal problems that occur while processing other ebMS message units.
  * It is exchanged between two MSHs when a problem is detected with the exchanged messages. Depending on the P-Mode
- * configuration it can however also be used to signal problems to the <i>business</i> application. 
- * <p>An error signal message contains one or more <code>eb:Error</code> elements which give detailed information on the 
+ * configuration it can however also be used to signal problems to the <i>business</i> application.
+ * <p>An error signal message contains one or more <code>eb:Error</code> elements which give detailed information on the
  * errors that occurred. See section 6 of the ebMS Core Specification for more information on error handling and the
  * structure of the error signal message unit.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see ISignalMessage
  * @see IMessageUnit
  */
 public interface IErrorMessage extends ISignalMessage {
-    
+
     /**
      * Gets the details of all errors included in this error signal message.
-     * 
+     *
      * @return  A collection of {@link IEbmsError} objects representing all errors in this error signal.
      */
     public Collection<IEbmsError> getErrors();

@@ -21,7 +21,7 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.ebms.axis2.MessageContextUtils;
+import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
@@ -31,17 +31,17 @@ import org.holodeckb2b.ebms3.packaging.PullRequest;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 
 /**
- * Is an in flow handler that checks if this message contains a pull request, i.e. contains a <eb:PullRequest> element 
- * in the ebMS header. When such a pull request message unit is found the information is read from the message and 
+ * Is an in flow handler that checks if this message contains a pull request, i.e. contains a <eb:PullRequest> element
+ * in the ebMS header. When such a pull request message unit is found the information is read from the message and
  * stored both in the database and message context (under key {@link MessageContextProperties#IN_PULL_REQUEST}).
- * <p>The meta data is stored in an {@link PullRequest} entity object which is stored in the database and added to the 
+ * <p>The meta data is stored in an {@link PullRequest} entity object which is stored in the database and added to the
  * message context under key {@link MessageContextProperties#IN_PULL_REQUEST}. The processing state of the pull request
  * is set to {@link ProcessingStates#RECEIVED}.
- * <p><b>NOTE:</b> The XML schema definition from the ebMS specification allows for multiple <code>eb:SignalMessage</code> 
- * elements in the ebMS header, so there could be more than one pull request in the message. The ebMS Core Specification 
- * however limits the number of pull request units in the message to just one. Holodeck B2B therefor only uses the first 
+ * <p><b>NOTE:</b> The XML schema definition from the ebMS specification allows for multiple <code>eb:SignalMessage</code>
+ * elements in the ebMS header, so there could be more than one pull request in the message. The ebMS Core Specification
+ * however limits the number of pull request units in the message to just one. Holodeck B2B therefor only uses the first
  * occurrence of <code>eb:SignalMessage</code> that has a <code>eb:PullRequest</code> child and ignores others.
- * 
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class ReadPullRequest extends BaseHandler {
@@ -52,14 +52,14 @@ public class ReadPullRequest extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) throws DatabaseException {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws DatabaseException {
         // First get the ebMS header block, that is the eb:Messaging element
-        SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
-        
+        final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
+
         if (messaging != null) {
-            // Check if there is a Pull Request signal 
+            // Check if there is a Pull Request signal
             log.debug("Check for PullRequest element to determine if message contains pull request");
-            OMElement prElement = PullRequest.getElement(messaging);
+            final OMElement prElement = PullRequest.getElement(messaging);
             if (prElement != null) {
                 log.debug("PullRequest found, read information from message");
                 // Read information into PullRequest object
@@ -67,29 +67,29 @@ public class ReadPullRequest extends BaseHandler {
                 try {
                     pullRequest = PullRequest.readElement(prElement);
                     // And store in database and message context for further processing
-                    log.info("PullRequest [msgId=" + pullRequest.getMessageId() + "] for MPC " + pullRequest.getMPC() 
+                    log.info("PullRequest [msgId=" + pullRequest.getMessageId() + "] for MPC " + pullRequest.getMPC()
                                 + " received.");
                     log.debug("Store PullRequest in database and message context");
-                    mc.setProperty(MessageContextProperties.IN_PULL_REQUEST, 
-                                                                MessageUnitDAO.storeReceivedMessageUnit(pullRequest));                    
-                } catch (PackagingException ex) {
+                    mc.setProperty(MessageContextProperties.IN_PULL_REQUEST,
+                                                                MessageUnitDAO.storeReceivedMessageUnit(pullRequest));
+                } catch (final PackagingException ex) {
                     // The ebMS header contains an ill formatted pull request
-                    log.warn("Received message contains invalid ebMS pull request signal message! Details: " 
+                    log.warn("Received message contains invalid ebMS pull request signal message! Details: "
                                 + ex.getMessage());
-                    
+
                     // Add an error to context, maybe it can be sent as response
-                    InvalidHeader   invalidHdrError = new InvalidHeader();
+                    final InvalidHeader   invalidHdrError = new InvalidHeader();
                     invalidHdrError.setShortDescription(ex.getMessage());
                     invalidHdrError.setErrorDetail("Source of header containing the error:" + prElement.toString());
-                    MessageContextUtils.addGeneratedError(mc, invalidHdrError);                    
-                }                 
+                    MessageContextUtils.addGeneratedError(mc, invalidHdrError);
+                }
             } else
                 log.debug("ebMS message does not contain PullRequest");
         } else {
             log.debug("Not an ebMS message, nothing to do.");
         }
-        
+
         return InvocationResponse.CONTINUE;
     }
-    
+
 }

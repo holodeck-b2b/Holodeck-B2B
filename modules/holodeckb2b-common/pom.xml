@@ -22,22 +22,21 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>2.0.2</version>
+        <version>2.1.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.holodeckb2b</groupId>
     <artifactId>holodeckb2b-common</artifactId>
     <packaging>jar</packaging>
     <name>Holodeck B2B - Common</name>
-  
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-interfaces</artifactId>
         </dependency>
-                
+
         <!-- Apache Axis2 kernel -->
         <dependency>
             <groupId>org.apache.axis2</groupId>
@@ -47,7 +46,7 @@
             <groupId>org.simpleframework</groupId>
             <artifactId>simple-xml</artifactId>
         </dependency>
-        
+
         <!-- Apache Tika is used to determine MIME Type -->
         <dependency>
             <groupId>org.apache.tika</groupId>
@@ -58,10 +57,8 @@
         <dependency>
             <groupId>org.apache.santuario</groupId>
             <artifactId>xmlsec</artifactId>
-            <type>jar</type>            
-            <version>2.0.5</version>
         </dependency>
-                        
+
         <!-- Dependencies specific for testing -->
         <dependency>
             <groupId>junit</groupId>
@@ -69,14 +66,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

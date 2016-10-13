@@ -27,39 +27,39 @@ import org.simpleframework.xml.Root;
  */
 @Root (name = "Flow", strict = false)
 public class UserMessageFlow implements IUserMessageFlow {
-    
+
     @Element (name = "BusinessInfo", required = false)
     private BusinessInfo businessInfo;
 
     @Element (name = "ErrorHandling", required = false)
     private ErrorHandling errorHandling;
-    
+
     @Element (name = "PayloadProfile", required = false)
     private PayloadProfile payloadProfile;
 
     /**
      * Gets the business information
-     * 
+     *
      * @return The business information
      */
     @Override
     public BusinessInfo getBusinessInfo() {
         return this.businessInfo;
     }
-    
+
     @Override
     public ErrorHandling getErrorHandlingConfiguration() {
         return errorHandling;
     }
-    
+
     /**
      * Gets the payload profile
-     * 
+     *
      * @return The payload profile
      */
     @Override
     public PayloadProfile getPayloadProfile() {
         return this.payloadProfile;
     }
-      
+
 }

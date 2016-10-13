@@ -27,8 +27,8 @@ import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 
 /**
  * Is the <i>in flow</i> handler that starts the process of delivering the user message message unit to the business
- * application by changing the message units processing state to {@link ProcessingStates#PROCESSING}. 
- * 
+ * application by changing the message units processing state to {@link ProcessingStates#PROCESSING}.
+ *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class StartProcessingUsrMessage extends AbstractUserMessageHandler {
@@ -39,17 +39,17 @@ public class StartProcessingUsrMessage extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> um) throws DatabaseException {
-        String msgId = um.entity.getMessageId();
+    protected InvocationResponse doProcessing(final MessageContext mc, final EntityProxy<UserMessage> um) throws DatabaseException {
+        final String msgId = um.entity.getMessageId();
         log.debug("Change processing state to indicate start of processing of message [" + msgId + "]" );
         if (!MessageUnitDAO.startProcessingMessageUnit(um)) {
             // Changing the state failed which indicates that the message unit is already being processed
             log.warn("User message [msgId= " + msgId + "] is already being processed");
             // Remove the User Message from the context to prevent further processing
             mc.removeProperty(MessageContextProperties.IN_USER_MESSAGE);
-        } else 
+        } else
             log.warn("User message [msgId= " + msgId + "] is ready for processing");
-        
+
         return InvocationResponse.CONTINUE;
     }
 }
