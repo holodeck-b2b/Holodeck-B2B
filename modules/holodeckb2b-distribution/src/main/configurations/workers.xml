@@ -77,13 +77,13 @@
     This worker is the default method for submitting messages to 
     Holodeck B2B. It reads all message meta data documents from the 
     specified directory and creates the messages for sending. The
-    actual send proces is started by the sender worker defined above.
+    actual send process is started by the sender worker defined above.
     
     It is RECOMMENDED to specify an absolute path to the directory to
     watch for meta data documents.
     
     The worker will look for all files with ".mmd" extension. After
-    processing the extenction will be changed to ".processed". If an
+    processing the extension will be changed to ".processed". If an
     error occurs an new file with the same name but ".error" extension
     will be written with information about the error.
     
