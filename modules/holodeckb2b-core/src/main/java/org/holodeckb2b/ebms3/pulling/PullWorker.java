@@ -154,42 +154,42 @@ public class PullWorker implements IWorkerTask {
      */
     @Override
     public void run() {
-            log.debug("Getting list of P-Modes for which pull requests should be send");
-            final Collection<IPMode>  pullForPModes = getPModesToPull();
+        log.debug("Getting list of P-Modes for which pull requests should be send");
+        final Collection<IPMode>  pullForPModes = getPModesToPull();
 
-            // Trigger Pull operation for each P-Mode
-            for(final IPMode p : pullForPModes) {
-                log.debug("Start Pull operation for P-Mode [" + p.getId() +"]");
-                // Get the MPC from the P-Mode
-                log.debug("Get MPC to pull from");
-                String mpc = null;
-                final ILeg leg = p.getLegs().iterator().next(); // currently only One-Way P-Modes, so only one leg
-                // First check PullRequest flow (sub-channel) and then UserMessage flow
-                final Collection<IPullRequestFlow> flows = leg.getPullRequestFlows();
-                if (flows != null && !flows.isEmpty()) {
-                    final IPullRequestFlow prf = flows.iterator().next();
-                    mpc = prf.getMPC() != null ? prf.getMPC() : null;
-                }
-                if (mpc == null || mpc.isEmpty()) {
-                    log.debug("No MPC defined in PullRequest flow, check UserMessage flow");
-                    final IUserMessageFlow flow = leg.getUserMessageFlow();
-                    mpc = flow != null && flow.getBusinessInfo() != null ? flow.getBusinessInfo().getMpc() : null;
-                }
-
-                if (mpc == null || mpc.isEmpty())
-                    // No MPC defined in P-Mode, use default MPC
-                    mpc = EbMSConstants.DEFAULT_MPC;
-                log.debug("Using [" + mpc + "] as MPC for pull request");
-
-                try {
-                    log.debug("Create the PullRequest signal");
-                    final String messageId = HolodeckB2BCoreInterface.getMessageSubmitter()
-                                                                    .submitMessage(new PullRequestData(p.getId(), mpc));
-                    log.info("PullRequest created [" + messageId + "] for P-Mode [" + p.getId() + "] and MPC=" + mpc);
-                } catch (final MessageSubmitException ex) {
-                    log.error("Could not submit PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
-                }
+        // Trigger Pull operation for each P-Mode
+        for(final IPMode p : pullForPModes) {
+            log.debug("Start Pull operation for P-Mode [" + p.getId() +"]");
+            // Get the MPC from the P-Mode
+            log.debug("Get MPC to pull from");
+            String mpc = null;
+            final ILeg leg = p.getLegs().iterator().next(); // currently only One-Way P-Modes, so only one leg
+            // First check PullRequest flow (sub-channel) and then UserMessage flow
+            final Collection<IPullRequestFlow> flows = leg.getPullRequestFlows();
+            if (flows != null && !flows.isEmpty()) {
+                final IPullRequestFlow prf = flows.iterator().next();
+                mpc = prf.getMPC() != null ? prf.getMPC() : null;
             }
+            if (mpc == null || mpc.isEmpty()) {
+                log.debug("No MPC defined in PullRequest flow, check UserMessage flow");
+                final IUserMessageFlow flow = leg.getUserMessageFlow();
+                mpc = flow != null && flow.getBusinessInfo() != null ? flow.getBusinessInfo().getMpc() : null;
+            }
+
+            if (mpc == null || mpc.isEmpty())
+                // No MPC defined in P-Mode, use default MPC
+                mpc = EbMSConstants.DEFAULT_MPC;
+            log.debug("Using [" + mpc + "] as MPC for pull request");
+
+            try {
+                log.debug("Create the PullRequest signal");
+                final String messageId = HolodeckB2BCoreInterface.getMessageSubmitter()
+                                                                .submitMessage(new PullRequestData(p.getId(), mpc));
+                log.info("PullRequest created [" + messageId + "] for P-Mode [" + p.getId() + "] and MPC=" + mpc);
+            } catch (final MessageSubmitException ex) {
+                log.error("Could not submit PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
+            }
+        }
     }
 
     /**
