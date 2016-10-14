@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>next-SNAPSHOT-1</version>
+        <version>next-SNAPSHOT-3</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -30,13 +30,13 @@
     <artifactId>holodeckb2b-common</artifactId>
     <packaging>jar</packaging>
     <name>Holodeck B2B - Common</name>
-  
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-interfaces</artifactId>
         </dependency>
-                
+
         <!-- Apache Axis2 kernel -->
         <dependency>
             <groupId>org.apache.axis2</groupId>
@@ -46,7 +46,7 @@
             <groupId>org.simpleframework</groupId>
             <artifactId>simple-xml</artifactId>
         </dependency>
-        
+
         <!-- Apache Tika is used to determine MIME Type -->
         <dependency>
             <groupId>org.apache.tika</groupId>
@@ -58,7 +58,7 @@
             <groupId>org.apache.santuario</groupId>
             <artifactId>xmlsec</artifactId>
         </dependency>
-                        
+
         <!-- Dependencies specific for testing -->
         <dependency>
             <groupId>junit</groupId>

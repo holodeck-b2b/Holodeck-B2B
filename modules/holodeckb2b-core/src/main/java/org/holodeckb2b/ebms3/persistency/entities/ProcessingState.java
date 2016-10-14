@@ -18,11 +18,11 @@ package org.holodeckb2b.ebms3.persistency.entities;
 
 import java.io.Serializable;
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -70,6 +70,10 @@ public class ProcessingState implements Serializable {
         return PROC_STATE_NUM;
     }
 
+    public void setMessageUnit(final MessageUnit mu) {
+        this.msgUnit = mu;
+    }
+
     /*
      * Constructors
      */
@@ -104,6 +108,9 @@ public class ProcessingState implements Serializable {
     @Id
     @GeneratedValue
     private long        OID;
+
+    @ManyToOne
+    private MessageUnit msgUnit;
 
     @Column(nullable = false)
     private int         PROC_STATE_NUM;
