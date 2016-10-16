@@ -52,8 +52,9 @@ public class SenderWorker extends AbstractWorkerTask {
     public void doProcessing() {
         try {
             log.debug("Getting list of message units to send");
-            final List<EntityProxy<MessageUnit>> newMsgs = MessageUnitDAO.getMessageUnitsInState(MessageUnit.class,
-                                                                        new String[] {ProcessingStates.READY_TO_PUSH});
+            final List<EntityProxy<MessageUnit>> newMsgs =
+                    MessageUnitDAO.getMessageUnitsInState(MessageUnit.class,
+                        new String[] {ProcessingStates.READY_TO_PUSH});
 
             if (newMsgs != null && newMsgs.size() > 0) {
                 log.info("Found " + newMsgs.size() + " message units to send");
