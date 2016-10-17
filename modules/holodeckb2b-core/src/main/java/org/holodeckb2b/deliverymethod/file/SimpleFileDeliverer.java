@@ -18,14 +18,14 @@ package org.holodeckb2b.deliverymethod.file;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -216,18 +216,25 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
      * @throws IOException When the XML can not be written to disk
      */
     protected String writeXMLDocument(final OMElement xml, final String msgId) throws IOException {
-        try {
-            final String msgFilePath = Utils.preventDuplicateFileName(directory + "mi-"
-                                                                + msgId.replaceAll("[^a-zA-Z0-9.-]", "_")
-                                                                + ".xml");
+        final Path msgFilePath = Utils.createFileWithUniqueName(directory + "mi-"
+                                                                    + msgId.replaceAll("[^a-zA-Z0-9.-]", "_")
+                                                                    + ".xml");
 
-            final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(new FileWriter(msgFilePath));
+        try {
+            final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(
+                                                                                new FileWriter(msgFilePath.toString()));
             xml.serialize(writer);
             writer.close();
 
-            return msgFilePath;
+            return msgFilePath.toString();
         } catch (final Exception ex) {
             // Can not write the message info XML to file -> delivery not possible
+            // Try to remove the already created file
+            try {
+                Files.deleteIfExists(msgFilePath);
+            } catch (IOException io) {
+                log.error("Could not remove temp file [" + msgFilePath.toString() + "]! Remove manually.");
+            }
             throw new IOException("Error writing message unit info to file!", ex);
         }
     }

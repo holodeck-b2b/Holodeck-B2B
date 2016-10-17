@@ -20,12 +20,12 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -141,10 +141,11 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
             org.holodeckb2b.ebms3.packaging.PayloadInfo.createElement(usrMsgElement, mmd.getPayloads());
         }
 
+        String msgFilePath = null;
         try {
-            final String msgFilePath = Utils.preventDuplicateFileName(directory + "message-"
+            msgFilePath = Utils.createFileWithUniqueName(directory + "message-"
                                                         + mmd.getMessageId().replaceAll("[^a-zA-Z0-9.-]", "_")
-                                                        + ".xml");
+                                                        + ".xml").toString();
             log.debug("Message meta data complete, start writing this to file " + msgFilePath);
             final FileWriter fw = new FileWriter(msgFilePath);
             final XMLStreamWriter xmlWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(fw);
@@ -172,6 +173,13 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
         } catch (IOException | XMLStreamException ex) {
             log.error("An error occurred while delivering the user message [" + mmd.getMessageId()
                                                                     + "]\n\tError details: " + ex.getMessage());
+            // Remove the delivery file (if it was already created)
+            if (!Utils.isNullOrEmpty(msgFilePath))
+                try {
+                    Files.deleteIfExists(Paths.get(msgFilePath));
+                } catch (IOException io) {
+                    log.error("Could not remove temp file [" + msgFilePath.toString() + "]! Remove manually.");
+                }
             // And signal failure
             throw new MessageDeliveryException("Unable to deliver user message [" + mmd.getMessageId()
                                                     + "]. Error details: " + ex.getMessage());
