@@ -25,12 +25,10 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.zip.ZipException;
-
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axis2.AxisFault;
@@ -42,6 +40,7 @@ import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.FailedDecryption;
 import org.holodeckb2b.ebms3.errors.MimeInconsistency;
+import org.holodeckb2b.ebms3.errors.OtherContentError;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
 import org.holodeckb2b.ebms3.persistency.entities.Payload;
@@ -149,7 +148,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                             createInconsistentError(mc, um, plRef);
                             return InvocationResponse.CONTINUE;
                         } else {
-                            try (final OutputStream aOS = new FileOutputStream(plFile)) 
+                            try (final OutputStream aOS = new FileOutputStream(plFile))
                             {
                                 dh.writeTo(aOS);
                             } catch (final ZipException decompressError) {
@@ -161,21 +160,29 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                                 MessageContextUtils.addGeneratedError(mc, decompressFailure);
                                 log.debug("Error generated and stored in MC, change processing state of user message");
                                 MessageUnitDAO.setFailed(um);
-                            } catch (final IOException readException) {
+                            } catch (final IOException ioException) {
+                                // An error must be generated, which one depending on the what caused the exception
+                                EbmsError writeFailure;
                                 // Check if this IO exception is caused by decryption failure
-                                if (Utils.getRootCause(readException)
+                                if (Utils.getRootCause(ioException)
                                                                 instanceof java.security.GeneralSecurityException) {
                                     log.error("Payload [" + plRef + "] in message [" + um.entity.getMessageId()
                                                 + "] could not be decompressed! Details: "
-                                                + Utils.getRootCause(readException).getMessage());
-                                    final FailedDecryption decryptFailure = new FailedDecryption(
-                                            "Payload [" + plRef + "] in message could not be decrypted!",
-                                            um.entity.getMessageId());
-                                    MessageContextUtils.addGeneratedError(mc, decryptFailure);
-                                    log.debug("Error generated and stored in MC, change processing state of user message");
-                                    MessageUnitDAO.setFailed(um);
-                                    return InvocationResponse.CONTINUE;
+                                                + Utils.getRootCause(ioException).getMessage());
+                                    writeFailure = new FailedDecryption("Payload [" + plRef
+                                                                        + "] in message could not be decrypted!",
+                                                                        um.entity.getMessageId());
+                                } else {
+                                    log.error("Payload [" + plRef + "] in message [" + um.entity.getMessageId()
+                                                + "] could not be written to temp directory! Details: "
+                                                + Utils.getRootCause(ioException).getMessage());
+                                    writeFailure = new OtherContentError("Unexpected error in payload processing!",
+                                                                        um.entity.getMessageId());
                                 }
+                                MessageContextUtils.addGeneratedError(mc, writeFailure);
+                                log.debug("Error generated and stored in MC, change processing state of user message");
+                                MessageUnitDAO.setFailed(um);
+                                return InvocationResponse.CONTINUE;
                             }
                             log.debug("Payload saved to temporary file, set content location in meta data");
                             p.setContentLocation(plFile.getAbsolutePath());

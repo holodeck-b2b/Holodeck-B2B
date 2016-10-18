@@ -39,6 +39,7 @@ public class SOAPEnv {
 
     /**
      * The prefix of the ebMS header block elements.
+     * todo this constant is the duplicate of EbMSConstants.EBMS3_NS_PREFIX (T.S.)
      */
     private static final String EBMS3_NS_PREFIX = "eb3";
 

@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
@@ -37,7 +36,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
-
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
@@ -128,6 +126,7 @@ public abstract class MessageUnit implements Serializable, org.holodeckb2b.inter
             states = new ArrayList<>();
 
         state.setSeqNumber(Utils.isNullOrEmpty(states) ? 0 : states.get(0).getSeqNumber() + 1);
+        state.setMessageUnit(this);
         states.add(0, state);
     }
 
@@ -249,7 +248,7 @@ public abstract class MessageUnit implements Serializable, org.holodeckb2b.inter
     @Temporal(TemporalType.TIMESTAMP)
     private Date    MU_TIMESTAMP;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "msgUnit", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("PROC_STATE_NUM DESC")
     private List<ProcessingState>       states;
 }

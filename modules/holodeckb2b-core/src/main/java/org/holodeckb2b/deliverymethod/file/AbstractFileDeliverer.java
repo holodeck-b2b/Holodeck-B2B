@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.util.Utils;
@@ -163,14 +162,20 @@ public abstract class AbstractFileDeliverer implements IMessageDeliverer {
         }
         final String ext = Utils.getExtension(mimeType);
 
-        final Path targetPath = Paths.get(Utils.preventDuplicateFileName(directory + "pl-"
-                                                       + (msgId + "-" + plRef).replaceAll("[^a-zA-Z0-9.-]", "_")
-                                                       + (ext != null ? ext : "")));
+        final Path targetPath = Utils.createFileWithUniqueName(directory + "pl-"
+                                                               + (msgId + "-" + plRef).replaceAll("[^a-zA-Z0-9.-]", "_")
+                                                               + (ext != null ? ext : ""));
 
         try {
             Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (final Exception ex) {
             // Can not move payload file -> delivery not possible
+            // Try to remove the already created file
+            try {
+                Files.deleteIfExists(targetPath);
+            } catch (IOException io) {
+                log.error("Could not remove temp file [" + targetPath.toString() + "]! Remove manually.");
+            }
             throw new IOException("Unable to deliver message because payload file ["
                             + p.getContentLocation() + "] can not be moved!", ex);
         }

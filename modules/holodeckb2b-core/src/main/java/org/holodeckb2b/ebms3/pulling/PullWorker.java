@@ -20,10 +20,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.ebms3.axis2.Axis2Sender;
+import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
+import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
@@ -181,15 +185,19 @@ public class PullWorker implements IWorkerTask {
                 mpc = EbMSConstants.DEFAULT_MPC;
             log.debug("Using [" + mpc + "] as MPC for pull request");
 
-            try {
-                log.debug("Create the PullRequest signal");
-                final String messageId = HolodeckB2BCoreInterface.getMessageSubmitter()
-                                                                .submitMessage(new PullRequestData(p.getId(), mpc));
-                log.info("PullRequest created [" + messageId + "] for P-Mode [" + p.getId() + "] and MPC=" + mpc);
-            } catch (final MessageSubmitException ex) {
-                log.error("Could not submit PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
-            }
-        }
+			try {
+				log.debug("Create the PullRequest signal for P-Mode [" + p.getId() + "] and MPC=" + mpc);
+				final String messageId = HolodeckB2BCoreInterface.getMessageSubmitter()
+																.submitMessage(new PullRequestData(p.getId(), mpc));
+				final EntityProxy<MessageUnit> pullRequest = MessageUnitDAO.getSentMessageUnitWithId(messageId);
+				log.info("Start send process for PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
+				Axis2Sender.sendMessage(pullRequest, log);
+			} catch (final MessageSubmitException ex) {
+				log.error("Could not submit PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
+			} catch (DatabaseException ex) {
+				log.error("Could not retrieve the created PullRequest from the database");
+			}
+		}
     }
 
     /**

@@ -265,16 +265,29 @@ public class MessageSubmitter implements IMessageSubmitter {
                 final Payload p = (Payload) ip;
                 final Path srcPath = Paths.get(p.getContentLocation());
                 // Ensure that the filename in the temp directory is unique
-                final Path destPath = Paths.get(Utils.preventDuplicateFileName(intPlDir + "/" + srcPath.getFileName()));
-                if (move) {
-                    log.debug("Moving payload [" + p.getContentLocation() + "] to internal directory");
-                    Files.move(srcPath, destPath, StandardCopyOption.REPLACE_EXISTING);
-                } else {
-                    log.debug("Copying payload [" + p.getContentLocation() + "] to internal directory");
-                    Files.copy(srcPath, destPath, StandardCopyOption.REPLACE_EXISTING);
+                final Path destPath = Utils.createFileWithUniqueName(intPlDir + "/" + srcPath.getFileName());
+                try {
+                    if (move) {
+                        log.debug("Moving payload [" + p.getContentLocation() + "] to internal directory");
+                        Files.move(srcPath, destPath, StandardCopyOption.REPLACE_EXISTING);
+                    } else {
+                        log.debug("Copying payload [" + p.getContentLocation() + "] to internal directory");
+                        Files.copy(srcPath, destPath, StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    log.debug("Payload moved/copied to internal directory");
+                    p.setContentLocation(destPath.toString());
+                } catch (IOException io) {
+                    log.error("Could not copy/move the payload [" + p.getContentLocation() + "] to internal directory"
+                             + " [" + intPlDir + "].\n\tError details: " + io.getMessage());
+                    // Remove the already created file for storing the payload
+                    try {
+                        Files.deleteIfExists(destPath);
+                    } catch (IOException removeFailure) {
+                        log.error("Could not remove the temporary payload file [" + destPath.toString() + "]!" +
+                                  " Please remove manually.");
+                    }
+                    throw io;
                 }
-                log.debug("Payload moved/copied to internal directory");
-                p.setContentLocation(destPath.toString());
             }
             // Update the database with new locations
             MessageUnitDAO.updateMessageUnitInfo(um);

@@ -21,6 +21,7 @@ package org.holodeckb2b.interfaces.submit;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
+@Deprecated
 public interface IMessageSubmitterFactory {
 
     /**

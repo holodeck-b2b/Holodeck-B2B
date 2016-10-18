@@ -36,7 +36,7 @@ import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
 import org.holodeckb2b.ebms3.pulling.PullConfiguration;
 import org.holodeckb2b.ebms3.pulling.PullConfigurationWatcher;
 import org.holodeckb2b.ebms3.pulling.PullWorker;
-import org.holodeckb2b.ebms3.submit.core.MessageSubmitterFactory;
+import org.holodeckb2b.ebms3.submit.core.MessageSubmitter;
 import org.holodeckb2b.events.SyncEventProcessor;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -49,7 +49,6 @@ import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
-import org.holodeckb2b.interfaces.submit.IMessageSubmitterFactory;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.pmode.PModeManager;
@@ -62,8 +61,8 @@ import org.holodeckb2b.pmode.PModeManager;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
-    private static final class SingletonHolder {
-        static final IMessageSubmitterFactory instance = new MessageSubmitterFactory ();
+    private static final class SubmitterSingletonHolder {
+        static final IMessageSubmitter instance = new MessageSubmitter();
     }
 
     /**
@@ -257,7 +256,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * @return  A {@link IMessageSubmitter} object to use for submission of User Messages
      */
     public IMessageSubmitter getMessageSubmitter() {
-        return SingletonHolder.instance.createMessageSubmitter();
+        return SubmitterSingletonHolder.instance;
     }
 
     /**

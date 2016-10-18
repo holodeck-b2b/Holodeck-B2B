@@ -14,52 +14,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.ebms3.handlers.inflow;
+package org.holodeckb2b.ebms3.packaging;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.engine.Handler;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
-import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessage;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.testhelpers.HolodeckCore;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.xml.namespace.QName;
 import java.io.File;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /**
- * Created at 23:28 21.09.16
+ * Created at 13:14 15.10.16
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class ReadUserMessageTest {
+public class UserMessageTest {
 
-    private static String baseDir;
-
-    private ReadUserMessage handler;
-
-    @BeforeClass
-    public static void setUpClass() {
-        baseDir = ReadUserMessageTest.class.getClassLoader()
-                .getResource("multihop").getPath();
-        HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(baseDir));
-    }
+    static final QName MESSAGING_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "Messaging");
+    static final QName USER_MESSAGE_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "UserMessage");
 
     @Before
     public void setUp() throws Exception {
-        handler = new ReadUserMessage();
+
     }
 
     @After
@@ -67,12 +54,8 @@ public class ReadUserMessageTest {
 
     }
 
-    /**
-     * Test construction of the user message to be successfully consumed by
-     * {@link org.holodeckb2b.ebms3.handlers.inflow.ReadUserMessage ReadUserMessage} handler
-     */
     @Test
-    public void testProcessing() {
+    public void testCreateElement() throws Exception {
         final String mmdPath =
                 this.getClass().getClassLoader()
                         .getResource("multihop/icloud/full_mmd.xml").getPath();
@@ -88,22 +71,22 @@ public class ReadUserMessageTest {
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding UserMessage from mmd
-        OMElement userMessage = UserMessage.createElement(headerBlock, mmd);
+        UserMessage.createElement(headerBlock, mmd);
+        // Check that soap header block of the envelope header contains user message
+        SOAPHeader header = env.getHeader();
+        OMElement messagingElement = header.getFirstElement();
+        assertEquals(MESSAGING_ELEMENT_NAME, messagingElement.getQName());
+        OMElement userMessageElement = messagingElement.getFirstElement();
+        assertEquals(USER_MESSAGE_ELEMENT_NAME, userMessageElement.getQName());
+    }
 
-        MessageContext mc = new MessageContext();
-        // Setting input message property
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessage);
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
+    @Test
+    public void testGetElements() throws Exception {
 
-        try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertNotNull(invokeResp);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
+    }
+
+    @Test
+    public void testReadElement() throws Exception {
+
     }
 }

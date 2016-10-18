@@ -66,7 +66,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
         log.debug("Get all user messages that may need to be resent");
         Collection<EntityProxy<UserMessage>> waitingForRcpt = null;
         try {
-            waitingForRcpt = MessageUnitDAO.getMessageUnitsInState(UserMessage.class,
+            waitingForRcpt = MessageUnitDAO.getSentMessageUnitsInState(UserMessage.class,
                                                             new String[] {ProcessingStates.AWAITING_RECEIPT,
                                                                           ProcessingStates.TRANSPORT_FAILURE,
                                                                           ProcessingStates.PROC_WITH_WARNING

@@ -637,8 +637,8 @@ public class UserMessageTest {
 
         T_PROCSTATE_2.setStartTime(new Date());
 
-        //em.persist(T_PROCSTATE_1);
-        //em.persist(T_PROCSTATE_2);
+//        em.persist(T_PROCSTATE_1);
+//        em.persist(T_PROCSTATE_2);
         instance.setProcessingState(T_PROCSTATE_1);
         instance.setProcessingState(T_PROCSTATE_2);
 

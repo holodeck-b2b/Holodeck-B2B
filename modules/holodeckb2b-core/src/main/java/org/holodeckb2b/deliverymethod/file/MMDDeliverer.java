@@ -18,7 +18,8 @@ package org.holodeckb2b.deliverymethod.file;
 
 import java.io.File;
 import java.io.IOException;
-
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.workers.SubmitFromFile;
@@ -52,10 +53,20 @@ public class MMDDeliverer extends AbstractFileDeliverer {
 
     @Override
     protected void writeUserMessageInfoToFile(final MessageMetaData mmd) throws IOException {
-        final String mmdFilePath = Utils.preventDuplicateFileName(directory
+        final Path mmdFilePath = Utils.createFileWithUniqueName(directory
                                                             + mmd.getMessageId().replaceAll("[^a-zA-Z0-9.-]", "_")
                                                             + ".mmd.xml");
-        mmd.writeToFile(new File(mmdFilePath));
+        try {
+            mmd.writeToFile(new File(mmdFilePath.toString()));
+        } catch (IOException ex) {
+            // Something went wrong on writing the mmd file, try to remove the already created file
+            try {
+                Files.deleteIfExists(mmdFilePath);
+            } catch (IOException io) {
+                log.error("Could not remove temp file [" + mmdFilePath.toString() + "]!");
+            }
+            throw ex;
+        }
     }
 
 }

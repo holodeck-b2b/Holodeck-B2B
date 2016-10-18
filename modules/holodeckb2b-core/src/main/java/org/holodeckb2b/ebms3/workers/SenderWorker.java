@@ -16,16 +16,19 @@
  */
 package org.holodeckb2b.ebms3.workers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.ebms3.axis2.Axis2Sender;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
+import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
+import org.holodeckb2b.ebms3.persistency.entities.Receipt;
+import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
@@ -52,12 +55,20 @@ public class SenderWorker extends AbstractWorkerTask {
     public void doProcessing() {
         try {
             log.debug("Getting list of message units to send");
-            final List<EntityProxy<MessageUnit>> newMsgs = MessageUnitDAO.getMessageUnitsInState(MessageUnit.class,
-                                                                        new String[] {ProcessingStates.READY_TO_PUSH});
+            final List<EntityProxy> newMsgs = new ArrayList<>();
+            // Add all User Messages waiting to be sent
+            newMsgs.addAll(MessageUnitDAO.getSentMessageUnitsInState(UserMessage.class,
+                                                                 new String[] {ProcessingStates.READY_TO_PUSH}));
+            // Add all Receipts waiting to be sent
+            newMsgs.addAll(MessageUnitDAO.getSentMessageUnitsInState(Receipt.class,
+                                                                 new String[] {ProcessingStates.READY_TO_PUSH}));
+            // Add all Errors waiting to be sent
+            newMsgs.addAll(MessageUnitDAO.getSentMessageUnitsInState(ErrorMessage.class,
+                                                                 new String[] {ProcessingStates.READY_TO_PUSH}));
 
-            if (newMsgs != null && newMsgs.size() > 0) {
+            if (!Utils.isNullOrEmpty(newMsgs)) {
                 log.info("Found " + newMsgs.size() + " message units to send");
-                for (final EntityProxy<MessageUnit> message : newMsgs) {
+                for (final EntityProxy message : newMsgs) {
                     // Indicate that processing will start
                     if (MessageUnitDAO.startProcessingMessageUnit(message)) {
                         // only when we could succesfully set processing state really start processing

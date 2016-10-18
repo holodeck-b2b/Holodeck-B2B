@@ -34,7 +34,6 @@ import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.testhelpers.HolodeckCore;
-import org.holodeckb2b.testhelpers.MP;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -57,7 +56,8 @@ public class CheckFromICloudTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = CheckFromICloudTest.class.getClassLoader().getResource("multihop").getPath();
+        baseDir = CheckFromICloudTest.class
+                .getClassLoader().getResource("multihop").getPath();
         HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(baseDir));
     }
 
@@ -88,11 +88,8 @@ public class CheckFromICloudTest {
         // Creating SOAP envelope
         SOAPEnvelope env =
                 SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        assertEquals(MP.ENVELOPE, env.toString());
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        //System.out.println("headerBlock: " + headerBlock);
-        assertEquals(MP.ENVELOPE_WITH_HEADER_AND_MESSAGING, env.toString());
         // Adding UserMessage from mmd
         OMElement userMessage = UserMessage.createElement(headerBlock, mmd);
 
@@ -103,10 +100,8 @@ public class CheckFromICloudTest {
                         MessageUnitDAO.storeReceivedMessageUnit(
                                 UserMessage.readElement(userMessage));
         } catch (PackagingException e) {
-            e.printStackTrace();
+            fail(e.getMessage());
         }
-
-        assertEquals(MP.ENVELOPE_WITH_HEADER_MESSAGING_AND_USER_MESSAGE, env.toString());
 
         MessageContext mc = new MessageContext();
 
@@ -119,14 +114,12 @@ public class CheckFromICloudTest {
         }
 
         SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
-        assertNotNull(messaging);
         // Setting Role, as stated in paragraph 4.3 of AS4 profile
         messaging.setRole(MultiHopConstants.NEXT_MSH_TARGET);
 
         assertNotNull(MessageContextUtils.getRcvdMessageUnits(mc));
 
         try {
-            assertNotNull(messaging);
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertEquals("InvocationResponse.CONTINUE", invokeResp.toString());
         } catch (Exception e) {

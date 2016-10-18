@@ -17,7 +17,7 @@ Java 7 is required to run Holodeck B2B itself (as provided in this project). Ext
 You will find a [step-by-step guide to setting up Holodeck B2B](http://holodeck-b2b.org/documentation/getting-started/) on the project website.
 
 ##Contributing
-We’re using the simplified Github workflow to accept modifications which means you should:
+We are using the simplified Github workflow to accept modifications which means you should:
 * create an issue related to the problem you want to fix or the function you want to add (good for traceability and cross-reference)
 * fork the repository
 * create a branch (optionally with the reference to the issue in the name)
