@@ -221,14 +221,16 @@ public final class Utils {
     }
 
     /**
-     * Ensures that the given file name will not conflict with an existing file. If there exists a file with the given
-     * name a numerical suffix will be added to the name until no duplicate exists.
+     * Creates a new file with the given name if no file already exists with the same name. If there exists a file with
+     * the given name a numerical suffix will be added to the name until no duplicate exists.
+     * <p><b>NOTE: </b>This method will create a new file. If the caller decides it doesn't need a
      *
-     * @param baseName      The file name to check for possible duplicates.
-     * @return              The base name added with a numerical suffix if necessary to prevent duplicates
+     * @param  baseName     The file name to use for creation of the file. This should include the (absolute) path to
+     *                      the location of the new file.
+     * @return              Path to the new file.
      * @throws IOException  When a parent directory does not exist (anymore)
      */
-    public static String preventDuplicateFileName(final String baseName) throws IOException {
+    public static Path createFileWithUniqueName(final String baseName) throws IOException {
         if (baseName == null || baseName.isEmpty())
             return null;
 
@@ -252,7 +254,7 @@ public final class Utils {
             }
         }
 
-        return targetPath.toString();
+        return targetPath;
     }
 
     /**

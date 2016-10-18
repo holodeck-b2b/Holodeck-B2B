@@ -22,7 +22,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
  * Describes the interface the Holodeck B2B Core exposes to create a new ebMS message unit for sending. Since version
- * 2.1.0 the Submitter must also be able to kick of the pull mechanism by accepting a pull request for submission.
+ * 2.1.0 the Submitter must also be able to accept a pull request for submission.
  * <p>Note that this is more or less an internal interface intended for use by helper classes that handle the submission
  * of business data from the client application (called the <i>Producer</i> in the ebMS V3 Specification).<br>
  * By decoupling the internal and external interface it is easier to implement different protocols for accepting

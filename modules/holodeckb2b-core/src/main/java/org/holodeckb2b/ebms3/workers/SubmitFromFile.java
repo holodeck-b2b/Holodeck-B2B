@@ -19,7 +19,10 @@ package org.holodeckb2b.ebms3.workers;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workers.DirWatcher;
@@ -92,7 +95,8 @@ public class SubmitFromFile extends DirWatcher {
                 submitter.submitMessage(mmd, mmd.shouldDeleteFilesAfterSubmit());
                 log.info("User message from " + f.getName() + " succesfully submitted to Holodeck B2B");
                 // Change extension to reflect success
-                new File(tFileName).renameTo(new File(Utils.preventDuplicateFileName(bFileName + ".accepted")));
+                Files.move(Paths.get(tFileName), Utils.createFileWithUniqueName(bFileName + ".accepted")
+                           , StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (final Exception e) {
             // Something went wrong on reading the message meta data
@@ -100,10 +104,12 @@ public class SubmitFromFile extends DirWatcher {
                         + ". Details: " + e.getMessage());
             // Change extension to reflect error and write error information
             try {
-                new File(tFileName).renameTo(new File(Utils.preventDuplicateFileName(bFileName + ".rejected")));
-                writeErrorFile(bFileName + ".err", e);
+                final Path rejectFilePath = Utils.createFileWithUniqueName(bFileName + ".rejected");
+                Files.move(Paths.get(tFileName), rejectFilePath, StandardCopyOption.REPLACE_EXISTING);
+                writeErrorFile(rejectFilePath, e);
             } catch (IOException ex) {
                 // The directory where the file was originally found has gone. Nothing we can do about it, so ignore
+                log.error("An error occured while renaming the mmd file or writing the error info to file!");
             }
         }
     }
@@ -127,12 +133,19 @@ public class SubmitFromFile extends DirWatcher {
     /**
      * Writes error information to file when a submission failed.
      *
-     * @param fileName   The file name that should used be for the error file.
-     * @param fault      The exception that caused the submission to fail
+     * @param rejectFilePath   The path to the renamed mmd file. Used to determine file name for the error file.
+     * @param fault            The exception that caused the submission to fail
      */
-    protected void writeErrorFile(final String fileName, final Exception fault) {
-        log.debug("Writing submission error to error file: " + fileName);
-        try (PrintWriter errorFile = new PrintWriter(new File(Utils.preventDuplicateFileName(fileName)))) {
+    protected void writeErrorFile(final Path rejectFilePath, final Exception fault) {
+        // Split the given path into name and extension part (if possible)
+        String nameOnly = rejectFilePath.toString();
+        final int startExt = nameOnly.lastIndexOf(".");
+        if (startExt > 0)
+            nameOnly = nameOnly.substring(0, startExt);
+        final String errFileName = nameOnly + ".err";
+
+        log.debug("Writing submission error to error file: " + errFileName);
+        try (PrintWriter errorFile = new PrintWriter(new File(errFileName))) {
 
             errorFile.write("The message could not be submitted to Holodeck B2B due to an error:\n\n");
             errorFile.write("Error type:    " + fault.getClass().getSimpleName() + "\n");
@@ -145,7 +158,7 @@ public class SubmitFromFile extends DirWatcher {
 
             log.debug("Error information written to file");
         } catch (final IOException ioe) {
-            log.error("Could not write error information to error file!");
+            log.error("Could not write error information to error file [" + errFileName + "]!");
         }
     }
 }
