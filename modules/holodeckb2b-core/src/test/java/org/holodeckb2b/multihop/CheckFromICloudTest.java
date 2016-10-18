@@ -22,21 +22,17 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.holodeckb2b.common.config.InternalConfiguration;
+import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
-import org.holodeckb2b.ebms3.packaging.*;
-import org.holodeckb2b.ebms3.persistency.entities.AgreementReference;
+import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.packaging.PackagingException;
+import org.holodeckb2b.ebms3.packaging.SOAPEnv;
+import org.holodeckb2b.ebms3.packaging.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.pmode.PModeManager;
-import org.holodeckb2b.pmode.helpers.Agreement;
-import org.holodeckb2b.pmode.helpers.Leg;
-import org.holodeckb2b.pmode.helpers.PMode;
-import org.holodeckb2b.pmode.helpers.Protocol;
 import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.After;
 import org.junit.Before;
@@ -48,35 +44,26 @@ import java.io.File;
 import static org.junit.Assert.*;
 
 /**
- * Created at 13:32 12.09.16
+ * Created at 23:10 17.09.16
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class ConfigureMultihopTest {
+public class CheckFromICloudTest {
 
     private static String baseDir;
 
-    private static HolodeckCore core;
-
-    private ConfigureMultihop handler;
-
-    private static PModeManager manager;
+    private CheckFromICloud handler;
 
     @BeforeClass
     public static void setUpClass() {
         baseDir = CheckFromICloudTest.class
                 .getClassLoader().getResource("multihop").getPath();
-        core = new HolodeckCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
-        InternalConfiguration initialConf =
-                (InternalConfiguration)HolodeckB2BCoreInterface.getConfiguration();
-        manager = new PModeManager(initialConf.getPModeValidatorImplClass(),
-                initialConf.getPModeStorageImplClass());
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(baseDir));
     }
 
     @Before
     public void setUp() throws Exception {
-        handler = new ConfigureMultihop();
+        handler = new CheckFromICloud();
     }
 
     @After
@@ -85,7 +72,8 @@ public class ConfigureMultihopTest {
     }
 
     @Test
-    public void testProcessingOfTheUserMessage() throws Exception {
+    public void testMessageReceivedFromICloud() throws DatabaseException {
+
         final String mmdPath =
                 this.getClass().getClassLoader()
                         .getResource("multihop/icloud/full_mmd.xml").getPath();
@@ -96,6 +84,7 @@ public class ConfigureMultihopTest {
         } catch (final Exception e) {
             fail("Unable to test because MMD could not be read correctly!");
         }
+
         // Creating SOAP envelope
         SOAPEnvelope env =
                 SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
@@ -108,43 +97,16 @@ public class ConfigureMultihopTest {
                 userMessageEntityProxy = null;
         try {
             userMessageEntityProxy =
-                    MessageUnitDAO.storeReceivedMessageUnit(
-                            UserMessage.readElement(userMessage));
+                        MessageUnitDAO.storeReceivedMessageUnit(
+                                UserMessage.readElement(userMessage));
         } catch (PackagingException e) {
             fail(e.getMessage());
         }
 
-        OMElement ciElement = CollaborationInfo.getElement(userMessage);
-        OMElement arElement = AgreementRef.getElement(ciElement);
-        AgreementReference ar = AgreementRef.readElement(arElement);
-
-        assertNotNull(ar.getPModeId());
-
         MessageContext mc = new MessageContext();
-        mc.setFLOW(MessageContext.OUT_FLOW);
 
-        PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-        Leg leg = new Leg();
-
-        Protocol protocolConfig = new Protocol();
-        protocolConfig.setAddress("address");
-        protocolConfig.setAddActorOrRoleAttribute(true);
-
-        leg.setProtocol(protocolConfig);
-        pmode.addLeg(leg);
-
-        Agreement agreement = new Agreement();
-        pmode.setAgreement(agreement);
-        pmode.setId(ar.getPModeId());
-
-        //Adding PMode to the managed PMode set.
-        core.getPModeSet().add(pmode);
-
-        userMessageEntityProxy.entity.setPMode(ar.getPModeId());
-        // Setting out message property
-        mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, userMessageEntityProxy);
+        // Setting input message property
+        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessageEntityProxy);
         try {
             mc.setEnvelope(env);
         } catch (AxisFault axisFault) {
@@ -154,7 +116,9 @@ public class ConfigureMultihopTest {
         SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
         // Setting Role, as stated in paragraph 4.3 of AS4 profile
         messaging.setRole(MultiHopConstants.NEXT_MSH_TARGET);
+
         assertNotNull(MessageContextUtils.getRcvdMessageUnits(mc));
+
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertEquals("InvocationResponse.CONTINUE", invokeResp.toString());

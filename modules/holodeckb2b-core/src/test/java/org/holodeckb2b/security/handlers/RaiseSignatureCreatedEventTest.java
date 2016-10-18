@@ -13,6 +13,6 @@ public class RaiseSignatureCreatedEventTest {
 
     @Test
     public void testDoProcessing() throws Exception {
-        // todo not implemented yet
+        // todo This seems to be integration test
     }
 }

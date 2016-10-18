@@ -119,7 +119,6 @@ public abstract class BaseHandler extends AbstractHandler {
             currentFlow = INITIATOR;
             currentFlowName = "INITIATOR_";
         }
-
         switch (mc.getFLOW()) {
             case MessageContext.IN_FLOW :
                 currentFlowName += "IN_FLOW"; currentFlow |= IN_FLOW;

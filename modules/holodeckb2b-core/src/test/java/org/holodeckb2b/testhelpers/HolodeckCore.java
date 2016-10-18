@@ -1,10 +1,22 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2016 The Holodeck B2B Team, Sander Fieten
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.holodeckb2b.testhelpers;
 
+import org.holodeckb2b.ebms3.submit.core.MessageSubmitterFactory;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
@@ -13,8 +25,10 @@ import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
+import org.holodeckb2b.interfaces.submit.IMessageSubmitterFactory;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
+import org.holodeckb2b.pmode.InMemoryPModeSet;
 import org.holodeckb2b.pmode.PModeManager;
 
 /**
@@ -23,6 +37,10 @@ import org.holodeckb2b.pmode.PModeManager;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class HolodeckCore implements IHolodeckB2BCore {
+
+    private static final class SingletonHolder {
+        static final IMessageSubmitterFactory instance = new MessageSubmitterFactory();
+    }
 
     private final Config  config;
 
@@ -40,6 +58,7 @@ public class HolodeckCore implements IHolodeckB2BCore {
 
     public HolodeckCore(final String homeDir, final String pmodeValidatorClass, final String pmodeStorageClass) {
         config = new Config(homeDir, pmodeValidatorClass, pmodeStorageClass);
+        pmodeSet = new InMemoryPModeSet();
     }
 
     @Override
@@ -54,12 +73,12 @@ public class HolodeckCore implements IHolodeckB2BCore {
 
     @Override
     public IMessageSubmitter getMessageSubmitter() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return SingletonHolder.instance.createMessageSubmitter();
     }
 
     @Override
     public IPModeSet getPModeSet() {
-        if (pmodeSet != null)
+        if (pmodeSet == null)
             pmodeSet = new PModeManager(config.getPModeValidatorImplClass(), config.getPModeStorageImplClass());
 
         return pmodeSet;
