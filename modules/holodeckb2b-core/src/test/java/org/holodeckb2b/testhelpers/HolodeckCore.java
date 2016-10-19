@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.testhelpers;
 
-import org.holodeckb2b.ebms3.submit.core.MessageSubmitterFactory;
+import org.holodeckb2b.ebms3.submit.core.MessageSubmitter;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
@@ -25,7 +25,6 @@ import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
-import org.holodeckb2b.interfaces.submit.IMessageSubmitterFactory;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.pmode.InMemoryPModeSet;
@@ -38,8 +37,8 @@ import org.holodeckb2b.pmode.PModeManager;
  */
 public class HolodeckCore implements IHolodeckB2BCore {
 
-    private static final class SingletonHolder {
-        static final IMessageSubmitterFactory instance = new MessageSubmitterFactory();
+    private static final class SubmitterSingletonHolder {
+        static final IMessageSubmitter instance = new MessageSubmitter();
     }
 
     private final Config  config;
@@ -73,7 +72,7 @@ public class HolodeckCore implements IHolodeckB2BCore {
 
     @Override
     public IMessageSubmitter getMessageSubmitter() {
-        return SingletonHolder.instance.createMessageSubmitter();
+        return SubmitterSingletonHolder.instance;
     }
 
     @Override

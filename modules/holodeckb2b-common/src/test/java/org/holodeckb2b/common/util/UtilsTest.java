@@ -117,9 +117,9 @@ public class UtilsTest {
                 files = dir.listFiles();
             }
             String newFileName1 =
-                    Utils.preventDuplicateFileName(baseDir + "/emptyfile.xml");
+                    Utils.createFileWithUniqueName(baseDir + "/emptyfile.xml").toString();
             String newFileName2 =
-                    Utils.preventDuplicateFileName(baseDir + "/emptyfile");
+                    Utils.createFileWithUniqueName(baseDir + "/emptyfile").toString();
             assertNotEquals(newFileName1, newFileName2);
             for (File file : files) {
                 assertNotEquals(file.getAbsolutePath(), newFileName1);
