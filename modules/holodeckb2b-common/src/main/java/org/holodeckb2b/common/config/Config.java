@@ -514,14 +514,16 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the class name of the {@link IPModeValidator} implementation that the Holodeck B2B Core's <code>PModeManager
+     * Gets the class name of the {@link org.holodeckb2b.interfaces.pmode.validation.IPModeValidator}
+     * implementation that the Holodeck B2B Core's <code>PModeManager
      * </code> must use to validate P-Modes before they are deployed. This is an optional configuration parameter and
      * when not set the Holodeck B2B Core will use a default implementation. To use a custom implementation set class
      * name in the <i>PModeValidator</i> parameter.
      * <b>NOTE:</b> The configured validator will be used to validate all P-Modes and should therefore only be used if
      * Holodeck B2B is deployed in a specific domain.
      *
-     * @return  The class name of the {@link IPModeValidator} implementation
+     * @return  The class name of the {@link org.holodeckb2b.interfaces.pmode.validation.IPModeValidator}
+     * implementation
      * @since  HB2B_NEXT_VERSION
      */
     @Override
@@ -530,12 +532,14 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the class name of the {@link IPModeSet} implementation that the Holodeck B2B Core's <code>PModeManager
+     * Gets the class name of the {@link org.holodeckb2b.interfaces.pmode.IPModeSet}
+     * implementation that the Holodeck B2B Core's <code>PModeManager
      * </code> must use to store the set of deployed P-Modes. This is an optional configuration parameter and when not
      * set the Holodeck B2B Core will use a default implementation. To use a custom implementation set class name in
      * the <i>PModeStorageImplementation</i> parameter.
      *
-     * @return  The class name of the {@link IPModeSet} implementation to use for storing deployed P-Modes
+     * @return  The class name of the {@link org.holodeckb2b.interfaces.pmode.IPModeSet}
+     * implementation to use for storing deployed P-Modes
      * @since  HB2B_NEXT_VERSION
      */
     @Override
