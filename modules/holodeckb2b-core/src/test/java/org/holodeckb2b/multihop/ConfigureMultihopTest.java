@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.multihop;
 
+import java.io.File;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -39,13 +40,10 @@ import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.Protocol;
 import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.io.File;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 13:32 12.09.16
@@ -105,14 +103,8 @@ public class ConfigureMultihopTest {
         OMElement userMessage = UserMessage.createElement(headerBlock, mmd);
 
         EntityProxy<org.holodeckb2b.ebms3.persistency.entities.UserMessage>
-                userMessageEntityProxy = null;
-        try {
-            userMessageEntityProxy =
-                    MessageUnitDAO.storeReceivedMessageUnit(
-                            UserMessage.readElement(userMessage));
-        } catch (PackagingException e) {
-            fail(e.getMessage());
-        }
+                                            userMessageEntityProxy = MessageUnitDAO.storeReceivedMessageUnit(
+                                                                                UserMessage.readElement(userMessage));
 
         OMElement ciElement = CollaborationInfo.getElement(userMessage);
         OMElement arElement = AgreementRef.getElement(ciElement);

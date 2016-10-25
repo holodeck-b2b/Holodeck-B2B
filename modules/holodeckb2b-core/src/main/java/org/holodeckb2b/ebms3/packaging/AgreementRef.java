@@ -17,7 +17,6 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.ebms3.persistency.entities.AgreementReference;
@@ -95,19 +94,13 @@ public class AgreementRef {
      * @return                       A new {@link org.holodeckb2b.ebms3.persistent.general.AgreementReference}
      *                               object containing the service info from the
      *                               element
-     * @throws PackagingException    When the given element does not contain a valid
-     *                               <code>AgreementRef</code> element.
      */
-    public static AgreementReference readElement(final OMElement arElement) throws PackagingException {
+    public static AgreementReference readElement(final OMElement arElement) {
         if (arElement == null)
             return null;
 
         // Read agreement info, i.e. name and type of reference
         final String agreement = arElement.getText();
-        if (agreement == null || agreement.isEmpty())
-            // AgreementRed must contain name of agreement
-            throw new PackagingException("AgreementRef does not contain agreement reference");
-
         final String type = arElement.getAttributeValue(new QName(LN_ATTR_TYPE));
         // Create entity object
         final AgreementReference arData = new AgreementReference(agreement, type);

@@ -17,7 +17,6 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -89,22 +88,18 @@ public class Property {
      * @return                       A new {@link org.holodeckb2b.ebms3.persistency.entities.Property}
      *                               object containing the service info from the
      *                               element
-     * @throws PackagingException    When the given element does not contain a valid
-     *                               <code>Property</code> element.
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.Property readElement(final OMElement propElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.Property readElement(final OMElement propElement) {
         if (propElement == null)
             return null;
 
         // Read property name and value
         final String name = propElement.getAttributeValue(new QName(LN_ATTR_NAME));
-        if (name == null || name.isEmpty())
-            throw new PackagingException("Name attribute missing for Property element");
-
         final String value = propElement.getText();
 
         // Create the entity object
-        final org.holodeckb2b.ebms3.persistency.entities.Property propData = new org.holodeckb2b.ebms3.persistency.entities.Property(name, value);
+        final org.holodeckb2b.ebms3.persistency.entities.Property propData =
+                                                new org.holodeckb2b.ebms3.persistency.entities.Property(name, value);
 
         //@todo: Uncomment when spec is changed and type is allowed
 //        // Read type attribute

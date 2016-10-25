@@ -18,9 +18,7 @@ package org.holodeckb2b.ebms3.packaging;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -28,13 +26,9 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 
 /**
  * Is a helper class for handling the ebMS Receipt signals in the ebMS SOAP header.
- * <p>The Receipt signal may contain any kind of element as child elements. For packaging
- * this means we do not know what the actual XML content will be so it has to be supplied
- * when constructing the element. Similar when reading the element the XML content is returned.
- * Because this information is not exchanged with the business application it is not included
- * in the {@link IReceipt} interface. Therefor the internal {@link org.holodeckb2b.ebms3.persistency.entities.Receipt}
- * entity object is used as parameter for the {@link #createElement(org.apache.axiom.om.OMElement, org.holodeckb2b.ebms3.persistent.message.Receipt)}
- * method.
+ * <p>The Receipt signal may contain any kind of element as child elements. For packaging this means we do not know what
+ * the actual XML content will be so it has to be supplied when constructing the element. Similar when reading the
+ * element the XML content is returned.
  * <p>The Receipt signal message unit is specified in section 5.2.3.3 of the ebMS 3 Core specification.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -53,7 +47,7 @@ public class Receipt {
      * @param receipt       The information to include in the receipt signal
      * @return              The new element representing the receipt signal
      */
-    public static OMElement createElement(final OMElement messaging, final org.holodeckb2b.ebms3.persistency.entities.Receipt receipt) {
+    public static OMElement createElement(final OMElement messaging, final IReceipt receipt) {
         // First create the SignalMessage element that is the placeholder for
         // the Receipt element containing the receipt info
         final OMElement signalmessage = SignalMessage.createElement(messaging);
@@ -76,16 +70,15 @@ public class Receipt {
      * message unit and stores it a {@link org.holodeckb2b.ebms3.persistency.entities.Receipt} object.
      * <p><b>NOTE:</b> The information is stored in an entity object, but this method will NOT persist the object.
      *
-     * @param sigElement    The parent <code>eb:SignalMessage</code> element that contains the <code>eb:Receipt</code> element
-     * @return              The {@link org.holodeckb2b.ebms3.persistency.entities.Receipt} object containing the information
-     *                      on the receipt
-     * @throws PackagingException   When the given element does not conform to
-     *                              ebMS specification and can therefore not be
-     *                              read completely
+     * @param sigElement    The parent <code>eb:SignalMessage</code> element that contains the <code>eb:Receipt</code>
+     *                      element
+     * @return              The {@link org.holodeckb2b.ebms3.persistency.entities.Receipt} object containing the
+     *                      information on the receipt
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.Receipt readElement(final OMElement sigElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.Receipt readElement(final OMElement sigElement) {
         // Create a new Receipt entity object to store the information in
-        final org.holodeckb2b.ebms3.persistency.entities.Receipt rcptData = new org.holodeckb2b.ebms3.persistency.entities.Receipt();
+        final org.holodeckb2b.ebms3.persistency.entities.Receipt rcptData =
+                                                              new org.holodeckb2b.ebms3.persistency.entities.Receipt();
 
         // First read general information from the MessageInfo child
         MessageInfo.readElement(MessageInfo.getElement(sigElement), rcptData);

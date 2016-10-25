@@ -21,23 +21,20 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.errors.InvalidHeader;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.packaging.PullRequest;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 
 /**
- * Is an in flow handler that checks if this message contains a pull request, i.e. contains a <eb:PullRequest> element
+ * Is an in flow handler that checks if this message contains a Pull Request, i.e. contains a <eb:PullRequest> element
  * in the ebMS header. When such a pull request message unit is found the information is read from the message and
  * stored both in the database and message context (under key {@link MessageContextProperties#IN_PULL_REQUEST}).
  * <p>The meta data is stored in an {@link PullRequest} entity object which is stored in the database and added to the
  * message context under key {@link MessageContextProperties#IN_PULL_REQUEST}. The processing state of the pull request
  * is set to {@link ProcessingStates#RECEIVED}.
- * <p><b>NOTE:</b> The XML schema definition from the ebMS specification allows for multiple <code>eb:SignalMessage</code>
+ * <p><b>NOTE:</b> The XML schema definition from the ebMS specification allows multiple <code>eb:SignalMessage</code>
  * elements in the ebMS header, so there could be more than one pull request in the message. The ebMS Core Specification
  * however limits the number of pull request units in the message to just one. Holodeck B2B therefor only uses the first
  * occurrence of <code>eb:SignalMessage</code> that has a <code>eb:PullRequest</code> child and ignores others.
@@ -63,26 +60,13 @@ public class ReadPullRequest extends BaseHandler {
             if (prElement != null) {
                 log.debug("PullRequest found, read information from message");
                 // Read information into PullRequest object
-                org.holodeckb2b.ebms3.persistency.entities.PullRequest pullRequest = null;
-                try {
-                    pullRequest = PullRequest.readElement(prElement);
-                    // And store in database and message context for further processing
-                    log.info("PullRequest [msgId=" + pullRequest.getMessageId() + "] for MPC " + pullRequest.getMPC()
-                                + " received.");
-                    log.debug("Store PullRequest in database and message context");
-                    mc.setProperty(MessageContextProperties.IN_PULL_REQUEST,
+                org.holodeckb2b.ebms3.persistency.entities.PullRequest pullRequest = PullRequest.readElement(prElement);
+                // And store in database and message context for further processing
+                log.debug("Store PullRequest in database and message context");
+                mc.setProperty(MessageContextProperties.IN_PULL_REQUEST,
                                                                 MessageUnitDAO.storeReceivedMessageUnit(pullRequest));
-                } catch (final PackagingException ex) {
-                    // The ebMS header contains an ill formatted pull request
-                    log.warn("Received message contains invalid ebMS pull request signal message! Details: "
-                                + ex.getMessage());
-
-                    // Add an error to context, maybe it can be sent as response
-                    final InvalidHeader   invalidHdrError = new InvalidHeader();
-                    invalidHdrError.setShortDescription(ex.getMessage());
-                    invalidHdrError.setErrorDetail("Source of header containing the error:" + prElement.toString());
-                    MessageContextUtils.addGeneratedError(mc, invalidHdrError);
-                }
+                log.info("PullRequest [msgId=" + pullRequest.getMessageId() + "] for MPC " + pullRequest.getMPC()
+                        + " received.");
             } else
                 log.debug("ebMS message does not contain PullRequest");
         } else {

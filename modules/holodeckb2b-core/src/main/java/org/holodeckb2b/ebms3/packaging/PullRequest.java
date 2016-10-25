@@ -17,17 +17,15 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import java.util.Iterator;
-
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 
 /**
- * Is a helper class for handling the ebMS PullRequest signal message elements
- * in the ebMS SOAP header, i.e. the <code>eb:PullRequest</code> element and its
- * sibling <code>eb:MessageInfo</code>.
+ * Is a helper class for handling the ebMS PullRequest signal message elements  in the ebMS SOAP header, i.e. the
+ * <code>eb:PullRequest</code> element and its sibling <code>eb:MessageInfo</code>.
  * <p>This element is specified in section 5.2.3.1 of the ebMS 3 Core specification.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -45,34 +43,27 @@ public class PullRequest {
     private static final String MPC_ATTR = "mpc";
 
     /**
-     * Reads the information from <code>eb:PullRequest</code> element and sibling
-     * <code>eb:MessageInfo</code> element that contains the PullRequest signal
-     * message unit and stores it a {@see PullRequest} object.
-     * <p><b>NOTE 1:</b> The {@see PullRequest} object also contains authentication
-     * information to authorize the request. This info however is not part of the
-     * <code>eb:SignalMessage</code> element and is therefor not filled here.
-     * <p><b>NOTE 2:</b> The information is stored in an entity object, but this
-     * method will NOT persist the object.
+     * Reads the information from <code>eb:PullRequest</code> element and sibling <code>eb:MessageInfo</code> element
+     * that contains the Pull Request signal message unit and stores it a {@link PullRequest} persistency object.
+     * <p><b>NOTE 1:</b> The {@see PullRequest} object also contains authentication information to authorize the
+     * request. This info however is not part of the <code>eb:SignalMessage</code> element and is therefor not filled
+     * here.
+     * <p><b>NOTE 2:</b> The information is stored in an entity object, but this method will NOT persist the object.
      *
      * @param prElement     The <code>eb:PullRequest</code> element
-     * @return              The {@see PullRequest} object containing the information
-     *                      on the pull request
-     * @throws PackagingException   When the given element does not conform to
-     *                              ebMS specification and can therefor not be
-     *                              read completely
+     * @return              The {@link PullRequest} object containing the information on the pull request
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.PullRequest readElement(final OMElement prElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.PullRequest readElement(final OMElement prElement) {
         // Create a new PullRequest entity object to store the information in
-        final org.holodeckb2b.ebms3.persistency.entities.PullRequest prData = new org.holodeckb2b.ebms3.persistency.entities.PullRequest();
+        final org.holodeckb2b.ebms3.persistency.entities.PullRequest prData =
+                                                        new org.holodeckb2b.ebms3.persistency.entities.PullRequest();
 
         // The PullRequest itself only contains the [optional] mpc attribute
         String  mpc = prElement.getAttributeValue(new QName(MPC_ATTR));
 
         // If there was no mpc attribute or it was empty (which formally is
         // illegal because the mpc should be a valid URI) it is set to the default MPC
-        if (mpc == null || mpc.isEmpty())
-            mpc = EbMSConstants.DEFAULT_MPC;
-        prData.setMPC(mpc);
+        prData.setMPC(Utils.isNullOrEmpty(mpc) ? EbMSConstants.DEFAULT_MPC : mpc);
 
         // Beside the PullRequest element also the MessageInfo sibling should be
         //  processed to get complete set of information
@@ -111,7 +102,7 @@ public class PullRequest {
      * Creates a new <code>eb:SignalMessage</code> for an <i>PullRequest</i> signal.
      *
      * @param messaging     The parent <code>eb:Messaging</code> element
-     * @param receipt       The information to include in the pull request signal
+     * @param pullRequest   The information to include in the pull request signal
      * @return              The new element representing the pull request signal
      */
     public static OMElement createElement(final OMElement messaging, final org.holodeckb2b.ebms3.persistency.entities.PullRequest pullRequest) {

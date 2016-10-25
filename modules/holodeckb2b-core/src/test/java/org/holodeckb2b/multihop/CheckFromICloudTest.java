@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.multihop;
 
+import java.io.File;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -27,7 +28,6 @@ import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
@@ -35,13 +35,10 @@ import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.io.File;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 23:10 17.09.16
@@ -94,14 +91,8 @@ public class CheckFromICloudTest {
         OMElement userMessage = UserMessage.createElement(headerBlock, mmd);
 
         EntityProxy<org.holodeckb2b.ebms3.persistency.entities.UserMessage>
-                userMessageEntityProxy = null;
-        try {
-            userMessageEntityProxy =
-                        MessageUnitDAO.storeReceivedMessageUnit(
-                                UserMessage.readElement(userMessage));
-        } catch (PackagingException e) {
-            fail(e.getMessage());
-        }
+                                                userMessageEntityProxy = MessageUnitDAO.storeReceivedMessageUnit(
+                                                                                  UserMessage.readElement(userMessage));
 
         MessageContext mc = new MessageContext();
 

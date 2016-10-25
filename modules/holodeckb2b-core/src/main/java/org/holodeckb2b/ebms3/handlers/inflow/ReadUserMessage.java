@@ -17,18 +17,14 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Iterator;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.errors.InvalidHeader;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.PackagingException;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
@@ -37,9 +33,11 @@ import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
  * Is the handler in the <i>IN_FLOW</i> responsible for reading the meta data on an user message message unit from the
  * received message (if such a message unit is included in the message). This data is contained in the
  * <code>eb:UserMessage</code> element in the ebMS header.
- * <p>The meta data is stored in an {@link UserMessage} entity object which is stored in the database and added to the
- * message context under key {@link MessageContextProperties#IN_USER_MESSAGE}. The processing state of the user message
- * is set to {@link ProcessingStates#PROCESSING}.
+ * <p>This handler will only read the meta-data that is available in the ebMS header without performing a validation on
+ * it. This is done later in the {@link BasicHeaderValidation} and optionally in custom validators specified in the
+ * P-Mode. The meta data is stored in an {@link UserMessage} entity object which is stored in the database and added to
+ * the message context under key {@link MessageContextProperties#IN_USER_MESSAGE}. The processing state of the user
+ * message is set to {@link ProcessingStates#PROCESSING}.
  * <p><b>NOTE:</b> The XML schema definition from the ebMS specification allows for multiple <code>eb:UserMessage</code>
  * elements in the ebMS header. In the Core Specification however the number of user message units in the message
  * is limited to just one. Holodeck B2B therefor only uses the first occurrence of <code>eb:UserMessage</code> and
@@ -66,23 +64,9 @@ public class ReadUserMessage extends BaseHandler {
             if (it.hasNext()) {
                 log.debug("UserMessage found, read information from message");
                 final OMElement umElement = (OMElement) it.next();
-                org.holodeckb2b.ebms3.persistency.entities.UserMessage umData = null;
-                try {
-                    // Read information into UserMessage entity object
-                    umData = UserMessage.readElement(umElement);
-                    log.debug("Succesfully read user message meta data from header");
-                } catch (final PackagingException ex) {
-                    // The UserMessage element in the message does not comply with the spec,
-                    //  so it can not be further processed.
-                    log.warn("Received message contains an invalid ebMS user message! + Details: " + ex.getMessage());
-
-                    // Add an error to context, maybe it can be sent as response
-                    final InvalidHeader   invalidHdrError = new InvalidHeader();
-                    invalidHdrError.setErrorDetail("Source of header containing the error:" + umElement.toString());
-                    MessageContextUtils.addGeneratedError(mc, invalidHdrError);
-
-                    return InvocationResponse.CONTINUE;
-                }
+                // Read information into UserMessage entity object
+                org.holodeckb2b.ebms3.persistency.entities.UserMessage umData =  UserMessage.readElement(umElement);
+                log.info("Succesfully read user message meta data from header. Msg-id=" + umData.getMessageId());
 
                 // Store it in both database and message context for further processing
                 log.debug("Saving user message meta data to database");
