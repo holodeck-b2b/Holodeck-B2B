@@ -17,7 +17,6 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.ebms3.persistency.entities.SchemaReference;
@@ -25,8 +24,7 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.ISchemaReference;
 
 /**
- * Is a helper class for handling the ebMS Schema element in the ebMS SOAP
- * header.
+ * Is a helper class for handling the ebMS Schema element in the ebMS SOAP header.
  * <p>This element is specified in section 5.2.2.13 of the ebMS 3 Core specification.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -97,23 +95,16 @@ public class Schema {
      *                              payload meta data from
      * @return                      A new {@link org.holodeckb2b.ebms3.persistency.entities.SchemaReference}
      *                              object containing the meta data about the payload
-     * @throws PackagingException   When the given element is not a valid
-     *                              <code>Schema</code> element.
      */
-    public static SchemaReference readElement(final OMElement siElement) throws PackagingException {
+    public static SchemaReference readElement(final OMElement siElement) {
         if (siElement == null)
             return null;
 
-        // Read the required location attribute
-        final String location = siElement.getAttributeValue(new QName(LN_ATTR_LOCATION));
-        if (location == null || location.isEmpty())
-            throw new PackagingException("Location attribute is required in Schema element");
-
         // Create entity object
         final SchemaReference schemaData = new SchemaReference();
-        schemaData.setLocation(location);
 
-        // Read the optional version and namespace attributes
+        // Read data from element
+        schemaData.setLocation(siElement.getAttributeValue(new QName(LN_ATTR_LOCATION)));
         schemaData.setNamespace(siElement.getAttributeValue(new QName(LN_ATTR_NAMESPACE)));
         schemaData.setVersion(siElement.getAttributeValue(new QName(LN_ATTR_VERSION)));
 

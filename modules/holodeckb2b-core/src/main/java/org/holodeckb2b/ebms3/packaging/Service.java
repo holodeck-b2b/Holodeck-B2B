@@ -17,7 +17,6 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -89,22 +88,17 @@ public class Service {
      * @return                       A new {@link org.holodeckb2b.ebms3.persistency.entities.Service}
      *                               object containing the service info from the
      *                               element
-     * @throws PackagingException    When the given element does not contain a valid
-     *                               <code>Service</code> element.
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.Service readElement(final OMElement svcElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.Service readElement(final OMElement svcElement) {
         if (svcElement == null)
             return null;
 
         // Read service name
         final String svcName = svcElement.getText();
 
-        if (svcName == null || svcName.isEmpty())
-            // Service name is required!
-            throw new PackagingException("Service name is missing from Service element");
-
         // Create the entity object
-        final org.holodeckb2b.ebms3.persistency.entities.Service svcData = new org.holodeckb2b.ebms3.persistency.entities.Service(svcName);
+        final org.holodeckb2b.ebms3.persistency.entities.Service svcData =
+                                                    new org.holodeckb2b.ebms3.persistency.entities.Service(svcName);
 
         // Read the optional service type
         svcData.setType(svcElement.getAttributeValue(new QName(LN_ATTR_TYPE)));

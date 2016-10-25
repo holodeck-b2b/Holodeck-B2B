@@ -17,7 +17,6 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.common.util.Utils;
@@ -100,34 +99,31 @@ public class MessageInfo {
     }
 
     /**
-     * Reads the information from the <code>eb:MessageInfo</code> element and
-     * stores it in the given {@see MessageUnit} object.
+     * Reads the information from the <code>eb:MessageInfo</code> element and  stores it in the given
+     * {@link MessageUnit} object.
      *
-     * @param miElement     The <code>MessageInfo</code> element to read the
+     * @param miElement     The {@link OMElement} object representing the <code>MessageInfo</code> element to read the
      *                      information from
-     * @param mu            The {@link MessageUnit} where information should be
-     *                      stored in
-     * @throws PackagingException   When the given element does not conform to
-     *                              ebMS specification and can therefore not be
-     *                              read completely
+     * @param mu            The {@link MessageUnit} where information should be stored in
      */
-    public static void readElement(final OMElement miElement, final MessageUnit mu) throws PackagingException {
+    public static void readElement(final OMElement miElement, final MessageUnit mu) {
+        if (miElement == null)
+            return;
+        
         try {
             mu.setTimestamp(Utils.fromXMLDateTime(miElement.getFirstChildWithName(Q_TIMESTAMP).getText()));
         } catch (final Exception e) {
-            throw new PackagingException("Required element " + Q_TIMESTAMP.getLocalPart()
-                                                                    + " is missing or has invalid value");
+            mu.setTimestamp(null);
         }
 
         final OMElement messageId = miElement.getFirstChildWithName(Q_MESSAGEID);
-
-        if (messageId == null || messageId.getText().isEmpty())
-            throw new PackagingException("Required element " + Q_TIMESTAMP.getLocalPart()
-                                                                    + " is missing or has invalid value");
-        mu.setMessageId(messageId.getText());
+        if (messageId != null && !Utils.isNullOrEmpty(messageId.getText()))
+            mu.setMessageId(messageId.getText());
+        else
+            mu.setMessageId(null);
 
         final OMElement  refToMsgId = miElement.getFirstChildWithName(Q_REFTO_MESSAGEID);
-        if (refToMsgId != null && !refToMsgId.getText().isEmpty())
+        if (refToMsgId != null && !Utils.isNullOrEmpty(refToMsgId.getText()))
             mu.setRefToMessageId(refToMsgId.getText());
     }
 }
