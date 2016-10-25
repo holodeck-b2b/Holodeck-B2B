@@ -25,7 +25,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Event framework to enable additional notification to external components about events that occur during message
 processing. See `org.holodeckb2b.interface.events` for the new interfaces.
 * Default implementation of message purging. This default implementation will remove all meta-data (including payload
-  data for User Messages) after a configurable number of days had passed since the last change to the message unit's
+  data for User Messages) after a configurable number of days has passed since the last change to the message unit's
   processing state.
 * Events for creation of a Receipt (see `org.holodeckb2b.interfaces.events.types.IReceiptCreatedEvent`), creation of
  a signature for a User Message (see `org.holodeckb2b.interfaces.events.types.ISignatureCreatedEvent`) and for the
