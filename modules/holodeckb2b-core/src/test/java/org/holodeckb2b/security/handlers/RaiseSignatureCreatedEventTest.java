@@ -20,10 +20,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.description.AxisModule;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
@@ -32,17 +29,17 @@ import org.holodeckb2b.ebms3.packaging.*;
 import org.holodeckb2b.ebms3.persistency.entities.AgreementReference;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-import org.holodeckb2b.module.HolodeckB2BCoreImpl;
-import org.holodeckb2b.module.HolodeckB2BCoreImplTest;
+import org.holodeckb2b.multihop.CheckFromICloudTest;
 import org.holodeckb2b.pmode.helpers.*;
+import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -54,16 +51,9 @@ import static org.junit.Assert.fail;
  */
 public class RaiseSignatureCreatedEventTest {
 
-    private static URL repoUrl;
+    private static String baseDir;
 
-    private static ConfigurationContext cc;
-    private static AxisModule am;
-
-    private HolodeckB2BCoreImpl coreImpl = new HolodeckB2BCoreImpl();
-
-//    private static String baseDir;
-//
-//    private static HolodeckCore core;
+    private static HolodeckCore core;
 
     private CreateWSSHeaders wssHeadersHandler;
 
@@ -71,32 +61,16 @@ public class RaiseSignatureCreatedEventTest {
 
     @BeforeClass
     public static void setUpClass() {
-//        baseDir = CheckFromICloudTest.class
-//                .getClassLoader().getResource("security").getPath();
-//        core = new HolodeckCore(baseDir);
-//        HolodeckB2BCoreInterface.setImplementation(core);
-
-        repoUrl = HolodeckB2BCoreImplTest.class.getClassLoader()
-                .getResource("moduletest/repository");
-
-        AxisConfiguration ac = new AxisConfiguration();
-        ac.setRepository(repoUrl);
-
-        cc = new ConfigurationContext(ac);
-        am = new AxisModule();
-        am.setName(HolodeckB2BCoreImpl.HOLODECKB2B_CORE_MODULE);
+        baseDir = CheckFromICloudTest.class
+                .getClassLoader().getResource("security").getPath();
+        core = new HolodeckCore(baseDir);
+        HolodeckB2BCoreInterface.setImplementation(core);
     }
 
     @Before
     public void setUp() throws Exception {
         wssHeadersHandler = new CreateWSSHeaders();
         handler = new RaiseSignatureCreatedEvent();
-
-        try {
-            coreImpl.init(cc, am);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
     }
 
     @Test
@@ -179,8 +153,7 @@ public class RaiseSignatureCreatedEventTest {
         pmode.setId(ar.getPModeId());
 
         //Adding PMode to the managed PMode set.
-//        core.getPModeSet().add(pmode);
-        coreImpl.getPModeSet().add(pmode);
+        core.getPModeSet().add(pmode);
 
         userMessageEntityProxy.entity.setPMode(ar.getPModeId());
 
