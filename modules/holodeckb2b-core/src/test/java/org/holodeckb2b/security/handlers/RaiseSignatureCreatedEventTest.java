@@ -61,7 +61,7 @@ public class RaiseSignatureCreatedEventTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = CheckFromICloudTest.class
+        baseDir = RaiseSignatureCreatedEventTest.class
                 .getClassLoader().getResource("security").getPath();
         core = new HolodeckCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
@@ -75,7 +75,6 @@ public class RaiseSignatureCreatedEventTest {
 
     @Test
     public void testDoProcessing() throws Exception {
-        System.out.println("[testDoProcessing]>");
         final String mmdPath =
                 this.getClass().getClassLoader()
                         .getResource("security/handlers/full_mmd.xml").getPath();
@@ -94,48 +93,51 @@ public class RaiseSignatureCreatedEventTest {
         // Adding UserMessage from mmd
         OMElement userMessage = UserMessage.createElement(headerBlock, mmd);
 
-        EntityProxy<org.holodeckb2b.ebms3.persistency.entities.UserMessage>
-                userMessageEntityProxy = null;
-        try {
-            userMessageEntityProxy =
-                    MessageUnitDAO.storeReceivedMessageUnit(
-                            UserMessage.readElement(userMessage));
-        } catch (PackagingException e) {
-            fail(e.getMessage());
-        }
-
-        OMElement ciElement = CollaborationInfo.getElement(userMessage);
-        OMElement arElement = AgreementRef.getElement(ciElement);
-        AgreementReference ar = AgreementRef.readElement(arElement);
-
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
         mc.setProperty(SecurityConstants.ADD_SECURITY_HEADERS, Boolean.TRUE);
+
+        // Setting signature configuration
+        SigningConfig sigConfig = new SigningConfig();
+        sigConfig.setKeystoreAlias("exampleca");
+        sigConfig.setCertificatePassword("ExampleCA");
+
+        // Setting token configuration
+        UsernameTokenConfig tokenConfig = new UsernameTokenConfig();
+        tokenConfig.setUsername("username");
+        tokenConfig.setPassword("secret");
+
+        mc.setProperty(SecurityConstants.SIGNATURE, sigConfig);
+        mc.setProperty(SecurityConstants.EBMS_USERNAMETOKEN, tokenConfig);
+        mc.setProperty(SecurityConstants.DEFAULT_USERNAMETOKEN, tokenConfig);
+
+        try {
+            mc.setEnvelope(env);
+        } catch (AxisFault axisFault) {
+            fail(axisFault.getMessage());
+        }
+
+        // Invoking CreateSecurityHeaders handler
+        try {
+            Handler.InvocationResponse invokeResp = wssHeadersHandler.invoke(mc);
+            assertEquals("InvocationResponse.CONTINUE", invokeResp.toString());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
 
         PMode pmode = new PMode();
         pmode.setMep(EbMSConstants.ONE_WAY_MEP);
         pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
 
         // Setting security configuration
-        PartnerConfig initiator = new PartnerConfig();
-        SigningConfig sigConfig = new SigningConfig();
-        sigConfig.setKeystoreAlias("exampleca");
-        sigConfig.setCertificatePassword("ExampleCA");
-
         SecurityConfig secConfig = new SecurityConfig();
         secConfig.setSignatureConfiguration(sigConfig);
-
-        mc.setProperty(SecurityConstants.SIGNATURE, sigConfig);
-
-        UsernameTokenConfig tokenConfig = new UsernameTokenConfig();
-        tokenConfig.setUsername("username");
-        tokenConfig.setPassword("secret");
-
         secConfig.setUsernameTokenConfiguration(
                 ISecurityConfiguration.WSSHeaderTarget.EBMS, tokenConfig);
         secConfig.setUsernameTokenConfiguration(
                 ISecurityConfiguration.WSSHeaderTarget.DEFAULT, tokenConfig);
 
+        PartnerConfig initiator = new PartnerConfig();
         initiator.setSecurityConfiguration(secConfig);
         pmode.setInitiator(initiator);
 
@@ -148,6 +150,10 @@ public class RaiseSignatureCreatedEventTest {
         leg.setProtocol(protocolConfig);
         pmode.addLeg(leg);
 
+        // We need agreement ref to get pmode id of the userMessage
+        AgreementReference ar =
+                AgreementRef.readElement(AgreementRef.getElement(
+                        CollaborationInfo.getElement(userMessage)));
         Agreement agreement = new Agreement();
         pmode.setAgreement(agreement);
         pmode.setId(ar.getPModeId());
@@ -155,38 +161,25 @@ public class RaiseSignatureCreatedEventTest {
         //Adding PMode to the managed PMode set.
         core.getPModeSet().add(pmode);
 
-        userMessageEntityProxy.entity.setPMode(ar.getPModeId());
-
-        mc.setProperty(SecurityConstants.EBMS_USERNAMETOKEN, tokenConfig);
-        mc.setProperty(SecurityConstants.DEFAULT_USERNAMETOKEN, tokenConfig);
-
-        mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, userMessageEntityProxy);
-
+        EntityProxy<org.holodeckb2b.ebms3.persistency.entities.UserMessage>
+                userMessageEntityProxy = null;
         try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
-
-        // Invoking CreateSecurityHeaders handler
-        try {
-            System.out.println("[before wssHeadersHandler.invoke()]>");
-            Handler.InvocationResponse invokeResp = wssHeadersHandler.invoke(mc);
-            System.out.println("<[after wssHeadersHandler.invoke()]");
-            assertEquals("InvocationResponse.CONTINUE", invokeResp.toString());
-        } catch (Exception e) {
+            userMessageEntityProxy =
+                    MessageUnitDAO.storeReceivedMessageUnit(
+                            UserMessage.readElement(userMessage));
+        } catch (PackagingException e) {
             fail(e.getMessage());
         }
+        userMessageEntityProxy.entity.setPMode(ar.getPModeId());
+        mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
+                userMessageEntityProxy);
 
         // Invoking RaiseSignatureEvent handler
         try {
-            System.out.println("[before handler.invoke()]>");
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            System.out.println("<[after handler.invoke()]");
             assertEquals("InvocationResponse.CONTINUE", invokeResp.toString());
         } catch (Exception e) {
             fail(e.getMessage());
         }
-        System.out.println("<[testDoProcessing]");
     }
 }

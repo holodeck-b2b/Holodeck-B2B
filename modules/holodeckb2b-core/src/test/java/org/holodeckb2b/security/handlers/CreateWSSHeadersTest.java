@@ -128,6 +128,7 @@ public class CreateWSSHeadersTest {
         encConfig.setKeystoreAlias("exampleca");
         encConfig.setCertificatePassword("ExampleCA");
 
+        // Setting token configuration
         UsernameTokenConfig tokenConfig = new UsernameTokenConfig();
         tokenConfig.setUsername("username");
         tokenConfig.setPassword("secret");
