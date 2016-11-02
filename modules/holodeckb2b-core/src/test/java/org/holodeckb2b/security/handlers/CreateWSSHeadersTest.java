@@ -112,83 +112,35 @@ public class CreateWSSHeadersTest {
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding UserMessage from mmd
-        OMElement userMessage = UserMessage.createElement(headerBlock, mmd);
-
-        EntityProxy<org.holodeckb2b.ebms3.persistency.entities.UserMessage>
-                userMessageEntityProxy = null;
-        try {
-            userMessageEntityProxy =
-                    MessageUnitDAO.storeReceivedMessageUnit(
-                            UserMessage.readElement(userMessage));
-        } catch (PackagingException e) {
-            fail(e.getMessage());
-        }
-
-        OMElement ciElement = CollaborationInfo.getElement(userMessage);
-        OMElement arElement = AgreementRef.getElement(ciElement);
-        AgreementReference ar = AgreementRef.readElement(arElement);
+        UserMessage.createElement(headerBlock, mmd);
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
         mc.setProperty(SecurityConstants.ADD_SECURITY_HEADERS, Boolean.TRUE);
 
-        PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-
-        // Setting security configuration
-        PartnerConfig initiator = new PartnerConfig();
+        // Setting signature configuration
         SigningConfig sigConfig = new SigningConfig();
         sigConfig.setKeystoreAlias("exampleca");
         sigConfig.setCertificatePassword("ExampleCA");
 
-        // First of all we need to test RaiseSignatureCreatedEvent
-        // So, we need only signature headers by now
-//        EncryptionConfig encConfig = new EncryptionConfig();
-//        encConfig.setKeystoreAlias("partya");
-//        encConfig.setCertificatePassword("ExampleA");
-
-        SecurityConfig secConfig = new SecurityConfig();
-        secConfig.setSignatureConfiguration(sigConfig);
-//        secConfig.setEncryptionConfiguration(encConfig);
-
-        mc.setProperty(SecurityConstants.SIGNATURE, sigConfig);
-//        mc.setProperty(SecurityConstants.ENCRYPTION, encConfig);
+        // Setting encription configuration
+        EncryptionConfig encConfig = new EncryptionConfig();
+        encConfig.setKeystoreAlias("exampleca");
+        encConfig.setCertificatePassword("ExampleCA");
 
         UsernameTokenConfig tokenConfig = new UsernameTokenConfig();
         tokenConfig.setUsername("username");
         tokenConfig.setPassword("secret");
 
-        secConfig.setUsernameTokenConfiguration(
-                ISecurityConfiguration.WSSHeaderTarget.EBMS, tokenConfig);
-        secConfig.setUsernameTokenConfiguration(
-                ISecurityConfiguration.WSSHeaderTarget.DEFAULT, tokenConfig);
-
-        initiator.setSecurityConfiguration(secConfig);
-        pmode.setInitiator(initiator);
-
+        mc.setProperty(SecurityConstants.SIGNATURE, sigConfig);
+        // First of all we need to test RaiseSignatureCreatedEvent
+        // So, we need only signature headers by now
+        // todo Setting encription causes org.apache.xml.security.exceptions.XMLSecurityException
+        // todo for unknown reason. I'll check this later (T.S.)
+//        mc.setProperty(SecurityConstants.ENCRYPTION, encConfig);
         mc.setProperty(SecurityConstants.EBMS_USERNAMETOKEN, tokenConfig);
         mc.setProperty(SecurityConstants.DEFAULT_USERNAMETOKEN, tokenConfig);
 
-        Leg leg = new Leg();
-
-        Protocol protocolConfig = new Protocol();
-        protocolConfig.setAddress("address");
-        protocolConfig.setAddActorOrRoleAttribute(true);
-
-        leg.setProtocol(protocolConfig);
-        pmode.addLeg(leg);
-
-        Agreement agreement = new Agreement();
-        pmode.setAgreement(agreement);
-        pmode.setId(ar.getPModeId());
-
-        //Adding PMode to the managed PMode set.
-        core.getPModeSet().add(pmode);
-
-        userMessageEntityProxy.entity.setPMode(ar.getPModeId());
-
-        mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, userMessageEntityProxy);
         try {
             mc.setEnvelope(env);
         } catch (AxisFault axisFault) {
@@ -205,11 +157,8 @@ public class CreateWSSHeadersTest {
         }
 
         env = mc.getEnvelope();
-        System.out.println(env);
-
-        // todo Time to use XMLUnit ?
+//        System.out.println(env);
         SOAPHeader header = env.getHeader();
-        //OMElement messagingElement = header.getFirstElement();
         ArrayList securityHeaders =
                 header.getHeaderBlocksWithNSURI(SecurityConstants.WSS_NAMESPACE_URI);
         assertNotNull(securityHeaders);
@@ -229,7 +178,6 @@ public class CreateWSSHeadersTest {
                 assertTrue(it.hasNext());
                 if (it.hasNext()) {
                     OMElement signedInfo = (OMElement)it.next();
-                    // todo check the contents of signedInfo
                     it = signedInfo.getChildrenWithName(CANONICALIZATION_METHOD_ELEMENT_NAME);
                     assertTrue(it.hasNext());
                     it = signedInfo.getChildrenWithName(SIGNATURE_METHOD_ELEMENT_NAME);
