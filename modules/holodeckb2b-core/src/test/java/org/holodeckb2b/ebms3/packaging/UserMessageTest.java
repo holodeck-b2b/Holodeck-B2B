@@ -43,6 +43,10 @@ public class UserMessageTest {
             new QName(EbMSConstants.EBMS3_NS_URI, "Messaging");
     static final QName USER_MESSAGE_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "UserMessage");
+    static final QName COLLABORATION_INFO_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "CollaborationInfo");
+    static final QName AGREEMENT_REF_INFO_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "AgreementRef");
 
     @Before
     public void setUp() throws Exception {
@@ -78,6 +82,10 @@ public class UserMessageTest {
         assertEquals(MESSAGING_ELEMENT_NAME, messagingElement.getQName());
         OMElement userMessageElement = messagingElement.getFirstElement();
         assertEquals(USER_MESSAGE_ELEMENT_NAME, userMessageElement.getQName());
+        OMElement ciElement = CollaborationInfo.getElement(userMessageElement);
+        assertEquals(COLLABORATION_INFO_ELEMENT_NAME, ciElement.getQName());
+        OMElement arElement = AgreementRef.getElement(ciElement);
+        assertEquals(AGREEMENT_REF_INFO_ELEMENT_NAME, arElement.getQName());
     }
 
     @Test
