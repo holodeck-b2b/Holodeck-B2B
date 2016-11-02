@@ -23,17 +23,15 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
-import org.holodeckb2b.ebms3.packaging.*;
-import org.holodeckb2b.ebms3.persistency.entities.AgreementReference;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.packaging.SOAPEnv;
+import org.holodeckb2b.ebms3.packaging.UserMessage;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-import org.holodeckb2b.pmode.helpers.*;
+import org.holodeckb2b.pmode.helpers.EncryptionConfig;
+import org.holodeckb2b.pmode.helpers.SigningConfig;
+import org.holodeckb2b.pmode.helpers.UsernameTokenConfig;
 import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -138,8 +136,8 @@ public class CreateWSSHeadersTest {
 
         // Setting encription configuration
         EncryptionConfig encConfig = new EncryptionConfig();
-        encConfig.setKeystoreAlias("exampleca");
-        encConfig.setCertificatePassword("ExampleCA");
+        encConfig.setKeystoreAlias("partyb");
+        encConfig.setCertificatePassword("ExampleB");
 
         // Setting token configuration
         UsernameTokenConfig tokenConfig = new UsernameTokenConfig();

@@ -32,7 +32,6 @@ import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-import org.holodeckb2b.multihop.CheckFromICloudTest;
 import org.holodeckb2b.pmode.helpers.*;
 import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.Before;
