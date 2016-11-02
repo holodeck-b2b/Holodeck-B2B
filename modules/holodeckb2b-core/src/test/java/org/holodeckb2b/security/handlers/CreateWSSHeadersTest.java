@@ -61,12 +61,25 @@ public class CreateWSSHeadersTest {
             new QName(SecurityConstants.DSIG_NAMESPACE_URI, "CanonicalizationMethod");
     static final QName SIGNATURE_METHOD_ELEMENT_NAME =
             new QName(SecurityConstants.DSIG_NAMESPACE_URI, "SignatureMethod");
+    static final QName REFERENCE_ELEMENT_NAME =
+            new QName(SecurityConstants.DSIG_NAMESPACE_URI, "Reference");
+    static final QName URI_ATTRIBUTE_NAME = new QName("", "URI");
     static final QName SIGNED_INFO_ELEMENT_NAME =
             new QName(SecurityConstants.DSIG_NAMESPACE_URI, "SignedInfo");
     static final QName SIGNATURE_VALUE_ELEMENT_NAME =
             new QName(SecurityConstants.DSIG_NAMESPACE_URI, "SignatureValue");
     static final QName KEY_INFO_ELEMENT_NAME =
             new QName(SecurityConstants.DSIG_NAMESPACE_URI, "KeyInfo");
+    static final QName SECURITY_TOKEN_REFERENCE_ELEMENT_NAME =
+            new QName(SecurityConstants.WSS_NAMESPACE_URI, "SecurityTokenReference");
+    static final QName X509_DATA_ELEMENT_NAME =
+            new QName(SecurityConstants.DSIG_NAMESPACE_URI, "X509Data");
+    static final QName X509_ISSUER_SERIAL_ELEMENT_NAME =
+            new QName(SecurityConstants.DSIG_NAMESPACE_URI, "X509IssuerSerial");
+    static final QName X509_ISSUER_NAME_ELEMENT_NAME =
+            new QName(SecurityConstants.DSIG_NAMESPACE_URI, "X509IssuerName");
+    static final QName X509_SERIAL_NUMBER_ELEMENT_NAME =
+            new QName(SecurityConstants.DSIG_NAMESPACE_URI, "X509SerialNumber");
     static final QName USERNAME_TOKEN_ELEMENT_NAME =
             new QName(SecurityConstants.WSS_NAMESPACE_URI, "UsernameToken");
     static final QName USERNAME_ELEMENT_NAME =
@@ -136,7 +149,8 @@ public class CreateWSSHeadersTest {
         mc.setProperty(SecurityConstants.SIGNATURE, sigConfig);
         // First of all we need to test RaiseSignatureCreatedEvent
         // So, we need only signature headers by now
-        // todo Setting encription causes org.apache.xml.security.exceptions.XMLSecurityException
+        // todo Setting encription causes
+        // todo org.apache.xml.security.exceptions.XMLSecurityException
         // todo for unknown reason. I'll check this later (T.S.)
 //        mc.setProperty(SecurityConstants.ENCRYPTION, encConfig);
         mc.setProperty(SecurityConstants.EBMS_USERNAMETOKEN, tokenConfig);
@@ -161,7 +175,8 @@ public class CreateWSSHeadersTest {
 //        System.out.println(env);
         SOAPHeader header = env.getHeader();
         ArrayList securityHeaders =
-                header.getHeaderBlocksWithNSURI(SecurityConstants.WSS_NAMESPACE_URI);
+                header.getHeaderBlocksWithNSURI(
+                        SecurityConstants.WSS_NAMESPACE_URI);
         assertNotNull(securityHeaders);
         // Should contain two security headers, one for the hb2b-sec:ebms;UsernameToken
         // another for hb2b-sec:wsse:UsernameToken
@@ -179,23 +194,57 @@ public class CreateWSSHeadersTest {
                 assertTrue(it.hasNext());
                 if (it.hasNext()) {
                     OMElement signedInfo = (OMElement)it.next();
-                    it = signedInfo.getChildrenWithName(CANONICALIZATION_METHOD_ELEMENT_NAME);
+                    it = signedInfo.getChildrenWithName(
+                            CANONICALIZATION_METHOD_ELEMENT_NAME);
                     assertTrue(it.hasNext());
-                    it = signedInfo.getChildrenWithName(SIGNATURE_METHOD_ELEMENT_NAME);
+                    it = signedInfo.getChildrenWithName(
+                            SIGNATURE_METHOD_ELEMENT_NAME);
                     assertTrue(it.hasNext());
-                    // todo check presence of the References
+                    // Check presence of the References
+                    // There should be four references
+                    // 1 - for Messaging
+                    // 1 - for body
+                    // 2 - for each UsernameToken
+                    it = signedInfo.getChildrenWithName(REFERENCE_ELEMENT_NAME);
+                    int k = 0;
+                    while(it.hasNext()) {
+                        OMElement ref = (OMElement)it.next();
+                        String id = ref.getAttributeValue(URI_ATTRIBUTE_NAME);
+                        assertNotNull(id);
+                        k++;
+                    }
+                    assertEquals(4, k);
                 }
                 it = sigElem.getChildrenWithName(SIGNATURE_VALUE_ELEMENT_NAME);
                 assertTrue(it.hasNext());
-                if (it.hasNext()) {
-                    OMElement sigValue = (OMElement)it.next();
-                    // todo check the contents of sigValue
-                }
                 it = sigElem.getChildrenWithName(KEY_INFO_ELEMENT_NAME);
                 assertTrue(it.hasNext());
                 if (it.hasNext()) {
                     OMElement keyInfo = (OMElement)it.next();
-                    // todo check the contents of keyInfo
+                    it = keyInfo.getChildrenWithName(
+                            SECURITY_TOKEN_REFERENCE_ELEMENT_NAME);
+                    assertTrue(it.hasNext());
+                    if(it.hasNext()) {
+                        OMElement securityTokenRef = (OMElement)it.next();
+                        it = securityTokenRef.getChildrenWithName(
+                                X509_DATA_ELEMENT_NAME);
+                        assertTrue(it.hasNext());
+                        if(it.hasNext()) {
+                            OMElement x509Data = (OMElement)it.next();
+                            it = x509Data.getChildrenWithName(
+                                    X509_ISSUER_SERIAL_ELEMENT_NAME);
+                            assertTrue(it.hasNext());
+                            if(it.hasNext()) {
+                                OMElement x509IssuerSerial = (OMElement)it.next();
+                                it = x509IssuerSerial.getChildrenWithName(
+                                        X509_ISSUER_NAME_ELEMENT_NAME);
+                                assertTrue(it.hasNext());
+                                it = x509IssuerSerial.getChildrenWithName(
+                                        X509_SERIAL_NUMBER_ELEMENT_NAME);
+                                assertTrue(it.hasNext());
+                            }
+                        }
+                    }
                 }
             }
             it = s.getChildrenWithName(USERNAME_TOKEN_ELEMENT_NAME);
