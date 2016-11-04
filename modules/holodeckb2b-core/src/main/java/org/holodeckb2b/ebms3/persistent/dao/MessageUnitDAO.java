@@ -720,6 +720,7 @@ public class MessageUnitDAO {
         boolean result = false;
         final EntityManager em = JPAUtil.getEntityManager();
         try {
+            em.getTransaction().begin();
             result = "true".equals(em.createNamedQuery("UserMessage.isDelivered",
                     String.class).setParameter("msgId", messageId)
                     .getSingleResult()
@@ -730,6 +731,7 @@ public class MessageUnitDAO {
             // Something went wrong during query execution
             throw new DatabaseException("Could not execute query", e);
         } finally {
+            em.getTransaction().commit();
             em.close();
         }
         return result;
@@ -765,6 +767,7 @@ public class MessageUnitDAO {
                              "AND s1.NAME IN :states " +
                              "ORDER BY mu.MU_TIMESTAMP";
         try {
+            em.getTransaction().begin();
             result = em.createQuery(queryString, type)
                                     .setParameter("states", pStates)
                                     .getResultList();
@@ -774,6 +777,7 @@ public class MessageUnitDAO {
             // Something went wrong during query execution
             throw new DatabaseException("Could not execute query", e);
         } finally {
+            em.getTransaction().commit();
             em.close();
         }
 
@@ -794,12 +798,14 @@ public class MessageUnitDAO {
         Long result = null;
         final EntityManager em = JPAUtil.getEntityManager();
         try {
+            em.getTransaction().begin();
             result = em.createNamedQuery("UserMessage.numOfTransmits", Long.class)
                        .setParameter("msgId", um.getMessageId()).getSingleResult();
         } catch (final Exception e) {
             // Something went wrong during query execution
             throw new DatabaseException("Could not execute query", e);
         } finally {
+            em.getTransaction().commit();
             em.close();
         }
         return result.intValue();
@@ -859,6 +865,7 @@ public class MessageUnitDAO {
         List<MessageUnit> result = null;
         final EntityManager em = JPAUtil.getEntityManager();
         try {
+            em.getTransaction().begin();
             result = em.createNamedQuery("MessageUnit.findWithMessageIdInDirection", MessageUnit.class)
                     .setParameter("msgId", messageId)
                     .setParameter("direction", direction)
@@ -869,6 +876,7 @@ public class MessageUnitDAO {
             // Something went wrong during query execution
             throw new DatabaseException("Could not execute query", e);
         } finally {
+            em.getTransaction().commit();
             em.close();
         }
         return createProxyResultList(result);
@@ -889,6 +897,7 @@ public class MessageUnitDAO {
         List<MessageUnit> result = null;
         final EntityManager em = JPAUtil.getEntityManager();
         try {
+            em.getTransaction().begin();
             result = em.createNamedQuery("MessageUnit.findWithLastStateChangeBefore", MessageUnit.class)
                     .setParameter("beforeDate", maxLastChangeDate)
                     .getResultList();
@@ -898,6 +907,7 @@ public class MessageUnitDAO {
             // Something went wrong during query execution
             throw new DatabaseException("Could not execute query", e);
         } finally {
+            em.getTransaction().commit();
             em.close();
         }
         return createProxyResultList(result);
@@ -963,6 +973,7 @@ public class MessageUnitDAO {
                              "AND s1.NAME = :state " +
                              "ORDER BY s1.START";
         try {
+            em.getTransaction().begin();
             result = em.createQuery(queryString, type)
                                     .setParameter("state", state)
                                     .setParameter("pmodes", pmodeIds)
@@ -973,6 +984,7 @@ public class MessageUnitDAO {
             // Something went wrong executing the query. Probably because wrong class was specified
             throw new DatabaseException("An error occurred while executing query to retreive message units!", e);
         } finally {
+            em.getTransaction().commit();
             em.close();
         }
         return createProxyResultList(result);
@@ -995,6 +1007,7 @@ public class MessageUnitDAO {
         List<T> result = null;
         final EntityManager em = JPAUtil.getEntityManager();
         try {
+            em.getTransaction().begin();
             final String queryName = type.getSimpleName() + ".findResponsesTo";
             result = em.createNamedQuery(queryName, type)
                     .setParameter("refToMsgId", refToMessageId)
@@ -1005,6 +1018,7 @@ public class MessageUnitDAO {
             // Something went wrong executing the query. Probably because wrong class was specified
             throw new DatabaseException("An error occurred while executing query to retreive message units!", e);
         } finally {
+            em.getTransaction().commit();
             em.close();
         }
         return createProxyResultList(result);
