@@ -12,6 +12,7 @@
       <property name="hibernate.connection.url" value="jdbc:derby:db/coreDB;databaseName=coreDB;create=true"/>
       <property name="hibernate.connection.username" value="hb2b"/>
       <property name="hibernate.connection.password" value="hb2b"/>
+      <property name="hibernate.connection.release_mode" value="after_transaction"/>
       <property name="hibernate.hbm2ddl.auto" value="update"/>
       <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
     </properties>
