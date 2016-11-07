@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+###Added
+
+###Changed
+
+###Fixed
+* Database connection not closed [#34](https://github.com/holodeck-b2b/Holodeck-B2B/issues/34)
+
+###Security
+
 ## 2.1.0
 ###### 2016-10-18
 ### Added
