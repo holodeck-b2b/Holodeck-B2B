@@ -35,8 +35,10 @@ Please document the steps to reproduce your problem in as much detail as you can
 Version numbering follows the [Semantic versioning](http://semver.org/) approach.
 
 ##License
+Holodeck B2B consists of 2 parts: Core (GPL3) and Interfaces/API’s (LGPL3).  
 The Holodeck B2B core is licensed under the General Public License V3 (GPLv3) which is included in the license.txt in the root of the project.
-This means you are not allowed to integrate Holodeck B2B in a closed source product. You can however use Holodeck B2B together with your closed source product as long as you only use the provided interfaces (API's) to communicate with the Holodeck B2B core. 
+This means you are not allowed to integrate Holodeck B2B in a closed source product.  
+You can however use Holodeck B2B together with your closed source product as long as you only use the provided interfaces (API's) to communicate with the Holodeck B2B core. 
 For this purpose, the interfaces module is licensed under the Lesser General Public License V3 (LGPLv3).
 
 ###3rd party components
