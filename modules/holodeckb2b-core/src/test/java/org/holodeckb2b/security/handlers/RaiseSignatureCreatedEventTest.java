@@ -155,7 +155,7 @@ public class RaiseSignatureCreatedEventTest {
         } catch (PackagingException e) {
             fail(e.getMessage());
         }
-        userMessageEntityProxy.entity.setPMode(pmodeId);
+        userMessageEntityProxy.entity.setPMode(pmode.getId());
         mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
                 userMessageEntityProxy);
 
