@@ -31,7 +31,6 @@ import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 import org.holodeckb2b.pmode.helpers.*;
 import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.Before;
@@ -101,14 +100,7 @@ public class RaiseSignatureCreatedEventTest {
         sigConfig.setKeystoreAlias("exampleca");
         sigConfig.setCertificatePassword("ExampleCA");
 
-        // Setting token configuration
-        UsernameTokenConfig tokenConfig = new UsernameTokenConfig();
-        tokenConfig.setUsername("username");
-        tokenConfig.setPassword("secret");
-
         mc.setProperty(SecurityConstants.SIGNATURE, sigConfig);
-        mc.setProperty(SecurityConstants.EBMS_USERNAMETOKEN, tokenConfig);
-        mc.setProperty(SecurityConstants.DEFAULT_USERNAMETOKEN, tokenConfig);
 
         try {
             mc.setEnvelope(env);
@@ -119,7 +111,7 @@ public class RaiseSignatureCreatedEventTest {
         // Invoking CreateSecurityHeaders handler
         try {
             Handler.InvocationResponse invokeResp = wssHeadersHandler.invoke(mc);
-            assertEquals("InvocationResponse.CONTINUE", invokeResp.toString());
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -131,10 +123,6 @@ public class RaiseSignatureCreatedEventTest {
         // Setting security configuration
         SecurityConfig secConfig = new SecurityConfig();
         secConfig.setSignatureConfiguration(sigConfig);
-        secConfig.setUsernameTokenConfiguration(
-                ISecurityConfiguration.WSSHeaderTarget.EBMS, tokenConfig);
-        secConfig.setUsernameTokenConfiguration(
-                ISecurityConfiguration.WSSHeaderTarget.DEFAULT, tokenConfig);
 
         PartnerConfig initiator = new PartnerConfig();
         initiator.setSecurityConfiguration(secConfig);
@@ -176,7 +164,7 @@ public class RaiseSignatureCreatedEventTest {
         // Invoking RaiseSignatureEvent handler
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals("InvocationResponse.CONTINUE", invokeResp.toString());
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
