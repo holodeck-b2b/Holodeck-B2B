@@ -164,7 +164,7 @@ public class CreateWSSHeadersTest {
             System.out.println("[before handler.invoke()]>");
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             System.out.println("<[after handler.invoke()]");
-            assertEquals("InvocationResponse.CONTINUE", invokeResp.toString());
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp.toString());
         } catch (Exception e) {
             fail(e.getMessage());
         }
