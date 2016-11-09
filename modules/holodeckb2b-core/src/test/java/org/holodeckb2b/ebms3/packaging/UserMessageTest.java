@@ -28,8 +28,10 @@ import org.junit.Test;
 
 import javax.xml.namespace.QName;
 import java.io.File;
+import java.util.Iterator;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -43,6 +45,10 @@ public class UserMessageTest {
             new QName(EbMSConstants.EBMS3_NS_URI, "Messaging");
     static final QName USER_MESSAGE_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "UserMessage");
+    static final QName MESSAGE_INFO_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "MessageInfo");
+    static final QName MESSAGE_ID_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "MessageId");
     static final QName COLLABORATION_INFO_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "CollaborationInfo");
     static final QName AGREEMENT_REF_INFO_ELEMENT_NAME =
@@ -82,6 +88,14 @@ public class UserMessageTest {
         assertEquals(MESSAGING_ELEMENT_NAME, messagingElement.getQName());
         OMElement userMessageElement = messagingElement.getFirstElement();
         assertEquals(USER_MESSAGE_ELEMENT_NAME, userMessageElement.getQName());
+        OMElement miElement = MessageInfo.getElement(userMessageElement);
+        assertEquals(MESSAGE_INFO_ELEMENT_NAME, miElement.getQName());
+        Iterator it = miElement.getChildrenWithName(MESSAGE_ID_ELEMENT_NAME);
+        assertTrue(it.hasNext());
+        if(it.hasNext()) {
+            OMElement idElement = (OMElement)it.next();
+            assertEquals("n-soaDLzuliyRmzSlBe7", idElement.getText());
+        }
         OMElement ciElement = CollaborationInfo.getElement(userMessageElement);
         assertEquals(COLLABORATION_INFO_ELEMENT_NAME, ciElement.getQName());
         OMElement arElement = AgreementRef.getElement(ciElement);

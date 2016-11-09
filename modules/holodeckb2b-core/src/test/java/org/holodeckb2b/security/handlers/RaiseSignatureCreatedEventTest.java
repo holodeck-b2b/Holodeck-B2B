@@ -26,10 +26,12 @@ import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.*;
-import org.holodeckb2b.ebms3.persistency.entities.AgreementReference;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.events.SignatureCreatedEvent;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.pmode.helpers.*;
 import org.holodeckb2b.testhelpers.HolodeckCore;
@@ -37,10 +39,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.xml.namespace.QName;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Created at 22:57 13.09.16
@@ -48,6 +52,9 @@ import static org.junit.Assert.fail;
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class RaiseSignatureCreatedEventTest {
+
+    static final QName MESSAGE_ID_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "MessageId");
 
     private static String baseDir;
 
@@ -159,12 +166,44 @@ public class RaiseSignatureCreatedEventTest {
         mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
                 userMessageEntityProxy);
 
+        // Adding event processor to make sure the SignatureCreatedEvent
+        // is actually raised.
+        final TestEventProcessor eventProcessor = new TestEventProcessor();
+        core.setEventProcessor(eventProcessor);
+
         // Invoking RaiseSignatureEvent handler
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
+        }
+
+        assertTrue(eventProcessor.allPurgeEvents);
+        assertEquals(1, eventProcessor.msgIdsPurged.size());
+
+        String msgId = null;
+        OMElement miElement = MessageInfo.getElement(userMessage);
+        Iterator it = miElement.getChildrenWithName(MESSAGE_ID_ELEMENT_NAME);
+        if(it.hasNext()) {
+            msgId = ((OMElement)it.next()).getText();
+        }
+        assertEquals(msgId, eventProcessor.msgIdsPurged.get(0));
+    }
+
+    class TestEventProcessor implements IMessageProcessingEventProcessor {
+
+        boolean allPurgeEvents = false;
+        ArrayList<String> msgIdsPurged = new ArrayList<>();
+
+        @Override
+        public void raiseEvent(final IMessageProcessingEvent event,
+                               final MessageContext msgContext) {
+            allPurgeEvents = event instanceof SignatureCreatedEvent;
+            if (allPurgeEvents) {
+                assertNotNull(event.getSubject());
+                msgIdsPurged.add(event.getSubject().getMessageId());
+            }
         }
     }
 }
