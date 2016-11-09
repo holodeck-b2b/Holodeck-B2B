@@ -37,8 +37,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import javax.xml.namespace.QName;
 import java.io.File;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -97,6 +100,8 @@ public class CreateWSSHeadersTest {
                 .getClassLoader().getResource("security").getPath();
         core = new HolodeckCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
+
+        Security.addProvider(new BouncyCastleProvider());
     }
 
     @Before
@@ -150,7 +155,7 @@ public class CreateWSSHeadersTest {
         // todo Setting encription causes
         // todo org.apache.xml.security.exceptions.XMLSecurityException
         // todo for unknown reason. I'll check this later (T.S.)
-//        mc.setProperty(SecurityConstants.ENCRYPTION, encConfig);
+        mc.setProperty(SecurityConstants.ENCRYPTION, encConfig);
         mc.setProperty(SecurityConstants.EBMS_USERNAMETOKEN, tokenConfig);
         mc.setProperty(SecurityConstants.DEFAULT_USERNAMETOKEN, tokenConfig);
 
@@ -164,7 +169,7 @@ public class CreateWSSHeadersTest {
             System.out.println("[before handler.invoke()]>");
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             System.out.println("<[after handler.invoke()]");
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp.toString());
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -176,7 +181,7 @@ public class CreateWSSHeadersTest {
                 header.getHeaderBlocksWithNSURI(
                         SecurityConstants.WSS_NAMESPACE_URI);
         assertNotNull(securityHeaders);
-        // Should contain two security headers, one for the hb2b-sec:ebms;UsernameToken
+        // Should contain two security headers, one for the hb2b-sec:ebms:UsernameToken
         // another for hb2b-sec:wsse:UsernameToken
         assertTrue(securityHeaders.size() == 2);
         boolean containsSignatureElement = false;
