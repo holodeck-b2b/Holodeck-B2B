@@ -137,13 +137,11 @@ public class RaiseSignatureCreatedEventTest {
         leg.setProtocol(protocolConfig);
         pmode.addLeg(leg);
 
-        // We need agreement ref to get pmode id of the userMessage
-        AgreementReference ar =
-                AgreementRef.readElement(AgreementRef.getElement(
-                        CollaborationInfo.getElement(userMessage)));
-        Agreement agreement = new Agreement();
-        pmode.setAgreement(agreement);
-        pmode.setId(ar.getPModeId());
+        OMElement agreementRef =
+                AgreementRef.getElement(CollaborationInfo.getElement(userMessage));
+        String pmodeId = agreementRef.getText();
+
+        pmode.setId(pmodeId);
 
         //Adding PMode to the managed PMode set.
         core.getPModeSet().add(pmode);
@@ -157,7 +155,7 @@ public class RaiseSignatureCreatedEventTest {
         } catch (PackagingException e) {
             fail(e.getMessage());
         }
-        userMessageEntityProxy.entity.setPMode(ar.getPModeId());
+        userMessageEntityProxy.entity.setPMode(pmodeId);
         mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
                 userMessageEntityProxy);
 
