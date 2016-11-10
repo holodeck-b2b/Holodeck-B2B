@@ -41,6 +41,7 @@
         <netbeans.hint.license>gpl30</netbeans.hint.license>
         <hibernate.version>5.2.4.Final</hibernate.version>
         <wss4j.version>2.0.4</wss4j.version>
+        <xmlsec.version>2.0.4</xmlsec.version>
         <log4j.version>2.6.2</log4j.version>
     </properties>
 
@@ -186,7 +187,7 @@
             <dependency>
                 <groupId>org.apache.santuario</groupId>
                 <artifactId>xmlsec</artifactId>
-                <version>2.0.5</version>
+                <version>${xmlsec.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.wss4j</groupId>
