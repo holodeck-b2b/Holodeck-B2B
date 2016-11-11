@@ -6,9 +6,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ###Added
 
 ###Changed
+* It is now possible to not only configure whether _Error Signals_ should be logged but also if all _Error Signals_
+  should be logged or only the ones that contain an Error with severity _failure_ (see `log4j2.xml` for more info).
 
 ###Fixed
 * Database connection not closed [#34](https://github.com/holodeck-b2b/Holodeck-B2B/issues/34)
+* ebMS errors are only logged when log level is ERROR [#35](https://github.com/holodeck-b2b/Holodeck-B2B/issues/35)
+* Exceptions in processing of WSS header not handled correctly [#36](https://github.com/holodeck-b2b/Holodeck-B2B/issues/36)
 
 ###Security
 
