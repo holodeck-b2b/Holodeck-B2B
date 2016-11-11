@@ -18,7 +18,6 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -103,7 +102,10 @@ public class ProcessErrors extends BaseHandler {
         }
 
         // Always log the error signal, even if its processing may fail later
-        errorLog.error(errSignalProxy.entity);
+        if (isWarning(errSignalProxy.entity))
+            errorLog.warn(errSignalProxy.entity);
+        else
+            errorLog.error(errSignalProxy.entity);
 
         log.debug("Get referenced message unit(s)");
         final ArrayList<EntityProxy<MessageUnit>> refdMessages = new ArrayList<>(1);
