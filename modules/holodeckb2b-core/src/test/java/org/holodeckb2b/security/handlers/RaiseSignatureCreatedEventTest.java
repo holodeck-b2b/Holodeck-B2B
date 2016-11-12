@@ -28,6 +28,7 @@ import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.*;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.integ.IntegrationTest;
 import org.holodeckb2b.events.SignatureCreatedEvent;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
@@ -38,6 +39,9 @@ import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+
+import org.holodeckb2b.testhelpers.TestEventProcessor;
 
 import javax.xml.namespace.QName;
 import java.io.File;
@@ -51,6 +55,7 @@ import static org.junit.Assert.*;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
+@Category(IntegrationTest.class)
 public class RaiseSignatureCreatedEventTest {
 
     static final QName MESSAGE_ID_ELEMENT_NAME =
@@ -179,31 +184,7 @@ public class RaiseSignatureCreatedEventTest {
             fail(e.getMessage());
         }
 
-        assertTrue(eventProcessor.allPurgeEvents);
-        assertEquals(1, eventProcessor.msgIdsPurged.size());
-
-        String msgId = null;
-        OMElement miElement = MessageInfo.getElement(userMessage);
-        Iterator it = miElement.getChildrenWithName(MESSAGE_ID_ELEMENT_NAME);
-        if(it.hasNext()) {
-            msgId = ((OMElement)it.next()).getText();
-        }
-        assertEquals(msgId, eventProcessor.msgIdsPurged.get(0));
-    }
-
-    class TestEventProcessor implements IMessageProcessingEventProcessor {
-
-        boolean allPurgeEvents = false;
-        ArrayList<String> msgIdsPurged = new ArrayList<>();
-
-        @Override
-        public void raiseEvent(final IMessageProcessingEvent event,
-                               final MessageContext msgContext) {
-            allPurgeEvents = event instanceof SignatureCreatedEvent;
-            if (allPurgeEvents) {
-                assertNotNull(event.getSubject());
-                msgIdsPurged.add(event.getSubject().getMessageId());
-            }
-        }
+        assertEquals(1, eventProcessor.events.size());
+        assertTrue(eventProcessor.events.get(0) instanceof SignatureCreatedEvent);
     }
 }
