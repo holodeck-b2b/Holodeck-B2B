@@ -28,25 +28,19 @@ import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.*;
 import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.integ.IntegrationTest;
 import org.holodeckb2b.events.SignatureCreatedEvent;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.pmode.helpers.*;
 import org.holodeckb2b.testhelpers.HolodeckCore;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
 import org.holodeckb2b.testhelpers.TestEventProcessor;
 
 import javax.xml.namespace.QName;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 import static org.junit.Assert.*;
 
@@ -55,7 +49,6 @@ import static org.junit.Assert.*;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-@Category(IntegrationTest.class)
 public class RaiseSignatureCreatedEventTest {
 
     static final QName MESSAGE_ID_ELEMENT_NAME =
