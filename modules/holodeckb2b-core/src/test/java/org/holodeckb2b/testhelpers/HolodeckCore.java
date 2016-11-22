@@ -17,6 +17,7 @@
 package org.holodeckb2b.testhelpers;
 
 import org.holodeckb2b.ebms3.submit.core.MessageSubmitter;
+import org.holodeckb2b.events.SyncEventProcessor;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
@@ -58,6 +59,7 @@ public class HolodeckCore implements IHolodeckB2BCore {
     public HolodeckCore(final String homeDir, final String pmodeValidatorClass, final String pmodeStorageClass) {
         config = new Config(homeDir, pmodeValidatorClass, pmodeStorageClass);
         pmodeSet = new InMemoryPModeSet();
+        eventProcessor = new SyncEventProcessor();
     }
 
     @Override
