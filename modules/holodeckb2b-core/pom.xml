@@ -31,7 +31,6 @@
     <packaging>jar</packaging>
     <name>Holodeck B2B - Core</name>
 
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -137,7 +136,17 @@
             <artifactId>derby</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-core</artifactId>
+            <version>2.2.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
@@ -163,6 +172,11 @@
                     </goals>
                   </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.19.1</version>
             </plugin>
         </plugins>
     </build>
