@@ -56,11 +56,14 @@ public class ITHelper {
     private static Process processB;
 
     static {
-        dFilePath = ITHelper.class.getClassLoader()
-                .getResource("").getPath();
+        // todo distr file name should be taken from pom.xml
         dFileName = "holodeckb2b-distribution-next-SNAPSHOT-3-full.zip";
-        dFilePath += "/../../../holodeckb2b-distribution/target/"
-                + dFileName;
+
+        dFilePath = ITHelper.class.getClassLoader().getResource("").getPath();
+        // todo distr module name should be taken from pom.xml
+        dFilePath += "/../../../holodeckb2b-distribution/target/" + dFileName;
+
+        // todo dir name should be taken from pom.xml
         dDirName = "holodeck-b2b-next-SNAPSHOT-3";
         workingDirPath = ITHelper.class.getClassLoader()
                 .getResource("integ").getPath();
@@ -318,5 +321,30 @@ public class ITHelper {
         } catch (SAXException sae) {
             sae.printStackTrace();
         }
+    }
+
+    /**
+     * Checks if the file <code>fileName</code> exists in <code>dirName</code>
+     * @param fileName
+     * @param dirName
+     * @return
+     */
+    boolean fileExistsInDirectory(String fileName, String dirName) {
+        File file = new File(workingDirPath + "/" + dirName + "/" + fileName);
+        return file.exists();
+    }
+
+    /**
+     *
+     * @param dirName
+     * @return
+     */
+    boolean dirIsNotEmpty(String dirName) {
+        boolean res = false;
+        File dir = new File(workingDirPath + "/" + dirName);
+        if(dir.exists()) {
+            res = dir.listFiles().length > 0;
+        }
+        return res;
     }
 }

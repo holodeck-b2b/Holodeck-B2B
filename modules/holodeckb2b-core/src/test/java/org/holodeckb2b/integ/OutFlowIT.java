@@ -22,10 +22,13 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
  * Created at 13:45 06.11.16
+ *
+ * todo add usage info
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -67,7 +70,8 @@ public class OutFlowIT {
             e.printStackTrace();
         }
 
-        assertTrue(itHelper.changeMsgExtensionToMMD("ex-mmd-push.accepted", dADirName));
+        assertTrue(itHelper.changeMsgExtensionToMMD("ex-mmd-push.accepted",
+                dADirName));
 
         try {
             Thread.sleep(30000);
@@ -75,19 +79,28 @@ public class OutFlowIT {
             e.printStackTrace();
         }
 
-        // todo check the results in A/msg_out & A/msg_in & B/msg_in
+        // todo check the results of communication in A/msg_out & A/msg_in & B/msg_in
 
-        // todo check A/msg_out
+        // check A/msg_out
 
         // ex-mmd-push.accepted should be present
+        assertTrue(itHelper.fileExistsInDirectory("ex-mmd-push.accepted",
+                dADirName + "/data/msg_out"));
+        // ex-mmd-push.rejected should not be present
+        assertFalse(itHelper.fileExistsInDirectory("ex-mmd-push.rejected",
+                dADirName + "/data/msg_out"));
+        // ex-mmd-push.err should not be present
+        assertFalse(itHelper.fileExistsInDirectory("ex-mmd-push.err",
+                dADirName + "/data/msg_out"));
 
         // todo check B/msg_in
 
-        // message xml should be present
+        // message xml and payload file should be present
+        assertTrue(itHelper.dirIsNotEmpty(dBDirName + "/data/msg_in"));
 
         // todo check A/msg_in
 
         // receipt message xml should be present
-
+        assertTrue(itHelper.dirIsNotEmpty(dADirName + "/data/msg_in"));
     }
 }
