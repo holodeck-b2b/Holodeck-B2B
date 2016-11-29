@@ -91,20 +91,6 @@ public class ITHelper {
     }
 
     /**
-     * Creates <code>distrDirName</code>/data/msg_out &
-     * <code>distrDirName</code>/data/msg_in directories
-     * @param distrDirName
-     */
-    void createDataMsgDirs(String distrDirName) {
-        File msgOutDir = new File(workingDirPath + "/" + distrDirName
-                + "/" + "data" + "/" + "msg_out");
-        msgOutDir.mkdir();
-        File msgInDir = new File(workingDirPath + "/" + distrDirName
-                + "/" + "data" + "/" + "msg_in");
-        msgInDir.mkdir();
-    }
-
-    /**
      * Copies <code>pmodeFileName</code> to <code>distrDirName</code>/conf/pmodes directory
      * @param distrDirName
      * @param pmodeFileName

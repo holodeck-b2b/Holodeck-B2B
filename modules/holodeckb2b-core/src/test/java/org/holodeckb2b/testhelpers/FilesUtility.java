@@ -55,19 +55,15 @@ public class FilesUtility {
         ZipEntry entry = zipIn.getNextEntry();
         while (entry != null) {
             String filePath = destDirectory + File.separator + entry.getName();
+            File parent = new File(filePath).getParentFile();
+            if(!parent.exists()) {
+                parent.mkdirs();
+            }
             if (!entry.isDirectory()) {
-                File parent = new File(filePath).getParentFile();
-                if(!parent.exists()) {
-                    parent.mkdirs();
-                }
                 extractFile(zipIn, filePath);
             } else {
-                try {
-                    File dir = new File(filePath);
-                    dir.mkdir();
-                } catch (SecurityException se) {
-                    System.out.println(se.getMessage());
-                }
+                File dir = new File(filePath);
+                dir.mkdir();
             }
             zipIn.closeEntry();
             entry = zipIn.getNextEntry();

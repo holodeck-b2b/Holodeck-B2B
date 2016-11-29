@@ -28,7 +28,10 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created at 13:45 06.11.16
  *
- * todo add usage info
+ * This test takes more time than junit tests
+ * That's why it is excluded from the tests during project compilation.
+ *
+ * To execute this integration test one should run <code>mvn vefify</code>
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -46,8 +49,6 @@ public class OutFlowIT {
 
         itHelper.unzipHolodeckDistribution(dADirName);
         itHelper.unzipHolodeckDistribution(dBDirName);
-        itHelper.createDataMsgDirs(dADirName);
-        itHelper.createDataMsgDirs(dBDirName);
         itHelper.copyPModeDescriptor(dADirName, "ex-pm-push-init.xml");
         itHelper.copyPModeDescriptor(dBDirName, "ex-pm-push-resp.xml");
         itHelper.modifyAxisServerPort(dBDirName, "9090");
