@@ -17,6 +17,9 @@
 package org.holodeckb2b.integ;
 
 import org.apache.commons.lang.SystemUtils;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.project.MavenProject;
 import org.holodeckb2b.testhelpers.FilesUtility;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -31,10 +34,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
@@ -47,6 +47,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class ITHelper {
 
+    private static String projectVersion;
     private static String dFilePath;
     private static String dFileName;
     private static String dDirName;
@@ -56,17 +57,38 @@ public class ITHelper {
     private static Process processB;
 
     static {
+        projectVersion = getProjectVersion();
         // todo distr file name should be taken from pom.xml
-        dFileName = "holodeckb2b-distribution-next-SNAPSHOT-3-full.zip";
+        dFileName = "holodeckb2b-distribution-"+projectVersion+"-full.zip";
 
         dFilePath = ITHelper.class.getClassLoader().getResource("").getPath();
         // todo distr module name should be taken from pom.xml
         dFilePath += "/../../../holodeckb2b-distribution/target/" + dFileName;
-
+        System.out.println("version: " + projectVersion);
         // todo dir name should be taken from pom.xml
-        dDirName = "holodeck-b2b-next-SNAPSHOT-3";
+        dDirName = "holodeck-b2b-"+projectVersion;
         workingDirPath = ITHelper.class.getClassLoader()
                 .getResource("integ").getPath();
+    }
+
+    /**
+     *
+     * @return
+     */
+    private static String getProjectVersion() {
+        File pomfile = new File(
+                ITHelper.class.getClassLoader().getResource("").getPath()
+                        + "/../../pom.xml");
+        Model model = null;
+        FileReader reader;
+        MavenXpp3Reader mavenreader = new MavenXpp3Reader();
+        try {
+            reader = new FileReader(pomfile);
+            model = mavenreader.read(reader);
+            model.setPomFile(pomfile);
+        } catch(Exception ex){}
+        MavenProject project = new MavenProject(model);
+        return project.getVersion();
     }
 
     /**
@@ -76,6 +98,7 @@ public class ITHelper {
      */
     void unzipHolodeckDistribution(String distrDirName) {
         // unzip first instance of the distribution zip file
+        // todo delete dir with distrDirName if it is already exist
         FilesUtility fu = new FilesUtility();
         try {
             fu.unzip(dFilePath, workingDirPath);
