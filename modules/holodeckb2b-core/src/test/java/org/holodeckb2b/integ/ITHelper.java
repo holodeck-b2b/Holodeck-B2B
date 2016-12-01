@@ -58,17 +58,13 @@ public class ITHelper {
 
     static {
         projectVersion = getProjectVersion();
-        // todo distr file name should be taken from pom.xml
         dFileName = "holodeckb2b-distribution-"+projectVersion+"-full.zip";
-
         dFilePath = ITHelper.class.getClassLoader().getResource("").getPath();
-        // todo distr module name should be taken from pom.xml
         dFilePath += "/../../../holodeckb2b-distribution/target/" + dFileName;
         System.out.println("version: " + projectVersion);
         // todo dir name should be taken from pom.xml
         dDirName = "holodeck-b2b-"+projectVersion;
-        workingDirPath = ITHelper.class.getClassLoader()
-                .getResource("integ").getPath();
+        workingDirPath = ITHelper.class.getClassLoader().getResource("integ").getPath();
     }
 
     /**
@@ -76,16 +72,16 @@ public class ITHelper {
      * @return
      */
     private static String getProjectVersion() {
-        File pomfile = new File(
+        File corePomfile = new File(
                 ITHelper.class.getClassLoader().getResource("").getPath()
                         + "/../../pom.xml");
         Model model = null;
         FileReader reader;
-        MavenXpp3Reader mavenreader = new MavenXpp3Reader();
+        MavenXpp3Reader mavenReader = new MavenXpp3Reader();
         try {
-            reader = new FileReader(pomfile);
-            model = mavenreader.read(reader);
-            model.setPomFile(pomfile);
+            reader = new FileReader(corePomfile);
+            model = mavenReader.read(reader);
+            model.setPomFile(corePomfile);
         } catch(Exception ex){}
         MavenProject project = new MavenProject(model);
         return project.getVersion();
