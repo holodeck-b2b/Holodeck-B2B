@@ -31,7 +31,7 @@ import static org.junit.Assert.assertTrue;
  * This test takes more time than junit tests
  * That's why it is excluded from the tests during project compilation.
  * todo check this
- * To execute this integration test one should run <code>mvn vefify</code>
+ * To execute this integration test one should run <code>mvn integration-test</code>
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
