@@ -46,6 +46,9 @@ public class OutFlowIT {
     @BeforeClass
     public static void setUpClass() {
         itHelper = new ITHelper();
+        // delete distr dirs if they exist (if test was stopped, for instance)
+        itHelper.deleteDistDir(dADirName);
+        itHelper.deleteDistDir(dBDirName);
 
         itHelper.unzipHolodeckDistribution(dADirName);
         itHelper.unzipHolodeckDistribution(dBDirName);
@@ -58,7 +61,7 @@ public class OutFlowIT {
 
     @AfterClass
     public static void tearDownClass() {
-        itHelper.stopHolodeckB2BInstances(dADirName, dBDirName);
+        itHelper.stopHolodeckB2BInstances();
         itHelper.deleteDistDir(dADirName);
         itHelper.deleteDistDir(dBDirName);
     }

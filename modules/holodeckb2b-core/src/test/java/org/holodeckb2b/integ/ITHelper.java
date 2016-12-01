@@ -172,7 +172,7 @@ public class ITHelper {
                         new File(workingDirPath + "/" + dBDirName + "/" + "bin"));
                 processB = pb.start();
             } else if (SystemUtils.IS_OS_WINDOWS) {
-                // todo check this in Windows OS
+                // todo check this in Windows OS if needed
                 ProcessBuilder pb =
                         new ProcessBuilder("startServer.bat");
                 pb.redirectOutput(new File(workingDirPath + "/output.log"));
@@ -191,10 +191,8 @@ public class ITHelper {
 
     /**
      * Stops HolodeckB2B receiver and sender instances
-     * @param dADirName
-     * @param dBDirName
      */
-    void stopHolodeckB2BInstances(String dADirName, String dBDirName) {
+    void stopHolodeckB2BInstances() {
         try {
             processA.destroy();
             processB.destroy();
@@ -207,7 +205,6 @@ public class ITHelper {
                 while ((line = in.readLine()) != null) {
                     if (line.contains("SimpleAxis2Server")) {
                         String pid = line.split(" ")[0];
-//                    System.out.println("pid: " + pid);
                         String command = "kill -9 " + pid;
                         Process pr = Runtime.getRuntime().exec(command);
                         pr.waitFor();
@@ -215,7 +212,7 @@ public class ITHelper {
                 }
                 p.waitFor();
             } else if (SystemUtils.IS_OS_WINDOWS) {
-                // todo
+                // todo add logic for Windows if needed
             }
         } catch (Exception e) {
             e.printStackTrace();
