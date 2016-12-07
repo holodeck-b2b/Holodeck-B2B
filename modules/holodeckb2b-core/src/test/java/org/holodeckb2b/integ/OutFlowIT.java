@@ -30,7 +30,7 @@ import static org.junit.Assert.assertTrue;
  *
  * This test takes more time than junit tests
  * That's why it is excluded from the tests during project compilation.
- * todo check this
+ *
  * To execute this integration test one should run <code>mvn integration-test</code>
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
@@ -83,7 +83,7 @@ public class OutFlowIT {
             e.printStackTrace();
         }
 
-        // todo check the results of communication in A/msg_out & A/msg_in & B/msg_in
+        // check the results of communication in A/msg_out & A/msg_in & B/msg_in
 
         // check A/msg_out
 
@@ -97,12 +97,12 @@ public class OutFlowIT {
         assertFalse(itHelper.fileExistsInDirectory("ex-mmd-push.err",
                 dADirName + "/data/msg_out"));
 
-        // todo check B/msg_in
+        // check B/msg_in
 
         // message xml and payload file should be present
         assertTrue(itHelper.dirIsNotEmpty(dBDirName + "/data/msg_in"));
 
-        // todo check A/msg_in
+        // check A/msg_in
 
         // receipt message xml should be present
         assertTrue(itHelper.dirIsNotEmpty(dADirName + "/data/msg_in"));
