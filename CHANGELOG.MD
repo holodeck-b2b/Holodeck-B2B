@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ###Added
 * P-Mode validation feature which separates the validation of P-Modes from both their internal and external storage.
 * Unit tests.
+* Integration tests.
 
 ###Changed
 * Refactored the validation of received message units into separate validation classes and handler.
