@@ -61,7 +61,7 @@ public class ITHelper {
         dFileName = "holodeckb2b-distribution-"+projectVersion+"-full.zip";
         dFilePath = ITHelper.class.getClassLoader().getResource("").getPath();
         dFilePath += "/../../../holodeckb2b-distribution/target/" + dFileName;
-        System.out.println("version: " + projectVersion);
+        //System.out.println("version: " + projectVersion);
         // todo dir name should be taken from pom.xml
         dDirName = "holodeck-b2b-"+projectVersion;
         workingDirPath = ITHelper.class.getClassLoader().getResource("integ").getPath();
@@ -162,7 +162,8 @@ public class ITHelper {
 
                 ProcessBuilder pb =
                         new ProcessBuilder("/bin/bash", "./startServer.sh");
-                pb.redirectOutput(new File(workingDirPath + "/output.log"));
+                //pb.redirectOutput(new File(workingDirPath + "/output.log"));
+                pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                 pb.redirectError(new File(workingDirPath + "/error.log"));
 
                 pb.directory(
