@@ -686,9 +686,11 @@ public class MessageUnitDAO {
 
                 mu.entity = actual;
                 return true;
-            } else
+            } else {
                 // Current states differ, nothing changed!
+                em.getTransaction().rollback();
                 return false;
+            }
         } catch (final OptimisticLockException | RollbackException alreadyChanged) {
             // During transaction the message unit was already updated, so state can not be changed.
             // Rollback and return false
