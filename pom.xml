@@ -39,7 +39,7 @@
         <axis2-version>1.6.3</axis2-version>
         <axiom-version>1.2.14</axiom-version>
         <netbeans.hint.license>gpl30</netbeans.hint.license>
-        <hibernate.version>5.2.4.Final</hibernate.version>
+        <hibernate.version>5.0.11.Final</hibernate.version>
         <wss4j.version>2.0.4</wss4j.version>
         <xmlsec.version>2.0.4</xmlsec.version>
         <log4j.version>2.6.2</log4j.version>
