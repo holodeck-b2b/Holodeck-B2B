@@ -17,7 +17,6 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Iterator;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
@@ -148,8 +147,7 @@ public class ReadError extends BaseHandler {
         }
 
         while (it.hasNext() && consistent) {
-            consistent = (errorRefToMsgId == refToMessageId
-                        || (errorRefToMsgId != null && errorRefToMsgId.equals(refToMessageId)));
+            consistent = (errorRefToMsgId == null || errorRefToMsgId.equals(refToMessageId));
             errorRefToMsgId = it.next().getRefToMessageInError();
         }
 
