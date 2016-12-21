@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 2.1.2
 ###### Unreleased
 ###Fixed
-* References in Error Signals are not checked correctly (#38)(https://github.com/holodeck-b2b/Holodeck-B2B/issues/38)
+* References in Error Signals are not checked correctly [#38](https://github.com/holodeck-b2b/Holodeck-B2B/issues/38)
 * Database connection leak [#39](https://github.com/holodeck-b2b/Holodeck-B2B/issues/39)
 * Dependency on Java 8 [#40](https://github.com/holodeck-b2b/Holodeck-B2B/issues/40)
 
