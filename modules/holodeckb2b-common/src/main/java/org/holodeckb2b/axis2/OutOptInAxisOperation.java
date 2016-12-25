@@ -85,7 +85,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
 
     /**
      * The client to handle the MEP. This is a copy of <code>OutInAxisOperationClient<code> inner class of {@link
-     * OutInAxisOperation} with an adjusted {@link #handleResponse()} method.
+     * OutInAxisOperation} with an adjusted {@link #handleResponse(MessageContext)} method.
      */
     class OutOptInAxisOperationClient extends OperationClient {
 
