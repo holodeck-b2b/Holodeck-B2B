@@ -132,9 +132,9 @@ public class HolodeckB2BCoreInterface {
         coreImplementation.setPullWorkerPoolConfiguration(pullConfiguration);
     }
 
-    /**
+   /**
      * Sets the Holodeck B2B Core implementation that is in use.
-     * <p><b>NOTE: </b>This message is for <b>internal use only</b>!
+     * <p><b>NOTE: </b>This method is for <b>internal use only</b>!
      *
      * @param impl  The current Holodeck B2B Core implementation
      */

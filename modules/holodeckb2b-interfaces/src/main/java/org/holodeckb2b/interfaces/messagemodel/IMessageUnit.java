@@ -44,6 +44,21 @@ import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 public interface IMessageUnit {
 
     /**
+     * Enumeration to define the direction in which the message unit flows.
+     *
+     * @since HB2B_NEXT_VERSION
+     */
+    enum Direction { IN, OUT };
+
+    /**
+     * Gets the direction in which this message unit is sent, i.e. received or sent by Holodeck B2B.
+     *
+     * @return The direction in which this message unit flows
+     * @since HB2B_NEXT_VERSION
+     */
+    Direction getDirection();
+
+    /**
      * Gets the timestamp when the message unit was created.
      * <p>Corresponds to the <code>MessageInfo/Timestamp</code> element. See section 5.2.2.1 of the ebMS Core
      * specification.
