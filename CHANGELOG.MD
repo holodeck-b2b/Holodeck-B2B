@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 ###Added
 * P-Mode validation feature which separates the validation of P-Modes from both their internal and external storage.
+* Unit tests.
+* Integration tests.
 
 ###Changed
 * Refactored the validation of received message units into separate validation classes and handler.
@@ -17,6 +19,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ###Security
 
+## 2.1.1
+###### 2016-11-11
+###Changed
+* It is now possible to not only configure whether _Error Signals_ should be logged but also if all signals
+  should be logged or only the ones that contain an Error with severity _failure_ (see `log4j2.xml` for more info).
+
+###Fixed
+* Database connection not closed [#34](https://github.com/holodeck-b2b/Holodeck-B2B/issues/34)
+* ebMS errors are only logged when log level is ERROR [#35](https://github.com/holodeck-b2b/Holodeck-B2B/issues/35)
+* Exceptions in processing of WSS header not handled correctly [#36](https://github.com/holodeck-b2b/Holodeck-B2B/issues/36)
 
 ## 2.1.0
 ###### 2016-10-18
@@ -25,7 +37,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Event framework to enable additional notification to external components about events that occur during message
 processing. See `org.holodeckb2b.interface.events` for the new interfaces.
 * Default implementation of message purging. This default implementation will remove all meta-data (including payload
-  data for User Messages) after a configurable number of days had passed since the last change to the message unit's
+  data for User Messages) after a configurable number of days has passed since the last change to the message unit's
   processing state.
 * Events for creation of a Receipt (see `org.holodeckb2b.interfaces.events.types.IReceiptCreatedEvent`), creation of
  a signature for a User Message (see `org.holodeckb2b.interfaces.events.types.ISignatureCreatedEvent`) and for the

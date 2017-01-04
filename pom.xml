@@ -23,7 +23,7 @@
     <groupId>org.holodeckb2b</groupId>
     <artifactId>holodeckb2b</artifactId>
     <packaging>pom</packaging>
-    <version>next-SNAPSHOT-4</version>
+    <version>next-SNAPSHOT-5</version>
     <name>Holodeck B2B</name>
     <url>http://www.holodeck-b2b.org/</url>
     <inceptionYear>2015</inceptionYear>
@@ -49,7 +49,7 @@
         <module>modules/holodeckb2b-common</module>
         <module>modules/holodeckb2b-core</module>
         <module>modules/holodeckb2b-distribution</module>
-        <module>Persistency</module>
+        <module>modules/holodeckb2b-persistency</module>
     </modules>
 
     <licenses>
@@ -256,7 +256,6 @@
                 <version>4.12</version>
                 <scope>test</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -306,6 +305,7 @@
                     </configuration>
                 </plugin>
                 <plugin>
+                    <inherited>true</inherited>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.3</version>
@@ -314,6 +314,26 @@
                         <target>1.7</target>
                         <encoding>UTF-8</encoding>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>2.13</version>
+                    <executions>
+                        <execution>
+                            <id>integration-test</id>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>verify</id>
+                            <goals>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
