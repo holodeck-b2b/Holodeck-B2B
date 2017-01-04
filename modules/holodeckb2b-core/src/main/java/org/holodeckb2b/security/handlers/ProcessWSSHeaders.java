@@ -431,7 +431,7 @@ public class ProcessWSSHeaders extends BaseHandler {
          *
          * @param mc    The {@link MessageContext} for the message
          * @param doc   The standard DOM representation of the SOAP Envelope of the message
-         * @param log   The log to use. We use the log of the handler to hide this class.
+         * @param handlerLog   The log to use. We use the log of the handler to hide this class.
          */
         WSSReceiveHandler(final MessageContext mc, final Document doc, final Log handlerLog) throws WSSecurityException {
             this.msgCtx = mc;

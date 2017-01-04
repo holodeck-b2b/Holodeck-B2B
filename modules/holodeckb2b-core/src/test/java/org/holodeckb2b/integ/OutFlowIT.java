@@ -45,29 +45,40 @@ public class OutFlowIT {
 
     @BeforeClass
     public static void setUpClass() {
+        System.out.println("Setting up the OutFlow integration test ... ");
         itHelper = new ITHelper();
         // delete distr dirs if they exist (if test was stopped, for instance)
         itHelper.deleteDistDir(dADirName);
         itHelper.deleteDistDir(dBDirName);
 
+        System.out.print("\tUnzipping HolodeckB2B instance ... ");
         itHelper.unzipHolodeckDistribution(dADirName);
+        System.out.println("done.");
+        System.out.print("\tUnzipping HolodeckB2B instance ... ");
         itHelper.unzipHolodeckDistribution(dBDirName);
+        System.out.println("done.");
+        System.out.print("\tConfiguring HolodeckB2B instances ... ");
         itHelper.copyPModeDescriptor(dADirName, "ex-pm-push-init.xml");
         itHelper.copyPModeDescriptor(dBDirName, "ex-pm-push-resp.xml");
         itHelper.modifyAxisServerPort(dBDirName, "9090");
         itHelper.startHolodeckB2BInstances(dADirName, dBDirName);
         itHelper.copyExampleDataToMsgOutDir(dADirName);
+        System.out.println("done.");
+        System.out.println("Setting up the OutFlow integration test finished.");
     }
 
     @AfterClass
     public static void tearDownClass() {
+        System.out.print("Cleaning up the OutFlow integration test resources ... ");
         itHelper.stopHolodeckB2BInstances();
         itHelper.deleteDistDir(dADirName);
         itHelper.deleteDistDir(dBDirName);
+        System.out.println("done.");
     }
 
     @Test
     public void testOneWayPush() {
+        System.out.println("The OutFlow integration test started ... ");
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
@@ -106,5 +117,6 @@ public class OutFlowIT {
 
         // receipt message xml should be present
         assertTrue(itHelper.dirIsNotEmpty(dADirName + "/data/msg_in"));
+        System.out.println("The OutFlow integration test finished.");
     }
 }
