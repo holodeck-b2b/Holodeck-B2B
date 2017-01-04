@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.ebms3.packaging;
 
+import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -23,16 +24,13 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
 
 /**
- * Is a helper class for handling the ebMS Property elements that occur in the ebMS SOAP
- * header.
- * <p>This element is used as a child of both MessageProperties and PartProperties specified in
- * sections 5.2.2.11 and 5.2.2.13 respectively of the ebMS 3 Core specification.
- * <p><b>NOTE:</b> The current version of the ebMS spec does define the type property,
- * but the schema does not. So adding this to the XML document makes it invalid!<br>
- * This problem is known to the OASIS ebXML Messaging TC under issue number 2
- * (see https://tools.oasis-open.org/issues/browse/EBXMLMSG-2). As noted there
- * the schema will be changed to include this attribute.<br>
- * Therefore it is already included in the object, but not in the actual xml.
+ * Is a helper class for handling the <code>Property</code> elements that occur in the ebMS SOAP header. This element is
+ * used as a child of both <code>MessageProperties</code> and <code>PartProperties</code> specified in sections 5.2.2.11
+ * and 5.2.2.13 respectively of the ebMS 3 Core specification.
+ * <p><b>NOTE:</b> The current version of the ebMS spec does define the type attribute, but the schema does not. So
+ * adding this to the XML document makes it invalid. This problem is known to the  OASIS ebXML Messaging TC under <a
+ * href="https://tools.oasis-open.org/issues/browse/EBXMLMSG-2">issue number 2</a>. As noted there the schema will be
+ * changed to include this attribute. Until the issue is fixed Holodeck B2B will not add the type.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -77,19 +75,26 @@ public class Property {
     }
 
     /**
-     * Reads the information from the <code>Property</code> object and returns it
-     * in a new {@link org.holodeckb2b.ebms3.persistency.entities.Property} entity
-     * object.
-     * <p><b>NOTE:</b> The entity object is not persisted by this method! It is
-     * the responsibility of the caller to store it.
+     * Gets an {@link Iterator} for all <code>Property</code> child elements of the given parent element.
      *
-     * @param propElement            The <code>Property</code> element to read the
-     *                               info from
-     * @return                       A new {@link org.holodeckb2b.ebms3.persistency.entities.Property}
-     *                               object containing the service info from the
-     *                               element
+     * @param   parent   The parent element, i.e. either a <code>MessageProperties</code> or <code>
+     *                      PartProperties</code> element
+     * @return              An {@link Iterator} for all {@link OMElement}s representing a <code>Property</code> child
+     *                      of the given parent element
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.Property readElement(final OMElement propElement) {
+    public static Iterator<OMElement> getElements(final OMElement parent) {
+        return parent.getChildrenWithName(Q_ELEMENT_NAME);
+    }
+
+    /**
+     * Reads the information from the <code>Property</code> object and returns it in a new {@link
+     * org.holodeckb2b.common.messagemodel.Property} object.
+     *
+     * @param   propElement     The <code>Property</code> element to read the info from
+     * @return                  A new {@link org.holodeckb2b.ebms3.persistency.entities.Property} object containing the
+     *                          service info from the element
+     */
+    public static org.holodeckb2b.common.messagemodel.Property readElement(final OMElement propElement) {
         if (propElement == null)
             return null;
 
@@ -97,16 +102,11 @@ public class Property {
         final String name = propElement.getAttributeValue(new QName(LN_ATTR_NAME));
         final String value = propElement.getText();
 
-        // Create the entity object
-        final org.holodeckb2b.ebms3.persistency.entities.Property propData =
-                                                new org.holodeckb2b.ebms3.persistency.entities.Property(name, value);
-
         //@todo: Uncomment when spec is changed and type is allowed
-//        // Read type attribute
+//      // Read type attribute
 //        String type = propElement.getAttributeValue(new QName(LN_ATTR_TYPE));
-//        if (type != null && !type.isEmpty())
-//            propData.setType(type);
 
-        return propData;
+        // Create and return the entity object
+        return new org.holodeckb2b.common.messagemodel.Property(name, value);
     }
 }

@@ -26,9 +26,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.mmd.xml.PartInfo;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
-import org.holodeckb2b.ebms3.mmd.xml.PartInfo;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
@@ -94,11 +94,10 @@ public abstract class AbstractFileDeliverer implements IMessageDeliverer {
             if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
                 log.debug("Copy all payload files to delivery directory");
                 for(final IPayload p : mmd.getPayloads()) {
-                    final PartInfo newPLInfo = new PartInfo(p);
                     final Path newPath = copyPayloadFile(p, mmd.getMessageId());
                     if (newPath != null)
-                        newPLInfo.setContentLocation(newPath.toString());
-                    copiedPLs.add(newPLInfo);
+                        ((PartInfo) p).setContentLocation(newPath.toString());
+                    copiedPLs.add(p);
                 }
                 log.debug("Copied all payload files, set as new payload info in MMD");
                 mmd.setPayloads(copiedPLs);

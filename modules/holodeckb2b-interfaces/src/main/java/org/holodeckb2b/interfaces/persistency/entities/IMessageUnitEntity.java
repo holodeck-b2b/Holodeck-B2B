@@ -56,4 +56,12 @@ public interface IMessageUnitEntity extends IMessageUnit {
      * @return  The leg label
      */
     ILeg.Label getLeg();
+
+    /**
+     * Gets the indication whether this message unit is send using a multi-hop exchange
+     *
+     * @return  <code>true</code> if multi-hop is used for exchange of this message unit,<br>
+     *          <code>false</code> otherwise
+     */
+    boolean usesMultiHop();
 }

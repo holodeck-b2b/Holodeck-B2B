@@ -18,9 +18,7 @@ package org.holodeckb2b.as4.handlers.inflow;
 
 import java.util.Collection;
 import java.util.Iterator;
-
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
@@ -29,14 +27,14 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.security.util.SecurityUtils;
 
 /**
@@ -45,7 +43,6 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * <i>"When signed receipts are requested in AS4 that make use of default conventions, the Sending message handler
  * (i.e. the MSH sending messages for which signed receipts are expected) MUST identify message parts (referenced in
  * eb:PartInfo elements in the received User Message) and MUST sign the SOAP body and all attachments"</i>
- *
  * <p>If a payload is not signed a <i>ValueInconsistent</i> error will be generated and reported to the sender of the
  * user message.
  *
@@ -59,17 +56,14 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final EntityProxy<UserMessage> umProxy) throws Exception {
-        // Extract the entity object from proxy
-        final UserMessage um = umProxy.entity;
-
+    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um) throws Exception {
         // First check if this message needs a Receipt and is signed
         final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
         if (pmode == null) {
             // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
             // is needed
             log.error("P-Mode " + um.getPModeId() + " not found in current P-Mode set!"
-                    + "Unable to determine if receipt is needed for message [msgId=" + um.getMessageId() + "]");
+                     + "Unable to determine if receipt is needed for message [msgId=" + um.getMessageId() + "]");
             return InvocationResponse.CONTINUE;
         }
 
@@ -81,7 +75,7 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
 
         // Check for signed message by retrieving the ds:References from the signature
         final Collection<OMElement> references = SecurityUtils.getSignatureReferences(mc);
-        if (references == null || references.isEmpty())
+        if (Utils.isNullOrEmpty(references))
             // No Signature, nothing to check
             return InvocationResponse.CONTINUE;
 
@@ -121,7 +115,7 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
         // If not all payloads are referenced the UserMessage should not be processed further, so change it processing
         // state to failed
         if (!allRefd)
-            MessageUnitDAO.setFailed(umProxy);
+            HolodeckB2BCore.getUpdateManager().setProcessingState(um, ProcessingState.FAILURE);
 
         return InvocationResponse.CONTINUE;
     }

@@ -19,30 +19,27 @@ package org.holodeckb2b.as4.handlers.inflow;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
-
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.persistency.entities.Receipt;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.events.ReceiptCreatedEvent;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.util.SecurityUtils;
 
@@ -87,13 +84,11 @@ public class CreateReceipt extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final EntityProxy<UserMessage> umProxy) throws AxisFault {
+    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um) {
         // Only when user message was successfully delivered to business application the Receipt should be created
         final Boolean delivered = (Boolean) mc.getProperty(MessageContextProperties.DELIVERED_USER_MSG);
 
         if (delivered != null && delivered) {
-            // Extract the entity object from the proxy
-            final UserMessage um = umProxy.entity;
             log.debug("User message was succesfully delivered, check if Receipt is needed");
 
             final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
@@ -106,7 +101,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
             }
 
             // Currently we only support one-way MEPs so the leg is always the first one
-            final ILeg leg = pmode.getLegs().iterator().next();
+            final ILeg leg = pmode.getLeg(um.getLeg() != null ? um.getLeg() : ILeg.Label.REQUEST);
             final IReceiptConfiguration rcptConfig = leg.getReceiptConfiguration();
 
             if (rcptConfig == null) {
@@ -118,7 +113,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
             final Receipt rcptData = new Receipt();
             // Copy some meta-data to receipt
             rcptData.setRefToMessageId(um.getMessageId());
-            rcptData.setPMode(um.getPModeId());
+            rcptData.setPModeId(um.getPModeId());
 
             log.debug("Determine type of Receipt that should be sent");
             // Check if message was signed, done by checking if Signature info was available in default WS-Sec header
@@ -129,35 +124,34 @@ public class CreateReceipt extends AbstractUserMessageHandler {
                 rcptData.setContent(createNRRContent(mc));
             } else {
                 log.debug("Received message not signed, create reception awareness receipt");
-                rcptData.setContent(createRARContent(mc, um));
+                rcptData.setContent(createRARContent(mc));
             }
 
             // Check reply patten to see if receipt should be sent as response
             final boolean asResponse = rcptConfig.getPattern() == ReplyPattern.RESPONSE;
-
             log.debug("Store the receipt signal in database");
             try {
-                //@todo: Use same pattern for creating the receipt as other message unit (let MsgDAO factor object)
-                final EntityProxy<Receipt> receipt = MessageUnitDAO.storeOutgoingReceiptMessageUnit(rcptData, asResponse);
+                IReceiptEntity receipt = (IReceiptEntity) HolodeckB2BCore.getUpdateManager()
+                                                                                .storeOutGoingMessageUnit(rcptData);
                 if (asResponse) {
                     log.debug("Store the receipt in the MessageContext");
                     mc.setProperty(MessageContextProperties.RESPONSE_RECEIPT, receipt);
                     mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
                 } else {
                     if (rcptConfig.getTo() != null && !rcptConfig.getTo().isEmpty()) {
-                        log.debug("The Receipt should be sent separately, change its processing state to READY_TO_PUSH");
-                        MessageUnitDAO.setReadyToPush(receipt);
+                        log.debug("The Receipt should be sent separately");
+                        HolodeckB2BCore.getUpdateManager().setProcessingState(receipt, ProcessingState.READY_TO_PUSH);
                     } else {
                         log.debug("Receipt will be piggybacked on next PullRequest");
                     }
                 }
                 log.debug("Receipt for message [msgId=" + um.getMessageId() + "] created successfully");
                 // Trigger event to signal that the event was created
-                HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(
-                   new ReceiptCreatedEvent(um, receipt.entity,
-                                           um.getCurrentProcessingState().getName().equals(ProcessingStates.DUPLICATE)),
+                HolodeckB2BCore.getEventProcessor().raiseEvent(
+                   new ReceiptCreatedEvent(um, receipt,
+                                           um.getCurrentProcessingState().getState() == ProcessingState.DUPLICATE),
                    mc);
-            } catch (final DatabaseException ex) {
+            } catch (final PersistenceException ex) {
                 // Storing the new Receipt signal failed! This is a severe problem, but it does not
                 // need to stop processing because the user message is already delivered. The receipt
                 // can be regenerated when a retry is received.
@@ -174,16 +168,14 @@ public class CreateReceipt extends AbstractUserMessageHandler {
 
     /**
      * Creates the content of a Reception Awareness Receipt as defined in section 5.1.8 of the AS4 profile.
-     * <p>NOTE: The first element returned by {@link org.holodeckb2b.ebms3.packaging.UserMessage#getElements(org.apache.axiom.om.OMElement)}
-     * is included in the <code>eb:Receipt</code> element. The given {@link UserMessage} object therefor MUST represent
-     * this element.
+     * <p>The first element returned by {@link org.holodeckb2b.ebms3.packaging.UserMessage#getElements(org.apache.axiom.om.OMElement)}
+     * applied to the received message is included in the <code>eb:Receipt</code> element. This implies that bundling
+     * of User Message units is NOT supported by this handler.
      *
      * @param mc    The current {@link MessageContext}, used to get copy of <code>eb:UserMessage</code> element
-     * @param um    The data on the current User Message being processed, used for getting <i>refToMessageId</i> and
-     *              <i>P-Mode</i> info.
      * @return      The content for the new Receipt represented as an iteration of <code>OMElement</code>s
      */
-    protected Iterator<OMElement> createRARContent(final MessageContext mc, final UserMessage um) {
+    protected Iterator<OMElement> createRARContent(final MessageContext mc) {
         final ArrayList<OMElement>    rcptContent = new ArrayList<>();
         // Get the UserMessage element from the message header
         final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());

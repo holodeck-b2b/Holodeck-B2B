@@ -19,18 +19,16 @@ package org.holodeckb2b.as4.compression;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is the <i>IN_FLOW</i> handler part of the AS4 Compression Feature responsible for the decompression of the payload
@@ -49,10 +47,8 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
 
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final EntityProxy<UserMessage> umProxy) throws AxisFault {
-        // Extract the entity object from the proxy
-        final UserMessage um = umProxy.entity;
-
+    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
+                                                                                          throws PersistenceException {
         // Decompression is only needed if the message contains payloads at all
         if (Utils.isNullOrEmpty(um.getPayloads()))
             return InvocationResponse.CONTINUE;
@@ -66,11 +62,12 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
                 // Replace current datahandler of attachment with CompressionDataHandler to facilitate decompression
                 // First get the MIME Type the orginal data is supposed to be in
                 String mimeType = null;
-                for(final Iterator<IProperty> pps = p.getProperties().iterator() ; pps.hasNext() && mimeType == null;) {
+                for(final Iterator<IProperty> pps = p.getProperties().iterator()
+                        ; pps.hasNext() && mimeType == null;) {
                     final IProperty pp = pps.next();
                     mimeType = CompressionFeature.MIME_TYPE_PROPERTY_NAME.equals(pp.getName()) ? pp.getValue() : null;
                 }
-                if (mimeType == null || mimeType.isEmpty()) {
+                if (Utils.isNullOrEmpty(mimeType)) {
                     log.warn("No source MIME Type specified for compressed payload!");
                     // Generate error and stop processing this user messsage
                     final DeCompressionFailure decompressFailure = new DeCompressionFailure();
@@ -78,13 +75,7 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
                             + p.getPayloadURI() + "]!");
                     decompressFailure.setRefToMessageInError(um.getMessageId());
                     MessageContextUtils.addGeneratedError(mc, decompressFailure);
-                    try {
-                        MessageUnitDAO.setFailed(umProxy);
-                    } catch (final DatabaseException dbe) {
-                        // Ai, something went wrong when changing the process state
-                        log.error("An error occurred when setting processing state to Failure. Details: "
-                                 + dbe.getMessage());
-                    }
+                    HolodeckB2BCore.getUpdateManager().setProcessingState(um, ProcessingState.FAILURE);
                 } else {
                     // Replace DataHandler to enable decompression
                     try {
@@ -102,6 +93,7 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
                 }
             }
         }
+
 
         return InvocationResponse.CONTINUE;
     }
@@ -122,7 +114,8 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
      */
     private boolean usesCompression(final IPayload p) {
         boolean compression = false;
-        for(final Iterator<IProperty> pps = p.getProperties().iterator() ; pps.hasNext() && !compression ;) {
+        for(final Iterator<IProperty> pps = (Iterator<IProperty>) p.getProperties().iterator()
+                    ; pps.hasNext() && !compression ;) {
             final IProperty pp = pps.next();
             compression = CompressionFeature.FEATURE_PROPERTY_NAME.equals(pp.getName())
                                 && CompressionFeature.COMPRESSED_CONTENT_TYPE.equals(pp.getValue());
@@ -139,7 +132,7 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
      * @param p     The payload meta data object to remove the property from
      */
     private void removeProperty(final IPayload p) {
-        final Collection<IProperty> partProperties = p.getProperties();
+        final Collection<IProperty> partProperties = (Collection<IProperty>) p.getProperties();
         final Collection<IProperty> remove = new ArrayList<>();
 
         for(final IProperty pp : partProperties)

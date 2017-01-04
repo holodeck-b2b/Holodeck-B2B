@@ -31,4 +31,13 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
  */
 public interface IErrorMessageEntity extends IMessageUnitEntity, IErrorMessage {
 
+    /**
+     * Gets indicator whether this Error Signal should be combined with a SOAP Fault.
+     * <p>Note that the decision whether the SOAP Fault will be added to the message is taken when the actual message
+     * is constructed and depends also on the other message units that are included in the same message.
+     *
+     * @return  <code>true</code> if this Error Signal should be combined with SOAP Fault,<br>
+     *          <code>false</code> when not
+     */
+    public boolean shouldHaveSOAPFault();
 }

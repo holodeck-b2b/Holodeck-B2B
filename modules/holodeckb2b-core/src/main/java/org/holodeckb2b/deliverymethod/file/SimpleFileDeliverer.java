@@ -20,8 +20,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
@@ -29,12 +27,11 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.holodeckb2b.common.messagemodel.Receipt;
+import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.mmd.xml.Property;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
-import org.holodeckb2b.ebms3.mmd.xml.PartInfo;
-import org.holodeckb2b.ebms3.mmd.xml.Property;
 import org.holodeckb2b.ebms3.packaging.ErrorSignal;
-import org.holodeckb2b.ebms3.packaging.Receipt;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
@@ -87,13 +84,13 @@ import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
             <eb:ConversationId>org:holodeckb2b:test:conversation</eb:ConversationId>
         </eb:CollaborationInfo>
         <eb:PayloadInfo>
-            <eb:PartInfo>
+            <eb:Payload>
                 <eb:PartProperties>
                     <eb:Property name="originalFileName">simpletest.xml</eb:Property>
                     <eb:Property name="org:holodeckb2b:location"
                         >/Users/safi/holodeck-test/pl-d6a19bec-4ffa-4e9c-862b-6dc127b00077_mountain-lion.fritz.box-body-16.xml</eb:Property>
                 </eb:PartProperties>
-            </eb:PartInfo>
+            </eb:Payload>
         </eb:PayloadInfo>
     </eb:UserMessage>
 </eb:Messaging>
@@ -157,7 +154,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
                 final Property locationProp = new Property();
                 locationProp.setName("org:holodeckb2b:location");
                 locationProp.setValue(p.getContentLocation());
-                ((PartInfo) p).getProperties().add(locationProp);
+                p.getProperties().add(locationProp);
             }
         }
 
@@ -184,10 +181,10 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
         container.declareNamespace(EbMSConstants.EBMS3_NS_URI, "eb");
 
         if (sigMsgUnit instanceof IReceipt) {
-            log.debug("Create facade to prevent content from inclusion in XML");
-            final org.holodeckb2b.ebms3.persistency.entities.Receipt rcpt = new DeliveryReceipt((IReceipt) sigMsgUnit);
+            log.debug("Create a new Receipt to prevent content from inclusion in XML");
+            IReceipt deliveryReceipt = createDeliveryReceipt((IReceipt) sigMsgUnit);
             log.debug("Add receipt meta data to XML");
-            Receipt.createElement(container, rcpt);
+            org.holodeckb2b.ebms3.packaging.Receipt.createElement(container, deliveryReceipt);
         } else if (sigMsgUnit instanceof IErrorMessage) {
             log.debug("Add error meta data to XML");
             ErrorSignal.createElement(container, (IErrorMessage) sigMsgUnit);
@@ -240,61 +237,34 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
     }
 
     /**
-     * Private inner class to replace actual receipt content with indicator of receipt type in output XML.
+     * Helper class to create a new Receipt that includes only the name of the first element of the original Receipt's
+     * content.
+     *
+     * @param originalReceipt   The original Receipt
+     * @return  A new Receipt with only the name of the first element of the original as content.
      */
-    private static class DeliveryReceipt extends org.holodeckb2b.ebms3.persistency.entities.Receipt {
+    private IReceipt createDeliveryReceipt(IReceipt originalReceipt) {
+        Receipt deliveryReceipt = new Receipt(originalReceipt);
 
-        private final IReceipt    source;
+        final OMElement rcptChild = OMAbstractFactory.getOMFactory().createOMElement(RECEIPT_CHILD_ELEM_NAME,
+                                                                               RECEIPT_CHILD_NS_URI, "");
+        rcptChild.declareDefaultNamespace(RECEIPT_CHILD_NS_URI);
 
-        private final ArrayList<OMElement>    newContent;
+        // If there was actual content (and we could get access to it) use the name of first element
+        final List<OMElement>  actual = originalReceipt.getContent();
+        String firstChildName = null;
+        if (!Utils.isNullOrEmpty(actual)) {
+            final OMElement firstChild = actual.get(0);
+            firstChildName = Utils.getValue(firstChild.getPrefix(), "");
+            firstChildName += (firstChildName.isEmpty() ? "" : ":") + firstChild.getLocalName();
+        } else
+            // If we can not access the actual content use a descriptive text
+            firstChildName = "Receipt content unknown";
+        rcptChild.setText(firstChildName);
 
-        public DeliveryReceipt(final IReceipt rcpt) {
-            source = rcpt;
+        deliveryReceipt.addElementToContent(rcptChild);
 
-            newContent = new ArrayList<>();
-            final OMElement rcptChild = OMAbstractFactory.getOMFactory().createOMElement(RECEIPT_CHILD_ELEM_NAME,
-                                                                                   RECEIPT_CHILD_NS_URI, "");
-            rcptChild.declareDefaultNamespace(RECEIPT_CHILD_NS_URI);
-
-            // We need to case the given receipt here to the persistency implementation to get access to the receipt
-            // content.
-            final List<OMElement>  actual = rcpt.getContent();
-
-            // If there was actual content (and we could get access to it) use the name of first element
-            String firstChildName = null;
-            if (actual != null && actual.size() >= 1) {
-                final OMElement firstChild = actual.get(0);
-                firstChildName = Utils.getValue(firstChild.getPrefix(), "");
-                firstChildName += (firstChildName.isEmpty() ? "" : ":") + firstChild.getLocalName();
-            } else
-                // If we can not access the actual content use a descriptive text
-                firstChildName = "Receipt content unknown";
-
-            rcptChild.setText(firstChildName);
-            newContent.add(rcptChild);
-        }
-
-        @Override
-        public Date getTimestamp() {
-            return source.getTimestamp();
-        }
-
-        @Override
-        public String getMessageId() {
-            return source.getMessageId();
-        }
-
-        @Override
-        public String getRefToMessageId() {
-            return source.getRefToMessageId();
-        }
-
-        @Override
-        public ArrayList<OMElement> getContent() {
-            return newContent;
-        }
+        return deliveryReceipt;
     }
-
-
 
 }

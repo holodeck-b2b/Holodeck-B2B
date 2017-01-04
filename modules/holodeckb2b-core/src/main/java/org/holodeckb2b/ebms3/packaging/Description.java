@@ -19,16 +19,16 @@ package org.holodeckb2b.ebms3.packaging;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IDescription;
 
 /**
- * Is a helper class for handling the ebMS Description element in the ebMS SOAP header.
- * <p>NOTE: This element is currently only specified in section 6.2.8 of the ebMS 3 Core specification as
- * a child of the <code>Error</code> element in a Signal message unit. The schema of the Core spec
- * however defines this element also as child of the PartInfo element, part of a user message
- * message unit. So this element can be reused there as well, although it is not described in section
- * 5.2.2.13 of the spec.
+ * Is a helper class for handling the <code>Description</code> element in the ebMS SOAP header.
+ * <p>NOTE: This element is currently only specified in section 6.2.8 of the ebMS 3 Core specification as a child of the
+ * <code>Error</code> element in a Signal message unit. The schema of the Core spec however defines this element also as
+ * child of the <code>PartInfo</code> element, part of a User Message message unit. So this element can be reused there
+ * as well, although it is not described in section 5.2.2.13 of the spec.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -48,15 +48,17 @@ public class Description {
 
     /**
      * Creates a <code>Description</code> element and adds it to the given parent element.
-     * <p>NOTE: This method should only be called when there is text to add to the description.
-     * When calling this method when no text is available the result will be an empty and
-     * useless Description element!
+     * <p>NOTE: As an empty <code>Description</code> element is not valid this method should only be called when there
+     * is text to add to the description. If called with a empty text the operation is ignored and no element is added.
      *
      * @param parent     The element this element should be added to as a child
      * @param data       The data to include in the element
      * @return  The new element
      */
     public static OMElement createElement(final OMElement parent, final IDescription data) {
+        if (data == null || Utils.isNullOrEmpty(data.getText()))
+            return null;
+
         final OMFactory f = parent.getOMFactory();
 
         // Create the element
@@ -76,41 +78,36 @@ public class Description {
     }
 
     /**
-     * Gets the {@link OMElement} object that represent the <code>Description</code>
-     * child element of the given element.
+     * Gets the {@link OMElement} object that represent the <code>Description</code> child element of the given element.
      *
      * @param parent     The parent element
-     * @return           The {@link OMElement} object representing the requested element
-     *                   or <code>null</code> when the requested element is not found as
-     *                   child of the given element.
+     * @return           The {@link OMElement} object representing the <code>Description</code> element or<br>
+     *                   <code>null</code> when no <code>Description</code> element was found as child of the given
+     *                   element.
      */
     public static OMElement getElement(final OMElement parent) {
         return parent.getFirstChildWithName(Q_ELEMENT_NAME);
     }
 
     /**
-     * Reads the information from a <code>eb:Description</code> element and returns it in a
-     * {@see org.holodeckb2b.ebms3.persistent.general.Description} object.
-     * <p><b>NOTE</b> Although the returned object is an entity object it is not stored in the database by this method.
+     * Reads the information from a <code>eb:Description</code> element and returns it in a {@link
+     * org.holodeckb2b.common.messagemodel.Description} object.
      *
      * @param descrElement  The element that contains the description to read
-     * @return              A {@link org.holodeckb2b.ebms3.persistent.general.Description} object containing the
+     * @return              A {@link org.holodeckb2b.common.messagemodel.Description} object containing the
      *                      information from the specified <code>Description</code> element
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.Description readElement(final OMElement descrElement) {
+    public static org.holodeckb2b.common.messagemodel.Description readElement(final OMElement descrElement) {
         // Check if there was a Description element to read
         if (descrElement == null)
             return null;
 
-        // Create new entity object
-        final org.holodeckb2b.ebms3.persistency.entities.Description  descrData =
-                                                        new org.holodeckb2b.ebms3.persistency.entities.Description();
-
         // Read description content
-        descrData.setText(descrElement.getText());
+        final String text = descrElement.getText();
         // Read language attribute
-        descrData.setLanguage(descrElement.getAttributeValue(new QName(NS_URI_ATTR_LANG, LN_ATTR_LANG)));
+        final String language = descrElement.getAttributeValue(new QName(NS_URI_ATTR_LANG, LN_ATTR_LANG));
 
-        return descrData;
+        // Create and return new entity object
+        return new org.holodeckb2b.common.messagemodel.Description(text, language);
     }
 }

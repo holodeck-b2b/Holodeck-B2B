@@ -16,11 +16,9 @@
  */
 package org.holodeckb2b.ebms3.handlers.outflow;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.soap.SOAP11Version;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -37,20 +35,21 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 
 /**
- * If there are <i>Error signals </i> that must be sent, this handler adds the <code>eb:SignalMessage</code> elements to
- * the ebMS header (which is created by {@link CreateSOAPEnvelopeHandler}).
- * <p>If there are error signal message units to be sent, the corresponding {@link ErrorMessage} objects MUST be
- * included in the Axis2 <code>MessageContext</code> property {@link MessageContextProperties#SEND_ERROR_SIGNALS}.<br>
- * Section 5.2.4 of the ebMS Core specification specifies that a message MUST NOT contain more than
- * one <code>SignalMessage</code> message per signal type. This handler however supports adding multiple error signals
- * to the message. It is the responsibility of the other handlers not to insert more than one error signal in
- * the {@link MessageContextProperties#SEND_ERROR_SIGNALS} message context property.
+ * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:SignalMessage</code> and child element for an
+ * Error Signal in the ebMS messaging header when Error Signals must be sent.
+ * <p>If there are error signal message units to be sent, the corresponding entity objects MUST be included in the
+ * <code>MessageContext</code> property {@link MessageContextProperties#SEND_ERROR_SIGNALS}.<br>
+ * Section 5.2.4 of the ebMS Core specification specifies that a message MUST NOT contain more than one <code>
+ * SignalMessage</code> message per signal type. This handler does however support adding multiple error signals to the
+ * message, which would create an ebMS message that <b>does not conform</b> to the ebMS V3 Core and AS4 specifications.
+ * It is the responsibility of the other handlers not to insert more than one error signal in the message context
+ * property.
  * <p>When one of the errors added to the message has severity <i>Failure</i> the ebMS specification states that the
  * SOAP message SHOULD also contains a <i>SOAPFault</i> (see section 6.6 of ebMS V3 Core Specification). This may cause
  * WS-I basic profile conformance problems when the message also contains another message unit, especially when the
@@ -82,8 +81,8 @@ public class PackageErrorSignals extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) {
         // First check if there are any errors to include
-        final ArrayList<EntityProxy<ErrorMessage>> errors =
-                    (ArrayList<EntityProxy<ErrorMessage>>) mc.getProperty(MessageContextProperties.OUT_ERROR_SIGNALS);
+        final Collection<IErrorMessageEntity> errors =
+                    (Collection<IErrorMessageEntity>) mc.getProperty(MessageContextProperties.OUT_ERRORS);
 
         if (Utils.isNullOrEmpty(errors))
             // No errors in this message, continue processing
@@ -97,13 +96,13 @@ public class PackageErrorSignals extends BaseHandler {
 
         // If one of the errors is of severity FAILURE a SOAP may be added
         boolean addSOAPFault = false;
-        for(final EntityProxy<ErrorMessage> e : errors) {
+        for(final IErrorMessageEntity e : errors) {
             log.debug("Add eb:SignalMessage element to the existing eb:Messaging header");
-            org.holodeckb2b.ebms3.packaging.ErrorSignal.createElement(messaging, e.entity);
+            org.holodeckb2b.ebms3.packaging.ErrorSignal.createElement(messaging, e);
             log.debug("eb:SignalMessage element succesfully added to header");
 
             // Check if a SOAPFault should be added
-            addSOAPFault |= e.entity.shouldHaveSOAPFault();
+            addSOAPFault |= e.shouldHaveSOAPFault();
         }
 
         // If SOAP Fault should be added, check if possible
@@ -129,10 +128,10 @@ public class PackageErrorSignals extends BaseHandler {
     protected boolean isSOAPFaultAllowed(final MessageContext mc) {
         // Check if message contains a non Error Signal message unit
         boolean onlyErrorMU = true;
-        final Iterator<EntityProxy<MessageUnit>> msgUnitsIt = MessageContextUtils.getSentMessageUnits(mc).iterator();
+        final Iterator<IMessageUnitEntity> msgUnitsIt = MessageContextUtils.getSentMessageUnits(mc).iterator();
 
         do {
-            onlyErrorMU = msgUnitsIt.next().entity instanceof ErrorMessage;
+            onlyErrorMU = msgUnitsIt.next() instanceof IErrorMessage;
         } while (onlyErrorMU && msgUnitsIt.hasNext());
 
         return onlyErrorMU;

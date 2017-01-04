@@ -18,20 +18,19 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistency.entities.Receipt;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.persistency.dao.UpdateManager;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for checking if receipt messages should be delivered to the business
@@ -54,47 +53,41 @@ public class DeliverReceipts extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws DatabaseException {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         // Check if this message contains receipt signals
-        final Collection<EntityProxy<Receipt>> rcptSignals = (Collection<EntityProxy<Receipt>>)
-                                                    mc.getProperty(MessageContextProperties.IN_RECEIPTS);
+        final Collection<IReceiptEntity> rcptSignals = (Collection<IReceiptEntity>)
+                                                                mc.getProperty(MessageContextProperties.IN_RECEIPTS);
 
-        if (rcptSignals == null || rcptSignals.isEmpty())
+        if (Utils.isNullOrEmpty(rcptSignals))
             // No receipts to deliver
             return InvocationResponse.CONTINUE;
 
-        log.debug("Message contains " + rcptSignals.size() + " Receipt signals");
-
+        log.debug("Message contains " + rcptSignals.size() + " Receipt Signals");
+        UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
         // Process each signal
-        for(final EntityProxy<Receipt> rcptSigProxy : rcptSignals) {
-            // Extract the entity object
-            final Receipt rcptSig = rcptSigProxy.entity;
-
+        for(final IReceiptEntity receipt : rcptSignals) {
             // Prepare message for delivery by checking it is still ready for delivery and then
             // change its processing state to "out for delivery"
-            log.debug("Prepare message [" + rcptSig.getMessageId() + "] for delivery");
-            final boolean readyForDelivery = MessageUnitDAO.startDeliveryOfMessageUnit(rcptSigProxy);
-
-            if(readyForDelivery) {
+            log.debug("Prepare message [" + receipt.getMessageId() + "] for delivery");
+            if(updateManager.setProcessingState(receipt, ProcessingState.READY_FOR_DELIVERY,
+                                                         ProcessingState.OUT_FOR_DELIVERY)) {
                 // Receipt in this signal can be delivered to business application
                 try {
-                    deliverReceipt(rcptSig);
+                    deliverReceipt(receipt);
                     // Receipt signal processed, change the processing state to done
-                    MessageUnitDAO.setDone(rcptSigProxy);
+                    updateManager.setProcessingState(receipt, ProcessingState.DONE);
                 } catch (final MessageDeliveryException ex) {
-                    log.warn("Could not deliver receipt (msgId=" + rcptSig.getMessageId()
+                    log.warn("Could not deliver Receipt Signal (msgId=" + receipt.getMessageId()
                                     + "]) to application! Error details: " + ex.getMessage());
                     // Although the receipt could not be delivered it was processed completely on the ebMS level,
                     //  so processing state is set to warning instead of failure
-                    MessageUnitDAO.setWarning(rcptSigProxy);
+                    updateManager.setProcessingState(receipt, ProcessingState.WARNING);
                 }
             } else {
-                log.info("Receipt signal [" + rcptSig.getMessageId() + "] is already processed for delivery");
+                log.info("Receipt signal [" + receipt.getMessageId() + "] is already processed for delivery");
             }
         }
-
         log.debug("Processed all Receipt signals in message");
-
         return InvocationResponse.CONTINUE;
     }
 
@@ -102,11 +95,11 @@ public class DeliverReceipts extends BaseHandler {
      * Is a helper method responsible for checking whether and if so delivering a receipt to the business application.
      * Delivery to the business application is done through a {@link IMessageDeliverer}.
      *
-     * @param receipt       The receipt to process
+     * @param receipt       The Receipt Signal to process
      * @throws MessageDeliveryException When the receipt should be delivered to the business application but an error
      *                                  prevented successful delivery
      */
-    private void deliverReceipt(final Receipt receipt) throws MessageDeliveryException {
+    private void deliverReceipt(final IReceiptEntity receipt) throws MessageDeliveryException {
         IDeliverySpecification deliverySpec = null;
 
         // Get delivery specification from P-Mode
@@ -115,7 +108,7 @@ public class DeliverReceipts extends BaseHandler {
         // If a delivery specification was found the receipt should be delivered, else no reporting is needed
         if (deliverySpec != null) {
             log.debug("Receipt should be delivered using delivery specification with id:" + deliverySpec.getId());
-            final IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec);
+            final IMessageDeliverer deliverer = HolodeckB2BCore.getMessageDeliverer(deliverySpec);
             // Deliver the Receipt using deliverer
             try {
                 deliverer.deliver(receipt);
@@ -138,16 +131,16 @@ public class DeliverReceipts extends BaseHandler {
     /**
      * Is a helper method to determine if and how an error should be delivered to the business application.
      *
-     * @param receipt   The Receipt message unit to get delivery spec for
+     * @param receipt   The Receipt Signal message unit to get delivery spec for
      * @return          When the receipt should be delivered to the business application, the {@link
      *                  IDeliverySpecification} that should be used for the delivery,<br>
      *                  <code>null</code> otherwise
      */
-    protected IDeliverySpecification getReceiptDelivery(final Receipt receipt) {
+    protected IDeliverySpecification getReceiptDelivery(final IReceiptEntity receipt) {
         IDeliverySpecification deliverySpec = null;
 
-        final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(receipt.getPModeId());
-        final ILeg leg = pmode.getLegs().iterator().next(); // Currently only One-Way MEPS supports, so only one leg
+        final ILeg leg = HolodeckB2BCore.getPModeSet().get(receipt.getPModeId())
+                                                      .getLeg(receipt.getLeg());
         final IReceiptConfiguration rcptConfig = leg.getReceiptConfiguration();
 
         if (rcptConfig != null && rcptConfig.shouldNotifyReceiptToBusinessApplication()) {

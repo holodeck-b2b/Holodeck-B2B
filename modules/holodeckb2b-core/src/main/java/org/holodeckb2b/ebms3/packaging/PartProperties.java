@@ -22,11 +22,12 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
 
 /**
- * Is a helper class for handling the ebMS PartProperties element in the ebMS SOAP header.
+ * Is a helper class for handling the <code>PartProperties</code> element in the ebMS SOAP header.
  * <p>This element is specified in section 5.2.2.13 of the ebMS 3 Core specification.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -40,37 +41,39 @@ public class PartProperties {
 
     /**
      * Creates a <code>PartProperties</code> element and adds it to the given <code>PartInfo</code> element.
-     * <p>NOTE: This method should only be used when there are part properties available for the processed payload.
+     * <p>NOTE: This method should only be used when there are part properties available for the processed payload as
+     * the XML schema definition requires the element to have at least one property (although the spec states there can
+     * be none).
      *
      * @param piElement     The <code>PartInfo</code> element this element should be added to
-     * @param properties    The message properties to include in the element
-     * @return  The new element if there where message properties available, null when no properties were available
+     * @param properties    The collection of part properties to include in the element
+     * @return              The new element if there where part properties available, or<br>
+     *                      <code>null</code> when no properties were available
      */
     public static OMElement createElement(final OMElement piElement, final Collection<IProperty> properties) {
         // Check for availability of properties before doing any processing
-        if (properties == null || properties.size() == 0)
+        if (Utils.isNullOrEmpty(properties))
             return null;
 
         final OMFactory f = piElement.getOMFactory();
 
         // Create the element
-        final OMElement msgProps = f.createOMElement(Q_ELEMENT_NAME, piElement);
+        final OMElement partProps = f.createOMElement(Q_ELEMENT_NAME, piElement);
 
         // Fill it based on the given data
         for(final IProperty p : properties)
-            Property.createElement(msgProps, p);
+            Property.createElement(partProps, p);
 
-        return msgProps;
+        return partProps;
     }
 
     /**
-     * Gets the {@link OMElement} object that represent the <code>PartProperties</code>
-     * child element of the <code>PartInfo</code> element.
+     * Gets the {@link OMElement} object that represent the <code>PartProperties</code> child element of the
+     * <code>PartInfo</code> element.
      *
-     * @param piElement     The parent <code>PartInfo</code> element
-     * @return              The {@link OMElement} object representing the requested element
-     *                      or <code>null</code> when the requested element is not found as
-     *                      child of the given element.
+     * @param   piElement   The parent <code>PartInfo</code> element
+     * @return              The {@link OMElement} object representing the <code>PartProperties</code> element or,<br>
+     *                      <code>null</code> when the requested element is not found as child of the given element.
      */
     public static OMElement getElement(final OMElement piElement) {
         return piElement.getFirstChildWithName(Q_ELEMENT_NAME);
@@ -78,22 +81,16 @@ public class PartProperties {
 
     /**
      * Reads the set of properties from the <code>PartProperties</code> element and returns them as a collection of
-     * {@link org.holodeckb2b.ebms3.persistency.entities.Property} entity objects.
-     * <p><b>NOTE:</b> The entity objects in the collection are not persisted by this method! It is the responsibility
-     * of the caller to store it.
+     * {@link org.holodeckb2b.common.messagemodel.Property} objects.
      *
-     * @param ppElement             The <code>PartProperties</code> element to read the properties from
-     * @return                      A new collection of {@link org.holodeckb2b.ebms3.persistency.entities.Property}
-     *                              objects
+     * @param   ppElement   The <code>PartProperties</code> element to read the properties from
+     * @return              A new collection of objects implementing {@link IProperty}
      */
-    public static Collection<org.holodeckb2b.ebms3.persistency.entities.Property> readElement(final OMElement ppElement) {
-        if (ppElement == null)
-            return null;
-
+    public static Collection<IProperty> readElement(final OMElement ppElement) {
         // Create new collection
-        final ArrayList<org.holodeckb2b.ebms3.persistency.entities.Property> props = new ArrayList<>();
+        final ArrayList<IProperty> props = new ArrayList<>();
         // Get all child elements containing the properties
-        final Iterator<?> it = ppElement.getChildrenWithName(Property.Q_ELEMENT_NAME);
+        final Iterator<OMElement> it = Property.getElements(ppElement);
         // Read each property element and add it info to the collection
         while (it.hasNext())
             props.add(Property.readElement((OMElement) it.next()));

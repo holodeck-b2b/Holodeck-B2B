@@ -18,7 +18,6 @@ package org.holodeckb2b.interfaces.messagemodel;
 
 
 import java.util.Collection;
-
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.general.IProperty;

@@ -20,15 +20,14 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 
 /**
- * If there is a <i>User Message unit</i> that must be sent, this handler adds the <code>eb:UserMessage</code> element
- * to the ebMS header (which is created by {@link CreateSOAPEnvelopeHandler}).
- * <p>If a user message unit is to be sent, the <code>EntityProxy</code> object for corresponding {@link UserMessage}
- * MUST be included in the  <code>MessageContext</code> parameter {@link MessageContextProperties#OUT_USER_MESSAGE}.
+ * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:UserMessage</code> element in the ebMS messaging
+ * header when a User Message must be sent.
+ * <p>If a user message unit is to be sent, the entity object representing the User Message MUST be included in the
+ * <code>MessageContext</code> parameter {@link MessageContextProperties#OUT_USER_MESSAGE}.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -43,12 +42,12 @@ public class PackageUsermessageInfo extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final EntityProxy<UserMessage> um) {
+    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um) {
 
         log.debug("Get the eb:Messaging header from the message");
         final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
         log.debug("Add eb:UserMessage element to the existing eb:Messaging header");
-        org.holodeckb2b.ebms3.packaging.UserMessage.createElement(messaging, um.entity);
+        org.holodeckb2b.ebms3.packaging.UserMessage.createElement(messaging, um);
         log.debug("eb:UserMessage element succesfully added to header");
 
         return InvocationResponse.CONTINUE;

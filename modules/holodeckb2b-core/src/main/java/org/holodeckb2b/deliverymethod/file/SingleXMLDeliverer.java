@@ -30,10 +30,9 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.util.base64.Base64EncodingWriterOutputStream;
+import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.mmd.xml.Property;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
-import org.holodeckb2b.ebms3.mmd.xml.PartInfo;
-import org.holodeckb2b.ebms3.mmd.xml.Property;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
@@ -75,11 +74,11 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
             <eb:ConversationId>org:holodeckb2b:test:conversation</eb:ConversationId>
         </eb:CollaborationInfo>
         <eb:PayloadInfo>
-            <eb:PartInfo>
+            <eb:Payload>
                 <eb:PartProperties>
                     <eb:Property name="org:holodeckb2b:ref">pl-1</eb:Property>
                 </eb:PartProperties>
-            </eb:PartInfo>
+            </eb:Payload>
         </eb:PayloadInfo>
     </eb:UserMessage>
     <Payloads>
@@ -136,7 +135,7 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
                 final Property refProp = new Property();
                 refProp.setName("org:holodeckb2b:ref");
                 refProp.setValue("pl-" + i++);
-                ((PartInfo) p).getProperties().add(refProp);
+                p.getProperties().add(refProp);
             }
             org.holodeckb2b.ebms3.packaging.PayloadInfo.createElement(usrMsgElement, mmd.getPayloads());
         }

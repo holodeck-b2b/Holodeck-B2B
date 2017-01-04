@@ -20,7 +20,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.junit.After;
 import org.junit.Before;

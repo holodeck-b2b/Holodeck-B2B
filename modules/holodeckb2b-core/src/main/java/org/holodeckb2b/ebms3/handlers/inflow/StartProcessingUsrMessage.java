@@ -17,16 +17,15 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
- * Is the <i>in flow</i> handler that starts the process of delivering the user message message unit to the business
+ * Is the <i>IN_FLOW</i> handler that starts the process of delivering the user message message unit to the business
  * application by changing the message units processing state to {@link ProcessingStates#PROCESSING}.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -39,10 +38,12 @@ public class StartProcessingUsrMessage extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final EntityProxy<UserMessage> um) throws DatabaseException {
-        final String msgId = um.entity.getMessageId();
+    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
+                                                                                        throws PersistenceException {
+        final String msgId = um.getMessageId();
         log.debug("Change processing state to indicate start of processing of message [" + msgId + "]" );
-        if (!MessageUnitDAO.startProcessingMessageUnit(um)) {
+        if (!HolodeckB2BCore.getUpdateManager().setProcessingState(um, ProcessingState.RECEIVED,
+                                                                       ProcessingState.PROCESSING)) {
             // Changing the state failed which indicates that the message unit is already being processed
             log.warn("User message [msgId= " + msgId + "] is already being processed");
             // Remove the User Message from the context to prevent further processing

@@ -17,10 +17,11 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import java.util.Collection;
+import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.ebms3.persistency.entities.Payload;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.general.IProperty;
@@ -28,8 +29,7 @@ import org.holodeckb2b.interfaces.general.ISchemaReference;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 
 /**
- * Is a helper class for handling the ebMS PartInfo element in the ebMS SOAP
- * header.
+ * Is a helper class for handling the ebMS <code>PartInfo</code> element in the ebMS SOAP header.
  * <p>This element is specified in section 5.2.2.13 of the ebMS 3 Core specification.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -79,49 +79,47 @@ public class PartInfo {
             Schema.createElement(piElement, schemaRef);
         // Create the Description element (if a description is provided)
         final IDescription descr = data.getDescription();
-        if (descr != null)
+        if (descr != null && !Utils.isNullOrEmpty(descr.getText()))
             Description.createElement(piElement, descr);
         // Create the PartProperties element (if there are message properties)
         final Collection<IProperty> partProps = data.getProperties();
-        if (partProps != null && partProps.size() > 0)
+        if (Utils.isNullOrEmpty(partProps))
             PartProperties.createElement(piElement, partProps);
 
         return piElement;
     }
 
     /**
-     * Gets the {@link OMElement} object that represent the <code>PartInfo</code>
-     * child element of the <code>UserMessage</code> element.
+     * Gets an {@link Iterator} for all <code>PartInfo</code> children of the given parent <code>PayloadInfo</code>
+     * element.
      *
-     * @param umElement     The parent <code>UserMessage</code> element
-     * @return              The {@link OMElement} object representing the requested element
-     *                      or <code>null</code> when the requested element is not found as
-     *                      child of the given element.
+     * @param   plElement   The parent <code>PayloadInfo</code> element
+     * @return              An {@link Iterator} for all {@link OMElement}s representing a <code>PartInfo</code>
+     *                      child element of given element, or<br>
+     *                      <code>null</code> when no such element is not found as child of the given element.
      */
-    public static OMElement getElement(final OMElement umElement) {
-        return umElement.getFirstChildWithName(Q_ELEMENT_NAME);
+    public static Iterator<OMElement> getElements(final OMElement plElement) {
+        return plElement.getChildrenWithName(Q_ELEMENT_NAME);
     }
 
     /**
-     * Reads the meta data about one payload from the <code>PartInfo</code> element  and returns it as a
-     * {@link org.holodeckb2b.ebms3.persistency.entities.Payload} entity object.
-     * <p><b>NOTE:</b> The entity object is not persisted by this method! It is the responsibility of the caller to
-     * store it.
+     * Reads the meta data about one payload from the <code>PartInfo</code> element and returns it as a
+     * {@link org.holodeckb2b.common.messagemodel.Payload} object.
      *
-     * @param piElement             The <code>PartInfo</code> element to read the payload meta-data from
-     * @return                      A new {@link org.holodeckb2b.ebms3.persistency.entities.Payload} object containing
-     *                              the meta-data about the payload
+     * @param   piElement   The <code>PartInfo</code> element to read the payload meta-data from
+     * @return              A new {@link org.holodeckb2b.common.messagemodel.Payload} object containing the
+     *                      meta-data about the payload
      */
-    public static Payload readElement(final OMElement piElement) {
+    public static org.holodeckb2b.common.messagemodel.Payload readElement(final OMElement piElement) {
         if (piElement == null)
             return null;
 
         // Create the entity object
-        final Payload plData = new Payload();
+        final org.holodeckb2b.common.messagemodel.Payload plData = new org.holodeckb2b.common.messagemodel.Payload();
 
         // Read href attribute
         String href = piElement.getAttributeValue(new QName(HREF_ATTR));
-        if (href == null || href.isEmpty())
+        if (Utils.isNullOrEmpty(href))
             plData.setContainment(IPayload.Containment.BODY);
         else {
             if (href.startsWith("#")) {

@@ -20,16 +20,17 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.holodeckb2b.common.messagemodel.PartyId;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.persistency.entities.PartyId;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
- * Is a helper class for handling the ebMS PartyInfo element in the ebMS SOAP header.
- * <p>This element is specified in section 5.2.2.2 of the ebMS 3 Core specification.
+ * Is a helper class for handling the ebMS <code>PartyInfo</code> element and its <code>From</code> and <code>To</code>
+ * child elements in the ebMS SOAP header.
+ * <p>This elements are specified in sections 5.2.2.2 to 5.2.2.5 of the ebMS 3 Core specification.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -41,9 +42,9 @@ public class PartyInfo {
     static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "PartyInfo");
 
     /**
-     * Creates an ebMS 3 <code>PartyInfo</code> element and adds it to <code>UserMessage</code> element.
-     * The created element includes the <code>From</code> and <code>To</code> elements that identify the
-     * sender and receiver of this message unit.
+     * Creates an ebMS 3 <code>PartyInfo</code> element and adds it to <code>UserMessage</code> element. The created
+     * element includes the <code>From</code> and <code>To</code> elements that identify the sender and receiver of this
+     * User Message.
      *
      * @param umElement     The <code>UserMessage</code> element this element should be added to
      * @param data          The data to include in the element
@@ -63,32 +64,29 @@ public class PartyInfo {
     }
 
     /**
-     * Gets the {@link OMElement} object that represent the <code>PartyInfo</code>
-     * child element of the <code>UserMessage</code> element.
+     * Gets the {@link OMElement} object that represent the <code>PartyInfo</code> child element of the given <code>
+     * UserMessage</code> element.
      *
      * @param muElement     The parent <code>UserMessage</code> element
-     * @return              The {@link OMElement} object representing the requested element
-     *                      or <code>null</code> when the requested element is not found as
-     *                      child of the given element.
+     * @return              The {@link OMElement} object representing the <code>PartyInfo</code> element or,<br>
+     *                      <code>null</code> when the requested element is not found as child of the given element.
      */
     public static OMElement getElement(final OMElement muElement) {
         return muElement.getFirstChildWithName(Q_ELEMENT_NAME);
     }
 
     /**
-     * Reads the information on the sender and receiver of the UserMessage message unit and stores it in the given
-     * {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage} object.
-     * <p><b>NOTE 1:</b> This method only reads the information that is available from the message. It does not perform
+     * Reads the information on the sender and receiver of the User Message message unit and stores it in the given
+     * {@link org.holodeckb2b.common.messagemodel.UserMessage} object.
+     * <p><b>NOTE:</b> This method only reads the information that is available from the message. It does not perform
      * any validation of the message, this is done in the validation handlers.
-     * <br><b>NOTE 2:</b> This method does NOT persist the entity objects! It is the  responsibility of the caller to
-     * save changes.
      *
      * @param piElement             The <code>PartyInfo</code> element that contains the info about the sender and
      *                              receiver of this User Message message unit
-     * @param umData                The {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage} object to update
+     * @param umData                The {@link org.holodeckb2b.common.messagemodel.UserMessage} object to update
      */
     public static void readElement(final OMElement piElement,
-                                   final org.holodeckb2b.ebms3.persistency.entities.UserMessage umData) {
+                                   final org.holodeckb2b.common.messagemodel.UserMessage umData) {
         if (piElement == null)
             return;
 
@@ -131,8 +129,8 @@ public class PartyInfo {
         private static final QName  Q_ROLE = new QName(EbMSConstants.EBMS3_NS_URI, "Role");
 
         /**
-         * Creates a <code>From</code> or <code>To</code> element and includes it in the given
-         * <code>PartyInfo</code> element.
+         * Creates a <code>From</code> or <code>To</code> element and includes it in the given <code>PartyInfo</code>
+         * element.
          *
          * @param rootName      The name to use for the element, i.e. <i>From</i> or <i>To</i>
          * @param piElement     The <code>PartyInfo</code> element this element should be added to
@@ -165,15 +163,13 @@ public class PartyInfo {
         }
 
         /**
-         * Gets the {@link OMElement} object that represent the <code>To</code> or
-         * <code>From</code> child element of the <code>eb:PartyInfo</code> element.
+         * Gets the {@link OMElement} object that represent the <code>To</code> or <code>From</code> child element of
+         * the <code>eb:PartyInfo</code> element.
          *
          * @param piElement     The parent <code>eb:PartyInfo</code> element.
-         * @param elemName      Indicates whether the <code>To</code> or <code>From</code>
-         *                      element should be retrieved
-         * @return              The {@link OMElement} object representing the requested element
-         *                      or <code>null</code> when the requested element is not found as
-         *                      child of the given element.
+         * @param elemName      Indicates whether the <code>To</code> or <code>From</code> element should be retrieved
+         * @return              The {@link OMElement} object representing the requested element or,<br>
+         *                      <code>null</code> when the requested element is not found as child of the given element.
          */
         public static OMElement getElement(final OMElement piElement, final ElementName elemName) {
             return piElement.getFirstChildWithName((elemName == ElementName.FROM ? Q_FROM_PARTY : Q_TO_PARTY));
@@ -182,19 +178,19 @@ public class PartyInfo {
 
         /**
          * Reads the trading partner information from a <code>From</code> or <code>To</code> element and returns it as
-         * a {@link org.holodeckb2b.ebms3.persistency.entities.TradingPartner} object.
+         * a {@link org.holodeckb2b.common.messagemodel.TradingPartner} object.
          *
          * @param tpElement     The element to read the information from
-         * @return              A {@link org.holodeckb2b.ebms3.persistency.entities.TradingPartner} object containing
+         * @return              A {@link org.holodeckb2b.common.messagemodel.TradingPartner} object containing
          *                      the information from the element
          */
-        public static org.holodeckb2b.ebms3.persistency.entities.TradingPartner readElement(final OMElement tpElement) {
+        public static org.holodeckb2b.common.messagemodel.TradingPartner readElement(final OMElement tpElement) {
             if (tpElement == null)
                 return null; // If there is no element content, there is no data
 
             // Create the entity object
-            final org.holodeckb2b.ebms3.persistency.entities.TradingPartner tpData =
-                                                        new org.holodeckb2b.ebms3.persistency.entities.TradingPartner();
+            final org.holodeckb2b.common.messagemodel.TradingPartner tpData =
+                                                        new org.holodeckb2b.common.messagemodel.TradingPartner();
 
             // Check for a Role element and use its value
             final OMElement roleElement = tpElement.getFirstChildWithName(Q_ROLE);
@@ -206,12 +202,10 @@ public class PartyInfo {
             while (it.hasNext()) {
                 final OMElement pidElem = (OMElement) it.next();
                 // Add PartyId to trading partner info
-                tpData.addPartyId(new PartyId(pidElem.getText(),
-                                              pidElem.getAttributeValue(new QName(LN_PARTYID_TYPE))));
+                tpData.addPartyId(new PartyId(pidElem.getText(),pidElem.getAttributeValue(new QName(LN_PARTYID_TYPE))));
             }
 
             return tpData;
         }
      }
-
 }

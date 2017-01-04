@@ -22,7 +22,7 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
-import org.holodeckb2b.testhelpers.HolodeckCore;
+import org.holodeckb2b.testhelpers.HolodeckB2BTestCore;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -46,7 +46,7 @@ public class PModeManagerTest {
     @BeforeClass
     public static void setUpClass() {
         baseDir = PModeManagerTest.class.getClassLoader().getResource("pmode_validation").getPath();
-        HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(baseDir));
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
         InternalConfiguration initialConf =
                 (InternalConfiguration)HolodeckB2BCoreInterface.getConfiguration();
         manager = new PModeManager(initialConf.getPModeValidatorImplClass(),

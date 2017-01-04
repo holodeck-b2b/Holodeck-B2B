@@ -19,13 +19,12 @@ package org.holodeckb2b.ebms3.packaging;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.ebms3.persistency.entities.AgreementReference;
+import org.holodeckb2b.common.messagemodel.AgreementReference;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 
 /**
- * Is a helper class for handling the ebMS AgreementRef element in the ebMS SOAP
- * header.
+ * Is a helper class for handling the ebMS <code>AgreementRef</code> element in the ebMS SOAP header.
  * <p>This element is specified in section 5.2.2.7 of the ebMS 3 Core specification.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -71,42 +70,38 @@ public class AgreementRef {
     }
 
     /**
-     * Gets the {@link OMElement} object that represent the <code>AgreementRef</code>
-     * child element of the <code>CollaborationInfo</code> element.
+     * Gets the {@link OMElement} object that represent the <code>AgreementRef</code> child element of the given <code>
+     * CollaborationInfo</code> element.
      *
      * @param ciElement     The parent <code>CollaborationInfo</code> element
-     * @return              The {@link OMElement} object representing the requested element
-     *                      or <code>null</code> when the requested element is not found as
-     *                      child of the given element.
+     * @return              The {@link OMElement} object representing the <code>AgreementRef</code> element, or<br>
+     *                      <code>null</code> when there is no <code>AgreementRef</code> element as child of the
+     *                      given element.
      */
     public static OMElement getElement(final OMElement ciElement) {
         return ciElement.getFirstChildWithName(Q_ELEMENT_NAME);
     }
 
     /**
-     * Reads the information from the <code>AgreementRef</code> object and returns it
-     * in a new {@link AgreementReference} entity object.
-     * <p><b>NOTE:</b> The entity object is not persisted by this method! It is
-     * the responsibility of the caller to store it.
+     * Reads the information from the <code>AgreementRef</code> element and returns it in a new {@link
+     * AgreementReference} object.
      *
-     * @param arElement             The <code>AgreementRef</code> element to read the
-     *                               info from
-     * @return                       A new {@link org.holodeckb2b.ebms3.persistent.general.AgreementReference}
+     * @param element  The <code>AgreementRef</code> element to read the info from
+     * @return         A new {@link }
      *                               object containing the service info from the
      *                               element
      */
-    public static AgreementReference readElement(final OMElement arElement) {
-        if (arElement == null)
+    public static AgreementReference readElement(final OMElement element) {
+        if (element == null)
             return null;
 
         // Read agreement info, i.e. name and type of reference
-        final String agreement = arElement.getText();
-        final String type = arElement.getAttributeValue(new QName(LN_ATTR_TYPE));
-        // Create entity object
-        final AgreementReference arData = new AgreementReference(agreement, type);
+        final String agreement = element.getText();
+        final String type = element.getAttributeValue(new QName(LN_ATTR_TYPE));
         // Read P-Mode id
-        arData.setPModeId(arElement.getAttributeValue(new QName(LN_ATTR_PMODE)));
+        final String pmode = element.getAttributeValue(new QName(LN_ATTR_PMODE));
 
-        return arData;
+        // Create and return the object
+        return new AgreementReference(agreement, type, pmode);
     }
 }

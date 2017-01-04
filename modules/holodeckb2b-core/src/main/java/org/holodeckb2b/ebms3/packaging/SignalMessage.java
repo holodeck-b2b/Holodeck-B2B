@@ -17,16 +17,15 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import java.util.Iterator;
-
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 
 /**
- * Is a helper class for handling the ebMS <code>eb:SignalMessage</code> element
- * in the ebMS SOAP header.
+ * Is a helper class for handling the ebMS <code>eb:SignalMessage</code> element in the ebMS SOAP header. As this
+ * element itself does not contain any data there are only methods for creating and getting the element.
+ * <p>This element is specified in section 5.2.3 of the ebMS 3 Core specification.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -54,15 +53,14 @@ public class SignalMessage {
     }
 
     /**
-     * Gets an {@link Iterator} for the <code>eb:SignalMessage</code> elements
-     * from the given ebMS 3 Messaging header in the SOAP message.
+     * Gets an {@link Iterator} for all <code>eb:SignalMessage</code> elements from the given ebMS 3 Messaging header in
+     * the SOAP message.
      *
-     * @param messaging   The SOAP Header block that contains the ebMS header,
-     *                    i.e. the <code>eb:Messaging</code> element
-     * @return      An {@link Iterator} for all {@link OMElement}s representing a
-     *              <code>eb:SignalMessage</code> element in the given header
+     * @param messaging   The parent <code>Messaging</code> element
+     * @return            An {@link Iterator} for all {@link OMElement}s representing a <code>eb:SignalMessage</code>
+     *                    element in the given header
      */
-    public static Iterator<?> getElements(final OMElement messaging) {
+    public static Iterator<OMElement> getElements(final OMElement messaging) {
         return messaging.getChildrenWithName(Q_ELEMENT_NAME);
     }
 }

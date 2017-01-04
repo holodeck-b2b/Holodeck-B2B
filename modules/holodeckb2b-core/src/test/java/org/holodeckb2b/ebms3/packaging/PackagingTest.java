@@ -35,7 +35,7 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;

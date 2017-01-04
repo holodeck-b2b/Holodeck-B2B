@@ -41,7 +41,7 @@ import org.apache.wss4j.dom.handler.RequestData;
 import org.apache.wss4j.dom.handler.WSHandler;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.holodeckb2b.axis2.Axis2Utils;
-import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.KeyValuePair;
 import org.holodeckb2b.common.util.Utils;
@@ -112,7 +112,7 @@ public class ProcessWSSHeaders extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws AxisFault, DatabaseException {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws AxisFault, PersistenceException {
         WSSReceiveHandler processor = null;
         List<Integer> actions = null;
         List<WSSecurityEngineResult> results = null;

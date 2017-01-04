@@ -19,12 +19,12 @@ package org.holodeckb2b.ebms3.packaging;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.holodeckb2b.ebms3.persistency.entities.SchemaReference;
+import org.holodeckb2b.common.messagemodel.SchemaReference;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.ISchemaReference;
 
 /**
- * Is a helper class for handling the ebMS Schema element in the ebMS SOAP header.
+ * Is a helper class for handling the <code>Schema</code> element in the ebMS SOAP header.
  * <p>This element is specified in section 5.2.2.13 of the ebMS 3 Core specification.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -72,29 +72,24 @@ public class Schema {
     }
 
     /**
-     * Gets the {@link OMElement} object that represent the <code>Schema</code>
-     * child element of the <code>PartInfo</code> element.
+     * Gets the {@link OMElement} object that represent the <code>Schema</code> child element of the <code>PartInfo
+     * </code> element.
      *
      * @param umElement     The parent <code>PartInfo</code> element
-     * @return              The {@link OMElement} object representing the requested element
-     *                      or <code>null</code> when the requested element is not found as
-     *                      child of the given element.
+     * @return              The {@link OMElement} object representing the <code>Schema</code> element or,<br>
+     *                      <code>null</code> when the requested element is not found as child of the given element.
      */
     public static OMElement getElement(final OMElement umElement) {
         return umElement.getFirstChildWithName(Q_ELEMENT_NAME);
     }
 
     /**
-     * Reads the schema data about the payload from the <code>Schema</code> element
-     * and returns it as a {@link org.holodeckb2b.ebms3.persistency.entities.SchemaReference}
-     * entity object.
-     * <p><b>NOTE:</b> The entity object is not persisted by this method! It is
-     * the responsibility of the caller to store it.
+     * Reads the schema data about the payload from the <code>Schema</code> element and returns it as a {@link
+     * org.holodeckb2b.common.messagemodel.SchemaReference} object.
      *
-     * @param siElement             The <code>Schema</code> element to read the
-     *                              payload meta data from
-     * @return                      A new {@link org.holodeckb2b.ebms3.persistency.entities.SchemaReference}
-     *                              object containing the meta data about the payload
+     * @param siElement             The <code>Schema</code> element to read the payload meta data from
+     * @return                      A new {@link org.holodeckb2b.common.messagemodel.SchemaReference} object containing
+     *                              the meta data about the payload
      */
     public static SchemaReference readElement(final OMElement siElement) {
         if (siElement == null)
@@ -102,7 +97,6 @@ public class Schema {
 
         // Create entity object
         final SchemaReference schemaData = new SchemaReference();
-
         // Read data from element
         schemaData.setLocation(siElement.getAttributeValue(new QName(LN_ATTR_LOCATION)));
         schemaData.setNamespace(siElement.getAttributeValue(new QName(LN_ATTR_NAMESPACE)));

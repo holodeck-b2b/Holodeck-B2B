@@ -23,8 +23,7 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
 
 /**
- * Is a helper class for handling the ebMS CollaborationInfo element in the ebMS SOAP
- * header.
+ * Is a helper class for handling the <code>CollaborationInfo</code> element in the ebMS SOAP header.
  * <p>This element is specified in section 5.2.2.6 of the ebMS 3 Core specification.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -76,39 +75,36 @@ public class CollaborationInfo {
     }
 
     /**
-     * Gets the {@link OMElement} object that represent the <code>CollaborationInfo</code>
-     * child element of the <code>UserMessage</code> element.
+     * Gets the {@link OMElement} object that represent the <code>CollaborationInfo</code> child element of the
+     * <code>UserMessage</code> element.
      *
-     * @param ciElement     The parent <code>UserMessage</code> element
-     * @return              The {@link OMElement} object representing the requested element
-     *                      or <code>null</code> when the requested element is not found as
-     *                      child of the given element.
+     * @param   parent     The parent <code>UserMessage</code> element
+     * @return             The {@link OMElement} object representing the <code>CollaborationInfo</code> element,or<br>
+     *                     <code>null</code> when there is no <code>CollaborationInfo</code> element as child of the
+     *                     given element.
      */
-    public static OMElement getElement(final OMElement umElement) {
-        return umElement.getFirstChildWithName(Q_ELEMENT_NAME);
+    public static OMElement getElement(final OMElement parent) {
+        return parent.getFirstChildWithName(Q_ELEMENT_NAME);
     }
 
     /**
-     * Reads the business transaction information of the UserMessage message unit
-     * contained in the <code>CollaborationInfo</code> element and returns it in
-     * a new {@link org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo}
-     * object.
-     * <p><b>NOTE:</b> This method does NOT persist the entity object! It is the
-     * responsibility of the caller to save it.
+     * Reads the business transaction information from the User Message message unit contained in the <code>
+     * CollaborationInfo</code> element and returns it in a new {@link
+     * org.holodeckb2b.common.messagemodel.CollaborationInfo} object.
      *
-     * @param ciElement             The <code>CollaborationInfo</code> element that contains the
-     *                              info about this User Message message unit
-     * @return                      The {@link org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo} object
-     *                              the information is returned in
+     * @param ciElement    The <code>CollaborationInfo</code> element that contains the info about this User Message
+     *                     message unit
+     * @return             The {@link org.holodeckb2b.common.messagemodel.CollaborationInfo} object the information is
+     *                     returned in
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo readElement(final OMElement ciElement) {
+    public static org.holodeckb2b.common.messagemodel.CollaborationInfo readElement(final OMElement ciElement) {
         // There must be a CollaborationInfo element
         if (ciElement == null)
             return null;
 
-        // Create new entity object
-        final org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo ciData =
-                                                    new org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo();
+        // Create new empty object
+        final org.holodeckb2b.common.messagemodel.CollaborationInfo ciData =
+                                                        new org.holodeckb2b.common.messagemodel.CollaborationInfo();
 
         // Start with reading the required elements: Service, Action and ConversationId
         OMElement child = Service.getElement(ciElement);

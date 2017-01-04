@@ -23,8 +23,7 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IService;
 
 /**
- * Is a helper class for handling the ebMS Service element in the ebMS SOAP
- * header.
+ * Is a helper class for handling the <code>Service</code> element in the ebMS SOAP header.
  * <p>This element is specified in section 5.2.2.8 of the ebMS 3 Core specification.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -64,45 +63,36 @@ public class Service {
     }
 
     /**
-     * Gets the {@link OMElement} object that represent the <code>Service</code>
-     * child element of the <code>CollaborationInfo</code> element.
+     * Gets the {@link OMElement} object that represent the <code>Service</code> child element of the <code>
+     * CollaborationInfo</code> element.
      *
      * @param ciElement     The parent <code>CollaborationInfo</code> element
-     * @return              The {@link OMElement} object representing the requested element
-     *                      or <code>null</code> when the requested element is not found as
-     *                      child of the given element.
+     * @return              The {@link OMElement} object representing the <code>Service</code> element or,
+     *                      <code>null</code> when there is <code>Service</code> element found as child of the given
+     *                      element.
      */
     public static OMElement getElement(final OMElement ciElement) {
         return ciElement.getFirstChildWithName(Q_ELEMENT_NAME);
     }
 
     /**
-     * Reads the information from the <code>Service</code> object and returns it
-     * in a new {@link org.holodeckb2b.ebms3.persistency.entities.Service} entity
-     * object.
-     * <p><b>NOTE:</b> The entity object is not persisted by this method! It is
-     * the responsibility of the caller to store it.
+     * Reads the information from the <code>Service</code> object and returns it in a new {@link
+     * org.holodeckb2b.common.messagemodel.Service} entity object.
      *
-     * @param svcElement             The <code>Service</code> element to read the
-     *                               info from
-     * @return                       A new {@link org.holodeckb2b.ebms3.persistency.entities.Service}
-     *                               object containing the service info from the
-     *                               element
+     * @param svcElement    The <code>Service</code> element to read the info from
+     * @return              A new {@link org.holodeckb2b.common.messagemodel.Service} object containing the service info
+     *                      from the element
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.Service readElement(final OMElement svcElement) {
+    public static org.holodeckb2b.common.messagemodel.Service readElement(final OMElement svcElement) {
         if (svcElement == null)
             return null;
 
         // Read service name
         final String svcName = svcElement.getText();
-
-        // Create the entity object
-        final org.holodeckb2b.ebms3.persistency.entities.Service svcData =
-                                                    new org.holodeckb2b.ebms3.persistency.entities.Service(svcName);
-
         // Read the optional service type
-        svcData.setType(svcElement.getAttributeValue(new QName(LN_ATTR_TYPE)));
+        final String svcType = svcElement.getAttributeValue(new QName(LN_ATTR_TYPE));
 
-        return svcData;
+        // Create and return the entity object
+        return new org.holodeckb2b.common.messagemodel.Service(svcName, svcType);
     }
 }

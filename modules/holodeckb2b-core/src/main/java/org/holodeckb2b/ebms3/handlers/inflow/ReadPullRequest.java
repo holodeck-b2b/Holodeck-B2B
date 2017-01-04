@@ -19,13 +19,12 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PullRequest;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is an in flow handler that checks if this message contains a Pull Request, i.e. contains a <eb:PullRequest> element
@@ -49,7 +48,7 @@ public class ReadPullRequest extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws DatabaseException {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         // First get the ebMS header block, that is the eb:Messaging element
         final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
 
@@ -60,11 +59,11 @@ public class ReadPullRequest extends BaseHandler {
             if (prElement != null) {
                 log.debug("PullRequest found, read information from message");
                 // Read information into PullRequest object
-                org.holodeckb2b.ebms3.persistency.entities.PullRequest pullRequest = PullRequest.readElement(prElement);
+                org.holodeckb2b.common.messagemodel.PullRequest pullRequest = PullRequest.readElement(prElement);
                 // And store in database and message context for further processing
                 log.debug("Store PullRequest in database and message context");
                 mc.setProperty(MessageContextProperties.IN_PULL_REQUEST,
-                                                                MessageUnitDAO.storeReceivedMessageUnit(pullRequest));
+                               HolodeckB2BCore.getUpdateManager().storeIncomingMessageUnit(pullRequest));
                 log.info("PullRequest [msgId=" + pullRequest.getMessageId() + "] for MPC " + pullRequest.getMPC()
                         + " received.");
             } else

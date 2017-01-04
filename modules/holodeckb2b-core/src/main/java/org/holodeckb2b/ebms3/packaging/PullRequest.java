@@ -22,9 +22,10 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 
 /**
- * Is a helper class for handling the ebMS PullRequest signal message elements  in the ebMS SOAP header, i.e. the
+ * Is a helper class for handling the ebMS Pull Request signal message units in the ebMS SOAP header, i.e. the
  * <code>eb:PullRequest</code> element and its sibling <code>eb:MessageInfo</code>.
  * <p>This element is specified in section 5.2.3.1 of the ebMS 3 Core specification.
  *
@@ -44,19 +45,17 @@ public class PullRequest {
 
     /**
      * Reads the information from <code>eb:PullRequest</code> element and sibling <code>eb:MessageInfo</code> element
-     * that contains the Pull Request signal message unit and stores it a {@link PullRequest} persistency object.
-     * <p><b>NOTE 1:</b> The {@see PullRequest} object also contains authentication information to authorize the
-     * request. This info however is not part of the <code>eb:SignalMessage</code> element and is therefor not filled
-     * here.
-     * <p><b>NOTE 2:</b> The information is stored in an entity object, but this method will NOT persist the object.
+     * that contains the Pull Request signal message unit and stores it a {@link
+     * org.holodeckb2b.common.messagemodel.PullRequest} object.
      *
-     * @param prElement     The <code>eb:PullRequest</code> element
-     * @return              The {@link PullRequest} object containing the information on the pull request
+     * @param prElement     The <code>eb:PullRequest</code> element to read info from
+     * @return              The {@link org.holodeckb2b.common.messagemodel.PullRequest} object containing the
+     *                      information on the pull request
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.PullRequest readElement(final OMElement prElement) {
+    public static org.holodeckb2b.common.messagemodel.PullRequest readElement(final OMElement prElement) {
         // Create a new PullRequest entity object to store the information in
-        final org.holodeckb2b.ebms3.persistency.entities.PullRequest prData =
-                                                        new org.holodeckb2b.ebms3.persistency.entities.PullRequest();
+        final org.holodeckb2b.common.messagemodel.PullRequest prData =
+                                                        new org.holodeckb2b.common.messagemodel.PullRequest();
 
         // The PullRequest itself only contains the [optional] mpc attribute
         String  mpc = prElement.getAttributeValue(new QName(MPC_ATTR));
@@ -73,21 +72,18 @@ public class PullRequest {
     }
 
     /**
-     * Gets the <code>eb:PullRequest</code> element from the given ebMS 3 Messaging
-     * header in the SOAP message. This method returns just one element because
-     * there SHOULD be only one pull request signal message per ebMS message as
+     * Gets the <code>eb:PullRequest</code> element from the given ebMS 3 Messaging header in the SOAP message. This
+     * method returns just one element because there SHOULD be only one pull request signal message per ebMS message as
      * described in section 5.2.3 of the ebMS V3 specification.
      *
-     * @param messaging   The SOAP Header block that contains the ebMS header,
-     *                    i.e. the <code>eb:Messaging</code> element
-     * @return      A {@see OMElement} representing the <code>eb:PullRequest</code> element
-     *              when one was found in the given header
+     * @param messaging   The SOAP Header block that contains the ebMS header,i.e. the <code>eb:Messaging</code> element
+     * @return      A {@link OMElement} representing the <code>eb:PullRequest</code> element when one was found in the
+     *              given header, or<br>
      *              <code>null</code> if no such element was found
      */
     public static OMElement getElement(final SOAPHeaderBlock messaging) {
-        // Before we can get the PullRequest element we first have to get the parent
-        //  SignalMessage element. Because a ebMS message can contain multiple signals
-        //  we have to check each for the PullRequest
+        // Before we can get the PullRequest element we first have to get the parent SignalMessage element. Because a
+        // ebMS message can contain multiple signals we have to check each for the PullRequest
         final Iterator<?> signals = org.holodeckb2b.ebms3.packaging.SignalMessage.getElements(messaging);
 
         // Search for the first PullRequest as there may only be one in an ebMS message
@@ -99,13 +95,13 @@ public class PullRequest {
     }
 
     /**
-     * Creates a new <code>eb:SignalMessage</code> for an <i>PullRequest</i> signal.
+     * Creates a new <code>eb:SignalMessage</code> for a <i>PullRequest</i> signal message unit.
      *
      * @param messaging     The parent <code>eb:Messaging</code> element
      * @param pullRequest   The information to include in the pull request signal
      * @return              The new element representing the pull request signal
      */
-    public static OMElement createElement(final OMElement messaging, final org.holodeckb2b.ebms3.persistency.entities.PullRequest pullRequest) {
+    public static OMElement createElement(final OMElement messaging, final IPullRequest pullRequest) {
         // First create the SignalMessage element that is the placeholder for
         // the Receipt element containing the receipt info
         final OMElement signalmessage = SignalMessage.createElement(messaging);

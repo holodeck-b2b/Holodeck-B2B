@@ -18,6 +18,7 @@ package org.holodeckb2b.common.config;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.holodeckb2b.interfaces.config.IConfiguration;
+import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 
 /**
@@ -35,13 +36,6 @@ public interface InternalConfiguration extends IConfiguration {
      * @return The Axis2 configuration context.
      */
     public ConfigurationContext getAxisConfigurationContext();
-
-    /**
-     * Gets the name of the JPA persistency unit to use for accessing the database
-     *
-     * @return The name of the persistency unit
-     */
-    public String getPersistencyUnit();
 
     /**
      * Gets the location of the workerpool configuration file. This an optional configuration parameter and when not
@@ -77,4 +71,14 @@ public interface InternalConfiguration extends IConfiguration {
      * @since  HB2B_NEXT_VERSION
      */
     public String getPModeStorageImplClass();
+
+    /**
+     * Gets the class name of the {@link IPersistencyProvider} implementation that the Holodeck B2B Core should use to
+     * store meta-data of processed message units. This is an optional configuration parameter and when not set the
+     * Holodeck B2B Core will use a default implementation.
+     *
+     * @return  The class name of the {@link IPersistencyProvider} implementation to use for storing meta-data
+     * @since HB2B_NEXT_VERSION
+     */
+    public String getPersistencyProviderClass();
 }

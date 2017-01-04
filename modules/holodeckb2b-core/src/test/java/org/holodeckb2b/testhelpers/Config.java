@@ -124,11 +124,6 @@ public class Config implements InternalConfiguration {
     }
 
     @Override
-    public String getPersistencyUnit() {
-        return "holodeckb2b-core-test";
-    }
-
-    @Override
     public String getMessageProcessingEventProcessor() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -141,5 +136,10 @@ public class Config implements InternalConfiguration {
     @Override
     public String getPModeStorageImplClass() {
         return pmodeStorageClass;
+    }
+
+    @Override
+    public String getPersistencyProviderClass() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

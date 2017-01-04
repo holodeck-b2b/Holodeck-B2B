@@ -20,17 +20,18 @@ import java.util.Properties;
 import org.apache.axis2.context.MessageContext;
 import org.apache.wss4j.common.ConfigurationConstants;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
+import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.security.callbackhandlers.PasswordCallbackHandler;
 import org.holodeckb2b.security.util.SecurityUtils;
 
@@ -86,22 +87,21 @@ public class SetupWSSProcessing extends BaseHandler {
         mc.setProperty(ConfigurationConstants.ENABLE_TIMESTAMP_CACHE, "false");
 
         log.debug("Get the primary message unit for this message to check specific setting");
-        final EntityProxy<MessageUnit> primaryMUProxy = MessageContextUtils.getPrimaryMessageUnit(mc);
-        if (primaryMUProxy == null)
+        final IMessageUnitEntity primaryMsgUnit = MessageContextUtils.getPrimaryMessageUnit(mc);
+        if (primaryMsgUnit == null)
             // No primary message => this is probably an empty response
             return InvocationResponse.CONTINUE;
-        
-        final MessageUnit primaryMU = primaryMUProxy != null ? primaryMUProxy.entity : null;
-        log.debug("The primary message unit is a " + primaryMU.getClass().getSimpleName()
-                                                                        + " with msg-id=" + primaryMU.getMessageId());
+
+        log.debug("The primary message unit is a " + MessageUnitUtils.getMessageUnitName(primaryMsgUnit)
+                                                                    + " with msg-id=" + primaryMsgUnit.getMessageId());
 
         // 2. Get the security settings
-        final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.getPModeId());
+        final IPMode pmode = HolodeckB2BCore.getPModeSet().get(primaryMsgUnit.getPModeId());
 
         // It is possible that we can not find a PMode when the primary message unit is a signal. In that case there
         // is no special configuration needed
         if (pmode == null) {
-            log.warn("No P-Mode found for primary message unit [msgId=" + primaryMU.getMessageId()
+            log.warn("No P-Mode found for primary message unit [msgId=" + primaryMsgUnit.getMessageId()
                                                                                     + "]. No specific configuration!");
             return InvocationResponse.CONTINUE;
         }
@@ -120,7 +120,7 @@ public class SetupWSSProcessing extends BaseHandler {
             will always be the initiator when receiving a error or receipt signals
            NOTE that this is only valid for One-Way MEP's! For Two-Way MEP's the MEP binding has to be considered!
         */
-        if (primaryMU instanceof UserMessage) {
+        if (primaryMsgUnit instanceof IUserMessage) {
             log.debug("Primary message unit is user message, detect initiator or responder");
             initiator = isInFlow(INITIATOR);
         } else {

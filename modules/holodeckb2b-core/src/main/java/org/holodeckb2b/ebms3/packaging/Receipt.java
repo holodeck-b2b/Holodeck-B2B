@@ -25,7 +25,8 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 
 /**
- * Is a helper class for handling the ebMS Receipt signals in the ebMS SOAP header.
+ * Is a helper class for handling the ebMS Receipt Signal message units in the ebMS SOAP header, i.e the
+ * <code>eb:Receipt</code> element and its sibling <code>eb:MessageInfo</code>.
  * <p>The Receipt signal may contain any kind of element as child elements. For packaging this means we do not know what
  * the actual XML content will be so it has to be supplied when constructing the element. Similar when reading the
  * element the XML content is returned.
@@ -41,7 +42,7 @@ public class Receipt {
     static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Receipt");
 
     /**
-     * Creates a new <code>eb:SignalMessage</code> for an <i>Receipt</i> signal.
+     * Creates a new <code>eb:SignalMessage</code> for a <i>Receipt Signal</i> message unit.
      *
      * @param messaging     The parent <code>eb:Messaging</code> element
      * @param receipt       The information to include in the receipt signal
@@ -67,18 +68,17 @@ public class Receipt {
 
     /**
      * Reads the information from a <code>eb:SignalMessage</code> and its child elements that contain the Receipt signal
-     * message unit and stores it a {@link org.holodeckb2b.ebms3.persistency.entities.Receipt} object.
-     * <p><b>NOTE:</b> The information is stored in an entity object, but this method will NOT persist the object.
+     * message unit and stores it a {@link org.holodeckb2b.common.messagemodel.Receipt} object.
      *
      * @param sigElement    The parent <code>eb:SignalMessage</code> element that contains the <code>eb:Receipt</code>
      *                      element
-     * @return              The {@link org.holodeckb2b.ebms3.persistency.entities.Receipt} object containing the
-     *                      information on the receipt
+     * @return              The {@link org.holodeckb2b.common.messagemodel.Receipt} object containing the information on
+     *                      the receipt
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.Receipt readElement(final OMElement sigElement) {
+    public static org.holodeckb2b.common.messagemodel.Receipt readElement(final OMElement sigElement) {
         // Create a new Receipt entity object to store the information in
-        final org.holodeckb2b.ebms3.persistency.entities.Receipt rcptData =
-                                                              new org.holodeckb2b.ebms3.persistency.entities.Receipt();
+        final org.holodeckb2b.common.messagemodel.Receipt rcptData =
+                                                              new org.holodeckb2b.common.messagemodel.Receipt();
 
         // First read general information from the MessageInfo child
         MessageInfo.readElement(MessageInfo.getElement(sigElement), rcptData);
@@ -90,16 +90,12 @@ public class Receipt {
     }
 
     /**
-     * Gets an {@link Iterator} for all <code>eb:SignalMessage</code> elements
-     * from the given ebMS 3 Messaging header in the SOAP message that represent
-     * <i>Receipt</i> signals.
+     * Gets an {@link Iterator} for all <code>eb:SignalMessage</code> elements from the given ebMS 3 Messaging header in
+     * the SOAP message that represent <i>Receipt Signal</i> message units.
      *
-     * @param messaging   The SOAP Header block that contains the ebMS header,
-     *                    i.e. the <code>eb:Messaging</code> element
-     * @return      An {@link Iterator} for all {@link OMElement}s representing a
-     *              <code>eb:SignalMessage</code> element that contains an
-     *              Error signal, i.e. has one or more <code>eb:Receipt</code>
-     *              child elements
+     * @param messaging   The SOAP Header block that contains the ebMS header,i.e. the <code>eb:Messaging</code> element
+     * @return      An {@link Iterator} for all {@link OMElement}s representing a <code>eb:SignalMessage</code> element
+     *              that contains an Receipt Signal, i.e. has one or more <code>eb:Receipt</code> child elements
      */
     public static Iterator<OMElement> getElements(final SOAPHeaderBlock messaging) {
         // Check all SignalMessage elements in the header
@@ -116,6 +112,4 @@ public class Receipt {
 
         return receipts.iterator();
     }
-
-
 }

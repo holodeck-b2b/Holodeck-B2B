@@ -27,8 +27,8 @@ import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
- * Is a helper class for handling the ebMS UserMessage element in the ebMS SOAP
- * header.
+ * Is a helper class for handling the ebMS User Message message units in the ebMS SOAP header, i.e the <code>
+ * eb:UserMessage</code> element and its children.
  * <p>This element is specified in section 5.2.2 of the ebMS 3 Core specification.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -73,7 +73,7 @@ public class UserMessage {
         CollaborationInfo.createElement(usermessage, data.getCollaborationInfo());
         // Create the MessageProperties element (if there are message properties)
         final Collection<IProperty> msgProps = data.getMessageProperties();
-        if (msgProps != null && msgProps.size() > 0)
+        if (Utils.isNullOrEmpty(msgProps))
             MessageProperties.createElement(usermessage, msgProps);
 
         // Create the eb:PayloadInfo element (if there are payloads)
@@ -83,31 +83,28 @@ public class UserMessage {
     }
 
     /**
-     * Gets an {@link Iterator} for the <code>eb:UserMessage</code> elements
-     * from the given ebMS 3 Messaging header in the SOAP message.
+     * Gets an {@link Iterator} for the <code>eb:UserMessage</code> elements from the given ebMS 3 Messaging header in
+     * the SOAP message.
      *
-     * @param messaging   The SOAP Header block that contains the ebMS header,
-     *                    i.e. the <code>eb:Messaging</code> element
-     * @return      An {@link Iterator} for all {@link OMElement}s representing a
-     *              <code>eb:UserMessage</code> element in the given header
+     * @param  messaging  The SOAP Header block that contains the ebMS header,i.e. the <code>eb:Messaging</code> element
+     * @return            An {@link Iterator} for all {@link OMElement}s representing a <code>eb:UserMessage</code>
+     *                    element in the given header
      */
-    public static Iterator<?> getElements(final OMElement messaging) {
+    public static Iterator<OMElement> getElements(final OMElement messaging) {
         return messaging.getChildrenWithName(Q_ELEMENT_NAME);
     }
 
     /**
-     * Reads the meta data of a User Message message unit from the <code>eb:UserMessage</code> element and return it as
-     * a {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage} entity object.
-     * <p><b>NOTE :</b> The entity object is not persisted by this method! It is the responsibility of the caller to
-     * store it.
+     * Reads the meta data of a User Message message unit from the given <code>eb:UserMessage</code> element and returns
+     * it as a {@link org.holodeckb2b.common.messagemodel.UserMessage} object.
      *
-     * @param   umElement           The <code>UserMessage</code> element that contains the meta data to read
-     * @return                      A new {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage} object
+     * @param   umElement   The <code>UserMessage</code> element that contains the meta data to read
+     * @return              A new {@link org.holodeckb2b.common.messagemodel.UserMessage} object
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.UserMessage readElement(final OMElement umElement) {
+    public static org.holodeckb2b.common.messagemodel.UserMessage readElement(final OMElement umElement) {
         // Create a new entity object to store the information in
-        final org.holodeckb2b.ebms3.persistency.entities.UserMessage umData =
-                                                        new org.holodeckb2b.ebms3.persistency.entities.UserMessage();
+        final org.holodeckb2b.common.messagemodel.UserMessage umData =
+                                                                new org.holodeckb2b.common.messagemodel.UserMessage();
 
         // Read the [optional] mpc attribute
         final String  mpc = umElement.getAttributeValue(new QName(MPC_ATTR));

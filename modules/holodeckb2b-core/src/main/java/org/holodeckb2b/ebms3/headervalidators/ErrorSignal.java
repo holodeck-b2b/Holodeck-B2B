@@ -71,6 +71,7 @@ public class ErrorSignal {
         if (refToMessageId == null && !HolodeckB2BCoreInterface.getConfiguration().useStrictErrorRefCheck())
             // Signal level ref == null => all individual refs should be same, take first as leading
             refToMessageId = it.next().getRefToMessageInError();
+
         while (it.hasNext() && consistent)
             consistent = Utils.nullSafeEqual(refToMessageId, it.next().getRefToMessageInError());
 

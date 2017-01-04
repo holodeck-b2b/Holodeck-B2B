@@ -20,33 +20,34 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.exceptions.DatabaseException;
-import org.holodeckb2b.common.util.MessageIdGenerator;
+import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
- * This worker is responsible for the retransmission of user messages that did not receive an AS4 receipt as expected.
+ * This worker is responsible for the retransmission of User Messages that did not receive an AS4 receipt as expected.
  * <p>
  *
  * @author Sander Fieten
@@ -64,29 +65,25 @@ public class RetransmissionWorker extends AbstractWorkerTask {
 
         // Get all the message id's for unacknowlegded user messages
         log.debug("Get all user messages that may need to be resent");
-        Collection<EntityProxy<UserMessage>> waitingForRcpt = null;
+        Collection<IUserMessageEntity> waitingForRcpt = null;
         try {
-            waitingForRcpt = MessageUnitDAO.getSentMessageUnitsInState(UserMessage.class,
-                                                            new String[] {ProcessingStates.AWAITING_RECEIPT,
-                                                                          ProcessingStates.TRANSPORT_FAILURE,
-                                                                          ProcessingStates.PROC_WITH_WARNING
-                                                                         });
-        } catch (final DatabaseException ex) {
+            waitingForRcpt = HolodeckB2BCore.getQueryManager()
+                                                .getMessageUnitsInState(IUserMessage.class, IMessageUnit.Direction.OUT,
+                                                        new ProcessingState[] { ProcessingState.AWAITING_RECEIPT,
+                                                                                ProcessingState.TRANSPORT_FAILURE,
+                                                                                ProcessingState.WARNING
+                                                                              });
+        } catch (final PersistenceException ex) {
             log.error("An error occurred while retrieving message units from the database! Details: " + ex.getMessage());
-            return;
-        }
-        catch (final Throwable t) {
-            log.error ("Internal error in RetransmissionWorker", t);
             return;
         }
 
         if (!Utils.isNullOrEmpty(waitingForRcpt)) {
             log.debug(waitingForRcpt.size() + " messages may be waiting for a Receipt");
 
+            UpdateManager   updManager = HolodeckB2BCore.getUpdateManager();
             // For each message check if it should be retransmitted or not
-            for (final EntityProxy<UserMessage> umProxy : waitingForRcpt) {
-                // Extract the entity object from the proxy
-                final UserMessage um = umProxy.entity;
+            for (final IUserMessageEntity um : waitingForRcpt) {
                 try {
                     log.debug("Get retry configuration from P-Mode [" + um.getPModeId() + "]");
                     // Retry information is contained in Leg, and as we only have One-way it is always the first
@@ -95,8 +92,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                     IAS4Leg leg = null;
                     IReceptionAwareness raConfig = null;
                     try {
-                        leg = (IAS4Leg) HolodeckB2BCoreInterface.getPModeSet().
-                                                            get(um.getPModeId()).getLegs().iterator().next();
+                        leg = (IAS4Leg) HolodeckB2BCore.getPModeSet().get(um.getPModeId()).getLeg(um.getLeg());
                         raConfig = leg.getReceptionAwareness();
                     } catch (final Exception e) {
                         // Could not get configuration for retries, maybe P-Mode configuration was deleted?
@@ -109,7 +105,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                                     + " Awareness configuration in P-Mode [" + um.getPModeId() + "]");
                         // Because we don't know how to process this message further the only thing we can do is set
                         // the processing to failed
-                        MessageUnitDAO.setFailed(umProxy);
+                        updManager.setProcessingState(um, ProcessingState.FAILURE);
                         continue; // with next message
                     }
 
@@ -123,24 +119,24 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         // has to be generated
 
                         // Initial transmission does not count for max retries
-                        final int numOfRetransmits = MessageUnitDAO.getNumberOfTransmissions(um) - 1;
+                        final int numOfRetransmits = HolodeckB2BCore.getQueryManager().getNumberOfTransmissions(um) - 1;
                         if (numOfRetransmits >= raConfig.getMaxRetries()) {
                             // No retries left, generate MissingReceipt error
                             missingReceiptsLog.error("No Receipt received for UserMessage with messageId="
                                                         + um.getMessageId());
                             // Change processing state accordingly
-                            MessageUnitDAO.setFailed(umProxy);
+                            updManager.setProcessingState(um, ProcessingState.FAILURE);
                             log.debug("Changed processing state of user message to reflect failure");
                             // Generate and report (if requested) MissingReceipt
                             generateMissingReceiptError(um, leg);
                         } else {
                             // Message can be resend, is the message to be pushed or pulled?
-                            if (isPulled(um)) {
-                                log.debug("Message must be pulled by receiver again");
-                                MessageUnitDAO.setWaitForPull(umProxy);
-                            } else {
+                            if (PModeUtils.doesHolodeckB2BTrigger(leg)) {
                                 log.debug("Message must be pushed to receiver again");
-                                MessageUnitDAO.setReadyToPush(umProxy);
+                                updManager.setProcessingState(um, ProcessingState.READY_TO_PUSH);
+                            } else {
+                                log.debug("Message must be pulled by receiver again");
+                                updManager.setProcessingState(um, ProcessingState.AWAITING_PULL);
                             }
                             log.debug("Message unit is ready for retransmission");
                         }
@@ -148,7 +144,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                             // Time to wait for receipt has not expired yet, wait longer
                             log.debug("Retransmit interval not expired yet. Nothing to do.");
                     }
-                } catch (final DatabaseException dbe) {
+                } catch (final PersistenceException dbe) {
                     log.error("An error occurred when checking retransmission of message unit [msgID="
                                 + um.getMessageId() + "]. Details: " + dbe.getMessage());
                 }
@@ -168,41 +164,24 @@ public class RetransmissionWorker extends AbstractWorkerTask {
     }
 
     /**
-     * Helper method to determine whether the given <code>UserMessage</code> is pulled by the receiver.
-     * <p>As the current version only supports the One-Way MEP there is no need to determine on which leg this message
-     * was exchanged and we can check the MEP binding of the P-Mode.
-     *
-     * @param um    The <code>UserMessage</code> for which to determine if it is pulled by the receiver
-     * @return      <code>true</code> if the user message should be pulled by the receiving MSH,<br>
-     *              <code>false</code> otherwise (i.e. the message should be pushed)
-     */
-    private boolean isPulled(final UserMessage um) {
-        return EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId()).getMepBinding());
-    }
-
-    /**
      * Generates the <i>MissingReceipt</i> error and notifies the business application on the error if configured in
      * the P-Mode.
      *
      * @param um        The <code>UserMessage</code> for which the <i>Receipt</i> is missing
      * @param leg       The P-Mode Leg configuration for this user message
      */
-    private void generateMissingReceiptError(final UserMessage um, final ILeg leg) {
+    private void generateMissingReceiptError(final IUserMessage um, final ILeg leg) {
 
         log.debug("Create and store MissingReceipt error");
         // Create the error and set reference to user message
         final MissingReceipt missingReceiptError = new MissingReceipt();
         missingReceiptError.setRefToMessageInError(um.getMessageId());
-        // To store and deliver the error it must be package as a signal message
-        final ErrorMessage errSignal = new ErrorMessage();
-        errSignal.setMessageId(MessageIdGenerator.createMessageId());
-        errSignal.setTimestamp(new Date());
-        errSignal.addError(missingReceiptError);
 
-        EntityProxy<ErrorMessage> errorSignal;
+        IErrorMessageEntity   errorMessage;
         try {
-            errorSignal = MessageUnitDAO.storeReceivedMessageUnit(errSignal);
-        } catch (final DatabaseException ex) {
+            errorMessage = HolodeckB2BCore.getUpdateManager().storeIncomingMessageUnit(
+                                                                                new ErrorMessage(missingReceiptError));
+        } catch (final PersistenceException ex) {
             log.error("An error occured while saving the MissingReceipt error in database!"
                         + "Details: " + ex.getMessage());
             return;
@@ -229,31 +208,30 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                 if (deliverySpec == null)
                     // No specific delivery set for receipt or error, use the default one
                     deliverySpec = leg.getDefaultDelivery();
-
                 if (deliverySpec == null) {
                     // No possibility to deliver error as not delivery specs are available, log error
                     log.error("No delivery specification available for notification of MissingReceipt!"
                                 + " P-Mode=" + um.getPModeId());
                     // Indicate delivery failure
-                    MessageUnitDAO.setFailed(errorSignal);
+                    HolodeckB2BCore.getUpdateManager().setProcessingState(errorMessage, ProcessingState.FAILURE);
                 } else {
                     try {
                         // Deliver the MissingReceipt error using the given delivery spec
                         final IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec);
-                        deliverer.deliver(errSignal);
+                        deliverer.deliver(errorMessage);
                         // Indicate successful delivery
-                        MessageUnitDAO.setDone(errorSignal);
+                        HolodeckB2BCore.getUpdateManager().setProcessingState(errorMessage, ProcessingState.DONE);
                     } catch (final MessageDeliveryException ex) {
                         log.error("An error occurred while delivering the MissingReceipt error to business application!"
                                     + "Details: "  + ex.getMessage());
                         // Indicate delivery failure
-                        MessageUnitDAO.setFailed(errorSignal);
+                        HolodeckB2BCore.getUpdateManager().setProcessingState(errorMessage, ProcessingState.FAILURE);
                     }
                 }
             } else
                 // Indicate MissingReceipt error processing is complete
-                MessageUnitDAO.setDone(errorSignal);
-        } catch (final DatabaseException dbe) {
+                HolodeckB2BCore.getUpdateManager().setProcessingState(errorMessage, ProcessingState.DONE);
+        } catch (final PersistenceException dbe) {
             log.error("An error occurred while updating the processing state of the MissingReceipt error!"
                      + " Details: " + dbe.getMessage());
         }

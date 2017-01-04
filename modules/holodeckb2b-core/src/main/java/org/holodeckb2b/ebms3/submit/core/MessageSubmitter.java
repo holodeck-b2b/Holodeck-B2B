@@ -21,24 +21,26 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.common.messagemodel.Payload;
+import org.holodeckb2b.common.messagemodel.PullRequest;
+import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.persistency.entities.Payload;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.submit.MessageSubmitException;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is the default implementation of {@see IMessageSubmitter}.
@@ -79,7 +81,7 @@ public class MessageSubmitter implements IMessageSubmitter {
 
         try {
             log.debug("Get the P-Mode for the message");
-            final IPMode  pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
+            final IPMode  pmode = HolodeckB2BCore.getPModeSet().get(um.getPModeId());
 
             if (pmode == null) {
                 log.warn("No P-Mode found for submitted message, rejecting message!");
@@ -88,35 +90,36 @@ public class MessageSubmitter implements IMessageSubmitter {
             log.debug("Found P-Mode:" + pmode.getId());
 
             log.debug("Check for completeness: combined with P-Mode all info must be known");
-            final IUserMessage completedMMD = MMDCompleter.complete(um, pmode); // Throws MessageSubmitException if meta-data is not complete
+            // The complete operation will throw aMessageSubmitException if meta-data is not complete
+            final UserMessage completedMMD = MMDCompleter.complete(um, pmode);
 
             log.debug("Checking availability of payloads");
-            checkPayloads(completedMMD, pmode); // Throws MessageSubmitException if there is a problem with a specified payloads
+            checkPayloads(completedMMD, pmode); // Throws MessageSubmitException if there is a problem with a specified submissionPayloadInfo
 
             log.debug("Add message to database");
-            final EntityProxy<UserMessage> newUM = MessageUnitDAO.createOutgoingUserMessage(completedMMD, pmode.getId());
-
+            final IUserMessageEntity newUserMessage = (IUserMessageEntity)
+                                            HolodeckB2BCore.getUpdateManager().storeOutGoingMessageUnit(completedMMD);
             try {
-                moveOrCopyPayloads(newUM, movePayloads);
+                moveOrCopyPayloads(newUserMessage, movePayloads);
             } catch (final IOException ex) {
                 log.error("Could not move/copy payload(s) to the internal storage! Unable to process message!"
                             + "\n\tError details: " + ex.getMessage());
+                HolodeckB2BCore.getUpdateManager().setProcessingState(newUserMessage, ProcessingState.FAILURE);
                 throw new MessageSubmitException("Could not move/copy payload(s) to the internal storage!", ex);
             }
 
             //Use P-Mode to find out if this message is to be pulled or pushed to receiver
             if (EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(pmode.getMepBinding())) {
                 log.debug("Message is to be pulled by receiver, change ProcessingState to wait for pull");
-                MessageUnitDAO.setWaitForPull(newUM);
+                HolodeckB2BCore.getUpdateManager().setProcessingState(newUserMessage, ProcessingState.AWAITING_PULL);
             } else {
                 log.debug("Message is to be pushed to receiver, change ProcessingState to trigger push");
-                MessageUnitDAO.setReadyToPush(newUM);
+                HolodeckB2BCore.getUpdateManager().setProcessingState(newUserMessage, ProcessingState.READY_TO_PUSH);
             }
 
             log.info("User Message succesfully submitted");
-            return newUM.entity.getMessageId();
-
-        } catch (final DatabaseException dbe) {
+            return newUserMessage.getMessageId();
+        } catch (final PersistenceException dbe) {
             log.error("An error occured when saving user message to database. Details: " + dbe.getMessage());
             throw new MessageSubmitException("Message could not be saved to database", dbe);
         }
@@ -149,27 +152,28 @@ public class MessageSubmitter implements IMessageSubmitter {
         String prMessageId = null;
         try {
             log.debug("Create and add PullRequest to database");
-            prMessageId = MessageUnitDAO.createOutgoingPullRequest(pullRequest).entity.getMessageId();
+            PullRequest submission = new PullRequest(pullRequest);
+            submission.setProcessingState(ProcessingState.SUBMITTED);
+            prMessageId = HolodeckB2BCore.getUpdateManager().storeOutGoingMessageUnit(submission).getMessageId();
             log.info("Submitted PullRequest, assigned messageId=" + prMessageId);
-        } catch (final DatabaseException ex) {
+        } catch (final PersistenceException ex) {
             log.error("Could not create the PullRequest because a error occurred in the database! Details: "
                         + ex.getMessage());
         }
-
         return prMessageId;
     }
 
     /**
-     * Helper method to check availability of the payloads.
+     * Helper method to check availability of the submissionPayloadInfo.
      * @todo: Also check compliance with payload profile of PMode!
      *
      * @param um     The meta data on the submitted user message
      * @param pmode  The P-Mode that governs the processing this user message
-     * @throws MessageSubmitException When one of the specified payloads can not be found or when the specified path is
-     *                                is not a regular file
+     * @throws MessageSubmitException When one of the specified submissionPayloadInfo can not be found or when the specified path is
+                                is not a regular file
      */
     private void checkPayloads(final IUserMessage um, final IPMode pmode) throws MessageSubmitException {
-        final Collection<IPayload> payloads = um.getPayloads();
+        final Collection<? extends IPayload> payloads = um.getPayloads();
         if (!Utils.isNullOrEmpty(payloads))
             for(final IPayload p : payloads) {
                 // Check that content is available
@@ -219,13 +223,13 @@ public class MessageSubmitter implements IMessageSubmitter {
      * Producing application, so here we accept that multiple <code>null</code> values exist.
      *
      * @param p         The meta-data on the payload to check the reference for
-     * @param paylaods  The meta-data on all payloads included in the message
+     * @param paylaods  The meta-data on all submissionPayloadInfo included in the message
      * @return          <code>true</code> if the references are unique for each payload,<br>
      *                  <code>false</code> if duplicates exists
      */
-    private boolean checkPayloadRefs(final IPayload p, final Collection<IPayload> payloads) {
+    private boolean checkPayloadRefs(final IPayload p, final Collection<? extends IPayload> payloads) {
         boolean c = true;
-        final Iterator<IPayload> it = payloads.iterator();
+        final Iterator<? extends IPayload> it = payloads.iterator();
         do {
             final IPayload p1 = it.next();
             final String   r0 = p.getPayloadURI(), r1 = p1.getPayloadURI();
@@ -241,31 +245,31 @@ public class MessageSubmitter implements IMessageSubmitter {
     }
 
     /**
-     * Helper method to copy or move the payloads to an internal directory so they will be kept available during the
-     * processing of the message (which may include resending).
+     * Helper method to copy or move the submissionPayloadInfo to an internal directory so they will be kept available during the
+ processing of the message (which may include resending).
      *
      * @param um     The meta data on the submitted user message
      * @param pmode  The P-Mode that governs the processing this user message
      * @throws IOException  When the payload could not be moved/copied to the internal payload storage
-     * @throws DatabaseException When the new payload locations couldn't be saved to the database
+     * @throws PersistenceException When the new payload locations couldn't be saved to the database
      */
-    private void moveOrCopyPayloads(final EntityProxy<UserMessage> um, final boolean move) throws IOException, DatabaseException {
-        // Path to the "temp" dir where to store payloads during processing
-        final String intPlDir = HolodeckB2BCoreInterface.getConfiguration().getTempDirectory() + "plcout";
+    private void moveOrCopyPayloads(final IUserMessageEntity um, final boolean move) throws IOException, PersistenceException {
+        // Path to the "temp" dir where to store submissionPayloadInfo during processing
+        final String internalPayloadDir = HolodeckB2BCore.getConfiguration().getTempDirectory() + "plcout";
         // Create the directory if needed
-        final Path pathPlDir = Paths.get(intPlDir);
+        final Path pathPlDir = Paths.get(internalPayloadDir);
         if (!Files.exists(pathPlDir)) {
-            log.debug("Create the directory [" + intPlDir + "] for storing payload files");
+            log.debug("Create the directory [" + internalPayloadDir + "] for storing payload files");
             Files.createDirectories(pathPlDir);
         }
 
-        final Collection<IPayload> payloads = um.entity.getPayloads();
-        if (!Utils.isNullOrEmpty(payloads)) {
-            for (final IPayload ip : payloads) {
-                final Payload p = (Payload) ip;
+        final Collection<? extends IPayload> submissionPayloadInfo = um.getPayloads();
+        Collection<Payload> internalPayloadInfo = new ArrayList<>();
+        if (!Utils.isNullOrEmpty(submissionPayloadInfo)) {
+            for (final IPayload p : submissionPayloadInfo) {
                 final Path srcPath = Paths.get(p.getContentLocation());
                 // Ensure that the filename in the temp directory is unique
-                final Path destPath = Utils.createFileWithUniqueName(intPlDir + "/" + srcPath.getFileName());
+                final Path destPath = Utils.createFileWithUniqueName(internalPayloadDir + "/" + srcPath.getFileName());
                 try {
                     if (move) {
                         log.debug("Moving payload [" + p.getContentLocation() + "] to internal directory");
@@ -275,10 +279,13 @@ public class MessageSubmitter implements IMessageSubmitter {
                         Files.copy(srcPath, destPath, StandardCopyOption.REPLACE_EXISTING);
                     }
                     log.debug("Payload moved/copied to internal directory");
-                    p.setContentLocation(destPath.toString());
+                    // Complete payload info to store
+                    Payload completeInfo = new Payload(p);
+                    completeInfo.setContentLocation(destPath.toString());
+                    internalPayloadInfo.add(completeInfo);
                 } catch (IOException io) {
                     log.error("Could not copy/move the payload [" + p.getContentLocation() + "] to internal directory"
-                             + " [" + intPlDir + "].\n\tError details: " + io.getMessage());
+                             + " [" + internalPayloadDir + "].\n\tError details: " + io.getMessage());
                     // Remove the already created file for storing the payload
                     try {
                         Files.deleteIfExists(destPath);
@@ -289,8 +296,8 @@ public class MessageSubmitter implements IMessageSubmitter {
                     throw io;
                 }
             }
-            // Update the database with new locations
-            MessageUnitDAO.updateMessageUnitInfo(um);
+            log.debug("Update the stored information with new locations");
+            HolodeckB2BCore.getUpdateManager().setPayloadInformation(um, internalPayloadInfo);
         }
     }
 

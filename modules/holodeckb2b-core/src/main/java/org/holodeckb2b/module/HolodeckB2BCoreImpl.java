@@ -32,25 +32,29 @@ import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.WorkerPool;
 import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
-import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
 import org.holodeckb2b.ebms3.pulling.PullConfiguration;
 import org.holodeckb2b.ebms3.pulling.PullConfigurationWatcher;
 import org.holodeckb2b.ebms3.pulling.PullWorker;
 import org.holodeckb2b.ebms3.submit.core.MessageSubmitter;
 import org.holodeckb2b.events.SyncEventProcessor;
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
+import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
+import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
+import org.holodeckb2b.persistency.dao.UpdateManager;
 import org.holodeckb2b.pmode.PModeManager;
 
 /**
@@ -78,20 +82,20 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     /**
      * The configuration of this Holodeck B2B instance
      */
-    private static  InternalConfiguration  instanceConfiguration = null;
+    private InternalConfiguration  instanceConfiguration = null;
 
     /**
      * Pool of worker threads that handle recurring tasks like message sending and
      * resending.
      */
-    private static  WorkerPool      workers = null;
+    private WorkerPool      workers = null;
 
     /**
      * Pool of worker threads that handle the sending of <i>pull request</i>. The workers in this pool are {@link PullWorker}
      * objects. The pool is configured by the {@link PullConfigurationWatcher} that runs in the normal worker pool and
      * checks the pull configuration for changes and applies them to this pull worker pool.
      */
-    private static  WorkerPool      pullWorkers = null;
+    private WorkerPool      pullWorkers = null;
 
     /**
      * Collection of active message delivery methods mapped by the <i>id</i> of the {@link IDeliverySpecification} that
@@ -99,19 +103,26 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * <p>For each unique delivery specification id Holodeck B2B will create factory class that creates the actual
      * {@link IMessageDeliverer} objects that are used to deliver messages to the business application.
      */
-    private static Map<String, IMessageDelivererFactory>    msgDeliveryFactories = null;
+    private Map<String, IMessageDelivererFactory>    msgDeliveryFactories = null;
 
     /**
      * The P-Mode manager that maintains the set of deployed P-Modes
      */
-    private static PModeManager pmodeManager = null;
+    private PModeManager pmodeManager = null;
 
     /**
      * The component responsible for processing of events that occur while processing a message. The processor will
-     * pass the events on to the configured event handlers.     *
+     * pass the events on to the configured event handlers.
      * @since 2.1.0
      */
-    private static IMessageProcessingEventProcessor eventProcessor = null;
+    private IMessageProcessingEventProcessor eventProcessor = null;
+
+    /**
+     * The DAO factory object of the persistency provider that manages the storage of the meta-data on processed
+     * message units.
+     * @since HB2B_NEXT_VERSION
+     */
+    private IDAOFactory    daoFactory = null;
 
     /**
      * Initializes the Holodeck B2B Core module.
@@ -142,8 +153,8 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         }
 
         log.debug("Initialize the P-Mode manager");
-        HolodeckB2BCoreImpl.pmodeManager = new PModeManager(instanceConfiguration.getPModeValidatorImplClass(),
-                                                            instanceConfiguration.getPModeStorageImplClass());
+        pmodeManager = new PModeManager(instanceConfiguration.getPModeValidatorImplClass(),
+                                        instanceConfiguration.getPModeStorageImplClass());
 
         log.debug("Create the processor for message processing events");
         final String eventProcessorClassname = instanceConfiguration.getMessageProcessingEventProcessor();
@@ -159,25 +170,49 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
             eventProcessor = new SyncEventProcessor();
         log.debug("Created " + eventProcessor.getClass().getSimpleName() + " event processor");
 
-        // From this point on external components can be started which need access to the Core
-        log.debug("Make Core available to outside world");
-        HolodeckB2BCoreInterface.setImplementation(this);
-
-                // Special ClassLoader required for correct Hibernate init!
-        {
-          final ClassLoader aOldCL = Thread.currentThread ().getContextClassLoader ();
-          Thread.currentThread ().setContextClassLoader (JPAUtil.class.getClassLoader ());
-          try
-          {
-            JPAUtil.getEntityManager ();
-          }
-          catch (final Exception ex)
-          {}
-          finally
-          {
-            Thread.currentThread ().setContextClassLoader (aOldCL);
-          }
+        log.debug("Load the persistency provided for storing meta-data on message units");
+        final String persistencyProviderClassname = instanceConfiguration.getPersistencyProviderClass();
+        IPersistencyProvider persistencyProvider = null;
+        if (!Utils.isNullOrEmpty(persistencyProviderClassname)) {
+            try {
+               persistencyProvider = (IPersistencyProvider) Class.forName(persistencyProviderClassname).newInstance();
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
+               // Could not create the specified event processor, fall back to default implementation
+               log.error("Could not load the specified persistency provider: " + persistencyProviderClassname
+                        + ". Using default implementation instead.");
+            }
+        } //else
+            // persistencyProvider = new SyncEventProcessor();
+        log.debug("Using " + persistencyProvider.getName() + " as persistency provider");
+        try {
+             persistencyProvider.init();
+             daoFactory = persistencyProvider.getDAOFactory();
+        } catch (PersistenceException initializationFailure) {
+            log.fatal("Could not initialize the persistency provider " + persistencyProvider.getName()
+                      + "! Unable to start Holodeck B2B. \n\tError details: " + initializationFailure.getMessage());
+            throw new AxisFault("Holodeck B2B could not be initialized!");
         }
+        log.debug("Succesfully loaded " + persistencyProvider.getName() + " as persistency provider");
+
+        // From this point on other components can be started which need access to the Core
+        log.debug("Make Core available to outside world");
+        HolodeckB2BCore.setImplementation(this);
+
+//                // Special ClassLoader required for correct Hibernate init!
+//        {
+//          final ClassLoader aOldCL = Thread.currentThread ().getContextClassLoader ();
+//          Thread.currentThread ().setContextClassLoader (JPAUtil.class.getClassLoader ());
+//          try
+//          {
+//            JPAUtil.getEntityManager ();
+//          }
+//          catch (final Exception ex)
+//          {}
+//          finally
+//          {
+//            Thread.currentThread ().setContextClassLoader (aOldCL);
+//          }
+//        }
 
         log.debug("Initialize worker pool");
         final IWorkerPoolConfiguration poolCfg =
@@ -241,7 +276,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      *
      * @return  The current configuration as a {@link IConfiguration} object
      */
-    public IConfiguration getConfiguration() {
+    public InternalConfiguration getConfiguration() {
         if (instanceConfiguration == null) {
             log.fatal("Missing configuration for this Holodeck B2B instance!");
             throw new IllegalStateException("Missing configuration for this Holodeck B2B instance!");
@@ -377,4 +412,29 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
             log.info("Pull configuration succesfully changed");
         }
     }
+
+    /**
+     * Gets the data access object that should be used to store and update the meta-data on processed message units.
+     * <p>The returned data access object is a facade to the one provided by the persistency provider to ensure that
+     * changes in the message unit meta-data are managed correctly.
+     *
+     * @return  The {@link IUpdateManager} that Core classes should use to update meta-data of message units
+     * @since HB2B_NEXT_VERSION
+     */
+    public UpdateManager getUpdateManager() {
+        return new UpdateManager(daoFactory.getUpdateManager());
+    }
+
+    /**
+     * Gets the data access object that should be used to query the meta-data on processed message units.
+     * <p>Note that the DAO itself is provided by the persistency provider.
+     *
+     * @return  The {@link IQueryManager} that should use to query the meta-data of message units
+     * @since HB2B_NEXT_VERSION
+     */
+    @Override
+    public IQueryManager getQueryManager() {
+        return daoFactory.getQueryManager();
+    }
+
 }

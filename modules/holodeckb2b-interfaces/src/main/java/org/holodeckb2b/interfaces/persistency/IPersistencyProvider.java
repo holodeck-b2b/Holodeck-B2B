@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.interfaces.persistency;
 
+import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
+
 /**
  * Defines the interface of a <i>persistency provider</i> that allows the Holodeck B2B Core to persist the meta-data of
  * processed message units. This interface is the "entry point" of the provider used to intialize the provider and to

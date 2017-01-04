@@ -17,30 +17,25 @@
 package org.holodeckb2b.multihop;
 
 import java.util.Collection;
-import java.util.List;
-
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.mmd.xml.CollaborationInfo;
-import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
-import org.holodeckb2b.ebms3.persistency.entities.SignalMessage;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IProtocol;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for adding the necessary WS-Addressing headers to the message to sent it
@@ -79,12 +74,12 @@ public class ConfigureMultihop extends BaseHandler {
 
         // If the primary message unit is a user message it can be multi-hop in itself. Receipt and/or Error signals
         // depends on whether the original message was sent using multi-hop.
-        final MessageUnit primMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
-        if (primMU instanceof UserMessage) {
+        final IMessageUnitEntity primMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+        if (primMU instanceof IUserMessage) {
             // Whether the user message is sent using multi-hop is defined by P-Mode parameter
             // PMode[1].Protocol.AddActorOrRoleAttribute
-            final IProtocol prot = HolodeckB2BCoreInterface.getPModeSet().get(primMU.getPModeId())
-                                                                   .getLegs().iterator().next().getProtocol();
+            final IProtocol prot = HolodeckB2BCore.getPModeSet().get(primMU.getPModeId())
+                                                                .getLeg(primMU.getLeg()).getProtocol();
             if (prot == null || !prot.shouldAddActorOrRoleAttribute())
                 log.debug("Primary message is a non multi-hop UserMessage");
             else {
@@ -93,19 +88,19 @@ public class ConfigureMultihop extends BaseHandler {
                 final SOAPHeaderBlock ebHeader = Messaging.getElement(mc.getEnvelope());
                 ebHeader.setRole(MultiHopConstants.NEXT_MSH_TARGET);
             }
-        } else if (primMU instanceof PullRequest) {
+        } else if (primMU instanceof IPullRequest) {
             // If the primary message unit is a PullRequest the message is not sent using multi-hop as this is not
             // supported in AS4 multi-hop
             log.debug("Primary message unit is a PullRequest -> no multi-hop");
         } else {
             // If the primary message unit is a Receipt or Error signal additional WS-A headers must be provided with
             // the necessary routing info. This info is retrieved from the UserMessage the signal is a response to.
-            final UserMessage usrMessage = getReferencedUserMsg((SignalMessage) primMU);
+            final IUserMessageEntity usrMessage = getReferencedUserMsg(mc, (ISignalMessage) primMU);
 
             // Check if the user message was received over multi-hop
             if (usrMessage != null && usrMessage.usesMultiHop()) {
                 log.debug("Primary message unit is response signal to multi-hop User Message -> add routing info");
-                addRoutingInfo(mc, usrMessage, (SignalMessage) primMU);
+                addRoutingInfo(mc, usrMessage, (ISignalMessage) primMU);
             } else
                 log.debug("Primary message unit is response signal to non (multi-hop) User Message");
         }
@@ -115,43 +110,40 @@ public class ConfigureMultihop extends BaseHandler {
 
     /**
      * Gets the UserMessage that is referenced by a signal message.
-     * <p>The reference will be retrieved from the signal message unit itself or when in case of an Error signal that
-     * does not directly reference a message the first error contained in the signal.
+     * <p>If the signal is sent as a response the related User Message is retrieved from the in flow message context,
+     * otherwise it is retrieved from the database. If multiple entity objects with the same <i>messageId</i> exist the
+     * first one is used as it assumed that all entity object represent the same User Message (based on the ebMS V3
+     * Specification's requirement that <i>messageId</i>s must be unique this is a safe assumption).
      *
+     * @param mc        The message context
      * @param signal    The signal message unit to get the reference user message for
      * @return          The referenced {@link UserMessage} or <code>null</code> if no unique referenced user message
      *                  can be found
      */
-    private UserMessage getReferencedUserMsg(final SignalMessage signal) {
-        UserMessage refdUM = null;
-        String refToMsgId = signal.getRefToMessageId();
+    private IUserMessageEntity getReferencedUserMsg(final MessageContext mc, final ISignalMessage signal)
+                                                                                        throws PersistenceException {
+        String refToMsgId = MessageUnitUtils.getRefToMessageId(signal);
+        // If the signal does not contain a reference to another message unit there is nothing to do here
+        if (Utils.isNullOrEmpty(refToMsgId))
+            return null;
 
-        if ((refToMsgId == null || refToMsgId.isEmpty()) && signal instanceof ErrorMessage) {
-            // For errors the reference can also be included in the Error element
-            final Collection<IEbmsError> errors = ((ErrorMessage) signal).getErrors();
-            refToMsgId = errors.isEmpty() ? null : errors.iterator().next().getRefToMessageInError();
+        // If the signal is the primary message unit in a response it is sent synchronously and the related user
+        // message must be available in the message context of the in flow
+        if (isInFlow(RESPONDER)) {
+            for(IMessageUnitEntity mu : MessageContextUtils.getReceivedMessageUnits(mc))
+                if (mu instanceof IUserMessage && refToMsgId.equals(mu.getMessageId()))
+                    return (IUserMessageEntity) mu;
+            return null;
+        } else {
+            // Not sent as response, so get the information from the database
+            Collection<IMessageUnitEntity> refdMessages = HolodeckB2BCore.getQueryManager()
+                                                                         .getMessageUnitsWithId(refToMsgId);
+            if (!Utils.isNullOrEmpty(refdMessages)) {
+                IMessageUnitEntity sentMsgUnit = refdMessages.iterator().next();
+                return (sentMsgUnit instanceof IUserMessageEntity) ? (IUserMessageEntity) sentMsgUnit : null;
+            } else
+                return null;
         }
-
-        if (refToMsgId != null && !refToMsgId.isEmpty()) {
-            List<EntityProxy<MessageUnit>> refdMessages = null;
-            try {
-                refdMessages = MessageUnitDAO.getReceivedMessageUnitsWithId(refToMsgId);
-                if (!Utils.isNullOrEmpty(refdMessages)) {
-                    // Signal refers to one other message unit, check that it is a User Message
-                    final EntityProxy<MessageUnit> refdMU = refdMessages.get(0);
-                    if (refdMU.entity instanceof UserMessage) {
-                        // Load all meta-data for the user message
-                        MessageUnitDAO.loadCompletely(refdMU);
-                        refdUM = (UserMessage) refdMU.entity;
-                    } else
-                        log.warn("Multi-hop signal on signal is not supported!");
-                } else
-                   log.debug("Signal message refers to no or multiple message units in database");
-            } catch (final DatabaseException dbe) {};
-        } else
-            log.debug("Signal message did not reference another message!");
-
-        return refdUM;
     }
 
     /**
@@ -163,8 +155,7 @@ public class ConfigureMultihop extends BaseHandler {
      * @param usrMessage    The User Message the routing input has to be deferred from
      * @param signal        The Signal message for which the routing input must be added
      */
-    private void addRoutingInfo(final MessageContext mc, final UserMessage usrMessage, final SignalMessage signal) {
-
+    private void addRoutingInfo(final MessageContext mc, final IUserMessage usrMessage, final ISignalMessage signal) {
         // wsa:To
         final EndpointReference toEpr = new EndpointReference(MultiHopConstants.WSA_TO_ICLOUD);
 
@@ -174,21 +165,21 @@ public class ConfigureMultihop extends BaseHandler {
         *  To create this parameter we first create a MessageMetaData object based on the UserMessage and then change
         *  the required fields
         */
-        final MessageMetaData tmpMMD = new MessageMetaData(usrMessage);
+        final UserMessage routingInputUsrMsg = new UserMessage(usrMessage);
         // Swap To and From
-        tmpMMD.setReceiver(usrMessage.getSender());
-        tmpMMD.setSender(usrMessage.getReceiver());
+        routingInputUsrMsg.setReceiver(usrMessage.getSender());
+        routingInputUsrMsg.setSender(usrMessage.getReceiver());
         // Extend Action
-        ((CollaborationInfo) tmpMMD.getCollaborationInfo()).setAction(
-                                usrMessage.getCollaborationInfo().getAction() + MultiHopConstants.GENERAL_RESP_SUFFIX);
+        routingInputUsrMsg.getCollaborationInfo().setAction(usrMessage.getCollaborationInfo().getAction()
+                                                            + MultiHopConstants.GENERAL_RESP_SUFFIX);
         // Extend MPC
         if (signal instanceof IReceipt)
-            tmpMMD.setMPC(usrMessage.getMPC() + MultiHopConstants.RECEIPT_SUFFIX);
+            routingInputUsrMsg.setMPC(usrMessage.getMPC() + MultiHopConstants.RECEIPT_SUFFIX);
         else
-            tmpMMD.setMPC(usrMessage.getMPC() + MultiHopConstants.ERROR_SUFFIX);
+            routingInputUsrMsg.setMPC(usrMessage.getMPC() + MultiHopConstants.ERROR_SUFFIX);
 
         // Create the ebint:RoutingInput element and add it as reference parameter to the To EPR
-        toEpr.addReferenceParameter(RoutingInput.createElement(mc.getEnvelope(), tmpMMD));
+        toEpr.addReferenceParameter(RoutingInput.createElement(mc.getEnvelope(), routingInputUsrMsg));
 
         mc.setTo(toEpr);
 

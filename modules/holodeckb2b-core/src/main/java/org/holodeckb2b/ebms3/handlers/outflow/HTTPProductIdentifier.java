@@ -20,8 +20,8 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.server.AxisHttpResponse;
+import org.holodeckb2b.common.constants.ProductId;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.ebms3.constants.ProductId;
 
 /**
  * Is the <i>OUT_FLOW</i> header responsible for setting the HTTP headers that provide information on the application

@@ -23,12 +23,12 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.testhelpers.HolodeckCore;
+import org.holodeckb2b.testhelpers.HolodeckB2BTestCore;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -36,6 +36,8 @@ import org.junit.Test;
 
 import java.io.File;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -54,7 +56,7 @@ public class ReadUserMessageTest {
     public static void setUpClass() {
         baseDir = ReadUserMessageTest.class.getClassLoader()
                 .getResource("multihop").getPath();
-        HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(baseDir));
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
     }
 
     @Before

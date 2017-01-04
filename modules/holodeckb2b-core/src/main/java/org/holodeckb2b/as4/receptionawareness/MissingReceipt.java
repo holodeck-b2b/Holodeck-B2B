@@ -17,22 +17,19 @@
 package org.holodeckb2b.as4.receptionawareness;
 
 import org.holodeckb2b.as4.handlers.inflow.CreateReceipt;
-import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 
 /**
  * Represent the <i>MissingReceipt</i> error that is part of the AS4 <i>reception awareness feature</i> and is used to
  * indicate that no receipt signal was received for a message. For more information on this error and the reception
  * awareness feature see section 3.2 of the AS4 profile.
- * <p>As this class is a child class of {@see EbmsError} it can be saved directly to the database. When retrieved from
- * the database again it is however a "normal" <code>EbmsError</code> as this class is not defined as an JPA class.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @see IReceptionAwareness
  * @see RetransmissionWorker
  * @see CreateReceipt
  */
-public class MissingReceipt extends EbmsError {
+public class MissingReceipt extends org.holodeckb2b.common.messagemodel.EbmsError {
 
     /**
      * The error code as defined in the AS4 specification
@@ -69,7 +66,7 @@ public class MissingReceipt extends EbmsError {
         setSeverity(ERROR_SEVERITY);
         setOrigin(ERROR_ORIGIN);
         setCategory(ERROR_CATEGORY);
-        setShortDescription(ERROR_MESSAGE);
+        setMessage(ERROR_MESSAGE);
     }
 
     /**

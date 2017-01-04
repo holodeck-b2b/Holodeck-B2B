@@ -21,7 +21,7 @@ import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
-import org.holodeckb2b.interfaces.persistency.IDAOFactory;
+import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
@@ -103,11 +103,11 @@ public interface IHolodeckB2BCore {
                                                                                     throws TaskConfigurationException;
 
     /**
-     * Gets the factory class for data access objects that should be used to store and access the meta-data on processed
-     * message units.
+     * Gets the data access object that should be used to query the meta-data on processed message units.
+     * <p>Note that the DAO itself is provided by the persistency provider.
      *
-     * @return  The DAO factory class from the currently installed persistency provider.
+     * @return  The {@link IQueryManager} that should use to query the meta-data of message units
      * @since HB2B_NEXT_VERSION
      */
-    public IDAOFactory getDAOFactory();
+    public IQueryManager getQueryManager();
 }

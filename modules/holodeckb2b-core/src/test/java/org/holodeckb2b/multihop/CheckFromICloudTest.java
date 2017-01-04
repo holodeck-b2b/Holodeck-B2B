@@ -23,17 +23,17 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.testhelpers.HolodeckCore;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.testhelpers.HolodeckB2BTestCore;
 import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -55,7 +55,7 @@ public class CheckFromICloudTest {
     public static void setUpClass() {
         baseDir = CheckFromICloudTest.class
                 .getClassLoader().getResource("multihop").getPath();
-        HolodeckB2BCoreInterface.setImplementation(new HolodeckCore(baseDir));
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
     }
 
     @Before
@@ -69,7 +69,7 @@ public class CheckFromICloudTest {
     }
 
     @Test
-    public void testMessageReceivedFromICloud() throws DatabaseException {
+    public void testMessageReceivedFromICloud() throws PersistenceException {
 
         final String mmdPath =
                 this.getClass().getClassLoader()
@@ -90,14 +90,14 @@ public class CheckFromICloudTest {
         // Adding UserMessage from mmd
         OMElement userMessage = UserMessage.createElement(headerBlock, mmd);
 
-        EntityProxy<org.holodeckb2b.ebms3.persistency.entities.UserMessage>
-                                                userMessageEntityProxy = MessageUnitDAO.storeReceivedMessageUnit(
+        IUserMessageEntity userMessageEntity = HolodeckB2BCore.getUpdateManager()
+                                                              .storeIncomingMessageUnit(
                                                                                   UserMessage.readElement(userMessage));
 
         MessageContext mc = new MessageContext();
 
         // Setting input message property
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessageEntityProxy);
+        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessageEntity);
         try {
             mc.setEnvelope(env);
         } catch (AxisFault axisFault) {
@@ -108,7 +108,7 @@ public class CheckFromICloudTest {
         // Setting Role, as stated in paragraph 4.3 of AS4 profile
         messaging.setRole(MultiHopConstants.NEXT_MSH_TARGET);
 
-        assertNotNull(MessageContextUtils.getRcvdMessageUnits(mc));
+        assertNotNull(MessageContextUtils.getReceivedMessageUnits(mc));
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);

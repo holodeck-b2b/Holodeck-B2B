@@ -17,20 +17,21 @@
 package org.holodeckb2b.security.handlers;
 
 import java.util.Collection;
-
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.KeyValuePair;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.errors.FailedAuthentication;
 import org.holodeckb2b.ebms3.errors.FailedDecryption;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
 import org.holodeckb2b.ebms3.errors.OtherContentError;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.persistency.dao.UpdateManager;
 
 /**
  * Is the <i>IN_FLOW</i> handler that checks for faults that occurred during processing of the WS-Security headers. If
@@ -98,16 +99,16 @@ public class ProcessSecurityFault extends BaseHandler {
      *
      * @param mc    The current message context
      */
-    private void handleDecryptionFailure(final MessageContext mc) throws DatabaseException {
-        final Collection<EntityProxy<MessageUnit>> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
-        if (rcvdMsgUnits != null && !rcvdMsgUnits.isEmpty()) {
-            for (final EntityProxy<MessageUnit> mu : rcvdMsgUnits) {
+    private void handleDecryptionFailure(final MessageContext mc) throws PersistenceException {
+        final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
+        if (!Utils.isNullOrEmpty(rcvdMsgUnits)) {
+            UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+            for (final IMessageUnitEntity mu : rcvdMsgUnits) {
                 final FailedDecryption authError = new FailedDecryption();
-                authError.setRefToMessageInError(mu.entity.getMessageId());
+                authError.setRefToMessageInError(mu.getMessageId());
                 authError.setErrorDetail("Decryption of the message [unit] failed!");
                 MessageContextUtils.addGeneratedError(mc, authError);
-                // Set the processing state of the message unit to FAILED
-                MessageUnitDAO.setFailed(mu);
+                updateManager.setProcessingState(mu, ProcessingState.FAILURE);
             }
         } else {
             // No message units read from message, generate generic error
@@ -123,15 +124,17 @@ public class ProcessSecurityFault extends BaseHandler {
      *
      * @param mc    The current message context
      */
-    private void handleAuthenticationFailure(final MessageContext mc) throws DatabaseException {
-        final Collection<EntityProxy<MessageUnit>> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
-        for (final EntityProxy<MessageUnit> mu : rcvdMsgUnits) {
-            final FailedAuthentication authError = new FailedAuthentication();
-            authError.setRefToMessageInError(mu.entity.getMessageId());
-            authError.setErrorDetail("Authentication of message unit failed!");
-            MessageContextUtils.addGeneratedError(mc, authError);
-            // Set the processing state of the message unit to FAILED
-            MessageUnitDAO.setFailed(mu);
+    private void handleAuthenticationFailure(final MessageContext mc) throws PersistenceException {
+        final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
+        if (!Utils.isNullOrEmpty(rcvdMsgUnits)) {
+            UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+            for (final IMessageUnitEntity mu : rcvdMsgUnits) {
+                final FailedAuthentication authError = new FailedAuthentication();
+                authError.setRefToMessageInError(mu.getMessageId());
+                authError.setErrorDetail("Authentication of message unit failed!");
+                MessageContextUtils.addGeneratedError(mc, authError);
+                updateManager.setProcessingState(mu, ProcessingState.FAILURE);
+            }
         }
     }
 
@@ -141,15 +144,17 @@ public class ProcessSecurityFault extends BaseHandler {
      *
      * @param mc    The current message context
      */
-    private void handleInvalidHeader(final MessageContext mc) throws DatabaseException {
+    private void handleInvalidHeader(final MessageContext mc) throws PersistenceException {
         final InvalidHeader invalidHdrErr = new InvalidHeader();
         invalidHdrErr.setErrorDetail("Message contains non allowed element in WS-Security header!");
         MessageContextUtils.addGeneratedError(mc, invalidHdrErr);
 
         // Set the processing state of all message units in message to FAILED
-        final Collection<EntityProxy<MessageUnit>> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
-        for (final EntityProxy<MessageUnit> mu : rcvdMsgUnits) {
-            MessageUnitDAO.setFailed(mu);
+        final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
+        if (!Utils.isNullOrEmpty(rcvdMsgUnits)) {
+            UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+            for (final IMessageUnitEntity mu : rcvdMsgUnits) 
+                updateManager.setProcessingState(mu, ProcessingState.FAILURE);
         }
     }
 
@@ -161,15 +166,17 @@ public class ProcessSecurityFault extends BaseHandler {
      *
      * @param mc    The current message context
      */
-    private void handleOtherFailure(final MessageContext mc) throws DatabaseException{
+    private void handleOtherFailure(final MessageContext mc) throws PersistenceException {
         final OtherContentError otherErr = new OtherContentError();
         otherErr.setErrorDetail("The WS-Security header(s) of the message could not be processed!");
         MessageContextUtils.addGeneratedError(mc, otherErr);
 
         // Set the processing state of all message units in message to FAILED
-        final Collection<EntityProxy<MessageUnit>> rcvdMsgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
-        for (final EntityProxy<MessageUnit> mu : rcvdMsgUnits) {
-            MessageUnitDAO.setFailed(mu);
+        final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
+        if (!Utils.isNullOrEmpty(rcvdMsgUnits)) {
+            UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+            for (final IMessageUnitEntity mu : rcvdMsgUnits)
+                updateManager.setProcessingState(mu, ProcessingState.FAILURE);
         }
     }
 }
