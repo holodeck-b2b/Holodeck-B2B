@@ -92,9 +92,10 @@ public class FilesUtility {
     /**
      *
      * @param folder
+     * @param deleteFolder
      * @throws IOException
      */
-    public void deleteFolderAndItsContent(final Path folder) throws IOException {
+    public void deleteFolderContent(final Path folder, final boolean deleteFolder) throws IOException {
         Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
@@ -107,7 +108,8 @@ public class FilesUtility {
                 if (exc != null) {
                     throw exc;
                 }
-                Files.delete(dir);
+                if(deleteFolder)
+                    Files.delete(dir);
                 return FileVisitResult.CONTINUE;
             }
         });
