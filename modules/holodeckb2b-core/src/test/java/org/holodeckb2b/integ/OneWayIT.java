@@ -48,7 +48,6 @@ public class OneWayIT {
         // delete distr dirs if they exist (if test was stopped, for instance)
         itHelper.deleteDistDir(dADirName);
         itHelper.deleteDistDir(dBDirName);
-
         System.out.print("\tUnzipping HolodeckB2B instance ... ");
         itHelper.unzipHolodeckDistribution(dADirName);
         System.out.println("done.");
@@ -64,7 +63,6 @@ public class OneWayIT {
         System.out.println("done.");
         System.out.print("\tStarting HolodeckB2B instances ... ");
         itHelper.startHolodeckB2BInstances(dADirName, dBDirName);
-//        itHelper.copyExampleDataToMsgOutDir(dADirName);
         System.out.println("done.");
         System.out.println("Setting up the OneWay integration test finished.");
     }
@@ -103,10 +101,8 @@ public class OneWayIT {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
         assertTrue(itHelper.changeMsgExtensionToMMD("ex-mmd-push.accepted",
                 dADirName));
-
         try {
             Thread.sleep(30000);
         } catch (InterruptedException e) {
@@ -142,20 +138,15 @@ public class OneWayIT {
     @Test
     public void testOneWayPull() {
         System.out.println("The OneWay/Pull integration test started ... ");
-
         // set pulling interval of initiator (HolodeckB2B-A) to 10 seconds
-
         itHelper.setPullingInterval(dADirName, 10);
-
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
         assertTrue(itHelper.changeMsgExtensionToMMD("ex-mmd-pull-ut.accepted",
                 dBDirName));
-
         try {
             Thread.sleep(30000);
         } catch (InterruptedException e) {

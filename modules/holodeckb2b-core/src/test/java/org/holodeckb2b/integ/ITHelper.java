@@ -94,15 +94,12 @@ public class ITHelper {
      * @param distrDirName HolodeckB2B instance folder name
      */
     void unzipHolodeckDistribution(String distrDirName) {
-        // unzip first instance of the distribution zip file
-        // todo delete dir with distrDirName if it is already exist
         FilesUtility fu = new FilesUtility();
         try {
             fu.unzip(dFilePath, workingDirPath);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // rename distr dir
         File distrDir = new File(workingDirPath +"/"+ dDirName);
         assertTrue(distrDir.exists());
         if(distrDir.exists()) {
@@ -223,7 +220,7 @@ public class ITHelper {
 
     /**
      * Copies the example data files to <code>distrDirName</code>/data/msg_out directory
-     * @param distrDirName
+     * @param distrDirName HolodeckB2B instance folder name
      */
     void copyExampleDataToMsgOutDir(String distrDirName) {
         File msgsDir = new File(workingDirPath + "/" + distrDirName + "/"
@@ -258,7 +255,7 @@ public class ITHelper {
 
     /**
      *
-     * @param distrDirName
+     * @param distrDirName HolodeckB2B instance folder name
      */
     void copyKeystores(String distrDirName) {
         File keysDir = new File(workingDirPath + "/" + distrDirName + "/"
@@ -288,8 +285,8 @@ public class ITHelper {
     }
 
     /**
-     *
-     * @param distrDirName
+     * Deletes contents of msg_out & msg_in folders of the HolodeckB2B instance
+     * @param distrDirName HolodeckB2B instance folder name
      */
     void clearMsgOutAndMsgInDirs(String distrDirName) {
         File msgOutDir =
@@ -309,12 +306,12 @@ public class ITHelper {
 
     /**
      * Changes msg file extension to .mmd
-     * @param msgFileName
-     * @param dADirName
+     * @param msgFileName message file name
+     * @param distrDirName HolodeckB2B instance folder name
      */
     boolean changeMsgExtensionToMMD(String msgFileName,
-                                                  String dADirName) {
-        File file = new File(workingDirPath + "/" + dADirName
+                                                  String distrDirName) {
+        File file = new File(workingDirPath + "/" + distrDirName
                 + "/data/msg_out/" + msgFileName);
         int index = file.getName().lastIndexOf(".");
         String fileName = file.getName().substring(0, index);
@@ -326,7 +323,7 @@ public class ITHelper {
 
     /**
      * Deletes <code>distrDirName</code> directory
-     * @param distrDirName
+     * @param distrDirName HolodeckB2B instance folder name
      */
     void deleteDistDir(String distrDirName) {
         FilesUtility fu = new FilesUtility();
