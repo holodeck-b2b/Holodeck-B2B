@@ -155,7 +155,7 @@ public abstract class MessageUnit implements IMessageUnit {
      * @param pmodeId The new message id
      */
     public void setPModeId(final String pmodeId) {
-        this.messageId = pmodeId;
+        this.pmodeId = pmodeId;
     }
 
     /**
