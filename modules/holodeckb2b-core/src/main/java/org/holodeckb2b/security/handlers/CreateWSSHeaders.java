@@ -232,7 +232,7 @@ public class CreateWSSHeaders extends BaseHandler {
      * handler is not created in this method, but shared for the header.
      *
      * @param mc            The {@link MessageContext} to set up
-     * @param sigConfig     The configuration for creating the signature
+     * @param sigCfg     The configuration for creating the signature
      * @param pwdCBHandler  The {@link PasswordCallbackHandler} to use for handing over the password to WSS4J library
      */
     private void setupSignature(final MessageContext mc, final ISigningConfiguration sigCfg, final PasswordCallbackHandler pwdCBHandler) {
@@ -282,7 +282,7 @@ public class CreateWSSHeaders extends BaseHandler {
      * handler is not created in this method, but shared for the header.
      *
      * @param mc            The {@link MessageContext} to set up
-     * @param sigConfig     The configuration for creating the signature
+     * @param encCfg     The configuration for creating the signature
      * @param pwdCBHandler  The {@link PasswordCallbackHandler} to use for handing over the password to WSS4J library
      */
     private void setupEncryption(final MessageContext mc, final IEncryptionConfiguration encCfg,
@@ -419,7 +419,7 @@ public class CreateWSSHeaders extends BaseHandler {
          *
          * @param mc    The {@link MessageContext} for the message
          * @param doc   The standard DOM representation of the SOAP Envelope of the message
-         * @param log   The log to use. We use the log of the handler to hide this class.
+         * @param handlerLog   The log to use. We use the log of the handler to hide this class.
          */
         WSSSendHandler(final MessageContext mc, final Document doc, final Log handlerLog) throws WSSecurityException {
             this.msgCtx = mc;
