@@ -81,7 +81,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
                      + messageId);
             // Check that the referenced event is an entity object
             if (!(event.getSubject() instanceof IMessageUnitEntity)) {
-                log.error("This processor can only handle event that inlude an entity object reference!");
+                log.error("This processor can only handle event that include an entity object reference!");
                 return;
             }
             final IMessageUnitEntity subject = (IMessageUnitEntity) event.getSubject();

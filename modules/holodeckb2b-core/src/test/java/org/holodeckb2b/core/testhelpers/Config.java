@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.testhelpers;
+package org.holodeckb2b.core.testhelpers;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.holodeckb2b.common.config.InternalConfiguration;
@@ -25,9 +25,9 @@ import org.holodeckb2b.common.config.InternalConfiguration;
  */
 public class Config implements InternalConfiguration {
 
-    private String hb2b_home;
-    private String pmodeValidatorClass = null;
-    private String pmodeStorageClass = null;
+    private String  hb2b_home;
+    private String  pmodeValidatorClass = null;
+    private String  pmodeStorageClass = null;
 
     Config(final String homeDir) {
         hb2b_home = homeDir;
@@ -38,8 +38,7 @@ public class Config implements InternalConfiguration {
         this.pmodeValidatorClass = pmodeValidatorClass;
     }
 
-    Config(final String homeDir, final String pmodeValidatorClass,
-           final String pmodeStorageClass) {
+    Config(final String homeDir, final String pmodeValidatorClass, final String pmodeStorageClass) {
         hb2b_home = homeDir;
         this.pmodeValidatorClass = pmodeValidatorClass;
         this.pmodeStorageClass = pmodeStorageClass;
@@ -67,36 +66,36 @@ public class Config implements InternalConfiguration {
 
     @Override
     public ConfigurationContext getAxisConfigurationContext() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public String getWorkerPoolCfgFile() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public String getTempDirectory() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public boolean allowSignalBundling() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public boolean shouldReportErrorOnError() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public boolean shouldReportErrorOnReceipt() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public boolean useStrictErrorRefCheck() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -111,7 +110,7 @@ public class Config implements InternalConfiguration {
 
     @Override
     public boolean shouldCheckCertificateRevocation() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -126,7 +125,7 @@ public class Config implements InternalConfiguration {
 
     @Override
     public String getMessageProcessingEventProcessor() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -141,6 +140,6 @@ public class Config implements InternalConfiguration {
 
     @Override
     public String getPersistencyProviderClass() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

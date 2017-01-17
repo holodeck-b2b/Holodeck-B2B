@@ -17,7 +17,7 @@
 package org.holodeckb2b.common.util;
 
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -64,6 +64,7 @@ public class MessageIdGeneratorTest {
         assertNotNull(contentId);
         String[] contentIdParts = contentId.split("@");
         assertTrue(contentIdParts.length == 2);
+        assertTrue(contentIdParts[0].contains(idParts[0]));
         assertEquals(idParts[0],
                 contentIdParts[0].substring(0, contentIdParts[0].lastIndexOf("-")));
         assertTrue(contentIdParts[0].length()>0);

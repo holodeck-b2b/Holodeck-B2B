@@ -18,7 +18,7 @@ package org.holodeckb2b.ebms3.workers;
 
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
-import org.holodeckb2b.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

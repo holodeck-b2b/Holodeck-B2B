@@ -34,8 +34,8 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.pmode.helpers.*;
-import org.holodeckb2b.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.testhelpers.TestEventProcessor;
+import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.core.testhelpers.TestEventProcessor;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -148,7 +148,9 @@ public class RaiseSignatureCreatedEventTest {
         //Adding PMode to the managed PMode set.
         core.getPModeSet().add(pmode);
         IUserMessageEntity userMessageEntity =
-                      HolodeckB2BCore.getUpdateManager().storeIncomingMessageUnit(UserMessage.readElement(userMessage));
+                      HolodeckB2BCore.getUpdateManager()
+                              .storeIncomingMessageUnit(
+                                      UserMessage.readElement(userMessage));
         mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
                 userMessageEntity);
 

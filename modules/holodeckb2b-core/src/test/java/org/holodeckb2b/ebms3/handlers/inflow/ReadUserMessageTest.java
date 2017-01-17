@@ -28,7 +28,7 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
