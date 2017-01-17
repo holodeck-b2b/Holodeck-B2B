@@ -64,7 +64,7 @@ public class MessageIdGenerator {
             // id does not contain '@' use empty right part
             final int i = msgId.indexOf("@");
             if (i > 0) {
-                leftPart = msgId.substring(0, i - 1);
+                leftPart = msgId.substring(0, i);
                 rightPart = msgId.substring(i);
             } else {
                 leftPart = msgId;
