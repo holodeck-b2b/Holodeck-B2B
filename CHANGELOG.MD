@@ -20,6 +20,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ###Deprecated
 
 ###Removed
+* The exceptions `org.holodeckb2b.common.exceptions.DatabaseException` and `org.holodeckb2b.common.exceptions.DuplicateMessageIdError`
+  which were bound to the specific persistency implementation of the older versions are removed.
 
 ###Fixed
 

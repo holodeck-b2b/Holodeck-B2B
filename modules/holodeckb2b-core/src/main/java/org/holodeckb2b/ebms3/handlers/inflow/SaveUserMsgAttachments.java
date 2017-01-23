@@ -103,7 +103,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
 
             // Save each payload to a file
             // We built a new collection of payload meta-data so we can update the content location
-            ArrayList<Payload>  newPayloadData = new ArrayList<>(payloads.size());
+            ArrayList<IPayload>  newPayloadData = new ArrayList<>(payloads.size());
             for(final IPayload ip : payloads) {
                 // Convert to Payload object so we can set properties
                 Payload p = new Payload(ip);

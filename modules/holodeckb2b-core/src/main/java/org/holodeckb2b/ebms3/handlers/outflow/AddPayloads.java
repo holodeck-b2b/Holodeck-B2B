@@ -78,7 +78,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
             log.debug("User message contains " + payloads.size() + " payload(s)");
             // If a MIME Content-Id is generated it should be saved to database as well, therefor we need to construct
             // new set of payload meta-data
-            ArrayList<Payload>  newPayloadInfo = new ArrayList<>(payloads.size());
+            ArrayList<IPayload>  newPayloadInfo = new ArrayList<>(payloads.size());
             boolean cidGenerated = false;
             for (final IPayload pl : payloads) {
                 // Create copy of existing meta-data

@@ -17,6 +17,7 @@
 package org.holodeckb2b.ebms3.workers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
@@ -61,14 +62,21 @@ public class SenderWorker extends AbstractWorkerTask {
             final List<IMessageUnitEntity> newMsgs = new ArrayList<>();
             final IQueryManager queryManager = HolodeckB2BCore.getQueryManager();
             // Add all User Messages waiting to be sent
-            newMsgs.addAll(queryManager.getMessageUnitsInState(IUserMessage.class, IMessageUnit.Direction.OUT,
-                                                                new ProcessingState[] {ProcessingState.READY_TO_PUSH}));
+            Collection<? extends IMessageUnitEntity> msgUnits = queryManager.getMessageUnitsInState(IUserMessage.class,
+                                                                IMessageUnit.Direction.OUT,
+                                                                new ProcessingState[] {ProcessingState.READY_TO_PUSH});
+            if (!Utils.isNullOrEmpty(msgUnits))
+                newMsgs.addAll(msgUnits);
             // Add all Receipts waiting to be sent
-            newMsgs.addAll(queryManager.getMessageUnitsInState(IReceipt.class, IMessageUnit.Direction.OUT,
-                                                                new ProcessingState[] {ProcessingState.READY_TO_PUSH}));
+            msgUnits = queryManager.getMessageUnitsInState(IReceipt.class, IMessageUnit.Direction.OUT,
+                                                                new ProcessingState[] {ProcessingState.READY_TO_PUSH});
+            if (!Utils.isNullOrEmpty(msgUnits))
+                newMsgs.addAll(msgUnits);
             // Add all Errors waiting to be sent
-            newMsgs.addAll(queryManager.getMessageUnitsInState(IErrorMessage.class, IMessageUnit.Direction.OUT,
-                                                                new ProcessingState[] {ProcessingState.READY_TO_PUSH}));
+            msgUnits = queryManager.getMessageUnitsInState(IErrorMessage.class, IMessageUnit.Direction.OUT,
+                                                                new ProcessingState[] {ProcessingState.READY_TO_PUSH});
+            if (!Utils.isNullOrEmpty(msgUnits))
+                newMsgs.addAll(msgUnits);
 
             if (!Utils.isNullOrEmpty(newMsgs)) {
                 log.info("Found " + newMsgs.size() + " message units to send");

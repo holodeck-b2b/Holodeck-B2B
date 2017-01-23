@@ -211,15 +211,6 @@
             </dependency>
 
             <!--===============================================================
-                For testing and "out of the box" operation Derby is used
-            =============================================================== -->
-            <dependency>
-                <groupId>org.apache.derby</groupId>
-                <artifactId>derby</artifactId>
-                <version>10.12.1.1</version>
-            </dependency>
-
-            <!--===============================================================
                 Log4j is used for logging in Holodeck B2B
             =============================================================== -->
             <dependency>

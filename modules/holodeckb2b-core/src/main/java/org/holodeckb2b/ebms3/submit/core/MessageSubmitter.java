@@ -264,7 +264,7 @@ public class MessageSubmitter implements IMessageSubmitter {
         }
 
         final Collection<? extends IPayload> submissionPayloadInfo = um.getPayloads();
-        Collection<Payload> internalPayloadInfo = new ArrayList<>();
+        Collection<IPayload> internalPayloadInfo = new ArrayList<>();
         if (!Utils.isNullOrEmpty(submissionPayloadInfo)) {
             for (final IPayload p : submissionPayloadInfo) {
                 final Path srcPath = Paths.get(p.getContentLocation());

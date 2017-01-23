@@ -18,18 +18,18 @@
 -->
 <!--
   This assembly builds the Holodeck B2B all-in-one distribution package.
-  
+
   The following parameters need to be defined for this assymbly to work:
-  
-  ${project.version}  (p)   The version of the Holodeck B2B. 
-  
+
+  ${project.version}  (p)   The version of the Holodeck B2B.
+
   ${tomcat-home}      (d)   The directory where the Tomcat base installation
-                            can be found 
+                            can be found
 
   ${axis-home}        (d)   The directory where the Axis 2 expanded WAR can be
                             found
-                            
-  The properties marked (p) are defined in the pom.xml of the Holodeck parent 
+
+  The properties marked (p) are defined in the pom.xml of the Holodeck parent
   project and the ones marked (d) are defined in the distribution module pom.xml
 -->
 <assembly>
@@ -40,7 +40,7 @@
     <includeBaseDirectory>false</includeBaseDirectory>
 
     <fileSets>
-        <!-- 
+        <!--
               (1) Copy Holodeck B2B adapted Axis2 base to target
 
               This includes the standard Axis2 configuration files adapted for Holodeck B2B
@@ -55,7 +55,7 @@
                 <exclude>.gitignore</exclude>
             </excludes>
         </fileSet>
-        
+
         <!--
               (2) Copy the project README to the base directory
         -->
@@ -66,8 +66,8 @@
                 <include>README.md</include>
             </includes>
         </fileSet>
-        
-        <!-- 
+
+        <!--
               (3) Copy the Holodeck B2B specific configuration files
         -->
         <!-- Copying global configuration -->
@@ -82,14 +82,14 @@
             </includes>
         </fileSet>
         <!-- Persistency configuration -->
-        <fileSet>
+<!--        <fileSet>
             <directory>src/main/configurations</directory>
             <outputDirectory>holodeck-b2b-${project.version}/conf/META-INF</outputDirectory>
             <includes>
                 <include>persistence.xml</include>
             </includes>
             <filtered>true</filtered>
-        </fileSet>
+        </fileSet>-->
         <!-- Core module configuration -->
         <fileSet>
             <directory>src/main/configurations</directory>
@@ -107,8 +107,8 @@
             </includes>
         </fileSet>
 
-        <!-- 
-              (4) Copy the XML schemas that define the used XML document 
+        <!--
+              (4) Copy the XML schemas that define the used XML document
         -->
         <!-- From common module -->
         <fileSet>
@@ -116,7 +116,7 @@
             <outputDirectory>holodeck-b2b-${project.version}/repository</outputDirectory>
             <includes>
                 <include>**/*.xsd</include>
-            </includes>         
+            </includes>
         </fileSet>
         <!-- From core module -->
         <fileSet>
@@ -124,11 +124,11 @@
             <outputDirectory>holodeck-b2b-${project.version}/repository</outputDirectory>
             <includes>
                 <include>**/*.xsd</include>
-            </includes>         
+            </includes>
         </fileSet>
 
-        <!-- 
-              (5) Copy the examples 
+        <!--
+              (5) Copy the examples
         -->
         <fileSet>
             <directory>src/main/examples/</directory>
@@ -138,8 +138,8 @@
             </includes>
             <useDefaultExcludes>true</useDefaultExcludes>
         </fileSet>
-        
-        <!-- 
+
+        <!--
               (6a) Copy the patched versions of libs
         -->
         <fileSet>
@@ -150,11 +150,11 @@
             </includes>
             <useDefaultExcludes>true</useDefaultExcludes>
         </fileSet>
-        
+
     </fileSets>
 
 
-    <!-- 
+    <!--
           (6b) Add all required libraries to the lib directory
     -->
     <dependencySets>

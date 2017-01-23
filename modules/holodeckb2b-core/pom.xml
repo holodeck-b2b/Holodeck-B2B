@@ -72,17 +72,6 @@
             <scope>runtime</scope>
         </dependency>
 
-
-        <!-- Hibernate JPA libraries -->
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-        </dependency>
-
         <!-- Simple XML framework for easy processing of XML documents -->
         <dependency>
             <groupId>org.simpleframework</groupId>
@@ -129,11 +118,6 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

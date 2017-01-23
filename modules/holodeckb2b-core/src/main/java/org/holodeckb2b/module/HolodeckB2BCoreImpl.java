@@ -171,19 +171,20 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         log.debug("Created " + eventProcessor.getClass().getSimpleName() + " event processor");
 
         log.debug("Load the persistency provided for storing meta-data on message units");
-        final String persistencyProviderClassname = instanceConfiguration.getPersistencyProviderClass();
+        String persistencyProviderClassname = instanceConfiguration.getPersistencyProviderClass();
+        if (Utils.isNullOrEmpty(persistencyProviderClassname))
+            persistencyProviderClassname = "org.holodeckb2b.persistency.DefaultProvider";
+
         IPersistencyProvider persistencyProvider = null;
-        if (!Utils.isNullOrEmpty(persistencyProviderClassname)) {
-            try {
-               persistencyProvider = (IPersistencyProvider) Class.forName(persistencyProviderClassname).newInstance();
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
-               // Could not create the specified event processor, fall back to default implementation
-               log.error("Could not load the specified persistency provider: " + persistencyProviderClassname
-                        + ". Using default implementation instead.");
-            }
-        } //else
-            // persistencyProvider = new SyncEventProcessor();
+        try {
+           persistencyProvider = (IPersistencyProvider) Class.forName(persistencyProviderClassname).newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
+           // Could not create the specified event processor, fall back to default implementation
+           log.error("Could not load the persistency provider: " + persistencyProviderClassname
+                    + ". Using default implementation instead.");
+        }
         log.debug("Using " + persistencyProvider.getName() + " as persistency provider");
+
         try {
              persistencyProvider.init();
              daoFactory = persistencyProvider.getDAOFactory();

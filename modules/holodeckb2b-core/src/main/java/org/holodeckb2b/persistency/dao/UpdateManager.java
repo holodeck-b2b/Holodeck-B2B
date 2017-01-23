@@ -94,7 +94,7 @@ public class UpdateManager {
                                                                                         throws PersistenceException {
         MessageUnit tempObject = createTempObject(messageUnit);
         // Set correct direction
-        tempObject.setDirection(IMessageUnit.Direction.IN);
+        tempObject.setDirection(IMessageUnit.Direction.OUT);
         if (messageUnit instanceof IUserMessage || messageUnit instanceof IPullRequest)
             tempObject.setProcessingState(ProcessingState.SUBMITTED);
         else
@@ -187,7 +187,7 @@ public class UpdateManager {
      * @throws PersistenceException     If an error occurs when saving the payload meta-data to the database
      */
     public void setPayloadInformation(final IUserMessageEntity userMessage,
-                                      final Collection<? extends IPayload> payloadInfo) throws PersistenceException {
+                                      final Collection<IPayload> payloadInfo) throws PersistenceException {
         parent.setPayloadInformation(userMessage, payloadInfo);
     }
 

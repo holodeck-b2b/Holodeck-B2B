@@ -16,9 +16,14 @@
  */
 package org.holodeckb2b.persistency;
 
-import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
+import org.holodeckb2b.common.constants.ProductId;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
+import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
+import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
+import org.holodeckb2b.persistency.managers.QueryManager;
+import org.holodeckb2b.persistency.managers.UpdateManager;
 
 /**
  *
@@ -30,17 +35,46 @@ public class DefaultProvider implements IPersistencyProvider {
 
     @Override
     public String getName() {
-        
+        return  "HB2B Default Persistency/" + ProductId.MAJOR_VERSION + "." + ProductId.MINOR_VERSION
+                                            + "." + ProductId.PATCH_VERSION;
     }
+
 
     @Override
     public void init() throws PersistenceException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     *
+     * @return The DAO Factory of the default persistency implementation
+     */
     @Override
     public IDAOFactory getDAOFactory() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new DAOFactory();
     }
 
+    /**
+     * Is the factory class of the default persistency implementation that enables the Holodeck B2B Core to persist and
+     * access the meta-data of the processed message units.
+     */
+    class DAOFactory implements IDAOFactory {
+
+        /**
+         *
+         * @return The update manager of the default persistency implementation
+         */
+        @Override
+        public IUpdateManager getUpdateManager() {
+            return new UpdateManager();
+        }
+
+        /**
+         *
+         * @return The query manager of the default persistency implementation
+         */
+        @Override
+        public IQueryManager getQueryManager() {
+            return new QueryManager();
+        }
+    }
 }
