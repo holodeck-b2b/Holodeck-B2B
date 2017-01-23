@@ -61,6 +61,10 @@ public abstract class MessageUnit implements IMessageUnit {
         this.refToMessageId = sourceMessageUnit.getRefToMessageId();
         this.pmodeId = sourceMessageUnit.getPModeId();
 
+        if (!Utils.isNullOrEmpty(sourceMessageUnit.getProcessingStates())) {
+            for (IMessageUnitProcessingState state : sourceMessageUnit.getProcessingStates())
+                setProcessingState(state);
+        }
     }
 
     /**
@@ -136,7 +140,7 @@ public abstract class MessageUnit implements IMessageUnit {
      * @param refToMessageId The new message id
      */
     public void setRefToMessageId(final String refToMessageId) {
-        this.messageId = refToMessageId;
+        this.refToMessageId = refToMessageId;
     }
 
     /**
@@ -155,7 +159,7 @@ public abstract class MessageUnit implements IMessageUnit {
      * @param pmodeId The new message id
      */
     public void setPModeId(final String pmodeId) {
-        this.messageId = pmodeId;
+        this.pmodeId = pmodeId;
     }
 
     /**
@@ -208,42 +212,16 @@ public abstract class MessageUnit implements IMessageUnit {
     }
 
     /**
-     * Is an implementation of {@link IMessageUnitProcessingState} used in the parent class to hold the processing
-     * states of the message unit.
+     * Sets a new current processing source for this message unit based on the provided source.
+     *
+     * @param source The new current processing source
      */
-    class MessageProcessingState implements IMessageUnitProcessingState {
-
-        private ProcessingState state;
-        private Date            startTime;
-
-        /**
-         * Creates a new <code>MessageProcessingState</code> object with the given state and the current time as start
-         */
-        public MessageProcessingState(final ProcessingState state) {
-            this.state = state;
-            this.startTime = new Date();
-        }
-
-        /**
-         * Creates a new <code>MessageProcessingState</code> object by copying the information from the given state
-         *
-         * @param sourceState  The source processing state to copy the information from
-         */
-        public MessageProcessingState(final IMessageUnitProcessingState sourceState) {
-            if (sourceState != null) {
-                this.state = sourceState.getState();
-                this.startTime = sourceState.getStartTime();
-            }
-        }
-
-        @Override
-        public ProcessingState getState() {
-            return state;
-        }
-
-        @Override
-        public Date getStartTime() {
-            return startTime;
+    public void setProcessingState(final IMessageUnitProcessingState source) {
+        if (source != null) {
+            if (states == null)
+                states = new ArrayList<>();
+            states.add(new MessageProcessingState(source));
         }
     }
+
 }

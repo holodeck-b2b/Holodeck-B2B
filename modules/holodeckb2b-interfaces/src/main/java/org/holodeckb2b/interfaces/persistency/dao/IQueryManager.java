@@ -38,7 +38,8 @@ public interface IQueryManager {
 
     /**
      * Retrieves all message units of the specified type and that are in one of the given states and are flowing in the
-     * specified direction.
+     * specified direction. If message units are found they are sorted on their timestamp starting with the oldest
+     * message units.
      * <br><b>NOTE:</b> The entity objects in the resulting collection may not be completely loaded! Before a message
      * unit is going to be processed it must be checked if it is loaded completely.
      *
@@ -51,7 +52,7 @@ public interface IQueryManager {
      *                  one of the given states,<br>or <code>null</code> when no such message units are found.
      * @throws PersistenceException When a problem occurs during the retrieval of the message units
      */
-    <T extends IMessageUnit, V extends IMessageUnitEntity> Collection<V>
+    <T extends IMessageUnit, V extends IMessageUnitEntity> List<V>
                                                  getMessageUnitsInState(final Class<T> type,
                                                                         final IMessageUnit.Direction direction,
                                                                         final ProcessingState[] states)
@@ -111,6 +112,8 @@ public interface IQueryManager {
 
     /**
      * Ensures that all meta-data of the given entity object is loaded and available for processing.
+     * <p>NOTE: The implementation of this method by the persistency provider may reload the meta-data from the storage
+     * and overwrite any changes that were made to the entity object.
      *
      * @param <V>           Limits the <code>messageUnit</code> parameter to only message unit classes
      * @param messageUnit   The entity object that needs to be loaded completely
@@ -143,6 +146,4 @@ public interface IQueryManager {
      * @throws PersistenceException If an error occurs when executing this query
      */
     boolean isAlreadyDelivered(final String messageId) throws PersistenceException;
-
-    public Collection<? extends IMessageUnitEntity> getMessageUnitsInState(Class<IUserMessage> aClass, ProcessingState[] processingState);
 }

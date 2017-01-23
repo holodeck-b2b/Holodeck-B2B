@@ -30,7 +30,10 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * Defines the interface for the <i>data access object</i> that is responsible for executing the functions that write
  * message unit meta-data to storage, like creating the stored object and setting the processing state.
  * <p>Implementations must ensure that all methods are thread-safe and the necessary locking is implemented both in the
- * Java code as well as in the database operations.
+ * Java code as well as in the database operations.<br>
+ * Also implementations must take into account the "<i>completely loaded</i>" state of the message unit entity when
+ * updates are performed, i.e. when all information of the updated message unit entity was loaded before the update it
+ * should still be loaded after performing the update.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since HB2B_NEXT_VERSION
@@ -46,7 +49,7 @@ public interface IUpdateManager {
      * @return              The created persistency object.
      * @throws PersistenceException        If an error occurs when saving the new message unit to the database.
      */
-    <T extends IMessageUnit, V extends IMessageUnitEntity> V storeMessageUnit(T messageUnit)
+    <T extends IMessageUnit, V extends IMessageUnitEntity> V storeMessageUnit(final T messageUnit)
                                                                                             throws PersistenceException;
 
     /**
@@ -102,7 +105,7 @@ public interface IUpdateManager {
      * @param payloadInfo   The meta-data on the payloads included with the User Message which must be persisted
      * @throws PersistenceException     If an error occurs when saving the payload meta-data to the database
      */
-    void setPayloadInformation(final IUserMessageEntity userMessage, final Collection<? extends IPayload> payloadInfo)
+    void setPayloadInformation(final IUserMessageEntity userMessage, final Collection<IPayload> payloadInfo)
                                                                                         throws PersistenceException;
 
     /**

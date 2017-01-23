@@ -36,10 +36,12 @@
         <!--===============================================================
             First the modules of Holodeck itself
         =============================================================== -->
+        <!-- The public interfaces -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-interfaces</artifactId>
         </dependency>
+        <!-- Common and Core classes -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-common</artifactId>
@@ -48,7 +50,11 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
         </dependency>
-
+        <!-- The default persistency implementation -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>default-persistency</artifactId>
+        </dependency>
         <!--===============================================================
             Second the runtime only dependencies, not declared in the
             modules
@@ -75,11 +81,11 @@
             <scope>runtime</scope>
         </dependency>
 
-        <dependency>
+<!--        <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
             <scope>runtime</scope>
-        </dependency>
+        </dependency>-->
     </dependencies>
 
     <build>

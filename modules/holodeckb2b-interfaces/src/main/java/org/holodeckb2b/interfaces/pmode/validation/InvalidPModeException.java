@@ -41,6 +41,7 @@ public class InvalidPModeException extends PModeSetException {
      *                  PModeManager</code>.
      */
     public InvalidPModeException(final Collection<PModeValidationError> errors) {
+        super("Invalid P-Mode");
         this.errors = Collections.unmodifiableCollection(errors);
     }
 

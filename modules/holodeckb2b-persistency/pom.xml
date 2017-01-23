@@ -32,6 +32,7 @@
     <name>Holodeck B2B - Default Persistency Provider</name>
 
     <dependencies>
+        <!-- The other Holodeck B2B libraries -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-common</artifactId>
@@ -39,6 +40,42 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-interfaces</artifactId>
+        </dependency>
+
+        <!-- Hibernate JPA libraries -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+        </dependency>
+
+        <!--===============================================================
+            For testing and "out of the box" operation Derby is used
+        =============================================================== -->
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>10.12.1.1</version>
+        </dependency>
+
+        <!-- Dependencies for testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

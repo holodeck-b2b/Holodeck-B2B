@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2017 The Holodeck B2B Team, Sander Fieten
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!--
+This is the Hibernate JPA configuration file for the default Holodeck B2B persistency provider. It uses an embedded
+Derby database for storing the message unit meta-data.
+
+Since: HB2B_NEXT_VERSION
+-->
+<persistence version="1.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+  <persistence-unit name="holodeckb2b-core" transaction-type="RESOURCE_LOCAL">
+    <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+    <properties>
+      <property name="hibernate.archive.autodetection" value="class"/>
+      <property name="hibernate.show_sql" value="false"/>
+      <property name="hibernate.format_sql" value="true"/>
+      <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+      <property name="hibernate.connection.url" value="jdbc:derby:db/coreDB;databaseName=coreDB;create=true"/>
+      <property name="hibernate.connection.username" value="hb2b"/>
+      <property name="hibernate.connection.password" value="hb2b"/>
+      <property name="hibernate.hbm2ddl.auto" value="update"/>
+      <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
+    </properties>
+  </persistence-unit>
+</persistence>

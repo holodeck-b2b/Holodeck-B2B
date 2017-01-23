@@ -34,8 +34,8 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 public class MessageUnitUtils {
 
     /**
-     * Returns the type of the given message unit. This is the name as described in the ebMS V3 Specification and not
-     * the Java class/interface type.
+     * Returns the type of the given message unit as a String. This is the name as described in the ebMS V3
+     * Specification and not the Java class/interface type.
      *
      * @param msgUnit   The message unit to get the type name for
      * @return          Descriptive name of the message unit's type
@@ -51,6 +51,26 @@ public class MessageUnitUtils {
             return "Error Message";
         else
             return "Unknown message type ";
+    }
+
+    /**
+     * Returns the type of the given message unit as a Class object of the interface from the Holodeck B2B message model
+     * that represents the message unit type of the given message unit.
+     *
+     * @param msgUnit   The message unit to get the type for
+     * @return          The message unit's type
+     */
+    public static Class<? extends IMessageUnit> getMessageUnitType(final IMessageUnit msgUnit) {
+        if (msgUnit instanceof IUserMessage)
+            return IUserMessage.class;
+        else if (msgUnit instanceof IPullRequest)
+            return IPullRequest.class;
+        else if (msgUnit instanceof IReceipt)
+            return IReceipt.class;
+        else if (msgUnit instanceof IErrorMessage)
+            return IErrorMessage.class;
+        else
+            throw new IllegalArgumentException("Given object is not a message unit object!");
     }
 
     /**

@@ -319,7 +319,7 @@ public class MessageMetaData implements IUserMessage {
      */
     @Override
     public Direction getDirection() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return null;
     }
 
     /**
