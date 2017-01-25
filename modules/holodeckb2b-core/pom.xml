@@ -40,6 +40,11 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-interfaces</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-persistency</artifactId>
+            <version>next-SNAPSHOT-5</version>
+        </dependency>
 
         <!-- Apache Axis2 kernel -->
         <dependency>
