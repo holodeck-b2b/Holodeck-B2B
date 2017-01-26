@@ -1,22 +1,34 @@
+/*
+ * Copyright (C) 2015 The Holodeck B2B Team
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.holodeckb2b.common.events;
 
-import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventConfiguration;
-import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.common.testhelpers.pmode.EventHandlerConfig;
-import org.holodeckb2b.common.testhelpers.pmode.Leg;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandler;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandlerFactory;
+import org.holodeckb2b.interfaces.events.MessageProccesingEventHandlingException;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.junit.Test;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Created at 14:58 14.01.17
@@ -25,110 +37,67 @@ import static org.junit.Assert.fail;
  */
 public class EventUtilsTest {
 
-    private static String baseDir;
-
-    private static HolodeckB2BTestCore core;
-
-    private static String hostname;
-
-    @BeforeClass
-    public static void setUpClass() {
-        baseDir = EventUtilsTest.class
-                .getClassLoader().getResource("utils").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
-        hostname =
-                HolodeckB2BCoreInterface.getConfiguration().getHostName();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-
-    }
-
-    @After
-    public void tearDown() throws Exception {
-
-    }
-
     @Test
     public void testShouldHandleEvent() throws Exception {
-        SyncEventForTest event =
-                new SyncEventForTest("test_event", "test event", null);
-        Leg leg = new Leg();
+        EventForTest event = new EventForTest(null);
+        AnotherEventForTest unhandledEvent = new AnotherEventForTest(null);
+
         EventHandlerConfig config = new EventHandlerConfig();
-        leg.addMessageProcessingEventConfiguration(config);
-        List<IMessageProcessingEventConfiguration> ec =
-                leg.getMessageProcessingEventConfiguration();
-        assertTrue(ec.size() > 0);
-        assertTrue(EventUtils.shouldHandleEvent(ec.get(0), event));
+        List<Class<? extends  IMessageProcessingEvent>> list = new ArrayList<>();
+        list.add(event.getClass());
+        config.setHandledEvents(list);
+
+        assertTrue(EventUtils.shouldHandleEvent(config, event));
+        assertFalse(EventUtils.shouldHandleEvent(config, unhandledEvent));
     }
 
     @Test
     public void testGetConfiguredHandler() throws Exception {
-        fail("Not implemented yet!");
+        EventForTest event = new EventForTest(null);
+
+        EventHandlerConfig config = new EventHandlerConfig();
+        List<Class<? extends  IMessageProcessingEvent>> list = new ArrayList<>();
+        list.add(event.getClass());
+        config.setHandledEvents(list);
+        config.setFactoryClass(EventHandlerFactory.class.getName());
+
+        assertEquals(
+                (new EventHandlerFactory()).createHandler().getClass(),
+                EventUtils.getConfiguredHandler(config));
     }
 
-    class SyncEventForTest implements IMessageProcessingEvent {
+    class EventForTest extends AbstractMessageProcessingEvent {
 
-        private String id;
-        private String message;
-        private IMessageUnit subject;
+        public EventForTest(IMessageUnit subject) {
+            super(subject);
+        }
+    }
 
-        public SyncEventForTest(String id, String message, IMessageUnit subject) {
-            this.id = id;
-            this.message = message;
-            this.subject = subject;
+    class EventForTestHandler implements IMessageProcessingEventHandler {
+
+        @Override
+        public void handleEvent(IMessageProcessingEvent event) throws IllegalArgumentException {
+
+        }
+    }
+
+    class AnotherEventForTest extends AbstractMessageProcessingEvent {
+
+        public AnotherEventForTest(IMessageUnit subject) {
+            super(subject);
+        }
+    }
+
+    class EventHandlerFactory implements IMessageProcessingEventHandlerFactory<EventForTestHandler> {
+
+        @Override
+        public void init(Map settings) throws MessageProccesingEventHandlingException {
+
         }
 
-        /**
-         * Gets the <b>unique</b> identifier of this event.
-         * It is RECOMMENDED that this identifier is a valid XML ID so it
-         * can be easily included in an XML representation of the event.
-         *
-         * @return A {@link String} containing the unique identifier of this event
-         */
         @Override
-        public String getId() {
-            return id;
-        }
-
-        /**
-         * Gets the timestamp when the event occurred.
-         *
-         * @return A {@link Date} representing the date and time the event occurred
-         */
-        @Override
-        public Date getTimestamp() {
-            return new Date();
-        }
-
-        /**
-         * Gets an <b>optional</b> short description of what happened.
-         * It is RECOMMENDED to limit the length of the
-         * description to 100 characters.
-         *
-         * @return A {@link String} with a short description of the event
-         * if available, <code>null</code> otherwise
-         */
-        @Override
-        public String getMessage() {
-            return message;
-        }
-
-        /**
-         * Gets the message unit that the event applies to.
-         * <p>NOTE: An event can only relate to one message unit.
-         * If an event occurs that applies to multiple message units
-         * the <i>event source component</i> must create multiple
-         * <code>IMessageProcessingEvent</code> objects for each
-         * message unit.
-         *
-         * @return The {@link IMessageUnit} this event applies to.
-         */
-        @Override
-        public IMessageUnit getSubject() {
-            return subject;
+        public EventForTestHandler createHandler() throws MessageProccesingEventHandlingException {
+            return new EventForTestHandler();
         }
     }
 }
