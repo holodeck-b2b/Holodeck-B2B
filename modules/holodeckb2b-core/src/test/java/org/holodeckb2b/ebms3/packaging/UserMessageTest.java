@@ -22,17 +22,18 @@ import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.xml.namespace.QName;
 import java.io.File;
+import java.util.Collection;
 import java.util.Iterator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Created at 13:14 15.10.16
@@ -53,6 +54,10 @@ public class UserMessageTest {
             new QName(EbMSConstants.EBMS3_NS_URI, "CollaborationInfo");
     static final QName AGREEMENT_REF_INFO_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "AgreementRef");
+    static final QName PAYLOAD_INFO_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "PayloadInfo");
+    static final QName PART_INFO_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "PartInfo");
 
     @Before
     public void setUp() throws Exception {
@@ -76,12 +81,33 @@ public class UserMessageTest {
         } catch (final Exception e) {
             fail("Unable to test because MMD could not be read correctly!");
         }
+        //System.out.println("Payloads:");
+
+        // Check the mmd for PayloadInfo properties presence
+
+        Collection<IPayload> payloadCollection = mmd.getPayloads();
+        for(IPayload payload : payloadCollection) {
+            //System.out.println("payload: " + payload.getContainment().toString());
+            if(payload.getContainment().toString().equalsIgnoreCase("EXTERNAL")) {
+                //System.out.println("here!!!");
+                Collection<IProperty> properties = payload.getProperties();
+                assertTrue(properties.size() == 2);
+                assertNotNull(properties);
+                Iterator<IProperty> pIt = properties.iterator();
+                IProperty p1 = pIt.next();
+                assertEquals("ozJjzK1OZJEF", p1.getName());
+                IProperty p2 = pIt.next();
+                assertEquals("VCHWFAqaEiadKr2F-", p2.getName());
+            }
+        }
+
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding UserMessage from mmd
-        UserMessage.createElement(headerBlock, mmd);
+        OMElement userMessage = UserMessage.createElement(headerBlock, mmd);
+        System.out.println("userMessage: " + userMessage);
         // Check that soap header block of the envelope header contains user message
         SOAPHeader header = env.getHeader();
         OMElement messagingElement = header.getFirstElement();
@@ -100,6 +126,24 @@ public class UserMessageTest {
         assertEquals(COLLABORATION_INFO_ELEMENT_NAME, ciElement.getQName());
         OMElement arElement = AgreementRef.getElement(ciElement);
         assertEquals(AGREEMENT_REF_INFO_ELEMENT_NAME, arElement.getQName());
+
+        // Check the UserMessage for PayloadInfo properties presence
+
+        OMElement piElement = PayloadInfo.getElement(userMessageElement);
+        assertEquals(PAYLOAD_INFO_ELEMENT_NAME, piElement.getQName());
+        it = piElement.getChildrenWithName(PART_INFO_ELEMENT_NAME);
+        assertTrue(it.hasNext());
+
+        OMElement partInfoElem1 = (OMElement)it.next();
+        assertNotNull(partInfoElem1);
+        OMElement partInfoElem2 = (OMElement)it.next();
+        assertNotNull(partInfoElem2);
+        OMElement schema = Schema.getElement(partInfoElem2);
+        assertNotNull(schema);
+        OMElement descr = Description.getElement(partInfoElem2);
+        assertNotNull(descr);
+        OMElement partProps = PartProperties.getElement(partInfoElem2);
+        assertNotNull(partProps); // PartProperties element should be present but it is missed!!!
     }
 
     @Test

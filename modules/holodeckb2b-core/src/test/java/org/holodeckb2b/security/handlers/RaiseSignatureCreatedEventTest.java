@@ -93,6 +93,8 @@ public class RaiseSignatureCreatedEventTest {
         // Adding UserMessage from mmd
         OMElement userMessage = UserMessage.createElement(headerBlock, mmd);
 
+        System.out.println("[1] userMessage: " + userMessage.toString());
+
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
         mc.setProperty(SecurityConstants.ADD_SECURITY_HEADERS, Boolean.TRUE);
@@ -145,10 +147,12 @@ public class RaiseSignatureCreatedEventTest {
 
         pmode.setId(pmodeId);
 
+        System.out.println("[2] userMessage: " + userMessage.toString());
+
         //Adding PMode to the managed PMode set.
         core.getPModeSet().add(pmode);
         IUserMessageEntity userMessageEntity =
-                      HolodeckB2BCore.getUpdateManager()
+                      core.getUpdateManager()
                               .storeIncomingMessageUnit(
                                       UserMessage.readElement(userMessage));
         mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
