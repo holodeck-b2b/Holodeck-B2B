@@ -83,7 +83,7 @@ public class PartInfo {
             Description.createElement(piElement, descr);
         // Create the PartProperties element (if there are message properties)
         final Collection<IProperty> partProps = data.getProperties();
-        if (Utils.isNullOrEmpty(partProps))
+        if (!Utils.isNullOrEmpty(partProps))
             PartProperties.createElement(piElement, partProps);
 
         return piElement;
