@@ -139,7 +139,8 @@ public class PartInfo {
         // Read and proces Description element (optional)
         plData.setDescription(Description.readElement(Description.getElement(piElement)));
         // Read and proces the PartProperties element (optional)
-        plData.setProperties(PartProperties.readElement(PartProperties.getElement(piElement)));
+        if(PartProperties.getElement(piElement) != null)
+            plData.setProperties(PartProperties.readElement(PartProperties.getElement(piElement)));
 
         return plData;
     }
