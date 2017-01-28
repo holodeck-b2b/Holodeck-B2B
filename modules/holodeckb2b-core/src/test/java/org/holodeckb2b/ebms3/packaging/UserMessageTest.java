@@ -148,11 +148,11 @@ public class UserMessageTest {
 
     @Test
     public void testGetElements() throws Exception {
-
+        fail("Not implemented yet.");
     }
 
     @Test
     public void testReadElement() throws Exception {
-
+        fail("Not implemented yet.");
     }
 }
