@@ -134,13 +134,18 @@ public class PartInfo {
             plData.setPayloadURI(href);
         }
 
-        // Read and proces Schema element (optional)
-        plData.setSchemaReference(Schema.readElement(Schema.getElement(piElement)));
-        // Read and proces Description element (optional)
-        plData.setDescription(Description.readElement(Description.getElement(piElement)));
-        // Read and proces the PartProperties element (optional)
-        if(PartProperties.getElement(piElement) != null)
-            plData.setProperties(PartProperties.readElement(PartProperties.getElement(piElement)));
+        // Read and process Schema element (optional)
+        OMElement schema = Schema.getElement(piElement);
+        if(schema != null)
+            plData.setSchemaReference(Schema.readElement(schema));
+        // Read and process Description element (optional)
+        OMElement description = Description.getElement(piElement);
+        if(description != null)
+            plData.setDescription(Description.readElement(description));
+        // Read and process the PartProperties element (optional)
+        OMElement partProperties = PartProperties.getElement(piElement);
+        if(partProperties != null)
+            plData.setProperties(PartProperties.readElement(partProperties));
 
         return plData;
     }
