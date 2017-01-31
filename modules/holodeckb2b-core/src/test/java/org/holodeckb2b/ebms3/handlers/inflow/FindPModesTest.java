@@ -30,6 +30,8 @@ import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.persistency.dao.UpdateManager;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -86,8 +88,7 @@ public class FindPModesTest {
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        // Setting input message property
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umElement);
+
         try {
             mc.setEnvelope(env);
         } catch (AxisFault axisFault) {
@@ -108,6 +109,15 @@ public class FindPModesTest {
         // todo if we don't set it the value returned by userMessage.getPModeId() is null
         userMessage.setPModeId(pmodeId);
 
+        core.getPModeSet().add(pmode);
+
+        // Setting input message property
+        UpdateManager updateManager = core.getUpdateManager();
+        IUserMessageEntity userMessageEntity =
+                updateManager.storeIncomingMessageUnit(userMessage);
+        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
+                userMessageEntity);
+
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertNotNull(invokeResp);
@@ -116,6 +126,6 @@ public class FindPModesTest {
         }
 
         assertNotNull(mc.getProperty(MessageContextProperties.IN_USER_MESSAGE));
-        //fail("Not implemented yet!");
+//        fail("Not implemented yet!");
     }
 }
