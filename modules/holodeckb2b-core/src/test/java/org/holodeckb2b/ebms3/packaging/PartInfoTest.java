@@ -43,13 +43,6 @@ import static org.junit.Assert.*;
  */
 public class PartInfoTest {
 
-    private static final QName PART_INFO_ELEMENT_NAME =
-            new QName(EbMSConstants.EBMS3_NS_URI, "PartInfo");
-
-    private MessageMetaData mmd;
-    private OMElement umElement;
-    private SOAPHeaderBlock headerBlock;
-    private SOAPEnvelope soapEnvelope;
     private OMElement plElement;
 
     @Before
@@ -58,6 +51,7 @@ public class PartInfoTest {
                 this.getClass().getClassLoader()
                         .getResource("packagetest/mmd_pcktest.xml").getPath();
         final File f = new File(mmdPath);
+        MessageMetaData mmd = null;
         try {
             mmd = MessageMetaData.createFromFile(f);
         } catch (final Exception e) {
@@ -65,11 +59,11 @@ public class PartInfoTest {
         }
 
         // Creating SOAP envelope
-        soapEnvelope = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        SOAPEnvelope soapEnvelope = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
-        headerBlock = Messaging.createElement(soapEnvelope);
+        SOAPHeaderBlock headerBlock = Messaging.createElement(soapEnvelope);
         // Adding UserMessage from mmd
-        umElement = UserMessage.createElement(headerBlock, mmd);
+        OMElement umElement = UserMessage.createElement(headerBlock, mmd);
         // Creating PayloadInfo element from mmd
         plElement = PayloadInfo.createElement(umElement, mmd.getPayloads());
     }
@@ -143,6 +137,7 @@ public class PartInfoTest {
         partInfo.setProperties(properties);
 
         OMElement piElement = PartInfo.createElement(plElement, partInfo);
+
         Payload payload = PartInfo.readElement(piElement);
         assertNotNull(payload);
         assertEquals(IPayload.Containment.ATTACHMENT, payload.getContainment());
