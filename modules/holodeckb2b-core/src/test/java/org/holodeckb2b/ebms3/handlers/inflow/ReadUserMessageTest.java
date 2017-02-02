@@ -22,11 +22,13 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.core.testhelpers.TestEventProcessor;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessage;
+import org.holodeckb2b.events.SignatureCreatedEvent;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.junit.After;
@@ -36,10 +38,8 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created at 23:28 21.09.16
@@ -55,7 +55,7 @@ public class ReadUserMessageTest {
     @BeforeClass
     public static void setUpClass() {
         baseDir = ReadUserMessageTest.class.getClassLoader()
-                .getResource("multihop").getPath();
+                .getResource("handlers").getPath();
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
     }
 
@@ -107,5 +107,7 @@ public class ReadUserMessageTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+
+        assertNotNull(mc.getProperty(MessageContextProperties.IN_USER_MESSAGE));
     }
 }
