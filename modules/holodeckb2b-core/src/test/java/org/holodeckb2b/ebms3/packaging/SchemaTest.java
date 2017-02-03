@@ -22,6 +22,7 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.SchemaReference;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,6 +37,9 @@ import static org.junit.Assert.*;
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class SchemaTest {
+
+    private static final QName SCHEMA_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "Schema");
 
     private OMElement plElement; // PayloadInfo
 
@@ -71,6 +75,7 @@ public class SchemaTest {
 
         OMElement schemaElement = Schema.createElement(piElement, schema);
         assertNotNull(schemaElement);
+        assertEquals(SCHEMA_ELEMENT_NAME, schemaElement.getQName());
         assertEquals("somewhere",
                 schemaElement.getAttributeValue(new QName("location")));
         assertEquals("namespace1",
