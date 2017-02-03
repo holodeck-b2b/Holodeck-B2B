@@ -40,6 +40,11 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-interfaces</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>default-persistency</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Apache Axis2 kernel -->
         <dependency>
