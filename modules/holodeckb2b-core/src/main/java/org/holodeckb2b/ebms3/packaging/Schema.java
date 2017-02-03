@@ -75,12 +75,12 @@ public class Schema {
      * Gets the {@link OMElement} object that represent the <code>Schema</code> child element of the <code>PartInfo
      * </code> element.
      *
-     * @param umElement     The parent <code>PartInfo</code> element
+     * @param piElement     The parent <code>PartInfo</code> element
      * @return              The {@link OMElement} object representing the <code>Schema</code> element or,<br>
      *                      <code>null</code> when the requested element is not found as child of the given element.
      */
-    public static OMElement getElement(final OMElement umElement) {
-        return umElement.getFirstChildWithName(Q_ELEMENT_NAME);
+    public static OMElement getElement(final OMElement piElement) {
+        return piElement.getFirstChildWithName(Q_ELEMENT_NAME);
     }
 
     /**

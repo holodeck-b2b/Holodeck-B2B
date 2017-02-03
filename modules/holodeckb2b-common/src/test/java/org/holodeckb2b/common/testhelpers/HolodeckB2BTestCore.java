@@ -14,10 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.testhelpers;
+package org.holodeckb2b.common.testhelpers;
 
-import org.holodeckb2b.ebms3.submit.core.MessageSubmitter;
-import org.holodeckb2b.events.SyncEventProcessor;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
@@ -29,19 +27,14 @@ import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
-import org.holodeckb2b.pmode.InMemoryPModeSet;
-import org.holodeckb2b.pmode.PModeManager;
 
 /**
- * Is utility class for testing the e-SENS connector that simulates the Holodeck B2B Core.
+ * Is utility class for testing the e-SENS connector
+ * that simulates the Holodeck B2B Core.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class HolodeckB2BTestCore implements IHolodeckB2BCore {
-
-    private static final class SubmitterSingletonHolder {
-        static final IMessageSubmitter instance = new MessageSubmitter();
-    }
 
     private final Config  config;
 
@@ -53,14 +46,15 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
         this(homeDir, null, null);
     }
 
-    public HolodeckB2BTestCore(final String homeDir, final String pmodeValidatorClass) {
+    public HolodeckB2BTestCore(final String homeDir,
+                               final String pmodeValidatorClass) {
         this(homeDir, pmodeValidatorClass, null);
     }
 
-    public HolodeckB2BTestCore(final String homeDir, final String pmodeValidatorClass, final String pmodeStorageClass) {
+    public HolodeckB2BTestCore(final String homeDir,
+                               final String pmodeValidatorClass,
+                               final String pmodeStorageClass) {
         config = new Config(homeDir, pmodeValidatorClass, pmodeStorageClass);
-        pmodeSet = new InMemoryPModeSet();
-        eventProcessor = new SyncEventProcessor();
     }
 
     @Override
@@ -69,24 +63,24 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
     }
 
     @Override
-    public IMessageDeliverer getMessageDeliverer(final IDeliverySpecification deliverySpec) throws MessageDeliveryException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public IMessageDeliverer getMessageDeliverer(
+            final IDeliverySpecification deliverySpec)
+            throws MessageDeliveryException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public IMessageSubmitter getMessageSubmitter() {
-        return SubmitterSingletonHolder.instance;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public IPModeSet getPModeSet() {
-        if (pmodeSet == null)
-            pmodeSet = new PModeManager(config.getPModeValidatorImplClass(), config.getPModeStorageImplClass());
-
-        return pmodeSet;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void setEventProcessor(final IMessageProcessingEventProcessor processor) {
+    public void setEventProcessor(
+            final IMessageProcessingEventProcessor processor) {
         eventProcessor = processor;
     }
 
@@ -96,13 +90,14 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
     }
 
     @Override
-    public void setPullWorkerPoolConfiguration(final IWorkerPoolConfiguration pullConfiguration) throws TaskConfigurationException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void setPullWorkerPoolConfiguration(
+            final IWorkerPoolConfiguration pullConfiguration)
+            throws TaskConfigurationException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public IQueryManager getQueryManager() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
-
 }

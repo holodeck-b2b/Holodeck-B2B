@@ -38,7 +38,7 @@ import org.holodeckb2b.pmode.helpers.Agreement;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.Protocol;
-import org.holodeckb2b.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;

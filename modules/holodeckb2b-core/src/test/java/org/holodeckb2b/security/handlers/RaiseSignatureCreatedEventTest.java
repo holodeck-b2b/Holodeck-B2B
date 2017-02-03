@@ -24,18 +24,21 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.messagemodel.*;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.*;
+import org.holodeckb2b.ebms3.packaging.CollaborationInfo;
+import org.holodeckb2b.ebms3.packaging.UserMessage;
 import org.holodeckb2b.events.SignatureCreatedEvent;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.pmode.helpers.*;
-import org.holodeckb2b.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.testhelpers.TestEventProcessor;
+import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.core.testhelpers.TestEventProcessor;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -91,7 +94,9 @@ public class RaiseSignatureCreatedEventTest {
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding UserMessage from mmd
-        OMElement userMessage = UserMessage.createElement(headerBlock, mmd);
+        OMElement umElement = UserMessage.createElement(headerBlock, mmd);
+
+        System.out.println("[1] umElement: " + umElement.toString());
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
@@ -139,16 +144,20 @@ public class RaiseSignatureCreatedEventTest {
         leg.setProtocol(protocolConfig);
         pmode.addLeg(leg);
 
-        OMElement agreementRef =
-                AgreementRef.getElement(CollaborationInfo.getElement(userMessage));
-        String pmodeId = agreementRef.getText();
+        org.holodeckb2b.common.messagemodel.UserMessage um =
+                UserMessage.readElement(umElement);
+
+        String pmodeId = um.getCollaborationInfo().getAgreement().getPModeId();
 
         pmode.setId(pmodeId);
+
+        System.out.println("[2] umElement: " + umElement.toString());
 
         //Adding PMode to the managed PMode set.
         core.getPModeSet().add(pmode);
         IUserMessageEntity userMessageEntity =
-                      HolodeckB2BCore.getUpdateManager().storeIncomingMessageUnit(UserMessage.readElement(userMessage));
+                      core.getUpdateManager()
+                              .storeIncomingMessageUnit(um);
         mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
                 userMessageEntity);
 

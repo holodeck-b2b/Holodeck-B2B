@@ -135,6 +135,8 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     public void init(final ConfigurationContext cc, final AxisModule am) throws AxisFault {
         log.info("Starting Holodeck B2B Core module...");
 
+        System.out.println("Starting Holodeck B2B Core module...");
+
         // Check if module name in module.xml is equal to constant use in code
         if (!am.getName().equals(HOLODECKB2B_CORE_MODULE)) {
             // Name is not equal! This is a fatal configuration error, stop loading this module and alert operator
@@ -174,6 +176,8 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         String persistencyProviderClassname = instanceConfiguration.getPersistencyProviderClass();
         if (Utils.isNullOrEmpty(persistencyProviderClassname))
             persistencyProviderClassname = "org.holodeckb2b.persistency.DefaultProvider";
+
+        System.out.println("persistencyProviderClassname: " + persistencyProviderClassname);
 
         IPersistencyProvider persistencyProvider = null;
         try {

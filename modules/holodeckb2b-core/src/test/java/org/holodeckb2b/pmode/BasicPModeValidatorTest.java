@@ -22,7 +22,7 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 import org.holodeckb2b.pmode.helpers.*;
 import org.holodeckb2b.security.util.SecurityUtils;
-import org.holodeckb2b.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 
 import org.junit.After;
 import org.junit.Before;

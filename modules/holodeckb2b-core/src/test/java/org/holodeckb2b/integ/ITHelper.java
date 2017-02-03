@@ -20,7 +20,7 @@ import org.apache.commons.lang.SystemUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
-import org.holodeckb2b.testhelpers.FilesUtility;
+import org.holodeckb2b.core.testhelpers.FilesUtility;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

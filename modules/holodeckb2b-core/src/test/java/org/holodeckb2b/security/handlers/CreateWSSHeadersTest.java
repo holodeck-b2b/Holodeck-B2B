@@ -38,7 +38,7 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.pmode.helpers.EncryptionConfig;
 import org.holodeckb2b.pmode.helpers.SigningConfig;
 import org.holodeckb2b.pmode.helpers.UsernameTokenConfig;
-import org.holodeckb2b.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
