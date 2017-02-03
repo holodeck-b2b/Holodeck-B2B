@@ -22,17 +22,18 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.messagemodel.AgreementReference;
+import org.holodeckb2b.common.messagemodel.TradingPartner;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessage;
+import org.holodeckb2b.ebms3.packaging.*;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.persistency.dao.UpdateManager;
-import org.holodeckb2b.pmode.helpers.PMode;
+import org.holodeckb2b.pmode.helpers.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -71,7 +72,7 @@ public class FindPModesTest {
     public void testDoProcessing() throws Exception {
         final String mmdPath =
                 this.getClass().getClassLoader()
-                        .getResource("multihop/icloud/full_mmd.xml").getPath();
+                        .getResource("handlers/full_mmd.xml").getPath();
         final File f = new File(mmdPath);
         MessageMetaData mmd = null;
         try {
@@ -99,10 +100,40 @@ public class FindPModesTest {
         pmode.setMep(EbMSConstants.ONE_WAY_MEP);
         pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
 
+        PartnerConfig initiator = new PartnerConfig();
+        pmode.setInitiator(initiator);
+
+        PartnerConfig responder = new PartnerConfig();
+        pmode.setResponder(responder);
+
+        Leg leg = new Leg();
+        pmode.addLeg(leg);
+
         org.holodeckb2b.common.messagemodel.UserMessage userMessage
                 = UserMessage.readElement(umElement);
 
-        String pmodeId = userMessage.getCollaborationInfo().getAgreement().getPModeId();
+        TradingPartner sender = userMessage.getSender();
+        initiator.setRole(sender.getRole());
+        initiator.setPartyIds(sender.getPartyIds());
+
+        TradingPartner receiver = userMessage.getReceiver();
+        responder.setRole(receiver.getRole());
+        responder.setPartyIds(receiver.getPartyIds());
+
+        AgreementReference agreementReference =
+                userMessage.getCollaborationInfo().getAgreement();
+        String pmodeId = agreementReference.getPModeId();
+        String agreementRefName = agreementReference.getName();
+        //System.out.println("agreementRefName: " + agreementRefName);
+        String agreementRefType = agreementReference.getType();
+        //System.out.println("agreementRefType: " + agreementRefType);
+
+        pmode.setId(pmodeId);
+
+        Agreement agreement = new Agreement();
+        agreement.setName(agreementRefName);
+        agreement.setType(agreementRefType);
+        pmode.setAgreement(agreement);
 
         // todo this seems strange that we need to set the PMode id value separately
         // todo when it is contained within the agreement
@@ -126,6 +157,5 @@ public class FindPModesTest {
         }
 
         assertNotNull(mc.getProperty(MessageContextProperties.IN_USER_MESSAGE));
-//        fail("Not implemented yet!");
     }
 }
