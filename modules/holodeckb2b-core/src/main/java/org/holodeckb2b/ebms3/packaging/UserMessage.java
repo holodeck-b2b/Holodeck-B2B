@@ -106,6 +106,8 @@ public class UserMessage {
         final org.holodeckb2b.common.messagemodel.UserMessage umData =
                                                                 new org.holodeckb2b.common.messagemodel.UserMessage();
 
+        // todo maybe we need to set PmodeId here, because it is not set now
+
         // Read the [optional] mpc attribute
         final String  mpc = umElement.getAttributeValue(new QName(MPC_ATTR));
         // If there was no mpc attribute or it was empty (which formally is illegal because the mpc should be a valid
@@ -135,5 +137,4 @@ public class UserMessage {
 
         return umData;
     }
-
 }
