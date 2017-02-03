@@ -87,6 +87,8 @@ public class SenderWorker extends AbstractWorkerTask {
                         // only when we could succesfully set processing state really start processing
                         log.debug("Start processing " + MessageUnitUtils.getMessageUnitName(msgUnit)
                                     + "[" + msgUnit.getMessageId() + "]");
+                        // Ensure all data is available for processing
+                        HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(msgUnit);
                         Axis2Sender.sendMessage(msgUnit, log);
                     } else
                         // Message probably already in process

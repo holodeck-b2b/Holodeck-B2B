@@ -87,6 +87,9 @@ public class PartProperties {
      * @return              A new collection of objects implementing {@link IProperty}
      */
     public static Collection<IProperty> readElement(final OMElement ppElement) {
+        if (ppElement == null)
+            return null;
+        
         // Create new collection
         final ArrayList<IProperty> props = new ArrayList<>();
         // Get all child elements containing the properties
