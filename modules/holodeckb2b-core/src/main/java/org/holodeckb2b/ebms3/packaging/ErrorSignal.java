@@ -180,7 +180,7 @@ public class ErrorSignal {
         // Add Description element
         final IDescription errDescription = error.getDescription();
         if (errDescription != null && errDescription.getText() != null)
-            Description.createElement(errorElement, errDescription);
+            DescriptionElement.createElement(errorElement, errDescription);
 
         return errorElement;
     }
@@ -213,7 +213,7 @@ public class ErrorSignal {
             error.setErrorDetail(errDetailElement.getText());
 
         // Read the description element (if it exists)
-        error.setDescription(Description.readElement(Description.getElement(errorElement)));
+        error.setDescription(DescriptionElement.readElement(DescriptionElement.getElement(errorElement)));
 
         return error;
     }

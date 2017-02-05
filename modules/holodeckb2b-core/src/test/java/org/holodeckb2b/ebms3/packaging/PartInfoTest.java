@@ -22,13 +22,11 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.messagemodel.*;
 import org.holodeckb2b.common.messagemodel.Property;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,7 +70,7 @@ public class PartInfoTest {
      public void testCreateEmptyElement() throws Exception {
         OMElement piElement = PartInfo.createElement(plElement, new Payload());
         System.out.println("piElement: " + piElement);
-        assertNotNull(plElement);
+        assertNotNull(piElement);
     }
 
     @Test
@@ -97,7 +95,7 @@ public class PartInfoTest {
         assertNotNull(piElement);
         OMElement schema = Schema.getElement(piElement);
         assertNotNull(schema);
-        OMElement descr = Description.getElement(piElement);
+        OMElement descr = DescriptionElement.getElement(piElement);
         assertNotNull(descr);
         OMElement partProps = PartProperties.getElement(piElement);
         assertNotNull(partProps);

@@ -80,7 +80,7 @@ public class PartInfo {
         // Create the Description element (if a description is provided)
         final IDescription descr = data.getDescription();
         if (descr != null && !Utils.isNullOrEmpty(descr.getText()))
-            Description.createElement(piElement, descr);
+            DescriptionElement.createElement(piElement, descr);
         // Create the PartProperties element (if there are message properties)
         final Collection<IProperty> partProps = data.getProperties();
         if (!Utils.isNullOrEmpty(partProps))
@@ -139,9 +139,9 @@ public class PartInfo {
         if(schema != null)
             plData.setSchemaReference(Schema.readElement(schema));
         // Read and process Description element (optional)
-        OMElement description = Description.getElement(piElement);
+        OMElement description = DescriptionElement.getElement(piElement);
         if(description != null)
-            plData.setDescription(Description.readElement(description));
+            plData.setDescription(DescriptionElement.readElement(description));
         // Read and process the PartProperties element (optional)
         OMElement partProperties = PartProperties.getElement(piElement);
         if(partProperties != null)

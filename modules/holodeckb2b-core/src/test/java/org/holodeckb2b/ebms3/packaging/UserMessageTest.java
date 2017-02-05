@@ -124,7 +124,7 @@ public class UserMessageTest {
         assertNotNull(partInfoElem2);
         OMElement schema = Schema.getElement(partInfoElem2);
         assertNotNull(schema);
-        OMElement descr = Description.getElement(partInfoElem2);
+        OMElement descr = DescriptionElement.getElement(partInfoElem2);
         assertNotNull(descr);
         OMElement partProps = PartProperties.getElement(partInfoElem2);
         assertNotNull(partProps);

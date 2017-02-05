@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.general.IDescription;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class Description {
+public class DescriptionElement {
 
     /**
      * The fully qualified name of the element as an {@see QName}
