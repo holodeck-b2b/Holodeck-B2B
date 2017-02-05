@@ -45,11 +45,11 @@
     </properties>
 
     <modules>
+        <module>modules/holodeckb2b-it</module>
         <module>modules/holodeckb2b-interfaces</module>
         <module>modules/holodeckb2b-common</module>
         <module>modules/holodeckb2b-core</module>
         <module>modules/holodeckb2b-distribution</module>
-        <module>modules/holodeckb2b-it</module>
     </modules>
 
     <licenses>
@@ -84,7 +84,6 @@
                 <artifactId>holodeckb2b-distribution</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
 
             <!--===============================================================
                 Holodeck is build on Axis2, so include all relevant Axis2
@@ -135,7 +134,6 @@
                 <version>${hibernate.version}</version>
                 <scope>runtime</scope>
             </dependency>
-
 
              <!--===============================================================
                 XML Processing libraries
@@ -249,6 +247,13 @@
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.12</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>holodeckb2b-it</artifactId>
+                <version>next-SNAPSHOT-3</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

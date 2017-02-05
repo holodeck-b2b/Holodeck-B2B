@@ -25,7 +25,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Created at 13:45 06.11.16
+ * Integration test. Tests the One Way Message Exchange Patterns communications
+ * between two HolodeckB2B instances.
  *
  * This test takes more time than junit tests
  * That's why it is excluded from the tests during project compilation.
@@ -35,13 +36,13 @@ import static org.junit.Assert.assertTrue;
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @Category(IntegrationTest.class)
-public class OneWayIT {
+public class OneWayMEPWorkflows {
     private static ITHelper itHelper;
 
     private static String dADirName = "HolodeckB2B-A";
     private static String dBDirName = "HolodeckB2B-B";
 
-    private static final Logger log = LogManager.getLogger(OneWayIT.class);
+    private static final Logger log = LogManager.getLogger(OneWayMEPWorkflows.class);
 
     @BeforeClass
     public static void setUpClass() {
@@ -73,8 +74,8 @@ public class OneWayIT {
     public static void tearDownClass() {
         System.out.print("Cleaning up the OneWay integration test resources ... ");
         itHelper.stopHolodeckB2BInstances();
-//        itHelper.deleteDistDir(dADirName);
-//        itHelper.deleteDistDir(dBDirName);
+        itHelper.deleteDistDir(dADirName);
+        itHelper.deleteDistDir(dBDirName);
         System.out.println("done.");
     }
 
