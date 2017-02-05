@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class CollaborationInfo {
+public class CollaborationInfoElement {
 
     /**
      * The fully qualified name of the element as an {@link QName}

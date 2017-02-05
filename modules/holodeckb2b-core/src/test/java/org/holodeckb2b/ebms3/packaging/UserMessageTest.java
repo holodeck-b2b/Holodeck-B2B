@@ -103,7 +103,7 @@ public class UserMessageTest {
             OMElement idElement = (OMElement)it.next();
             assertEquals("n-soaDLzuliyRmzSlBe7", idElement.getText());
         }
-        OMElement ciElement = CollaborationInfo.getElement(userMessageElement);
+        OMElement ciElement = CollaborationInfoElement.getElement(userMessageElement);
         assertEquals(COLLABORATION_INFO_ELEMENT_NAME, ciElement.getQName());
         OMElement arElement = AgreementRef.getElement(ciElement);
         assertEquals(AGREEMENT_REF_INFO_ELEMENT_NAME, arElement.getQName());

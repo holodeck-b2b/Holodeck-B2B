@@ -106,7 +106,7 @@ public class ConfigureMultihopTest {
                                                               .storeIncomingMessageUnit(
                                                                                 UserMessage.readElement(userMessage));
 
-        OMElement ciElement = CollaborationInfo.getElement(userMessage);
+        OMElement ciElement = CollaborationInfoElement.getElement(userMessage);
         OMElement arElement = AgreementRef.getElement(ciElement);
         AgreementReference ar = AgreementRef.readElement(arElement);
 

@@ -70,7 +70,7 @@ public class UserMessage {
         // Create the PartyInfo element
         PartyInfo.createElement(usermessage, data);
         // Create the CollaborationInfo element
-        CollaborationInfo.createElement(usermessage, data.getCollaborationInfo());
+        CollaborationInfoElement.createElement(usermessage, data.getCollaborationInfo());
         // Create the MessageProperties element (if there are message properties)
         final Collection<IProperty> msgProps = data.getMessageProperties();
         if (Utils.isNullOrEmpty(msgProps))
@@ -123,7 +123,7 @@ public class UserMessage {
         PartyInfo.readElement(PartyInfo.getElement(umElement), umData);
 
         // Get and read the CollaborationInfo element
-        umData.setCollaborationInfo(CollaborationInfo.readElement(CollaborationInfo.getElement(umElement)));
+        umData.setCollaborationInfo(CollaborationInfoElement.readElement(CollaborationInfoElement.getElement(umElement)));
 
         // Get the MessageProperties element and process it when available
         child = MessageProperties.getElement(umElement);
