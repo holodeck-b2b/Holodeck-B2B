@@ -18,11 +18,10 @@ package org.holodeckb2b.ebms3.packaging;
 
 import java.util.Collection;
 import java.util.Iterator;
-
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
@@ -97,56 +96,35 @@ public class UserMessage {
     }
 
     /**
-     * Reads the meta data of a User Message message unit from the <code>eb:UserMessage</code>
-     * element and return it as a {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage}
-     * entity object.
-     * <p><b>NOTE 1:</b> The entity object is not persisted by this method! It
-     * is the responsibility of the caller to store it.
-     * <p><b>NOTE 2:</b>
+     * Reads the meta data of a User Message message unit from the <code>eb:UserMessage</code> element and return it as
+     * a {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage} entity object.
+     * <p><b>NOTE :</b> The entity object is not persisted by this method! It is the responsibility of the caller to
+     * store it.
      *
-     * @param   umElement           The <code>UserMessage</code> element that contains
-     *                              the meta data to read
-     * @return                      A new {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage}
-     *                              object
-     * @throws PackagingException   When the given element is not a valid
-     *                              <code>UserMessage</code> element.
+     * @param   umElement           The <code>UserMessage</code> element that contains the meta data to read
+     * @return                      A new {@link org.holodeckb2b.ebms3.persistency.entities.UserMessage} object
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.UserMessage readElement(final OMElement umElement) throws PackagingException {
-        // Create a new PullRequest entity object to store the information in
-        final org.holodeckb2b.ebms3.persistency.entities.UserMessage umData = new org.holodeckb2b.ebms3.persistency.entities.UserMessage();
+    public static org.holodeckb2b.ebms3.persistency.entities.UserMessage readElement(final OMElement umElement) {
+        // Create a new entity object to store the information in
+        final org.holodeckb2b.ebms3.persistency.entities.UserMessage umData =
+                                                        new org.holodeckb2b.ebms3.persistency.entities.UserMessage();
 
-        // The PullRequest itself only contains the [optional] mpc attribute
-        String  mpc = umElement.getAttributeValue(new QName(MPC_ATTR));
-
-        // If there was no mpc attribute or it was empty (which formally is
-        // illegal because the mpc should be a valid URI) it is set to the default MPC
-        if (mpc == null || mpc.isEmpty())
-            mpc = EbMSConstants.DEFAULT_MPC;
-        umData.setMPC(mpc);
+        // Read the [optional] mpc attribute
+        final String  mpc = umElement.getAttributeValue(new QName(MPC_ATTR));
+        // If there was no mpc attribute or it was empty (which formally is illegal because the mpc should be a valid
+        // URI) it is set to the default MPC
+        umData.setMPC(Utils.isNullOrEmpty(mpc) ? EbMSConstants.DEFAULT_MPC : mpc);
 
         // Get the MessageInfo element
         OMElement child = MessageInfo.getElement(umElement);
-        if (child == null)
-            // The MessageInfo element is required, so this is an invalid message. Raise exception
-            throw new PackagingException("Missing MessageInfo element in UserMessage");
-        // Read the MessageInfo element
+        // Read the MessageInfo element and store info in the persistency object
         MessageInfo.readElement(child, umData);
 
-        // Get the PartyInfo element
-        child = PartyInfo.getElement(umElement);
-        if (child == null)
-            // The PartyInfo element is required, so this is an invalid message. Raise exception
-            throw new PackagingException("Missing PartyInfo element in UserMessage");
-        // Read the PartyInfo element
-        PartyInfo.readElement(child, umData);
+        // Get and read the PartyInfo element
+        PartyInfo.readElement(PartyInfo.getElement(umElement), umData);
 
-        // Get the CollaborationInfo element
-        child = CollaborationInfo.getElement(umElement);
-        if (child == null)
-            // The CollaborationInfo element is required, so this is an invalid message. Raise exception
-            throw new PackagingException("Missing CollaborationInfo element in UserMessage");
-        // Read the CollaborationInfo element
-        umData.setCollaborationInfo(CollaborationInfo.readElement(child));
+        // Get and read the CollaborationInfo element
+        umData.setCollaborationInfo(CollaborationInfo.readElement(CollaborationInfo.getElement(umElement)));
 
         // Get the MessageProperties element and process it when available
         child = MessageProperties.getElement(umElement);

@@ -1,7 +1,7 @@
 #Holodeck B2B
 Holodeck B2B is a standalone B2B messaging solution that implements the OASIS specifications for ebMS3 and the AS4 profile. Java based, it will run on most platforms. 
 
-It is designed with extensibility in mind providing an interface layer (API) which you can find in the interfaces module, and lots of documentation inside the code. 
+It is designed with extensibility in mind providing an interface layer (API) which you can find in the Interfaces module, and lots of documentation inside the code. 
 
 __________________
 For more information on using Holodeck B2B visit the website at http://holodeck-b2b.org  

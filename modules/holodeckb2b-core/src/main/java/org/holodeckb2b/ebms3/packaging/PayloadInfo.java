@@ -19,9 +19,7 @@ package org.holodeckb2b.ebms3.packaging;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -80,21 +78,17 @@ public class PayloadInfo {
     }
 
     /**
-     * Reads the meta data on the payloads from the <code>PartInfo</code> child
-     * elements and returns them as a collection of {@link org.holodeckb2b.ebms3.persistency.entities.Payload}
-     * entity objects.
-     * <p><b>NOTE:</b> The entity objects in the collection are not persisted by
-     * this method! It is the responsibility of the caller to store it.
+     * Reads the meta data on the payloads from the <code>PartInfo</code> child elements and returns them as a
+     * collection of {@link org.holodeckb2b.ebms3.persistency.entities.Payload} entity objects.
+     * <p><b>NOTE:</b> The entity objects in the collection are not persisted by this method! It is the responsibility
+     * of the caller to store it.
      *
-     * @param piElement             The <code>PayloadInfo</code> element that contains
-     *                              the <code>PartInfo</code> element to read the
-     *                              meta data from
+     * @param piElement             The <code>PayloadInfo</code> element that contains the <code>PartInfo</code> element
+     *                              to read the meta-data from
      * @return                      A new collection of {@link org.holodeckb2b.ebms3.persistency.entities.Payload}
      *                              objects
-     * @throws PackagingException   When the given element is not a valid
-     *                              <code>PayloadInfo</code> element.
      */
-    public static Collection<org.holodeckb2b.ebms3.persistency.entities.Payload> readElement(final OMElement piElement) throws PackagingException {
+    public static Collection<org.holodeckb2b.ebms3.persistency.entities.Payload> readElement(final OMElement piElement){
         if (piElement == null)
             return null;
 
@@ -105,10 +99,6 @@ public class PayloadInfo {
         // Read each property element and add it info to the collection
         while (it.hasNext())
             payloads.add(PartInfo.readElement((OMElement) it.next()));
-
-        // The collection must contain at least 1 payload
-        if (payloads.isEmpty())
-            throw new PackagingException("PayloadInfo does not contain PartInfo elements");
 
         return payloads;
     }

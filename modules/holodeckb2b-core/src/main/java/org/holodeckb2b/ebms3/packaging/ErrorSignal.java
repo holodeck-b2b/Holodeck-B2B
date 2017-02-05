@@ -18,9 +18,7 @@ package org.holodeckb2b.ebms3.packaging;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -33,14 +31,12 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 
 /**
  * Is a helper class for handling the ebMS error signals in the ebMS SOAP header.
- * The error signal message unit is a bit different from the other signal message
- * units as it can contain multiple <code>eb:Error</code> elements with one sibling
- * <code>eb:MessageInfo</code> element under the parent <code>eb:SignalMessage</code>
- * element.
- * <p>The Error signal message unit is specified in section 6.2 and 6.3 of the
- * ebMS 3 Core specification.
- * <p>NOTE: The naming of this class differs from the other classes in this packages
- * because <code>Error</code> is a reserved class name.
+ * The error signal message unit is a bit different from the other signal message units as it can contain multiple
+ * <code>eb:Error</code> elements with one sibling <code>eb:MessageInfo</code> element under the parent
+ * <code>eb:SignalMessage</code> element.
+ * <p>The Error signal message unit is specified in section 6.2 and 6.3 of the ebMS 3 Core specification.
+ * <p>NOTE: The naming of this class differs from the other classes in this packages because <code>Error</code> is a
+ * reserved class name.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -89,21 +85,18 @@ public class ErrorSignal {
     }
 
     /**
-     * Reads the information from a <code>eb:SignalMessage</code> and its child
-     * elements that contain the Error signal message unit and stores it a
-     * {@link ErrorMessage} object.
-     * <p><b>NOTE:</b> The information is stored in an entity object, but this
-     * method will NOT persist the object.
+     * Reads the information from a <code>eb:SignalMessage</code> and its child elements that contain the Error signal
+     * message unit and stores it a {@link ErrorMessage} object.
+     * <p><b>NOTE:</b> The information is stored in an entity object, but this method will NOT persist the object.
      *
-     * @param sigElement    The parent <code>eb:SignalMessage</code> element that contains the <code>eb:Error</code> elements
+     * @param sigElement    The parent <code>eb:SignalMessage</code> element that contains the <code>eb:Error</code>
+     *                      elements
      * @return              The {@link ErrorMessage} object containing the information on the Error signal
-     * @throws PackagingException   When the given element does not conform to
-     *                              ebMS specification and can therefore not be
-     *                              read completely
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.ErrorMessage readElement(final OMElement sigElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.ErrorMessage readElement(final OMElement sigElement) {
         // Create a new EbmsError entity object to store the information in
-        final org.holodeckb2b.ebms3.persistency.entities.ErrorMessage errData = new org.holodeckb2b.ebms3.persistency.entities.ErrorMessage();
+        final org.holodeckb2b.ebms3.persistency.entities.ErrorMessage errData =
+                                                        new org.holodeckb2b.ebms3.persistency.entities.ErrorMessage();
 
         // First read general information from the MessageInfo child
         MessageInfo.readElement(MessageInfo.getElement(sigElement), errData);
@@ -204,12 +197,10 @@ public class ErrorSignal {
 
     /**
      * Helper method for reading information from the <code>Error</code> element.
-     * This element contains the error details which are stored in the {@link EbmsError}
-     * entity object.
+     * This element contains the error details which are stored in the {@link EbmsError} persistency object.
      *
      * @param errorElement      The <code>Error</code> element to read the error details from
-     * @return                  {@link EbmsError} object containing the data read
-     *                          from the element
+     * @return                  {@link EbmsError} object containing the data read from the element
      */
     protected static EbmsError readErrorElement(final OMElement errorElement) {
         final EbmsError   error = new EbmsError();
