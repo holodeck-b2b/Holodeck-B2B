@@ -117,6 +117,13 @@
 
         <!-- JUnit for testing -->
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-it</artifactId>
+            <version>next-SNAPSHOT-3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>

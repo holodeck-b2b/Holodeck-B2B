@@ -62,10 +62,11 @@ public class ITHelper {
         dFileName = "holodeckb2b-distribution-"+projectVersion+"-full.zip";
         dFilePath = ITHelper.class.getClassLoader().getResource("").getPath();
         dFilePath += "/../../../holodeckb2b-distribution/target/" + dFileName;
-        //System.out.println("version: " + projectVersion);
+        System.out.println("version: " + projectVersion);
         // todo dir name should be taken from pom.xml
         dDirName = "holodeck-b2b-"+projectVersion;
         workingDirPath = ITHelper.class.getClassLoader().getResource("integ").getPath();
+        System.out.println("working dir: " + workingDirPath);
     }
 
     /**
@@ -435,9 +436,7 @@ public class ITHelper {
      * @return
      */
     boolean fileExistsInDirectory(String fileName, String dirName) {
-
         File file = new File(workingDirPath + "/" + dirName + "/" + fileName);
-        System.out.println("fileExistsInDirectory: " + file.getPath());
         return file.exists();
     }
 

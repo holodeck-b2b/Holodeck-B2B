@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>holodeckb2b</artifactId>
+        <groupId>org.holodeckb2b</groupId>
+        <version>next-SNAPSHOT-3</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>holodeckb2b-it</artifactId>
+
+    <packaging>jar</packaging>
+    <name>Holodeck B2B - Integration Tests JUnit Categories</name>
+
+</project>

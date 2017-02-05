@@ -34,6 +34,7 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
+@Category(IntegrationTest.class)
 public class OneWayIT {
     private static ITHelper itHelper;
 
@@ -90,8 +91,8 @@ public class OneWayIT {
     @After
     public void tearDown() {
         // delete all messages from msg_in & msg_out
-//        itHelper.clearMsgOutAndMsgInDirs(dADirName);
-//        itHelper.clearMsgOutAndMsgInDirs(dBDirName);
+        itHelper.clearMsgOutAndMsgInDirs(dADirName);
+        itHelper.clearMsgOutAndMsgInDirs(dBDirName);
     }
 
     @Test
@@ -136,7 +137,7 @@ public class OneWayIT {
         System.out.println("The OneWay/Push integration test finished.");
     }
 
-    //@Test
+    @Test
     public void testOneWayPull() {
         System.out.println("The OneWay/Pull integration test started ... ");
         // set pulling interval of initiator (HolodeckB2B-A) to 10 seconds

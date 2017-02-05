@@ -49,6 +49,7 @@
         <module>modules/holodeckb2b-common</module>
         <module>modules/holodeckb2b-core</module>
         <module>modules/holodeckb2b-distribution</module>
+        <module>modules/holodeckb2b-it</module>
     </modules>
 
     <licenses>
@@ -310,9 +311,22 @@
                     </configuration>
                 </plugin>
                 <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.19.1</version>
+                    <configuration>
+                        <excludedGroups>org.holodeckb2b.integ.IntegrationTest</excludedGroups>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>2.13</version>
+                    <configuration>
+                        <includes>
+                            <include>**/*.java</include>
+                        </includes>
+                        <groups>org.holodeckb2b.integ.IntegrationTest</groups>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>integration-test</id>
