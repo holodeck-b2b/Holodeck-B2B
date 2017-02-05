@@ -105,7 +105,7 @@ public class UserMessageTest {
         }
         OMElement ciElement = CollaborationInfoElement.getElement(userMessageElement);
         assertEquals(COLLABORATION_INFO_ELEMENT_NAME, ciElement.getQName());
-        OMElement arElement = AgreementRef.getElement(ciElement);
+        OMElement arElement = AgreementRefElement.getElement(ciElement);
         assertEquals(AGREEMENT_REF_INFO_ELEMENT_NAME, arElement.getQName());
 
         // Check the UserMessage for PayloadInfo properties presence

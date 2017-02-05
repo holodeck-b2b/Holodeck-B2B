@@ -60,7 +60,7 @@ public class CollaborationInfoElement {
 
         // Fill it based on the given data
         if (data.getAgreement() != null)
-            AgreementRef.createElement(collabInfo, data.getAgreement());
+            AgreementRefElement.createElement(collabInfo, data.getAgreement());
 
         Service.createElement(collabInfo, data.getService());
 
@@ -123,9 +123,9 @@ public class CollaborationInfoElement {
             ciData.setConversationId(child.getText());
 
         // Get and read optional AgreementRef child element
-        child = AgreementRef.getElement(ciElement);
+        child = AgreementRefElement.getElement(ciElement);
         if (child != null)
-            ciData.setAgreement(AgreementRef.readElement(child));
+            ciData.setAgreement(AgreementRefElement.readElement(child));
 
         return ciData;
     }

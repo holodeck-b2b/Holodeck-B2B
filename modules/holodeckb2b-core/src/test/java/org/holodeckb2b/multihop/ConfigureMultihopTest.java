@@ -107,8 +107,8 @@ public class ConfigureMultihopTest {
                                                                                 UserMessage.readElement(userMessage));
 
         OMElement ciElement = CollaborationInfoElement.getElement(userMessage);
-        OMElement arElement = AgreementRef.getElement(ciElement);
-        AgreementReference ar = AgreementRef.readElement(arElement);
+        OMElement arElement = AgreementRefElement.getElement(ciElement);
+        AgreementReference ar = AgreementRefElement.readElement(arElement);
 
         assertNotNull(ar.getPModeId());
 

@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class AgreementRef {
+public class AgreementRefElement {
 
     /**
      * The fully qualified name of the element as an {@link QName}
