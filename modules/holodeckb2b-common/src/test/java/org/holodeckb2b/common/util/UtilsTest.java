@@ -16,21 +16,19 @@
  */
 package org.holodeckb2b.common.util;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.SortedSet;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
 import org.holodeckb2b.common.exceptions.ObjectSerializationException;
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.SortedSet;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 20:32 15.09.16
@@ -125,6 +123,9 @@ public class UtilsTest {
                 assertNotEquals(file.getAbsolutePath(), newFileName1);
                 assertNotEquals(file.getAbsolutePath(), newFileName2);
             }
+
+            new File(newFileName1).delete();
+            new File(newFileName2).delete();            
         } catch (IOException e) {
             fail();
         }

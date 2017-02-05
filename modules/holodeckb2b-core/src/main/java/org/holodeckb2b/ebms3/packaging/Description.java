@@ -17,15 +17,13 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IDescription;
 
 /**
- * Is a helper class for handling the ebMS Description element in the ebMS SOAP
- * header.
+ * Is a helper class for handling the ebMS Description element in the ebMS SOAP header.
  * <p>NOTE: This element is currently only specified in section 6.2.8 of the ebMS 3 Core specification as
  * a child of the <code>Error</code> element in a Signal message unit. The schema of the Core spec
  * however defines this element also as child of the PartInfo element, part of a user message
@@ -91,33 +89,28 @@ public class Description {
     }
 
     /**
-     * Reads the information from a <code>eb:Description</code> element and
-     * returns it in a {@see org.holodeckb2b.ebms3.persistent.general.Description} object.
-     * <p><b>NOTE</b> Although the returned object is an entity object it is not
-     * stored in the database by this method.
+     * Reads the information from a <code>eb:Description</code> element and returns it in a
+     * {@see org.holodeckb2b.ebms3.persistent.general.Description} object.
+     * <p><b>NOTE</b> Although the returned object is an entity object it is not stored in the database by this method.
      *
      * @param descrElement  The element that contains the description to read
-     * @return              {@see org.holodeckb2b.ebms3.persistent.general.Description}
-     *                      object containing the information from the <code>Description</code>
-     *                      element if one exists as child of the given element
-     *                      <code>null</code> if the given element does not contain
-     *                      a <code>Description</code> element
+     * @return              A {@link org.holodeckb2b.ebms3.persistent.general.Description} object containing the
+     *                      information from the specified <code>Description</code> element
      */
     public static org.holodeckb2b.ebms3.persistency.entities.Description readElement(final OMElement descrElement) {
         // Check if there was a Description element to read
         if (descrElement == null)
             return null;
-        else {
-            // Create new entity object
-            final org.holodeckb2b.ebms3.persistency.entities.Description  descrData = new org.holodeckb2b.ebms3.persistency.entities.Description();
 
-            // Read description content
-            descrData.setText(descrElement.getText());
+        // Create new entity object
+        final org.holodeckb2b.ebms3.persistency.entities.Description  descrData =
+                                                        new org.holodeckb2b.ebms3.persistency.entities.Description();
 
-            // Read language attribute
-            descrData.setLanguage(descrElement.getAttributeValue(new QName(NS_URI_ATTR_LANG, LN_ATTR_LANG)));
+        // Read description content
+        descrData.setText(descrElement.getText());
+        // Read language attribute
+        descrData.setLanguage(descrElement.getAttributeValue(new QName(NS_URI_ATTR_LANG, LN_ATTR_LANG)));
 
-            return descrData;
-        }
+        return descrData;
     }
 }

@@ -19,17 +19,14 @@ package org.holodeckb2b.ebms3.packaging;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
 
 /**
- * Is a helper class for handling the ebMS PartProperties element in the ebMS SOAP
- * header.
+ * Is a helper class for handling the ebMS PartProperties element in the ebMS SOAP header.
  * <p>This element is specified in section 5.2.2.13 of the ebMS 3 Core specification.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
@@ -80,20 +77,16 @@ public class PartProperties {
     }
 
     /**
-     * Reads the set of properties from the <code>PartProperties</code> element
-     * and returns them as a collection of {@link org.holodeckb2b.ebms3.persistency.entities.Property}
-     * entity objects.
-     * <p><b>NOTE:</b> The entity objects in the collection are not persisted by
-     * this method! It is the responsibility of the caller to store it.
+     * Reads the set of properties from the <code>PartProperties</code> element and returns them as a collection of
+     * {@link org.holodeckb2b.ebms3.persistency.entities.Property} entity objects.
+     * <p><b>NOTE:</b> The entity objects in the collection are not persisted by this method! It is the responsibility
+     * of the caller to store it.
      *
-     * @param ppElement             The <code>PartProperties</code> element to read the
-     *                              properties from
+     * @param ppElement             The <code>PartProperties</code> element to read the properties from
      * @return                      A new collection of {@link org.holodeckb2b.ebms3.persistency.entities.Property}
      *                              objects
-     * @throws PackagingException   When the given element is not a valid
-     *                              <code>MessageProperties</code> element.
      */
-    public static Collection<org.holodeckb2b.ebms3.persistency.entities.Property> readElement(final OMElement ppElement) throws PackagingException {
+    public static Collection<org.holodeckb2b.ebms3.persistency.entities.Property> readElement(final OMElement ppElement) {
         if (ppElement == null)
             return null;
 
@@ -104,10 +97,6 @@ public class PartProperties {
         // Read each property element and add it info to the collection
         while (it.hasNext())
             props.add(Property.readElement((OMElement) it.next()));
-
-        // The collection must contain at least 1 property
-        if (props.isEmpty())
-            throw new PackagingException("PartProperties does not contain properties");
 
         return props;
     }

@@ -17,7 +17,6 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -101,47 +100,31 @@ public class CollaborationInfo {
      *                              info about this User Message message unit
      * @return                      The {@link org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo} object
      *                              the information is returned in
-     * @throws PackagingException   When the given element does not contain a valid
-     *                              <code>CollaborationInfo</code> element.
      */
-    public static org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo readElement(final OMElement ciElement) throws PackagingException {
+    public static org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo readElement(final OMElement ciElement) {
         // There must be a CollaborationInfo element
         if (ciElement == null)
             return null;
 
         // Create new entity object
-        final org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo ciData = new org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo();
+        final org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo ciData =
+                                                    new org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo();
 
         // Start with reading the required elements: Service, Action and ConversationId
         OMElement child = Service.getElement(ciElement);
-        if (child == null)
-            // Service element is required, so raise exception about invalid message
-            throw new PackagingException("Service element is missing from CollaborationInfo");
-
-        // Read the Service element and store info in entity object
-        ciData.setService(Service.readElement(child));
+        if (child != null)
+            // Read the Service element and store info in entity object
+            ciData.setService(Service.readElement(child));
 
         // Action child element
         child = ciElement.getFirstChildWithName(Q_ACTION);
-        if (child == null)
-            throw new PackagingException("Action element is missing from CollaborationInfo");
-
-        final String action = child.getText();
-        if (action == null || action.isEmpty())
-            throw new PackagingException("Action element is empty");
-
-        ciData.setAction(action);
+        if (child != null)
+            ciData.setAction(child.getText());
 
         // ConversationId child element
         child = ciElement.getFirstChildWithName(Q_CONVERSATIONID);
-        if (child == null)
-            throw new PackagingException("ConversationId element is missing from CollaborationInfo");
-
-        final String convId = child.getText();
-        if (convId == null || convId.isEmpty())
-            throw new PackagingException("ConversationId element is empty");
-
-        ciData.setConversationId(convId);
+        if (child != null)
+            ciData.setConversationId(child.getText());
 
         // Get and read optional AgreementRef child element
         child = AgreementRef.getElement(ciElement);
