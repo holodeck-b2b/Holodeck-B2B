@@ -45,11 +45,12 @@
     </properties>
 
     <modules>
-        <module>modules/holodeckb2b-it</module>
         <module>modules/holodeckb2b-interfaces</module>
         <module>modules/holodeckb2b-common</module>
         <module>modules/holodeckb2b-core</module>
         <module>modules/holodeckb2b-distribution</module>
+        <module>modules/holodeckb2b-it_lib</module>
+        <module>modules/holodeckb2b-it</module>
     </modules>
 
     <licenses>

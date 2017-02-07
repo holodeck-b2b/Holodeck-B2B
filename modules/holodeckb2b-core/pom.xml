@@ -118,7 +118,7 @@
         <!-- JUnit for testing -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-it</artifactId>
+            <artifactId>holodeckb2b-it_lib</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
