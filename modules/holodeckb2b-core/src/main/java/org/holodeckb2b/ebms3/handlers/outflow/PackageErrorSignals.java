@@ -34,6 +34,7 @@ import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -98,7 +99,7 @@ public class PackageErrorSignals extends BaseHandler {
         boolean addSOAPFault = false;
         for(final IErrorMessageEntity e : errors) {
             log.debug("Add eb:SignalMessage element to the existing eb:Messaging header");
-            org.holodeckb2b.ebms3.packaging.ErrorSignal.createElement(messaging, e);
+            ErrorSignalElement.createElement(messaging, e);
             log.debug("eb:SignalMessage element succesfully added to header");
 
             // Check if a SOAPFault should be added

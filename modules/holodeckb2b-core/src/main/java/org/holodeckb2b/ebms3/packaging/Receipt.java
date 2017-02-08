@@ -54,7 +54,7 @@ public class Receipt {
         final OMElement signalmessage = SignalMessage.createElement(messaging);
 
         // Create the generic MessageInfo element
-        MessageInfo.createElement(signalmessage, receipt);
+        MessageInfoElement.createElement(signalmessage, receipt);
 
         // Create the Receipt element
         final OMElement rcptElement = signalmessage.getOMFactory().createOMElement(Q_ELEMENT_NAME, signalmessage);
@@ -81,7 +81,7 @@ public class Receipt {
                                                               new org.holodeckb2b.common.messagemodel.Receipt();
 
         // First read general information from the MessageInfo child
-        MessageInfo.readElement(MessageInfo.getElement(sigElement), rcptData);
+        MessageInfoElement.readElement(MessageInfoElement.getElement(sigElement), rcptData);
 
         // Because the content of the Receipt is not predefined read and store all child elements of the Receipt element
         rcptData.setContent(sigElement.getFirstChildWithName(Q_ELEMENT_NAME).getChildElements());

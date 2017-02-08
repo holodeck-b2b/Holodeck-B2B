@@ -39,7 +39,7 @@ import static org.junit.Assert.*;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class PartInfoTest {
+public class PartInfoElementTest {
 
     private OMElement plElement;
 
@@ -68,7 +68,7 @@ public class PartInfoTest {
 
     @Test
      public void testCreateEmptyElement() throws Exception {
-        OMElement piElement = PartInfo.createElement(plElement, new Payload());
+        OMElement piElement = PartInfoElement.createElement(plElement, new Payload());
         System.out.println("piElement: " + piElement);
         assertNotNull(piElement);
     }
@@ -90,7 +90,7 @@ public class PartInfoTest {
         properties.add(new Property("name1", "value1", "type1"));
         partInfo.setProperties(properties);
 
-        OMElement piElement = PartInfo.createElement(plElement, partInfo);
+        OMElement piElement = PartInfoElement.createElement(plElement, partInfo);
         assertNotNull(piElement);
         OMElement schema = Schema.getElement(piElement);
         assertNotNull(schema);
@@ -102,15 +102,15 @@ public class PartInfoTest {
 
     @Test
     public void testGetElements() throws Exception {
-        Iterator<OMElement> it = PartInfo.getElements(plElement);
+        Iterator<OMElement> it = PartInfoElement.getElements(plElement);
         assertNotNull(it);
         assertTrue(it.hasNext());
     }
 
     @Test
     public void testReadEmptyElement() throws Exception {
-        OMElement piElement = PartInfo.createElement(plElement, new Payload());
-        Payload payload = PartInfo.readElement(piElement);
+        OMElement piElement = PartInfoElement.createElement(plElement, new Payload());
+        Payload payload = PartInfoElement.readElement(piElement);
         assertNotNull(payload);
         payload.getContainment();
     }
@@ -132,9 +132,9 @@ public class PartInfoTest {
         properties.add(new Property("name1", "value1", "type1"));
         partInfo.setProperties(properties);
 
-        OMElement piElement = PartInfo.createElement(plElement, partInfo);
+        OMElement piElement = PartInfoElement.createElement(plElement, partInfo);
 
-        Payload payload = PartInfo.readElement(piElement);
+        Payload payload = PartInfoElement.readElement(piElement);
         assertNotNull(payload);
 //        assertEquals(IPayload.Containment.ATTACHMENT, payload.getContainment()); // fails
         assertEquals("somewhere", partInfo.getSchemaReference().getLocation());

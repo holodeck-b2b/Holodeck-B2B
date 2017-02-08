@@ -24,7 +24,7 @@ import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.packaging.ErrorSignal;
+import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -57,7 +57,7 @@ public class ReadError extends BaseHandler {
         if (messaging != null) {
             // Check if there are Error signals
             log.debug("Check for Error elements to determine if message contains one or more errors");
-            final Iterator<OMElement> errorSigs = ErrorSignal.getElements(messaging);
+            final Iterator<OMElement> errorSigs = ErrorSignalElement.getElements(messaging);
 
             if (!Utils.isNullOrEmpty(errorSigs)) {
                 log.debug("Error Signal(s) found, read information from message");
@@ -65,7 +65,7 @@ public class ReadError extends BaseHandler {
                 while (errorSigs.hasNext()) {
                     final OMElement errElem = errorSigs.next();
                     // Read information into ErrorMessage object
-                    ErrorMessage errorSignal = ErrorSignal.readElement(errElem);
+                    ErrorMessage errorSignal = ErrorSignalElement.readElement(errElem);
                     log.info("Succesfully read Error message meta data from header. Msg-id="
                             + errorSignal.getMessageId());
                     // And store in database and message context for further processing

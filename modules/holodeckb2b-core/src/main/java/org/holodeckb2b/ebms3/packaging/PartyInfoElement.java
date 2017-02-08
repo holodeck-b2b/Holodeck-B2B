@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class PartyInfo {
+public class PartyInfoElement {
 
     /**
      * The fully qualified name of the element as an {@link QName}

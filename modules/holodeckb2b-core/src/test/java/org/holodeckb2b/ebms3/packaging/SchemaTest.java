@@ -67,7 +67,7 @@ public class SchemaTest {
 
     @Test
     public void testCreateElement() throws Exception {
-        OMElement piElement = PartInfo.createElement(plElement, new Payload());
+        OMElement piElement = PartInfoElement.createElement(plElement, new Payload());
         SchemaReference schema = new SchemaReference();
         schema.setLocation("somewhere");
         schema.setNamespace("namespace1");
@@ -92,7 +92,7 @@ public class SchemaTest {
         schema.setNamespace("namespace1");
         schema.setVersion("test");
         payload.setSchemaReference(schema);
-        OMElement piElement = PartInfo.createElement(plElement, payload);
+        OMElement piElement = PartInfoElement.createElement(plElement, payload);
 
         OMElement schemaElement = Schema.getElement(piElement);
         assertNotNull(schemaElement);
@@ -112,7 +112,7 @@ public class SchemaTest {
         testSchema.setNamespace("namespace1");
         testSchema.setVersion("test");
         payload.setSchemaReference(testSchema);
-        OMElement piElement = PartInfo.createElement(plElement, payload);
+        OMElement piElement = PartInfoElement.createElement(plElement, payload);
         OMElement schemaElement = Schema.createElement(piElement, testSchema);
 
         SchemaReference schema = Schema.readElement(schemaElement);

@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class PartInfo {
+public class PartInfoElement {
 
     /**
      * The fully qualified name of the element as an {@see QName}

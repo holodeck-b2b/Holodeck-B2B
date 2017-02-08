@@ -97,7 +97,7 @@ public class UserMessageElementTest {
         assertEquals(MESSAGING_ELEMENT_NAME, messagingElement.getQName());
         OMElement userMessageElement = messagingElement.getFirstElement();
         assertEquals(USER_MESSAGE_ELEMENT_NAME, userMessageElement.getQName());
-        OMElement miElement = MessageInfo.getElement(userMessageElement);
+        OMElement miElement = MessageInfoElement.getElement(userMessageElement);
         assertEquals(MESSAGE_INFO_ELEMENT_NAME, miElement.getQName());
         Iterator it = miElement.getChildrenWithName(MESSAGE_ID_ELEMENT_NAME);
         assertTrue(it.hasNext());

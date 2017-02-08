@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.general.IProperty;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class MessageProperties {
+public class MessagePropertiesElement {
 
     /**
      * The fully qualified name of the element as an {@link QName}

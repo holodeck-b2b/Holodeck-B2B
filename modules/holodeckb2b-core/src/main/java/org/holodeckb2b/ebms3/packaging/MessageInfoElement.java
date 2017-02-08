@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class MessageInfo {
+public class MessageInfoElement {
 
     /**
      * The fully qualified name of the element as an {@see QName}

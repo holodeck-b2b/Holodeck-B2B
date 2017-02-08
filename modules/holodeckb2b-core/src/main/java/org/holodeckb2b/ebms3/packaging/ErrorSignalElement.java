@@ -38,7 +38,7 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class ErrorSignal {
+public class ErrorSignalElement {
 
     /**
      * The fully qualified name of the element as an {@link QName}
@@ -73,7 +73,7 @@ public class ErrorSignal {
         final OMElement signalmessage = SignalMessage.createElement(messaging);
 
         // Create the generice MessageInfo element
-        MessageInfo.createElement(signalmessage, errorMU);
+        MessageInfoElement.createElement(signalmessage, errorMU);
 
         // Now create an Error element for each error in the error message unit
         for(final IEbmsError error : errorMU.getErrors())
@@ -97,7 +97,7 @@ public class ErrorSignal {
                                                         new org.holodeckb2b.common.messagemodel.ErrorMessage();
 
         // First read general information from the MessageInfo child
-        MessageInfo.readElement(MessageInfo.getElement(sigElement), errData);
+        MessageInfoElement.readElement(MessageInfoElement.getElement(sigElement), errData);
 
         // Now get all child Error elements
         final Iterator<OMElement> it = sigElement.getChildrenWithName(Q_ELEMENT_NAME);

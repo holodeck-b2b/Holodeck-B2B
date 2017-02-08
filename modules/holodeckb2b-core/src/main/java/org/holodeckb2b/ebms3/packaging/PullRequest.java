@@ -66,7 +66,9 @@ public class PullRequest {
 
         // Beside the PullRequest element also the MessageInfo sibling should be
         //  processed to get complete set of information
-        MessageInfo.readElement(MessageInfo.getElement((OMElement) prElement.getParent()), prData);
+        MessageInfoElement.readElement(
+                MessageInfoElement.getElement(
+                        (OMElement) prElement.getParent()), prData);
 
         return prData;
     }
@@ -107,7 +109,7 @@ public class PullRequest {
         final OMElement signalmessage = SignalMessage.createElement(messaging);
 
         // Create the generic MessageInfo element
-        MessageInfo.createElement(signalmessage, pullRequest);
+        MessageInfoElement.createElement(signalmessage, pullRequest);
 
         // Create the PullRequest element
         final OMElement prElement = signalmessage.getOMFactory().createOMElement(Q_ELEMENT_NAME, signalmessage);
