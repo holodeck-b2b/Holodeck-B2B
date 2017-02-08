@@ -21,6 +21,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
@@ -63,8 +64,9 @@ public class ReadUserMessage extends BaseHandler {
                 log.debug("UserMessage found, read information from message");
                 final OMElement umElement = (OMElement) it.next();
                 // Read information into UserMessage entity object
-                org.holodeckb2b.common.messagemodel.UserMessage userMessage = UserMessageElement.readElement(umElement);
-                log.info("Succesfully read user message meta data from header. Msg-id=" + userMessage.getMessageId());
+                UserMessage userMessage = UserMessageElement.readElement(umElement);
+                log.info("Succesfully read user message meta data from header. Msg-id="
+                        + userMessage.getMessageId());
 
                 // Store it in both database and message context for further processing
                 log.debug("Saving user message meta data to database and message context");
