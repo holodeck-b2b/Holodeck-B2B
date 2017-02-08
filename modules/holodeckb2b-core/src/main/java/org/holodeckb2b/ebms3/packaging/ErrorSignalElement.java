@@ -70,7 +70,7 @@ public class ErrorSignalElement {
     public static OMElement createElement(final OMElement messaging, final IErrorMessage errorMU) {
         // First create the SignalMessage element that is the placeholder for
         // the Error elements containing the error info
-        final OMElement signalmessage = SignalMessage.createElement(messaging);
+        final OMElement signalmessage = SignalMessageElement.createElement(messaging);
 
         // Create the generice MessageInfo element
         MessageInfoElement.createElement(signalmessage, errorMU);
@@ -118,7 +118,7 @@ public class ErrorSignalElement {
      */
     public static Iterator<OMElement> getElements(final SOAPHeaderBlock messaging) {
         // Check all SignalMessage elements in the header
-        final Iterator<OMElement> signals = SignalMessage.getElements(messaging);
+        final Iterator<OMElement> signals = SignalMessageElement.getElements(messaging);
 
         final ArrayList<OMElement>  errors = new ArrayList<>();
         while(signals.hasNext()) {

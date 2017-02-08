@@ -63,7 +63,7 @@ public class PartInfoElementTest {
         // Adding UserMessage from mmd
         OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
         // Creating PayloadInfo element from mmd
-        plElement = PayloadInfo.createElement(umElement, mmd.getPayloads());
+        plElement = PayloadInfoElement.createElement(umElement, mmd.getPayloads());
     }
 
     @Test
@@ -92,11 +92,11 @@ public class PartInfoElementTest {
 
         OMElement piElement = PartInfoElement.createElement(plElement, partInfo);
         assertNotNull(piElement);
-        OMElement schema = Schema.getElement(piElement);
+        OMElement schema = SchemaElement.getElement(piElement);
         assertNotNull(schema);
         OMElement descr = DescriptionElement.getElement(piElement);
         assertNotNull(descr);
-        OMElement partProps = PartProperties.getElement(piElement);
+        OMElement partProps = PartPropertiesElement.getElement(piElement);
         assertNotNull(partProps);
     }
 

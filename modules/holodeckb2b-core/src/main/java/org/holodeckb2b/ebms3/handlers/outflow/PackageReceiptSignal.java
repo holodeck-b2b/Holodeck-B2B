@@ -23,6 +23,7 @@ import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.packaging.ReceiptElement;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 
 /**
@@ -73,7 +74,7 @@ public class PackageReceiptSignal extends BaseHandler {
 
         for(final IReceiptEntity r : receipts) {
             log.debug("Add eb:SignalMessage element to the existing eb:Messaging header");
-            org.holodeckb2b.ebms3.packaging.Receipt.createElement(messaging, r);
+            ReceiptElement.createElement(messaging, r);
             log.debug("eb:SignalMessage element succesfully added to header");
         }
 

@@ -33,7 +33,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class PayloadInfo {
+public class PayloadInfoElement {
 
     /**
      * The fully qualified name of the element as an {@see QName}

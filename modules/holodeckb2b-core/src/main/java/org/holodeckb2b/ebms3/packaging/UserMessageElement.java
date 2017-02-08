@@ -77,7 +77,7 @@ public class UserMessageElement {
             MessagePropertiesElement.createElement(usermessage, msgProps);
 
         // Create the eb:PayloadInfo element (if there are payloads)
-        PayloadInfo.createElement(usermessage, data.getPayloads());
+        PayloadInfoElement.createElement(usermessage, data.getPayloads());
 
         return usermessage;
     }
@@ -131,9 +131,9 @@ public class UserMessageElement {
             umData.setMessageProperties(MessagePropertiesElement.readElement(child));
 
         // Get the PayloadInfo element and process it when available
-        child = PayloadInfo.getElement(umElement);
+        child = PayloadInfoElement.getElement(umElement);
         if (child != null)
-            umData.setPayloads(PayloadInfo.readElement(child));
+            umData.setPayloads(PayloadInfoElement.readElement(child));
 
         return umData;
     }

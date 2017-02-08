@@ -22,6 +22,7 @@ import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.packaging.PullRequestElement;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 
 /**
@@ -68,7 +69,7 @@ public class PackagePullRequestSignal extends BaseHandler {
         final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
 
         log.debug("Add eb:SignalMessage element to the existing eb:Messaging header");
-        org.holodeckb2b.ebms3.packaging.PullRequest.createElement(messaging, pullReq);
+        PullRequestElement.createElement(messaging, pullReq);
         log.debug("eb:SignalMessage element succesfully added to header");
 
         return InvocationResponse.CONTINUE;

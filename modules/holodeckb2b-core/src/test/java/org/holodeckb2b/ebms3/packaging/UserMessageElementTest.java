@@ -111,7 +111,7 @@ public class UserMessageElementTest {
         assertEquals(AGREEMENT_REF_INFO_ELEMENT_NAME, arElement.getQName());
 
         // Check the UserMessage for PayloadInfo properties presence
-        OMElement piElement = PayloadInfo.getElement(userMessageElement);
+        OMElement piElement = PayloadInfoElement.getElement(userMessageElement);
         System.out.println("piElement: " + piElement);
         assertEquals(PAYLOAD_INFO_ELEMENT_NAME, piElement.getQName());
         it = piElement.getChildrenWithName(PART_INFO_ELEMENT_NAME);
@@ -124,11 +124,11 @@ public class UserMessageElementTest {
         OMElement partInfoElem2 = (OMElement)it.next();
         System.out.println("partInfoElem2: " + partInfoElem2);
         assertNotNull(partInfoElem2);
-        OMElement schema = Schema.getElement(partInfoElem2);
+        OMElement schema = SchemaElement.getElement(partInfoElem2);
         assertNotNull(schema);
         OMElement descr = DescriptionElement.getElement(partInfoElem2);
         assertNotNull(descr);
-        OMElement partProps = PartProperties.getElement(partInfoElem2);
+        OMElement partProps = PartPropertiesElement.getElement(partInfoElem2);
         assertNotNull(partProps);
     }
 

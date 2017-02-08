@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.general.IProperty;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class Property {
+public class PropertyElement {
 
     /**
      * The fully qualified name of the element as an {@link QName}

@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class SignalMessage {
+public class SignalMessageElement {
 
     /**
      * The fully qualified name of the element as an {@link QName}

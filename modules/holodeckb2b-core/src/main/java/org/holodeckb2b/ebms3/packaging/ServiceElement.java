@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.general.IService;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class Service {
+public class ServiceElement {
 
     /**
      * The fully qualified name of the element as an {@link QName}

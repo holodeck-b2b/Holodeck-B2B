@@ -33,6 +33,7 @@ import org.apache.axiom.util.base64.Base64EncodingWriterOutputStream;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.common.mmd.xml.Property;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.ebms3.packaging.PayloadInfoElement;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
@@ -137,7 +138,7 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
                 refProp.setValue("pl-" + i++);
                 p.getProperties().add(refProp);
             }
-            org.holodeckb2b.ebms3.packaging.PayloadInfo.createElement(usrMsgElement, mmd.getPayloads());
+            PayloadInfoElement.createElement(usrMsgElement, mmd.getPayloads());
         }
 
         String msgFilePath = null;

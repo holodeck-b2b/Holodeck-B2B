@@ -62,7 +62,7 @@ public class CollaborationInfoElement {
         if (data.getAgreement() != null)
             AgreementRefElement.createElement(collabInfo, data.getAgreement());
 
-        Service.createElement(collabInfo, data.getService());
+        ServiceElement.createElement(collabInfo, data.getService());
 
         // Elements Action and ConversationId are so simple that they are created here
         final OMElement action = f.createOMElement(Q_ACTION, collabInfo);
@@ -107,10 +107,10 @@ public class CollaborationInfoElement {
                                                         new org.holodeckb2b.common.messagemodel.CollaborationInfo();
 
         // Start with reading the required elements: Service, Action and ConversationId
-        OMElement child = Service.getElement(ciElement);
+        OMElement child = ServiceElement.getElement(ciElement);
         if (child != null)
             // Read the Service element and store info in entity object
-            ciData.setService(Service.readElement(child));
+            ciData.setService(ServiceElement.readElement(child));
 
         // Action child element
         child = ciElement.getFirstChildWithName(Q_ACTION);

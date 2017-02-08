@@ -31,7 +31,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class PullRequest {
+public class PullRequestElement {
 
     /**
      * The fully qualified name of the element as an {@see QName}
@@ -86,7 +86,7 @@ public class PullRequest {
     public static OMElement getElement(final SOAPHeaderBlock messaging) {
         // Before we can get the PullRequest element we first have to get the parent SignalMessage element. Because a
         // ebMS message can contain multiple signals we have to check each for the PullRequest
-        final Iterator<?> signals = org.holodeckb2b.ebms3.packaging.SignalMessage.getElements(messaging);
+        final Iterator<?> signals = SignalMessageElement.getElements(messaging);
 
         // Search for the first PullRequest as there may only be one in an ebMS message
         OMElement pullReq = null;
@@ -106,7 +106,7 @@ public class PullRequest {
     public static OMElement createElement(final OMElement messaging, final IPullRequest pullRequest) {
         // First create the SignalMessage element that is the placeholder for
         // the Receipt element containing the receipt info
-        final OMElement signalmessage = SignalMessage.createElement(messaging);
+        final OMElement signalmessage = SignalMessageElement.createElement(messaging);
 
         // Create the generic MessageInfo element
         MessageInfoElement.createElement(signalmessage, pullRequest);

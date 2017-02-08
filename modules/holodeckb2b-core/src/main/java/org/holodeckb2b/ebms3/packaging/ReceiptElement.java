@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class Receipt {
+public class ReceiptElement {
 
     /**
      * The fully qualified name of the element as an {@link QName}
@@ -51,7 +51,7 @@ public class Receipt {
     public static OMElement createElement(final OMElement messaging, final IReceipt receipt) {
         // First create the SignalMessage element that is the placeholder for
         // the Receipt element containing the receipt info
-        final OMElement signalmessage = SignalMessage.createElement(messaging);
+        final OMElement signalmessage = SignalMessageElement.createElement(messaging);
 
         // Create the generic MessageInfo element
         MessageInfoElement.createElement(signalmessage, receipt);
@@ -99,7 +99,7 @@ public class Receipt {
      */
     public static Iterator<OMElement> getElements(final SOAPHeaderBlock messaging) {
         // Check all SignalMessage elements in the header
-        final Iterator<?> signals = org.holodeckb2b.ebms3.packaging.SignalMessage.getElements(messaging);
+        final Iterator<?> signals = SignalMessageElement.getElements(messaging);
 
         final ArrayList<OMElement>  receipts = new ArrayList<>();
         while(signals.hasNext()) {

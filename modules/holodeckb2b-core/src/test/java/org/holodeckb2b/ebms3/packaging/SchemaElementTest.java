@@ -36,7 +36,7 @@ import static org.junit.Assert.*;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class SchemaTest {
+public class SchemaElementTest {
 
     private static final QName SCHEMA_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "Schema");
@@ -62,7 +62,7 @@ public class SchemaTest {
 
         OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
         // Creating PayloadInfo element from mmd
-        plElement = PayloadInfo.createElement(umElement, mmd.getPayloads());
+        plElement = PayloadInfoElement.createElement(umElement, mmd.getPayloads());
     }
 
     @Test
@@ -73,7 +73,7 @@ public class SchemaTest {
         schema.setNamespace("namespace1");
         schema.setVersion("test");
 
-        OMElement schemaElement = Schema.createElement(piElement, schema);
+        OMElement schemaElement = SchemaElement.createElement(piElement, schema);
         assertNotNull(schemaElement);
         assertEquals(SCHEMA_ELEMENT_NAME, schemaElement.getQName());
         assertEquals("somewhere",
@@ -94,7 +94,7 @@ public class SchemaTest {
         payload.setSchemaReference(schema);
         OMElement piElement = PartInfoElement.createElement(plElement, payload);
 
-        OMElement schemaElement = Schema.getElement(piElement);
+        OMElement schemaElement = SchemaElement.getElement(piElement);
         assertNotNull(schemaElement);
         assertEquals("somewhere",
                 schemaElement.getAttributeValue(new QName("location")));
@@ -113,9 +113,9 @@ public class SchemaTest {
         testSchema.setVersion("test");
         payload.setSchemaReference(testSchema);
         OMElement piElement = PartInfoElement.createElement(plElement, payload);
-        OMElement schemaElement = Schema.createElement(piElement, testSchema);
+        OMElement schemaElement = SchemaElement.createElement(piElement, testSchema);
 
-        SchemaReference schema = Schema.readElement(schemaElement);
+        SchemaReference schema = SchemaElement.readElement(schemaElement);
         assertNotNull(schema);
         assertEquals("somewhere", schema.getLocation());
         assertEquals("namespace1", schema.getNamespace());

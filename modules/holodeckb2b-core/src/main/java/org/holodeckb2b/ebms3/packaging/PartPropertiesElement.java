@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.general.IProperty;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class PartProperties {
+public class PartPropertiesElement {
 
     /**
      * The fully qualified name of the element as an {@link QName}
@@ -62,7 +62,7 @@ public class PartProperties {
 
         // Fill it based on the given data
         for(final IProperty p : properties)
-            Property.createElement(partProps, p);
+            PropertyElement.createElement(partProps, p);
 
         return partProps;
     }
@@ -93,10 +93,10 @@ public class PartProperties {
         // Create new collection
         final ArrayList<IProperty> props = new ArrayList<>();
         // Get all child elements containing the properties
-        final Iterator<OMElement> it = Property.getElements(ppElement);
+        final Iterator<OMElement> it = PropertyElement.getElements(ppElement);
         // Read each property element and add it info to the collection
         while (it.hasNext())
-            props.add(Property.readElement((OMElement) it.next()));
+            props.add(PropertyElement.readElement((OMElement) it.next()));
 
         return props;
     }

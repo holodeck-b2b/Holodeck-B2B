@@ -76,7 +76,7 @@ public class PartInfoElement {
         // Create the Schema element (if schema reference is provided)
         final ISchemaReference schemaRef = data.getSchemaReference();
         if (schemaRef != null)
-            Schema.createElement(piElement, schemaRef);
+            SchemaElement.createElement(piElement, schemaRef);
         // Create the Description element (if a description is provided)
         final IDescription descr = data.getDescription();
         if (descr != null && !Utils.isNullOrEmpty(descr.getText()))
@@ -84,7 +84,7 @@ public class PartInfoElement {
         // Create the PartProperties element (if there are message properties)
         final Collection<IProperty> partProps = data.getProperties();
         if (!Utils.isNullOrEmpty(partProps))
-            PartProperties.createElement(piElement, partProps);
+            PartPropertiesElement.createElement(piElement, partProps);
 
         return piElement;
     }
@@ -135,17 +135,17 @@ public class PartInfoElement {
         }
 
         // Read and process Schema element (optional)
-        OMElement schema = Schema.getElement(piElement);
+        OMElement schema = SchemaElement.getElement(piElement);
         if(schema != null)
-            plData.setSchemaReference(Schema.readElement(schema));
+            plData.setSchemaReference(SchemaElement.readElement(schema));
         // Read and process Description element (optional)
         OMElement description = DescriptionElement.getElement(piElement);
         if(description != null)
             plData.setDescription(DescriptionElement.readElement(description));
         // Read and process the PartProperties element (optional)
-        OMElement partProperties = PartProperties.getElement(piElement);
+        OMElement partProperties = PartPropertiesElement.getElement(piElement);
         if(partProperties != null)
-            plData.setProperties(PartProperties.readElement(partProperties));
+            plData.setProperties(PartPropertiesElement.readElement(partProperties));
 
         return plData;
     }
