@@ -24,7 +24,7 @@ import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.errors.FailedAuthentication;
-import org.holodeckb2b.ebms3.packaging.PullRequest;
+import org.holodeckb2b.ebms3.packaging.PullRequestElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -70,7 +70,7 @@ public class AuthorizeMessage extends BaseHandler {
         log.debug("Get the primary message unit");
         final IMessageUnitEntity mu = MessageContextUtils.getPrimaryMessageUnit(mc);
 
-        if (mu == null || mu instanceof PullRequest) {
+        if (mu == null || mu instanceof PullRequestElement) {
             // Primary message unit is PullRequest => authorization checked separately
             return InvocationResponse.CONTINUE;
         }
@@ -136,7 +136,7 @@ public class AuthorizeMessage extends BaseHandler {
 
         for (final IMessageUnitEntity mu : rcvdMsgUnits) {
             // PullRequest are authenticated seperately, so process only other message unit types
-            if (! (mu instanceof PullRequest)) {
+            if (! (mu instanceof PullRequestElement)) {
                 log.debug("Authentication of " + MessageUnitUtils.getMessageUnitName(mu)
                                                + "[msgId=" + mu.getMessageId() + "] failed!");
                 final FailedAuthentication authError = new FailedAuthentication();
