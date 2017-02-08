@@ -28,7 +28,7 @@ import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessage;
+import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
@@ -88,11 +88,11 @@ public class CheckFromICloudTest {
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding UserMessage from mmd
-        OMElement userMessage = UserMessage.createElement(headerBlock, mmd);
+        OMElement userMessage = UserMessageElement.createElement(headerBlock, mmd);
 
-        IUserMessageEntity userMessageEntity = HolodeckB2BCore.getUpdateManager()
-                                                              .storeIncomingMessageUnit(
-                                                                                  UserMessage.readElement(userMessage));
+        IUserMessageEntity userMessageEntity =
+                HolodeckB2BCore.getUpdateManager().storeIncomingMessageUnit(
+                                UserMessageElement.readElement(userMessage));
 
         MessageContext mc = new MessageContext();
 

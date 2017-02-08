@@ -24,13 +24,13 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.messagemodel.AgreementReference;
 import org.holodeckb2b.common.messagemodel.TradingPartner;
+import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.*;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.persistency.dao.UpdateManager;
 import org.holodeckb2b.pmode.helpers.*;
@@ -85,7 +85,7 @@ public class FindPModesTest {
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding UserMessage from mmd
-        OMElement umElement = UserMessage.createElement(headerBlock, mmd);
+        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
@@ -109,8 +109,8 @@ public class FindPModesTest {
         Leg leg = new Leg();
         pmode.addLeg(leg);
 
-        org.holodeckb2b.common.messagemodel.UserMessage userMessage
-                = UserMessage.readElement(umElement);
+        UserMessage userMessage
+                = UserMessageElement.readElement(umElement);
 
         TradingPartner sender = userMessage.getSender();
         initiator.setRole(sender.getRole());

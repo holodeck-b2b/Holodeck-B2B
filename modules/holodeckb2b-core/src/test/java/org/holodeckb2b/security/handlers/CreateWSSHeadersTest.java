@@ -33,7 +33,7 @@ import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessage;
+import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.pmode.helpers.EncryptionConfig;
 import org.holodeckb2b.pmode.helpers.SigningConfig;
@@ -125,7 +125,7 @@ public class CreateWSSHeadersTest {
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding UserMessage from mmd
-        UserMessage.createElement(headerBlock, mmd);
+        UserMessageElement.createElement(headerBlock, mmd);
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);

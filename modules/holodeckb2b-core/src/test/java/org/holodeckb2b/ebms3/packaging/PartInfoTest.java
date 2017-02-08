@@ -61,7 +61,7 @@ public class PartInfoTest {
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(soapEnvelope);
         // Adding UserMessage from mmd
-        OMElement umElement = UserMessage.createElement(headerBlock, mmd);
+        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
         // Creating PayloadInfo element from mmd
         plElement = PayloadInfo.createElement(umElement, mmd.getPayloads());
     }
@@ -83,8 +83,7 @@ public class PartInfoTest {
         sr.setNamespace("namespace");
         sr.setVersion("test");
         partInfo.setSchemaReference(sr);
-        org.holodeckb2b.common.messagemodel.Description description =
-                new org.holodeckb2b.common.messagemodel.Description();
+        Description description = new Description();
         description.setText("description");
         partInfo.setDescription(description);
         Collection<IProperty> properties = new ArrayList<>();
@@ -126,8 +125,7 @@ public class PartInfoTest {
         sr.setNamespace("namespace");
         sr.setVersion("test");
         partInfo.setSchemaReference(sr);
-        org.holodeckb2b.common.messagemodel.Description description =
-                new org.holodeckb2b.common.messagemodel.Description();
+        Description description = new Description();
         description.setText("description");
         partInfo.setDescription(description);
         Collection<IProperty> properties = new ArrayList<>();

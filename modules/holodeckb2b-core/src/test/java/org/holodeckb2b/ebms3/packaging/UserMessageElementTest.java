@@ -21,6 +21,8 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.messagemodel.AgreementReference;
+import org.holodeckb2b.common.messagemodel.CollaborationInfo;
+import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -40,7 +42,7 @@ import static org.junit.Assert.*;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class UserMessageTest {
+public class UserMessageElementTest {
 
     private static final QName MESSAGING_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "Messaging");
@@ -87,7 +89,7 @@ public class UserMessageTest {
 
     @Test
     public void testCreateElement() throws Exception {
-        UserMessage.createElement(headerBlock, mmd);
+        UserMessageElement.createElement(headerBlock, mmd);
 
         // Check that soap header block of the envelope header contains user message
         SOAPHeader header = soapEnvelope.getHeader();
@@ -132,21 +134,20 @@ public class UserMessageTest {
 
     @Test
     public void testGetElements() throws Exception {
-        Iterator<OMElement> it = UserMessage.getElements(headerBlock);
+        Iterator<OMElement> it = UserMessageElement.getElements(headerBlock);
         assertNotNull(it);
     }
 
     @Test
     public void testReadElement() throws Exception {
-        OMElement umElement = UserMessage.createElement(headerBlock, mmd);
+        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
 
         System.out.println("umElement: " + umElement);
 
-        org.holodeckb2b.common.messagemodel.UserMessage userMessage =
-                UserMessage.readElement(umElement);
+        UserMessage userMessage =
+                UserMessageElement.readElement(umElement);
 
-        org.holodeckb2b.common.messagemodel.CollaborationInfo collaborationInfo
-                = userMessage.getCollaborationInfo();
+        CollaborationInfo collaborationInfo = userMessage.getCollaborationInfo();
         assertNotNull(collaborationInfo);
         AgreementReference agreementReference = collaborationInfo.getAgreement();
         assertNotNull(agreementReference);

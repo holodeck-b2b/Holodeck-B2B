@@ -24,18 +24,16 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.holodeckb2b.common.messagemodel.*;
+import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.*;
-import org.holodeckb2b.ebms3.packaging.CollaborationInfo;
-import org.holodeckb2b.ebms3.packaging.UserMessage;
+import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.events.SignatureCreatedEvent;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.pmode.helpers.*;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestEventProcessor;
@@ -94,7 +92,7 @@ public class RaiseSignatureCreatedEventTest {
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding UserMessage from mmd
-        OMElement umElement = UserMessage.createElement(headerBlock, mmd);
+        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
 
         System.out.println("[1] umElement: " + umElement.toString());
 
@@ -144,8 +142,7 @@ public class RaiseSignatureCreatedEventTest {
         leg.setProtocol(protocolConfig);
         pmode.addLeg(leg);
 
-        org.holodeckb2b.common.messagemodel.UserMessage um =
-                UserMessage.readElement(umElement);
+        UserMessage um = UserMessageElement.readElement(umElement);
 
         String pmodeId = um.getCollaborationInfo().getAgreement().getPModeId();
 

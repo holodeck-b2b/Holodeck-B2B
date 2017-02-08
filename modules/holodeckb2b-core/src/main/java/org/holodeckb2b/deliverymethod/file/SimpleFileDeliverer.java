@@ -32,7 +32,7 @@ import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.common.mmd.xml.Property;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.packaging.ErrorSignal;
-import org.holodeckb2b.ebms3.packaging.UserMessage;
+import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -160,7 +160,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
 
         log.debug("Add message info to XML container");
         // Add the information on the user message to the container
-        final OMElement  usrMsgElement = UserMessage.createElement(container, mmd);
+        final OMElement  usrMsgElement = UserMessageElement.createElement(container, mmd);
         log.debug("Information complete, write XML document to file");
 
         writeXMLDocument(container, mmd.getMessageId());

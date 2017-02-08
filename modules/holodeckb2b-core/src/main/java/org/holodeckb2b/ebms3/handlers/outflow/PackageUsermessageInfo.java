@@ -20,6 +20,7 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 
@@ -47,7 +48,7 @@ public class PackageUsermessageInfo extends AbstractUserMessageHandler {
         log.debug("Get the eb:Messaging header from the message");
         final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
         log.debug("Add eb:UserMessage element to the existing eb:Messaging header");
-        org.holodeckb2b.ebms3.packaging.UserMessage.createElement(messaging, um);
+        UserMessageElement.createElement(messaging, um);
         log.debug("eb:UserMessage element succesfully added to header");
 
         return InvocationResponse.CONTINUE;

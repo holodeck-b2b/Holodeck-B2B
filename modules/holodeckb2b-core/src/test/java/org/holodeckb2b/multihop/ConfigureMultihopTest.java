@@ -100,11 +100,11 @@ public class ConfigureMultihopTest {
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding UserMessage from mmd
-        OMElement userMessage = UserMessage.createElement(headerBlock, mmd);
+        OMElement userMessage = UserMessageElement.createElement(headerBlock, mmd);
 
-        IUserMessageEntity userMessageEntity = HolodeckB2BCore.getUpdateManager()
-                                                              .storeIncomingMessageUnit(
-                                                                                UserMessage.readElement(userMessage));
+        IUserMessageEntity userMessageEntity =
+                HolodeckB2BCore.getUpdateManager().storeIncomingMessageUnit(
+                        UserMessageElement.readElement(userMessage));
 
         OMElement ciElement = CollaborationInfoElement.getElement(userMessage);
         OMElement arElement = AgreementRefElement.getElement(ciElement);

@@ -60,7 +60,7 @@ public class SchemaTest {
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(soapEnvelope);
 
-        OMElement umElement = UserMessage.createElement(headerBlock, mmd);
+        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
         // Creating PayloadInfo element from mmd
         plElement = PayloadInfo.createElement(umElement, mmd.getPayloads());
     }

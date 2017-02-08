@@ -22,13 +22,11 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.holodeckb2b.core.testhelpers.TestEventProcessor;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessage;
-import org.holodeckb2b.events.SignatureCreatedEvent;
+import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.junit.After;
@@ -90,7 +88,7 @@ public class ReadUserMessageTest {
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding UserMessage from mmd
-        OMElement userMessage = UserMessage.createElement(headerBlock, mmd);
+        OMElement userMessage = UserMessageElement.createElement(headerBlock, mmd);
 
         MessageContext mc = new MessageContext();
         // Setting input message property

@@ -81,7 +81,7 @@ public class PackagingTest {
             fail("Unable to test because MMD could not be read correctly!");
         }
 
-        final OMElement umElement = UserMessage.createElement(messaging, mmd);
+        final OMElement umElement = UserMessageElement.createElement(messaging, mmd);
 
         // The SOAP enveloppe should be valid according to the ebMS schema, write the
         // xml to file and validate it using Xerces

@@ -23,7 +23,7 @@ import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.UserMessage;
+import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
@@ -33,7 +33,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * <code>eb:UserMessage</code> element in the ebMS header.
  * <p>This handler will only read the meta-data that is available in the ebMS header without performing a validation on
  * it. This is done later in the {@link BasicHeaderValidation} and optionally in custom validators specified in the
- * P-Mode. The meta data is stored in an {@link UserMessage} entity object which is stored in the database and added to
+ * P-Mode. The meta data is stored in an {@link UserMessageElement} entity object which is stored in the database and added to
  * the message context under key {@link MessageContextProperties#IN_USER_MESSAGE}. The processing state of the user
  * message is set to {@link ProcessingStates#PROCESSING}.
  * <p><b>NOTE:</b> The XML schema definition from the ebMS specification allows for multiple <code>eb:UserMessage</code>
@@ -58,12 +58,12 @@ public class ReadUserMessage extends BaseHandler {
         if (messaging != null) {
             // Check if there is a user message unit
             log.debug("Check for UserMessage element");
-            final Iterator<?> it = UserMessage.getElements(messaging);
+            final Iterator<?> it = UserMessageElement.getElements(messaging);
             if (it.hasNext()) {
                 log.debug("UserMessage found, read information from message");
                 final OMElement umElement = (OMElement) it.next();
                 // Read information into UserMessage entity object
-                org.holodeckb2b.common.messagemodel.UserMessage userMessage = UserMessage.readElement(umElement);
+                org.holodeckb2b.common.messagemodel.UserMessage userMessage = UserMessageElement.readElement(umElement);
                 log.info("Succesfully read user message meta data from header. Msg-id=" + userMessage.getMessageId());
 
                 // Store it in both database and message context for further processing

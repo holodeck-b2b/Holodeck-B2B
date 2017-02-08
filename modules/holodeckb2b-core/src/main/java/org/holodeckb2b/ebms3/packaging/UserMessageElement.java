@@ -33,7 +33,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class UserMessage {
+public class UserMessageElement {
 
     /**
      * The fully qualified name of the element as an {@link QName}
