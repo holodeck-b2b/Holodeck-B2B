@@ -49,7 +49,6 @@
         <module>modules/holodeckb2b-common</module>
         <module>modules/holodeckb2b-core</module>
         <module>modules/holodeckb2b-distribution</module>
-        <module>modules/holodeckb2b-it_lib</module>
         <module>modules/holodeckb2b-it</module>
     </modules>
 
@@ -251,12 +250,6 @@
                 <scope>test</scope>
             </dependency>
 
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>holodeckb2b-it</artifactId>
-                <version>${project.version}</version>
-                <scope>test</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 

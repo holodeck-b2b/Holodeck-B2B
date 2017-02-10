@@ -5,5 +5,4 @@ package org.holodeckb2b.integ;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public interface IntegrationTest {
-}
+public interface IntegrationTest {}
