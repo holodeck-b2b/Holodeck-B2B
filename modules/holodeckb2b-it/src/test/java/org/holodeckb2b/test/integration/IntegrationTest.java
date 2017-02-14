@@ -1,4 +1,4 @@
-package org.holodeckb2b.integ;
+package org.holodeckb2b.test.integration;
 
 /**
  * Category for junit integration testing

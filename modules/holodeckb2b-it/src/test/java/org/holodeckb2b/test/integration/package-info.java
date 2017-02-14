@@ -4,4 +4,4 @@
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-package org.holodeckb2b.integ;
+package org.holodeckb2b.test.integration;
