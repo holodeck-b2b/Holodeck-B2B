@@ -16,13 +16,15 @@
  */
 package org.holodeckb2b.pmode.helpers;
 
+import org.apache.wss4j.common.principal.UsernameTokenPrincipal;
 import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration.PasswordType;
+import org.holodeckb2b.security.tokens.UsernameToken;
 
 /**
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class UsernameTokenConfig implements IUsernameTokenConfiguration {
+public class UsernameTokenConfig extends UsernameToken
+        implements IUsernameTokenConfiguration {
 
     private String          username;
     private String          password;
@@ -30,7 +32,21 @@ public class UsernameTokenConfig implements IUsernameTokenConfiguration {
     private boolean         includeNonce;
     private boolean         includeCreated;
 
-    @Override
+    /**
+     * Creates a new <code>UsernameToken</code> based on a WSS4J {@link UsernameTokenPrincipal} that is read from
+     * the SOAP message.
+     *
+     * @param principal The data to construct the UsernameToken
+     */
+    public UsernameTokenConfig(UsernameTokenPrincipal principal) {
+        super(principal);
+    }
+
+    public UsernameTokenConfig() {
+        super(new UsernameTokenPrincipalForTest());
+    }
+
+        @Override
     public String getUsername() {
         return username;
     }
@@ -75,4 +91,52 @@ public class UsernameTokenConfig implements IUsernameTokenConfiguration {
         this.includeCreated = includeCreated;
     }
 
+}
+
+class UsernameTokenPrincipalForTest implements UsernameTokenPrincipal {
+
+    @Override
+    public boolean isPasswordDigest() {
+        return false;
+    }
+
+    @Override
+    public String getPassword() {
+        return null;
+    }
+
+    @Override
+    public byte[] getNonce() {
+        return new byte[0];
+    }
+
+    @Override
+    public String getCreatedTime() {
+        return null;
+    }
+
+    @Override
+    public String getPasswordType() {
+        return null;
+    }
+
+    @Override
+    public boolean equals(Object another) {
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return null;
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
 }
