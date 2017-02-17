@@ -67,7 +67,7 @@ public class FindPModes extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
-        log.debug("Check for User Mesage message unit in received message");
+        log.debug("Check for UserMessage message unit in received message");
         final IUserMessageEntity userMsg =
                                           (IUserMessageEntity) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
         if (userMsg != null) {
