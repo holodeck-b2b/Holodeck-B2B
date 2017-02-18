@@ -22,32 +22,57 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+import org.apache.log4j.Appender;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.AgreementReference;
 import org.holodeckb2b.common.messagemodel.TradingPartner;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.*;
+import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.packaging.SOAPEnv;
+import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.persistency.dao.UpdateManager;
-import org.holodeckb2b.pmode.helpers.*;
+import org.holodeckb2b.pmode.helpers.Agreement;
+import org.holodeckb2b.pmode.helpers.Leg;
+import org.holodeckb2b.pmode.helpers.PMode;
+import org.holodeckb2b.pmode.helpers.PartnerConfig;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.File;
+import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Created at 23:22 29.01.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
+@RunWith(MockitoJUnitRunner.class)
 public class FindPModesTest {
+
+    // Appender to control logging events
+    @Mock
+    private Appender mockAppender;
+    @Captor
+    private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
 
     private static String baseDir;
 
@@ -66,6 +91,16 @@ public class FindPModesTest {
     @Before
     public void setUp() throws Exception {
         handler = new FindPModes();
+        // Taking control over FindPModes logger
+        mockAppender = mock(Appender.class);
+        Logger logger = LogManager.getRootLogger();
+        logger.addAppender(mockAppender);
+        logger.setLevel(Level.DEBUG);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        LogManager.getRootLogger().removeAppender(mockAppender);
     }
 
     @Test
@@ -112,6 +147,8 @@ public class FindPModesTest {
         UserMessage userMessage
                 = UserMessageElement.readElement(umElement);
 
+        String msgId = userMessage.getMessageId();
+
         TradingPartner sender = userMessage.getSender();
         initiator.setRole(sender.getRole());
         initiator.setPartyIds(sender.getPartyIds());
@@ -124,9 +161,7 @@ public class FindPModesTest {
                 userMessage.getCollaborationInfo().getAgreement();
         String pmodeId = agreementReference.getPModeId();
         String agreementRefName = agreementReference.getName();
-        //System.out.println("agreementRefName: " + agreementRefName);
         String agreementRefType = agreementReference.getType();
-        //System.out.println("agreementRefType: " + agreementRefType);
 
         pmode.setId(pmodeId);
 
@@ -144,6 +179,7 @@ public class FindPModesTest {
 
         // Setting input message property
         UpdateManager updateManager = core.getUpdateManager();
+        System.out.println("um: " + updateManager.getClass());
         IUserMessageEntity userMessageEntity =
                 updateManager.storeIncomingMessageUnit(userMessage);
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
@@ -156,6 +192,20 @@ public class FindPModesTest {
             fail(e.getMessage());
         }
 
-        assertNotNull(mc.getProperty(MessageContextProperties.IN_USER_MESSAGE));
+        // Checking log messages to make sure handler found pmode
+        verify(mockAppender, atLeastOnce())
+                .doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+        String expLogMsg = "Found P-Mode [" + pmode.getId()
+                + "] for User Message [" + msgId + "]";
+        boolean containsExpLogMsg = false;
+        for(LoggingEvent e : events) {
+            if(e.getLevel().equals(Level.DEBUG)) {
+                if(e.getRenderedMessage().equals(expLogMsg)) {
+                    containsExpLogMsg = true;
+                }
+            }
+        }
+        assertTrue(containsExpLogMsg);
     }
 }
