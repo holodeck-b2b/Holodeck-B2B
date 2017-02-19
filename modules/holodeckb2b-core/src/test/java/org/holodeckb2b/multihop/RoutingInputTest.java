@@ -26,6 +26,7 @@ import java.util.Iterator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.junit.Test;
@@ -42,7 +43,7 @@ public class RoutingInputTest {
 
     @Test
     public void testFullUserMessageHeader() {
-        MessageMetaData mmd = getMMD("multihop/ri/full_mmd.xml");
+        MessageMetaData mmd = TestUtils.getMMD("multihop/ri/full_mmd.xml", this);
         // Create a SOAP envelope that should contain the RoutingInput element
         final SOAPEnvelope    env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
 
@@ -58,22 +59,5 @@ public class RoutingInputTest {
         assertTrue(ciChilds.hasNext());
         final OMElement ciChild = (OMElement) ciChilds.next();
         assertEquals(EbMSConstants.EBMS3_NS_URI, ciChild.getNamespaceURI());
-    }
-
-    /**
-     * Get filled mmd document for testing
-     * @return
-     */
-    private MessageMetaData getMMD(String resource) {
-        final String mmdPath =
-                this.getClass().getClassLoader().getResource(resource).getPath();
-        final File f = new File(mmdPath);
-        MessageMetaData mmd = null;
-        try {
-            mmd = MessageMetaData.createFromFile(f);
-        } catch (final Exception e) {
-            fail("Unable to test because MMD could not be read correctly!");
-        }
-        return mmd;
     }
 }

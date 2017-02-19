@@ -22,6 +22,7 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.SchemaReference;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,16 +48,7 @@ public class SchemaElementTest {
 
     @Before
     public void setUp() throws Exception {
-        final String mmdPath =
-                this.getClass().getClassLoader()
-                        .getResource("packagetest/mmd_pcktest.xml").getPath();
-        final File f = new File(mmdPath);
-        MessageMetaData mmd = null;
-        try {
-            mmd = MessageMetaData.createFromFile(f);
-        } catch (final Exception e) {
-            fail("Unable to test because MMD could not be read correctly!");
-        }
+        MessageMetaData mmd = TestUtils.getMMD("packagetest/mmd_pcktest.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope soapEnvelope = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header

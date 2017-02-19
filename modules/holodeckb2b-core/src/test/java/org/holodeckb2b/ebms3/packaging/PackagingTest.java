@@ -36,6 +36,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -54,8 +55,6 @@ public class PackagingTest {
     private final String    SOAP11schemaFile;
     private final String    SOAP12schemaFile;
 
-
-
     public PackagingTest() {
         ebMSschemaFile = this.getClass().getClassLoader().getResource("xsd/ebms-header-3_0-200704_refactored.xsd").getPath();
         SOAP11schemaFile = this.getClass().getClassLoader().getResource("xsd/soap11-envelope.xsd").getPath();
@@ -71,15 +70,7 @@ public class PackagingTest {
         final SOAPEnvelope    env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         final SOAPHeaderBlock messaging = Messaging.createElement(env);
 
-        // Use correctly filled mmd document for testing
-        final String mmdPath = this.getClass().getClassLoader().getResource("packagetest/mmd_pcktest.xml").getPath();
-        final File   f = new File(mmdPath);
-        MessageMetaData mmd = null;
-        try {
-            mmd = MessageMetaData.createFromFile(f);
-        } catch (final Exception e) {
-            fail("Unable to test because MMD could not be read correctly!");
-        }
+        MessageMetaData mmd = TestUtils.getMMD("packagetest/mmd_pcktest.xml", this);
 
         final OMElement umElement = UserMessageElement.createElement(messaging, mmd);
 

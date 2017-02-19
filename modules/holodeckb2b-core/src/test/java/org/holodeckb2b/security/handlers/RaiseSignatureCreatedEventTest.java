@@ -26,6 +26,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.*;
@@ -73,7 +74,7 @@ public class RaiseSignatureCreatedEventTest {
 
     @Test
     public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = getMMD("security/handlers/full_mmd.xml");
+        MessageMetaData mmd = TestUtils.getMMD("security/handlers/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env =
                 SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
@@ -161,22 +162,5 @@ public class RaiseSignatureCreatedEventTest {
 
         assertEquals(1, eventProcessor.events.size());
         assertTrue(eventProcessor.events.get(0) instanceof SignatureCreatedEvent);
-    }
-
-    /**
-     * Get filled mmd document for testing
-     * @return
-     */
-    private MessageMetaData getMMD(String resource) {
-        final String mmdPath =
-                this.getClass().getClassLoader().getResource(resource).getPath();
-        final File f = new File(mmdPath);
-        MessageMetaData mmd = null;
-        try {
-            mmd = MessageMetaData.createFromFile(f);
-        } catch (final Exception e) {
-            fail("Unable to test because MMD could not be read correctly!");
-        }
-        return mmd;
     }
 }

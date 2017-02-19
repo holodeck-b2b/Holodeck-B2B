@@ -15,6 +15,7 @@ import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
@@ -78,7 +79,7 @@ public class CreateSOAPEnvelopeHandlerTest {
 
     @Test
     public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = getMMD("handlers/full_mmd.xml");
+        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
@@ -137,22 +138,5 @@ public class CreateSOAPEnvelopeHandlerTest {
             }
         }
         assertTrue(containsExpLogMsg);
-    }
-
-    /**
-     * Get filled mmd document for testing
-     * @return
-     */
-    private MessageMetaData getMMD(String resource) {
-        final String mmdPath =
-                this.getClass().getClassLoader().getResource(resource).getPath();
-        final File f = new File(mmdPath);
-        MessageMetaData mmd = null;
-        try {
-            mmd = MessageMetaData.createFromFile(f);
-        } catch (final Exception e) {
-            fail("Unable to test because MMD could not be read correctly!");
-        }
-        return mmd;
     }
 }

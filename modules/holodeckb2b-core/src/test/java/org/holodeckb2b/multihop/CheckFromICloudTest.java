@@ -24,6 +24,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -70,7 +71,7 @@ public class CheckFromICloudTest {
 
     @Test
     public void testMessageReceivedFromICloud() throws PersistenceException {
-        MessageMetaData mmd = getMMD("multihop/icloud/full_mmd.xml");
+        MessageMetaData mmd = TestUtils.getMMD("multihop/icloud/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env =
                 SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
@@ -105,22 +106,5 @@ public class CheckFromICloudTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
-    }
-
-    /**
-     * Get filled mmd document for testing
-     * @return
-     */
-    private MessageMetaData getMMD(String resource) {
-        final String mmdPath =
-                this.getClass().getClassLoader().getResource(resource).getPath();
-        final File f = new File(mmdPath);
-        MessageMetaData mmd = null;
-        try {
-            mmd = MessageMetaData.createFromFile(f);
-        } catch (final Exception e) {
-            fail("Unable to test because MMD could not be read correctly!");
-        }
-        return mmd;
     }
 }
