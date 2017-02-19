@@ -23,13 +23,13 @@ import org.holodeckb2b.common.messagemodel.Description;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.Property;
 import org.holodeckb2b.common.messagemodel.SchemaReference;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.TestUtils;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -43,19 +43,26 @@ import static org.junit.Assert.*;
  */
 public class PartInfoElementTest {
 
+    private static final QName USER_MESSAGE_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "UserMessage");
+    private static final QName PAYLOAD_INFO_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "PayloadInfo");
+
     private OMElement plElement;
 
     @Before
     public void setUp() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("packagetest/mmd_pcktest.xml", this);
         // Creating SOAP envelope
-        SOAPEnvelope soapEnvelope = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        SOAPEnvelope soapEnvelope =
+                SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(soapEnvelope);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-        // Creating PayloadInfo element from mmd
-        plElement = PayloadInfoElement.createElement(umElement, mmd.getPayloads());
+        // Create the element
+        OMElement umElement = headerBlock.getOMFactory()
+                .createOMElement(USER_MESSAGE_ELEMENT_NAME, headerBlock);
+        // Create the element
+        plElement = headerBlock.getOMFactory()
+                .createOMElement(PAYLOAD_INFO_ELEMENT_NAME, umElement);
     }
 
     @Test
@@ -94,6 +101,22 @@ public class PartInfoElementTest {
 
     @Test
     public void testGetElements() throws Exception {
+        Payload partInfo = new Payload();
+        partInfo.setContainment(IPayload.Containment.ATTACHMENT);
+
+        SchemaReference sr = new SchemaReference();
+        sr.setLocation("somewhere");
+        sr.setNamespace("namespace");
+        sr.setVersion("test");
+        partInfo.setSchemaReference(sr);
+        Description description = new Description();
+        description.setText("description");
+        partInfo.setDescription(description);
+        Collection<IProperty> properties = new ArrayList<>();
+        properties.add(new Property("name1", "value1", "type1"));
+        partInfo.setProperties(properties);
+        PartInfoElement.createElement(plElement, partInfo);
+
         Iterator<OMElement> it = PartInfoElement.getElements(plElement);
         assertNotNull(it);
         assertTrue(it.hasNext());
