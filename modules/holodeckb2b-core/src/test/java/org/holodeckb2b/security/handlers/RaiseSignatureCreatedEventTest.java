@@ -49,9 +49,6 @@ import org.junit.Test;
  */
 public class RaiseSignatureCreatedEventTest {
 
-    static final QName MESSAGE_ID_ELEMENT_NAME =
-            new QName(EbMSConstants.EBMS3_NS_URI, "MessageId");
-
     private static String baseDir;
 
     private static HolodeckB2BTestCore core;
@@ -76,16 +73,7 @@ public class RaiseSignatureCreatedEventTest {
 
     @Test
     public void testDoProcessing() throws Exception {
-        final String mmdPath =
-                this.getClass().getClassLoader()
-                        .getResource("security/handlers/full_mmd.xml").getPath();
-        final File f = new File(mmdPath);
-        MessageMetaData mmd = null;
-        try {
-            mmd = MessageMetaData.createFromFile(f);
-        } catch (final Exception e) {
-            fail("Unable to test because MMD could not be read correctly!");
-        }
+        MessageMetaData mmd = getMMD("security/handlers/full_mmd.xml");
         // Creating SOAP envelope
         SOAPEnvelope env =
                 SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
@@ -173,5 +161,22 @@ public class RaiseSignatureCreatedEventTest {
 
         assertEquals(1, eventProcessor.events.size());
         assertTrue(eventProcessor.events.get(0) instanceof SignatureCreatedEvent);
+    }
+
+    /**
+     * Get filled mmd document for testing
+     * @return
+     */
+    private MessageMetaData getMMD(String resource) {
+        final String mmdPath =
+                this.getClass().getClassLoader().getResource(resource).getPath();
+        final File f = new File(mmdPath);
+        MessageMetaData mmd = null;
+        try {
+            mmd = MessageMetaData.createFromFile(f);
+        } catch (final Exception e) {
+            fail("Unable to test because MMD could not be read correctly!");
+        }
+        return mmd;
     }
 }

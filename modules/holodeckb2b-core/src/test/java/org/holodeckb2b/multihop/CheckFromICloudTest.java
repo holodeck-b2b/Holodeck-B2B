@@ -70,18 +70,7 @@ public class CheckFromICloudTest {
 
     @Test
     public void testMessageReceivedFromICloud() throws PersistenceException {
-
-        final String mmdPath =
-                this.getClass().getClassLoader()
-                        .getResource("multihop/icloud/full_mmd.xml").getPath();
-        final File f = new File(mmdPath);
-        MessageMetaData mmd = null;
-        try {
-            mmd = MessageMetaData.createFromFile(f);
-        } catch (final Exception e) {
-            fail("Unable to test because MMD could not be read correctly!");
-        }
-
+        MessageMetaData mmd = getMMD("multihop/icloud/full_mmd.xml");
         // Creating SOAP envelope
         SOAPEnvelope env =
                 SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
@@ -116,5 +105,22 @@ public class CheckFromICloudTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+    }
+
+    /**
+     * Get filled mmd document for testing
+     * @return
+     */
+    private MessageMetaData getMMD(String resource) {
+        final String mmdPath =
+                this.getClass().getClassLoader().getResource(resource).getPath();
+        final File f = new File(mmdPath);
+        MessageMetaData mmd = null;
+        try {
+            mmd = MessageMetaData.createFromFile(f);
+        } catch (final Exception e) {
+            fail("Unable to test because MMD could not be read correctly!");
+        }
+        return mmd;
     }
 }

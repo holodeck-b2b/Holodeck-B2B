@@ -108,17 +108,7 @@ public class CreateWSSHeadersTest {
 
     @Test
     public void testDoProcessing () throws Exception {
-        System.out.println("[testDoProcessing]>");
-        final String mmdPath =
-                this.getClass().getClassLoader()
-                        .getResource("security/handlers/full_mmd.xml").getPath();
-        final File f = new File(mmdPath);
-        MessageMetaData mmd = null;
-        try {
-            mmd = MessageMetaData.createFromFile(f);
-        } catch (final Exception e) {
-            fail("Unable to test because MMD could not be read correctly!");
-        }
+        MessageMetaData mmd = getMMD("security/handlers/full_mmd.xml");
         // Creating SOAP envelope
         SOAPEnvelope env =
                 SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
@@ -266,5 +256,22 @@ public class CreateWSSHeadersTest {
         // One of the two security elements should contain Signature element
         assertTrue(containsSignatureElement);
         System.out.println("<[testDoProcessing]");
+    }
+
+    /**
+     * Get filled mmd document for testing
+     * @return
+     */
+    private MessageMetaData getMMD(String resource) {
+        final String mmdPath =
+                this.getClass().getClassLoader().getResource(resource).getPath();
+        final File f = new File(mmdPath);
+        MessageMetaData mmd = null;
+        try {
+            mmd = MessageMetaData.createFromFile(f);
+        } catch (final Exception e) {
+            fail("Unable to test because MMD could not be read correctly!");
+        }
+        return mmd;
     }
 }

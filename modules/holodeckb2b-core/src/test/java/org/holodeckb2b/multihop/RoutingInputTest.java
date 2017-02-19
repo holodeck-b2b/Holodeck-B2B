@@ -42,16 +42,7 @@ public class RoutingInputTest {
 
     @Test
     public void testFullUserMessageHeader() {
-        // Use filled mmd document for testing
-        final String mmdPath = this.getClass().getClassLoader().getResource("multihop/ri/full_mmd.xml").getPath();
-        final File   f = new File(mmdPath);
-        MessageMetaData mmd = null;
-        try {
-            mmd = MessageMetaData.createFromFile(f);
-        } catch (final Exception e) {
-            fail("Unable to test because MMD could not be read correctly!");
-        }
-
+        MessageMetaData mmd = getMMD("multihop/ri/full_mmd.xml");
         // Create a SOAP envelope that should contain the RoutingInput element
         final SOAPEnvelope    env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
 
@@ -69,4 +60,20 @@ public class RoutingInputTest {
         assertEquals(EbMSConstants.EBMS3_NS_URI, ciChild.getNamespaceURI());
     }
 
+    /**
+     * Get filled mmd document for testing
+     * @return
+     */
+    private MessageMetaData getMMD(String resource) {
+        final String mmdPath =
+                this.getClass().getClassLoader().getResource(resource).getPath();
+        final File f = new File(mmdPath);
+        MessageMetaData mmd = null;
+        try {
+            mmd = MessageMetaData.createFromFile(f);
+        } catch (final Exception e) {
+            fail("Unable to test because MMD could not be read correctly!");
+        }
+        return mmd;
+    }
 }

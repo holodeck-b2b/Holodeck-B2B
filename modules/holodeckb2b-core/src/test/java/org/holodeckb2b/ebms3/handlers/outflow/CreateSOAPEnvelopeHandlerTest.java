@@ -78,7 +78,7 @@ public class CreateSOAPEnvelopeHandlerTest {
 
     @Test
     public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = getMMD();
+        MessageMetaData mmd = getMMD("handlers/full_mmd.xml");
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
@@ -140,13 +140,12 @@ public class CreateSOAPEnvelopeHandlerTest {
     }
 
     /**
-     *
+     * Get filled mmd document for testing
      * @return
      */
-    private MessageMetaData getMMD() {
+    private MessageMetaData getMMD(String resource) {
         final String mmdPath =
-                this.getClass().getClassLoader()
-                        .getResource("handlers/full_mmd.xml").getPath();
+                this.getClass().getClassLoader().getResource(resource).getPath();
         final File f = new File(mmdPath);
         MessageMetaData mmd = null;
         try {
