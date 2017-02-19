@@ -22,6 +22,7 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -29,6 +30,7 @@ import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -37,7 +39,6 @@ import org.junit.Test;
 import java.io.File;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Created at 23:28 21.09.16
@@ -73,16 +74,7 @@ public class ReadUserMessageTest {
      */
     @Test
     public void testProcessing() {
-        final String mmdPath =
-                this.getClass().getClassLoader()
-                        .getResource("multihop/icloud/full_mmd.xml").getPath();
-        final File f = new File(mmdPath);
-        MessageMetaData mmd = null;
-        try {
-            mmd = MessageMetaData.createFromFile(f);
-        } catch (final Exception e) {
-            fail("Unable to test because MMD could not be read correctly!");
-        }
+        MessageMetaData mmd = getMMD();
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
@@ -107,5 +99,23 @@ public class ReadUserMessageTest {
         }
 
         assertNotNull(mc.getProperty(MessageContextProperties.IN_USER_MESSAGE));
+    }
+
+    /**
+     *
+     * @return
+     */
+    private MessageMetaData getMMD() {
+        final String mmdPath =
+                this.getClass().getClassLoader()
+                        .getResource("multihop/icloud/full_mmd.xml").getPath();
+        final File f = new File(mmdPath);
+        MessageMetaData mmd = null;
+        try {
+            mmd = MessageMetaData.createFromFile(f);
+        } catch (final Exception e) {
+            fail("Unable to test because MMD could not be read correctly!");
+        }
+        return mmd;
     }
 }

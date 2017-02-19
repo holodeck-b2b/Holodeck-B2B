@@ -103,16 +103,7 @@ public class AuthorizeMessageTest {
 
     @Test
     public void testDoProcessing() throws Exception {
-        final String mmdPath =
-                this.getClass().getClassLoader()
-                        .getResource("handlers/full_mmd.xml").getPath();
-        final File f = new File(mmdPath);
-        MessageMetaData mmd = null;
-        try {
-            mmd = MessageMetaData.createFromFile(f);
-        } catch (final Exception e) {
-            fail("Unable to test because MMD could not be read correctly!");
-        }
+        MessageMetaData mmd = getMMD();
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
@@ -139,9 +130,9 @@ public class AuthorizeMessageTest {
 
         String pmodeId = userMessage.getCollaborationInfo().getAgreement().getPModeId();
 
-        // todo this seems strange that we need to set the PMode id value separately
+        // todo It seems strange that we need to set the PMode id value separately
         // todo when it is contained within the agreement
-        // todo if we don't set it the value returned by userMessage.getPModeId() is null
+        // todo But if we don't set it the value returned by userMessage.getPModeId() is null now
         userMessage.setPModeId(pmodeId);
 
         String msgId = userMessage.getMessageId();
@@ -200,5 +191,23 @@ public class AuthorizeMessageTest {
         //Check the message being logged
         assertThat(loggingEvent.getRenderedMessage(),
                 is("Message [Primary msg msgId="+msgId+"] successfully authorized"));
+    }
+
+    /**
+     *
+     * @return
+     */
+    private MessageMetaData getMMD() {
+        final String mmdPath =
+                this.getClass().getClassLoader()
+                        .getResource("handlers/full_mmd.xml").getPath();
+        final File f = new File(mmdPath);
+        MessageMetaData mmd = null;
+        try {
+            mmd = MessageMetaData.createFromFile(f);
+        } catch (final Exception e) {
+            fail("Unable to test because MMD could not be read correctly!");
+        }
+        return mmd;
     }
 }
