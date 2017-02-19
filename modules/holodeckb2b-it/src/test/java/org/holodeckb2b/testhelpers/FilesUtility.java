@@ -16,11 +16,7 @@
  */
 package org.holodeckb2b.testhelpers;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -92,9 +88,10 @@ public class FilesUtility {
     /**
      *
      * @param folder
+     * @param deleteFolder
      * @throws IOException
      */
-    public void deleteFolderAndItsContent(final Path folder) throws IOException {
+    public void deleteFolderContent(final Path folder, final boolean deleteFolder) throws IOException {
         Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
@@ -107,7 +104,8 @@ public class FilesUtility {
                 if (exc != null) {
                     throw exc;
                 }
-                Files.delete(dir);
+                if(deleteFolder)
+                    Files.delete(dir);
                 return FileVisitResult.CONTINUE;
             }
         });

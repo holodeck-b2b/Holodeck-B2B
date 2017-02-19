@@ -14,18 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.integ;
+package org.holodeckb2b.test.integration;
 
-import org.apache.commons.lang.SystemUtils;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.apache.maven.project.MavenProject;
-import org.holodeckb2b.testhelpers.FilesUtility;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,11 +27,17 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-
+import org.apache.commons.lang.SystemUtils;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.project.MavenProject;
+import org.holodeckb2b.testhelpers.FilesUtility;
 import static org.junit.Assert.assertTrue;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  * Created at 9:56 29.11.16
@@ -61,10 +60,11 @@ public class ITHelper {
         dFileName = "holodeckb2b-distribution-"+projectVersion+"-full.zip";
         dFilePath = ITHelper.class.getClassLoader().getResource("").getPath();
         dFilePath += "/../../../holodeckb2b-distribution/target/" + dFileName;
-        //System.out.println("version: " + projectVersion);
+        System.out.println("version: " + projectVersion);
         // todo dir name should be taken from pom.xml
         dDirName = "holodeck-b2b-"+projectVersion;
         workingDirPath = ITHelper.class.getClassLoader().getResource("integ").getPath();
+        System.out.println("working dir: " + workingDirPath);
     }
 
     /**
@@ -90,18 +90,15 @@ public class ITHelper {
     /**
      * Unpacks HolodeckB2B distribution and renames the distribution directory
      * to <code>distrDirName</code>
-     * @param distrDirName
+     * @param distrDirName HolodeckB2B instance folder name
      */
     void unzipHolodeckDistribution(String distrDirName) {
-        // unzip first instance of the distribution zip file
-        // todo delete dir with distrDirName if it is already exist
         FilesUtility fu = new FilesUtility();
         try {
             fu.unzip(dFilePath, workingDirPath);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // rename distr dir
         File distrDir = new File(workingDirPath +"/"+ dDirName);
         assertTrue(distrDir.exists());
         if(distrDir.exists()) {
@@ -111,8 +108,8 @@ public class ITHelper {
 
     /**
      * Copies <code>pmodeFileName</code> to <code>distrDirName</code>/conf/pmodes directory
-     * @param distrDirName
-     * @param pmodeFileName
+     * @param distrDirName HolodeckB2B instance folder name
+     * @param pmodeFileName pmode configuration file name
      */
     void copyPModeDescriptor(String distrDirName, String pmodeFileName) {
         File pmodeXml = new File(workingDirPath + "/" + distrDirName + "/"
@@ -129,7 +126,7 @@ public class ITHelper {
 
     /**
      * Changes the receiver port of the HolodeckB2B instance
-     * @param distrDirName
+     * @param distrDirName HolodeckB2B instance folder name
      * @param port
      */
     void modifyAxisServerPort(String distrDirName, String port) {
@@ -143,8 +140,8 @@ public class ITHelper {
 
     /**
      * Starts sender & receiver HolodeckB2B instances
-     * @param dADirName sender HolodeckB2B instance
-     * @param dBDirName receiver HolodeckB2B instance
+     * @param dADirName initiator HolodeckB2B instance folder name
+     * @param dBDirName responder HolodeckB2B instance folder name
      */
     void startHolodeckB2BInstances(String dADirName, String dBDirName) {
         String command;
@@ -222,7 +219,7 @@ public class ITHelper {
 
     /**
      * Copies the example data files to <code>distrDirName</code>/data/msg_out directory
-     * @param distrDirName
+     * @param distrDirName HolodeckB2B instance folder name
      */
     void copyExampleDataToMsgOutDir(String distrDirName) {
         File msgsDir = new File(workingDirPath + "/" + distrDirName + "/"
@@ -256,13 +253,64 @@ public class ITHelper {
     }
 
     /**
+     *
+     * @param distrDirName HolodeckB2B instance folder name
+     */
+    void copyKeystores(String distrDirName) {
+        File keysDir = new File(workingDirPath + "/" + distrDirName + "/"
+                + "examples" + "/" + "certs");
+        File repoKeysDir =
+                new File(workingDirPath + "/" + distrDirName
+                        + "/" + "repository" + "/" + "certs");
+        File[] keysFiles = keysDir.listFiles();
+//                keysDir.listFiles(new FilenameFilter() {
+//            @Override
+//            public boolean accept(File dir, String name) {
+//                if(name.endsWith("jks"))
+//                    return true;
+//                return false;
+//            }
+//        });
+        try {
+            for (File f : keysFiles) {
+                File newF =
+                        new File(repoKeysDir.getPath() + "/" + f.getName());
+                Files.copy(f.toPath(), newF.toPath(),
+                        StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Deletes contents of msg_out & msg_in folders of the HolodeckB2B instance
+     * @param distrDirName HolodeckB2B instance folder name
+     */
+    void clearMsgOutAndMsgInDirs(String distrDirName) {
+        File msgOutDir =
+                new File(workingDirPath + "/" + distrDirName
+                        + "/" + "data" + "/" + "msg_out");
+        File msgInDir =
+                new File(workingDirPath + "/" + distrDirName
+                        + "/" + "data" + "/" + "msg_in");
+        FilesUtility fu = new FilesUtility();
+        try {
+            fu.deleteFolderContent(msgOutDir.toPath(), false);
+            fu.deleteFolderContent(msgInDir.toPath(), false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Changes msg file extension to .mmd
-     * @param msgFileName
-     * @param dADirName
+     * @param msgFileName message file name
+     * @param distrDirName HolodeckB2B instance folder name
      */
     boolean changeMsgExtensionToMMD(String msgFileName,
-                                                  String dADirName) {
-        File file = new File(workingDirPath + "/" + dADirName
+                                                  String distrDirName) {
+        File file = new File(workingDirPath + "/" + distrDirName
                 + "/data/msg_out/" + msgFileName);
         int index = file.getName().lastIndexOf(".");
         String fileName = file.getName().substring(0, index);
@@ -274,14 +322,14 @@ public class ITHelper {
 
     /**
      * Deletes <code>distrDirName</code> directory
-     * @param distrDirName
+     * @param distrDirName HolodeckB2B instance folder name
      */
     void deleteDistDir(String distrDirName) {
         FilesUtility fu = new FilesUtility();
         File distrDir = new File(workingDirPath+"/"+distrDirName);
         if(distrDir.exists()) {
             try {
-                fu.deleteFolderAndItsContent(distrDir.toPath());
+                fu.deleteFolderContent(distrDir.toPath(), true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -293,7 +341,7 @@ public class ITHelper {
      * @param filePath
      * @param port
      */
-    void changePortInAxis2Xml(String filePath, String port) {
+    private void changePortInAxis2Xml(String filePath, String port) {
         try {
             DocumentBuilderFactory docFactory =
                     DocumentBuilderFactory.newInstance();
@@ -327,6 +375,59 @@ public class ITHelper {
     }
 
     /**
+     * Set the pulling interval of the pull worker
+     * @param distrDirName HolodeckB2B instance dir
+     * @param interval time interval in seconds
+     */
+    void setPullingInterval(String distrDirName, int interval) {
+        File axisXml = new File(workingDirPath + "/" + distrDirName + "/"
+                + "conf" + "/" + "pulling_configuration.xml");
+        assertTrue(axisXml.exists());
+        if(axisXml.exists()) {
+            changeIntervalInPullingConfigurationXml(axisXml.getPath(), interval);
+        }
+    }
+
+    /**
+     * Change the value of the pulling interval in seconds
+     * @param filePath path to configuration file
+     * @param interval time interval in seconds
+     */
+    private void changeIntervalInPullingConfigurationXml(String filePath, int interval) {
+        try {
+            DocumentBuilderFactory docFactory =
+                    DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document doc = docBuilder.parse(filePath);
+            Node pulling = doc.getElementsByTagName("pulling").item(0);
+            NodeList nodes = pulling.getChildNodes();
+            int nodesAmount = nodes.getLength();
+            for(int i = 0; i < nodesAmount; i++) {
+                Node n = nodes.item(i);
+                String nN = n.getNodeName();
+                if(nN.equals("default")) {
+                    NamedNodeMap attributes = n.getAttributes();
+                    attributes.getNamedItem("interval")
+                            .setTextContent(String.valueOf(interval));
+                }
+            }
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(new File(filePath));
+            transformer.transform(source, result);
+        } catch (ParserConfigurationException pce) {
+            pce.printStackTrace();
+        } catch (TransformerException tfe) {
+            tfe.printStackTrace();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        } catch (SAXException sae) {
+            sae.printStackTrace();
+        }
+    }
+
+    /**
      * Checks if the file <code>fileName</code> exists in <code>dirName</code>
      * @param fileName
      * @param dirName
@@ -339,8 +440,9 @@ public class ITHelper {
 
     /**
      *
-     * @param dirName
-     * @return
+     * @param dirName directory name
+     * @return true - if the <code>dirName</code> directory is not empty,
+     *          false - otherwise
      */
     boolean dirIsNotEmpty(String dirName) {
         boolean res = false;

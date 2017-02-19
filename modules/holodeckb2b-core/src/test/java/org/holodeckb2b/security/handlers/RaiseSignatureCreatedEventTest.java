@@ -152,14 +152,10 @@ public class RaiseSignatureCreatedEventTest {
         core.getPModeSet().add(pmode);
 
         EntityProxy<org.holodeckb2b.ebms3.persistency.entities.UserMessage>
-                userMessageEntityProxy = null;
-        try {
             userMessageEntityProxy =
                     MessageUnitDAO.storeReceivedMessageUnit(
                             UserMessage.readElement(userMessage));
-        } catch (PackagingException e) {
-            fail(e.getMessage());
-        }
+
         userMessageEntityProxy.entity.setPMode(pmode.getId());
         mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
                 userMessageEntityProxy);
