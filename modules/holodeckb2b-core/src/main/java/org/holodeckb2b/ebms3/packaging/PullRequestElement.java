@@ -20,6 +20,7 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
@@ -54,8 +55,7 @@ public class PullRequestElement {
      */
     public static org.holodeckb2b.common.messagemodel.PullRequest readElement(final OMElement prElement) {
         // Create a new PullRequest entity object to store the information in
-        final org.holodeckb2b.common.messagemodel.PullRequest prData =
-                                                        new org.holodeckb2b.common.messagemodel.PullRequest();
+        final PullRequest prData = new PullRequest();
 
         // The PullRequest itself only contains the [optional] mpc attribute
         String  mpc = prElement.getAttributeValue(new QName(MPC_ATTR));
