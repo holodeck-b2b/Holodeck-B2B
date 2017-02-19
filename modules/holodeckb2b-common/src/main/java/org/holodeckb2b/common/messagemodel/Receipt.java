@@ -63,7 +63,7 @@ public class Receipt extends MessageUnit implements IReceipt {
     }
 
     public void setContent(final Iterator<OMElement> content) {
-        if (Utils.isNullOrEmpty(content)) {
+        if (!Utils.isNullOrEmpty(content)) {
             this.content = new ArrayList<>();
             while (content.hasNext())
                 this.content.add(content.next().cloneOMElement());
