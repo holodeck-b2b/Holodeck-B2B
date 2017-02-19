@@ -59,7 +59,8 @@ public class BasicHeaderValidation extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
         // Validate User Message
-        IUserMessageEntity userMessage = (IUserMessageEntity) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
+        IUserMessageEntity userMessage = (IUserMessageEntity)
+                mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
         if (userMessage != null) {
             log.debug("Check received User Message");
             InvalidHeader   invalidHeaderError = UserMessage.validate(userMessage);
@@ -69,10 +70,11 @@ public class BasicHeaderValidation extends BaseHandler {
                 log.debug("Received User Message satisfies basic validations");
         }
         // Validate Pull Request
-        IPullRequestEntity pullRequest = (IPullRequestEntity) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
+        IPullRequestEntity pullRequest = (IPullRequestEntity)
+                mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
         if (pullRequest != null) {
             log.debug("Check received Pull Request");
-            InvalidHeader   invalidHeaderError = PullRequest.validate((IPullRequest) pullRequest);
+            InvalidHeader   invalidHeaderError = PullRequest.validate(pullRequest);
             if (invalidHeaderError != null)
                 saveError(invalidHeaderError, pullRequest, mc);
             else
