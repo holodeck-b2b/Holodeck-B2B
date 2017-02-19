@@ -27,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.xml.namespace.QName;
-import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 

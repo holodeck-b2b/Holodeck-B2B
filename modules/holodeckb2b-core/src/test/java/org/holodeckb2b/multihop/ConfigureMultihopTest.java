@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.multihop;
 
-import java.io.File;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -26,6 +25,7 @@ import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.common.messagemodel.AgreementReference;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
@@ -39,12 +39,12 @@ import org.holodeckb2b.pmode.helpers.Agreement;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.Protocol;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Created at 13:32 12.09.16

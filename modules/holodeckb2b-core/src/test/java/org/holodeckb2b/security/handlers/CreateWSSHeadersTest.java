@@ -16,11 +16,6 @@
  */
 package org.holodeckb2b.security.handlers;
 
-import java.io.File;
-import java.security.Security;
-import java.util.ArrayList;
-import java.util.Iterator;
-import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
@@ -30,6 +25,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -39,11 +35,16 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.pmode.helpers.EncryptionConfig;
 import org.holodeckb2b.pmode.helpers.SigningConfig;
 import org.holodeckb2b.pmode.helpers.UsernameTokenConfig;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import javax.xml.namespace.QName;
+import java.security.Security;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import static org.junit.Assert.*;
 
 /**
  * Created at 20:31 16.10.16
