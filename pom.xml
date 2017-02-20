@@ -76,7 +76,7 @@
             </dependency>
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
-                <artifactId>default-persistency</artifactId>
+                <artifactId>holodeckb2b-persistency</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -53,7 +53,7 @@
         <!-- The default persistency implementation -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>default-persistency</artifactId>
+            <artifactId>holodeckb2b-persistency</artifactId>
         </dependency>
         <!--===============================================================
             Second the runtime only dependencies, not declared in the
