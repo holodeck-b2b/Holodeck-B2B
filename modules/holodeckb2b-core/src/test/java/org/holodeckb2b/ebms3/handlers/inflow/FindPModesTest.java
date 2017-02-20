@@ -161,11 +161,6 @@ public class FindPModesTest {
         agreement.setType(agreementRefType);
         pmode.setAgreement(agreement);
 
-        // todo It seems strange that we need to set the PMode id value separately
-        // todo when it is contained within the agreement
-        // todo but if we don't set it the value returned by userMessage.getPModeId() is null now
-        userMessage.setPModeId(pmodeId);
-
         core.getPModeSet().add(pmode);
 
         // Setting input message property
