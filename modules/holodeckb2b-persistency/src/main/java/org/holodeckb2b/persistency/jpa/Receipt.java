@@ -85,6 +85,7 @@ public class Receipt extends MessageUnit implements IReceipt, Serializable {
             xmlContent = null;
             CONTENT = null;
         } else {
+            xmlContent = new ArrayList<>();
             // Copy XML elements to instance variable and add them to container element for serialization to database
             // Create a "placeholder" element for all children of the Receipt element
             final OMElement c = OMAbstractFactory.getOMFactory().createOMElement(XML_CONTENT_QNAME);
