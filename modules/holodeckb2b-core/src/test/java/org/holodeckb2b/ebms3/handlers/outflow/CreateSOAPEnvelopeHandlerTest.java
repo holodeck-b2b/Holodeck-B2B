@@ -74,7 +74,7 @@ public class CreateSOAPEnvelopeHandlerTest {
     }
 
     @Test
-    public void testDoProcessing() throws Exception {
+    public void testDoProcessingIfInitiator() throws Exception {
         MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
@@ -85,12 +85,6 @@ public class CreateSOAPEnvelopeHandlerTest {
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
-
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
 
         PMode pmode = new PMode();
 
@@ -135,4 +129,6 @@ public class CreateSOAPEnvelopeHandlerTest {
         }
         assertTrue(containsExpLogMsg);
     }
+
+    //todo we need to add test of the empty response case
 }
