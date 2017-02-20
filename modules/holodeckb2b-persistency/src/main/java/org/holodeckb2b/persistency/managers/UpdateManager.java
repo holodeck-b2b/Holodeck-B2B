@@ -59,15 +59,15 @@ public class UpdateManager implements IUpdateManager {
             // Determine which JPA class should be created to store the meta-data
             Class jpaEntityClass = JPAEntityHelper.determineJPAClass(messageUnit);
             Constructor cons = jpaEntityClass.getConstructor(
-                                                      new Class[] { MessageUnitUtils.getMessageUnitType(messageUnit) });
+                    new Class[] { MessageUnitUtils.getMessageUnitType(messageUnit) });
             jpaMsgUnit = (MessageUnit) cons.newInstance(messageUnit);
 
             em = EntityManagerUtil.getEntityManager();
             em.getTransaction().begin();
             em.persist(jpaMsgUnit);
             em.getTransaction().commit();
-        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
-                 | IllegalArgumentException | InvocationTargetException ex) {
+        } catch (NoSuchMethodException | SecurityException | InstantiationException
+                | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             // Could not create a JPA entity object for the given message unit
             throw new PersistenceException("An error occurred while saving the message unit's meta-data!", ex);
         } finally {
