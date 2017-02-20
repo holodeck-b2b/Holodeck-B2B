@@ -48,8 +48,8 @@ public class PullRequest {
         // First validate the general meta-data
         errDetails.append(MessageUnit.validate(pullReqInfo));
 
-        // Check that a RefToMessageId is included
-        if (Utils.isNullOrEmpty(pullReqInfo.getRefToMessageId()))
+        // Check that no RefToMessageId is included
+        if (!Utils.isNullOrEmpty(pullReqInfo.getRefToMessageId()))
             errDetails.append("There must be no RefToMessageId\n");
 
         // Create the ebMS error if any problems were found
