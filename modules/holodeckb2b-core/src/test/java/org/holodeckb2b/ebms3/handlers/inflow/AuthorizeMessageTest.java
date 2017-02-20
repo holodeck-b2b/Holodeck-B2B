@@ -144,15 +144,8 @@ public class AuthorizeMessageTest {
 
         mc.setProperty(SecurityConstants.EBMS_USERNAMETOKEN, tokenConfig);
 
-        // Setting signature configuration
-        SigningConfig sigConfig = new SigningConfig();
-        sigConfig.setKeystoreAlias("exampleca");
-        sigConfig.setCertificatePassword("ExampleCA");
-
-        mc.setProperty(SecurityConstants.SIGNATURE, sigConfig);
         // Setting security configuration
         SecurityConfig secConfig = new SecurityConfig();
-        secConfig.setSignatureConfiguration(sigConfig);
         secConfig.setUsernameTokenConfiguration(
                 ISecurityConfiguration.WSSHeaderTarget.EBMS, tokenConfig);
 
