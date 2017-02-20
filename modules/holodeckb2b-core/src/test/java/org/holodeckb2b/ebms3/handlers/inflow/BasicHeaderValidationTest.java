@@ -27,16 +27,18 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
-import org.holodeckb2b.common.messagemodel.PullRequest;
-import org.holodeckb2b.common.messagemodel.Receipt;
-import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.common.messagemodel.*;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.*;
+import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.packaging.PullRequestElement;
+import org.holodeckb2b.ebms3.packaging.SOAPEnv;
+import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
@@ -166,6 +168,7 @@ public class BasicHeaderValidationTest {
         PullRequest pullRequest = new PullRequest();
         pullRequest.setMPC("some_mpc");
         pullRequest.setMessageId("some_id");
+        // there should not be ref to message id
 //        pullRequest.setRefToMessageId("some_ref_to_message_id");
         pullRequest.setTimestamp(new Date());
         PullRequestElement.createElement(headerBlock, pullRequest);
@@ -210,30 +213,28 @@ public class BasicHeaderValidationTest {
         assertTrue(containsExpLogMsg);
     }
 
-    //@Test
+    // todo the following test fails. Correct it and uncomment
+    @Test
     public void testDoProcessingOfReciepts() throws Exception {
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding Receipts
-
         Receipt receipt = new Receipt();
         receipt.setMessageId("some_message_id");
-//        receipt.setRefToMessageId("some_ref_to_message_id");
+        receipt.setRefToMessageId("some_ref_to_message_id");
         receipt.setTimestamp(new Date());
         ArrayList<OMElement> receiptContent = new ArrayList<>();
 
         OMElement receiptChildElement =
                 headerBlock.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
         receiptChildElement.setText("eb3:UserMessage");
+        System.out.println("receiptChildElement: " + receiptChildElement);
 
         receiptContent.add(receiptChildElement);
+
         receipt.setContent(receiptContent);
-
-        OMElement receiptElement = ReceiptElement.createElement(headerBlock, receipt);
-
-        System.out.println("receiptElement1: " + receiptElement);
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
@@ -246,7 +247,6 @@ public class BasicHeaderValidationTest {
 
         // Setting input Receipt property
         UpdateManager updateManager = core.getUpdateManager();
-        // todo something is wrong in the following code
 
         IReceiptEntity receiptEntity =
                 updateManager.storeIncomingMessageUnit(receipt);
@@ -277,11 +277,52 @@ public class BasicHeaderValidationTest {
             }
         }
         assertTrue(containsExpLogMsg);
-        //        fail("Not implemented yet!");
     }
 
-    //@Test
+    @Test
     public void testDoProcessingOfErrors() throws Exception {
-//        fail("Not implemented yet!");
+        // Initialising Errors
+        ErrorMessage error = new ErrorMessage();
+        error.setMessageId("some_message_id");
+        error.setTimestamp(new Date());
+        ArrayList<IEbmsError> errors = new ArrayList<>();
+        errors.add(new EbmsError());
+        error.setErrors(errors);
+
+        MessageContext mc = new MessageContext();
+
+        // Setting input Receipt property
+        UpdateManager updateManager = core.getUpdateManager();
+
+        IErrorMessageEntity errorMessageEntity =
+                updateManager.storeIncomingMessageUnit(error);
+        System.out.println("errors: " + errorMessageEntity.getErrors());
+        ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
+        errorMessageEntities.add(errorMessageEntity);
+        mc.setProperty(MessageContextProperties.IN_ERRORS,
+                errorMessageEntities);
+
+        try {
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertNotNull(invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        // Checking log messages to make sure handler validated
+        // the pull request successfully
+        verify(mockAppender, atLeastOnce())
+                .doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+        String expLogMsg = "Received Error satisfies basic validations";
+        boolean containsExpLogMsg = false;
+        for(LoggingEvent e : events) {
+            if(e.getLevel().equals(Level.DEBUG)) {
+                if(e.getRenderedMessage().equals(expLogMsg)) {
+                    containsExpLogMsg = true;
+                }
+            }
+        }
+        assertTrue(containsExpLogMsg);
     }
 }
