@@ -159,7 +159,9 @@ public class UpdateManagerTest {
         assertTrue(CompareUtils.areEqual(TestData.userMsg1.getMessageProperties().iterator().next(),
                                          userMsg.getMessageProperties().iterator().next()));
 
-
+        ReceiptEntity receiptEntity =
+                updManager.storeMessageUnit(new org.holodeckb2b.common.messagemodel.Receipt(TestData.receipt6));
+        assertNotNull(receiptEntity);
     }
 
     @Test
@@ -216,6 +218,11 @@ public class UpdateManagerTest {
         em.refresh(userMsgJPA);
         assertEquals(T_NEW_PROC_STATE_2, userMsgJPA.getCurrentProcessingState().getState());
         assertEquals(3, userMsgJPA.getProcessingStates().size());
+    }
+
+    @Test
+    public void testStoreMessageUnit1() throws Exception {
+
     }
 
     class ProcUpdater implements Runnable {
