@@ -337,7 +337,7 @@ public class MessageContextUtils {
             return primaryMsgUnit;
 
         // No errors, maybe a PullRequest?
-        primaryMsgUnit = (IUserMessageEntity) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
+        primaryMsgUnit = (IMessageUnitEntity) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
 
         return primaryMsgUnit;
     }
