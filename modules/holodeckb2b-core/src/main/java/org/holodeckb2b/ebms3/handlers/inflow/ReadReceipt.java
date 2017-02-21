@@ -20,21 +20,21 @@ import java.util.Iterator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.Receipt;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.ebms3.packaging.ReceiptElement;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is the handler that checks if this message contains one or more Receipt signals, i.e. contains one or more
  * <code>eb:Receipt</code> elements in the ebMS header. When such signal message units are found the information is read
- * from the message into a array of {@link Receipt} objects and stored in both database and message context (under key
+ * from the message into a array of {@link ReceiptElement} objects and stored in both database and message context (under key
  * {@link MessageContextProperties#IN_RECEIPTS}). The processing state of the new receipts will be set to {@link
  * ProcessingStates#RECEIVED}.
  * <p><b>NOTE: </b>This handler will process all receipt signals that are in the message although the ebMS V3 Core
@@ -50,27 +50,26 @@ public class ReadReceipt extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws DatabaseException {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         // First get the ebMS header block, that is the eb:Messaging element
         final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
 
         if (messaging != null) {
             // Check if there are Receipt signals
             log.debug("Check for Receipt elements to determine if message contains one or more receipts");
-            final Iterator<OMElement> rcpts = Receipt.getElements(messaging);
+            final Iterator<OMElement> rcpts = ReceiptElement.getElements(messaging);
 
             if (!Utils.isNullOrEmpty(rcpts)) {
                 log.debug("Receipt(s) found, read information from message");
                 while (rcpts.hasNext()) {
                     final OMElement rcptElem = rcpts.next();
                     // Read information into Receipt object
-                    org.holodeckb2b.ebms3.persistency.entities.Receipt receipt = Receipt.readElement(rcptElem);
+                    Receipt receipt = ReceiptElement.readElement(rcptElem);
 
                     // And store in database and message context for further processing
                     log.debug("Store Receipt in database");
-                    final EntityProxy<org.holodeckb2b.ebms3.persistency.entities.Receipt> rcptProxy =
-                                                                      MessageUnitDAO.storeReceivedMessageUnit(receipt);
-                    MessageContextUtils.addRcvdReceipt(mc, rcptProxy);
+                    MessageContextUtils.addRcvdReceipt(mc, (IReceiptEntity) HolodeckB2BCore.getUpdateManager()
+                                                                                  .storeIncomingMessageUnit(receipt));
                     log.info("Receipt [msgId=" + receipt.getMessageId() + "] received for message with id:"
                              + receipt.getRefToMessageId());
                 }

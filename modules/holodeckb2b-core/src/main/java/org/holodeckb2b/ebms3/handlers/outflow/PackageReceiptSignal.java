@@ -16,27 +16,26 @@
  */
 package org.holodeckb2b.ebms3.handlers.outflow;
 
-import java.util.ArrayList;
-
+import java.util.Collection;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.persistency.entities.Receipt;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.ebms3.packaging.ReceiptElement;
+import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:Receipt</code> element in the ebMS messaging
  * header if a receipt signal should be sent.
- * <p>Whether a receipt signal must be sent is determined by the existence of the
- * {@link MessageContextProperties#OUT_RECEIPTS} property. It contains an array of <code>EntityProxy</code>s for the
- * {@link Receipt} objects containing the data of the receipt signals to include.
- * <p>NOTE: This handler will insert more than one Receipt signal if the array contains multiple {@link Receipt}
- * objects. The resulting ebMS message will <b>not conform</b> to the Core Spec and AS4 profile as they do not allow
- * bundling signal message of the same type. It is the responsibility of the other handlers not to insert more than one
- * receipt if conformance is required.
+ * <p>Whether a receipt signal must be sent is determined by the existence of the {@link
+ * MessageContextProperties#OUT_RECEIPTS} property.  It contains an collection of entity objects representing the
+ * Receipt Signal message units to include.
+ * <p>NOTE: This handler will insert more than one Receipt Signal if the collection contains multiple objects. The
+ * resulting ebMS message will <b>not conform</b> to the Core Spec and AS4 profile as they do not allow bundling signal
+ * message of the same type. It is the responsibility of the other handlers not to insert more than one receipt if
+ * conformance is required.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -53,14 +52,15 @@ public class PackageReceiptSignal extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) {
         // First check if there is a receipt to include
-        ArrayList<EntityProxy<Receipt>> receipts = null;
+        Collection<IReceiptEntity> receipts = null;
 
         try {
-            receipts = (ArrayList<EntityProxy<Receipt>>) mc.getProperty(MessageContextProperties.OUT_RECEIPTS);
+            receipts =  (Collection<IReceiptEntity>) mc.getProperty(MessageContextProperties.OUT_RECEIPTS);
         } catch (final ClassCastException e) {
             log.fatal("Illegal state of processing! MessageContext contained a "
-                        + mc.getProperty(MessageContextProperties.OUT_RECEIPTS).getClass().getName() + " object as collection of receipts!");
-            return InvocationResponse.ABORT;
+                        + mc.getProperty(MessageContextProperties.OUT_RECEIPTS).getClass().getName()
+                        + " object as collection of receipts!");
+            throw new IllegalStateException("MessageContext contained a wrong object as collection of receipts!");
         }
         if (Utils.isNullOrEmpty(receipts))
             // No receipt in this message, continue processing
@@ -72,9 +72,9 @@ public class PackageReceiptSignal extends BaseHandler {
         log.debug("Get the eb:Messaging header from the message");
         final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
 
-        for(final EntityProxy<Receipt> r : receipts) {
+        for(final IReceiptEntity r : receipts) {
             log.debug("Add eb:SignalMessage element to the existing eb:Messaging header");
-            org.holodeckb2b.ebms3.packaging.Receipt.createElement(messaging, r.entity);
+            ReceiptElement.createElement(messaging, r);
             log.debug("eb:SignalMessage element succesfully added to header");
         }
 

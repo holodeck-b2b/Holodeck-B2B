@@ -17,19 +17,18 @@
 package org.holodeckb2b.events;
 
 import java.util.List;
-
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.events.EventUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandlerFactory;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 
@@ -81,11 +80,11 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
             log.info("A " + eventType + " event [" + event.getId() + "] was raised for " + msgUnitType + " with msgId="
                      + messageId);
             // Check that the referenced event is an entity object
-            if (!(event.getSubject() instanceof MessageUnit)) {
+            if (!(event.getSubject() instanceof IMessageUnitEntity)) {
                 log.error("This processor can only handle event that include an entity object reference!");
                 return;
             }
-            final MessageUnit subject = (MessageUnit) event.getSubject();
+            final IMessageUnitEntity subject = (IMessageUnitEntity) event.getSubject();
             final String pmodeId = subject.getPModeId();
             if (Utils.isNullOrEmpty(pmodeId)) {
                 // No P-Mode available for this message unit => no handler config
@@ -100,7 +99,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
                 log.error("The P-Mode for the message unit [" + pmodeId + "] is not available!");
                 return;
             }
-            final ILeg leg = pmode.getLeg(subject.getLeg()!= null ? subject.getLeg() : ILeg.Label.REQUEST);
+            final ILeg leg = pmode.getLeg(subject.getLeg() != null ? subject.getLeg() : ILeg.Label.REQUEST);
             final List<IMessageProcessingEventConfiguration> eventHandlers = leg.getMessageProcessingEventConfiguration();
             if (Utils.isNullOrEmpty(eventHandlers)) {
                 log.debug(leg.getLabel() != null ? leg.getLabel().toString() : "REQUEST" + " leg of P-Mode [" + pmodeId

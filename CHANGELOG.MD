@@ -5,19 +5,34 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 ###Added
 * P-Mode validation feature which separates the validation of P-Modes from both their internal and external storage.
-* Unit tests.
-* Integration tests.
+* Unit tests to improve test coverage
+* Integration tests. These tests setup two Holodeck B2B instances and execute both a push and pull exchange to check
+  that everything works also on run time.
+* A default implementation of the message model interface (in Common module)
+* Interfaces for separation of Core functionality and storage of message unit meta-data.
+* Default _persistency provider_ implementation
 
 ###Changed
 * Refactored the validation of received message units into separate validation classes and handler.
+* Refactored Core module to use new persistency interfaces
+* Moved XML messsge meta-data implementation and ProductId classes to Common module
 
 ###Deprecated
 
 ###Removed
+* The exceptions `org.holodeckb2b.common.exceptions.DatabaseException` and `org.holodeckb2b.common.exceptions.DuplicateMessageIdError`
+  which were bound to the specific persistency implementation of the older versions are removed.
 
 ###Fixed
 
 ###Security
+
+## 2.1.2
+###### 2016-12-21
+###Fixed
+* References in Error Signals are not checked correctly [#38](https://github.com/holodeck-b2b/Holodeck-B2B/issues/38)
+* Database connection leak [#39](https://github.com/holodeck-b2b/Holodeck-B2B/issues/39)
+* The dependency on Java 8 is removed again [#40](https://github.com/holodeck-b2b/Holodeck-B2B/issues/40)
 
 ## 2.1.1
 ###### 2016-11-11

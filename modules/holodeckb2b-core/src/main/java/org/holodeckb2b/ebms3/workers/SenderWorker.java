@@ -17,21 +17,25 @@
 package org.holodeckb2b.ebms3.workers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.ebms3.axis2.Axis2Sender;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
-import org.holodeckb2b.ebms3.persistency.entities.Receipt;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is responsible for starting the send process of message units. It looks for all messages waiting in the database to
@@ -55,33 +59,45 @@ public class SenderWorker extends AbstractWorkerTask {
     public void doProcessing() {
         try {
             log.debug("Getting list of message units to send");
-            final List<EntityProxy> newMsgs = new ArrayList<>();
+            final List<IMessageUnitEntity> newMsgs = new ArrayList<>();
+            final IQueryManager queryManager = HolodeckB2BCore.getQueryManager();
             // Add all User Messages waiting to be sent
-            newMsgs.addAll(MessageUnitDAO.getSentMessageUnitsInState(UserMessage.class,
-                                                                 new String[] {ProcessingStates.READY_TO_PUSH}));
+            Collection<? extends IMessageUnitEntity> msgUnits = queryManager.getMessageUnitsInState(IUserMessage.class,
+                                                                IMessageUnit.Direction.OUT,
+                                                                new ProcessingState[] {ProcessingState.READY_TO_PUSH});
+            if (!Utils.isNullOrEmpty(msgUnits))
+                newMsgs.addAll(msgUnits);
             // Add all Receipts waiting to be sent
-            newMsgs.addAll(MessageUnitDAO.getSentMessageUnitsInState(Receipt.class,
-                                                                 new String[] {ProcessingStates.READY_TO_PUSH}));
+            msgUnits = queryManager.getMessageUnitsInState(IReceipt.class, IMessageUnit.Direction.OUT,
+                                                                new ProcessingState[] {ProcessingState.READY_TO_PUSH});
+            if (!Utils.isNullOrEmpty(msgUnits))
+                newMsgs.addAll(msgUnits);
             // Add all Errors waiting to be sent
-            newMsgs.addAll(MessageUnitDAO.getSentMessageUnitsInState(ErrorMessage.class,
-                                                                 new String[] {ProcessingStates.READY_TO_PUSH}));
+            msgUnits = queryManager.getMessageUnitsInState(IErrorMessage.class, IMessageUnit.Direction.OUT,
+                                                                new ProcessingState[] {ProcessingState.READY_TO_PUSH});
+            if (!Utils.isNullOrEmpty(msgUnits))
+                newMsgs.addAll(msgUnits);
 
             if (!Utils.isNullOrEmpty(newMsgs)) {
                 log.info("Found " + newMsgs.size() + " message units to send");
-                for (final EntityProxy message : newMsgs) {
+                for (final IMessageUnitEntity msgUnit : newMsgs) {
                     // Indicate that processing will start
-                    if (MessageUnitDAO.startProcessingMessageUnit(message)) {
+                    if (HolodeckB2BCore.getUpdateManager().setProcessingState(msgUnit, ProcessingState.READY_TO_PUSH,
+                                                                              ProcessingState.PROCESSING)) {
                         // only when we could succesfully set processing state really start processing
-                        log.debug("Start processing message [" + message.entity.getMessageId() + "]");
-                        Axis2Sender.sendMessage(message, log);
+                        log.debug("Start processing " + MessageUnitUtils.getMessageUnitName(msgUnit)
+                                    + "[" + msgUnit.getMessageId() + "]");
+                        // Ensure all data is available for processing
+                        HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(msgUnit);
+                        Axis2Sender.sendMessage(msgUnit, log);
                     } else
                         // Message probably already in process
-                        log.debug("Could not start processing message [" + message.entity.getMessageId()
+                        log.debug("Could not start processing message [" + msgUnit.getMessageId()
                                     + "] because switching to processing state was unsuccesful");
                 }
             } else
                 log.info("No messages found that are ready for sending");
-        } catch (final DatabaseException dbError) {
+        } catch (final PersistenceException dbError) {
             log.error("Could not process message because a database error occurred. Details:"
                         + dbError.toString() + "\n");
         }

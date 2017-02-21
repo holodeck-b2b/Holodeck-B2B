@@ -21,7 +21,7 @@ import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.holodeckb2b.ebms3.packaging.UserMessage;
+import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
@@ -57,7 +57,7 @@ public class RoutingInput {
         routingInput.declareNamespace(EbMSConstants.EBMS3_NS_URI, EbMSConstants.EBMS3_NS_PREFIX);
 
         // And add a regular UserMessage child to it
-        final OMElement usrMsgElem = UserMessage.createElement(routingInput, routinginfo);
+        final OMElement usrMsgElem = UserMessageElement.createElement(routingInput, routinginfo);
         // This UserMessage element however has incorrect namespace, so change it to the multi-hop namespace
         usrMsgElem.setNamespace(routingInput.getNamespace());
 

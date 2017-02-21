@@ -53,18 +53,19 @@ public final class CompareUtils {
      * @return      <code>true</code> if both collection contain the same party ids,
      *              <code>false</code> otherwise
      */
-    public static boolean areEqual(final Collection<IPartyId> pids1, final Collection<IPartyId> pids2) {
+    public static boolean areEqual(final Collection<? extends IPartyId> pids1,
+                                   final Collection<? extends IPartyId> pids2) {
         boolean equal = pids1.size() == pids2.size();
 
         if (equal) {
             // Check every PartyId from the first collection to exist in the second and ensure all id's from the second
             // collection have been checked
             final boolean[] checked = new boolean[pids2.size()]; // have all items in second collection been checked?
-            for(final Iterator<IPartyId> it1 = pids1.iterator() ; equal && it1.hasNext() ;) {
+            for(final Iterator<? extends IPartyId> it1 = pids1.iterator() ; equal && it1.hasNext() ;) {
                 final IPartyId pi1 = it1.next();
                 // Check if this areEqual exists in the second collection
                 int i = 0; boolean exists = false;
-                for (final Iterator<IPartyId> it2 = pids2.iterator() ; !exists && it2.hasNext() ; i++)
+                for (final Iterator<? extends IPartyId> it2 = pids2.iterator() ; !exists && it2.hasNext() ; i++)
                     if (exists = areEqual(pi1, it2.next()))
                         checked[i] = true; // This item in the second collection is successfully compared
                 equal &= exists;

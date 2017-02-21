@@ -17,10 +17,9 @@
 package org.holodeckb2b.events;
 
 import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
-import org.holodeckb2b.ebms3.persistency.entities.Receipt;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
 import org.holodeckb2b.interfaces.events.types.IReceiptCreatedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
  * Is the implementation class of {@link IReceiptCreatedEvent} to indicate that a Receipt is created for a received
@@ -51,7 +50,7 @@ public class ReceiptCreatedEvent extends AbstractMessageProcessingEvent implemen
      * @param subject The received User Message for which the Receipt was created
      * @param receipt The created Receipt
      */
-    public ReceiptCreatedEvent(final UserMessage subject, final Receipt receipt) {
+    public ReceiptCreatedEvent(final IUserMessage subject, final IReceipt receipt) {
         this(subject, receipt, false);
     }
 
@@ -65,7 +64,7 @@ public class ReceiptCreatedEvent extends AbstractMessageProcessingEvent implemen
      * @param isForDuplicate    Indicates whether the received User Message is a duplicate and not delivered to the
      *                          business application.
      */
-    public ReceiptCreatedEvent(final UserMessage subject, final Receipt receipt, final boolean isForDuplicate) {
+    public ReceiptCreatedEvent(final IUserMessage subject, final IReceipt receipt, final boolean isForDuplicate) {
         super(subject);
         this.receipt = receipt;
         this.forDuplicate = isForDuplicate;

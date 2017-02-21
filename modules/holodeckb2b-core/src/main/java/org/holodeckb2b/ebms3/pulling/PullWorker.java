@@ -18,19 +18,15 @@ package org.holodeckb2b.ebms3.pulling;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.ebms3.axis2.Axis2Sender;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
@@ -39,6 +35,7 @@ import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.submit.MessageSubmitException;
 import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is responsible for starting the send process of Pull Request message units. The ebMS specific handlers in the Axis2
@@ -185,19 +182,20 @@ public class PullWorker implements IWorkerTask {
                 mpc = EbMSConstants.DEFAULT_MPC;
             log.debug("Using [" + mpc + "] as MPC for pull request");
 
-			try {
-				log.debug("Create the PullRequest signal for P-Mode [" + p.getId() + "] and MPC=" + mpc);
-				final String messageId = HolodeckB2BCoreInterface.getMessageSubmitter()
-																.submitMessage(new PullRequestData(p.getId(), mpc));
-				final EntityProxy<MessageUnit> pullRequest = MessageUnitDAO.getSentMessageUnitWithId(messageId);
-				log.info("Start send process for PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
-				Axis2Sender.sendMessage(pullRequest, log);
-			} catch (final MessageSubmitException ex) {
-				log.error("Could not submit PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
-			} catch (DatabaseException ex) {
-				log.error("Could not retrieve the created PullRequest from the database");
-			}
-		}
+            try {
+                log.debug("Create the PullRequest signal for P-Mode [" + p.getId() + "] and MPC=" + mpc);
+                final String messageId = HolodeckB2BCore.getMessageSubmitter()
+                                                        .submitMessage(new PullRequest(p.getId(), mpc));
+                final IPullRequestEntity pullRequest = (IPullRequestEntity) HolodeckB2BCore.getQueryManager()
+                                                                    .getMessageUnitsWithId(messageId).iterator().next();
+                log.info("Start send process for PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
+                Axis2Sender.sendMessage(pullRequest, log);
+            } catch (final MessageSubmitException ex) {
+                    log.error("Could not submit PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
+            } catch (PersistenceException ex) {
+                    log.error("Could not retrieve the created PullRequest from the database");
+            }
+        }
     }
 
     /**
@@ -247,45 +245,5 @@ public class PullWorker implements IWorkerTask {
         log.info("Pulling for " + pmodesToPull.size() + " P-Modes");
 
         return pmodesToPull;
-    }
-
-    /**
-     * Inner class to provide the meta-data on the Pull Request to the Holodeck B2B Core. Only supports passing of the
-     * PMode id and MPC.
-     */
-    private class PullRequestData implements IPullRequest {
-
-        String pModeId;
-        String mpc;
-
-        PullRequestData(final String pmodeId, final String mpc) {
-            this.pModeId = pmodeId;
-            this.mpc = mpc;
-        }
-
-        @Override
-        public String getMPC() {
-            return mpc;
-        }
-
-        @Override
-        public Date getTimestamp() {
-            return null;
-        }
-
-        @Override
-        public String getMessageId() {
-            return null;
-        }
-
-        @Override
-        public String getRefToMessageId() {
-            return null;
-        }
-
-        @Override
-        public String getPModeId() {
-            return pModeId;
-        }
     }
 }

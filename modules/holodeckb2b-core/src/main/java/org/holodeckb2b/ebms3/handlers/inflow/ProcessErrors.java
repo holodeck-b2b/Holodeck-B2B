@@ -17,29 +17,30 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
-import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.persistency.dao.UpdateManager;
 
 /**
- * Is the handler responsible for processing received error signals. For each error contained in one of the
- * {@link ErrorMessage}s available in the message context property {@link MessageContextProperties#IN_ERRORS} it will
- * check if there is a {@link MessageUnit} in the database and mark that message as failed.
+ * Is the <i>IN_FLOW</i> handler responsible for processing received error signals. For each error contained in one of
+ * the {@link ErrorMessage}s available in the message context property {@link MessageContextProperties#IN_ERRORS} it
+ * will check if there is a {@link MessageUnit} in the database and mark that message as failed.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -57,19 +58,18 @@ public class ProcessErrors extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws DatabaseException {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         log.debug("Check for received errors in message.");
-        final ArrayList<EntityProxy<ErrorMessage>>  errorSignals =
-                              (ArrayList<EntityProxy<ErrorMessage>>) mc.getProperty(MessageContextProperties.IN_ERRORS);
+        final ArrayList<IErrorMessageEntity>  errorSignals =
+                              (ArrayList<IErrorMessageEntity>) mc.getProperty(MessageContextProperties.IN_ERRORS);
 
         if (!Utils.isNullOrEmpty(errorSignals)) {
             log.debug("Message contains " + errorSignals.size() + " Error signals, start processing");
-            for (final EntityProxy<ErrorMessage> e : errorSignals)
+            for (final IErrorMessageEntity e : errorSignals)
                 // Ignore Errors that already failed
-                if (!ProcessingStates.FAILURE.equals(e.entity.getCurrentProcessingState().getName())) {
+                if (e.getCurrentProcessingState().getState() != ProcessingState.FAILURE)
                     processErrorSignal(e, mc);
-                }
-            log.debug("Error Signals processed");
+            log.debug("All Error Signals processed");
         } else
             log.debug("Message does not contain error signals, continue processing");
 
@@ -87,69 +87,65 @@ public class ProcessErrors extends BaseHandler {
      * ProcessingStates#READY_FOR_DELIVERY} to indicate that the error can be delivered to the business application if
      * needed.
      *
-     * @param errSignalProxy    The {@link EntityProxy} containing the {@link ErrorMessage} to process
+     * @param errSignalProxy    The {@link IErrorMessageEntity} object representing the Error Signal to process
      * @param mc                The current message context
-     * @throws DatabaseException When a database error occurs while processing the Error Signal
+     * @throws PersistenceException When a database error occurs while processing the Error Signal
      */
-    protected void processErrorSignal(final EntityProxy<ErrorMessage> errSignalProxy, final MessageContext mc)
-                                                                                        throws DatabaseException {
-        log.debug("Start processing Error [msgId=" + errSignalProxy.entity.getMessageId() + "]");
+    protected void processErrorSignal(final IErrorMessageEntity errSignal, final MessageContext mc)
+                                                                                        throws PersistenceException {
+        log.debug("Start processing Error Signal [msgId=" + errSignal.getMessageId() + "]");
+        UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
         // Change processing state to indicate we start processing the error. Also checks that the error is not
         // already being processed
-        if (!MessageUnitDAO.startProcessingMessageUnit(errSignalProxy)) {
-            log.debug("Error [msgId=" + errSignalProxy.entity.getMessageId()
-                                                                           + "] is already being processed, skipping");
+        if (!updateManager.setProcessingState(errSignal, ProcessingState.RECEIVED, ProcessingState.PROCESSING)) {
+            log.debug("Error Signal [msgId=" + errSignal.getMessageId() + "] is already being processed, skipping");
             return;
         }
 
         // Always log the error signal, even if its processing may fail later
-        errorLog.error(errSignalProxy.entity);
+        errorLog.error(MessageUnitUtils.errorSignalToString(errSignal));
 
         log.debug("Get referenced message unit(s)");
-        final ArrayList<EntityProxy<MessageUnit>> refdMessages = new ArrayList<>(1);
-
+        Collection<IMessageUnitEntity> refdMessages = null;
         // There may not be a refToMessageId in the error itself, in that case the message units from the request are
         // assumed to be referenced
-        final String refToMessageId = errSignalProxy.entity.getRefToMessageId();
+        final String refToMessageId = errSignal.getRefToMessageId();
         if (!Utils.isNullOrEmpty(refToMessageId)) {
-            log.debug("Error message [" + errSignalProxy.entity.getMessageId() + "] references messageId: "
+            log.debug("Error Signal [" + errSignal.getMessageId() + "] references messageId: "
                         + refToMessageId);
-            final EntityProxy<MessageUnit> mu = MessageUnitDAO.getSentMessageUnitWithId(refToMessageId);
-            if (mu != null)
-                refdMessages.add(mu);
+            refdMessages = HolodeckB2BCore.getQueryManager().getMessageUnitsWithId(refToMessageId);
         } else if (isInFlow(INITIATOR)) {
-            log.warn("Error message [" + errSignalProxy.entity.getMessageId() + "] does not contain reference."
+            log.warn("Error Signal [" + errSignal.getMessageId() + "] does not contain reference."
                     + "Assuming it refers to sent messages");
-            refdMessages.addAll(MessageContextUtils.getSentMessageUnits(mc));
+            refdMessages = MessageContextUtils.getSentMessageUnits(mc);
         }
 
         // An error should reference a message unit
-        if (refdMessages.isEmpty()) {
-            log.warn("Error message [" + errSignalProxy.entity.getMessageId()
-                                                                       + "] does not reference a known message unit!");
+        if (Utils.isNullOrEmpty(refdMessages)) {
+            log.warn("Error Signal [" + errSignal.getMessageId() + "] does not reference a known message unit!");
             // Create error and add to context
             final ValueInconsistent   viError = new ValueInconsistent();
             viError.setErrorDetail("Error does not reference a sent message unit");
-            viError.setRefToMessageInError(errSignalProxy.entity.getMessageId());
+            viError.setRefToMessageInError(errSignal.getMessageId());
             MessageContextUtils.addGeneratedError(mc, viError);
             // The message processing of the error fails
-            MessageUnitDAO.setFailed(errSignalProxy);
+            updateManager.setProcessingState(errSignal, ProcessingState.FAILURE);
         } else {
             // Change the processing state of the found message unit(s)
-            for (final EntityProxy mu : refdMessages) {
-                if (isWarning(errSignalProxy.entity)) {
+            for (final IMessageUnitEntity mu : refdMessages) {
+                if (isWarning(errSignal)) {
                     log.debug("Error level is warning, set processing state of referenced message ["
-                                                                    + mu.entity.getMessageId() + "] to warning");
-                    MessageUnitDAO.setWarning(mu);
+                              + mu.getMessageId() + "] to warning");
+                    updateManager.setProcessingState(mu, ProcessingState.WARNING);
                 } else {
                     log.debug("Error level is warning, set processing state of referenced message ["
-                                                                    + mu.entity.getMessageId() + "] to failure");
-                    MessageUnitDAO.setFailed(mu);
+                              + mu.getMessageId() + "] to failure");
+                    updateManager.setProcessingState(mu, ProcessingState.FAILURE);
                 }
             }
-            log.debug("Done processing Error signal [" + errSignalProxy.entity.getMessageId() + "]");
+            log.debug("Processed Error Signal [" + errSignal.getMessageId() + "]");
             // Errors may need to be delivered to bussiness app which can be done now
-            MessageUnitDAO.setReadyForDelivery(errSignalProxy);
+            updateManager.setProcessingState(errSignal, ProcessingState.READY_FOR_DELIVERY);
         }
     }
 

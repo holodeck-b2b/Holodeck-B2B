@@ -21,21 +21,22 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistency.entities.Receipt;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
-import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.IProtocol;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
- * Configures the actual message transport over the HTTP protocol. The parameters for the transfer are defined by
- * the {@link IProtocol} interface and currently consist of <i>HTTP gzip compression</i> and <i>HTTP chunking</i>
- * <p>The actual configuration is done by setting specific {@see Options} in the message context. Not all options (see
+ * Is the <i>OUT_FLOW</i> handler that configures the actual message transport over the HTTP protocol. The parameters
+ * for the transfer are defined by the P-Mode parameters represented by the {@link IProtocol} interface and currently
+ * consist of <i>HTTP gzip compression</i> and <i>HTTP chunking</i>.
+ * <p>The actual configuration is done by setting specific {@link Options} in the message context. Not all options (see
  * <a href="http://wso2.com/library/230/#HTTPConstants">http://wso2.com/library/230/#HTTPConstants</a> for an overview
  * of all options), are relevant for Holodeck B2B. The options set by this handler are:<ul>
  * <li>Transfer-encoding : When sending messages with large payloads included in the SOAP Body it is useful to compress
@@ -81,13 +82,12 @@ public class ConfigureHTTPTransportHandler extends BaseHandler {
 
         // Get the primary message unit that is processed
         log.debug("Get the primary MessageUnit from MessageContext");
-        final MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
+        final IMessageUnitEntity primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
 
         // Only when message contains a message unit there is something to do
         if (primaryMU != null) {
             log.debug("Get P-Mode configuration for primary MU");
-            final IPModeSet pmSet = HolodeckB2BCoreInterface.getPModeSet();
-            final IPMode pmode = pmSet.get(primaryMU.getPModeId());
+            final IPMode pmode = HolodeckB2BCore.getPModeSet().get(primaryMU.getPModeId());
             // For response error messages the P-Mode may be unknown, so no special HTTP configuration
             if (pmode == null) {
                 log.debug("No P-Mode given for primary message unit, using default HTTP configuration");
@@ -95,7 +95,7 @@ public class ConfigureHTTPTransportHandler extends BaseHandler {
             }
 
             // Currently only One-Way MEPs are supported, so always on first leg
-            final ILeg leg = pmode.getLegs().iterator().next();
+            final ILeg leg = pmode.getLeg(primaryMU.getLeg());
             final IProtocol protocolCfg = leg.getProtocol();
 
             // If Holodeck B2B is initiator the destination URL must be set
@@ -105,9 +105,9 @@ public class ConfigureHTTPTransportHandler extends BaseHandler {
                 try {
                     // First we check if the Receipt or Error signal have a specific URL defined
                     try {
-                       if (primaryMU instanceof Receipt)
+                       if (primaryMU instanceof IReceipt)
                             destURL = leg.getReceiptConfiguration().getTo();
-                        else if (primaryMU instanceof ErrorMessage)
+                        else if (primaryMU instanceof IErrorMessage)
                             destURL = leg.getUserMessageFlow().getErrorHandlingConfiguration().getReceiverErrorsTo();
                     } finally {}
 
@@ -117,7 +117,8 @@ public class ConfigureHTTPTransportHandler extends BaseHandler {
                         destURL = leg.getProtocol().getAddress();
                 } catch (final NullPointerException npe) {
                     // The P-Mode does not contain the necessary information, unable to sent this message!
-                    log.error("P-Mode does not contain destination URL for " + primaryMU.getClass().getSimpleName());
+                    log.error("P-Mode does not contain destination URL for "
+                                + MessageUnitUtils.getMessageUnitName(primaryMU));
                 }
                 log.debug("Destination URL=" + destURL);
                 mc.setProperty(Constants.Configuration.TRANSPORT_URL, destURL);

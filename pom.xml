@@ -23,7 +23,7 @@
     <groupId>org.holodeckb2b</groupId>
     <artifactId>holodeckb2b</artifactId>
     <packaging>pom</packaging>
-    <version>next-SNAPSHOT-4</version>
+    <version>next-SNAPSHOT-5</version>
     <name>Holodeck B2B</name>
     <url>http://www.holodeck-b2b.org/</url>
     <inceptionYear>2015</inceptionYear>
@@ -49,6 +49,7 @@
         <module>modules/holodeckb2b-common</module>
         <module>modules/holodeckb2b-core</module>
         <module>modules/holodeckb2b-distribution</module>
+        <module>modules/holodeckb2b-persistency</module>
         <module>modules/holodeckb2b-it</module>
     </modules>
 
@@ -72,6 +73,11 @@
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
                 <artifactId>holodeckb2b-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.holodeckb2b</groupId>
+                <artifactId>holodeckb2b-persistency</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -249,7 +255,12 @@
                 <version>4.12</version>
                 <scope>test</scope>
             </dependency>
-
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>2.4.0</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

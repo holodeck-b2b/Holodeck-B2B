@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
  * timestamp, but must not include a reference to another message unit. Although a MPC is required for pulling it is not
  * required to be in the Pull Request (see section 5.2.3.1 of the ebMS V3 Core Spec). If an error is detected an ebMS
  * <i>InvalidHeader</i> is created and reported back.
- *
+ * todo Rename to PullRequestValidator
  * @author Sander Fieten <sander at chasquis-services.com>
  * @since  HB2B_NEXT_VERSION
  */
@@ -48,7 +48,7 @@ public class PullRequest {
         // First validate the general meta-data
         errDetails.append(MessageUnit.validate(pullReqInfo));
 
-        // Check that a RefToMessageId is included
+        // Check that no RefToMessageId is included
         if (!Utils.isNullOrEmpty(pullReqInfo.getRefToMessageId()))
             errDetails.append("There must be no RefToMessageId\n");
 

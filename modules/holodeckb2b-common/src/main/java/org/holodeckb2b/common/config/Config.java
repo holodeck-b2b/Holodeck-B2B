@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import org.apache.axis2.context.ConfigurationContext;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 
 /**
  * Contains the configuration of the Holodeck B2B Core.
@@ -47,11 +48,6 @@ public class Config implements InternalConfiguration {
      * The Holodeck B2B home directory
      */
     private String holodeckHome = null;
-
-    /*
-     * Name of the JPA persistency unit to get database access
-     */
-    private String  persistencyUnit = null;
 
     /*
      * The host name
@@ -146,6 +142,12 @@ public class Config implements InternalConfiguration {
      */
     private String pmodeStorageClass = null;
 
+    /*
+     * The class name of the persistency provider that should be used to store the meta-data on processed message units
+     * @since HB2B_NEXT_VERSION
+     */
+    private String persistencyProviderClass = null;
+
     private boolean isTrue (final String s) {
       return "on".equalsIgnoreCase(s) || "true".equalsIgnoreCase(s) || "1".equalsIgnoreCase(s);
     }
@@ -168,10 +170,6 @@ public class Config implements InternalConfiguration {
         // Read the configuration file
         final ConfigXmlFile configFile = ConfigXmlFile.loadFromFile(
                                                         Paths.get(holodeckHome, "conf", "holodeckb2b.xml").toString());
-
-        // The JPA persistency unit to get database access
-        //@TODO: REQUIRED, check and throw exception when not available!
-        persistencyUnit = configFile.getParameter("PersistencyUnit");
 
         // The hostname to use in message processing
         hostName = configFile.getParameter("ExternalHostName");
@@ -262,6 +260,9 @@ public class Config implements InternalConfiguration {
 
         // The class name of the component to store P-Modes
         pmodeStorageClass = configFile.getParameter("PModeStorageImplementation");
+
+        // The class name of the persistency provider
+        persistencyProviderClass = configFile.getParameter("PersistencyProvider");
     }
 
     /**
@@ -291,16 +292,6 @@ public class Config implements InternalConfiguration {
     @Override
     public ConfigurationContext getAxisConfigurationContext() {
         return axisCfgCtx;
-    }
-
-    /**
-     * Gets the name of the JPA persistency unit to use for accessing the database
-     *
-     * @return The name of the persistency unit
-     */
-    @Override
-    public String getPersistencyUnit() {
-        return persistencyUnit;
     }
 
     /**
@@ -523,7 +514,7 @@ public class Config implements InternalConfiguration {
      * Holodeck B2B is deployed in a specific domain.
      *
      * @return  The class name of the {@link org.holodeckb2b.interfaces.pmode.validation.IPModeValidator}
-     * implementation
+     *          implementation
      * @since  HB2B_NEXT_VERSION
      */
     @Override
@@ -532,18 +523,31 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the class name of the {@link org.holodeckb2b.interfaces.pmode.IPModeSet}
-     * implementation that the Holodeck B2B Core's <code>PModeManager
-     * </code> must use to store the set of deployed P-Modes. This is an optional configuration parameter and when not
-     * set the Holodeck B2B Core will use a default implementation. To use a custom implementation set class name in
-     * the <i>PModeStorageImplementation</i> parameter.
+     * Gets the class name of the {@link org.holodeckb2b.interfaces.pmode.IPModeSet} implementation that the Holodeck
+     * B2B Core's <code>PModeManager</code> must use to store the set of deployed P-Modes. This is an optional
+     * configuration parameter and when not set the Holodeck B2B Core will use a default implementation. To use a custom
+     * implementation set class name in the <i>PModeStorageImplementation</i> parameter.
      *
-     * @return  The class name of the {@link org.holodeckb2b.interfaces.pmode.IPModeSet}
-     * implementation to use for storing deployed P-Modes
+     * @return  The class name of the {@link org.holodeckb2b.interfaces.pmode.IPModeSet} implementation to use for
+     *          storing deployed P-Modes
      * @since  HB2B_NEXT_VERSION
      */
     @Override
     public String getPModeStorageImplClass() {
         return pmodeStorageClass;
+    }
+
+    /**
+     * Gets the class name of the {@link IPersistencyProvider} implementation that the Holodeck B2B Core should use to
+     * store the meta-data on processed message units. Note that this is an optional configuration parameter and when
+     * not set the Holodeck B2B Core will use a default implementation. To use a custom implementation set class name
+     * in the <i>PersistencyProvider</i> parameter.
+     *
+     * @return  The class name of the {@link IPersistencyProvider} implementation to use for storing meta-data
+     * @since  HB2B_NEXT_VERSION
+     */
+    @Override
+    public String getPersistencyProviderClass() {
+        return persistencyProviderClass;
     }
 }

@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>next-SNAPSHOT-4</version>
+        <version>next-SNAPSHOT-5</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -36,10 +36,12 @@
         <!--===============================================================
             First the modules of Holodeck itself
         =============================================================== -->
+        <!-- The public interfaces -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-interfaces</artifactId>
         </dependency>
+        <!-- Common and Core classes -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-common</artifactId>
@@ -48,65 +50,11 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
         </dependency>
-
-        <!-- JUnit for testing -->
+        <!-- The default persistency implementation -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-persistency</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.xmlunit</groupId>
-            <artifactId>xmlunit-core</artifactId>
-            <version>2.2.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!--Used to parse pom.xml and get project properties, such as version-->
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-model</artifactId>
-            <version>3.0.4</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-utils</artifactId>
-            <version>2.0.6</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-core</artifactId>
-            <version>3.0.4</version>
-            <scope>test</scope>
-        </dependency>
-
         <!--===============================================================
             Second the runtime only dependencies, not declared in the
             modules

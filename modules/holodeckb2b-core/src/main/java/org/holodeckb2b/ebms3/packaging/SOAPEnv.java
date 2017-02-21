@@ -24,9 +24,8 @@ import org.apache.axiom.soap.SOAPFactory;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 
 /**
- * Is a helper class for handling a SOAPEnv for an ebMS V3 message.
- * <p>Note: This class is named SOAPEnv to avoid confusion with the SOAPEnvelope
- * class of the Axis2/Axiom framework.
+ * Is a helper class for handling the SOAP envelope for an ebMS V3 message.
+ * <p>NOTE: This class is named SOAPEnv to avoid confusion with the SOAPEnvelope class of the Axis2/Axiom framework.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -38,14 +37,8 @@ public class SOAPEnv {
     public enum SOAPVersion { SOAP_11, SOAP_12 }
 
     /**
-     * The prefix of the ebMS header block elements.
-     * todo this constant is the duplicate of EbMSConstants.EBMS3_NS_PREFIX (T.S.)
-     */
-    private static final String EBMS3_NS_PREFIX = "eb3";
-
-    /**
-     * Creates a new SOAP Envelope for sending an ebMS 3 message. The created SOAP
-     * envelop will already contain a declaration of the ebMS 3 namespace.
+     * Creates a new SOAP Envelope for sending an ebMS 3 message. The created SOAP envelop will already contain a
+     * declaration of the ebMS 3 namespace.
      *
      * @param   v       The SOAP version to use
      * @return  The newly created SOAP envelope
@@ -61,14 +54,13 @@ public class SOAPEnv {
         }
 
         final org.apache.axiom.soap.SOAPEnvelope envelope = omFactory.getDefaultEnvelope();
-
         declareNamespaces(envelope);
 
         return envelope;
     }
 
     /**
-     * Ensures that the requires namespaces are declared on the SOAP envelope element.
+     * Ensures that the required namespaces are declared on the SOAP envelope element.
      *
      * @param envelope  The SOAP envelope element to add the namespace declarations to
      */
@@ -76,26 +68,25 @@ public class SOAPEnv {
         // Declare all namespaces that are needed by default
         envelope.declareNamespace("http://www.w3.org/1999/XMLSchema-instance/", "xsi");
         envelope.declareNamespace("http://www.w3.org/1999/XMLSchema", "xsd");
-        envelope.declareNamespace(EbMSConstants.EBMS3_NS_URI, EBMS3_NS_PREFIX);
+        envelope.declareNamespace(EbMSConstants.EBMS3_NS_URI, EbMSConstants.EBMS3_NS_PREFIX);
     }
 
 
     /**
-     * Gets an {@link OMNamespace} object for the ebMS 3 namespace for the SOAP
-     * envelope the given element is contained in.
+     * Gets an {@link OMNamespace} object for the ebMS 3 namespace for the SOAP envelope the given element is contained
+     * in.
      *
      * @param   e     The element that is contained in the SOAP envelop
-     * @return  The {@link OMNamespace} object for the ebMS 3 namespace if it was
-     *          declared in this SOAP message;
-     *          <code>null</code> if there is no namespace declared for ebMS 3
+     * @return        The {@link OMNamespace} object for the ebMS 3 namespace if it was declared in this SOAP message;
+     *                <code>null</code> if there is no namespace declared for ebMS 3
      */
     public static OMNamespace getEbms3Namespace(final OMElement e) {
         return e.findNamespace(EbMSConstants.EBMS3_NS_URI, null);
     }
 
     /**
-     * Checks whether this SOAP message is an ebMS V3 message. A SOAP message
-     * is an ebMS V3 message when it contains the ebMS header element <code>eb:Messaging</code>
+     * Checks whether this SOAP message is an ebMS V3 message. A SOAP message is an ebMS V3 message when it contains the
+     * ebMS header element <code>eb:Messaging</code>
      *
      * @param   env     The SOAP Envelope of the SOAP message to check
      * @return          <code>true</code> when this is an ebMS V3 message,

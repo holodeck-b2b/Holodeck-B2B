@@ -17,20 +17,19 @@
 package org.holodeckb2b.ebms3.handlers.outflow;
 
 import java.util.Collection;
-
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistency.entities.SignalMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.persistency.dao.UpdateManager;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for changing the processing state of message units that are and have been
@@ -60,17 +59,18 @@ public class CheckSentResult extends BaseHandler {
      * @param mc            The current message
      * @return              {@link InvocationResponse#CONTINUE} as this handler only needs to run when the message has
      *                      been sent.
-     * @throws DatabaseException    When the processing state can not be changed
+     * @throws PersistenceException    When the processing state can not be changed
      */
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws DatabaseException {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         // Get all message units in this message
-        final Collection<EntityProxy<MessageUnit>> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
+        final Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
         // And change their processing state
-        for (final EntityProxy<MessageUnit> mu : msgUnits) {
-            MessageUnitDAO.setSending(mu);
-            log.info(mu.entity.getClass().getSimpleName() + " with msg-id ["
-                                                                    + mu.entity.getMessageId() + "] is being sent");
+        final UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+        for (final IMessageUnitEntity mu : msgUnits) {
+            updateManager.setProcessingState(mu, ProcessingState.SENDING);
+            log.info(MessageUnitUtils.getMessageUnitName(mu) + " with msg-id ["
+                                                                    + mu.getMessageId() + "] is being sent");
         }
 
         return InvocationResponse.CONTINUE;
@@ -99,35 +99,34 @@ public class CheckSentResult extends BaseHandler {
             log.debug("The sent operation was " + (success ? "" : "not ") + "successfull");
 
             //Change processing state of all message units in the message accordingly
-            final Collection<EntityProxy<MessageUnit>> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
-
-            for (final EntityProxy<MessageUnit> mu : msgUnits) {
+            final Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
+            final UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+            for (final IMessageUnitEntity mu : msgUnits) {
                 try {
                     if (!success) {
-                        MessageUnitDAO.setTransportFailure(mu);
+                        updateManager.setProcessingState(mu, ProcessingState.TRANSPORT_FAILURE);
                     } else {
                         // State to set depends on type of message unit
-                        if (mu.entity instanceof SignalMessage) {
+                        if (mu instanceof ISignalMessage) {
                             // Signals are always set to delivered
-                            MessageUnitDAO.setDelivered(mu);
+                            updateManager.setProcessingState(mu, ProcessingState.DELIVERED);
                         } else {
                             log.debug("User Message is sent, check P-Mode if Receipt is expected");
                             // Because we only support One-Way the first leg determines
-                            final ILeg leg = HolodeckB2BCoreInterface.getPModeSet().get(mu.entity.getPModeId()).getLegs()
-                                            .iterator().next();
+                            final ILeg leg = HolodeckB2BCore.getPModeSet().get(mu.getPModeId()).getLeg(mu.getLeg());
                             if (leg.getReceiptConfiguration() != null)
-                                MessageUnitDAO.setWaitForReceipt(mu);
+                                updateManager.setProcessingState(mu, ProcessingState.AWAITING_RECEIPT);
                             else
-                                MessageUnitDAO.setDelivered(mu);
+                                updateManager.setProcessingState(mu, ProcessingState.DELIVERED);
                         }
                     }
-                    log.debug("Processing state for message unit [" + mu.entity.getMessageId() + "] changed to"
-                                + mu.entity.getCurrentProcessingState().getName());
-                } catch (final DatabaseException databaseException) {
+                    log.debug("Processing state for message unit [" + mu.getMessageId() + "] changed to"
+                                + mu.getCurrentProcessingState().getState());
+                } catch (final PersistenceException databaseException) {
                     // Ai, something went wrong updating the processing state of the message unit. As the message unit
                     // is already processed there is nothing we can other than logging the error
                     log.error("A database error occurred while update the processing state of message unit ["
-                                + mu.entity.getMessageId() + "]. Details: " + databaseException.getMessage());
+                                + mu.getMessageId() + "]. Details: " + databaseException.getMessage());
                 }
             }
         }

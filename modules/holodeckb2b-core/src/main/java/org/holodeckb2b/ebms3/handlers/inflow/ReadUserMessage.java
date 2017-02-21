@@ -20,14 +20,13 @@ import java.util.Iterator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.ebms3.packaging.UserMessageElement;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is the handler in the <i>IN_FLOW</i> responsible for reading the meta data on an user message message unit from the
@@ -35,7 +34,7 @@ import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
  * <code>eb:UserMessage</code> element in the ebMS header.
  * <p>This handler will only read the meta-data that is available in the ebMS header without performing a validation on
  * it. This is done later in the {@link BasicHeaderValidation} and optionally in custom validators specified in the
- * P-Mode. The meta data is stored in an {@link UserMessage} entity object which is stored in the database and added to
+ * P-Mode. The meta data is stored in an {@link UserMessageElement} entity object which is stored in the database and added to
  * the message context under key {@link MessageContextProperties#IN_USER_MESSAGE}. The processing state of the user
  * message is set to {@link ProcessingStates#PROCESSING}.
  * <p><b>NOTE:</b> The XML schema definition from the ebMS specification allows for multiple <code>eb:UserMessage</code>
@@ -53,29 +52,27 @@ public class ReadUserMessage extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws DatabaseException {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         // First get the ebMS header block, that is the eb:Messaging element
         final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
 
         if (messaging != null) {
             // Check if there is a user message unit
             log.debug("Check for UserMessage element");
-            final Iterator<?> it = UserMessage.getElements(messaging);
+            final Iterator<?> it = UserMessageElement.getElements(messaging);
             if (it.hasNext()) {
                 log.debug("UserMessage found, read information from message");
                 final OMElement umElement = (OMElement) it.next();
                 // Read information into UserMessage entity object
-                org.holodeckb2b.ebms3.persistency.entities.UserMessage umData =  UserMessage.readElement(umElement);
-                log.info("Succesfully read user message meta data from header. Msg-id=" + umData.getMessageId());
+                UserMessage userMessage = UserMessageElement.readElement(umElement);
+                log.info("Succesfully read user message meta data from header. Msg-id="
+                        + userMessage.getMessageId());
 
                 // Store it in both database and message context for further processing
-                log.debug("Saving user message meta data to database");
-                final EntityProxy<org.holodeckb2b.ebms3.persistency.entities.UserMessage> userMessage =
-                                                                        MessageUnitDAO.storeReceivedMessageUnit(umData);
-                log.debug("Message meta data saved to database");
-
-                mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessage);
-                log.debug("User message with msgId " + umData.getMessageId() + " succesfully read");
+                log.debug("Saving user message meta data to database and message context");
+                mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
+                               HolodeckB2BCore.getUpdateManager().storeIncomingMessageUnit(userMessage));
+                log.debug("User message with msgId " + userMessage.getMessageId() + " succesfully read");
             }
         }
 

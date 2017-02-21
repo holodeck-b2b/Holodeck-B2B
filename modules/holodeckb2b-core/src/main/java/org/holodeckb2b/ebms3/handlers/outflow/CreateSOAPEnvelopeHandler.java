@@ -26,15 +26,15 @@ import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
- * Is the Holodeck B2B handler in the out flow that creates an empty ebMS message, i.e. a SOAP Envelope containing
- * only an <code>eb:Messaging</code> element. When running in a <i>response</i> flow the SOAP Envelope probably already
- * exists and creation can therefor be skipped.
+ * Is the <i>OUT_FLOW</i> handler that creates an empty ebMS message, i.e. a SOAP Envelope containing only an <code>
+ * eb:Messaging</code> element. When running in a <i>response</i> flow the SOAP Envelope probably already  exists and
+ * creation can therefor be skipped.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -57,14 +57,14 @@ public class CreateSOAPEnvelopeHandler extends BaseHandler {
             SOAPEnv.SOAPVersion version;
             if (isInFlow(INITIATOR)) {
                 log.debug("Use P-Mode of primary message unit to get SOAP version");
-                final MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
+                final IMessageUnitEntity primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
                 if (primaryMU == null) {
                     log.debug("No message unit in this response, no envelope needed");
                     return InvocationResponse.CONTINUE;
                 }
                 final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.getPModeId());
                 // Currently only One-Way MEPs are supported, so always on first leg
-                final ILeg leg = pmode.getLegs().iterator().next();
+                final ILeg leg = pmode.getLeg(primaryMU.getLeg());
                 version = leg.getProtocol() != null && "1.1".equals(leg.getProtocol().getSOAPVersion()) ?
                                     SOAPEnv.SOAPVersion.SOAP_11 : SOAPEnv.SOAPVersion.SOAP_12;
             } else {

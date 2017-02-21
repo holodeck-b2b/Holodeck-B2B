@@ -19,19 +19,18 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.PullRequest;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.ebms3.packaging.PullRequestElement;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is an in flow handler that checks if this message contains a Pull Request, i.e. contains a <eb:PullRequest> element
  * in the ebMS header. When such a pull request message unit is found the information is read from the message and
  * stored both in the database and message context (under key {@link MessageContextProperties#IN_PULL_REQUEST}).
- * <p>The meta data is stored in an {@link PullRequest} entity object which is stored in the database and added to the
+ * <p>The meta data is stored in an {@link PullRequestElement} entity object which is stored in the database and added to the
  * message context under key {@link MessageContextProperties#IN_PULL_REQUEST}. The processing state of the pull request
  * is set to {@link ProcessingStates#RECEIVED}.
  * <p><b>NOTE:</b> The XML schema definition from the ebMS specification allows multiple <code>eb:SignalMessage</code>
@@ -49,22 +48,22 @@ public class ReadPullRequest extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws DatabaseException {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         // First get the ebMS header block, that is the eb:Messaging element
         final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
 
         if (messaging != null) {
             // Check if there is a Pull Request signal
             log.debug("Check for PullRequest element to determine if message contains pull request");
-            final OMElement prElement = PullRequest.getElement(messaging);
+            final OMElement prElement = PullRequestElement.getElement(messaging);
             if (prElement != null) {
                 log.debug("PullRequest found, read information from message");
                 // Read information into PullRequest object
-                org.holodeckb2b.ebms3.persistency.entities.PullRequest pullRequest = PullRequest.readElement(prElement);
+                org.holodeckb2b.common.messagemodel.PullRequest pullRequest = PullRequestElement.readElement(prElement);
                 // And store in database and message context for further processing
                 log.debug("Store PullRequest in database and message context");
                 mc.setProperty(MessageContextProperties.IN_PULL_REQUEST,
-                                                                MessageUnitDAO.storeReceivedMessageUnit(pullRequest));
+                               HolodeckB2BCore.getUpdateManager().storeIncomingMessageUnit(pullRequest));
                 log.info("PullRequest [msgId=" + pullRequest.getMessageId() + "] for MPC " + pullRequest.getMPC()
                         + " received.");
             } else

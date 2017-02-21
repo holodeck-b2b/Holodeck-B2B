@@ -18,26 +18,28 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.ErrorMessage;
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.persistency.dao.UpdateManager;
 import org.holodeckb2b.pmode.PModeUtils;
 
 /**
@@ -62,47 +64,46 @@ public class DeliverErrors extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws DatabaseException {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         // Check if this message contains error signals
-        final Collection<EntityProxy<ErrorMessage>> errorSignals = (Collection<EntityProxy<ErrorMessage>>)
-                                                    mc.getProperty(MessageContextProperties.IN_ERRORS);
+        final Collection<IErrorMessageEntity> errorSignals = (Collection<IErrorMessageEntity>)
+                                                                    mc.getProperty(MessageContextProperties.IN_ERRORS);
 
-        if (errorSignals == null || errorSignals.isEmpty())
+        if (Utils.isNullOrEmpty(errorSignals))
             // No errors to deliver
             return InvocationResponse.CONTINUE;
 
-        log.debug("Message contains " + errorSignals.size() + " Error signals");
-
+        log.debug("Message contains " + errorSignals.size() + " Error Signals");
+        UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
         // Process each signal
-        for(final EntityProxy<ErrorMessage> errSigProxy : errorSignals) {
-            // Extract the entity object
-            final ErrorMessage errorSig = errSigProxy.entity;
-
+        for(final IErrorMessageEntity errorSignal : errorSignals) {
             // Prepare message for delivery by checking it is still ready for delivery and then
             // change its processing state to "out for delivery"
-            log.debug("Prepare message [" + errorSig.getMessageId() + "] for delivery");
-            final boolean readyForDelivery = MessageUnitDAO.startDeliveryOfMessageUnit(errSigProxy);
+            log.debug("Prepare Error Signal [" + errorSignal.getMessageId() + "] for delivery");
 
-            if(readyForDelivery) {
+            if(updateManager.setProcessingState(errorSignal, ProcessingState.READY_FOR_DELIVERY,
+                                                             ProcessingState.OUT_FOR_DELIVERY)) {
                 // Errors in this signal can be delivered to business application
-                log.debug("Start delivery of Error signal [" + errorSig.getMessageId() + "]");
+                log.debug("Start delivery of Error Signal [" + errorSignal.getMessageId() + "]");
                 // We deliver each error in the signal separately because they can reference different
                 // messages and therefor have different delivery specs
                 try {
-                    checkAndDeliver(errorSig, mc);
+                    checkAndDeliver(errorSignal, mc);
+                    // All errors in signal processed, change the processing state to done
+                    updateManager.setProcessingState(errorSignal, ProcessingState.DONE);
                 } catch (final MessageDeliveryException ex) {
-                    log.warn("Could not deliver error signal to application! Error details: " + ex.getMessage());
+                    log.warn("Could not deliver Error Signal (msgId=" + errorSignal.getMessageId()
+                                    + "]) to application! Error details: " + ex.getMessage());
+                    // Although the error could not be delivered it was processed completely on the ebMS level,
+                    //  so processing state is set to warning instead of failure
+                    updateManager.setProcessingState(errorSignal, ProcessingState.WARNING);
                 }
-
-                // All errors in signal processed, change the processing state to done
-                MessageUnitDAO.setDone(errSigProxy);
             } else {
-                log.info("Error signal [" + errorSig.getMessageId() + "] is already processed for delivery");
+                log.info("Error signal [" + errorSignal.getMessageId() + "] is already processed for delivery");
             }
         }
 
         log.debug("Processed all Error signals in message");
-
         return InvocationResponse.CONTINUE;
     }
 
@@ -115,25 +116,26 @@ public class DeliverErrors extends BaseHandler {
      *                      directly
      * @throws MessageDeliveryException When the error should be delivered to the business application but an error
      *                                  prevented successful delivery
-     * @throws DatabaseException    When an error occurs retrieving the message unit referenced by the Error Signal
+     * @throws PersistenceException    When an error occurs retrieving the message unit referenced by the Error Signal
      */
-    private void checkAndDeliver(final ErrorMessage errorSignal, final MessageContext mc)
-            throws MessageDeliveryException, DatabaseException {
+    private void checkAndDeliver(final IErrorMessageEntity errorSignal, final MessageContext mc)
+            throws MessageDeliveryException, PersistenceException {
         IDeliverySpecification deliverySpec = null;
 
         log.debug("Determine P-Mode for error");
         // Does the error reference another message unit?
-        String refToMsgId = errorSignal.getRefToMessageId();
+        String refToMsgId = MessageUnitUtils.getRefToMessageId(errorSignal);
 
         if (!Utils.isNullOrEmpty(refToMsgId)) {
             log.debug("The error references message unit with msgId=" + refToMsgId);
             // Get the referenced message unit. There may be more than one MU with the given id, we assume they
             // all use the same P-Mode
-            final EntityProxy<MessageUnit> refdMsgUnit = MessageUnitDAO.getSentMessageUnitWithId(refToMsgId);
+            final Collection<IMessageUnitEntity> refdMsgUnits = HolodeckB2BCore.getQueryManager()
+                                                                               .getMessageUnitsWithId(refToMsgId);
 
-            if (refdMsgUnit != null)
-                // Found referenced message unit(s), use its P-Mode to determine if and how to deliver error
-                deliverySpec = getErrorDelivery(refdMsgUnit);
+            if (!Utils.isNullOrEmpty(refdMsgUnits))
+                // Found referenced message unit (should be one), use its P-Mode to determine if and how to deliver
+                deliverySpec = getErrorDelivery(refdMsgUnits.iterator().next());
             else
                 // No messsage units found for refToMsgId. This should not occur here as this is already checked in
                 // previous handler!
@@ -142,26 +144,27 @@ public class DeliverErrors extends BaseHandler {
             log.debug("Error does not directly reference a message unit");
             // If the error is a direct response and there was just on outgoing message unit we still have a
             // reference
-            final Collection<EntityProxy<MessageUnit>>  reqMUs = MessageContextUtils.getSentMessageUnits(mc);
-            if (reqMUs.size() == 1) {
+            final Collection<IMessageUnitEntity>  reqMUs = MessageContextUtils.getSentMessageUnits(mc);
+            if (reqMUs != null && reqMUs.size() == 1) {
                 log.debug("Request contained one message unit, assuming error applies to it");
-                final EntityProxy<MessageUnit> refdMU = reqMUs.iterator().next();
-                refToMsgId = refdMU.entity.getMessageId();
+                final IMessageUnitEntity refdMU = reqMUs.iterator().next();
+                refToMsgId = refdMU.getMessageId();
                 deliverySpec = getErrorDelivery(refdMU);
             }
         }
 
         // If a delivery specification was found the error should be delivered, else no reporting is needed
         if (deliverySpec != null) {
-            log.debug("Error should be delivered using delivery specification with id:" + deliverySpec.getId());
+            log.debug("Error Signal should be delivered using delivery specification with id:" + deliverySpec.getId());
             log.debug("Get deliverer from Core");
-            final IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec);
+            final IMessageDeliverer deliverer = HolodeckB2BCore.getMessageDeliverer(deliverySpec);
             log.debug("Delivering the error using deliverer");
             // Because the reference to the message in error may be derived, set it explicitly on signal meta-data
             // See issue #12
-            errorSignal.setRefToMessageId(refToMsgId);
             try {
-                deliverer.deliver(errorSignal);
+                ErrorMessage deliverySignal = new ErrorMessage(errorSignal);
+                deliverySignal.setRefToMessageId(refToMsgId);
+                deliverer.deliver(deliverySignal);
                 log.debug("Error successfully delivered!");
             } catch (final MessageDeliveryException ex) {
                 // There was an "normal/expected" issue during delivery, continue as normal
@@ -197,26 +200,25 @@ public class DeliverErrors extends BaseHandler {
      *                  IDeliverySpecification} that should be used for the delivery,<br>
      *                  <code>null</code> otherwise
      */
-    private IDeliverySpecification getErrorDelivery(final EntityProxy<MessageUnit> refdMU) {
+    private IDeliverySpecification getErrorDelivery(final IMessageUnitEntity refdMU) {
         IDeliverySpecification deliverySpec = null;
-        final MessageUnit entity = refdMU.entity;
 
-        if (Utils.isNullOrEmpty(entity.getPModeId()))
+        if (Utils.isNullOrEmpty(refdMU.getPModeId()))
             return null; // Referenced message unit without P-Mode, can not determine delivery
 
-        final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(entity.getPModeId());
+        final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(refdMU.getPModeId());
         if (pmode == null) {
-            log.warn("Sent message unit [" + entity.getMessageId() +"] does not reference valid P-Mode ["
-                        + entity.getPModeId() + "]!");
+            log.warn("Sent message unit [" + refdMU.getMessageId() +"] does not reference valid P-Mode ["
+                        + refdMU.getPModeId() + "]!");
             return null;
         }
         // First get the delivery specification for errors related to the user message as this will also be the fall
         // back for errors related to pull request if nothing is specified specifically for pull requests
-        final ILeg leg = pmode.getLegs().iterator().next(); // Currently only One-Way MEPS supports, so only one leg
+        final ILeg leg = pmode.getLeg(refdMU.getLeg());
         final IUserMessageFlow umFlow = leg.getUserMessageFlow();
         IErrorHandling errHandling = umFlow != null ? umFlow.getErrorHandlingConfiguration() : null;
 
-        if (entity instanceof PullRequest) {
+        if (refdMU instanceof IPullRequest) {
             // Check if the pull request have their own error handling
             final IPullRequestFlow prFlow = PModeUtils.getOutPullRequestFlow(pmode);
             errHandling = prFlow != null && prFlow.getErrorHandlingConfiguration() != null ?

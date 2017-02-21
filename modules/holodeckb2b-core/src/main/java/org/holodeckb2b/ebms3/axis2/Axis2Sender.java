@@ -28,57 +28,58 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.logging.Log;
 import org.holodeckb2b.axis2.Axis2Utils;
+import org.holodeckb2b.common.config.InternalConfiguration;
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
-import org.holodeckb2b.ebms3.persistency.entities.Receipt;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.module.HolodeckB2BCoreImpl;
 
 /**
+ * Is a helper class that handles the sending of a message unit using the Axis2 framework.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class Axis2Sender {
 
     /**
-     * Send the message unit to the other MSH.
+     * Sends the given message unit to the other MSH.
      *
-     * @param message   The MessageUnit to send
-     * @param log       The log to use for writing log information
+     * @param messageUnit   The message unit to send
+     * @param log           The log to use for writing log information
      */
-    public static void sendMessage(final EntityProxy msgProxy, final Log log) {
+    public static void sendMessage(final IMessageUnitEntity messageUnit, final Log log) {
         ServiceClient sc;
         OperationClient oc;
         final MessageContext msgCtx = new MessageContext();
 
-        final MessageUnit message = msgProxy.entity;
         try {
-            log.debug("Prepare Axis2 client to send " + message.getClass().getSimpleName());
-            sc = new ServiceClient(HolodeckB2BCoreInterface.getConfiguration().getAxisConfigurationContext(),
+            log.debug("Prepare Axis2 client to send " + MessageUnitUtils.getMessageUnitName(messageUnit)
+                        + " with msgId: " + messageUnit.getMessageId());
+            sc = new ServiceClient(((InternalConfiguration) HolodeckB2BCoreInterface.getConfiguration())
+                                                                                    .getAxisConfigurationContext(),
                                    Axis2Utils.createAnonymousService());
             sc.engageModule(HolodeckB2BCoreImpl.HOLODECKB2B_CORE_MODULE);
             oc = sc.createClient(ANON_OUT_IN_OP);
 
             log.debug("Create an empty MessageContext for message with current configuration");
 
-            if (message instanceof UserMessage) {
-                log.debug("Message to send is a UserMessage");
-                msgCtx.setProperty(MessageContextProperties.OUT_USER_MESSAGE, msgProxy);
-            } else if (message instanceof PullRequest) {
-                log.debug("Message to send is a PullRequest");
-                msgCtx.setProperty(MessageContextProperties.OUT_PULL_REQUEST, msgProxy);
-            } else if (message instanceof ErrorMessage) {
-                log.debug("Message to send is a ErrorMessage");
-                MessageContextUtils.addErrorSignalToSend(msgCtx, msgProxy);
-            } else if (message instanceof Receipt) {
-                log.debug("Message to send is a Receipt");
-                MessageContextUtils.addReceiptToSend(msgCtx, msgProxy);
-            }
+            if (messageUnit instanceof IUserMessage)
+                msgCtx.setProperty(MessageContextProperties.OUT_USER_MESSAGE, messageUnit);
+            else if (messageUnit instanceof IPullRequest)
+                msgCtx.setProperty(MessageContextProperties.OUT_PULL_REQUEST, messageUnit);
+            else if (messageUnit instanceof IErrorMessage)
+                MessageContextUtils.addErrorSignalToSend(msgCtx, (IErrorMessageEntity) messageUnit);
+            else if (messageUnit instanceof IReceipt)
+                MessageContextUtils.addReceiptToSend(msgCtx, (IReceiptEntity) messageUnit);
+
             oc.addMessageContext(msgCtx);
 
             // This dummy EPR has to be provided to be able to trigger message sending. It will be replaced later
@@ -112,7 +113,7 @@ public class Axis2Sender {
                 logMsg.append("\n\t    Caused by: ").append(errorStack.get(i).getClass().getSimpleName());
             }
             logMsg.append(" {").append(errorStack.get(errorStack.size() - 1).getMessage()).append('}');
-            log.error("An error occurred while sending the message [" + message.getMessageId() + "]!"
+            log.error("An error occurred while sending the message [" + messageUnit.getMessageId() + "]!"
                      + logMsg.toString());
         } finally {
             try {
@@ -123,5 +124,4 @@ public class Axis2Sender {
             }
         }
     }
-
 }

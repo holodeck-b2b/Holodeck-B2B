@@ -17,19 +17,18 @@
 package org.holodeckb2b.security.handlers;
 
 import java.util.Collection;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
@@ -37,6 +36,7 @@ import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.pmode.PModeUtils;
 
 /**
@@ -59,16 +59,16 @@ public class GetSecurityConfiguration extends BaseHandler {
     protected InvocationResponse doProcessing(final MessageContext mc) throws AxisFault {
 
         log.debug("Get the primary message unit for this message");
-        final MessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
+        final IMessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
         if (primaryMU == null)
             // No primary message => this is probably an empty response
             return InvocationResponse.CONTINUE;
 
-        log.debug("The primary message unit is a " + primaryMU.getClass().getSimpleName()
+        log.debug("The primary message unit is a " + MessageUnitUtils.getMessageUnitName(primaryMU)
                                                                         + " with msg-id=" + primaryMU.getMessageId());
 
         // 2. Get the security settings
-        final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.getPModeId());
+        final IPMode pmode = HolodeckB2BCore.getPModeSet().get(primaryMU.getPModeId());
 
         // It is possible that we can not find a PMode when the primary message unit is an Error signal. In that case
         // no security can be applied
@@ -84,7 +84,7 @@ public class GetSecurityConfiguration extends BaseHandler {
         // If the primary message is a pull request it can have a specific security configuration
         ISecurityConfiguration  tpSecConfig = null, pullReqSecConfig = null, tpEncSecConfig = null;
 
-        if (primaryMU instanceof PullRequest) {
+        if (primaryMU instanceof IPullRequest) {
             /* When a the message contains a PullRequest we must be the initiator (as we only have One-Way MEPs, if
                there can be Two-Way MEPs it should be checked on the mep binding value or if Pull-Pull the address of
                the legs)
@@ -100,7 +100,7 @@ public class GetSecurityConfiguration extends BaseHandler {
                 if that user message was received using Pull or Push as this determins whether we operate as Initiator
                 or Responder
             */
-            if (primaryMU instanceof UserMessage) {
+            if (primaryMU instanceof IUserMessage) {
                 log.debug("Primary message unit is user message, detect initiator or responder");
                 initiator = isInFlow(INITIATOR);
             } else {
@@ -170,7 +170,7 @@ public class GetSecurityConfiguration extends BaseHandler {
         // Check if message must be encrypted. Note this is specified by the SecurityConfiguration
         // of the Responder (and NOT the Initiator). We will only encrypt UserMessage, so we only check this when
         // the primary message unit is a UserMessage
-        if (primaryMU instanceof UserMessage) {
+        if (primaryMU instanceof IUserMessage) {
             final IEncryptionConfiguration encryptConfig = tpEncSecConfig != null ?
                                                         tpEncSecConfig.getEncryptionConfiguration() : null;
 
@@ -178,7 +178,7 @@ public class GetSecurityConfiguration extends BaseHandler {
                 addSecurityForMessage(mc, SecurityConstants.ENCRYPTION, encryptConfig);
                 // Check if this message contains payloads in the body to determine whether body should be encrypted
                 boolean includesBodyPl = false;
-                final Collection<IPayload> payloads = ((UserMessage) primaryMU).getPayloads();
+                final Collection<IPayload> payloads = (Collection<IPayload>) ((IUserMessage) primaryMU).getPayloads();
                 if (!Utils.isNullOrEmpty(payloads))
                     for (final IPayload pl : payloads)
                         includesBodyPl = pl.getContainment() == IPayload.Containment.BODY;

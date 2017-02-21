@@ -16,22 +16,20 @@
  */
 package org.holodeckb2b.ebms3.util;
 
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.handlers.inflow.ReadUserMessage;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
  * Extends {@link BaseHandler} to ensure the handler only runs when there is a User Message to process. It checks
- * whether a {@link UserMessage} object is available in the current <code>MessageContext</code> for the flow the handler
- * is running in and that its current processing state is not <code>FAILURE</code>.
- * <p>Implementation that run in the <i>IN_FLOW</i> or <i>IN_FAULT_FLOW</i> must be configured to run after the {@link
+ * whether a {@link IUserMessageEntity} object is available in the current <code>MessageContext</code> for the flow the
+ * handler is running in and that its current processing state is not <code>FAILURE</code>.
+ * <p>Implementations that run in the <i>IN_FLOW</i> or <i>IN_FAULT_FLOW</i> must be configured to run after the {@link
  * ReadUserMessage} handler because this handler is responsible for reading the user message unit and adding the
- * {@link UserMessage} object it to the message context.
+ * {@link IUserMessageEntity} object it to the message context.
  * <p>Implementations MUST implement the {@link BaseHandler#inFlows()} to indicate the flows which the handler can run
  * in. Only when the handler runs in the correct flow <code>AbstractUserMessageHandler</code> will check if there is a
  * user message present in the current context.
@@ -41,45 +39,45 @@ import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 public abstract class AbstractUserMessageHandler extends BaseHandler {
 
     /**
-     * Checks whether this flow contains a user message unit for processing. Only when it does message processing
+     * Checks whether this flow contains a User Message unit for processing. Only when it does message processing
      * is passed on to the implementation class.
-     * <p>In the in flows the <code>UserMessage</code> should be available in the {@link MessageContextProperties#IN_USER_MESSAGE}
-     * message context property. For the out flows it should be available in the {@link MessageContextProperties#OUT_USER_MESSAGE}.
+     * <p>In the in flows the <code>IUserMessageEntity</code> should be available in the {@link
+     * MessageContextProperties#IN_USER_MESSAGE} message context property. For the out flows it should be available in
+     * the {@link MessageContextProperties#OUT_USER_MESSAGE}.
      *
      * @param mc            The current {@link MessageContext}
-     * @return              How to continue processing. If there is no UserMessage unit available message processing
-     *                      is always continued; if there is a UserMessage unit the implementation class decides how
-     *                      to continue processing {@link #doProcessing(org.apache.axis2.context.MessageContext,
-     *                      org.holodeckb2b.ebms3.persistent.message.UserMessage)}
+     * @return              How to continue processing. If there is no User Message message unit available message
+     *                      processing is always continued; if there is a User Message unit the implementation class
+     *                      decides how to continue processing {@link #doProcessing(MessageContext,
+     *                      IUserMessageEntity)}
      * @throws Exception    When the message context property that should contain the <code>UserMessage</code> object
-     *                      exists but does not contain a <code>UserMessage</code> object <b>OR</b> when the
+     *                      exists but does not contain a <code>IUserMessageEntity</code> object <b>OR</b> when the
      *                      implementation throws the exception in
-     *                      {@link #doProcessing(org.apache.axis2.context.MessageContext, org.holodeckb2b.ebms3.persistent.message.UserMessage)}
+     *                      {@link #doProcessing(MessageContext, IUserMessageEntity)}
      */
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) throws Exception {
 
         log.debug("Check if MessageContext contains a MessageUnit");
-        EntityProxy<UserMessage> mu = null;
+        IUserMessageEntity userMessage = null;
         try {
-            mu = (EntityProxy<UserMessage>) mc.getProperty((isInFlow(IN_FLOW) ?
-                    MessageContextProperties.IN_USER_MESSAGE : MessageContextProperties.OUT_USER_MESSAGE));
+            userMessage = (IUserMessageEntity) mc.getProperty((isInFlow(IN_FLOW) ?
+                                                                    MessageContextProperties.IN_USER_MESSAGE :
+                                                                    MessageContextProperties.OUT_USER_MESSAGE));
         } catch (final ClassCastException cce) {
             // MessageContext did contain an object for the given key, but it is not a UserMessage!
             // This SHOULD not occur, abort processing
             log.fatal("Illegal state of processing! MessageContext contained non UserMessage object as user message!");
-            throw new AxisFault("Internal error",
-                                new IllegalStateException(
-                                        "MessageContext contained a non UserMessage object as user message!"));
+            throw new IllegalStateException("MessageContext contained a non UserMessage object as user message!");
         }
 
-        if (mu == null || ProcessingStates.FAILURE.equals(mu.entity.getCurrentProcessingState().getName())) {
+        if (userMessage == null || ProcessingState.FAILURE == userMessage.getCurrentProcessingState().getState()) {
             // This flow does not contain a UserMessage message unit to process, so nothing to do
             log.debug("MessageContext does not contain a UserMessage message unit for processing, continue flow");
             return InvocationResponse.CONTINUE;
         } else {
             // The flow contains a UserMessage, continue processing in implementation
-            return doProcessing(mc, mu);
+            return doProcessing(mc, userMessage);
         }
     }
 
@@ -87,7 +85,7 @@ public abstract class AbstractUserMessageHandler extends BaseHandler {
      * Abstract method that implementations must use to do the actual user message processing.
      *
      * @param mc            The Axis2 {@link MessageContext} of the processed message
-     * @param um            The {@link EntityProxy} to the currently processed {@links UserMessage}
+     * @param userMessage   The currently processed User Messsge as a {@links IUserMessageEntity}
      * @return              How to continue processing of the message. If message processing should not continue, it is
      *                      RECOMMENDED to throw an AxisFault instead of returning <code>InvocationResponse.ABORT</code>
      *                      because this enables sending a response.
@@ -96,5 +94,6 @@ public abstract class AbstractUserMessageHandler extends BaseHandler {
      *                      units in an undefined state! Also ensure that all information needed for a response is set
      *                      in the message context to make it available for handlers in the fault flow!
      */
-    protected abstract InvocationResponse doProcessing(MessageContext mc, EntityProxy<UserMessage> um) throws Exception;
+    protected abstract InvocationResponse doProcessing(final MessageContext mc,
+                                                       final IUserMessageEntity userMessage) throws Exception;
 }

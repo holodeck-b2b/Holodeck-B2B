@@ -16,21 +16,22 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import java.util.HashSet;
 import java.util.List;
-
+import java.util.Set;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.EmptyMessagePartitionChannel;
-import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for retrieving a message unit waiting to be pulled and which can be
@@ -48,44 +49,43 @@ public class GetMessageUnitForPulling extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws DatabaseException {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         // First check whether this flow contained a valid pull request
         log.debug("Check for authenticated pull request");
         final List<IPMode> authPModes = (List<IPMode>) mc.getProperty(MessageContextProperties.PULL_AUTH_PMODES);
-        if (authPModes == null || authPModes.isEmpty()) {
+        if (Utils.isNullOrEmpty(authPModes)) {
             // Nothing to do, even if request contained a PullRequest no authorized P-modes could be found
             return InvocationResponse.CONTINUE;
         }
 
         // The request contained a valid PullRequest, indicate start of processing
-        final EntityProxy<PullRequest> prProxy = (EntityProxy<PullRequest>)
-                                                            mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
+        final IPullRequestEntity pullRequest =
+                                          (IPullRequestEntity) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
         log.debug("Starting processing of received pull request");
-        if (!MessageUnitDAO.startProcessingMessageUnit(prProxy)) {
-            // Changing processing state failed, stop processing the pull request, but continue
-            //  message processing as other parts may be processed succesfully
+        if (!HolodeckB2BCore.getUpdateManager().setProcessingState(pullRequest, ProcessingState.RECEIVED,
+                                                                                ProcessingState.PROCESSING)) {
+            // Changing processing state failed, stop processing the pull request
             log.info("Failed to change processing state! Can not process PullRequest in message.");
             return InvocationResponse.CONTINUE;
         }
-        final PullRequest pullrequest = prProxy.entity;
 
         log.debug("Get the oldest message that can be pulled for the MPC in pull request");
-        final EntityProxy<UserMessage> pulledMsg = getMUForPulling(authPModes, pullrequest.getMPC());
+        final IUserMessageEntity pulledUserMsg = getForPulling(authPModes, pullRequest.getMPC());
 
-        if (pulledMsg == null) {
+        if (pulledUserMsg == null) {
             // No message available -> return Empty MPC error
             log.debug("No message unit available for pulling, return empty MPC error");
-
             // Create the error and store it in the message context so it can be processed later
             // in the pipeline
             final EmptyMessagePartitionChannel mpcEmptyError = new EmptyMessagePartitionChannel();
-            mpcEmptyError.setErrorDetail("The MPC " + pullrequest.getMPC() + " is empty!");
-            mpcEmptyError.setRefToMessageInError(pullrequest.getMessageId());
-
+            mpcEmptyError.setErrorDetail("The MPC " + pullRequest.getMPC() + " is empty!");
+            mpcEmptyError.setRefToMessageInError(pullRequest.getMessageId());
             MessageContextUtils.addGeneratedError(mc, mpcEmptyError);
+            log.debug("Set processing state of Pull Request to indicate processing has completed");
+            HolodeckB2BCore.getUpdateManager().setProcessingState(pullRequest, ProcessingState.DONE);
         } else {
-            log.debug("Message selected for pulling, msgId=" + pulledMsg.entity.getMessageId());
-            mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, pulledMsg);
+            log.debug("Message selected for pulling, msgId=" + pulledUserMsg.getMessageId());
+            mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, pulledUserMsg);
             log.debug("Message stored in context for processing in out flow");
             mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
         }
@@ -94,28 +94,31 @@ public class GetMessageUnitForPulling extends BaseHandler {
     }
 
     /**
-     * Helper method to retrieve a user message waiting for pulling on the requested MPC from the database. The longest
+     * Helper method to retrieve a User Message waiting for pulling on the requested MPC from the database. The longest
      * waiting message is selected by default. Because the MPC is not always specified in the P-Mode the query based on
      * P-Mode does not guarantee that only messages with the given MPC are returned. Therefore the MPC is checked before
-     * selecting the message. Also the message unit's processing state is changed to {@see ProcessingStates#PROCESSING}.
+     * selecting the message. Also the message unit's processing state is changed to {@link ProcessingState#PROCESSING}.
      * Only if the state change is successful the message unit is returned. If the state could not be changed the next
      * available message unit is selected.
      *
      * @param authPModes    The list of P-Modes messages may be selected from
      * @param reqMPC        The MPC contained in the pull request
-     * @return              The message unit to returned as result for Pull Request
-     *                      or <code>null</code> if no message unit is available
-     *                      for processing
-     * @throws DatabaseException When a database error occurs while retrieving the message units waiting to be pulled.
+     * @return              The User Message message unit to returned as result for Pull Request or,<br>
+     *                      <code>null</code> if no User Message message unit is available for processing
+     * @throws PersistenceException When a database error occurs while retrieving the message units waiting to be pulled.
      */
-    private EntityProxy<UserMessage> getMUForPulling(final List<IPMode> authPModes, final String reqMPC) throws DatabaseException {
+    private IUserMessageEntity getForPulling(final List<IPMode> authPModes, final String reqMPC)
+                                                                                        throws PersistenceException {
         log.debug("Get list of messages waiting to be pulled");
-        List<EntityProxy<UserMessage>> waitingMU = null;
-        waitingMU = MessageUnitDAO.getMessageUnitsForPModesInState(UserMessage.class, authPModes,
-                                                                    ProcessingStates.AWAITING_PULL);
-
+        // Query is based on the P-Mode ids so convert given set of P-Modes to id only collection
+        Set<String> pmodeIds = new HashSet<>(authPModes.size());
+        for (IPMode p : authPModes) pmodeIds.add(p.getId());
+        List<IUserMessageEntity> waitingUserMessages =  HolodeckB2BCore.getQueryManager()
+                                                            .getMessageUnitsForPModesInState(IUserMessage.class,
+                                                                                        pmodeIds,
+                                                                                        ProcessingState.AWAITING_PULL);
         // Are there messages waiting?
-        if (Utils.isNullOrEmpty(waitingMU))
+        if (Utils.isNullOrEmpty(waitingUserMessages))
             return null;
         else {
             // There is at least one message available, take the oldest one. This is the first one in result list (as
@@ -123,17 +126,18 @@ public class GetMessageUnitForPulling extends BaseHandler {
             // Message must be selected only if their MPC (defined in message meta-data or P-Mode) matches the requested
             // MPC and its state can be changed to Processing to ensure that message will only be pulled once
             boolean r = false; int i = 0;
-            EntityProxy<UserMessage> pulledMsgProxy = null;
+            IUserMessageEntity userMsgToPull = null;
             do {
-                pulledMsgProxy = waitingMU.get(i);
-                log.debug("Selected message unit with msgId=" + pulledMsgProxy.entity.getMessageId() + " for pulling");
-
+                userMsgToPull = waitingUserMessages.get(i);
+                log.debug("Check if User Message [" + userMsgToPull.getMessageId() + "] can be pulled.");
                 // The usermessage should be on assigned to the requested MPC or a parent MPC
-                if (reqMPC.startsWith(pulledMsgProxy.entity.getMPC())) {
-                    log.debug("Set processing state to Processing");
+                if (reqMPC.startsWith(userMsgToPull.getMPC())) {
+                    log.debug("User Message can be pulled, set processing state to Processing");
                     try {
-                        r = MessageUnitDAO.startProcessingMessageUnit(pulledMsgProxy);
-                    } catch (final DatabaseException ex) {
+                        r = HolodeckB2BCore.getUpdateManager().setProcessingState(userMsgToPull,
+                                                                                  ProcessingState.AWAITING_PULL,
+                                                                                  ProcessingState.PROCESSING);
+                    } catch (final PersistenceException ex) {
                         log.error("An error occurred while setting processing state! Details: " + ex.getMessage());
                         // Maybe the error is specific for this MU, so continue with others
                     }
@@ -141,12 +145,12 @@ public class GetMessageUnitForPulling extends BaseHandler {
                 } else
                     log.debug("MPC value of selected message is different from requested MPC!");
                 i++;
-            } while (!r && i < waitingMU.size());
+            } while (!r && i < waitingUserMessages.size());
 
             if (r)
-                return pulledMsgProxy;
+                return userMsgToPull;
             else {
-                log.debug("None of the available messages could be set to processing");
+                log.debug("None of the available messages is available for pulling!");
                 return null;
             }
         }
