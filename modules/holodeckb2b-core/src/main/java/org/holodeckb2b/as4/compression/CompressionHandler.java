@@ -97,7 +97,10 @@ public class CompressionHandler extends AbstractUserMessageHandler {
 
         // Set the part properties to indicate AS4 Compression feature was used and original MIME Type
         // First ensure that there do not exists properties with this name
-        final Collection<IProperty> partProperties = p.getProperties();
+
+        // partProperties should not be null here
+        final Collection<IProperty> partProperties =
+                ((p.getProperties() != null) ? p.getProperties() : new ArrayList<IProperty>());
         final Collection<IProperty> remove = new ArrayList<>();
         for(final IProperty pp : partProperties)
             if (CompressionFeature.FEATURE_PROPERTY_NAME.equals(pp.getName())
