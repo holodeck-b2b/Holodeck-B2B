@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.ebms3.handlers.outflow;
+package org.holodeckb2b.as4.compression;
 
+import org.apache.axiom.attachments.Attachments;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -26,6 +27,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
+import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
@@ -35,9 +37,9 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.pmode.helpers.Leg;
-import org.holodeckb2b.pmode.helpers.PMode;
+import org.holodeckb2b.pmode.helpers.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -48,6 +50,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import javax.activation.DataHandler;
+import java.net.URL;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -55,12 +59,12 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 /**
- * Created at 23:42 29.01.17
+ * Created at 13:57 21.02.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
-public class CreateSOAPEnvelopeHandlerTest {
+public class CompressionHandlerTest {
 
     @Mock
     private Appender mockAppender;
@@ -71,19 +75,19 @@ public class CreateSOAPEnvelopeHandlerTest {
 
     private static HolodeckB2BTestCore core;
 
-    private CreateSOAPEnvelopeHandler handler;
+    private CompressionHandler handler;
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = CreateSOAPEnvelopeHandlerTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = CompressionHandlerTest.class.getClassLoader()
+                .getResource("compression").getPath();
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
 
     @Before
     public void setUp() throws Exception {
-        handler = new CreateSOAPEnvelopeHandler();
+        handler = new CompressionHandler();
         Logger logger = LogManager.getRootLogger();
         logger.addAppender(mockAppender);
         logger.setLevel(Level.DEBUG);
@@ -95,8 +99,8 @@ public class CreateSOAPEnvelopeHandlerTest {
     }
 
     @Test
-    public void testDoProcessingIfInitiator() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
+    public void testDoProcessing() throws Exception {
+        MessageMetaData mmd = TestUtils.getMMD("compression/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
@@ -110,15 +114,37 @@ public class CreateSOAPEnvelopeHandlerTest {
         PMode pmode = new PMode();
 
         Leg leg = new Leg();
+
+        UserMessageFlow umFlow = new UserMessageFlow();
+
+        PayloadProfile plProfile = new PayloadProfile();
+        plProfile.setCompressionType(CompressionFeature.COMPRESSED_CONTENT_TYPE);
+        umFlow.setPayloadProfile(plProfile);
+
+        leg.setUserMessageFlow(umFlow);
+
         pmode.addLeg(leg);
 
         UserMessage userMessage = UserMessageElement.readElement(umElement);
 
+        // We need to add payload with containment type "attachment" to user message,
+        // because PartInfoElement does not read the "containment" attribute
+        // value of the PartInfo tag from file now (23-Feb-2017 T.S.)
+        Payload payload = new Payload();
+        payload.setContainment(IPayload.Containment.ATTACHMENT);
+        String payloadPath = "file://./uncompressed.jpg";
+        payload.setPayloadURI(payloadPath);
+        userMessage.addPayload(payload);
+
+        Attachments attachments = new Attachments();
+        attachments.addDataHandler(payloadPath,
+                new DataHandler(new URL(payload.getPayloadURI())));
+        mc.setAttachmentMap(attachments);
+
         String pmodeId =
                 userMessage.getCollaborationInfo().getAgreement().getPModeId();
-        // todo the pmodeId should be set to userMessage in the UserMessageElement.readElement() method
+        // Copy pmodeId of the agreement to the user message
         userMessage.setPModeId(pmodeId);
-//        System.out.println("userMessage pmode id: " + userMessage.getPModeId());
         pmode.setId(pmodeId);
 
         core.getPModeSet().add(pmode);
@@ -139,7 +165,7 @@ public class CreateSOAPEnvelopeHandlerTest {
         verify(mockAppender, atLeastOnce())
                 .doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "Added SOAP envelope to message context";
+        String expLogMsg = "Enabled compression for all attached payloads";
         boolean containsExpLogMsg = false;
         for(LoggingEvent e : events) {
             if(e.getLevel().equals(Level.DEBUG)) {
@@ -150,6 +176,4 @@ public class CreateSOAPEnvelopeHandlerTest {
         }
         assertTrue(containsExpLogMsg);
     }
-
-    //todo we need to add test of the empty response case
 }
