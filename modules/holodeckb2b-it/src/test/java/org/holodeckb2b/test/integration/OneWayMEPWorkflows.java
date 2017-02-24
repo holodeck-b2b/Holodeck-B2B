@@ -63,6 +63,7 @@ public class OneWayMEPWorkflows {
         itHelper.copyPModeDescriptor(dADirName, "ex-pm-pull-ut-init.xml");
         itHelper.copyPModeDescriptor(dBDirName, "ex-pm-pull-ut-resp.xml");
         itHelper.modifyAxisServerPort(dBDirName, "9090");
+        itHelper.setPullingInterval(dADirName, 10);
         System.out.println("done.");
         System.out.print("\tStarting HolodeckB2B instances ... ");
         itHelper.startHolodeckB2BInstances(dADirName, dBDirName);
@@ -98,32 +99,37 @@ public class OneWayMEPWorkflows {
 
     @Test
     public void testOneWayPush() {
+        String msgFileName = "ex-mmd-push";
         System.out.println("The OneWay/Push integration test started ... ");
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        assertTrue(itHelper.changeMsgExtensionToMMD("ex-mmd-push.accepted",
+        assertTrue(itHelper.changeMsgExtensionToMMD(msgFileName+".accepted",
                 dADirName));
+        System.out.println("Message to push is placed into msg_out dir."
+                + " Waiting for message processing ... ");
         try {
             Thread.sleep(30000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        System.out.println("Message should be processed now."
+                + " Checking the results ...");
 
         // check the results of communication in A/msg_out & A/msg_in & B/msg_in
 
         // check A/msg_out
 
         // ex-mmd-push.accepted should be present
-        assertTrue(itHelper.fileExistsInDirectory("ex-mmd-push.accepted",
+        assertTrue(itHelper.fileExistsInDirectory(msgFileName+".accepted",
                 dADirName + "/data/msg_out"));
         // ex-mmd-push.rejected should not be present
-        assertFalse(itHelper.fileExistsInDirectory("ex-mmd-push.rejected",
+        assertFalse(itHelper.fileExistsInDirectory(msgFileName+".rejected",
                 dADirName + "/data/msg_out"));
         // ex-mmd-push.err should not be present
-        assertFalse(itHelper.fileExistsInDirectory("ex-mmd-push.err",
+        assertFalse(itHelper.fileExistsInDirectory(msgFileName+".err",
                 dADirName + "/data/msg_out"));
 
         // check B/msg_in
@@ -140,42 +146,43 @@ public class OneWayMEPWorkflows {
 
     @Test
     public void testOneWayPull() {
+        String msgFileName = "ex-mmd-pull-ut";
         System.out.println("The OneWay/Pull integration test started ... ");
-        // set pulling interval of initiator (HolodeckB2B-A) to 10 seconds
-        itHelper.setPullingInterval(dADirName, 10);
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        assertTrue(itHelper.changeMsgExtensionToMMD("ex-mmd-pull-ut.accepted",
+        assertTrue(itHelper.changeMsgExtensionToMMD(msgFileName+".accepted",
                 dBDirName));
+        System.out.println("Message to pull is placed into msg_out dir."
+                + " Waiting for message processing ... ");
         try {
-            Thread.sleep(30000);
+            Thread.sleep(40000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        System.out.println("Message should be processed now."
+                + " Checking the results ...");
 
         // check the results of communication in A/msg_out & A/msg_in & B/msg_in
 
         // check B/msg_out
 
         // ex-mmd-pull-ut.accepted should be present
-        assertTrue(itHelper.fileExistsInDirectory("ex-mmd-pull-ut.accepted",
+        assertTrue(itHelper.fileExistsInDirectory(msgFileName+".accepted",
                 dBDirName + "/data/msg_out"));
         // ex-mmd-pull-ut.rejected should not be present
-        assertFalse(itHelper.fileExistsInDirectory("ex-mmd-pull-ut.rejected",
+        assertFalse(itHelper.fileExistsInDirectory(msgFileName+".rejected",
                 dBDirName + "/data/msg_out"));
         // ex-mmd-pull-ut.err should not be present
-        assertFalse(itHelper.fileExistsInDirectory("ex-mmd-pull-ut.err",
+        assertFalse(itHelper.fileExistsInDirectory(msgFileName+".err",
                 dBDirName + "/data/msg_out"));
 
         // check A/msg_in
 
         // message xml and payload file should be present
         assertTrue(itHelper.dirIsNotEmpty(dADirName + "/data/msg_in"));
-
-        // check A/msg_in
 
         // receipt message xml should be present
         assertTrue(itHelper.dirIsNotEmpty(dADirName + "/data/msg_in"));
