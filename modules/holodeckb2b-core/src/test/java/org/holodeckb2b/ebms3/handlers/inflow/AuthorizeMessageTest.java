@@ -57,6 +57,7 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -173,7 +174,7 @@ public class AuthorizeMessageTest {
             fail(e.getMessage());
         }
 
-        verify(mockAppender).doAppend((LoggingEvent)captorLoggingEvent.capture());
+        verify(mockAppender, atLeastOnce()).doAppend((LoggingEvent)captorLoggingEvent.capture());
         LoggingEvent loggingEvent = (LoggingEvent)captorLoggingEvent.getValue();
         //Check log level
         assertThat(loggingEvent.getLevel(), is(Level.INFO));
