@@ -35,6 +35,12 @@ Since: HB2B_NEXT_VERSION
       <property name="hibernate.connection.password" value="hb2b"/>
       <property name="hibernate.hbm2ddl.auto" value="update"/>
       <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
+        <!--
+            Next property is set to bypass the
+            "org.holodeckb2b.persistency.jpa.UserMessage.payloads, could not initialize proxy - no Session"
+            exception.
+            We should not use it in production environment. We need to find the cause.
+        -->
       <property name="hibernate.enable_lazy_load_no_trans" value="true"/>
     </properties>
   </persistence-unit>
