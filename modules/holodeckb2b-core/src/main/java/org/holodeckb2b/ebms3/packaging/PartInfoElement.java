@@ -134,6 +134,7 @@ public class PartInfoElement {
                 plData.setContainment(IPayload.Containment.EXTERNAL);
 
             plData.setPayloadURI(href);
+            plData.setContentLocation(href);
         }
 
         // Read and process Schema element (optional)
