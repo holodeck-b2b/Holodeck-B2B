@@ -37,9 +37,11 @@ import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:SignalMessage</code> and child element for an
@@ -80,7 +82,7 @@ public class PackageErrorSignals extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         // First check if there are any errors to include
         final Collection<IErrorMessageEntity> errors =
                     (Collection<IErrorMessageEntity>) mc.getProperty(MessageContextProperties.OUT_ERRORS);
@@ -98,6 +100,11 @@ public class PackageErrorSignals extends BaseHandler {
         // If one of the errors is of severity FAILURE a SOAP may be added
         boolean addSOAPFault = false;
         for(final IErrorMessageEntity e : errors) {
+            log.debug("Make sure that all meta-data on the error is loaded");
+            if (!e.isLoadedCompletely()) {
+                log.debug("Not all meta-data is available, load now");
+                HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(e);
+            }
             log.debug("Add eb:SignalMessage element to the existing eb:Messaging header");
             ErrorSignalElement.createElement(messaging, e);
             log.debug("eb:SignalMessage element succesfully added to header");

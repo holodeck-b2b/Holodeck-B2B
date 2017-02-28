@@ -49,6 +49,13 @@
                 <role>Lead developer</role>
             </roles>
         </developer>
+        <developer>
+            <name>Renate Slebe</name>
+            <email>renate at chasquis-service.com</email>
+            <roles>
+                <role>QA and Documentation</role>
+            </roles>
+        </developer>
     </developers>
     <contributors>
         <contributor>

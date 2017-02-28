@@ -67,7 +67,13 @@ public class AddPayloads extends AbstractUserMessageHandler {
     protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
                                                                                           throws PersistenceException {
 
-        log.debug("Check for payloads to include");
+        log.debug("Check that all meta-data of the User Message is available for processing");
+        if (!um.isLoadedCompletely()) {
+            log.debug("Not all info loaded, load now");
+            HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(um);
+        }
+
+        log.debug("All meta-data of User Message available, check for payloads to include");
         final Collection<IPayload> payloads = um.getPayloads();
 
         if (Utils.isNullOrEmpty(payloads)) {

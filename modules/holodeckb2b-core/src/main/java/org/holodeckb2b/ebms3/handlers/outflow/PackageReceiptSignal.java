@@ -24,7 +24,9 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.ReceiptElement;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:Receipt</code> element in the ebMS messaging
@@ -50,7 +52,7 @@ public class PackageReceiptSignal extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         // First check if there is a receipt to include
         Collection<IReceiptEntity> receipts = null;
 
@@ -73,6 +75,11 @@ public class PackageReceiptSignal extends BaseHandler {
         final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
 
         for(final IReceiptEntity r : receipts) {
+            log.debug("Make sure that all meta-data on the Receipt is loaded");
+            if (!r.isLoadedCompletely()) {
+                log.debug("Not all meta-data is available, load now");
+                HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(r);
+            }
             log.debug("Add eb:SignalMessage element to the existing eb:Messaging header");
             ReceiptElement.createElement(messaging, r);
             log.debug("eb:SignalMessage element succesfully added to header");
