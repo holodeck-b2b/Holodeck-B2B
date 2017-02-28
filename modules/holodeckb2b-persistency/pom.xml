@@ -22,11 +22,11 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>next-SNAPSHOT-5</version>
+        <version>next-SNAPSHOT-6</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
-
     <modelVersion>4.0.0</modelVersion>
+
     <artifactId>holodeckb2b-persistency</artifactId>
     <packaging>jar</packaging>
     <name>Holodeck B2B - Default Persistency Provider</name>

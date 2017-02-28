@@ -23,17 +23,43 @@
     <groupId>org.holodeckb2b</groupId>
     <artifactId>holodeckb2b</artifactId>
     <packaging>pom</packaging>
-    <version>next-SNAPSHOT-5</version>
+    <version>next-SNAPSHOT-6</version>
     <name>Holodeck B2B</name>
     <url>http://www.holodeck-b2b.org/</url>
     <inceptionYear>2015</inceptionYear>
     <description>
         A standard open source implementation of the AS4 profile of ebMS V3.
     </description>
+
+    <scm>
+        <url>https://github.com/holodeck-b2b/Holodeck-B2B</url>
+        <connection>scm:git:https://github.com/holodeck-b2b/Holodeck-B2B.git</connection>
+        <developerConnection>scm:git:git@github.com:holodeck-b2b/Holodeck-B2B.git</developerConnection>
+    </scm>
+
     <organization>
         <name>The Holodeck B2B Team</name>
         <url>http://www.holodeck-b2b.org/team</url>
     </organization>
+    <developers>
+        <developer>
+            <name>Sander Fieten</name>
+            <email>sander at chasquis-service.com</email>
+            <roles>
+                <role>Lead developer</role>
+            </roles>
+        </developer>
+    </developers>
+    <contributors>
+        <contributor>
+            <name>Philip Helger</name>
+            <email>philip at helger.com</email>
+        </contributor>
+        <contributor>
+            <name>Timur Shakuov</name>
+            <email>t.shakuov at gmail.com</email>
+        </contributor>
+    </contributors>
 
     <properties>
         <axis2-version>1.6.3</axis2-version>
@@ -207,15 +233,6 @@
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk15on</artifactId>
                 <version>1.54</version>
-            </dependency>
-
-            <!--===============================================================
-                For testing and "out of the box" operation Derby is used
-            =============================================================== -->
-            <dependency>
-                <groupId>org.apache.derby</groupId>
-                <artifactId>derby</artifactId>
-                <version>10.12.1.1</version>
             </dependency>
 
             <!--===============================================================

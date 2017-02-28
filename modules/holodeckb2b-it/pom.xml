@@ -21,7 +21,7 @@
     <parent>
         <artifactId>holodeckb2b</artifactId>
         <groupId>org.holodeckb2b</groupId>
-        <version>next-SNAPSHOT-5</version>
+        <version>next-SNAPSHOT-6</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -42,7 +42,14 @@
             <type>pom</type>
         </dependency>
 
-        <!-- JUnit for testing -->
+        <!-- The tests used Log4j to provide info on the execution -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JUnit is used creating the interop tests -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
