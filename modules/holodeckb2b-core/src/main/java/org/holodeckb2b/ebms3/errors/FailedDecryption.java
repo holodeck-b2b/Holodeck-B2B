@@ -16,16 +16,12 @@
  */
 package org.holodeckb2b.ebms3.errors;
 
-import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
-
 /**
  * Represent the standard <i>FailedDecryption</i> error as defined in section 6.7 of the Core specification.
- * <p>As this class is a child class of {@see EbmsError} it can be saved directly to the database. When retrieved from
- * the database again it is however a "normal" <code>EbmsError</code> as this class is not defined as an JPA class.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class FailedDecryption extends EbmsError {
+public class FailedDecryption extends org.holodeckb2b.common.messagemodel.EbmsError {
 
     /**
      * The error code as defined in the core specification
@@ -62,7 +58,7 @@ public class FailedDecryption extends EbmsError {
         setSeverity(ERROR_SEVERITY);
         setOrigin(ERROR_ORIGIN);
         setCategory(ERROR_CATEGORY);
-        setShortDescription(ERROR_SHORT_DESCRIPTION);
+        setMessage(ERROR_SHORT_DESCRIPTION);
     }
 
     /**

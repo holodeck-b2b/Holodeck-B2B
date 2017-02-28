@@ -19,30 +19,27 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistency.entities.Receipt;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.persistency.dao.UpdateManager;
 
 /**
  * Is the first handler of the out flow and is responsible for preparing a response by checking if the handlers in the
- * in flow prepared message units that should be sent as response. If they did the <code>EntityProxy</code> objects for
- * the message units are copied to the out flow message context to make them available to the other handlers in the out
- * flow.
+ * in flow prepared message units that should be sent as response. If they did the entity objects for the message units
+ * are copied to the out flow message context to make them available to the other handlers in the out flow.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -55,10 +52,9 @@ public class PrepareResponseMessage extends BaseHandler {
 
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) throws AxisFault {
-        // Check which response message units were set during in flow, starting
-        // with user message
+        // Check which response message units were set during in flow, starting with user message
         log.debug("Check for response user message unit");
-        final EntityProxy<UserMessage> um = (EntityProxy<UserMessage>) MessageContextUtils.getPropertyFromInMsgCtx(mc,
+        final IUserMessageEntity um = (IUserMessageEntity) MessageContextUtils.getPropertyFromInMsgCtx(mc,
                                                                             MessageContextProperties.OUT_USER_MESSAGE);
         if (um != null) {
             log.debug("Response contains an user message unit");
@@ -69,7 +65,7 @@ public class PrepareResponseMessage extends BaseHandler {
 
         // Check if there is a receipt signal messages to be included
         log.debug("Check for receipt signal to be included");
-        final EntityProxy<Receipt> receipt = (EntityProxy<Receipt>) MessageContextUtils.getPropertyFromInMsgCtx(mc,
+        final IReceiptEntity receipt = (IReceiptEntity) MessageContextUtils.getPropertyFromInMsgCtx(mc,
                                                                           MessageContextProperties.RESPONSE_RECEIPT);
         if (receipt != null) {
             log.debug("Response contains a receipt signal");
@@ -80,28 +76,28 @@ public class PrepareResponseMessage extends BaseHandler {
 
         // Check if there are error signal messages to be included
         log.debug("Check for error signals generated during in flow to be included");
-        final Collection<EntityProxy<ErrorMessage>> errors =
-                (Collection<EntityProxy<ErrorMessage>>) MessageContextUtils.getPropertyFromInMsgCtx(mc,
-                                                                      MessageContextProperties.OUT_ERROR_SIGNALS);
+        final Collection<IErrorMessageEntity> errors =
+                            (Collection<IErrorMessageEntity>) MessageContextUtils.getPropertyFromInMsgCtx(mc,
+                                                                                  MessageContextProperties.OUT_ERRORS);
         if (Utils.isNullOrEmpty(errors))
             log.debug("Response does not contain error signal(s)");
         else if (errors.size() > 1) {
             // The were multiple error signals generated in the in flow, check if bundling is allowed
             log.debug("Response contains multiple error signals");
-            if (HolodeckB2BCoreInterface.getConfiguration().allowSignalBundling()) {
+            if (HolodeckB2BCore.getConfiguration().allowSignalBundling()) {
                 // Bundling is enabled, so include all errors
                 log.debug("Bundling allowed, add all errors to response");
                 // Copy to current context so it gets processed correctly
-                mc.setProperty(MessageContextProperties.OUT_ERROR_SIGNALS, errors);
+                mc.setProperty(MessageContextProperties.OUT_ERRORS, errors);
             } else {
                 // Bundling not allowed, select one error signal to include
                 log.debug("Bundling is not allowed, select one error to report");
-                final EntityProxy<ErrorMessage> include = selectError(errors, mc);
+                final IErrorMessageEntity include = selectError(errors, mc);
                 errors.remove(include);
                 // The other errors can not be further processed, so change their state to failed
                 setFailed(errors);
-                log.debug("Include the selected error [msgID/refTo" + include.entity.getMessageId() + "/"
-                                + include.entity.getRefToMessageId() + "] for processing");
+                log.debug("Include the selected error [msgID/refTo" + include.getMessageId() + "/"
+                                + include.getRefToMessageId() + "] for processing");
                 MessageContextUtils.addErrorSignalToSend(mc, include);
             }
         } else {
@@ -124,24 +120,24 @@ public class PrepareResponseMessage extends BaseHandler {
      *
      * @param errors    The collection of errors that were generated for the received message
      * @param mc        The current [out flow] messsage context
-     * @return          The <code>EntityProxy</code> for the {@link ErrorMessage} to include in the response
+     * @return          The error signal message to include in the response
      */
-    private EntityProxy<ErrorMessage> selectError(final Collection<EntityProxy<ErrorMessage>> errors, final MessageContext mc) {
-        EntityProxy<ErrorMessage>    r = null;
+    private IErrorMessageEntity selectError(final Collection<IErrorMessageEntity> errors, final MessageContext mc) {
+        IErrorMessageEntity    r = null;
         int             cp = -1; // The prio of the currently selected err, 0=Error or Receipt, 1=PullReq, 2=UsrMsg
 
         log.debug("Get the messageIds and types of received message units");
-        final Map<String, Class<?>>  rcvdMsgs = getReceivedMessageUnits(mc);
+        final Map<String, Class<? extends IMessageUnitEntity>>  rcvdMsgs = getReceivedMessageUnits(mc);
         // Now select the error with highest prio
-        for(final EntityProxy<ErrorMessage> e : errors) {
-            final String refTo = e.entity.getRefToMessageId();
-            if (refTo == null || refTo.isEmpty()) {
+        for(final IErrorMessageEntity e : errors) {
+            final String refTo = e.getRefToMessageId();
+            if (Utils.isNullOrEmpty(refTo)) {
                 log.debug("Select general error (without refTo)");
                 r = e; // This is the error signal that does not reference a message unit
                 break;
             } else {
                 log.debug("Check which type of MU is referenced by error");
-                final Class<?> type = rcvdMsgs.get(refTo);
+                final Class<? extends IMessageUnitEntity> type = rcvdMsgs.get(refTo);
                 if (IUserMessage.class.isAssignableFrom(type)) {
                     log.debug("Select error referencing the UserMessage");
                     r = e; cp = 2;
@@ -164,12 +160,12 @@ public class PrepareResponseMessage extends BaseHandler {
      * @param mc    The current [out flow] message context
      * @return      {@link Map} containing all messageIds and their message unit type
      */
-    private Map<String, Class<?>> getReceivedMessageUnits(final MessageContext mc) {
-        final HashMap<String, Class<?>>   reqMUs = new HashMap<>();
+    private Map<String, Class<? extends IMessageUnitEntity>> getReceivedMessageUnits(final MessageContext mc) {
+        final HashMap<String, Class<? extends IMessageUnitEntity>>   reqMUs = new HashMap<>();
 
-        final Collection<EntityProxy<MessageUnit>> msgUnits = MessageContextUtils.getRcvdMessageUnits(mc);
-        for (final EntityProxy<MessageUnit> mu : msgUnits)
-            reqMUs.put(mu.entity.getMessageId(), mu.entity.getClass());
+        final Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
+        for (final IMessageUnitEntity mu : msgUnits)
+            reqMUs.put(mu.getMessageId(), mu.getClass());
 
         return reqMUs;
     }
@@ -180,15 +176,16 @@ public class PrepareResponseMessage extends BaseHandler {
      *
      * @param errors    The collection of {@link ErrorMessage}s that can not be included in the response.
      */
-    private void setFailed(final Collection<EntityProxy<ErrorMessage>> errors) {
-        for(final EntityProxy<ErrorMessage> e : errors)
+    private void setFailed(final Collection<IErrorMessageEntity> errors) {
+        UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+        for(final IErrorMessageEntity e : errors)
             try {
-                MessageUnitDAO.setFailed(e);
-                log.debug("Changed state of error [" + e.entity.getMessageId()
+                updateManager.setProcessingState(e, ProcessingState.FAILURE);
+                log.debug("Changed state of error [" + e.getMessageId()
                             + "] to failed as it can not be included in response!");
-            } catch (final DatabaseException dbe) {
+            } catch (final PersistenceException dbe) {
                 // Log and ignore error
-                log.error("An error occured while changing the state of error [" + e.entity.getMessageId()
+                log.error("An error occured while changing the state of error [" + e.getMessageId()
                             + "]! Details: " + dbe.getMessage());
             }
     }

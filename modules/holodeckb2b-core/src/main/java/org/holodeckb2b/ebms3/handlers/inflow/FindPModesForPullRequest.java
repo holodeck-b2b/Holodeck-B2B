@@ -18,24 +18,23 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
 import java.util.Map;
-
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.errors.ProcessingModeMismatch;
-import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.pmode.PModeFinder;
 import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for determining the P-Modes that may apply to the received PullRequest.
  * <p>Identifying the P-Modes that may apply to a PullRequest requires knowledge of information contained in the
- * WS-Security header of the message. Therefor finding the P-Mode for the PullRequest is done seperately from the
+ * WS-Security header of the message. Therefor finding the P-Mode for the PullRequest is done separately from the
  * general P-Mode finding (in {@link FindPModes}).
  * <p>Based on only the MPC and authentication info it may not be possible to uniquely identify a P-Mode, so the result
  * of P-Mode finding for a PullRequest is a collection of P-Mode that a user message may be pulled from.
@@ -53,29 +52,28 @@ public class FindPModesForPullRequest extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) throws Exception {
         log.debug("Check if MessageContext contains a PullRequest");
-        final EntityProxy<PullRequest> prProxy = (EntityProxy<PullRequest>)
-                                                        mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
-        if (prProxy != null) {
+        final IPullRequestEntity pullRequest = (IPullRequestEntity)
+                                                            mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
+        if (pullRequest != null) {
             /* A PullRequest can at this point be handled by multiple P-Modes because P-Modes can "share" an MPC.
              * Only when a specific message is pulled it the exact P-Mode is known. For finding the P-Mode both the
              * MPC and given authentication info are used.
              */
-            final PullRequest pullrequest = prProxy.entity;
             log.debug("Get available authentication info contained in pull request");
             final Map<String, IAuthenticationInfo> authInfo = (Map<String, IAuthenticationInfo>)
                                                                mc.getProperty(SecurityConstants.MC_AUTHENTICATION_INFO);
             log.debug("Find P-Modes matching the pull request");
-            final Collection<IPMode> pmodes = PModeFinder.findForPulling(authInfo, pullrequest.getMPC());
+            final Collection<IPMode> pmodes = PModeFinder.findForPulling(authInfo, pullRequest.getMPC());
             if (pmodes == null || pmodes.isEmpty()) {
                 // No P-Modes found for the MPC and authentication info provided in pull request
-                log.error("No P-Mode found for PullRequest [" + pullrequest.getMessageId()
+                log.error("No P-Mode found for PullRequest [" + pullRequest.getMessageId()
                                                                                          + "], unable to process it!");
                 final ProcessingModeMismatch   noPmodeIdError = new ProcessingModeMismatch();
-                noPmodeIdError.setRefToMessageInError(pullrequest.getMessageId());
+                noPmodeIdError.setRefToMessageInError(pullRequest.getMessageId());
                 noPmodeIdError.setErrorDetail("Can not process pull request because no P-Mode was found!");
                 MessageContextUtils.addGeneratedError(mc, noPmodeIdError);
                 log.debug("Set the processing state of this PullRequest to failure");
-                MessageUnitDAO.setFailed(prProxy);
+                HolodeckB2BCore.getUpdateManager().setProcessingState(pullRequest, ProcessingState.FAILURE);
             } else {
                 log.debug("Store the list of " + pmodes.size()
                             + " authorized PModes so next handler can retrieve message unit to return");

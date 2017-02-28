@@ -18,22 +18,19 @@ package org.holodeckb2b.as4.compression;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
 import javax.activation.DataHandler;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.common.messagemodel.Property;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.persistency.entities.Property;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4PayloadProfile;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPayloadProfile;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is the <i>OUT_FLOW</i> handler part of the AS4 Compression Feature responsible for the compression of the payload
@@ -56,21 +53,20 @@ public class CompressionHandler extends AbstractUserMessageHandler {
 
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final EntityProxy<UserMessage> umProxy) throws AxisFault {
-        // Extract the entity object from the proxy
-        final UserMessage um = umProxy.entity;
-
+    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
+                                                                                                    throws AxisFault {
         // First check if this message contains payloads at all
         if (Utils.isNullOrEmpty(um.getPayloads()))
             return InvocationResponse.CONTINUE;
 
         log.debug("Check P-Mode configuration if AS4 compression must be used");
-        final IUserMessageFlow flow = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId())
+        final IUserMessageFlow flow = HolodeckB2BCore.getPModeSet().get(um.getPModeId())
                                                                     .getLegs().iterator().next().getUserMessageFlow();
         final IPayloadProfile plProfile = (flow != null ? flow.getPayloadProfile() : null);
 
         if ((plProfile instanceof IAS4PayloadProfile) &&
-                CompressionFeature.COMPRESSED_CONTENT_TYPE.equalsIgnoreCase(((IAS4PayloadProfile) plProfile).getCompressionType())) {
+             CompressionFeature.COMPRESSED_CONTENT_TYPE.equalsIgnoreCase(
+                                                               ((IAS4PayloadProfile) plProfile).getCompressionType())) {
             log.debug("AS4 Compression feature is used");
             // enable compression by decorating DataHandler and setting payload properties
             for (final IPayload p : um.getPayloads())
@@ -101,7 +97,10 @@ public class CompressionHandler extends AbstractUserMessageHandler {
 
         // Set the part properties to indicate AS4 Compression feature was used and original MIME Type
         // First ensure that there do not exists properties with this name
-        final Collection<IProperty> partProperties = p.getProperties();
+
+        // partProperties should not be null here
+        final Collection<IProperty> partProperties =
+                ((p.getProperties() != null) ? p.getProperties() : new ArrayList<IProperty>());
         final Collection<IProperty> remove = new ArrayList<>();
         for(final IProperty pp : partProperties)
             if (CompressionFeature.FEATURE_PROPERTY_NAME.equals(pp.getName())

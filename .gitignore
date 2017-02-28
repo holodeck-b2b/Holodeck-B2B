@@ -48,3 +48,4 @@ Thumbs.db
 *.iml
 /.idea
 /modules/holodeckb2b-core/nbproject/
+/modules/holodeckb2b-persistency/nbproject/

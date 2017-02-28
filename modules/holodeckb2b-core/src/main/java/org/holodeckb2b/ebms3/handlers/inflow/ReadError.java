@@ -20,16 +20,16 @@ import java.util.Iterator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.packaging.ErrorSignal;
+import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.module.HolodeckB2BCore;
+
 
 /**
  * Is the handler that checks if this message contains one or more Error signals, i.e. the ebMS header contains one or
@@ -50,14 +50,14 @@ public class ReadError extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws DatabaseException {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         // First get the ebMS header block, that is the eb:Messaging element
         final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
 
         if (messaging != null) {
             // Check if there are Error signals
             log.debug("Check for Error elements to determine if message contains one or more errors");
-            final Iterator<OMElement> errorSigs = ErrorSignal.getElements(messaging);
+            final Iterator<OMElement> errorSigs = ErrorSignalElement.getElements(messaging);
 
             if (!Utils.isNullOrEmpty(errorSigs)) {
                 log.debug("Error Signal(s) found, read information from message");
@@ -65,15 +65,13 @@ public class ReadError extends BaseHandler {
                 while (errorSigs.hasNext()) {
                     final OMElement errElem = errorSigs.next();
                     // Read information into ErrorMessage object
-                    org.holodeckb2b.ebms3.persistency.entities.ErrorMessage errorSignal =
-                                                                                      ErrorSignal.readElement(errElem);
+                    ErrorMessage errorSignal = ErrorSignalElement.readElement(errElem);
                     log.info("Succesfully read Error message meta data from header. Msg-id="
                             + errorSignal.getMessageId());
                     // And store in database and message context for further processing
-                    log.debug("Store Error Signal in database");
-                    final EntityProxy<ErrorMessage> errSigProxy = MessageUnitDAO.storeReceivedMessageUnit(errorSignal);
-                    // Add to message context for further processing
-                    MessageContextUtils.addRcvdError(mc, errSigProxy);
+                    log.debug("Store Error Signal in database and message context");
+                    MessageContextUtils.addRcvdError(mc, (IErrorMessageEntity) HolodeckB2BCore.getUpdateManager()
+                                                                                .storeIncomingMessageUnit(errorSignal));
                     log.debug("Error signal with msgId " + errorSignal.getMessageId() + " succesfully read");
                 }
             } else

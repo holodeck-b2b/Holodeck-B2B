@@ -16,22 +16,20 @@
  */
 package org.holodeckb2b.as4.receptionawareness;
 
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for detecting and when requested eliminating duplicate <i>user messages</i>.
@@ -61,10 +59,8 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final EntityProxy<UserMessage> umProxy) throws AxisFault {
-        // Extract entity object from proxy
-        final UserMessage um = umProxy.entity;
-
+    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
+                                                                                        throws PersistenceException {
         // First determine if duplicate check must be executed for this UserMessage
         //
         boolean detectDups = false;
@@ -80,7 +76,7 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
             return InvocationResponse.CONTINUE;
         }
         // Currently we only support one-way MEPs so the leg is always the first one
-        final ILeg leg = pmode.getLegs().iterator().next();
+        final ILeg leg = pmode.getLeg(um.getLeg() != null ? um.getLeg() : ILeg.Label.REQUEST);
 
         // Duplicate detection is part of the AS4 Reception Awareness feature which can only be configured on a leg
         // of type ILegAS4, so check type
@@ -105,26 +101,18 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
                         + "] has already been delivered");
 
             boolean isDuplicate = false;
-            try {
-                isDuplicate = MessageUnitDAO.isUserMsgDelivered(msgId);
+            isDuplicate = HolodeckB2BCore.getQueryManager().isAlreadyDelivered(msgId);
+            if (isDuplicate) {
+                log.debug("UserMessage [msgId=" + msgId + "] has already been delivered");
+                // Also log in special duplicate log
+                duplicateLog.info("UserMessage [msgId=" + msgId
+                                            + "] is a duplicate of an already delivered message");
 
-                if (isDuplicate) {
-                    log.debug("UserMessage [msgId=" + msgId + "] has already been delivered");
-                    // Also log in special duplicate log
-                    duplicateLog.info("UserMessage [msgId=" + msgId
-                                                + "] is a duplicate of an already delivered message");
+                log.debug("Update processing state to duplicate");
+                HolodeckB2BCore.getUpdateManager().setProcessingState(um, ProcessingState.DUPLICATE);
 
-                    log.debug("Update processing state to duplicate");
-                    MessageUnitDAO.setDuplicate(umProxy);
-
-                    // To prevent repeated delivery but still send a receipt set message as delivered
-                    mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);
-                }
-            } catch (final DatabaseException ex) {
-                // Oops, something went wrong saving the data
-                log.error("A database error occurred when checking for duplicates. Details: " + ex.getMessage());
-
-                // Continue processing, as other parts of the message may be processed succesfully
+                // To prevent repeated delivery but still send a receipt set message as delivered
+                mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);
             }
 
             return InvocationResponse.CONTINUE;

@@ -17,17 +17,14 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 
 /**
- * Is a helper class for handling the ebMS Messaging element in the SOAP header.
- * It contains methods for creating and accessing information in the SOAP header
- * block.
- * <p>The messaging element is specified in section 5.2.1 of the ebMS 3 Core
- * specification.
+ * Is a helper class for handling the <code>Messaging</code> element in the SOAP header that represents the ebMS header.
+ * It contains methods for creating the and accessing the child elements in the <code>Messaging</code> element.
+ * <p>The messaging element is specified in section 5.2.1 of the ebMS 3 Core specification.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
@@ -39,14 +36,12 @@ public class Messaging {
     static final String LOCAL_NAME = "Messaging";
 
     /**
-     * Creates an ebMS 3 Messaging element and adds it to given SOAP envelope when
-     * it does not already exist.
-     * If there already is an ebMS 3 Messaging element in the SOAP envelope that
-     * one will be returned.
+     * Creates an <code>Messaging</code> element representing the ebMS SOAP header and adds it to given SOAP envelope
+     * when it does not already exist. If there already is an <code>Messaging</code> element in the SOAP envelope that
+     * one will be returned instead.
      *
-     * @param env   The SOAP envelope
-     * @return      The ebMS 3 Messaging element that is now contained in the SOAP
-     *              envelope
+     * @param env   The SOAP envelope in which to add the ebMS header
+     * @return      The ebMS 3 Messaging element that is now contained in the SOAP envelope
      */
     public static SOAPHeaderBlock createElement(final org.apache.axiom.soap.SOAPEnvelope env) {
         // First check if the ebMS header block already exists
@@ -64,13 +59,12 @@ public class Messaging {
     }
 
     /**
-     * Gets the SOAP header block for the ebMS 3 Messaging element in the given SOAP
-     * envelope.
+     * Gets the SOAP header block for the <code>Messaging</code> element in the given SOAP envelope.
      *
      * @param env   The SOAP envelope that should contain the ebMS header
-     * @return      A {@see SOAPHeaderBlock} representing the Messaging element
-     *              when one was found in the given SOAP envelope
-     *              <code>null</code> if no messaging element was found
+     * @return      A {@link SOAPHeaderBlock} representing the <code>Messaging</code> element when one was found in the
+     *              given SOAP envelope, or<br>
+     *              <code>null</code> if no <code>Messaging</code> element was found
      */
     public static SOAPHeaderBlock getElement(final SOAPEnvelope env) {
         SOAPHeaderBlock messaging = null;
@@ -80,12 +74,11 @@ public class Messaging {
             messaging = (SOAPHeaderBlock) env.getHeader().getFirstChildWithName(
                                                             new QName(EbMSConstants.EBMS3_NS_URI, LOCAL_NAME));
         } catch (final Exception ex) {
-            // Returned element not a header block or no header available -> can not be the messaging element, leave null
+            // Returned element not a header block or no header available
+            //      => can not be the messaging element, leave null
             messaging = null;
         }
 
         return messaging;
     }
-
-
 }

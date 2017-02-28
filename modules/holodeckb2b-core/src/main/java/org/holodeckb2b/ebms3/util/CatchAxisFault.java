@@ -16,21 +16,23 @@
  */
 package org.holodeckb2b.ebms3.util;
 
+import java.util.Collection;
 import java.util.Collections;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.ErrorMessage;
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
+import org.holodeckb2b.common.util.MessageIdGenerator;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.errors.OtherContentError;
-import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
-import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is a special handler to handle unexpected and previously unhandled errors. When such errors are detected the
@@ -39,7 +41,7 @@ import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
  * <p>When the error occurs while processing a request or creating a response to a PullRequest an ebMS <i>Other</i>
  * error is generated and reported to the sender of the request. No other message unit is included in the response to
  * the sender.<br>
- * Because error reporting to the <i>Producer</i> of a message is current not supported the error is only logged when
+ * Because error reporting to the <i>Producer</i> of a message is currently not supported the error is only logged when
  * it occurs when processing an outgoing request.
  * <p>Note that this is a kind of "last resort" error handler and therefore is not supposed to handle normal errors that
  * can occur in the processing of ebMS messages. These errors should all result in an ebMS error and handled
@@ -63,114 +65,74 @@ public class CatchAxisFault extends BaseHandler {
     public void doFlowComplete(final MessageContext mc) {
         // This handler only needs to act when there was an unexpected failure
         if (mc.getFailureReason() != null) {
-            if (isInFlow(OUT_FLOW)) {
-                log.error("A Fault was raised while processing messages!"
-                            + " Reported cause= " + mc.getFailureReason().getMessage());
-                /*
-                    Change the processing state of the message units to FAILED unless the message unit is already
-                    processed completely, i.e. its processing state is DELIVERED or WAITING_FOR_RECEIPT.
-                */
-                for (final EntityProxy mu : MessageContextUtils.getSentMessageUnits(mc)) {
-                    // Changing the processing state may fail if the problems are caused by the database.
-                    try {
-                        final String curState = mu.entity.getCurrentProcessingState().getName();
-                        if (!ProcessingStates.DELIVERED.equals(curState)
-                           && !ProcessingStates.AWAITING_RECEIPT.equals(curState)) {
-                            log.error(mu.entity.getClass().getSimpleName() + " with msg-id [" + mu.entity.getMessageId()
-                                                                    + "] could not be sent due to an internal error.");
-                            MessageUnitDAO.setFailed(mu);
-                        }
-                    } catch (final DatabaseException ex) {
-                        // Unable to change the processing state, log the error.
-                        log.error(mu.entity.getClass().getSimpleName() + " with msg-id [" + mu.entity.getMessageId()
-                                                                    + "] could not be sent due to an internal error.");
+            log.error("A Fault was raised while processing messages!  Reported cause= "
+                        + mc.getFailureReason().getMessage());
+            // As we don't know the exact cause of the error the processing state of all message units that are being
+            // currently processed should be set to failed if there processing is not completed yet
+            Collection<IMessageUnitEntity>  msgUnitsInProcessing = null;
+
+            if (isInFlow(OUT_FLOW))
+                msgUnitsInProcessing = MessageContextUtils.getSentMessageUnits(mc);
+            else
+                msgUnitsInProcessing = MessageContextUtils.getReceivedMessageUnits(mc);
+
+            for (final IMessageUnitEntity mu : msgUnitsInProcessing) {
+                // Changing the processing state may fail if the problems are caused by the database.
+                try {
+                    final ProcessingState curState = mu.getCurrentProcessingState().getState();
+                    if (ProcessingState.DELIVERED != curState && ProcessingState.AWAITING_RECEIPT != curState) {
+                        log.error(MessageUnitUtils.getMessageUnitName(mu) + " with msg-id [" + mu.getMessageId()
+                                    + "] could not be processed due to an internal error.");
+                        HolodeckB2BCore.getUpdateManager().setProcessingState(mu, ProcessingState.FAILURE);
                     }
-                }
-                log.debug("Remove existing outgoing message units from context");
-                mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, null);
-                mc.setProperty(MessageContextProperties.OUT_RECEIPTS, null);
-                mc.setProperty(MessageContextProperties.OUT_ERROR_SIGNALS, null);
-
-                // If we are responding to a PullRequest we will sent an ebMS "Other" error to indicate the problem
-                if (MessageContextUtils.getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_PULL_REQUEST) != null) {
-                    EntityProxy<ErrorMessage> newErrorMU = null;
-
-                    final OtherContentError   otherError = new OtherContentError();
-                    otherError.setErrorDetail("An internal error occurred while processing the message.");
-                    otherError.setSeverity(IEbmsError.Severity.WARNING);
-                    try {
-                        log.debug("Create the Error signal message");
-                        newErrorMU = MessageUnitDAO.createOutgoingErrorMessageUnit(
-                                                                    Collections.singletonList((EbmsError) otherError),
-                                                                    null, null, true, true);
-                    } catch (final DatabaseException dbe) {
-                        // (Still) a problem with the database, create the Error signal message without storing it
-                        log.fatal("Could not store error signal message in database! Details: " + dbe.getMessage());
-                        log.debug("Create non persisted ErrorMessage");
-                        newErrorMU = MessageUnitDAO.createTransientOtherError(otherError);
-                    }
-                    log.debug("Created a new Error signal message");
-                    mc.setProperty(MessageContextProperties.OUT_ERROR_SIGNALS, Collections.singletonList(newErrorMU));
-                    log.debug("Set the Error signal as the only ebMS message to return");
-
-                    // Remove the error condition from the context as we handled the error here
-                    mc.setFailureReason(null);
-                }
-            } else if (isInFlow(IN_FLOW)) {
-                log.error("A Fault was raised in the IN_FLOW while processing a request!"
-                            + " Reported cause= " + mc.getFailureReason().getMessage());
-                /*
-                    Change the processing state of the message units in this request to FAILED unless the message unit
-                    is already processed completely, i.e. its processing state is DONE or DELIVERED.
-
-                    There may already be message units created for the response. Although they maybe could be sent in
-                    the OUT_FAULT_FLOW the processing state of these message units are also changed to FAILED.
-                */
-                for (final EntityProxy mu : MessageContextUtils.getRcvdMessageUnits(mc)) {
-                    // Changing the processing state may fail if the problems are caused by the database.
-                    try {
-                        final String curState = mu.entity.getCurrentProcessingState().getName();
-                        if (!ProcessingStates.DELIVERED.equals(curState)
-                           && !ProcessingStates.AWAITING_RECEIPT.equals(curState)) {
-                            log.error(mu.entity.getClass().getSimpleName() + " with msg-id [" + mu.entity.getMessageId()
-                                                                    + "] could not be sent due to an internal error.");
-                            MessageUnitDAO.setFailed(mu);
-                        }
-                    } catch (final DatabaseException ex) {
-                        // Unable to change the processing state, log the error.
-                        log.error(mu.entity.getClass().getSimpleName() + " with msg-id [" + mu.entity.getMessageId()
-                                                                    + "] could not be sent due to an internal error.");
-                    }
-                }
-                log.debug("Remove prepared outgoing message units from context");
-                mc.setProperty(MessageContextProperties.OUT_RECEIPTS, null);
-                mc.setProperty(MessageContextProperties.OUT_ERROR_SIGNALS, null);
-
-                // If we are responding to a equest we will sent an ebMS "Other" error to indicate the problem
-                if (isInFlow(RESPONDER)) {
-                    EntityProxy<ErrorMessage> newErrorMU = null;
-                    final OtherContentError   otherError = new OtherContentError();
-                    otherError.setErrorDetail("An internal error occurred while processing the message.");
-                    otherError.setSeverity(IEbmsError.Severity.WARNING);
-                    try {
-                        log.debug("Create the Error signal message");
-                        newErrorMU = MessageUnitDAO.createOutgoingErrorMessageUnit(
-                                                                    Collections.singletonList((EbmsError) otherError),
-                                                                    null, null, true, true);
-                    } catch (final DatabaseException dbe) {
-                        // (Still) a problem with the database, create the Error signal message without storing it
-                        log.fatal("Could not store error signal message in database! Details: " + dbe.getMessage());
-                        log.debug("Create non persisted ErrorMessage");
-                        newErrorMU = MessageUnitDAO.createTransientOtherError(otherError);
-                    }
-                    log.debug("Created a new Error signal message");
-                    mc.setProperty(MessageContextProperties.OUT_ERROR_SIGNALS, Collections.singletonList(newErrorMU));
-                    log.debug("Set the Error signal as the only ebMS message to return");
-
-                    // Remove the error condition from the context as we handled the error here
-                    mc.setFailureReason(null);
+                } catch (final PersistenceException ex) {
+                    // Unable to change the processing state, log the error.
+                    log.error(MessageUnitUtils.getMessageUnitName(mu) + " with msg-id [" + mu.getMessageId()
+                                + "] could not be processed due to an internal error.");
                 }
             }
+
+            log.debug("Remove existing outgoing message units from context");
+            mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, null);
+            mc.setProperty(MessageContextProperties.OUT_RECEIPTS, null);
+            mc.setProperty(MessageContextProperties.OUT_ERRORS, null);
+
+            // If we are in the in flow and responding to received messages or when we were sending response to a
+            // PullRequest we will sent an ebMS "Other" error to indicate the problem
+            if (isInFlow((byte) (IN_FLOW | RESPONDER)) ||
+                MessageContextUtils.getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_PULL_REQUEST) != null)
+                createOtherError(mc);
         }
+    }
+
+    /**
+     * Creates a new Error Signal message with one <i>Other</i> error that indicates that an internal error occurred
+     * while processing the received message unit(s). As we don't know exactly what was the cause of the error the ebMS
+     * error does not reference any other message unit.
+     *
+     * @param mc    The current message context to which the error is added
+     */
+    private void createOtherError(final MessageContext mc) {
+        final OtherContentError   otherError = new OtherContentError();
+        otherError.setErrorDetail("An internal error occurred while processing the message.");
+        otherError.setSeverity(IEbmsError.Severity.WARNING);
+        ErrorMessage errorMessage = new ErrorMessage();
+        errorMessage.addError(otherError);
+        try {
+            log.debug("Create the Error signal message");
+            IErrorMessageEntity storedError = (IErrorMessageEntity) HolodeckB2BCore.getUpdateManager()
+                                                                                .storeOutGoingMessageUnit(errorMessage);
+            log.debug("Created a new Error signal message");
+            mc.setProperty(MessageContextProperties.OUT_ERRORS, Collections.singletonList(storedError));
+            log.debug("Set the Error signal as the only ebMS message to return");
+        } catch (final PersistenceException dbe) {
+            // (Still) a problem with the database, create the Error signal message without storing it
+            log.fatal("Could not store error signal message in database! Details: " + dbe.getMessage());
+            log.debug("Set the non-persisted ErrorMessage in message context");
+            errorMessage.setMessageId(MessageIdGenerator.createMessageId());
+            mc.setProperty(MessageContextProperties.OUT_ERRORS, Collections.singletonList(errorMessage));
+        }
+        // Remove the error condition from the context as we handled the error here
+        mc.setFailureReason(null);
     }
 }

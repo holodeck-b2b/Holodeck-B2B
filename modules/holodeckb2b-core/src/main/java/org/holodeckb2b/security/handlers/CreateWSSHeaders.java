@@ -18,9 +18,7 @@ package org.holodeckb2b.security.handlers;
 
 import java.util.List;
 import java.util.Properties;
-
 import javax.security.auth.callback.CallbackHandler;
-
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
@@ -35,12 +33,13 @@ import org.apache.wss4j.dom.handler.WSHandler;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.holodeckb2b.axis2.Axis2Utils;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.DefaultSecurityAlgorithm;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.IKeyTransport;
 import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
@@ -347,16 +346,17 @@ public class CreateWSSHeaders extends BaseHandler {
     private void logError(final MessageContext mc, final String role, final String message) {
         final StringBuffer logMsg = new StringBuffer();
         // Use primary message unit to log error
-        final MessageUnit  pMU = MessageContextUtils.getPrimaryMessageUnit(mc).entity;
+        final IMessageUnit  pMU = MessageContextUtils.getPrimaryMessageUnit(mc);
 
         logMsg.append("Could not create WS-Security header");
         if (Utils.isNullOrEmpty(role))
             logMsg.append("(s)");
         else
             logMsg.append(" targeted to ").append(role);
-        logMsg.append(" for message with primary message unit [");
-        logMsg.append(pMU.getClass().getSimpleName()).append(";msgID=").append(pMU.getMessageId()).append(']');
-        logMsg.append("\n\tError details: ").append(message);
+        logMsg.append(" for message with primary message unit [")
+              .append(MessageUnitUtils.getMessageUnitName(pMU))
+              .append(";msgID=").append(pMU.getMessageId()).append(']')
+              .append("\n\tError details: ").append(message);
 
         log.error(logMsg.toString());
     }

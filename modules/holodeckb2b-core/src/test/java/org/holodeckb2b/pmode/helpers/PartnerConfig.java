@@ -16,8 +16,11 @@
  */
 package org.holodeckb2b.pmode.helpers;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
 
@@ -43,6 +46,21 @@ public class PartnerConfig implements ITradingPartnerConfiguration {
     @Override
     public Collection<IPartyId> getPartyIds() {
         return partyIds;
+    }
+
+    /**
+     * Sets the party identifiers used by this trading partner.
+     *
+     * @param pids  A collection of party identifiers
+     */
+    public void setPartyIds(final Collection<IPartyId> pids) {
+        // Copy to list of PartyId object
+        if (!Utils.isNullOrEmpty(pids)) {
+            partyIds = new ArrayList<>(pids.size());
+            for (final IPartyId p : pids)
+                partyIds.add(new org.holodeckb2b.common.messagemodel.PartyId(p));
+        } else
+            partyIds = null;
     }
 
     public void addPartyId(final PartyId partyId) {

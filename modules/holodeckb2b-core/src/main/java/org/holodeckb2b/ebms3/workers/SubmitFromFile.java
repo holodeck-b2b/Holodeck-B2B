@@ -24,10 +24,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
+import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.mmd.xml.PartInfo;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workers.DirWatcher;
-import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
-import org.holodeckb2b.ebms3.mmd.xml.PartInfo;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
@@ -124,9 +124,8 @@ public class SubmitFromFile extends DirWatcher {
         final String basePath = mmdFile.getParent();
         if (!Utils.isNullOrEmpty(mmd.getPayloads()))
             for (final IPayload p : mmd.getPayloads()) {
-                final PartInfo pi = (PartInfo) p;
-                if (!(Paths.get(pi.getContentLocation()).isAbsolute()))
-                    pi.setContentLocation(Paths.get(basePath, pi.getContentLocation()).normalize().toString());
+                if (!(Paths.get(p.getContentLocation()).isAbsolute()))
+                    ((PartInfo) p).setContentLocation(Paths.get(basePath, p.getContentLocation()).normalize().toString());
             }
     }
 

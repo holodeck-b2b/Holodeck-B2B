@@ -19,31 +19,30 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.messagemodel.EbmsError;
+import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.ProcessingStates;
 import org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage;
-import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
-import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistency.entities.PullRequest;
-import org.holodeckb2b.ebms3.persistency.entities.Receipt;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.persistency.dao.UpdateManager;
 
 /**
  * Is the in flow handler that collects all ebMS errors generated during the processing of the received message. The
@@ -70,118 +69,101 @@ public class ProcessGeneratedErrors extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws AxisFault {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         log.debug("Check if errors were generated");
-        final ArrayList<EbmsError>    errors = (ArrayList<EbmsError>) mc.getProperty(MessageContextProperties.GENERATED_ERRORS);
+        final ArrayList<EbmsError>    errors = (ArrayList<EbmsError>)
+                                                            mc.getProperty(MessageContextProperties.GENERATED_ERRORS);
 
         if (Utils.isNullOrEmpty(errors)) {
             log.debug("No errors were generated during this in flow, nothing to do");
         } else {
+            UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
             log.debug(errors.size() + " error(s) were generated during this in flow");
 
             // First bundle the errors per message in error
             log.debug("Bundling errors per message unit");
-            final HashMap<String, Collection<EbmsError>> segmentedErrors = segmentErrors(errors);
-
-            // Create Error signal for each bundle
+            final HashMap<String, Collection<IEbmsError>> segmentedErrors = segmentErrors(errors);
+            // Create Error signal for each bundle, i.e. each referenced message
             for(final String refToMsgId : segmentedErrors.keySet()) {
-                final Collection<EbmsError> errForMsg = segmentedErrors.get(refToMsgId);
-                try {
-                    if (refToMsgId.equals("null")) {
-                        // This collection of errors does not reference a specific message unit, should therefor be sent
-                        // as a response.
-                        // If however the message contained multiple message units some can be processed succesfully and
-                        // returning an non referenceable error creates ambiguity as the sender can only set all sent
-                        // message units to failed.
-                        // Therefor we only sent out this error if there no message unit with a processing state
-                        // different than FAILURE
-                        // Anyhow the error should be registered
-                        final EntityProxy<ErrorMessage> errorMU =
-                                    MessageUnitDAO.createOutgoingErrorMessageUnit(errForMsg, null, null, false, true);
-
-                        if (onlyFailedMessageUnits(mc)) {
-                            log.debug("All message units failed to process successfully, anonymous error can be sent");
-                            MessageContextUtils.addErrorSignalToSend(mc, errorMU);
-                            mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
-                        } else {
-                            log.warn("Error without reference can not be sent because successfull message units exist");
-                            // As we can not do anything with the error change its processing state to DONE
-                            MessageUnitDAO.setDone(errorMU);
-                        }
+                final Collection<IEbmsError> errForMsg = segmentedErrors.get(refToMsgId);
+                log.debug("Create the Error Signal and save to database");
+                final IErrorMessageEntity errorMessage =
+                                                    updateManager.storeOutGoingMessageUnit(new ErrorMessage(errForMsg));
+                if (refToMsgId.equals("null")) {
+                    // This collection of errors does not reference a specific message unit, should therefor be sent
+                    // as a response.
+                    // If however the message contained multiple message units some can be processed succesfully and
+                    // returning an non referenceable error creates ambiguity as the sender can only set all sent
+                    // message units to failed.
+                    // Therefor we only sent out this error if there no message unit with a processing state
+                    // different than FAILURE
+                    if (isInFlow(INITIATOR) || onlyFailedMessageUnits(mc)) {
+                        log.debug("All message units failed to process successfully, anonymous error can be sent");
+                        MessageContextUtils.addErrorSignalToSend(mc, errorMessage);
+                        mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
                     } else {
-                        // This collection of errors references one of the received message units.
-                        log.debug("Check type of the message unit in error");
-                        final MessageUnit muInError = getAllMessageUnits(mc).get(refToMsgId);
-                        if (muInError instanceof PullRequest) {
-                            /* The message unit in error is a PullRequest. Because the PullRequest is not necessarily
-                            bound to one P-Mode we can only sent the error as a response.
-                            The ebMS specification however is not very clear about whether error reporting to another
-                            URL should be possible and how that shoud be configured.
-                            */
-                            log.debug("Message unit in error is PullRequest, error must be sent as response");
-                            final EntityProxy<ErrorMessage> errorMU = MessageUnitDAO.createOutgoingErrorMessageUnit(errForMsg,
-                                                                                                        refToMsgId,
-                                                                                                        null,
-                                                                                                        false,
-                                                                                                        true);
-                            MessageContextUtils.addErrorSignalToSend(mc, errorMU);
-                            mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
-                        } else {
-                            log.debug("Get P-Mode information to determine how new signal must be processed");
-                            // Errorhandling config is contained in flow
-                            final String pmodeId = muInError.getPModeId();
-                            final IUserMessageFlow flow = (pmodeId != null ? HolodeckB2BCoreInterface.getPModeSet().get(pmodeId)
-                                                                    .getLegs().iterator().next().getUserMessageFlow()
-                                                            : null);
-                            final IErrorHandling errorHandling = (flow != null ? flow.getErrorHandlingConfiguration() : null);
-                            // Default is to send error as response when the message in error is received as a
-                            //  request
-                            final boolean asResponse = errorHandling != null ?
-                                                            errorHandling.getPattern() == ReplyPattern.RESPONSE :
-                                                            isInFlow(RESPONDER);
-                            // Should this error signal be combined with a SOAP Fault? Because SOAP Faults can confuse
-                            // the MSH that receives the error Holodeck B2B by default does not add the SOAP, it should
-                            // be configured explicitly in the P-Mode
-                            final boolean addSOAPFault = errorHandling != null ?  errorHandling.shouldAddSOAPFault() : false;
-                            // For signals error reporting is optional, so check if error is for a signal and if P-Mode
-                            // is configured to report errors. Default is not to report errors for signals
-                            boolean sendError = true;
-                            if (muInError instanceof ErrorMessage)
-                                sendError = errorHandling != null && errorHandling.shouldReportErrorOnError() != null ?
-                                            errorHandling.shouldReportErrorOnError() :
-                                            HolodeckB2BCoreInterface.getConfiguration().shouldReportErrorOnError();
+                        log.warn("Error without reference can not be sent because successfull message units exist"
+                                + " or message received as response");
+                        // As we can not do anything with the error change its processing state to DONE
+                        updateManager.setProcessingState(errorMessage, ProcessingState.WARNING);
+                    }
+                } else {
+                    // This collection of errors references one of the received message units.
+                    log.debug("Check type of the message unit in error");
+                    final IMessageUnitEntity muInError = getRefdMessageUnit(mc, refToMsgId);
+                    if (muInError instanceof IPullRequest) {
+                        /* The message unit in error is a PullRequest. Because the PullRequest is not necessarily
+                        bound to one P-Mode we can only sent the error as a response.
+                        The ebMS specification however is not very clear about whether error reporting to another
+                        URL should be possible and how that shoud be configured.
+                        */
+                        log.debug("Message unit in error is PullRequest, error must be sent as response");
+                        MessageContextUtils.addErrorSignalToSend(mc, errorMessage);
+                        mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
+                    } else {
+                        log.debug("Get P-Mode information to determine how new signal must be processed");
+                        // Errorhandling config is contained in flow
+                        final String pmodeId = muInError.getPModeId();
+                        final IUserMessageFlow flow = pmodeId == null ? null :
+                                                            HolodeckB2BCoreInterface.getPModeSet().get(pmodeId)
+                                                                   .getLeg(muInError.getLeg()).getUserMessageFlow();
+                        final IErrorHandling errorHandling = (flow != null ? flow.getErrorHandlingConfiguration()
+                                                                           : null);
+                        // Default is to send error as response when the message in error is received as a request
+                        final boolean asResponse = errorHandling != null ?
+                                                        errorHandling.getPattern() == ReplyPattern.RESPONSE :
+                                                        isInFlow(RESPONDER);
+                        // Should this error signal be combined with a SOAP Fault? Because SOAP Faults can confuse
+                        // the MSH that receives the error Holodeck B2B by default does not add the SOAP, it should
+                        // be configured explicitly in the P-Mode
+                        final boolean addSOAPFault = errorHandling != null ?  errorHandling.shouldAddSOAPFault()
+                                                                           : false;
+                        // For signals error reporting is optional, so check if error is for a signal and if P-Mode
+                        // is configured to report errors. Default is not to report errors for signals
+                        boolean sendError = true;
+                        if (muInError instanceof IErrorMessage)
+                            sendError = errorHandling != null && errorHandling.shouldReportErrorOnError() != null ?
+                                        errorHandling.shouldReportErrorOnError() :
+                                        HolodeckB2BCore.getConfiguration().shouldReportErrorOnError();
 
-                            if (muInError instanceof Receipt)
-                                sendError = errorHandling != null && errorHandling.shouldReportErrorOnReceipt() != null?
-                                            errorHandling.shouldReportErrorOnReceipt() :
-                                            HolodeckB2BCoreInterface.getConfiguration().shouldReportErrorOnReceipt();
+                        if (muInError instanceof IReceipt)
+                            sendError = errorHandling != null && errorHandling.shouldReportErrorOnReceipt() != null?
+                                        errorHandling.shouldReportErrorOnReceipt() :
+                                        HolodeckB2BCore.getConfiguration().shouldReportErrorOnReceipt();
 
-                            if (sendError) {
-                                log.debug("Error should be returned as response? " + asResponse);
-                                log.debug("Create Error signal and store in message database");
-                                final EntityProxy<ErrorMessage> errorMU =
-                                                    MessageUnitDAO.createOutgoingErrorMessageUnit(errForMsg,
-                                                                                                  refToMsgId,
-                                                                                                  muInError.getPModeId(),
-                                                                                                  addSOAPFault,
-                                                                                                  asResponse);
-                                log.debug("Error signal stored in database");
-                                if (sendError && asResponse) {
-                                    log.debug("This error signal should be returned as a response, prepare MessageContext");
-                                    MessageContextUtils.addErrorSignalToSend(mc, errorMU);
-                                    mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
-                                }
+                        if (sendError) {
+                            log.debug("This error signal should be sent"
+                                        + (asResponse ?  "as a response" : "a using callback"));
+                            if (asResponse) {
+                                MessageContextUtils.addErrorSignalToSend(mc, errorMessage);
+                                mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
                             } else
-                                log.debug("Error doesn't need to be sent. Processing completed.");
+                                updateManager.setProcessingState(errorMessage, ProcessingState.READY_TO_PUSH);
+                        } else {
+                            log.debug("Error doesn't need to be sent. Processing completed.");
+                            updateManager.setProcessingState(errorMessage, ProcessingState.DONE);
                         }
                     }
-                } catch (final DatabaseException ex) {
-                    // Creating the new Error signal failed! As this invalidates the message processing
-                    //  we must stop processing this flow
-                    log.fatal("Creating the Error signal in repsonse to message unit [msgId="
-                                    + refToMsgId + "] failed! Details: " + ex.getMessage());
-                    // Signal this problem using a SOAP Fault
-                    throw new AxisFault(ex.getMessage());
                 }
             }
         }
@@ -197,14 +179,14 @@ public class ProcessGeneratedErrors extends BaseHandler {
      * @return              A collection of errors per messageId. Errors that do not reference another message unit are
      *                      bundled under key <i>"null"</i>
      */
-    private HashMap<String, Collection<EbmsError>> segmentErrors(final Collection<EbmsError> errors) {
-        final HashMap<String, Collection<EbmsError>> segmentedErrors = new HashMap<>();
+    private HashMap<String, Collection<IEbmsError>> segmentErrors(final Collection<EbmsError> errors) {
+        final HashMap<String, Collection<IEbmsError>> segmentedErrors = new HashMap<>();
         for(final EbmsError e : errors) {
             String  refToMsgId = e.getRefToMessageInError();
             // Check if the error is related to another message (it may be a general error)
-            if (refToMsgId == null || refToMsgId.isEmpty())
+            if (Utils.isNullOrEmpty(refToMsgId))
                 refToMsgId = "null"; // general error
-            Collection<EbmsError> errForMsg = segmentedErrors.get(refToMsgId);
+            Collection<IEbmsError> errForMsg = segmentedErrors.get(refToMsgId);
             if (errForMsg == null) {
                 // No errors known for this referenced message unit
                 errForMsg = new ArrayList<>();
@@ -224,46 +206,25 @@ public class ProcessGeneratedErrors extends BaseHandler {
      */
     private boolean onlyFailedMessageUnits(final MessageContext mc) {
         boolean onlyFailed = true;
-        final Map<String, MessageUnit> allMUs = getAllMessageUnits(mc);
-        for(final String id : allMUs.keySet())
-            onlyFailed &= ProcessingStates.FAILURE.equals(allMUs.get(id).getCurrentProcessingState().getName());
+        Collection<IMessageUnitEntity> allRcvdMessageUnits = MessageContextUtils.getReceivedMessageUnits(mc);
+        if (!Utils.isNullOrEmpty(allRcvdMessageUnits))
+            for(final IMessageUnitEntity m : allRcvdMessageUnits)
+                onlyFailed &= m.getCurrentProcessingState().getState() == ProcessingState.FAILURE;
         return onlyFailed;
     }
 
     /**
-     * Helper to get all received message units.
+     * Helper method to get the meta-data on the received message unit that is referenced by the error.
      *
-     * @param mc    The current message context
-     * @return      Collection of all {@link MessageUnit}s in the received message indexed on their messageId
+     * @param mc            The current message context
+     * @param refToMsgId    The messageId that the error refers to
+     * @return  The referenced message unit
      */
-    private Map<String, MessageUnit> getAllMessageUnits(final MessageContext mc) {
-        final Map<String, MessageUnit>     allMUs = new HashMap<>();
-
-        final EntityProxy<UserMessage> userMsg = (EntityProxy<UserMessage>)
-                MessageContextUtils.getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_USER_MESSAGE);
-        if (userMsg != null) {
-            allMUs.put(userMsg.entity.getMessageId(), userMsg.entity);
-        }
-        final EntityProxy<PullRequest> pullReq = (EntityProxy<PullRequest>)
-                MessageContextUtils.getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_PULL_REQUEST);
-        if (pullReq != null) {
-            log.debug("Request message contained a PullRequest");
-            allMUs.put(pullReq.entity.getMessageId(), pullReq.entity);
-        }
-        final Collection<EntityProxy<Receipt>> receipts = (ArrayList<EntityProxy<Receipt>>)
-                MessageContextUtils.getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_RECEIPTS);
-        if (!Utils.isNullOrEmpty(receipts))
-            for(final EntityProxy<Receipt> r : receipts)
-                allMUs.put(r.entity.getMessageId(), r.entity);
-
-        final Collection<EntityProxy<ErrorMessage>> errors = (ArrayList<EntityProxy<ErrorMessage>>)
-                MessageContextUtils.getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_ERRORS);
-        if (!Utils.isNullOrEmpty(errors))
-            for(final EntityProxy<ErrorMessage> e : errors)
-                allMUs.put(e.entity.getMessageId(), e.entity);
-
-
-        return allMUs;
+    private IMessageUnitEntity getRefdMessageUnit(MessageContext mc, String refToMsgId) {
+        for(IMessageUnitEntity m : MessageContextUtils.getReceivedMessageUnits(mc))
+            if (m.getMessageId().equals(refToMsgId))
+                return m;
+        return null;
     }
 
 }

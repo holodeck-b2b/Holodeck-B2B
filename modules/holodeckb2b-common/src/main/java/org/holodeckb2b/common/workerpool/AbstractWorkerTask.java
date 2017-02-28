@@ -81,8 +81,8 @@ public abstract class AbstractWorkerTask implements IWorkerTask {
         } catch (final InterruptedException interrupted) {
             log.warn("Task is interrupted!");
             Thread.currentThread().interrupt();
-        } catch (final Exception e) {
-            log.error("Exception occurred during execution! Details: " + e.getMessage());
+        } catch (final Throwable t) {
+            log.error("Exception occurred during execution! Details: " + t.getMessage());
         }
     }
 

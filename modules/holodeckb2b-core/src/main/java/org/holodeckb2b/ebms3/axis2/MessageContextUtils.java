@@ -18,36 +18,35 @@ package org.holodeckb2b.ebms3.axis2;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.wsdl.WSDLConstants;
-import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.persistency.entities.EbmsError;
-import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistency.entities.Receipt;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+
 
 /**
- * Contains some utility methods related to the {@link MessageContext}.
+ * Contains some utility methods related to handling the message units available in the Axis2 {@link MessageContext}.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public class MessageContextUtils {
 
     /**
-     * Adds a {@link Receipt} to the list of received receipt signals in the given {@link MessageContext}.
+     * Adds a {@link IReceiptEntity} to the list of received receipt signals in the given {@link MessageContext}.
      *
      * @param mc        The {@link MessageContext} to which the receipt should be added
-     * @param receipt   The {@link Receipt} to add
+     * @param receipt   The {@link IReceiptEntity} to add
      */
-    public static void addRcvdReceipt(final MessageContext mc, final EntityProxy<Receipt> receipt) {
-        ArrayList<EntityProxy<Receipt>> rcptList = null;
+    public static void addRcvdReceipt(final MessageContext mc, final IReceiptEntity receipt) {
+        ArrayList<IReceiptEntity> rcptList = null;
 
         try {
-            rcptList = (ArrayList<EntityProxy<Receipt>>) mc.getProperty(MessageContextProperties.IN_RECEIPTS);
+            rcptList = (ArrayList<IReceiptEntity>) mc.getProperty(MessageContextProperties.IN_RECEIPTS);
         } catch (final Exception e) {}
 
         // If the message context does not contain a list of receipts already or if
@@ -62,16 +61,16 @@ public class MessageContextUtils {
     }
 
     /**
-     * Adds a {@link ErrorMessage} to the list of received error signals in the given {@link MessageContext}.
+     * Adds a {@link IErrorMessageEntity} to the list of received error signals in the given {@link MessageContext}.
      *
      * @param mc        The {@link MessageContext} to which the receipt should be added
-     * @param receipt   The {@link ErrorMessage} to add
+     * @param error     The {@link IErrorMessageEntity} to add
      */
-    public static void addRcvdError(final MessageContext mc, final EntityProxy<ErrorMessage> error) {
-        ArrayList<EntityProxy<ErrorMessage>> errList = null;
+    public static void addRcvdError(final MessageContext mc, final IErrorMessageEntity error) {
+        ArrayList<IErrorMessageEntity> errList = null;
 
         try {
-            errList = (ArrayList<EntityProxy<ErrorMessage>>) mc.getProperty(MessageContextProperties.IN_RECEIPTS);
+            errList = (ArrayList<IErrorMessageEntity>) mc.getProperty(MessageContextProperties.IN_ERRORS);
         } catch (final Exception e) {}
 
         // If the message context does not contain a list of errors already or if
@@ -86,16 +85,16 @@ public class MessageContextUtils {
     }
 
     /**
-     * Adds a {@link Receipt} to the list of receipt signals that should be sent with the current message.
+     * Adds a {@link IReceiptEntity} to the list of receipt signals that should be sent with the current message.
      *
      * @param mc        The {@link MessageContext} representing the message to which the receipt should be added
      * @param receipt   The {@link Receipt} to add
      */
-    public static void addReceiptToSend(final MessageContext mc, final EntityProxy<Receipt> receipt) {
-        ArrayList<EntityProxy<Receipt>> rcptList = null;
+    public static void addReceiptToSend(final MessageContext mc, final IReceiptEntity receipt) {
+        ArrayList<IReceiptEntity> rcptList = null;
 
         try {
-            rcptList = (ArrayList<EntityProxy<Receipt>>) mc.getProperty(MessageContextProperties.OUT_RECEIPTS);
+            rcptList = (ArrayList<IReceiptEntity>) mc.getProperty(MessageContextProperties.OUT_RECEIPTS);
         } catch (final Exception e) {}
 
         // If the message context does not contain a list of errors already or if
@@ -110,17 +109,16 @@ public class MessageContextUtils {
     }
 
     /**
-     * Adds an error that has been generated during message processing to the
-     * {@link MessageContext}.
+     * Adds an {@link IEbmsError} that has been generated during message processing to the {@link MessageContext}.
      *
      * @param mc        The {@link MessageContext} to which the error should be added
      * @param error     The {@link EbmsError} to add
      */
-    public static void addGeneratedError(final MessageContext mc, final EbmsError error) {
-        ArrayList<EbmsError> errList = null;
+    public static void addGeneratedError(final MessageContext mc, final IEbmsError error) {
+        ArrayList<IEbmsError> errList = null;
 
         try {
-            errList = (ArrayList<EbmsError>) mc.getProperty(MessageContextProperties.GENERATED_ERRORS);
+            errList = (ArrayList<IEbmsError>) mc.getProperty(MessageContextProperties.GENERATED_ERRORS);
         } catch (final Exception e) {}
 
         // If the message context does not contain a list of errors already or if
@@ -135,142 +133,138 @@ public class MessageContextUtils {
     }
 
     /**
-     * Adds an error signal that has to be sent as a response to the current
-     * message to the {@link MessageContext} so it can be retrieved in the out
-     * flow.
+     * Adds an {@link IErrorMessageEntity} to the list of error signals that have to be sent as part of the current
+     * message.
      *
      * @param mc        The {@link MessageContext} to which the error should be added
-     * @param errorMU    The {@link ErrorMessage} to add
-     * @deprecated Use {@link #addErrorSignalToSend(org.apache.axis2.context.MessageContext, org.holodeckb2b.ebms3.persistent.message.ErrorMessage)} and
-     * set {@link MessageContextProperties#RESPONSE_REQUIRED} separately
+     * @param error     The {@link IErrorMessageEntity} to add
      */
-    @Deprecated
-    public static void addErrorSignalToRespond(final MessageContext mc, final EntityProxy<ErrorMessage> errorMU) {
-        addErrorSignalToSend(mc, errorMU);
-
-        // And require that a response is sent
-        mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
-    }
-
-    /**
-     * Adds an error signal message unit to the current message.
-     *
-     * @param mc        The {@link MessageContext} to which the error should be added
-     * @param errorMU   The {@link ErrorMessage} to add
-     */
-    public static void addErrorSignalToSend(final MessageContext mc, final EntityProxy<ErrorMessage> errorMU) {
-        ArrayList<EntityProxy<ErrorMessage>> errList = null;
+    public static void addErrorSignalToSend(final MessageContext mc, final IErrorMessageEntity error) {
+        ArrayList<IErrorMessageEntity> errList = null;
 
         try {
-            errList = (ArrayList<EntityProxy<ErrorMessage>>) mc.getProperty(MessageContextProperties.OUT_ERROR_SIGNALS);
+            errList = (ArrayList<IErrorMessageEntity>) mc.getProperty(MessageContextProperties.OUT_ERRORS);
         } catch (final Exception e) {}
 
         // If the message context does not contain a list of errors already or if
         // the returned object is not a list, create new list
         if (errList == null) {
             errList = new ArrayList<>();
-            mc.setProperty(MessageContextProperties.OUT_ERROR_SIGNALS, errList);
+            mc.setProperty(MessageContextProperties.OUT_ERRORS, errList);
         }
 
         // Add the error to the list
-        errList.add(errorMU);
+        errList.add(error);
     }
 
     /**
-     * Gets a property from the in flow message context to which the given message context is a response.
+     * Gets a property from the in flow message context of the operation the given message context is part of. Note that
+     * this can retrieve the property from the given if it already is the message context of the in flow.
      *
-     * @param outMsgCtx     The response {@link MessageContext}
-     * @param key           The name of the property to get the value for
-     * @return              The value of the requested property if it exists
-     *                      in the in flow message context, <code>null</code>
-     *                      otherwise.
+     * @param currentMsgCtx     The current {@link MessageContext}
+     * @param key               The name of the property to get the value for
+     * @return              The value of the requested property if it exists in the in flow message context, or<br>
+     *                      <code>null</code> otherwise.
      */
-    public static Object getPropertyFromInMsgCtx(final MessageContext outMsgCtx, final String key) {
-        if (outMsgCtx == null || key == null)
-            return null;
-
-        try {
-            final OperationContext opContext = outMsgCtx.getOperationContext();
-            final MessageContext inMsgContext = opContext.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
-
-            return inMsgContext.getProperty(key);
-        } catch (final Exception ex) {
-            return null;
-        }
+    public static Object getPropertyFromInMsgCtx(final MessageContext currentMsgCtx, final String key) {
+        return getPropertyFromMsgCtx(currentMsgCtx, key, MessageContext.IN_FLOW);
     }
 
     /**
-     * Gets a property from the out flow message context of the current message exchange.
+     * Gets a property from the out flow message context of the operation the given message context is part of. Note
+     * that this can retrieve the property from the given if it already is the message context of the out flow.
      *
-     * @param msgCtx     The current {@link MessageContext}
-     * @param key        The name of the property to get the value for
+     * @param currentMsgCtx     The current {@link MessageContext}
+     * @param key               The name of the property to get the value for
      * @return           The value of the requested property if it exists in the out flow message context,or <br>
      *                   <code>null</code> otherwise.
      */
-    public static Object getPropertyFromOutMsgCtx(final MessageContext msgCtx, final String key) {
-        if (msgCtx == null || key == null)
+    public static Object getPropertyFromOutMsgCtx(final MessageContext currentMsgCtx, final String key) {
+        return getPropertyFromMsgCtx(currentMsgCtx, key, MessageContext.OUT_FLOW);
+    }
+
+    /**
+     * Helper method to retrieve a property from a specific message context of the operation the given message context
+     * is part of.
+     *
+     * @param currentMsgCtx     The current {@link MessageContext}
+     * @param key               The name of the property to get the value for
+     * @param flow              The flow from which the property should be retrieved as integer represented using the
+     *                          {@link MessageContext#IN_FLOW} and {@link MessageContext#OUT_FLOW} constants
+     * @return          The value of the requested property if it exists in the out flow message context,or <br>
+     *                   <code>null</code> otherwise.
+     */
+    private static Object getPropertyFromMsgCtx(final MessageContext currentMsgCtx, final String key,
+                                                final int flow) {
+        if (currentMsgCtx == null || key == null)
             return null;
 
         try {
-            final OperationContext opContext = msgCtx.getOperationContext();
-            final MessageContext outMsgContext = opContext.getMessageContext(WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
+            final OperationContext opContext = currentMsgCtx.getOperationContext();
+            final MessageContext targetMsgContext = opContext.getMessageContext(flow == MessageContext.IN_FLOW ?
+                                                                                WSDLConstants.MESSAGE_LABEL_IN_VALUE :
+                                                                                WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
 
-            return outMsgContext.getProperty(key);
+            return targetMsgContext.getProperty(key);
         } catch (final Exception ex) {
             return null;
         }
     }
 
     /**
-     * Retrieves all message units that were previously (or are to be) sent.
+     * Retrieves all entity objects of message units that are (to be) or were previously sent in the current operation.
      *
      * @param mc    The current message context
-     * @return      {@link Collection} of {@link MessageUnit} objects for the message units that were sent.
+     * @return      {@link Collection} of {@link IMessageUnitEntity} objects for the message units that were sent.
      */
-    public static Collection<EntityProxy<MessageUnit>> getSentMessageUnits(final MessageContext mc) {
-        final Collection<EntityProxy<MessageUnit>>   reqMUs = new ArrayList<>();
+    public static Collection<IMessageUnitEntity> getSentMessageUnits(final MessageContext mc) {
+        final Collection<IMessageUnitEntity>   messageUnits = new ArrayList<>();
 
-        final EntityProxy<MessageUnit> userMsg = (EntityProxy<MessageUnit>)
-                getPropertyFromOutMsgCtx(mc, MessageContextProperties.OUT_USER_MESSAGE);
+        final IMessageUnitEntity userMsg = (IMessageUnitEntity)
+                                                getPropertyFromOutMsgCtx(mc, MessageContextProperties.OUT_USER_MESSAGE);
         if (userMsg != null)
-            reqMUs.add(userMsg);
-        final EntityProxy<MessageUnit> pullReq = (EntityProxy<MessageUnit>)
-                getPropertyFromOutMsgCtx(mc, MessageContextProperties.OUT_PULL_REQUEST);
+            messageUnits.add(userMsg);
+        final IMessageUnitEntity pullReq = (IMessageUnitEntity)
+                                                getPropertyFromOutMsgCtx(mc, MessageContextProperties.OUT_PULL_REQUEST);
         if (pullReq != null)
-            reqMUs.add(pullReq);
-        final Collection<EntityProxy<MessageUnit>> receipts = (Collection<EntityProxy<MessageUnit>>)
-                getPropertyFromOutMsgCtx(mc, MessageContextProperties.OUT_RECEIPTS);
+            messageUnits.add(pullReq);
+        final Collection<IMessageUnitEntity> receipts = (Collection<IMessageUnitEntity>)
+                                                getPropertyFromOutMsgCtx(mc, MessageContextProperties.OUT_RECEIPTS);
         if (receipts != null && !receipts.isEmpty())
-            reqMUs.addAll(receipts);
-        final Collection<EntityProxy<MessageUnit>> errors = (Collection<EntityProxy<MessageUnit>>)
-                getPropertyFromOutMsgCtx(mc, MessageContextProperties.OUT_ERROR_SIGNALS);
+            messageUnits.addAll(receipts);
+        final Collection<IMessageUnitEntity> errors = (Collection<IMessageUnitEntity>)
+                                               getPropertyFromOutMsgCtx(mc, MessageContextProperties.OUT_ERRORS);
         if (errors != null && !errors.isEmpty())
-            reqMUs.addAll(errors);
-        return reqMUs;
+            messageUnits.addAll(errors);
+        return messageUnits;
     }
 
     /**
-     * Retrieves all message units in the received message.
+     * Retrieves all entity objects of message units that are received in the current operation.
      *
-     * @param mc    The in flow message context
+     * @param mc    The current message context
      * @return      {@link Collection} of {@link EntityProxy} objects for the message units in the received message.
      */
-    public static Collection<EntityProxy<MessageUnit>> getRcvdMessageUnits(final MessageContext mc) {
-        final Collection<EntityProxy<MessageUnit>>   reqMUs = new ArrayList<>();
+    public static Collection<IMessageUnitEntity> getReceivedMessageUnits(final MessageContext mc) {
+        final Collection<IMessageUnitEntity>   messageUnits = new ArrayList<>();
 
-        final EntityProxy<MessageUnit> userMsg = (EntityProxy<MessageUnit>) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
+        final IMessageUnitEntity userMsg = (IMessageUnitEntity)
+                                                getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_USER_MESSAGE);
         if (userMsg != null)
-            reqMUs.add(userMsg);
-        final EntityProxy<MessageUnit> pullReq = (EntityProxy<MessageUnit>) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
+            messageUnits.add(userMsg);
+        final IMessageUnitEntity pullReq = (IMessageUnitEntity)
+                                                getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_PULL_REQUEST);
         if (pullReq != null)
-            reqMUs.add(pullReq);
-        final Collection<EntityProxy<MessageUnit>> receipts = (Collection<EntityProxy<MessageUnit>>) mc.getProperty(MessageContextProperties.IN_RECEIPTS);
-        if (!Utils.isNullOrEmpty(receipts))
-            reqMUs.addAll(receipts);
-        final Collection<EntityProxy<MessageUnit>> errors = (Collection<EntityProxy<MessageUnit>>) mc.getProperty(MessageContextProperties.IN_ERRORS);
-        if (!Utils.isNullOrEmpty(errors))
-            reqMUs.addAll(errors);
-        return reqMUs;
+            messageUnits.add(pullReq);
+        final Collection<IMessageUnitEntity> receipts = (Collection<IMessageUnitEntity>)
+                                                getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_RECEIPTS);
+        if (receipts != null && !receipts.isEmpty())
+            messageUnits.addAll(receipts);
+        final Collection<IMessageUnitEntity> errors = (Collection<IMessageUnitEntity>)
+                                               getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_ERRORS);
+        if (errors != null && !errors.isEmpty())
+            messageUnits.addAll(errors);
+        return messageUnits;
     }
 
     /**
@@ -290,10 +284,10 @@ public class MessageContextUtils {
      * </table>
      *
      * @param mc    The {@link MessageContext} of the message
-     * @return      The primary message unit if one was found or <code>null</code> if no message unit could be found
-     *              in the message context
+     * @return      The entity object of the primary message unit if one was found, or
+     *              <code>null</code> if no message unit could be found in the message context
      */
-    public static EntityProxy<MessageUnit> getPrimaryMessageUnit(final MessageContext mc) {
+    public static IMessageUnitEntity getPrimaryMessageUnit(final MessageContext mc) {
         if (mc.getFLOW() == MessageContext.IN_FLOW || mc.getFLOW() == MessageContext.IN_FAULT_FLOW)
             return getPrimaryMessageUnitFromInFlow(mc);
         else
@@ -304,102 +298,96 @@ public class MessageContextUtils {
      * Gets the primary message unit from a received message.
      *
      * @param mc    The {@link MessageContext} of the message
-     * @return      The primary message unit if one was found or <code>null</code> if no message unit could be found
-     *              in the message context
+     * @return      The entity object of the primary message unit if one was found, or<br>
+     *              <code>null</code> if no message unit could be found in the message context
      * @see         #getPrimaryMessageUnit(org.apache.axis2.context.MessageContext)
      */
-    protected static EntityProxy getPrimaryMessageUnitFromInFlow(final MessageContext mc) {
+    private static IMessageUnitEntity getPrimaryMessageUnitFromInFlow(final MessageContext mc) {
         //
         // Class cast exceptions are ignored, the requested message unit type is considered to not be available
-        EntityProxy pMU = null;
+        IMessageUnitEntity primaryMsgUnit = null;
         try {
-            pMU = (EntityProxy) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
+            primaryMsgUnit = (IUserMessageEntity) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
         } catch (final ClassCastException cce) {}
 
-        if (pMU != null)
-            // Message contains UserMessage, so this is the primary message unit
-            return pMU;
+        if (primaryMsgUnit != null)
+            // Message contains User Message, so this is the primary message unit
+            return primaryMsgUnit;
 
         // No user message, check for Receipt
         try {
-            final Collection<EntityProxy> rcpts = (Collection<EntityProxy>)
+            final Collection<IUserMessageEntity> rcpts = (Collection<IUserMessageEntity>)
                                                         mc.getProperty(MessageContextProperties.IN_RECEIPTS);
-            pMU = rcpts.iterator().next();
+            primaryMsgUnit = rcpts.iterator().next();
         } catch (final Exception ex) {}
 
-        if (pMU != null)
-            // Message does contain receipt, so this becomes the primary message unit
-            return pMU;
+        if (primaryMsgUnit != null)
+            // Message does contain Receipt, so this becomes the primary message unit
+            return primaryMsgUnit;
 
         // No receipts either, maybe errors?
         try {
-            final Collection<EntityProxy> errs = (Collection<EntityProxy>)
+            final Collection<IUserMessageEntity> errors = (Collection<IUserMessageEntity>)
                                                         mc.getProperty(MessageContextProperties.IN_ERRORS);
-            pMU = errs.iterator().next();
+            primaryMsgUnit = errors.iterator().next();
         } catch (final Exception ex) {}
 
-        if (pMU != null)
+        if (primaryMsgUnit != null)
             // Message does contain error, so this becomes the primary message unit
-            return pMU;
+            return primaryMsgUnit;
 
-        // No errors, maybe a PullRequest
-        try {
-            pMU = (EntityProxy) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
-        } catch (final ClassCastException cce) {}
+        // No errors, maybe a PullRequest?
+        primaryMsgUnit = (IMessageUnitEntity) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
 
-        if (pMU != null)
-            // Message does contain error, so this becomes the primary message unit
-            return pMU;
-        else // no message unit in this context
-            return null;
+        return primaryMsgUnit;
     }
 
     /**
      * Gets the primary message unit from a message to be sent.
      *
      * @param mc    The {@link MessageContext} of the message
-     * @return      The primary message unit if one was found or <code>null</code> if no message unit could be found
-     *              in the message context
+     * @return      The entity object of the primary message unit if one was found, or<br>
+     *              <code>null</code> if no message unit could be found in the message context
      * @see         #getPrimaryMessageUnit(org.apache.axis2.context.MessageContext)
      */
-    protected static EntityProxy getPrimaryMessageUnitFromOutFlow(final MessageContext mc) {
+    protected static IMessageUnitEntity getPrimaryMessageUnitFromOutFlow(final MessageContext mc) {
         //
         // Class cast exceptions are ignored, the requested message unit type is considered to not be available
-        EntityProxy pMU = null;
+        IMessageUnitEntity primaryMsgUnit = null;
         try {
-            pMU = (EntityProxy) mc.getProperty(MessageContextProperties.OUT_PULL_REQUEST);
+            primaryMsgUnit = (IMessageUnitEntity) mc.getProperty(MessageContextProperties.OUT_PULL_REQUEST);
         } catch (final ClassCastException cce) {}
-        if (pMU != null)
+        if (primaryMsgUnit != null)
             // Message contains PullRequest, so this is the primary message unit
-            return pMU;
+            return primaryMsgUnit;
 
         // No PullRequest, check for User message
         try {
-            pMU = (EntityProxy) mc.getProperty(MessageContextProperties.OUT_USER_MESSAGE);
+            primaryMsgUnit = (IMessageUnitEntity) mc.getProperty(MessageContextProperties.OUT_USER_MESSAGE);
         } catch (final ClassCastException cce) {}
-        if (pMU != null)
+        if (primaryMsgUnit != null)
             // Message does contains User Message, so this becomes the primary message unit
-            return pMU;
+            return primaryMsgUnit;
 
         // No pull request message, check for Receipt
         try {
-            final Collection<EntityProxy> rcpts = (Collection<EntityProxy>)
+            final Collection<IMessageUnitEntity> rcpts = (Collection<IMessageUnitEntity>)
                                                         mc.getProperty(MessageContextProperties.OUT_RECEIPTS);
-            pMU = rcpts.iterator().next();
+            primaryMsgUnit = rcpts.iterator().next();
         } catch (final Exception ex) {}
-        if (pMU != null)
+        if (primaryMsgUnit != null)
             // Message does contain receipt, so this becomes the primary message unit
-            return pMU;
+            return primaryMsgUnit;
 
         // No receipts either, maybe errors?
         try {
-            final Collection<EntityProxy> errs = (Collection<EntityProxy>)
-                                                        mc.getProperty(MessageContextProperties.OUT_ERROR_SIGNALS);
-            pMU = errs.iterator().next();
+            final Collection<IMessageUnitEntity> errs = (Collection<IMessageUnitEntity>)
+                                                        mc.getProperty(MessageContextProperties.OUT_ERRORS);
+            primaryMsgUnit = errs.iterator().next();
         } catch (final Exception ex) {}
-        if (pMU != null)
+        if (primaryMsgUnit != null)
             // Message does contain error, so this becomes the primary message unit
-            return pMU;
+            return primaryMsgUnit;
         else // no message unit in this context
             return null;
     }

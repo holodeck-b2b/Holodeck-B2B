@@ -22,27 +22,24 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
-import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.*;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
+import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.events.SignatureCreatedEvent;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.pmode.helpers.*;
-import org.holodeckb2b.testhelpers.HolodeckCore;
+import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.core.testhelpers.TestEventProcessor;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import org.holodeckb2b.testhelpers.TestEventProcessor;
-
-import javax.xml.namespace.QName;
-import java.io.File;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 22:57 13.09.16
@@ -51,12 +48,9 @@ import static org.junit.Assert.*;
  */
 public class RaiseSignatureCreatedEventTest {
 
-    static final QName MESSAGE_ID_ELEMENT_NAME =
-            new QName(EbMSConstants.EBMS3_NS_URI, "MessageId");
-
     private static String baseDir;
 
-    private static HolodeckCore core;
+    private static HolodeckB2BTestCore core;
 
     private CreateWSSHeaders wssHeadersHandler;
 
@@ -66,7 +60,7 @@ public class RaiseSignatureCreatedEventTest {
     public static void setUpClass() {
         baseDir = RaiseSignatureCreatedEventTest.class
                 .getClassLoader().getResource("security").getPath();
-        core = new HolodeckCore(baseDir);
+        core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
 
@@ -78,23 +72,16 @@ public class RaiseSignatureCreatedEventTest {
 
     @Test
     public void testDoProcessing() throws Exception {
-        final String mmdPath =
-                this.getClass().getClassLoader()
-                        .getResource("security/handlers/full_mmd.xml").getPath();
-        final File f = new File(mmdPath);
-        MessageMetaData mmd = null;
-        try {
-            mmd = MessageMetaData.createFromFile(f);
-        } catch (final Exception e) {
-            fail("Unable to test because MMD could not be read correctly!");
-        }
+        MessageMetaData mmd = TestUtils.getMMD("security/handlers/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env =
                 SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding UserMessage from mmd
-        OMElement userMessage = UserMessage.createElement(headerBlock, mmd);
+        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
+
+        System.out.println("[1] umElement: " + umElement.toString());
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
@@ -142,23 +129,21 @@ public class RaiseSignatureCreatedEventTest {
         leg.setProtocol(protocolConfig);
         pmode.addLeg(leg);
 
-        OMElement agreementRef =
-                AgreementRef.getElement(CollaborationInfo.getElement(userMessage));
-        String pmodeId = agreementRef.getText();
+        UserMessage um = UserMessageElement.readElement(umElement);
+
+        String pmodeId = um.getCollaborationInfo().getAgreement().getPModeId();
 
         pmode.setId(pmodeId);
 
+        System.out.println("[2] umElement: " + umElement.toString());
+
         //Adding PMode to the managed PMode set.
         core.getPModeSet().add(pmode);
-
-        EntityProxy<org.holodeckb2b.ebms3.persistency.entities.UserMessage>
-            userMessageEntityProxy =
-                    MessageUnitDAO.storeReceivedMessageUnit(
-                            UserMessage.readElement(userMessage));
-
-        userMessageEntityProxy.entity.setPMode(pmode.getId());
+        IUserMessageEntity userMessageEntity =
+                      core.getUpdateManager()
+                              .storeIncomingMessageUnit(um);
         mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
-                userMessageEntityProxy);
+                userMessageEntity);
 
         // Adding event processor to make sure the SignatureCreatedEvent
         // is actually raised.

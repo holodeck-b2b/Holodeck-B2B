@@ -18,7 +18,6 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
@@ -29,13 +28,15 @@ import org.holodeckb2b.ebms3.headervalidators.ErrorSignal;
 import org.holodeckb2b.ebms3.headervalidators.PullRequest;
 import org.holodeckb2b.ebms3.headervalidators.Receipt;
 import org.holodeckb2b.ebms3.headervalidators.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
-import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
-import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
-import org.holodeckb2b.interfaces.messagemodel.IReceipt;
-import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is the <i>IN FLOW</i> handler responsible for checking basic conformance of the received ebMS header meta data. The
@@ -58,31 +59,34 @@ public class BasicHeaderValidation extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
         // Validate User Message
-        EntityProxy userMessage = (EntityProxy) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
+        IUserMessageEntity userMessage = (IUserMessageEntity)
+                mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
         if (userMessage != null) {
             log.debug("Check received User Message");
-            InvalidHeader   invalidHeaderError = UserMessage.validate((IUserMessage) userMessage.entity);
+            InvalidHeader   invalidHeaderError = UserMessage.validate(userMessage);
             if (invalidHeaderError != null)
                 saveError(invalidHeaderError, userMessage, mc);
             else
                 log.debug("Received User Message satisfies basic validations");
         }
         // Validate Pull Request
-        EntityProxy pullRequest = (EntityProxy) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
+        IPullRequestEntity pullRequest = (IPullRequestEntity)
+                mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
         if (pullRequest != null) {
             log.debug("Check received Pull Request");
-            InvalidHeader   invalidHeaderError = PullRequest.validate((IPullRequest) pullRequest.entity);
+            InvalidHeader   invalidHeaderError = PullRequest.validate(pullRequest);
             if (invalidHeaderError != null)
                 saveError(invalidHeaderError, pullRequest, mc);
             else
                 log.debug("Received Pull Request satisfies basic validations");
         }
         // Validate Receipts
-        Collection<EntityProxy> receipts = (Collection<EntityProxy>) mc.getProperty(MessageContextProperties.IN_RECEIPTS);
+        Collection<IReceiptEntity> receipts = (Collection<IReceiptEntity>)
+                                                                mc.getProperty(MessageContextProperties.IN_RECEIPTS);
         if (!Utils.isNullOrEmpty(receipts)) {
             log.debug("Check received Receipts");
-            for (EntityProxy rcpt : receipts) {
-                InvalidHeader   invalidHeaderError = Receipt.validate((IReceipt) rcpt.entity);
+            for (IReceiptEntity rcpt : receipts) {
+                InvalidHeader   invalidHeaderError = Receipt.validate(rcpt);
                 if (invalidHeaderError != null)
                     saveError(invalidHeaderError, rcpt, mc);
                 else
@@ -90,11 +94,12 @@ public class BasicHeaderValidation extends BaseHandler {
             }
         }
         // Validate Errors
-        Collection<EntityProxy> errors = (Collection<EntityProxy>) mc.getProperty(MessageContextProperties.IN_ERRORS);
+        Collection<IErrorMessageEntity> errors = (Collection<IErrorMessageEntity>)
+                                                                mc.getProperty(MessageContextProperties.IN_ERRORS);
         if (!Utils.isNullOrEmpty(errors)) {
             log.debug("Check received Errors");
-            for (EntityProxy error : errors) {
-                InvalidHeader   invalidHeaderError = ErrorSignal.validate((IErrorMessage) error.entity);
+            for (IErrorMessageEntity error : errors) {
+                InvalidHeader   invalidHeaderError = ErrorSignal.validate(error);
                 if (invalidHeaderError != null)
                     saveError(invalidHeaderError, error, mc);
                 else
@@ -110,19 +115,18 @@ public class BasicHeaderValidation extends BaseHandler {
      * and sets the processing state of the message unit to <i>FAILURE</i>.
      *
      * @param invalidHeaderError    The error that was generated during validation
-     * @param messageUnit           The message unit that was validated as an {@link EntityProxy}
+     * @param messageUnit           The message unit that was validated
      * @param mc                    The current message context
-     * @throws DatabaseException    When there is a problem changing the processing state of the invalid message unit
+     * @throws PersistenceException    When there is a problem changing the processing state of the invalid message unit
      */
-    private void saveError(InvalidHeader invalidHeaderError, EntityProxy messageUnit, MessageContext mc)
-                                                                                            throws DatabaseException {
-        IMessageUnit msgUnit = messageUnit.entity;
-        log.warn("Received " + MessageUnitUtils.getMessageUnitName(msgUnit) + " [" + msgUnit.getMessageId()
+    private void saveError(InvalidHeader invalidHeaderError, IMessageUnitEntity messageUnit, MessageContext mc)
+                                                                                          throws PersistenceException {
+        log.warn("Received " + MessageUnitUtils.getMessageUnitName(messageUnit) + " [" + messageUnit.getMessageId()
                  + "] is not valid");
         log.debug("Save the error to message context");
         MessageContextUtils.addGeneratedError(mc, invalidHeaderError);
         log.debug("Set processing state for invalid message to failure");
-        MessageUnitDAO.setFailed(messageUnit);
+        HolodeckB2BCore.getUpdateManager().setProcessingState(messageUnit, ProcessingState.FAILURE);
         log.debug("Processed InvalidHeader error");
     }
 }

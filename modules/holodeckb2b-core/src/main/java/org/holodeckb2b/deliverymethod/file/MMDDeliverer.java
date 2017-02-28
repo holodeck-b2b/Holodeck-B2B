@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.workers.SubmitFromFile;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;

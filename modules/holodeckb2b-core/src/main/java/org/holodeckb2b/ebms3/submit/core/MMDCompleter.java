@@ -18,14 +18,12 @@ package org.holodeckb2b.ebms3.submit.core;
 
 import java.util.Collection;
 import java.util.Iterator;
-
+import org.holodeckb2b.common.messagemodel.AgreementReference;
+import org.holodeckb2b.common.messagemodel.CollaborationInfo;
+import org.holodeckb2b.common.messagemodel.Service;
+import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.mmd.xml.AgreementReference;
-import org.holodeckb2b.ebms3.mmd.xml.CollaborationInfo;
-import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
-import org.holodeckb2b.ebms3.mmd.xml.Service;
-import org.holodeckb2b.ebms3.mmd.xml.TradingPartner;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IAgreement;
 import org.holodeckb2b.interfaces.general.IPartyId;
@@ -49,7 +47,7 @@ import org.holodeckb2b.interfaces.submit.MessageSubmitException;
  * <p>This class also checks for completeness of the unified set, i.e. the resulting set of message meta data must be
  * enough to process the message. See method documentation for more information on completeness requirements.
  * <p>Because the input of a message submit is an implementation of the {@link IUserMessage} it can not be extended with
- * parameters from the P-Mode. Therefor this class uses an instance of {@link MessageMetaData} to create the complete
+ * parameters from the P-Mode. Therefor this class uses an instance of {@link UserMessage} to create the complete
  * set of meta-data.
  * <p>This class is to be used only by the internal message submitter, therefore its visibility is limited to package.
  *
@@ -60,15 +58,15 @@ final class MMDCompleter {
     /**
      * The P-Mode that must be used to complete the MMD
      */
-    private final IPMode       pmode;
+    private final IPMode        pmode;
     /**
      * The P-Mode parameters for the Leg the message is exchanged on
      */
-    private final ILeg         leg;
+    private final ILeg          leg;
     /**
      * The unified set of message meta data
      */
-    private final MessageMetaData cd;
+    private final UserMessage   submission;
 
     /**
      * Combines the meta-data information on a user message obtained during submission and from the P-Mode to one set
@@ -83,7 +81,7 @@ final class MMDCompleter {
      *                                  sending the message, or<br>
      *                                  when a parameter exists in both sets but with a different value.
      */
-    public static IUserMessage complete(final IUserMessage submittedMMD, final IPMode pmode) throws MessageSubmitException {
+    public static UserMessage complete(final IUserMessage submittedMMD, final IPMode pmode) throws MessageSubmitException {
         final MMDCompleter completer = new MMDCompleter(submittedMMD, pmode);
 
         return completer.complete();
@@ -94,21 +92,21 @@ final class MMDCompleter {
      * the submission and P-Mode contain the same parameters it is checked that these do not conflict (for most
      * parameters this means that they must be equal).
      *
-     * @return  A complete set of message meta-data
-     * @throws MessageSubmitException   When the unified set does not contain all required meta-data required for
+     * @return  A complete set of message meta-data that can be processed bythe Core
+     * @throws  MessageSubmitException  When the unified set does not contain all required meta-data required for
      *                                  sending the message, or<br>
      *                                  when a parameter exists in both sets but with a different value.
      */
-    private IUserMessage complete() throws MessageSubmitException {
+    private UserMessage complete() throws MessageSubmitException {
 
-        final String pmMPC = (leg.getUserMessageFlow() != null && leg.getUserMessageFlow().getBusinessInfo() != null ?
-                            leg.getUserMessageFlow().getBusinessInfo().getMpc() : null);
-        switch (Utils.compareStrings(cd.getMPC(), pmMPC)) {
+        final String pmMPC = leg.getUserMessageFlow() != null && leg.getUserMessageFlow().getBusinessInfo() != null ?
+                                leg.getUserMessageFlow().getBusinessInfo().getMpc() : null;
+        switch (Utils.compareStrings(submission.getMPC(), pmMPC)) {
             case -2 :
-                throw new MessageSubmitException("Different MPC values (submitted: " + cd.getMPC() + ",P-Mode: " + pmMPC
-                                              + ") specified!");
+                throw new MessageSubmitException("Different MPC values (submitted: " + submission.getMPC()
+                                                + ",P-Mode: " + pmMPC + ") specified!");
             case 2 :
-                cd.setMPC(pmMPC);
+                submission.setMPC(pmMPC);
         }
 
         completeSender();
@@ -116,7 +114,7 @@ final class MMDCompleter {
         completeCollaborationInfo();
         completeProperties();
 
-        return cd;
+        return submission;
     }
 
     /**
@@ -129,25 +127,26 @@ final class MMDCompleter {
      */
     private void completeSender() throws MessageSubmitException {
         // Get sender info from MMD
-        final ITradingPartner ms = cd.getSender();
+        final ITradingPartner submissionSender = submission.getSender();
         Collection<IPartyId> sPartyIds = null;
         String  sRole = null;
-        if (ms != null) {
-            sPartyIds = ms.getPartyIds();
-            sRole = ms.getRole();
+        if (submissionSender != null) {
+            sPartyIds = (Collection<IPartyId>) submissionSender.getPartyIds();
+            sRole = submissionSender.getRole();
         }
+
         // Get sender info from P-Mode
-        ITradingPartner ps = null;
+        ITradingPartner pmodeSender = null;
         // When pulling is used the responder is sending the message!
         if (pmode.getMepBinding().equals(EbMSConstants.ONE_WAY_PUSH))
-            ps = pmode.getInitiator();
+            pmodeSender = pmode.getInitiator();
         else
-            ps = pmode.getResponder();
+            pmodeSender = pmode.getResponder();
         Collection<IPartyId> pmPartyIds = null;
         String  pmRole = null;
-        if (ps != null) {
-            pmPartyIds = ps.getPartyIds();
-            pmRole = ps.getRole();
+        if (pmodeSender != null) {
+            pmPartyIds = (Collection<IPartyId>) pmodeSender.getPartyIds();
+            pmRole = pmodeSender.getRole();
         }
 
         // Check PartyId(s)
@@ -155,7 +154,7 @@ final class MMDCompleter {
             throw new MessageSubmitException("Missing PartyId information for Sender of the message!");
         else if (Utils.isNullOrEmpty(sPartyIds))
             // PartyId(s) specified in P-Mode
-            cd.setSender(ps);
+            submission.setSender(pmodeSender);
         else if (!Utils.isNullOrEmpty(pmPartyIds))
             // Both submission and P-Mode specify PartyId(s) => must be equal
             if (!CompareUtils.areEqual(sPartyIds, pmPartyIds))
@@ -167,7 +166,7 @@ final class MMDCompleter {
             throw new MessageSubmitException("Missing Role information for Sender of the message!");
         else if (Utils.isNullOrEmpty(sRole))
             // Role specified in P-Mode
-            ((TradingPartner) cd.getSender()).setRole(pmRole);
+            submission.getSender().setRole(pmRole);
         else if (!Utils.isNullOrEmpty(pmRole)) {
             // Both submission and P-Mode specify Role => must be equal
             if (!pmRole.equals(sRole))
@@ -175,7 +174,7 @@ final class MMDCompleter {
         } else
             // Only submission contains Role, but since sender info may be overriden because P-Mode specified the
             // PartyId(s), set it again
-            ((TradingPartner) cd.getSender()).setRole(sRole);
+            submission.getSender().setRole(sRole);
     }
 
     /**
@@ -189,11 +188,11 @@ final class MMDCompleter {
      */
     private void completeReceiver() throws MessageSubmitException {
         // Get receiver info from MMD
-        final ITradingPartner mr = cd.getReceiver();
+        final ITradingPartner mr = submission.getReceiver();
         Collection<IPartyId> sPartyIds = null;
         String  sRole = null;
         if (mr != null) {
-            sPartyIds = mr.getPartyIds();
+            sPartyIds = (Collection<IPartyId>) mr.getPartyIds();
             sRole = mr.getRole();
         }
         // Get receiver info from P-Mode
@@ -206,7 +205,7 @@ final class MMDCompleter {
         Collection<IPartyId> pmPartyIds = null;
         String  pmRole = null;
         if (pr != null) {
-            pmPartyIds = pr.getPartyIds();
+            pmPartyIds = (Collection<IPartyId>) pr.getPartyIds();
             pmRole = pr.getRole();
         }
 
@@ -215,7 +214,7 @@ final class MMDCompleter {
             throw new MessageSubmitException("Missing PartyId information for Receiver of the message!");
         else if (Utils.isNullOrEmpty(sPartyIds))
             // PartyId(s) specified in P-Mode
-            cd.setReceiver(pr);
+            submission.setReceiver(pr);
         else if (!Utils.isNullOrEmpty(pmPartyIds))
             // Both submission and P-Mode specify PartyId(s) => must be equal
             if (!CompareUtils.areEqual(sPartyIds, pmPartyIds))
@@ -227,7 +226,7 @@ final class MMDCompleter {
             throw new MessageSubmitException("Missing Role information for Receiver of the message!");
         else if (Utils.isNullOrEmpty(sRole))
             // Role specified in P-Mode
-            ((TradingPartner) cd.getReceiver()).setRole(pmRole);
+            submission.getReceiver().setRole(pmRole);
         else if (!Utils.isNullOrEmpty(pmRole)) {
             // Both submission and P-Mode specify Role => must be equal
             if (!pmRole.equals(sRole))
@@ -235,7 +234,7 @@ final class MMDCompleter {
         } else
             // Only submission contains Role, but since sender info may be overriden because P-Mode specified the
             // PartyId(s), set it again
-            ((TradingPartner) cd.getReceiver()).setRole(sRole);
+            submission.getReceiver().setRole(sRole);
     }
 
     /**
@@ -248,7 +247,7 @@ final class MMDCompleter {
      *                                P-Mode conflicts
      */
     private void completeCollaborationInfo() throws MessageSubmitException {
-        final CollaborationInfo sci = (CollaborationInfo) cd.getCollaborationInfo();
+        final CollaborationInfo sci = submission.getCollaborationInfo();
         final IBusinessInfo pbi = (leg.getUserMessageFlow() != null ? leg.getUserMessageFlow().getBusinessInfo() : null);
 
         // The submission must include a ConversationId
@@ -266,7 +265,7 @@ final class MMDCompleter {
                 sci.setAction(pa);
         }
         // This set will copy information into merged info set, therefor set after info is made complete
-        cd.setCollaborationInfo(sci);
+        submission.setCollaborationInfo(sci);
 
         completeService();
         completeAgreement();
@@ -286,13 +285,13 @@ final class MMDCompleter {
         IService      psi = null;
         if (pbi != null)
             psi = pbi.getService();
-        final Service ssi = (Service) cd.getCollaborationInfo().getService();
+        final Service ssi = submission.getCollaborationInfo().getService();
 
         if (ssi == null && psi == null)
             throw new MessageSubmitException("Missing required information on the receiver of the message");
         else if (ssi == null)
             // Take P-Mode info
-            ((CollaborationInfo) cd.getCollaborationInfo()).setService(psi);
+            ((CollaborationInfo) submission.getCollaborationInfo()).setService(psi);
         else if (psi != null) {
             // Both P-Mode and submitted MMD contain service info, ensure they are equal
             if (!CompareUtils.areEqual(ssi, psi))
@@ -310,7 +309,7 @@ final class MMDCompleter {
      *                                  P-Mode conflicts
      */
     private void completeAgreement() throws MessageSubmitException {
-        AgreementReference sar = (AgreementReference) cd.getCollaborationInfo().getAgreement();
+        AgreementReference sar = submission.getCollaborationInfo().getAgreement();
         final IAgreement pa = pmode.getAgreement();
 
         if (sar == null && pa == null)
@@ -354,7 +353,7 @@ final class MMDCompleter {
         }
 
         // Set the complete information in the merged set
-        ((CollaborationInfo) cd.getCollaborationInfo()).setAgreement(sar);
+        submission.getCollaborationInfo().setAgreement(sar);
     }
 
     /**
@@ -370,9 +369,9 @@ final class MMDCompleter {
             return; // no properties from P-Mode
 
         // Get the collection of message properties provided with submission
-        final Collection<IProperty> smp = cd.getMessageProperties();
+        final Collection<IProperty> smp = submission.getMessageProperties();
 
-        if (smp != null && !smp.isEmpty()) {
+        if (!Utils.isNullOrEmpty(smp)) {
             // Check if the same property is also defined in both P-Mode and submitted data
             for (final IProperty p : pbi.getProperties()) {
                 boolean found = false;
@@ -382,11 +381,11 @@ final class MMDCompleter {
                         && (xi.getType() != null ? xi.getType().equals(p.getType()) : p.getType() == null);
                 }
                 if (!found) // Add the property from P-Mode when not already defined when submitted
-                    cd.getMessageProperties().add(p);
+                    submission.addMessageProperty(p);
             }
         } else {
             // No properties provided with submission, so use all properties provided in P-Mode
-            cd.setMessageProperties(pbi.getProperties());
+            submission.setMessageProperties(pbi.getProperties());
         }
     }
 
@@ -403,6 +402,6 @@ final class MMDCompleter {
         this.leg = pmode.getLegs().iterator().next();
 
         // Start with a copy of the supplied MMD
-        this.cd = new MessageMetaData(submittedMMD);
+        this.submission = new UserMessage(submittedMMD);
     }
 }

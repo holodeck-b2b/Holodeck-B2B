@@ -21,6 +21,7 @@ import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
@@ -100,4 +101,13 @@ public interface IHolodeckB2BCore {
      */
     public void setPullWorkerPoolConfiguration(IWorkerPoolConfiguration pullConfiguration)
                                                                                     throws TaskConfigurationException;
+
+    /**
+     * Gets the data access object that should be used to query the meta-data on processed message units.
+     * <p>Note that the DAO itself is provided by the persistency provider.
+     *
+     * @return  The {@link IQueryManager} that should use to query the meta-data of message units
+     * @since HB2B_NEXT_VERSION
+     */
+    public IQueryManager getQueryManager();
 }

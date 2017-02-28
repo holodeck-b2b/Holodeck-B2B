@@ -16,15 +16,12 @@
  */
 package org.holodeckb2b.ebms3.handlers.outflow;
 
-import static org.holodeckb2b.interfaces.messagemodel.IPayload.Containment.ATTACHMENT;
-
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.Collection;
-
 import javax.activation.FileDataSource;
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.attachments.ConfigurableDataHandler;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -32,16 +29,16 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.util.MessageIdGenerator;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.persistency.entities.Payload;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
-import org.holodeckb2b.ebms3.persistent.dao.EntityProxy;
-import org.holodeckb2b.ebms3.persistent.dao.MessageUnitDAO;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import static org.holodeckb2b.interfaces.messagemodel.IPayload.Containment.ATTACHMENT;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is the <i>OUT_FLOW</i> handler that will add the payloads to the SOAP message if there is a <i>User Message</i> to be
@@ -67,31 +64,37 @@ public class AddPayloads extends AbstractUserMessageHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final EntityProxy<UserMessage> um) throws DatabaseException {
+    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
+                                                                                          throws PersistenceException {
 
         log.debug("Check for payloads to include");
-        final Collection<IPayload> payloads = um.entity.getPayloads();
+        final Collection<IPayload> payloads = um.getPayloads();
 
         if (Utils.isNullOrEmpty(payloads)) {
             // No payloads in this user message, so nothing to do
-            log.debug("Usser message has no payloads");
+            log.debug("User message has no payloads");
         } else {
             // Add each payload to the message as described by the containment attribute
             log.debug("User message contains " + payloads.size() + " payload(s)");
-            // If a MIME Content-Id is generated it should be saved to database as well
+            // If a MIME Content-Id is generated it should be saved to database as well, therefor we need to construct
+            // new set of payload meta-data
+            ArrayList<IPayload>  newPayloadInfo = new ArrayList<>(payloads.size());
             boolean cidGenerated = false;
             for (final IPayload pl : payloads) {
+                // Create copy of existing meta-data
+                Payload p = new Payload(pl);
                 // First ensure that the payload is assigned a MIME Content-Id when it added as an attachment
                 if (pl.getContainment() == ATTACHMENT && Utils.isNullOrEmpty(pl.getPayloadURI())) {
                     // No MIME Content-Id assigned on submission, assign now
-                    final String cid = MessageIdGenerator.createContentId(um.entity.getMessageId());
+                    final String cid = MessageIdGenerator.createContentId(um.getMessageId());
                     log.debug("Generated a new Content-id [" + cid + "] for payload [" + pl.getContentLocation() + "]");
-                    ((Payload) pl).setPayloadURI(cid);
+                    p.setPayloadURI(cid);
                     cidGenerated = true;
                 }
+                newPayloadInfo.add(p);
                 // Add the content of the payload to the SOAP message
                 try {
-                    addContent(pl, mc);
+                    addContent(p, mc);
                 } catch (final Exception e) {
                     log.error("Adding the payload content to message failed. Error details: " + e.getMessage());
                     // If adding the payload fails, the message is in an incomplete state and should not
@@ -100,7 +103,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
                 }
             }
             if (cidGenerated) {
-                MessageUnitDAO.updateMessageUnitInfo(um);
+                HolodeckB2BCore.getUpdateManager().setPayloadInformation(um, newPayloadInfo);
                 log.debug("Generated MIME Content-Id(s) saved to database");
             }
             log.debug("Payloads successfully added to message");

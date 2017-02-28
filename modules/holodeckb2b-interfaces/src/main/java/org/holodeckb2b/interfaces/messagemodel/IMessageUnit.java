@@ -18,12 +18,15 @@ package org.holodeckb2b.interfaces.messagemodel;
 
 
 import java.util.Date;
+import java.util.List;
+import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 
 /**
  * Is a general representation for all types of ebMS message units and defines methods to access the information
  * available to all ebMS message units. This is the information contained in the <code>eb:MessageInfo</code> and child
  * elements of the ebMS messaging header. See ebMS V3 Core specification, section 5 for more information on the message
- * header. Added is the relation to the P-Mode that governs the processing of the message unit.
+ * header. Added is the relation to the P-Mode that governs the processing of the message unit and, since HB2B_NEXT_VERSION
+ * the list of processing states that the message unit is/was in.
  * <p>Descendants of this base interface define how information specific for a type of message unit can be accessed.
  * Together they are used in Holodeck B2B to define the interfaces between the Core and the external <i>business</i>
  * applications. This decoupling allows for more easy extension of both the Core as the external functionality.
@@ -41,13 +44,28 @@ import java.util.Date;
 public interface IMessageUnit {
 
     /**
+     * Enumeration to define the direction in which the message unit flows.
+     *
+     * @since HB2B_NEXT_VERSION
+     */
+    enum Direction { IN, OUT };
+
+    /**
+     * Gets the direction in which this message unit is sent, i.e. received or sent by Holodeck B2B.
+     *
+     * @return The direction in which this message unit flows
+     * @since HB2B_NEXT_VERSION
+     */
+    Direction getDirection();
+
+    /**
      * Gets the timestamp when the message unit was created.
      * <p>Corresponds to the <code>MessageInfo/Timestamp</code> element. See section 5.2.2.1 of the ebMS Core
      * specification.
      *
      * @return  The timestamp when the message unit was created as a {@link Date}
      */
-    public Date getTimestamp();
+    Date getTimestamp();
 
     /**
      * Gets the message id of the message unit.
@@ -56,7 +74,7 @@ public interface IMessageUnit {
      *
      * @return  The message id as a globally unique identifier conforming to RFC2822.
      */
-    public String getMessageId();
+    String getMessageId();
 
     /**
      * Get the message id of the message unit to which this message unit is a response.
@@ -65,7 +83,7 @@ public interface IMessageUnit {
      *
      * @return  The message id of the message this message unit is a response to
      */
-    public String getRefToMessageId();
+    String getRefToMessageId();
 
     /**
      * Gets the identifier of the P-Mode that governs the processing of this message unit.
@@ -76,5 +94,26 @@ public interface IMessageUnit {
      *          otherwise <code>null</code>
      * @since   2.1.0
      */
-    public String getPModeId();
+    String getPModeId();
+
+    /**
+     * Gets the list of processing states this message unit was or is in.
+     * <p>The order of the processing states as they occur in the list is the same as they applied to the message unit
+     * with the last processing state in the list  (i.e. with the highest index) being the current processing state.
+     *
+     * @return  List of {@link IMessageUnitProcessingState} in the order they applied to this message unit
+     * @since  HB2B_NEXT_VERSION
+     */
+    List<IMessageUnitProcessingState>   getProcessingStates();
+
+    /**
+     * Gets the current processing state the message unit is in.
+     * <p>Although the current state is the last item in the list that is returned by the {@link #getProcessingStates()}
+     * method this method is simpler to use and it also allows implements to optimize the handling of the current
+     * processing state.
+     *
+     * @return  The {@link IMessageUnitProcessingState} the message unit is currently in
+     * @since  HB2B_NEXT_VERSION
+     */
+    IMessageUnitProcessingState getCurrentProcessingState();
 }

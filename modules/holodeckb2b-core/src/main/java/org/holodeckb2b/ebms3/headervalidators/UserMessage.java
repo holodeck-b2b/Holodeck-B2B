@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
  * Provides basic validation of the ebMS header information specific for <i>User Message</i> message units.
- * <p>This incudes a check on the general message meta-data and information about the sender and receiver of the message
+ * <p>This includes a check on the general message meta-data and information about the sender and receiver of the message
  * as well as business information like service and action are available. If an error is detected an ebMS
  * <i>InvalidHeader</i> is created and reported back.
  *
@@ -73,7 +73,7 @@ public class UserMessage {
        errDetails.append(checkProperties(userMessageInfo.getMessageProperties(), "Message"));
 
        // Check PayloadInfo, in this validator only the part properties are checked
-       final Collection<IPayload> payloadInfo = userMessageInfo.getPayloads();
+       final Collection<IPayload> payloadInfo = (Collection<IPayload>) userMessageInfo.getPayloads();
        if (!Utils.isNullOrEmpty(payloadInfo))
            for (IPayload p : payloadInfo)
                errDetails.append(checkProperties(p.getProperties(), "Part"));
@@ -121,7 +121,7 @@ public class UserMessage {
      * @param propSetName   The name of the set, i.e. "Message" or "Part"
      * @return              An empty String when no errors where found, else a description of the errors found
      */
-    private static String checkProperties(final Collection<IProperty> properties, final String propSetName) {
+    private static String checkProperties(final Collection<? extends IProperty> properties, final String propSetName) {
         StringBuilder errors = new StringBuilder();
         if (!Utils.isNullOrEmpty(properties))
             for(IProperty p : properties) {
