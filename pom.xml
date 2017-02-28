@@ -44,14 +44,14 @@
     <developers>
         <developer>
             <name>Sander Fieten</name>
-            <email>sander at chasquis-service.com</email>
+            <email>sander at chasquis-services.com</email>
             <roles>
                 <role>Lead developer</role>
             </roles>
         </developer>
         <developer>
             <name>Renate Slebe</name>
-            <email>renate at chasquis-service.com</email>
+            <email>renate at chasquis-services.com</email>
             <roles>
                 <role>QA and Documentation</role>
             </roles>
@@ -125,7 +125,7 @@
             </dependency>
 
             <!--===============================================================
-                Holodeck is build on Axis2, so include all relevant Axis2
+                Holodeck is built on Axis2, so include all relevant Axis2
                 modules
             =============================================================== -->
             <dependency>
