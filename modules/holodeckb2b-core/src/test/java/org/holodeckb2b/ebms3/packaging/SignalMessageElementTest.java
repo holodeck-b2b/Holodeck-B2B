@@ -39,7 +39,7 @@ public class SignalMessageElementTest {
     private static final QName SIGNAL_MESSAGE_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "SignalMessage");
 
-    private static SOAPHeaderBlock headerBlock;
+    private SOAPHeaderBlock headerBlock;
 
     @Before
     public void setUp() throws Exception {

@@ -43,8 +43,8 @@ public class ReceiptElementTest {
     private static final QName RECEIPT_CHILD_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "ReceiptChild");
 
-    private static SOAPEnvelope soapEnvelope;
-    private static SOAPHeaderBlock headerBlock;
+    private SOAPEnvelope soapEnvelope;
+    private SOAPHeaderBlock headerBlock;
 
     @Before
     public void setUp() throws Exception {
@@ -57,7 +57,6 @@ public class ReceiptElementTest {
     @Test
     public void testCreateElement() throws Exception {
         Receipt receipt = new Receipt();
-        final QName RECEIPT_CHILD_ELEMENT_NAME = new QName("ReceiptChild");
         OMElement receiptChildElement =
                 soapEnvelope.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
         ArrayList<OMElement> content = new ArrayList<>();
