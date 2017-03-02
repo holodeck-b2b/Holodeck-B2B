@@ -44,7 +44,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since HB2B_NEXT_VERSION
  */
-public class UpdateManager {
+public class StorageManager {
 
     /**
      * The update manager provided by the persistency provider which does the "real" work of storing the data
@@ -57,7 +57,7 @@ public class UpdateManager {
      *
      * @param parent    The update manager from the persistency provider
      */
-    public UpdateManager(final IUpdateManager parent) {
+    public StorageManager(final IUpdateManager parent) {
         this.parent = parent;
     }
 

@@ -140,7 +140,7 @@ public class RaiseSignatureCreatedEventTest {
         //Adding PMode to the managed PMode set.
         core.getPModeSet().add(pmode);
         IUserMessageEntity userMessageEntity =
-                      core.getUpdateManager()
+                      core.getStorageManager()
                               .storeIncomingMessageUnit(um);
         mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
                 userMessageEntity);

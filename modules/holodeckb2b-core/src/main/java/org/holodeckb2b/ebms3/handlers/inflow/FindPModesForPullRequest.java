@@ -73,7 +73,7 @@ public class FindPModesForPullRequest extends BaseHandler {
                 noPmodeIdError.setErrorDetail("Can not process pull request because no P-Mode was found!");
                 MessageContextUtils.addGeneratedError(mc, noPmodeIdError);
                 log.debug("Set the processing state of this PullRequest to failure");
-                HolodeckB2BCore.getUpdateManager().setProcessingState(pullRequest, ProcessingState.FAILURE);
+                HolodeckB2BCore.getStoreManager().setProcessingState(pullRequest, ProcessingState.FAILURE);
             } else {
                 log.debug("Store the list of " + pmodes.size()
                             + " authorized PModes so next handler can retrieve message unit to return");

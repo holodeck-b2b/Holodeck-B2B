@@ -35,7 +35,7 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received receipt signals.
@@ -87,7 +87,7 @@ public class ProcessReceipts extends BaseHandler {
      * @throws PersistenceException When a database error occurs while processing the Receipt Signal
      */
     protected void processReceipt(final IReceiptEntity receipt, final MessageContext mc) throws PersistenceException {
-        UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
         // Change processing state to indicate we start processing the receipt. Also checks that the receipt is not
         // already being processed
         if (!updateManager.setProcessingState(receipt, ProcessingState.RECEIVED, ProcessingState.PROCESSING)) {

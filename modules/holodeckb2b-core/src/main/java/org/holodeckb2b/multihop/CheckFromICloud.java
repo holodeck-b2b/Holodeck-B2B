@@ -23,7 +23,7 @@ import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 
 
 /**
@@ -56,7 +56,7 @@ public class CheckFromICloud extends BaseHandler {
 
             if (isMultiHop) {
                 log.debug("Message received through I-Cloud, update message units");
-                UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+                StorageManager updateManager = HolodeckB2BCore.getStoreManager();
                 for (final IMessageUnitEntity mu : MessageContextUtils.getReceivedMessageUnits(mc))
                     updateManager.setMultiHop(mu, isMultiHop);
             }

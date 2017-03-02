@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 
 /**
  * Is the first handler of the out flow and is responsible for preparing a response by checking if the handlers in the
@@ -177,7 +177,7 @@ public class PrepareResponseMessage extends BaseHandler {
      * @param errors    The collection of {@link ErrorMessage}s that can not be included in the response.
      */
     private void setFailed(final Collection<IErrorMessageEntity> errors) {
-        UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
         for(final IErrorMessageEntity e : errors)
             try {
                 updateManager.setProcessingState(e, ProcessingState.FAILURE);

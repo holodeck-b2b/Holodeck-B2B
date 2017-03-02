@@ -42,7 +42,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -128,7 +128,7 @@ public class BasicHeaderValidationTest {
         UserMessage userMessage
                 = UserMessageElement.readElement(umElement);
         // Setting input message property
-        UpdateManager updateManager = core.getUpdateManager();
+        StorageManager updateManager = core.getStorageManager();
         IUserMessageEntity userMessageEntity =
                 updateManager.storeIncomingMessageUnit(userMessage);
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
@@ -183,7 +183,7 @@ public class BasicHeaderValidationTest {
         }
 
         // Setting input PullRequest property
-        UpdateManager updateManager = core.getUpdateManager();
+        StorageManager updateManager = core.getStorageManager();
         IPullRequestEntity pullRequestEntity =
                 updateManager.storeIncomingMessageUnit(pullRequest);
         mc.setProperty(MessageContextProperties.IN_PULL_REQUEST,
@@ -246,7 +246,7 @@ public class BasicHeaderValidationTest {
         }
 
         // Setting input Receipt property
-        UpdateManager updateManager = core.getUpdateManager();
+        StorageManager updateManager = core.getStorageManager();
 
         IReceiptEntity receiptEntity =
                 updateManager.storeIncomingMessageUnit(receipt);
@@ -292,7 +292,7 @@ public class BasicHeaderValidationTest {
         MessageContext mc = new MessageContext();
 
         // Setting input Receipt property
-        UpdateManager updateManager = core.getUpdateManager();
+        StorageManager updateManager = core.getStorageManager();
 
         IErrorMessageEntity errorMessageEntity =
                 updateManager.storeIncomingMessageUnit(error);

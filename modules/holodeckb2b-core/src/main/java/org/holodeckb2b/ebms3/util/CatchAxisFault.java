@@ -83,7 +83,7 @@ public class CatchAxisFault extends BaseHandler {
                     if (ProcessingState.DELIVERED != curState && ProcessingState.AWAITING_RECEIPT != curState) {
                         log.error(MessageUnitUtils.getMessageUnitName(mu) + " with msg-id [" + mu.getMessageId()
                                     + "] could not be processed due to an internal error.");
-                        HolodeckB2BCore.getUpdateManager().setProcessingState(mu, ProcessingState.FAILURE);
+                        HolodeckB2BCore.getStoreManager().setProcessingState(mu, ProcessingState.FAILURE);
                     }
                 } catch (final PersistenceException ex) {
                     // Unable to change the processing state, log the error.
@@ -120,7 +120,7 @@ public class CatchAxisFault extends BaseHandler {
         errorMessage.addError(otherError);
         try {
             log.debug("Create the Error signal message");
-            IErrorMessageEntity storedError = (IErrorMessageEntity) HolodeckB2BCore.getUpdateManager()
+            IErrorMessageEntity storedError = (IErrorMessageEntity) HolodeckB2BCore.getStoreManager()
                                                                                 .storeOutGoingMessageUnit(errorMessage);
             log.debug("Created a new Error signal message");
             mc.setProperty(MessageContextProperties.OUT_ERRORS, Collections.singletonList(storedError));

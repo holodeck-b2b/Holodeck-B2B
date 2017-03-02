@@ -19,8 +19,7 @@ package org.holodeckb2b.module;
 import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 
 /**
  * Provides access to the Holodeck B2B Core of a running instance to the Holodeck B2B Core classes. It is an extension
@@ -47,10 +46,10 @@ public class HolodeckB2BCore extends HolodeckB2BCoreInterface {
      * <p>The returned data access object is a facade to the one provided by the persistency provider to ensure that
      * changes in the message unit meta-data are managed correctly.
      *
-     * @return  The {@link IUpdateManager} that Core classes should use to update meta-data of message units
+     * @return  The {@link StorageManager} that Core classes should use to update meta-data of message units
      * @since HB2B_NEXT_VERSION
      */
-    public static UpdateManager getUpdateManager() {
-        return ((HolodeckB2BCoreImpl) coreImplementation).getUpdateManager();
+    public static StorageManager getStoreManager() {
+        return ((HolodeckB2BCoreImpl) coreImplementation).getStorageManager();
     }
 }

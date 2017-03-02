@@ -110,7 +110,7 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
                         log.debug("User Message [" + msgUnit.getMessageId() + "] has no payloads");
                 }
                 // Remove meta-data from database
-                HolodeckB2BCore.getUpdateManager().deleteMessageUnit(msgUnit);
+                HolodeckB2BCore.getStoreManager().deleteMessageUnit(msgUnit);
                 log.info(MessageUnitUtils.getMessageUnitName(msgUnit)
                          + " [msgId=" + msgUnit.getMessageId() + "] is removed");
 
