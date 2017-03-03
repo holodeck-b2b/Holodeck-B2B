@@ -23,10 +23,12 @@ import org.holodeckb2b.common.messagemodel.Property;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.xml.namespace.QName;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -34,11 +36,11 @@ import java.util.Iterator;
 import static org.junit.Assert.*;
 
 /**
- * Created at 15:16 19.02.17
+ * Created at 18:03 02.03.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class MessagePropertiesElementTest {
+public class PartPropertiesElementTest {
 
     private static final QName Q_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "UserMessage");
@@ -58,16 +60,21 @@ public class MessagePropertiesElementTest {
                 .createOMElement(Q_ELEMENT_NAME, headerBlock);
     }
 
+    @After
+    public void tearDown() throws Exception {
+
+    }
+
     @Test
     public void testCreateElement() throws Exception {
         ArrayList<IProperty> properties = new ArrayList<>();
         properties.add(new Property("some_property01", "some_value01", "some_type01"));
         properties.add(new Property("some_property02", "some_value02", "some_type02"));
-        OMElement mpElement =
-                MessagePropertiesElement.createElement(umElement, properties);
-        assertNotNull(mpElement);
+        OMElement ppElement =
+                PartPropertiesElement.createElement(umElement, properties);
+        assertNotNull(ppElement);
         Iterator it =
-                mpElement.getChildrenWithName(PROPERTY_ELEMENT_NAME);
+                ppElement.getChildrenWithName(PROPERTY_ELEMENT_NAME);
         assertTrue(it.hasNext());
         OMElement pElem = (OMElement)it.next();
         TestUtils.checkPropertyElementContent(pElem, "some_property01", "some_value01", "some_type01");
@@ -80,12 +87,12 @@ public class MessagePropertiesElementTest {
         ArrayList<IProperty> properties = new ArrayList<>();
         properties.add(new Property("some_property01", "some_value01", "some_type01"));
         properties.add(new Property("some_property02", "some_value02", "some_type02"));
-        MessagePropertiesElement.createElement(umElement, properties);
+        PartPropertiesElement.createElement(umElement, properties);
 
-        OMElement mpElement = MessagePropertiesElement.getElement(umElement);
-        assertNotNull(mpElement);
+        OMElement ppElement = PartPropertiesElement.getElement(umElement);
+        assertNotNull(ppElement);
         Iterator it =
-                mpElement.getChildrenWithName(PROPERTY_ELEMENT_NAME);
+                ppElement.getChildrenWithName(PROPERTY_ELEMENT_NAME);
         assertTrue(it.hasNext());
         OMElement pElem = (OMElement)it.next();
         TestUtils.checkPropertyElementContent(pElem, "some_property01", "some_value01", "some_type01");
@@ -98,11 +105,11 @@ public class MessagePropertiesElementTest {
         ArrayList<IProperty> properties = new ArrayList<>();
         properties.add(new Property("some_property01", "some_value01", "some_type01"));
         properties.add(new Property("some_property02", "some_value02", "some_type02"));
-        OMElement mpElement =
-                MessagePropertiesElement.createElement(umElement, properties);
+        OMElement ppElement =
+                PartPropertiesElement.createElement(umElement, properties);
 
         Collection<IProperty> readProperties =
-                MessagePropertiesElement.readElement(mpElement);
+                PartPropertiesElement.readElement(ppElement);
         Iterator<IProperty> it = readProperties.iterator();
         IProperty p = it.next();
         TestUtils.checkPropertyContent(p, "some_property01", "some_value01", "some_type01");

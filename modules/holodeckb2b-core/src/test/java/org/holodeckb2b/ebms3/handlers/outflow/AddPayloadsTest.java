@@ -150,7 +150,7 @@ public class AddPayloadsTest {
 
         // Setting input message property
         IUserMessageEntity userMessageEntity =
-                core.getUpdateManager().storeIncomingMessageUnit(userMessage);
+                core.getStorageManager().storeIncomingMessageUnit(userMessage);
         mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
                 userMessageEntity);
 
