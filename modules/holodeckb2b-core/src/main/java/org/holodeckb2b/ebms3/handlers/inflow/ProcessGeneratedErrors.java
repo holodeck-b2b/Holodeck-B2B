@@ -42,7 +42,7 @@ import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 
 /**
  * Is the in flow handler that collects all ebMS errors generated during the processing of the received message. The
@@ -77,7 +77,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
         if (Utils.isNullOrEmpty(errors)) {
             log.debug("No errors were generated during this in flow, nothing to do");
         } else {
-            UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+            StorageManager updateManager = HolodeckB2BCore.getStoreManager();
             log.debug(errors.size() + " error(s) were generated during this in flow");
 
             // First bundle the errors per message in error

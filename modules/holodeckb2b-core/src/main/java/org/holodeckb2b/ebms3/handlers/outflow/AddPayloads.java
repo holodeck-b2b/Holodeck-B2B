@@ -109,7 +109,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
                 }
             }
             if (cidGenerated) {
-                HolodeckB2BCore.getUpdateManager().setPayloadInformation(um, newPayloadInfo);
+                HolodeckB2BCore.getStoreManager().setPayloadInformation(um, newPayloadInfo);
                 log.debug("Generated MIME Content-Id(s) saved to database");
             }
             log.debug("Payloads successfully added to message");

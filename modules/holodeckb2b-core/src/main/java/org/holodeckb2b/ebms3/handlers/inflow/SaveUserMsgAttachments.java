@@ -51,7 +51,7 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for reading the payload content from the SOAP message. The payloads are
@@ -85,7 +85,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
                                                                             throws AxisFault, PersistenceException {
-        UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
 
         final Collection<IPayload> payloads = um.getPayloads();
         // If there are no payloads in the UserMessage directly continue processing
@@ -286,7 +286,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
         log.debug("Error stored in message context for further processing");
 
         log.debug("Change processing state of the user message");
-        HolodeckB2BCore.getUpdateManager().setProcessingState(um, ProcessingState.FAILURE);
+        HolodeckB2BCore.getStoreManager().setProcessingState(um, ProcessingState.FAILURE);
     }
 
 

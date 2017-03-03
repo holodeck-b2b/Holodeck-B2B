@@ -81,7 +81,7 @@ public class CheckFromICloudTest {
         OMElement userMessage = UserMessageElement.createElement(headerBlock, mmd);
 
         IUserMessageEntity userMessageEntity =
-                HolodeckB2BCore.getUpdateManager().storeIncomingMessageUnit(
+                HolodeckB2BCore.getStoreManager().storeIncomingMessageUnit(
                                 UserMessageElement.readElement(userMessage));
 
         MessageContext mc = new MessageContext();

@@ -35,7 +35,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeFinder;
 
 /**
@@ -66,7 +66,7 @@ public class FindPModes extends BaseHandler {
 
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
-        UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
         log.debug("Check for UserMessage message unit in received message");
         final IUserMessageEntity userMsg =
                                           (IUserMessageEntity) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);

@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for the delivery of the User message message unit to the business
@@ -50,7 +50,7 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
                                                                                         throws PersistenceException {
-        UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
         // Prepare message for delivery by checking it is still ready for delivery and then
         // change its processing state to "out for delivery"
         log.debug("Prepare message [" + um.getMessageId() + "] for delivery");

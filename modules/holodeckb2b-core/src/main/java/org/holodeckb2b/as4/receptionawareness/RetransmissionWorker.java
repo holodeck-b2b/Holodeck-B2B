@@ -43,7 +43,7 @@ import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeUtils;
 
 /**
@@ -81,7 +81,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
         if (!Utils.isNullOrEmpty(waitingForRcpt)) {
             log.debug(waitingForRcpt.size() + " messages may be waiting for a Receipt");
 
-            UpdateManager   updManager = HolodeckB2BCore.getUpdateManager();
+            StorageManager   updManager = HolodeckB2BCore.getStoreManager();
             // For each message check if it should be retransmitted or not
             for (final IUserMessageEntity um : waitingForRcpt) {
                 try {
@@ -179,7 +179,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
 
         IErrorMessageEntity   errorMessage;
         try {
-            errorMessage = HolodeckB2BCore.getUpdateManager().storeIncomingMessageUnit(
+            errorMessage = HolodeckB2BCore.getStoreManager().storeIncomingMessageUnit(
                                                                                 new ErrorMessage(missingReceiptError));
         } catch (final PersistenceException ex) {
             log.error("An error occured while saving the MissingReceipt error in database!"
@@ -213,24 +213,24 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                     log.error("No delivery specification available for notification of MissingReceipt!"
                                 + " P-Mode=" + um.getPModeId());
                     // Indicate delivery failure
-                    HolodeckB2BCore.getUpdateManager().setProcessingState(errorMessage, ProcessingState.FAILURE);
+                    HolodeckB2BCore.getStoreManager().setProcessingState(errorMessage, ProcessingState.FAILURE);
                 } else {
                     try {
                         // Deliver the MissingReceipt error using the given delivery spec
                         final IMessageDeliverer deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec);
                         deliverer.deliver(errorMessage);
                         // Indicate successful delivery
-                        HolodeckB2BCore.getUpdateManager().setProcessingState(errorMessage, ProcessingState.DONE);
+                        HolodeckB2BCore.getStoreManager().setProcessingState(errorMessage, ProcessingState.DONE);
                     } catch (final MessageDeliveryException ex) {
                         log.error("An error occurred while delivering the MissingReceipt error to business application!"
                                     + "Details: "  + ex.getMessage());
                         // Indicate delivery failure
-                        HolodeckB2BCore.getUpdateManager().setProcessingState(errorMessage, ProcessingState.FAILURE);
+                        HolodeckB2BCore.getStoreManager().setProcessingState(errorMessage, ProcessingState.FAILURE);
                     }
                 }
             } else
                 // Indicate MissingReceipt error processing is complete
-                HolodeckB2BCore.getUpdateManager().setProcessingState(errorMessage, ProcessingState.DONE);
+                HolodeckB2BCore.getStoreManager().setProcessingState(errorMessage, ProcessingState.DONE);
         } catch (final PersistenceException dbe) {
             log.error("An error occurred while updating the processing state of the MissingReceipt error!"
                      + " Details: " + dbe.getMessage());

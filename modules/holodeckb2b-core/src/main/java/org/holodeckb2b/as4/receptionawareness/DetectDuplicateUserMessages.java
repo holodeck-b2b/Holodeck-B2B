@@ -109,7 +109,7 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
                                             + "] is a duplicate of an already delivered message");
 
                 log.debug("Update processing state to duplicate");
-                HolodeckB2BCore.getUpdateManager().setProcessingState(um, ProcessingState.DUPLICATE);
+                HolodeckB2BCore.getStoreManager().setProcessingState(um, ProcessingState.DUPLICATE);
 
                 // To prevent repeated delivery but still send a receipt set message as delivered
                 mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);

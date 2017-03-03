@@ -35,7 +35,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received error signals. For each error contained in one of
@@ -94,7 +94,7 @@ public class ProcessErrors extends BaseHandler {
     protected void processErrorSignal(final IErrorMessageEntity errSignal, final MessageContext mc)
                                                                                         throws PersistenceException {
         log.debug("Start processing Error Signal [msgId=" + errSignal.getMessageId() + "]");
-        UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
         // Change processing state to indicate we start processing the error. Also checks that the error is not
         // already being processed
         if (!updateManager.setProcessingState(errSignal, ProcessingState.RECEIVED, ProcessingState.PROCESSING)) {

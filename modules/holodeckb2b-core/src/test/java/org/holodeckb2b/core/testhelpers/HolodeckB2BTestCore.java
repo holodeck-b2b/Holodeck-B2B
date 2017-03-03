@@ -37,7 +37,7 @@ import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.module.HolodeckB2BCoreImpl;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.InMemoryPModeSet;
 import org.holodeckb2b.pmode.PModeManager;
 
@@ -108,8 +108,8 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
     }
 
     @Override
-    public UpdateManager getUpdateManager() {
-        return new UpdateManager(daoFactory.getUpdateManager());
+    public StorageManager getStorageManager() {
+        return new StorageManager(daoFactory.getUpdateManager());
     }
 
     @Override

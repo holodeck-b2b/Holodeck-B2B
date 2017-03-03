@@ -39,7 +39,7 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.helpers.*;
 import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.junit.After;
@@ -160,7 +160,7 @@ public class AuthorizeMessageTest {
 
         mc.setProperty(SecurityConstants.MC_AUTHENTICATION_INFO, authInfo);
 
-        UpdateManager updateManager = core.getUpdateManager();
+        StorageManager updateManager = core.getStorageManager();
 
         IUserMessageEntity userMessageEntity =
                 updateManager.storeIncomingMessageUnit(userMessage);

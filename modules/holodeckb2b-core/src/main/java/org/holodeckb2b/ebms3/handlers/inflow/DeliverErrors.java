@@ -39,7 +39,7 @@ import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeUtils;
 
 /**
@@ -74,7 +74,7 @@ public class DeliverErrors extends BaseHandler {
             return InvocationResponse.CONTINUE;
 
         log.debug("Message contains " + errorSignals.size() + " Error Signals");
-        UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
         // Process each signal
         for(final IErrorMessageEntity errorSignal : errorSignals) {
             // Prepare message for delivery by checking it is still ready for delivery and then

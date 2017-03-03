@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for changing the processing state of message units that are and have been
@@ -66,7 +66,7 @@ public class CheckSentResult extends BaseHandler {
         // Get all message units in this message
         final Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
         // And change their processing state
-        final UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+        final StorageManager updateManager = HolodeckB2BCore.getStoreManager();
         for (final IMessageUnitEntity mu : msgUnits) {
             updateManager.setProcessingState(mu, ProcessingState.SENDING);
             log.info(MessageUnitUtils.getMessageUnitName(mu) + " with msg-id ["
@@ -100,7 +100,7 @@ public class CheckSentResult extends BaseHandler {
 
             //Change processing state of all message units in the message accordingly
             final Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
-            final UpdateManager updateManager = HolodeckB2BCore.getUpdateManager();
+            final StorageManager updateManager = HolodeckB2BCore.getStoreManager();
             for (final IMessageUnitEntity mu : msgUnits) {
                 try {
                     if (!success) {

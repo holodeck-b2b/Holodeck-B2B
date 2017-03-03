@@ -48,13 +48,12 @@ import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
-import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeManager;
 
 /**
@@ -176,8 +175,6 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         String persistencyProviderClassname = instanceConfiguration.getPersistencyProviderClass();
         if (Utils.isNullOrEmpty(persistencyProviderClassname))
             persistencyProviderClassname = "org.holodeckb2b.persistency.DefaultProvider";
-
-        System.out.println("persistencyProviderClassname: " + persistencyProviderClassname);
 
         IPersistencyProvider persistencyProvider = null;
         try {
@@ -423,11 +420,11 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * <p>The returned data access object is a facade to the one provided by the persistency provider to ensure that
      * changes in the message unit meta-data are managed correctly.
      *
-     * @return  The {@link IUpdateManager} that Core classes should use to update meta-data of message units
+     * @return  The {@link StorageManager} that Core classes should use to update meta-data of message units
      * @since HB2B_NEXT_VERSION
      */
-    public UpdateManager getUpdateManager() {
-        return new UpdateManager(daoFactory.getUpdateManager());
+    public StorageManager getStorageManager() {
+        return new StorageManager(daoFactory.getUpdateManager());
     }
 
     /**

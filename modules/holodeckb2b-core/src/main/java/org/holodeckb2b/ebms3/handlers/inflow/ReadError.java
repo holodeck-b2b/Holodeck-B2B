@@ -70,7 +70,7 @@ public class ReadError extends BaseHandler {
                             + errorSignal.getMessageId());
                     // And store in database and message context for further processing
                     log.debug("Store Error Signal in database and message context");
-                    MessageContextUtils.addRcvdError(mc, (IErrorMessageEntity) HolodeckB2BCore.getUpdateManager()
+                    MessageContextUtils.addRcvdError(mc, (IErrorMessageEntity) HolodeckB2BCore.getStoreManager()
                                                                                 .storeIncomingMessageUnit(errorSignal));
                     log.debug("Error signal with msgId " + errorSignal.getMessageId() + " succesfully read");
                 }

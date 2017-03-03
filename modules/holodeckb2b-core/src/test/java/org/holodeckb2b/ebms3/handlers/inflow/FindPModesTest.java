@@ -40,7 +40,7 @@ import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.persistency.dao.UpdateManager;
+import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.helpers.Agreement;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
@@ -164,7 +164,7 @@ public class FindPModesTest {
         core.getPModeSet().add(pmode);
 
         // Setting input message property
-        UpdateManager updateManager = core.getUpdateManager();
+        StorageManager updateManager = core.getStorageManager();
         System.out.println("um: " + updateManager.getClass());
         IUserMessageEntity userMessageEntity =
                 updateManager.storeIncomingMessageUnit(userMessage);

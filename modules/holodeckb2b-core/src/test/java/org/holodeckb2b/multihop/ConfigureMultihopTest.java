@@ -95,7 +95,7 @@ public class ConfigureMultihopTest {
         OMElement userMessage = UserMessageElement.createElement(headerBlock, mmd);
 
         IUserMessageEntity userMessageEntity =
-                HolodeckB2BCore.getUpdateManager().storeIncomingMessageUnit(
+                HolodeckB2BCore.getStoreManager().storeIncomingMessageUnit(
                         UserMessageElement.readElement(userMessage));
 
         OMElement ciElement = CollaborationInfoElement.getElement(userMessage);
@@ -126,7 +126,7 @@ public class ConfigureMultihopTest {
         //Adding PMode to the managed PMode set.
         core.getPModeSet().add(pmode);
 
-        HolodeckB2BCore.getUpdateManager().setPModeId(userMessageEntity, ar.getPModeId());
+        HolodeckB2BCore.getStoreManager().setPModeId(userMessageEntity, ar.getPModeId());
         // Setting out message property
         mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, userMessageEntity);
         try {

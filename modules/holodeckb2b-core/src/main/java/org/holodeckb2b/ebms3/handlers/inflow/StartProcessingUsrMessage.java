@@ -42,7 +42,7 @@ public class StartProcessingUsrMessage extends AbstractUserMessageHandler {
                                                                                         throws PersistenceException {
         final String msgId = um.getMessageId();
         log.debug("Change processing state to indicate start of processing of message [" + msgId + "]" );
-        if (!HolodeckB2BCore.getUpdateManager().setProcessingState(um, ProcessingState.RECEIVED,
+        if (!HolodeckB2BCore.getStoreManager().setProcessingState(um, ProcessingState.RECEIVED,
                                                                        ProcessingState.PROCESSING)) {
             // Changing the state failed which indicates that the message unit is already being processed
             log.warn("User message [msgId= " + msgId + "] is already being processed");

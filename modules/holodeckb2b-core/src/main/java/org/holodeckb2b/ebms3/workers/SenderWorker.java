@@ -82,7 +82,7 @@ public class SenderWorker extends AbstractWorkerTask {
                 log.info("Found " + newMsgs.size() + " message units to send");
                 for (final IMessageUnitEntity msgUnit : newMsgs) {
                     // Indicate that processing will start
-                    if (HolodeckB2BCore.getUpdateManager().setProcessingState(msgUnit, ProcessingState.READY_TO_PUSH,
+                    if (HolodeckB2BCore.getStoreManager().setProcessingState(msgUnit, ProcessingState.READY_TO_PUSH,
                                                                               ProcessingState.PROCESSING)) {
                         // only when we could succesfully set processing state really start processing
                         log.debug("Start processing " + MessageUnitUtils.getMessageUnitName(msgUnit)
