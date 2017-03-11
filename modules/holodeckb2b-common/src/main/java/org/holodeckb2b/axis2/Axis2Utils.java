@@ -39,7 +39,7 @@ import org.w3c.dom.Document;
 /**
  * This class contains helper functions related to the Axis2 framework
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public final class Axis2Utils {
 

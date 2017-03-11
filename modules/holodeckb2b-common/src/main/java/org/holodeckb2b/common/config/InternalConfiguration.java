@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.pmode.IPModeSet;
  * Extends the public configuration interface with some settings only to be used by the Holodeck B2B Core itself.
  * <p>An interface is used to make it easier to use a different implementation when testing.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  2.1.0
  */
 public interface InternalConfiguration extends IConfiguration {

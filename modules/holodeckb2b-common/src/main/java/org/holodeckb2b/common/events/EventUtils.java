@@ -30,7 +30,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 /**
  * Contains some utility methods for processing {@link IMessageProcessingEvent}s.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
 public final class EventUtils {

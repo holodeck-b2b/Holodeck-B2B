@@ -56,7 +56,7 @@ import org.apache.commons.logging.LogFactory;
  * Although there is just one method that changes in the <code>OperationClient</code> it must be copied from the super
  * class a an inner class can not be extended.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class OutOptInAxisOperation extends OutInAxisOperation {
 

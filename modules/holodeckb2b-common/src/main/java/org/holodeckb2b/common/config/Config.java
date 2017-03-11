@@ -40,7 +40,7 @@ import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
  * SHOULD be limited to the account that is used to run Holodeck B2B.
  * @todo Encryption of keystore passwords
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class Config implements InternalConfiguration {
 

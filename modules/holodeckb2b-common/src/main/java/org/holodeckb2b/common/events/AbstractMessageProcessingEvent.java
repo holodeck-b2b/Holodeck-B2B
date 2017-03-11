@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * <p>In addition to the required <i>getters</i> this class adds <i>setters</i> for the event message and subject. The
  * identifier and timestamp are fixed and set when the event instance is created.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
 public abstract class AbstractMessageProcessingEvent implements IMessageProcessingEvent {
