@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
  * as events need only be processed for specific message exchanges. The configuration is used by the {@link
  * IMessageProcessingEventProcessor} to decide if a handler needs to be created and called to handle an event.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IPMode
  * @see IMessageProcessingEventProcessor
  * @since 2.1.0

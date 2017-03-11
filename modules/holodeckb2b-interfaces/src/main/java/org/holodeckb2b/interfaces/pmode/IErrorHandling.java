@@ -53,7 +53,7 @@ import org.holodeckb2b.interfaces.general.ReplyPattern;
  * error reporting on such errors is configured globally (see {@link IConfiguration#shouldReportErrorOnError()} and
  * {@link IConfiguration#shouldReportErrorOnReceipt()}). But it is possible to overwrite these global settings using the P-Mode.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IErrorHandling {
 

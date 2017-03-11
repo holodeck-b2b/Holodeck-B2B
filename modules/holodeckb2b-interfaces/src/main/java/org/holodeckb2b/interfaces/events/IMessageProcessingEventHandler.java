@@ -24,7 +24,7 @@ package org.holodeckb2b.interfaces.events;
  * class itself is more generic so it can handle multiple event types. Which event a handler will handle is determined
  * in the handler configuration.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IMessageProcessingEventHandlerFactory
  * @see IMessageProcessingEventConfiguration
  * @since 2.1.0

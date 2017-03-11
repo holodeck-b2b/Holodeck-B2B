@@ -36,7 +36,7 @@ import org.holodeckb2b.interfaces.general.Interval;
  * {@link IAS4Leg#getReceptionAwareness()} returns a non-null value. Note that we use a special type of leg ({@link
  * IAS4Leg}) to indicate that the leg includes AS4 specific features.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IReceptionAwareness {
 

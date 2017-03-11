@@ -27,7 +27,7 @@ package org.holodeckb2b.interfaces.pmode;
  * (<code>eb:Messaging</code> element) must be targeted to a specific SOAP target role/actor.
  *
  * @author Bram Bakx <bram at holodeck-b2b.org>
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IProtocol {
 

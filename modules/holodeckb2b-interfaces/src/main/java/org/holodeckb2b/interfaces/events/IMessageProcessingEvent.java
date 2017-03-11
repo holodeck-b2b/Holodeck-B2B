@@ -33,7 +33,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * method defined to get the type of event as each type of event should have its own implementing class or extension of
  * this interface.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IMessageProcessingEventHandler
  * @since 2.1.0
  */

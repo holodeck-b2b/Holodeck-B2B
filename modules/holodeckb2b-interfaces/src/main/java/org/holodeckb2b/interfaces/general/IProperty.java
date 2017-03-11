@@ -21,7 +21,7 @@ package org.holodeckb2b.interfaces.general;
  * A simple name value pair representing a property assigned to an entity. To facilitate further processing of the
  * property also the value type can be given.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IProperty {
 

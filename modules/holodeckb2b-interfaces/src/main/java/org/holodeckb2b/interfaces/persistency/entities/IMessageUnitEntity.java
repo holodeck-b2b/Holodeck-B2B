@@ -36,7 +36,7 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
  * lazily loaded, i.e. {@link #getProcessingStates()} should only be called when the data is completely loaded. <b>
  * NOTE</b> that implementations MUST return the current processing state even if the object is not completely loaded.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public interface IMessageUnitEntity extends IMessageUnit {

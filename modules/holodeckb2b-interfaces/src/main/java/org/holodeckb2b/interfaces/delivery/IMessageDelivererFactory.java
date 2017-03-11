@@ -30,7 +30,7 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
  * which should be configured in the P-Mode of the message unit to be delivered. As the factory is specific for each
  * set of parameters Holodeck B2B will create a factory per {@link IDeliverySpecification}.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IMessageDeliverer
  * @see IDeliverySpecification
  * @see IPMode

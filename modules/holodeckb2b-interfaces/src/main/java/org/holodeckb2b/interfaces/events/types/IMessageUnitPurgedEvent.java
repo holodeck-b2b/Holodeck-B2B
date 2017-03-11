@@ -31,7 +31,7 @@ import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
  * still be included in back-ups of database and/or file system. It is up to the operator of the system to removed these
  * if needed.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
 public interface IMessageUnitPurgedEvent extends IMessageProcessingEvent {

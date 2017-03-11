@@ -23,7 +23,7 @@ package org.holodeckb2b.interfaces.pmode.validation;
  * {@link IPModeValidator} but for some basic parameters it can also be created by the Core's <code>PModeManager</code>
  * directly.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  HB2B_NEXT_VERSION
  */
 public class PModeValidationError {

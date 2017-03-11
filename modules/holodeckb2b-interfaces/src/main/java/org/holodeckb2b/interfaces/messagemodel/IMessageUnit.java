@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
  * If for example a user message is submitted to Holodeck B2B as a response of a Two-Way MEP, only the
  * <i>RefToMessageId</i> might be known.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IUserMessage
  * @see ISignalMessage
  * @see IErrorMessage

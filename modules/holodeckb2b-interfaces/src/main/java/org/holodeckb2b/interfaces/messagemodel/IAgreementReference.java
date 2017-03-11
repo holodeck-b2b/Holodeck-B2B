@@ -22,7 +22,7 @@ package org.holodeckb2b.interfaces.messagemodel;
  * agreement. Corresponds to the information contained in the <code>eb:AgreementRef</code> element of the ebMS header.
  * See also section 5.2.2.7 of the ebMS Core Specification for more info.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IAgreementReference {
 

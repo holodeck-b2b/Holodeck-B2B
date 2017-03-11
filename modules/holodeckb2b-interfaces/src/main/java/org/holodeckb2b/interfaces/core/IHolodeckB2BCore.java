@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  * Defines the interface the Holodeck B2B Core implementation has to provide to the outside world, like submitters
  * delivery methods and extensions for dynamic configuration.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IHolodeckB2BCore {
 

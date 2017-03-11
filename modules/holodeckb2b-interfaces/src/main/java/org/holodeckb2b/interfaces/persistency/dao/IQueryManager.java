@@ -31,7 +31,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * stored message unit meta-data, like retrieving all message units in a certain processing state or that are related
  * to another message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public interface IQueryManager {

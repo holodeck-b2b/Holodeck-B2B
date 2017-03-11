@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
  * <p>Beside the generic meta-data fields that may be <i>lazily loaded</i> there are no fields specific to the pull
  * request signal that can be <i>lazily loaded</i>.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  * @see   IMessageUnitEntity
  */

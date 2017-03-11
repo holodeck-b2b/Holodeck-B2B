@@ -26,7 +26,7 @@ package org.holodeckb2b.interfaces.pmode.security;
  * there are no P-Mode parameters defined in the ebMS specification for configuration of key transport.
  *
  * @author Bram Bakx <bram at holodeck-b2b.org>
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IKeyTransport {
 

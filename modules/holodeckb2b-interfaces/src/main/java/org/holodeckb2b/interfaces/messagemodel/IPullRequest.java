@@ -21,7 +21,7 @@ package org.holodeckb2b.interfaces.messagemodel;
  * <p>The only information contained in a PullRequest is the <i>MPC</i> (message partition channel) the message should
  * be pulled from. See section 3 of the ebMS Core Specification for more information on the concept of pulling.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IMessageUnit
  */
 public interface IPullRequest extends ISignalMessage {

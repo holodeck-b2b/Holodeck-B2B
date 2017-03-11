@@ -19,7 +19,7 @@ package org.holodeckb2b.interfaces.persistency;
 /**
  * Indicates that there was a problem executing a persistency operation.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public class PersistenceException extends Exception {

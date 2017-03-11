@@ -22,7 +22,7 @@ import java.util.Map;
  * Defines the interface for the factory classes that are responsible for creating and configuring the {@link
  * IMessageProcessingEventHandler}s.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @param <T>   The type of event handler the implementing factory class can create
  * @since 2.1.0
  */

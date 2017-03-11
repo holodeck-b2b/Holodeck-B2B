@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * getters to access this info the {@link #isLoadedCompletely()} should be executed to check if all information is
  * loaded.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  * @see   IMessageUnitEntity
  */

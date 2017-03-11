@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.security.IPayloadDigest;
  * created as part of the message level signature so it can check data integrity both for the sent message but also of
  * a resulting <i>NRR</i>.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
 public interface ISignatureCreatedEvent extends IMessageProcessingEvent {
