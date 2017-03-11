@@ -23,7 +23,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class TestEvent3 implements TestEvent2 {
 

@@ -59,7 +59,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  *      <i>primary</i> message unit will be used to set the URL.</li>
  * </ul>
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ConfigureHTTPTransportHandler extends BaseHandler {
 

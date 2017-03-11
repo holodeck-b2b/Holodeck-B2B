@@ -47,7 +47,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * can occur in the processing of ebMS messages. These errors should all result in an ebMS error and handled
  * accordingly.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CatchAxisFault extends BaseHandler {
 

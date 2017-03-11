@@ -38,7 +38,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * <p>NOTE: The actual delivery to the business application is done through a <i>DeliveryMethod</i> which is specified
  * in the P-Mode for this message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class DeliverUserMessage extends AbstractUserMessageHandler {
 

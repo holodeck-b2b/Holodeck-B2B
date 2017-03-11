@@ -68,7 +68,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * B2B will only add the SOAP Fault when the error signal(s) is/are not bundled with another message unit to prevent
  * interop issues mentioned above.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IErrorHandling
  */
 public class PackageErrorSignals extends BaseHandler {

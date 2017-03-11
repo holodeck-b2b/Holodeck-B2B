@@ -41,7 +41,7 @@ import org.simpleframework.xml.core.Persister;
  * is contained in <code>pmode.xsd</code>.
  *
  * @author Bram Bakx <bram at holodeck-b2b.org>
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IPMode
  */
 @Root (name="PMode", strict=false)

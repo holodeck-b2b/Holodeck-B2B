@@ -30,7 +30,7 @@ import org.holodeckb2b.interfaces.general.IDescription;
  * child of the <code>PartInfo</code> element, part of a User Message message unit. So this element can be reused there
  * as well, although it is not described in section 5.2.2.13 of the spec.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class DescriptionElement {
 

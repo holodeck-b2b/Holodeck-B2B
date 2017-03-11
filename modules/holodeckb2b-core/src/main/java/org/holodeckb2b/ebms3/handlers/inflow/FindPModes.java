@@ -55,7 +55,7 @@ import org.holodeckb2b.pmode.PModeFinder;
  * ebMS specification is not very clear if a specific error must be used. Current choice is based on discussion on <a
  * href="https://issues.oasis-open.org/browse/EBXMLMSG-67">issue 67 of ebMS TC</a>.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class FindPModes extends BaseHandler {
 

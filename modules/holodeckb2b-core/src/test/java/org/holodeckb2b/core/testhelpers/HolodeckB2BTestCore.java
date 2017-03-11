@@ -44,7 +44,7 @@ import org.holodeckb2b.pmode.PModeManager;
 /**
  * Is utility class for testing the e-SENS connector that simulates the Holodeck B2B Core.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
 

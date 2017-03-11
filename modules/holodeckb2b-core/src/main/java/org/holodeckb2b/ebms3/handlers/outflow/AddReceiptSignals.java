@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
  * units (see issue https://tools.oasis-open.org/issues/browse/EBXMLMSG-50?jql=project%20%3D%20EBXMLMSG). This is also
  * a reason to bundle only if the URL is the same.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 @Deprecated
 public class AddReceiptSignals extends BaseHandler {

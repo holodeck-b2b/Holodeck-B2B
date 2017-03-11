@@ -50,7 +50,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * also implies that a message containing an unexpected username token is not rejected.
  * <p>The P-Mode of the <i>primary</i> message unit is used to determine whether the message must be authorized.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class AuthorizeMessage extends BaseHandler {
 

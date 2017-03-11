@@ -42,7 +42,7 @@ import org.w3c.dom.Node;
 /**
  *
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class WSSProcessingEngine extends WSSecurityEngine {
 

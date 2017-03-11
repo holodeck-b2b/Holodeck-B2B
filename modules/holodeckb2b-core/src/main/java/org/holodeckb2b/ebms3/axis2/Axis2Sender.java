@@ -45,7 +45,7 @@ import org.holodeckb2b.module.HolodeckB2BCoreImpl;
 /**
  * Is a helper class that handles the sending of a message unit using the Axis2 framework.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class Axis2Sender {
 

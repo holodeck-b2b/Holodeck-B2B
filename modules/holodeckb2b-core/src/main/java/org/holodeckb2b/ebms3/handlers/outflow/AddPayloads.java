@@ -51,7 +51,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * documents in the SOAP body. Alternatively the content can be external to message, for example stored on a web site,
  * in which case this handler does nothing.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class AddPayloads extends AbstractUserMessageHandler {
 

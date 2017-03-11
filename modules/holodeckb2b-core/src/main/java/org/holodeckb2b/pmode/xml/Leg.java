@@ -37,7 +37,7 @@ import org.simpleframework.xml.core.Commit;
 
 /**
  * @author Bram Bakx <bram at holodeck-b2b.org>
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 
 public class Leg implements IAS4Leg {

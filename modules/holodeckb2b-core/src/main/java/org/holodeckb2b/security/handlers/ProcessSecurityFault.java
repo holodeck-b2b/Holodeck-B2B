@@ -43,7 +43,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * <i>FailedDecryption<i>. If the problem is caused by another element in the header it is ignored because this element
  * is irrelevant for the ebMS processing.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ProcessSecurityFault extends BaseHandler {
 

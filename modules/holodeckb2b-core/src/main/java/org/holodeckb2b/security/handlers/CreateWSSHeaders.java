@@ -73,7 +73,7 @@ import org.w3c.dom.Document;
  *              <td>The <code>Signature</code> to create in the <i>default</i> header</td></tr>
  * </table>
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CreateWSSHeaders extends BaseHandler {
 

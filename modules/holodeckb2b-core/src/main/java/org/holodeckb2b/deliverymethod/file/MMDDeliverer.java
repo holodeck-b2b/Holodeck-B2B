@@ -36,7 +36,7 @@ import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
  * ({@link SubmitFromFile}) and defined in the <code>http://holodeck-b2b.org/schemas/2014/06/mmd</code> xml schema
  * definition.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see FileDeliveryFactory
  * @see MessageMetaData
  */

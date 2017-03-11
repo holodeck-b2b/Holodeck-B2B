@@ -45,7 +45,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * the complete feature from part 2 has many parameters the AS4 multi-hop profile is very restricted and much simpler.
  * For details see section 4 of the AS4 Profile.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ConfigureMultihop extends BaseHandler {
 

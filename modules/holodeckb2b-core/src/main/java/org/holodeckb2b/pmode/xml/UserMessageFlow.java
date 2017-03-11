@@ -23,7 +23,7 @@ import org.simpleframework.xml.Root;
 /**
  *
  * @author Bram Bakx <bram at holodeck-b2b.org>
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 @Root (name = "Flow", strict = false)
 public class UserMessageFlow implements IUserMessageFlow {

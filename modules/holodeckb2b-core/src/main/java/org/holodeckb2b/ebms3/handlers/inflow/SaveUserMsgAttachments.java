@@ -61,7 +61,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * <p>As this handler is only useful when a {@link UserMessage} object is already available in the message context this
  * handler extends from {@link AbstractUserMessageHandler} to ensure it only runs when a UserMessage is available.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
 

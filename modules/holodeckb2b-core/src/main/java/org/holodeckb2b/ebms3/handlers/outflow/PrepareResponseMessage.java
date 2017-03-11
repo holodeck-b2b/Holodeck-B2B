@@ -41,7 +41,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * in flow prepared message units that should be sent as response. If they did the entity objects for the message units
  * are copied to the out flow message context to make them available to the other handlers in the out flow.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PrepareResponseMessage extends BaseHandler {
 

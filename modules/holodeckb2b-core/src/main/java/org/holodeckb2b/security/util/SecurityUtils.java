@@ -44,7 +44,7 @@ import org.holodeckb2b.security.tokens.UsernameToken;
 /**
  * Is a container for general security related functions.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class SecurityUtils {
 

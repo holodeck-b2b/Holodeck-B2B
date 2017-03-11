@@ -42,7 +42,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * basic settings like the values for MEP, MEP binding, MPC for pulling and security settings. If needed because of
  * specific requirements in a certain domain a custom validator can be used.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public class BasicPModeValidator implements IPModeValidator {

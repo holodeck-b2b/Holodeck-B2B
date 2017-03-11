@@ -34,7 +34,7 @@ import javax.activation.DataHandler;
  * <p>For decompression of the data the {@link DataHandler#getInputStream()} is used, so the source <code>DataHandler
  * </code> MUST implement this method to ensure correct decompression.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CompressionDataHandler extends DataHandler {
 

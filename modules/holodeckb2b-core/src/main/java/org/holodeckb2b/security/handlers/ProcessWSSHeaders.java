@@ -101,7 +101,7 @@ import org.w3c.dom.Element;
  * NOTE: Creating the correct ebMS error based on the problems in processing the security header is done in the
  * {@link ProcessSecurityFault} handler.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 public class ProcessWSSHeaders extends BaseHandler {

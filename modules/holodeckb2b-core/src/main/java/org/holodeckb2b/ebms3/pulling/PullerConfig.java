@@ -39,7 +39,7 @@ import org.simpleframework.xml.Root;
  * <code>http://holodeck-b2b.org/schemas/2014/05/pullconfiguration</code>. This class handles the
  * <code>genericPullerType</code>. The overall configuration document is handled by {@link PullConfiguration}.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 @Root
 public class PullerConfig implements IWorkerConfiguration {

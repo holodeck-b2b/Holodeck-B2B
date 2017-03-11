@@ -39,7 +39,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * <p>The {@link CheckAndAuthorizePullRequest} handler has already determined from which P-Modes messages may be
  * selected. This handler will select the user message message unit that is waiting as longest to get pulled.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class GetMessageUnitForPulling extends BaseHandler {
 

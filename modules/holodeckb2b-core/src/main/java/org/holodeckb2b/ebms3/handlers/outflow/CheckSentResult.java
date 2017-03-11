@@ -40,7 +40,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * either {@link ProcessingStates#TRANSPORT_FAILURE} or {@link ProcessingStates#DELIVERED} /
  * {@link ProcessingStates#AWAITING_RECEIPT} (for User Message that should be acknowledged through a Receipt).
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CheckSentResult extends BaseHandler {
 

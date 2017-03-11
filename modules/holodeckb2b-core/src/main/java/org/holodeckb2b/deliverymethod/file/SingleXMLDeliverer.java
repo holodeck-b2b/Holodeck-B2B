@@ -88,7 +88,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 </ebmsMessage>
 }</pre>
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see FileDeliveryFactory
  */
 public class SingleXMLDeliverer extends SimpleFileDeliverer {

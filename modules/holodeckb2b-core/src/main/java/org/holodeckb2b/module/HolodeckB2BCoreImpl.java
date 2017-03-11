@@ -61,7 +61,7 @@ import org.holodeckb2b.pmode.PModeManager;
  * <p>This class is responsible for the initialization and shutdown of the ebMS module. This includes
  * starting and stopping the workers needed to drive the message exchanges.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     private static final class SubmitterSingletonHolder {

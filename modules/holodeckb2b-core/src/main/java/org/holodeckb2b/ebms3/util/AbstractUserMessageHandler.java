@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * in. Only when the handler runs in the correct flow <code>AbstractUserMessageHandler</code> will check if there is a
  * user message present in the current context.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public abstract class AbstractUserMessageHandler extends BaseHandler {
 

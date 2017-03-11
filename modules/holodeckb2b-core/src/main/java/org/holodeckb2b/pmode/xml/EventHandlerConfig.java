@@ -54,7 +54,7 @@ import org.simpleframework.xml.core.Validate;
  * <li>The fourth element is the <code>Parameter</code> element that can occur zero or more times and contains the
  * settings to initialize the handler.</li></ul>
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
 

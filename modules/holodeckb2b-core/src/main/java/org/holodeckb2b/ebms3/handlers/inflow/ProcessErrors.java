@@ -42,7 +42,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * the {@link ErrorMessage}s available in the message context property {@link MessageContextProperties#IN_ERRORS} it
  * will check if there is a {@link MessageUnit} in the database and mark that message as failed.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ProcessErrors extends BaseHandler {
 

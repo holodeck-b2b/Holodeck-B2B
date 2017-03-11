@@ -40,7 +40,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * <p><b>NOTE: </b>This handler will process all receipt signals that are in the message although the ebMS V3 Core
  * Specification does not allow more than one.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ReadReceipt extends BaseHandler {
 

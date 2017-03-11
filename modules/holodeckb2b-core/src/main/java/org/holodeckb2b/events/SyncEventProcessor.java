@@ -46,7 +46,7 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
  * done as part of the message processing. This processor only passes raised events to the handlers, there is no
  * archiving.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IMessageProcessingEvent
  * @see IMessageProcessingEventConfiguration
  * @since 2.1.0

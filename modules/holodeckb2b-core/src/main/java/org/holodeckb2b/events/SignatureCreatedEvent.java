@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.security.IPayloadDigest;
  * Message to be sent. The information about the digests canonly be set when the event is created and not be modified
  * afterwards.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
 public class SignatureCreatedEvent extends AbstractMessageProcessingEvent implements ISignatureCreatedEvent {

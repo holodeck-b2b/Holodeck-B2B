@@ -30,7 +30,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
  * <p>If a user message unit is to be sent, the entity object representing the User Message MUST be included in the
  * <code>MessageContext</code> parameter {@link MessageContextProperties#OUT_USER_MESSAGE}.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PackageUsermessageInfo extends AbstractUserMessageHandler {
 

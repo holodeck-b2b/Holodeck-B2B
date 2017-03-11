@@ -23,7 +23,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 /**
  * Is the implementation class of {@link IMessageUnitPurgedEvent} to indicate that
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  2.1.0
  */
 public class MessageUnitPurgedEvent extends AbstractMessageProcessingEvent implements IMessageUnitPurgedEvent {

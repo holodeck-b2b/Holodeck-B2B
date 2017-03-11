@@ -54,7 +54,7 @@ import org.holodeckb2b.pmode.PModeUtils;
  * specified in the P-Mode for this message unit. That P-Mode is the same as the P-Mode of the referenced message or
  * if no message is referenced and this message unit is received as a response the primary message unit in the request.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class DeliverErrors extends BaseHandler {
 

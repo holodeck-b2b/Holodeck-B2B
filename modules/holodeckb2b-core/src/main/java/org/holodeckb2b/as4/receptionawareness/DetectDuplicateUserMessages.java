@@ -42,7 +42,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * Because the duplicate may be a retry due to a missing Receipt signal a new Receipt will be sent as response. This is
  * done by marking this message unit as delivered.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
 

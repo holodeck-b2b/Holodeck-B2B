@@ -37,7 +37,7 @@ import org.holodeckb2b.interfaces.pmode.validation.PModeValidationError;
  * <p><b>NOTE: </b>Although in this architecture the internal and external storage is more loosely coupled they still
  * influence each other and changing either implementation may affect the other.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  HB2B_NEXT_VERSION
  * @see InternalConfiguration#getPModeStorageImplClass()
  * @see InMemoryPModeSet

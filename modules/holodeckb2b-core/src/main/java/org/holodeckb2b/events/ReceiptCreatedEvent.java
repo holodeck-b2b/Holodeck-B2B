@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * Is the implementation class of {@link IReceiptCreatedEvent} to indicate that a Receipt is created for a received
  * User Message.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
 public class ReceiptCreatedEvent extends AbstractMessageProcessingEvent implements IReceiptCreatedEvent {

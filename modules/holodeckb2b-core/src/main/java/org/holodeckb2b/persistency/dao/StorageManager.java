@@ -41,7 +41,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public class StorageManager {

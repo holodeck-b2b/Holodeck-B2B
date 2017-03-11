@@ -42,7 +42,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * is limited to just one. Holodeck B2B therefor only uses the first occurrence of <code>eb:UserMessage</code> and
  * ignores others.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ReadUserMessage extends BaseHandler {
 

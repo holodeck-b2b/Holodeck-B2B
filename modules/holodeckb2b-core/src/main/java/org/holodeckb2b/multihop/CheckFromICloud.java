@@ -35,7 +35,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * User Messages can be created. This however allows to support the AS4 Multi-hop profile which does not specify support
  * for signals on signals.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CheckFromICloud extends BaseHandler {
 

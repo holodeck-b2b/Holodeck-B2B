@@ -46,7 +46,7 @@ import org.holodeckb2b.pmode.PModeUtils;
  * unit's</i> P-Mode. If bundling of message units from different P-Modes is used the user should ensure that all
  * messages use (or accept) the same security settings.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class GetSecurityConfiguration extends BaseHandler {
 

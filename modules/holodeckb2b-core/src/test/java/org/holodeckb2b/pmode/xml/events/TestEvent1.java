@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 /**
  * A {@link IMessageProcessingEvent} implementation for testing configuration of event configuration.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class TestEvent1 implements IMessageProcessingEvent {
 

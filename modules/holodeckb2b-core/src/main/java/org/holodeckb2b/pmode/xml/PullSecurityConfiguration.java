@@ -29,7 +29,7 @@ import org.simpleframework.xml.core.Validate;
  * channel can have its own authentication and authorization. The sub-channel information is contained in <code>
  * PullRequestFlow/SecurityConfiguration</code>.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 @Root
 public class PullSecurityConfiguration extends SecurityConfiguration {

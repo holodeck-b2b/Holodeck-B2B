@@ -47,7 +47,7 @@ import org.xml.sax.SAXException;
  *
  * @todo: Add more tests for variations in mmd completeness
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PackagingTest {
 

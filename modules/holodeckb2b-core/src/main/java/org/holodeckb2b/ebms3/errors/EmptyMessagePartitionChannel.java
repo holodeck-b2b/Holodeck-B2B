@@ -21,7 +21,7 @@ import org.holodeckb2b.common.messagemodel.EbmsError;
 /**
  * Represents the <i>EmptyMessagePartitionChannel</i> error as defined in section 6.7 of the Core specification.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class EmptyMessagePartitionChannel extends EbmsError {
 

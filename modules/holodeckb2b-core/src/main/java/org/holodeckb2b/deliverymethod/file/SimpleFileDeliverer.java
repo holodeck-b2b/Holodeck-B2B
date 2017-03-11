@@ -115,7 +115,7 @@ import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 </eb:Messaging>
 }</pre>
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see FileDeliveryFactory
  */
 public class SimpleFileDeliverer extends AbstractFileDeliverer {

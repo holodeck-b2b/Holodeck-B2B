@@ -31,7 +31,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * eb:UserMessage</code> element and its children.
  * <p>This element is specified in section 5.2.2 of the ebMS 3 Core specification.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class UserMessageElement {
 

@@ -28,7 +28,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * Is the <i>IN_FLOW</i> handler that starts the process of delivering the user message message unit to the business
  * application by changing the message units processing state to {@link ProcessingStates#PROCESSING}.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class StartProcessingUsrMessage extends AbstractUserMessageHandler {
 

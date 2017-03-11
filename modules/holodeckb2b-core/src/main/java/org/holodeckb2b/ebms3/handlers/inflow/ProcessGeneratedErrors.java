@@ -52,7 +52,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * response. This can result in multiple error signals ready to be sent. The {@link PrepareResponseMessage} handler in
  * the out flow is responsible to decide which signal(s) should be included in the response message.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ProcessGeneratedErrors extends BaseHandler {
 

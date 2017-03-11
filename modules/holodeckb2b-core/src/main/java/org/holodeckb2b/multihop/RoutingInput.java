@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * Represent the <code>ebint:RoutingInput</code> WS-A EPR parameter that is used to include routing information to
  * Signal message when exchanged using multi-hop.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class RoutingInput {
 

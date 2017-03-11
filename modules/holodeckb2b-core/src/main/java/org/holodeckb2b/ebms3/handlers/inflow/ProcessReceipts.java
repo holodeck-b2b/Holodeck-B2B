@@ -51,7 +51,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * acknowledged by another Receipt or it has failed due to an Error) the Receipt's processing state will be changed to
  * {@link ProcessingStates#DONE}.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ProcessReceipts extends BaseHandler {
 

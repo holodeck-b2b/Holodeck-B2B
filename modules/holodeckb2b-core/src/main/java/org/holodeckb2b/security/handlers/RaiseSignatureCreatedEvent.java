@@ -37,7 +37,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * Is the <i>OUT_FLOW</i> handler that will create and raise the {@link ISignatureCreatedEvent} message processing event
  * when the sent User Message is signed.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
 public class RaiseSignatureCreatedEvent extends AbstractUserMessageHandler {

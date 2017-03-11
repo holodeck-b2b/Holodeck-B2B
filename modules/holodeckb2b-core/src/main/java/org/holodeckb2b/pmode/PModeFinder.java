@@ -57,7 +57,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * Because the P-Mode id might not be available during message processing the P-Mode must be found based on the
  * available message meta data.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IPMode
  */
 public class PModeFinder {

@@ -41,7 +41,7 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  * be changed to <b>rejected</b> and information on the error will be written to a file with the same name but
  * with extension <b>err</b>.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class SubmitFromFile extends DirWatcher {
 

@@ -23,7 +23,7 @@ import org.simpleframework.xml.Text;
  * Represents an element in the P-Mode XML document with type <code>KeyReferenceMethods</code>. Converts the strings
  * used in the XML document to equivalent value of {@link X509ReferenceType} enumeration.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 class KeyReferenceMethod {
 

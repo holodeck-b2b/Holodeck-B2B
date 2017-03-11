@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
  * element itself does not contain any data there are only methods for creating and getting the element.
  * <p>This element is specified in section 5.2.3 of the ebMS 3 Core specification.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class SignalMessageElement {
 

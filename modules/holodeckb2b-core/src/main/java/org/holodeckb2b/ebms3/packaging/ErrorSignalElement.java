@@ -36,7 +36,7 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
  * <p>NOTE: The naming of this class differs from the other classes in this packages because <code>Error</code> is a
  * reserved class name.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ErrorSignalElement {
 

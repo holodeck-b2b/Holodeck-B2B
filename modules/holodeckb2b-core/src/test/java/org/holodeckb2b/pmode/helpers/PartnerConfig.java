@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
 
 /**
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PartnerConfig implements ITradingPartnerConfiguration {
 

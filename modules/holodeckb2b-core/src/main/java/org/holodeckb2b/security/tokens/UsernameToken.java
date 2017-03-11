@@ -23,7 +23,7 @@ import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
  * Is used to represent a WSS UsernameToken that is included in the security header of the message as an
  * {@link IAuthenticationInfo} so it can be used for the authentication of the sender of the message.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class UsernameToken implements IAuthenticationInfo {
 

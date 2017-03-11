@@ -43,7 +43,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * Receipt {@link IReceiptConfiguration#getReceiptDelivery()}) will be used, otherwise the default delivery method
  * ({@link ILeg#getDefaultDelivery())} will be used.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class DeliverReceipts extends BaseHandler {
 
