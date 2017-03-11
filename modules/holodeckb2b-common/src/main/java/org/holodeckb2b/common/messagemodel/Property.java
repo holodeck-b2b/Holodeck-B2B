@@ -22,7 +22,7 @@ import org.holodeckb2b.interfaces.general.IProperty;
  * Is an in memory only implementation of {@link IProperty} to temporarily store a property that was contain in the ebMS
  * message header of a message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public class Property implements IProperty {

@@ -22,7 +22,7 @@ import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
  * Is an in memory only implementation of {@link IAgreementReference} to temporarily store the business agreement meta-
  * data of a User Message message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public class AgreementReference implements IAgreementReference {

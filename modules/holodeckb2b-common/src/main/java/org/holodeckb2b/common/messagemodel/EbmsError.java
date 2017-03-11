@@ -23,7 +23,7 @@ import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
  * Is an in memory only implementation of {@link IEbmsError} to temporarily store the meta-data on a ebMS Error that is
  * contained in an Error Signal message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public class EbmsError implements IEbmsError {

@@ -22,7 +22,7 @@ import org.holodeckb2b.interfaces.general.IDescription;
  * Is an in memory only implementation of {@link IDescription} to temporarily store a generic description contained in
  * the ebMS header of a message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public class Description implements IDescription {

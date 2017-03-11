@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  * Is an <i>abstract</i> implementation of an Axis2 handler that acts as the base class for the Holodeck B2B handlers.
  * It ensures that the handler runs only in the correct flows and prepares the logging.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public abstract class BaseHandler extends AbstractHandler {
 

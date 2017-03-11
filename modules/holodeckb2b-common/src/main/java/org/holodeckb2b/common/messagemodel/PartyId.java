@@ -22,7 +22,7 @@ import org.holodeckb2b.interfaces.general.IPartyId;
  * Is an in memory only implementation of {@link IPartyId} to temporarily store the party identifier of a trading
  * partner that is involved in the exchange of a User Message message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public class PartyId implements IPartyId {

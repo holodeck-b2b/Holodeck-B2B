@@ -22,7 +22,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
  * Is an in memory only implementation of {@link IPullRequest} to temporarily store the meta-data information on a Pull
  * Request Signal message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public class PullRequest extends MessageUnit implements IPullRequest {

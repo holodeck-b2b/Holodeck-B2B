@@ -19,7 +19,7 @@ package org.holodeckb2b.common.exceptions;
 /**
  * Signals errors that occur when an object was (de)serialized.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ObjectSerializationException extends Exception {
 

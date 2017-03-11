@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * Is an implementation of {@link IMessageUnitProcessingState} used in the parent class to hold the processing
  * states of the message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public class MessageProcessingState implements IMessageUnitProcessingState {

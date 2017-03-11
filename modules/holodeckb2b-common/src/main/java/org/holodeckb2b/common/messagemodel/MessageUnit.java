@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * Is an in memory only implementation of {@link IMessageUnit} to temporarily store the generic information on message
  * unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public abstract class MessageUnit implements IMessageUnit {
