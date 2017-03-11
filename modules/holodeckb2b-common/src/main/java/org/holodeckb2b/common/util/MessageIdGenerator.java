@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 /**
  * Generates unique identifiers for use in message processing.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class MessageIdGenerator {
 

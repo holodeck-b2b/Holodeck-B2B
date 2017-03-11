@@ -21,7 +21,7 @@ import org.holodeckb2b.common.config.InternalConfiguration;
 
 /**
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class Config implements InternalConfiguration {
 

@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.general.ITradingPartner;
  * Is a utility class that offers methods to check whether two message model objects are equal, i.e. refer to the same
  * business information.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public final class CompareUtils {
   /**

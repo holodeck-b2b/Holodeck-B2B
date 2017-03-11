@@ -26,7 +26,7 @@ import org.simpleframework.xml.Text;
  * contained in this element may be used by the business applications that
  * handle the payload. It is not used by Holodeck B2B in processing the message.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class Description implements IDescription {
 

@@ -39,7 +39,7 @@ import org.simpleframework.xml.core.Validate;
  * included in the message, as attachment or in the SOAP body, or is external is
  * indicated by the <code>containment</code> attribute. Its default value is as attachment.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PartInfo implements IPayload {
 

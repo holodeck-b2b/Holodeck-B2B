@@ -33,7 +33,7 @@ import org.simpleframework.xml.Element;
  * so Holodeck B2B can unambiguously determine the P-Mode to use for processing
  * the message.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CollaborationInfo implements ICollaborationInfo {
 
