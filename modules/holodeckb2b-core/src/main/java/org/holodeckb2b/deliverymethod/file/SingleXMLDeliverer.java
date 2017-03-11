@@ -83,7 +83,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
         </eb:PayloadInfo>
     </eb:UserMessage>
     <Payloads>
-        <Payload xml:id="pl-1">«base64 encoded data»/Payload>
+        <Payload xml:id="pl-1">«base64 encoded data»</Payload>
     </Payloads>
 </ebmsMessage>
 }</pre>
