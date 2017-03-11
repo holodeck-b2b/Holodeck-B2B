@@ -45,7 +45,7 @@ import org.holodeckb2b.persistency.util.JPAEntityHelper;
 /**
  * Is the default persistency provider's implementation of the {@link IUpdateManager} interface.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public class UpdateManager implements IUpdateManager {

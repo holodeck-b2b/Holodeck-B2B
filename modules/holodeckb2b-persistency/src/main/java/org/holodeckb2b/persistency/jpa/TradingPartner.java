@@ -37,7 +37,7 @@ import org.holodeckb2b.interfaces.general.ITradingPartner;
  * <p>Although an [business] entity may be involved in multiple exchanges using the same PartyId and Role, each
  * {@link UserMessage} will have its own two <code>TradingPartner</code> instances for sender and receiver.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 @Entity

@@ -27,7 +27,7 @@ import org.holodeckb2b.persistency.jpa.Service;
 /**
  * JPA Entity wrapper for testing the {@link Service} embedable
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 @Entity
 @Table(name="TST_W_SERVICE")

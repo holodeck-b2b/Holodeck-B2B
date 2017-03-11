@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.general.IDescription;
  * <p>This class is <i>embeddable</i> as the description data is always bound specifically to one other object and
  * therefor can be easily stored together with that object.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 @Embeddable

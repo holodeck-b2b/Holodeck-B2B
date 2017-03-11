@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.general.IPartyId;
  * <p>This class is <i>embeddable</i> so the party id meta-data is always stored together with the specific trading
  * partner meta-data it relates to.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 @Embeddable

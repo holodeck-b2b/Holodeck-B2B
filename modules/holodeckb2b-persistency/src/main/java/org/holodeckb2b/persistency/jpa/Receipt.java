@@ -45,7 +45,7 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  * <li><i>Receipt.findResponsesTo</i> finds all Receipt Signals that are a response to another message unit, i.e.
  *              which refer to the given message id.</li></ul>
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 @Entity

@@ -24,7 +24,7 @@ import org.holodeckb2b.persistency.jpa.ErrorMessage;
 /**
  * Is the {@link IErrorMessageEntity} implementation of the default persistency provider of Holodeck B2B.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public class ErrorMessageEntity extends MessageUnitEntity<ErrorMessage> implements IErrorMessageEntity {

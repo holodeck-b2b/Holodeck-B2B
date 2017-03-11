@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
  * Is the JPA entity class to store the meta-data of a <b>PullRequest Signal</b> message unit as described by the {@link
  * IPullRequest} interface in the Holodeck B2B messaging model. The maximum length of the MPC URL is 1024 characters.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 @Entity

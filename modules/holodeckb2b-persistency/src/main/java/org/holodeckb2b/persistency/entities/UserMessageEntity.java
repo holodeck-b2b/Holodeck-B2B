@@ -27,7 +27,7 @@ import org.holodeckb2b.persistency.jpa.UserMessage;
 /**
  * Is the {@link IUserMessageEntity} implementation of the default persistency provider of Holodeck B2B.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 public class UserMessageEntity extends MessageUnitEntity<UserMessage> implements IUserMessageEntity {
