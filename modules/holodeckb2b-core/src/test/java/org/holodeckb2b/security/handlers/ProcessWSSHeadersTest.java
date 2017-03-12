@@ -27,12 +27,12 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
-import org.apache.wss4j.common.ConfigurationConstants;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
@@ -50,21 +50,15 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
 
 /**
- * Created at 17:25 31.01.17
+ * Created at 17:24 31.01.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
-public class SetupWSSProcessingTest {
+public class ProcessWSSHeadersTest {
 
     // Appender to control logging events
     @Mock
@@ -76,20 +70,23 @@ public class SetupWSSProcessingTest {
 
     private static HolodeckB2BTestCore core;
 
-    private SetupWSSProcessing handler;
+    private SetupWSSProcessing setupWSSProcessingHandler;
+    private ProcessWSSHeaders handler;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = SetupWSSProcessingTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        // The baseDir folder should contain publickeys.jks file
+        baseDir = ProcessWSSHeadersTest.class.getClassLoader()
+                .getResource("security").getPath();
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
 
     @Before
     public void setUp() throws Exception {
-        // launched after org.holodeckb2b.ebms3.handlers.inflow.FindPModes handler
-        handler = new SetupWSSProcessing();
+        // launched after org.holodeckb2b.security.handlers.SetupWSSProcessing handler
+        setupWSSProcessingHandler = new SetupWSSProcessing();
+        handler = new ProcessWSSHeaders();
         // Adding appender to the FindPModes logger
         Logger logger = LogManager.getRootLogger();
         logger.addAppender(mockAppender);
@@ -145,13 +142,9 @@ public class SetupWSSProcessingTest {
         sigConfig.setCertificatePassword("ExampleCA");
         sigConfig.setRevocationCheck(true); // optional
 
-        EncryptionConfig encConfig = new EncryptionConfig();
-        encConfig.setKeystoreAlias("exampleca");
-
         // Setting security configuration
         SecurityConfig secConfig = new SecurityConfig();
         secConfig.setSignatureConfiguration(sigConfig);
-        secConfig.setEncryptionConfiguration(encConfig);
 
         PartnerConfig initiator = new PartnerConfig();
         initiator.setSecurityConfiguration(secConfig);
@@ -169,6 +162,15 @@ public class SetupWSSProcessingTest {
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
                 userMessageEntity);
 
+        // Invoke SetupWSSProcessing handler
+        try {
+            Handler.InvocationResponse invokeResp = setupWSSProcessingHandler.invoke(mc);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        // Invoke ProcessWSSHeaders handler
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
@@ -176,32 +178,6 @@ public class SetupWSSProcessingTest {
             fail(e.getMessage());
         }
 
-        verify(mockAppender, atLeastOnce())
-                .doAppend(captorLoggingEvent.capture());
-        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        HashMap<String, Boolean> messages = new HashMap<>();
-        messages.put("Primary message unit is user message, detect initiator or responder", false);
-        messages.put("Security is  configured for the primary message unit", false);
-        messages.put("P-Mode enables revocation check of certificates", false); // optional
-        messages.put("Encryption used, provide access to private key.", false);
-        Set<String> keys = messages.keySet();
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                String key = e.getRenderedMessage();
-                if(keys.contains(key)) {
-                    messages.put(key, true);
-                }
-            }
-        }
-        boolean containsAllMessages = true;
-        for(Boolean flag : messages.values()) {
-            containsAllMessages &= flag;
-        }
-        assertTrue(containsAllMessages);
-
-        // todo check the presence of the mc properties. In this case checking only messages does not fit.
-        assertNotNull(mc.getProperty(MessageContextProperties.IN_USER_MESSAGE));
-        assertNotNull(mc.getProperty(ConfigurationConstants.ENABLE_REVOCATION));  // optional
-        assertNotNull(mc.getProperty(ConfigurationConstants.PW_CALLBACK_REF));
+        assertNotNull(mc.getProperty(SecurityConstants.MC_AUTHENTICATION_INFO));
     }
 }
