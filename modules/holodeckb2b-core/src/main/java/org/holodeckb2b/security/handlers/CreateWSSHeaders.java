@@ -82,8 +82,7 @@ public class CreateWSSHeaders extends BaseHandler {
     protected static final String WSS4J_PART_S11_BODY = "{}{http://schemas.xmlsoap.org/soap/envelope/}Body;";
     protected static final String WSS4J_PART_S12_BODY = "{}{http://www.w3.org/2003/05/soap-envelope}Body;";
 
-    protected static final String WSS4J_PART_UT =
-                "{}{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd}UsernameToken;";
+    protected static final String WSS4J_PART_UT = "{}{" + SecurityConstants.WSS_NAMESPACE_URI + "}UsernameToken;";
 
     protected static final String WSS4J_PART_ATTACHMENTS = "{}cid:Attachments;";
 
