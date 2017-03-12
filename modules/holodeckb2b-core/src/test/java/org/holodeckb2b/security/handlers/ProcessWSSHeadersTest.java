@@ -22,11 +22,6 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
@@ -40,15 +35,9 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.pmode.helpers.*;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.*;
 
@@ -57,14 +46,7 @@ import static org.junit.Assert.*;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-@RunWith(MockitoJUnitRunner.class)
 public class ProcessWSSHeadersTest {
-
-    // Appender to control logging events
-    @Mock
-    private Appender mockAppender;
-    @Captor
-    private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
 
     private static String baseDir;
 
@@ -87,15 +69,6 @@ public class ProcessWSSHeadersTest {
         // launched after org.holodeckb2b.security.handlers.SetupWSSProcessing handler
         setupWSSProcessingHandler = new SetupWSSProcessing();
         handler = new ProcessWSSHeaders();
-        // Adding appender to the FindPModes logger
-        Logger logger = LogManager.getRootLogger();
-        logger.addAppender(mockAppender);
-        logger.setLevel(Level.DEBUG);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        LogManager.getRootLogger().removeAppender(mockAppender);
     }
 
     @Test

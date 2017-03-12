@@ -97,6 +97,7 @@ public class CreateWSSHeadersTest {
     public static void setUpClass() {
         Security.addProvider(new BouncyCastleProvider());
 
+        // The baseDir folder should contain publickeys.jks file
         baseDir = CreateWSSHeadersTest.class
                 .getClassLoader().getResource("security").getPath();
         core = new HolodeckB2BTestCore(baseDir);
@@ -110,6 +111,7 @@ public class CreateWSSHeadersTest {
 
     @Test
     public void testDoProcessing () throws Exception {
+        System.out.println("[testDoProcessing]>");
         MessageMetaData mmd = TestUtils.getMMD("security/handlers/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env =
