@@ -163,7 +163,7 @@ public class SetupWSSProcessing extends BaseHandler {
             mc.setProperty(ConfigurationConstants.PW_CALLBACK_REF, pwdCBHandler);
 
             // The password to access the certificate in the keystore, alias converted to lower case because JKS
-            // aliasses are case insensitive and in lower case
+            // aliases are case insensitive and in lower case
             pwdCBHandler.addUser(encConfig.getKeystoreAlias().toLowerCase(), encConfig.getCertificatePassword());
         } else {
             log.debug("Encryption configuration is NULL! No access to private key.");
