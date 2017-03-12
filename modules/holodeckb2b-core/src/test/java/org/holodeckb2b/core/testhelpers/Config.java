@@ -111,7 +111,7 @@ public class Config implements InternalConfiguration {
 
     @Override
     public boolean shouldCheckCertificateRevocation() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return true;
     }
 
     @Override
