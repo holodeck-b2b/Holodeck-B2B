@@ -16,13 +16,10 @@
  */
 package org.holodeckb2b.core.testhelpers;
 
-import org.apache.axis2.AxisFault;
 import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.submit.core.MessageSubmitter;
 import org.holodeckb2b.events.SyncEventProcessor;
-import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
@@ -31,7 +28,6 @@ import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
-import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
@@ -87,24 +83,17 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
             persistencyProvider = (IPersistencyProvider) Class.forName(persistencyProviderClassname).newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
             // Could not create the specified event processor, fall back to default implementation
-//            log.error("Could not load the persistency provider: " + persistencyProviderClassname
-//                    + ". Using default implementation instead.");
             System.err.println("Could not load the persistency provider: " + persistencyProviderClassname
                     + ". Using default implementation instead.");
         }
-//        log.debug("Using " + persistencyProvider.getName() + " as persistency provider");
-
         try {
             persistencyProvider.init();
             daoFactory = persistencyProvider.getDAOFactory();
         } catch (PersistenceException initializationFailure) {
-//            log.fatal("Could not initialize the persistency provider " + persistencyProvider.getName()
-//                    + "! Unable to start Holodeck B2B. \n\tError details: " + initializationFailure.getMessage());
             //throw new AxisFault("Holodeck B2B could not be initialized!");
             System.err.println("Could not initialize the persistency provider " + persistencyProvider.getName()
                     + "! Unable to start Holodeck B2B. \n\tError details: " + initializationFailure.getMessage());
         }
-//        log.debug("Succesfully loaded " + persistencyProvider.getName() + " as persistency provider");
     }
 
     @Override
@@ -156,6 +145,6 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
 
     @Override
     public IQueryManager getQueryManager() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return daoFactory.getQueryManager();
     }
 }
