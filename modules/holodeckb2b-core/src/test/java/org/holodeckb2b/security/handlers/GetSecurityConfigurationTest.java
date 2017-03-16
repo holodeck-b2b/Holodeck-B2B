@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2016 The Holodeck B2B Team, Sander Fieten
  *
@@ -15,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.ebms3.handlers.inflow;
+package org.holodeckb2b.security.handlers;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -26,6 +25,7 @@ import org.apache.axis2.engine.Handler;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
@@ -36,8 +36,9 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.persistency.dao.StorageManager;
+import org.holodeckb2b.pmode.helpers.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -54,13 +55,14 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 /**
- * Created at 22:19 09.03.17
+ * Created at 12:10 15.03.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
-public class StartProcessingUsrMessageTest {
+public class GetSecurityConfigurationTest {
 
+    // Appender to control logging events
     @Mock
     private Appender mockAppender;
     @Captor
@@ -70,11 +72,11 @@ public class StartProcessingUsrMessageTest {
 
     private static HolodeckB2BTestCore core;
 
-    private StartProcessingUsrMessage handler;
+    private GetSecurityConfiguration handler;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = StartProcessingUsrMessageTest.class.getClassLoader()
+        baseDir = GetSecurityConfigurationTest.class.getClassLoader()
                 .getResource("handlers").getPath();
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
@@ -82,8 +84,12 @@ public class StartProcessingUsrMessageTest {
 
     @Before
     public void setUp() throws Exception {
-        handler = new StartProcessingUsrMessage();
-        LogManager.getRootLogger().addAppender(mockAppender);
+        // launched after org.holodeckb2b.multihop.ConfigureMultihop handler
+        handler = new GetSecurityConfiguration();
+        // Adding appender to the FindPModes logger
+        Logger logger = LogManager.getRootLogger();
+        logger.addAppender(mockAppender);
+        logger.setLevel(Level.DEBUG);
     }
 
     @After
@@ -93,7 +99,7 @@ public class StartProcessingUsrMessageTest {
 
     @Test
     public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
+        MessageMetaData mmd = TestUtils.getMMD("security/handlers/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
@@ -101,27 +107,66 @@ public class StartProcessingUsrMessageTest {
         // Adding UserMessage from mmd
         OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
 
+        UserMessage um = UserMessageElement.readElement(umElement);
+
+        String pmodeId = um.getCollaborationInfo().getAgreement().getPModeId();
+
+        um.setPModeId(pmodeId);
+
+        System.out.println("umElement: " + umElement.toString());
+
         MessageContext mc = new MessageContext();
-        // Setting input message property
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umElement);
+        mc.setFLOW(MessageContext.OUT_FLOW);
+
         try {
             mc.setEnvelope(env);
         } catch (AxisFault axisFault) {
             fail(axisFault.getMessage());
         }
 
-        UserMessage userMessage
-                = UserMessageElement.readElement(umElement);
-        String msgId = userMessage.getMessageId();
-        StorageManager updateManager = core.getStorageManager();
+        PMode pmode = new PMode();
+        pmode.setId(pmodeId);
+        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+        pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
+        pmode.addLeg(new Leg());
+
+        // Setting token configuration
+        UsernameTokenConfig tokenConfig = new UsernameTokenConfig();
+        tokenConfig.setUsername("username");
+        tokenConfig.setPassword("secret");
+
+        // Setting signature configuration
+        SigningConfig sigConfig = new SigningConfig();
+        sigConfig.setKeystoreAlias("exampleca");
+        sigConfig.setCertificatePassword("ExampleCA");
+        sigConfig.setRevocationCheck(true); // optional
+
+        EncryptionConfig encConfig = new EncryptionConfig();
+        encConfig.setKeystoreAlias("exampleca");
+
+        // Setting security configuration
+        SecurityConfig secConfig = new SecurityConfig();
+        secConfig.setSignatureConfiguration(sigConfig);
+        secConfig.setEncryptionConfiguration(encConfig);
+
+        PartnerConfig initiator = new PartnerConfig();
+        initiator.setSecurityConfiguration(secConfig);
+        pmode.setInitiator(initiator);
+
+        PartnerConfig responder = new PartnerConfig();
+        responder.setSecurityConfiguration(secConfig);
+        pmode.setResponder(responder);
+
+        core.getPModeSet().add(pmode);
         IUserMessageEntity userMessageEntity =
-                updateManager.storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
+                core.getStorageManager()
+                        .storeIncomingMessageUnit(um);
+        mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
                 userMessageEntity);
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertNotNull(invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -129,9 +174,10 @@ public class StartProcessingUsrMessageTest {
         verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
         LoggingEvent loggingEvent = captorLoggingEvent.getValue();
         //Check log level
-        assertThat(loggingEvent.getLevel(), is(Level.WARN));
+        assertThat(loggingEvent.getLevel(), is(Level.DEBUG));
         //Check the message being logged
         assertThat(loggingEvent.getRenderedMessage(),
-                is("User message [msgId= " + msgId + "] is ready for processing"));
+                is("Message context prepared for adding all security headers "
+                        + "(signing and encryption)"));
     }
 }
