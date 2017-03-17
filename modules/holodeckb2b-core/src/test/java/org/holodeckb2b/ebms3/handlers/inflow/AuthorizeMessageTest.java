@@ -71,7 +71,7 @@ public class AuthorizeMessageTest {
     @Mock
     private Appender mockAppender;
     @Captor
-    private ArgumentCaptor captorLoggingEvent;
+    private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
 
     private static String baseDir;
 
@@ -174,8 +174,8 @@ public class AuthorizeMessageTest {
             fail(e.getMessage());
         }
 
-        verify(mockAppender, atLeastOnce()).doAppend((LoggingEvent)captorLoggingEvent.capture());
-        LoggingEvent loggingEvent = (LoggingEvent)captorLoggingEvent.getValue();
+        verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
+        LoggingEvent loggingEvent = captorLoggingEvent.getValue();
         //Check log level
         assertThat(loggingEvent.getLevel(), is(Level.INFO));
         //Check the message being logged
