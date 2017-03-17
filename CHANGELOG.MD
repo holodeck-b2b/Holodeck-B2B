@@ -3,44 +3,44 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
-###Added
+### Added
 * P-Mode validation feature which separates the validation of P-Modes from both their internal and external storage
 * Unit tests to improve test coverage
-* Integration tests. These tests setup two Holodeck B2B instances and execute both a push and pull exchange to check
+* Integration tests. These tests set up two Holodeck B2B instances and execute both a push and pull exchange to check
   that everything works on run time
 * A default implementation of the message model interface (in Common module)
 * Interfaces for separation of Core functionality and storage of message unit meta-data
 * Default _persistency provider_ implementation
 
-###Changed
+### Changed
 * Refactored the validation of received message units into separate validation classes and handler
 * Refactored Core module to use new persistency interfaces
 * Moved XML message meta-data implementation and ProductId classes to Common module
 
-###Deprecated
+### Deprecated
 
-###Removed
+### Removed
 * Exceptions `org.holodeckb2b.common.exceptions.DatabaseException` and `org.holodeckb2b.common.exceptions.DuplicateMessageIdError`
   which were bound to the specific persistency implementation of previous versions
 
-###Fixed
+### Fixed
 
-###Security
+### Security
 
 ## 2.1.2
 ###### 2016-12-21
-###Fixed
+### Fixed
 * References in Error Signals are not checked correctly [#38](https://github.com/holodeck-b2b/Holodeck-B2B/issues/38)
 * Database connection leak [#39](https://github.com/holodeck-b2b/Holodeck-B2B/issues/39)
 * The dependency on Java 8 is removed again [#40](https://github.com/holodeck-b2b/Holodeck-B2B/issues/40)
 
 ## 2.1.1
 ###### 2016-11-11
-###Changed
+### Changed
 * It is now possible to not only configure whether _Error Signals_ should be logged but also if all signals
   should be logged or only the ones that contain an Error with severity _failure_ (see `log4j2.xml` for more info)
 
-###Fixed
+### Fixed
 * Database connection not closed [#34](https://github.com/holodeck-b2b/Holodeck-B2B/issues/34)
 * ebMS errors are only logged when log level is ERROR [#35](https://github.com/holodeck-b2b/Holodeck-B2B/issues/35)
 * Exceptions in processing of WSS header not handled correctly [#36](https://github.com/holodeck-b2b/Holodeck-B2B/issues/36)
