@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2016 The Holodeck B2B Team, Sander Fieten
  *
@@ -20,7 +19,6 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.apache.log4j.Appender;
@@ -102,13 +100,6 @@ public class StartProcessingUsrMessageTest {
         OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
 
         MessageContext mc = new MessageContext();
-        // Setting input message property
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umElement);
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
 
         UserMessage userMessage
                 = UserMessageElement.readElement(umElement);
@@ -121,7 +112,7 @@ public class StartProcessingUsrMessageTest {
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertNotNull(invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
