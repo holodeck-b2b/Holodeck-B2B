@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.ebms3.handlers.outflow;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
@@ -26,16 +27,15 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
-import org.holodeckb2b.common.messagemodel.EbmsError;
-import org.holodeckb2b.common.messagemodel.ErrorMessage;
+import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.packaging.ReceiptElement;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.junit.After;
 import org.junit.Before;
@@ -47,6 +47,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,12 +58,15 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 /**
- * Created at 15:46 27.02.17
+ * Created at 15:45 27.02.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
-public class PackageErrorSignalsTest {
+public class PackageReceiptSignalTest {
+
+    private static final QName RECEIPT_CHILD_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "ReceiptChild");
 
     @Mock
     private Appender mockAppender;
@@ -73,11 +77,11 @@ public class PackageErrorSignalsTest {
 
     private static HolodeckB2BTestCore core;
 
-    private PackageErrorSignals handler;
+    private PackageReceiptSignal handler;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = PackageErrorSignalsTest.class.getClassLoader()
+        baseDir = PackageReceiptSignalTest.class.getClassLoader()
                 .getResource("handlers").getPath();
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
@@ -85,7 +89,7 @@ public class PackageErrorSignalsTest {
 
     @Before
     public void setUp() throws Exception {
-        handler = new PackageErrorSignals();
+        handler = new PackageReceiptSignal();
         // Adding appender to the FindPModes logger
         Logger logger = LogManager.getRootLogger();
         logger.addAppender(mockAppender);
@@ -113,28 +117,21 @@ public class PackageErrorSignalsTest {
             fail(axisFault.getMessage());
         }
 
-        ErrorMessage errorMessage = new ErrorMessage();
-        ArrayList<IEbmsError> errors = new ArrayList<>();
-        EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
-        ebmsError.setErrorCode("some_error_code");
-        errors.add(ebmsError);
-        errorMessage.setErrors(errors);
+        Receipt receipt = new Receipt();
+        OMElement receiptChildElement =
+                env.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
+        ArrayList<OMElement> content = new ArrayList<>();
+        content.add(receiptChildElement);
+        receipt.setContent(content);
 
-        ErrorSignalElement.createElement(headerBlock, errorMessage);
+        ReceiptElement.createElement(headerBlock, receipt);
 
         StorageManager updateManager = core.getStorageManager();
-        IErrorMessageEntity errorMessageEntity =
-                updateManager.storeIncomingMessageUnit(errorMessage);
-        System.out.println("shouldHaveSOAPFault: " + errorMessageEntity.shouldHaveSOAPFault());
-        ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
-        errorMessageEntities.add(errorMessageEntity);
-        mc.setProperty(MessageContextProperties.OUT_ERRORS,
-                errorMessageEntities);
-
-        // todo We also need to test the case when the
-        // todo org.holodeckb2b.persistency.jpa.ErrorMessage.shouldHaveSOAPFault()
-        // todo option is set to true. I don't know how to set it for now (TS)
+        IReceiptEntity receiptEntity =
+                updateManager.storeIncomingMessageUnit(receipt);
+        ArrayList<IReceiptEntity> receiptEntities = new ArrayList<>();
+        receiptEntities.add(receiptEntity);
+        mc.setProperty(MessageContextProperties.OUT_RECEIPTS, receiptEntities);
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
@@ -147,9 +144,8 @@ public class PackageErrorSignalsTest {
                 .doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
         HashMap<String, Boolean> messages = new HashMap<>();
-        messages.put("Adding " + 1 + " error signal(s) to the message", false);
+        messages.put("Adding receipt signal(s) to the message", false);
         messages.put("Get the eb:Messaging header from the message", false);
-        messages.put("Make sure that all meta-data on the error is loaded", false);
         messages.put("Add eb:SignalMessage element to the existing eb:Messaging header", false);
         messages.put("eb:SignalMessage element succesfully added to header", false);
         Set<String> keys = messages.keySet();

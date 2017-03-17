@@ -26,16 +26,14 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
-import org.holodeckb2b.common.messagemodel.EbmsError;
-import org.holodeckb2b.common.messagemodel.ErrorMessage;
+import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.packaging.PullRequestElement;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.junit.After;
 import org.junit.Before;
@@ -47,22 +45,23 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 /**
- * Created at 15:46 27.02.17
+ * Created at 15:45 27.02.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
-public class PackageErrorSignalsTest {
+public class PackagePullRequestSignalTest {
 
     @Mock
     private Appender mockAppender;
@@ -73,11 +72,11 @@ public class PackageErrorSignalsTest {
 
     private static HolodeckB2BTestCore core;
 
-    private PackageErrorSignals handler;
+    private PackagePullRequestSignal handler;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = PackageErrorSignalsTest.class.getClassLoader()
+        baseDir = PackagePullRequestSignalTest.class.getClassLoader()
                 .getResource("handlers").getPath();
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
@@ -85,7 +84,7 @@ public class PackageErrorSignalsTest {
 
     @Before
     public void setUp() throws Exception {
-        handler = new PackageErrorSignals();
+        handler = new PackagePullRequestSignal();
         // Adding appender to the FindPModes logger
         Logger logger = LogManager.getRootLogger();
         logger.addAppender(mockAppender);
@@ -113,28 +112,15 @@ public class PackageErrorSignalsTest {
             fail(axisFault.getMessage());
         }
 
-        ErrorMessage errorMessage = new ErrorMessage();
-        ArrayList<IEbmsError> errors = new ArrayList<>();
-        EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
-        ebmsError.setErrorCode("some_error_code");
-        errors.add(ebmsError);
-        errorMessage.setErrors(errors);
+        PullRequest pullRequest = new PullRequest();
+        pullRequest.setMPC("some_mpc");
 
-        ErrorSignalElement.createElement(headerBlock, errorMessage);
+        PullRequestElement.createElement(headerBlock, pullRequest);
 
         StorageManager updateManager = core.getStorageManager();
-        IErrorMessageEntity errorMessageEntity =
-                updateManager.storeIncomingMessageUnit(errorMessage);
-        System.out.println("shouldHaveSOAPFault: " + errorMessageEntity.shouldHaveSOAPFault());
-        ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
-        errorMessageEntities.add(errorMessageEntity);
-        mc.setProperty(MessageContextProperties.OUT_ERRORS,
-                errorMessageEntities);
-
-        // todo We also need to test the case when the
-        // todo org.holodeckb2b.persistency.jpa.ErrorMessage.shouldHaveSOAPFault()
-        // todo option is set to true. I don't know how to set it for now (TS)
+        IPullRequestEntity pullRequestEntity =
+                updateManager.storeIncomingMessageUnit(pullRequest);
+        mc.setProperty(MessageContextProperties.OUT_PULL_REQUEST, pullRequestEntity);
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
@@ -147,9 +133,8 @@ public class PackageErrorSignalsTest {
                 .doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
         HashMap<String, Boolean> messages = new HashMap<>();
-        messages.put("Adding " + 1 + " error signal(s) to the message", false);
+        messages.put("Adding pull request signal to the message", false);
         messages.put("Get the eb:Messaging header from the message", false);
-        messages.put("Make sure that all meta-data on the error is loaded", false);
         messages.put("Add eb:SignalMessage element to the existing eb:Messaging header", false);
         messages.put("eb:SignalMessage element succesfully added to header", false);
         Set<String> keys = messages.keySet();
