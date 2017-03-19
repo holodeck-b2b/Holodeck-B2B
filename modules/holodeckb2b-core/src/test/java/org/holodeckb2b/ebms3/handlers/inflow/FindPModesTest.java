@@ -57,6 +57,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.List;
 
+import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -182,16 +183,8 @@ public class FindPModesTest {
         verify(mockAppender, atLeastOnce())
                 .doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "Found P-Mode [" + pmode.getId()
+        String msg = "Found P-Mode [" + pmode.getId()
                 + "] for User Message [" + msgId + "]";
-        boolean containsExpLogMsg = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                if(e.getRenderedMessage().equals(expLogMsg)) {
-                    containsExpLogMsg = true;
-                }
-            }
-        }
-        assertTrue(containsExpLogMsg);
+        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 }

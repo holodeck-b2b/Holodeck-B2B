@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -158,16 +159,8 @@ public class FindPModesForPullRequestTest {
         verify(mockAppender, atLeastOnce())
                 .doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "Store the list of " + 1
+        String msg = "Store the list of " + 1
                 + " authorized PModes so next handler can retrieve message unit to return";
-        boolean containsExpLogMsg = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                if(e.getRenderedMessage().equals(expLogMsg)) {
-                    containsExpLogMsg = true;
-                }
-            }
-        }
-        assertTrue(containsExpLogMsg);
+        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 }

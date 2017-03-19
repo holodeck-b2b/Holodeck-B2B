@@ -24,7 +24,6 @@ import org.apache.axis2.transport.http.server.AxisHttpResponse;
 import org.holodeckb2b.common.constants.ProductId;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -61,11 +60,6 @@ public class HTTPProductIdentifierTest {
     @Before
     public void setUp() throws Exception {
         handler = new HTTPProductIdentifier();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-
     }
 
     @Test

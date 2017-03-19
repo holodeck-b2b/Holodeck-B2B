@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -69,7 +70,6 @@ import static org.mockito.Mockito.verify;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class BasicHeaderValidationTest {
-
     // Appender to control logging events
     @Mock
     private Appender mockAppender;
@@ -146,16 +146,8 @@ public class BasicHeaderValidationTest {
         verify(mockAppender, atLeastOnce())
                 .doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "Received User Message satisfies basic validations";
-        boolean containsExpLogMsg = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                if(e.getRenderedMessage().equals(expLogMsg)) {
-                    containsExpLogMsg = true;
-                }
-            }
-        }
-        assertTrue(containsExpLogMsg);
+        String msg = "Received User Message satisfies basic validations";
+        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 
     @Test
@@ -201,16 +193,8 @@ public class BasicHeaderValidationTest {
         verify(mockAppender, atLeastOnce())
                 .doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "Received Pull Request satisfies basic validations";
-        boolean containsExpLogMsg = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                if(e.getRenderedMessage().equals(expLogMsg)) {
-                    containsExpLogMsg = true;
-                }
-            }
-        }
-        assertTrue(containsExpLogMsg);
+        String msg = "Received Pull Request satisfies basic validations";
+        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 
     // todo the following test fails. Correct it and uncomment
@@ -267,16 +251,8 @@ public class BasicHeaderValidationTest {
         verify(mockAppender, atLeastOnce())
                 .doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "Received Receipt satisfies basic validations";
-        boolean containsExpLogMsg = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                if(e.getRenderedMessage().equals(expLogMsg)) {
-                    containsExpLogMsg = true;
-                }
-            }
-        }
-        assertTrue(containsExpLogMsg);
+        String msg = "Received Receipt satisfies basic validations";
+        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 
     @Test
@@ -314,15 +290,7 @@ public class BasicHeaderValidationTest {
         verify(mockAppender, atLeastOnce())
                 .doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "Received Error satisfies basic validations";
-        boolean containsExpLogMsg = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                if(e.getRenderedMessage().equals(expLogMsg)) {
-                    containsExpLogMsg = true;
-                }
-            }
-        }
-        assertTrue(containsExpLogMsg);
+        String msg = "Received Error satisfies basic validations";
+        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 }

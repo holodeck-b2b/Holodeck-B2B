@@ -1,12 +1,15 @@
 package org.holodeckb2b.core.testhelpers;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.log4j.Level;
+import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
 
 import javax.xml.namespace.QName;
 import java.io.File;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -50,6 +53,18 @@ public class TestUtils {
         assertEquals(value, p.getValue());
         // todo see PropertyElement.createElement() method implementation
         //assertEquals(type, p.getType());
+    }
+
+    public static boolean eventContainsMsg(List<LoggingEvent> events, Level logLevel, String msg) {
+        boolean flag = false;
+        for(LoggingEvent e : events) {
+            if(e.getLevel().equals(logLevel)) {
+                if(e.getRenderedMessage().equals(msg)) {
+                    flag = true;
+                }
+            }
+        }
+        return flag;
     }
 
     private static final QName PROPERTY_ELEMENT_NAME =

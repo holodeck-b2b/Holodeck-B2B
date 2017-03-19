@@ -57,6 +57,7 @@ import javax.activation.DataHandler;
 import java.net.URL;
 import java.util.List;
 
+import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -170,15 +171,7 @@ public class ConfigureHTTPTransportHandlerTest {
         verify(mockAppender, atLeastOnce())
                 .doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "HTTP configuration done";
-        boolean containsExpLogMsg = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                if(e.getRenderedMessage().equals(expLogMsg)) {
-                    containsExpLogMsg = true;
-                }
-            }
-        }
-        assertTrue(containsExpLogMsg);
+        String msg = "HTTP configuration done";
+        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 }

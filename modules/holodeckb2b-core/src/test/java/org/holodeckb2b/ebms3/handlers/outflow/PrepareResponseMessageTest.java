@@ -59,6 +59,7 @@ import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -149,16 +150,8 @@ public class PrepareResponseMessageTest {
         verify(mockAppender, atLeastOnce())
                 .doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "Response contains an user message unit";
-        boolean containsExpLogMsg = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                if(e.getRenderedMessage().equals(expLogMsg)) {
-                    containsExpLogMsg = true;
-                }
-            }
-        }
-        assertTrue(containsExpLogMsg);
+        String msg = "Response contains an user message unit";
+        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 
     @Test
@@ -204,16 +197,8 @@ public class PrepareResponseMessageTest {
         verify(mockAppender, atLeastOnce())
                 .doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "Response contains a receipt signal";
-        boolean containsExpLogMsg = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                if(e.getRenderedMessage().equals(expLogMsg)) {
-                    containsExpLogMsg = true;
-                }
-            }
-        }
-        assertTrue(containsExpLogMsg);
+        String msg = "Response contains a receipt signal";
+        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 
     @Test
@@ -273,15 +258,7 @@ public class PrepareResponseMessageTest {
         verify(mockAppender, atLeastOnce())
                 .doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "Response does contain one error signal";
-        boolean containsExpLogMsg = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                if(e.getRenderedMessage().equals(expLogMsg)) {
-                    containsExpLogMsg = true;
-                }
-            }
-        }
-        assertTrue(containsExpLogMsg);
+        String msg = "Response does contain one error signal";
+        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 }
