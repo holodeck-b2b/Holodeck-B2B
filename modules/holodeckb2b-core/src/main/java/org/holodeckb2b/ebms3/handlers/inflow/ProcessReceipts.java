@@ -16,8 +16,6 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import java.util.Collection;
-import java.util.List;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -37,19 +35,22 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received receipt signals.
- * <p>For each {@link Receipt} in the message (indicated by message context property
- * {@link MessageContextProperties#IN_RECEIPTS}) it will check if the referenced {@link UserMessage} expects a Receipt
+ * <p>For each {@link IReceiptEntity} in the message (indicated by message context property
+ * {@link MessageContextProperties#IN_RECEIPTS}) it will check if the referenced {@link IMessageUnitEntity} expects a Receipt
  * anyway. This is done by checking the <i>ReceiptConfiguration</i> for the leg ({@link ILeg#getReceiptConfiguration()}.
  * If no configuration exists Receipt are not expected and a <i>ProcessingModeMismatch</i> error is generated for the
- * Receipt and its processing state is set to {@link ProcessingStates#FAILURE}.<br>
+ * Receipt and its processing state is set to {@link ProcessingState#FAILURE}.<br>
  * If a receipt configuration exists and if the user message is waiting for a receipt it will be marked as delivered and
- * the Receipt's state will be set to {@link ProcessingStates#READY_FOR_DELIVERY} to indicate that it can be delivered
+ * the Receipt's state will be set to {@link ProcessingState#READY_FOR_DELIVERY} to indicate that it can be delivered
  * to the business application. The actual delivery is done by the {@link DeliverReceipts} handler.<br>
  * If a receipt configuration exists but the user message is not waiting for a receipt anymore (because it is already
  * acknowledged by another Receipt or it has failed due to an Error) the Receipt's processing state will be changed to
- * {@link ProcessingStates#DONE}.
+ * {@link ProcessingState#DONE}.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
@@ -100,6 +101,9 @@ public class ProcessReceipts extends BaseHandler {
                     + "] for referenced message with msgId=" + refToMsgId);
         Collection<IMessageUnitEntity> refdMsgs = HolodeckB2BCore.getQueryManager()
                                                                  .getMessageUnitsWithId(refToMsgId);
+
+        System.out.println("refdMsgs: " + refdMsgs);
+
         if (Utils.isNullOrEmpty(refdMsgs)) {
             // This error SHOULD NOT occur because the reference is already checked when finding the P-Mode
             log.error("Receipt [msgId=" + receipt.getMessageId() + "] contains unknown refToMessageId ["
@@ -115,6 +119,9 @@ public class ProcessReceipts extends BaseHandler {
             if (ackedMessage instanceof IUserMessage) {
                 // Check if the found message unit expects a receipt
                 final IPMode pmode = HolodeckB2BCore.getPModeSet().get(ackedMessage.getPModeId());
+
+                System.out.println("pmode: " + pmode);
+
                 if (pmode == null || pmode.getLeg(ackedMessage.getLeg()).getReceiptConfiguration() == null) {
                     // The P-Mode is not configured for receipts, generate error
                     updateManager.setProcessingState(receipt, ProcessingState.FAILURE);
@@ -172,6 +179,8 @@ public class ProcessReceipts extends BaseHandler {
         ProcessingState prevState = null, curState = mu.getCurrentProcessingState().getState();
         if (mu.getProcessingStates().size() > 1)
             prevState = states.get(states.size() - 2).getState();
+
+        System.out.println("curState: " + curState);
 
         return curState == ProcessingState.AWAITING_RECEIPT
                || (( curState == ProcessingState.AWAITING_PULL || curState == ProcessingState.READY_TO_PUSH )

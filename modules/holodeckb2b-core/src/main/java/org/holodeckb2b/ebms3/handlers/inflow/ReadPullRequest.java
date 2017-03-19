@@ -25,6 +25,7 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PullRequestElement;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
  * Is an in flow handler that checks if this message contains a Pull Request, i.e. contains a <eb:PullRequest> element
@@ -32,7 +33,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * stored both in the database and message context (under key {@link MessageContextProperties#IN_PULL_REQUEST}).
  * <p>The meta data is stored in an {@link PullRequestElement} entity object which is stored in the database and added to the
  * message context under key {@link MessageContextProperties#IN_PULL_REQUEST}. The processing state of the pull request
- * is set to {@link ProcessingStates#RECEIVED}.
+ * is set to {@link ProcessingState#RECEIVED}.
  * <p><b>NOTE:</b> The XML schema definition from the ebMS specification allows multiple <code>eb:SignalMessage</code>
  * elements in the ebMS header, so there could be more than one pull request in the message. The ebMS Core Specification
  * however limits the number of pull request units in the message to just one. Holodeck B2B therefor only uses the first

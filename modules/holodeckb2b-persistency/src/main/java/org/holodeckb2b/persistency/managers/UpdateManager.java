@@ -16,13 +16,6 @@
  */
 package org.holodeckb2b.persistency.managers;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.OptimisticLockException;
-import javax.persistence.RollbackException;
 import org.holodeckb2b.common.messagemodel.MessageProcessingState;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
@@ -41,6 +34,14 @@ import org.holodeckb2b.persistency.jpa.MessageUnitProcessingState;
 import org.holodeckb2b.persistency.jpa.UserMessage;
 import org.holodeckb2b.persistency.util.EntityManagerUtil;
 import org.holodeckb2b.persistency.util.JPAEntityHelper;
+
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import javax.persistence.OptimisticLockException;
+import javax.persistence.RollbackException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 
 /**
  * Is the default persistency provider's implementation of the {@link IUpdateManager} interface.
@@ -90,6 +91,10 @@ public class UpdateManager implements IUpdateManager {
             // Check that the current state equals the required state
             MessageUnitProcessingState currentState = (MessageUnitProcessingState)
                                                                                 jpaMsgUnit.getCurrentProcessingState();
+
+            System.out.println("currentState: " + currentState.getState());
+            System.out.println("currentProcState: " + currentProcState);
+
             if (currentState.getState() != currentProcState) {
                 // Not in the required state, stop execution
                 em.getTransaction().rollback();

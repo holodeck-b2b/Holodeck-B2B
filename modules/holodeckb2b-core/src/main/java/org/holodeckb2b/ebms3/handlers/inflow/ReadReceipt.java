@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import java.util.Iterator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
@@ -29,14 +28,17 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.ReceiptElement;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
+
+import java.util.Iterator;
 
 /**
  * Is the handler that checks if this message contains one or more Receipt signals, i.e. contains one or more
  * <code>eb:Receipt</code> elements in the ebMS header. When such signal message units are found the information is read
  * from the message into a array of {@link ReceiptElement} objects and stored in both database and message context (under key
  * {@link MessageContextProperties#IN_RECEIPTS}). The processing state of the new receipts will be set to {@link
- * ProcessingStates#RECEIVED}.
+ * ProcessingState#RECEIVED}.
  * <p><b>NOTE: </b>This handler will process all receipt signals that are in the message although the ebMS V3 Core
  * Specification does not allow more than one.
  *

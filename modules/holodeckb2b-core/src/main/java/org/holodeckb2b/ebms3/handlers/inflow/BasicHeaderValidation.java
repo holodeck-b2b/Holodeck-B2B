@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -28,15 +27,12 @@ import org.holodeckb2b.ebms3.headervalidators.ErrorSignal;
 import org.holodeckb2b.ebms3.headervalidators.PullRequest;
 import org.holodeckb2b.ebms3.headervalidators.Receipt;
 import org.holodeckb2b.ebms3.headervalidators.UserMessage;
-import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.persistency.entities.*;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
+
+import java.util.Collection;
 
 /**
  * Is the <i>IN FLOW</i> handler responsible for checking basic conformance of the received ebMS header meta data. The
