@@ -21,55 +21,54 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.messagemodel.EbmsError;
+import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.junit.After;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.ArrayList;
+
 import static org.junit.Assert.*;
 
 /**
- * Created at 23:28 21.09.16
+ * Created at 23:23 29.01.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class ReadUserMessageTest {
+public class ReadErrorTest {
 
     private static String baseDir;
 
-    private ReadUserMessage handler;
+    private static HolodeckB2BTestCore core;
+
+    private ReadError handler;
 
     @BeforeClass
-    public static void setUpClass() {
-        baseDir = ReadUserMessageTest.class.getClassLoader()
+    public static void setUpClass() throws Exception {
+        baseDir = ReadErrorTest.class.getClassLoader()
                 .getResource("handlers").getPath();
-        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
+        core = new HolodeckB2BTestCore(baseDir);
+        HolodeckB2BCoreInterface.setImplementation(core);
     }
 
     @Before
     public void setUp() throws Exception {
-        handler = new ReadUserMessage();
+        handler = new ReadError();
     }
 
-    @After
-    public void tearDown() throws Exception {
-
-    }
-
-    /**
-     * Test construction of the user message to be successfully consumed by
-     * {@link org.holodeckb2b.ebms3.handlers.inflow.ReadUserMessage ReadUserMessage} handler
-     */
     @Test
-    public void testProcessing() {
+    public void testDoProcessing() throws Exception {
         MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
@@ -78,22 +77,43 @@ public class ReadUserMessageTest {
         // Adding UserMessage from mmd
         UserMessageElement.createElement(headerBlock, mmd);
 
+        String msgId = "some_msg_id";
+
         MessageContext mc = new MessageContext();
+        mc.setServerSide(true);
+        mc.setFLOW(MessageContext.IN_FLOW);
+
         try {
             mc.setEnvelope(env);
         } catch (AxisFault axisFault) {
             fail(axisFault.getMessage());
         }
 
-        assertNull(mc.getProperty(MessageContextProperties.IN_USER_MESSAGE));
+        String errorId = "error_id";
+        ErrorMessage errorMessage = new ErrorMessage();
+        ArrayList<IEbmsError> errors = new ArrayList<>();
+        EbmsError ebmsError = new EbmsError();
+        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setErrorCode("some_error_code");
+        ebmsError.setRefToMessageInError(msgId);
+        ebmsError.setMessage("some error message");
+
+        errors.add(ebmsError);
+        errorMessage.setErrors(errors);
+        errorMessage.setRefToMessageId(msgId);
+        errorMessage.setMessageId(errorId);
+
+        ErrorSignalElement.createElement(headerBlock, errorMessage);
+
+        assertNull(mc.getProperty(MessageContextProperties.IN_ERRORS));
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            assertNotNull(invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
-        assertNotNull(mc.getProperty(MessageContextProperties.IN_USER_MESSAGE));
+        assertNotNull(mc.getProperty(MessageContextProperties.IN_ERRORS));
     }
 }

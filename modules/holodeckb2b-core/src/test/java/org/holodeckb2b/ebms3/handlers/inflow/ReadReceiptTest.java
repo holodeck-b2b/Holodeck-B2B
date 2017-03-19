@@ -16,60 +16,60 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.packaging.ReceiptElement;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.junit.After;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+
 import static org.junit.Assert.*;
 
 /**
- * Created at 23:28 21.09.16
+ * Created at 23:21 29.01.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class ReadUserMessageTest {
+public class ReadReceiptTest {
+
+    private static final QName RECEIPT_CHILD_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "ReceiptChild");
 
     private static String baseDir;
 
-    private ReadUserMessage handler;
+    private ReadReceipt handler;
 
     @BeforeClass
-    public static void setUpClass() {
-        baseDir = ReadUserMessageTest.class.getClassLoader()
+    public static void setUpClass() throws Exception {
+        baseDir = ReadReceiptTest.class.getClassLoader()
                 .getResource("handlers").getPath();
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
     }
 
     @Before
     public void setUp() throws Exception {
-        handler = new ReadUserMessage();
+        handler = new ReadReceipt();
     }
 
-    @After
-    public void tearDown() throws Exception {
-
-    }
-
-    /**
-     * Test construction of the user message to be successfully consumed by
-     * {@link org.holodeckb2b.ebms3.handlers.inflow.ReadUserMessage ReadUserMessage} handler
-     */
     @Test
-    public void testProcessing() {
+    public void testDoProcessing() throws Exception {
         MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
@@ -79,21 +79,36 @@ public class ReadUserMessageTest {
         UserMessageElement.createElement(headerBlock, mmd);
 
         MessageContext mc = new MessageContext();
+        mc.setServerSide(true);
+        mc.setFLOW(MessageContext.IN_FLOW);
+
         try {
             mc.setEnvelope(env);
         } catch (AxisFault axisFault) {
             fail(axisFault.getMessage());
         }
 
-        assertNull(mc.getProperty(MessageContextProperties.IN_USER_MESSAGE));
+        // Setting input receipts property
+        Receipt receipt = new Receipt();
+        OMElement receiptChildElement =
+                env.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
+        ArrayList<OMElement> content = new ArrayList<>();
+        content.add(receiptChildElement);
+        receipt.setContent(content);
+        receipt.setRefToMessageId("some_msg_id");
+        receipt.setMessageId("receipt_id");
+
+        ReceiptElement.createElement(headerBlock, receipt);
+
+        assertNull(mc.getProperty(MessageContextProperties.IN_RECEIPTS));
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            assertNotNull(invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
-        assertNotNull(mc.getProperty(MessageContextProperties.IN_USER_MESSAGE));
+        assertNotNull(mc.getProperty(MessageContextProperties.IN_RECEIPTS));
     }
 }
