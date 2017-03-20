@@ -27,24 +27,26 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
-import org.holodeckb2b.common.messagemodel.EbmsError;
-import org.holodeckb2b.common.messagemodel.ErrorMessage;
+import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.packaging.ReceiptElement;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.pmode.helpers.*;
+import org.holodeckb2b.pmode.helpers.DeliverySpecification;
+import org.holodeckb2b.pmode.helpers.Leg;
+import org.holodeckb2b.pmode.helpers.PMode;
+import org.holodeckb2b.pmode.helpers.ReceiptConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -55,22 +57,23 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 /**
- * Created at 12:04 15.03.17
+ * Created at 12:05 15.03.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
-public class DeliverErrorsTest {
-
+public class DeliverReceiptsTest {
+    private static final QName RECEIPT_CHILD_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "ReceiptChild");
     // Appender to control logging events
     @Mock
     private Appender mockAppender;
@@ -81,11 +84,9 @@ public class DeliverErrorsTest {
 
     private static HolodeckB2BTestCore core;
 
-    private ProcessErrors processErrorsHandler;
+    private ProcessReceipts processReceiptsHandler;
 
-    private DeliverErrors handler;
-
-    private UserMessage userMessage;
+    private DeliverReceipts handler;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -96,9 +97,9 @@ public class DeliverErrorsTest {
     }
     @Before
     public void setUp() throws Exception {
-        processErrorsHandler = new ProcessErrors();
-        // Executed after org.holodeckb2b.ebms3.handlers.inflow.ProcessErrors handler
-        handler = new DeliverErrors();
+        processReceiptsHandler = new ProcessReceipts();
+        // Executed after org.holodeckb2b.ebms3.handlers.inflow.ProcessReceipts handler
+        handler = new DeliverReceipts();
         // Adding appender to the FindPModes logger
         Logger logger = LogManager.getRootLogger();
         logger.addAppender(mockAppender);
@@ -107,7 +108,6 @@ public class DeliverErrorsTest {
 
     @After
     public void tearDown() throws Exception {
-        TestUtils.cleanOldMessageUnitEntities();
         LogManager.getRootLogger().removeAppender(mockAppender);
     }
 
@@ -121,7 +121,10 @@ public class DeliverErrorsTest {
         // Adding UserMessage from mmd
         OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
 
-        String msgId = "some_msg_id_01";
+        PMode pmode = new PMode();
+        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+
+        String msgId = "org.holodeckb2b.ebms3.handlers.inflow.ProcessReceiptsTest_01";
         UserMessage userMessage = UserMessageElement.readElement(umElement);
 
         String pmodeId =
@@ -129,24 +132,7 @@ public class DeliverErrorsTest {
         userMessage.setPModeId(pmodeId);
         userMessage.setMessageId(msgId);
 
-        PMode pmode = new PMode();
         pmode.setId(pmodeId);
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-
-        Leg leg = new Leg();
-
-        UserMessageFlow umFlow = new UserMessageFlow();
-        ErrorHandlingConfig errorHandlingConfig = new ErrorHandlingConfig();
-        errorHandlingConfig.setNotifyErrorToBusinessApplication(true);
-        DeliverySpecification deliverySpecification = new DeliverySpecification();
-        deliverySpecification.setId("delivery_spec_id");
-        errorHandlingConfig.setErrorDelivery(deliverySpecification);
-        umFlow.setErrorHandlingConfiguration(errorHandlingConfig);
-
-        leg.setUserMessageFlow(umFlow);
-        pmode.addLeg(leg);
-
-        core.getPModeSet().add(pmode);
 
         MessageContext mc = new MessageContext();
         mc.setServerSide(true);
@@ -158,19 +144,17 @@ public class DeliverErrorsTest {
             fail(axisFault.getMessage());
         }
 
-        String errorId = "error_id";
-        ErrorMessage errorMessage = new ErrorMessage();
-        ArrayList<IEbmsError> errors = new ArrayList<>();
-        EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
-        ebmsError.setErrorCode("some_error_code");
-        ebmsError.setRefToMessageInError(msgId);
-        ebmsError.setMessage("some error message");
+        Leg leg = new Leg();
+        ReceiptConfiguration receiptConfig = new ReceiptConfiguration();
+        receiptConfig.setNotifyReceiptToBusinessApplication(true);
+        DeliverySpecification deliverySpec = new DeliverySpecification();
+        deliverySpec.setId("some_delivery_spec_01");
+        receiptConfig.setReceiptDelivery(deliverySpec);
+        leg.setReceiptConfiguration(receiptConfig);
 
-        errors.add(ebmsError);
-        errorMessage.setErrors(errors);
-        errorMessage.setRefToMessageId(msgId);
-        errorMessage.setMessageId("error_id");
+        pmode.addLeg(leg);
+
+        core.getPModeSet().add(pmode);
 
         StorageManager storageManager = core.getStorageManager();
 
@@ -180,18 +164,30 @@ public class DeliverErrorsTest {
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
                 userMessageEntity);
 
-        // Setting input errors property
-        ErrorSignalElement.createElement(headerBlock, errorMessage);
-        IErrorMessageEntity errorMessageEntity =
-                storageManager.storeIncomingMessageUnit(errorMessage);
-        ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
-        errorMessageEntities.add(errorMessageEntity);
-        mc.setProperty(MessageContextProperties.IN_ERRORS,
-                errorMessageEntities);
+        storageManager.setProcessingState(userMessageEntity, ProcessingState.AWAITING_RECEIPT);
+
+        // Setting input receipts property
+        Receipt receipt = new Receipt();
+        OMElement receiptChildElement =
+                env.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
+        ArrayList<OMElement> content = new ArrayList<>();
+        content.add(receiptChildElement);
+        receipt.setContent(content);
+        receipt.setRefToMessageId(msgId);
+        receipt.setMessageId("receipt_id");
+        receipt.setPModeId(pmodeId);
+
+        ReceiptElement.createElement(headerBlock, receipt);
+
+        IReceiptEntity receiptEntity =
+                storageManager.storeIncomingMessageUnit(receipt);
+        ArrayList<IReceiptEntity> receiptEntities = new ArrayList<>();
+        receiptEntities.add(receiptEntity);
+        mc.setProperty(MessageContextProperties.IN_RECEIPTS, receiptEntities);
 
         try {
-            Handler.InvocationResponse invokeResp = processErrorsHandler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            Handler.InvocationResponse invokeResp = processReceiptsHandler.invoke(mc);
+            assertNotNull(invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -203,11 +199,14 @@ public class DeliverErrorsTest {
             fail(e.getMessage());
         }
 
+        // todo find how to get changed state & possibly replace the log messages
+        // todo verification
+
         verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String msg1 = "Processed Error Signal ["+errorId+"]";
-        assertTrue(eventContainsMsg(events, Level.DEBUG, msg1));
-        String msg2 = "Error successfully delivered!";
-        assertTrue(eventContainsMsg(events, Level.DEBUG, msg2));
+        String msg1 = "Receipt successfully delivered!";
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg1));
+        String msg2 = "Processed all Receipt signals in message";
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg2));
     }
 }

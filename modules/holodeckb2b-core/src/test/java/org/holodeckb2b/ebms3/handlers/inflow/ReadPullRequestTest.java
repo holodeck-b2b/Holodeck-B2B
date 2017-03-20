@@ -21,8 +21,11 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.packaging.PullRequestElement;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.junit.Before;
@@ -32,21 +35,21 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Created at 12:09 15.03.17
+ * Created at 12:08 15.03.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class ReportHeaderProcessedTest {
+public class ReadPullRequestTest {
 
     private static String baseDir;
 
     private static HolodeckB2BTestCore core;
 
-    private ReportHeaderProcessed handler;
+    private ReadPullRequest handler;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = ReportHeaderProcessedTest.class.getClassLoader()
+        baseDir = ReadPullRequestTest.class.getClassLoader()
                 .getResource("handlers").getPath();
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
@@ -54,17 +57,18 @@ public class ReportHeaderProcessedTest {
 
     @Before
     public void setUp() throws Exception {
-        handler = new ReportHeaderProcessed();
+        handler = new ReadPullRequest();
     }
 
     @Test
-    public void doProcessing() throws Exception {
+    public void testInFlows() throws Exception {
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
 
         MessageContext mc = new MessageContext();
+        mc.setFLOW(MessageContext.IN_FLOW);
 
         try {
             mc.setEnvelope(env);
@@ -72,15 +76,18 @@ public class ReportHeaderProcessedTest {
             fail(axisFault.getMessage());
         }
 
-        assertFalse(headerBlock.isProcessed());
+        PullRequest pullRequest = new PullRequest();
+        pullRequest.setMessageId("some_pull_request_id_01");
 
+        PullRequestElement.createElement(headerBlock, pullRequest);
+
+        assertNull(mc.getProperty(MessageContextProperties.IN_PULL_REQUEST));
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
-
-        assertTrue(headerBlock.isProcessed());
+        assertNotNull(mc.getProperty(MessageContextProperties.IN_PULL_REQUEST));
     }
 }

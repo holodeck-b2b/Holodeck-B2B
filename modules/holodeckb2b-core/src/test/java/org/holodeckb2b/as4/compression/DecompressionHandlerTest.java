@@ -14,34 +14,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.ebms3.handlers.inflow;
+package org.holodeckb2b.as4.compression;
 
+import org.apache.axiom.attachments.Attachments;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
+import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.helpers.*;
-import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -52,21 +51,23 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.activation.DataHandler;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 /**
- * Created at 23:44 29.01.17
+ * Created at 16:54 20.03.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
-public class AuthorizeMessageTest {
+public class DecompressionHandlerTest {
 
     @Mock
     private Appender mockAppender;
@@ -77,20 +78,22 @@ public class AuthorizeMessageTest {
 
     private static HolodeckB2BTestCore core;
 
-    private AuthorizeMessage handler;
+    private DecompressionHandler handler;
 
     @BeforeClass
-    public static void setUpClass() throws Exception {
-        baseDir = AuthorizeMessageTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+    public static void setUpClass() {
+        baseDir = DecompressionHandlerTest.class.getClassLoader()
+                .getResource("compression").getPath();
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
 
     @Before
     public void setUp() throws Exception {
-        handler = new AuthorizeMessage();
-        LogManager.getRootLogger().addAppender(mockAppender);
+        handler = new DecompressionHandler();
+        Logger logger = LogManager.getRootLogger();
+        logger.addAppender(mockAppender);
+        logger.setLevel(Level.DEBUG);
     }
 
     @After
@@ -100,70 +103,68 @@ public class AuthorizeMessageTest {
 
     @Test
     public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
+        MessageMetaData mmd = TestUtils.getMMD("compression/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding UserMessage from mmd
         OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-//        System.out.println("umElement: " + umElement);
+
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        // Setting input message property
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umElement);
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
 
         PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
 
-        UserMessage userMessage
-                = UserMessageElement.readElement(umElement);
+        Leg leg = new Leg();
 
-        String pmodeId = userMessage.getCollaborationInfo().getAgreement().getPModeId();
+        UserMessageFlow umFlow = new UserMessageFlow();
 
-        // todo It seems strange that we need to set the PMode id value separately
-        // todo when it is contained within the agreement
-        // todo But if we don't set it the value returned by userMessage.getPModeId() is null now
+        PayloadProfile plProfile = new PayloadProfile();
+        plProfile.setCompressionType(CompressionFeature.COMPRESSED_CONTENT_TYPE);
+        umFlow.setPayloadProfile(plProfile);
+
+        leg.setUserMessageFlow(umFlow);
+
+        pmode.addLeg(leg);
+
+        UserMessage userMessage = UserMessageElement.readElement(umElement);
+
+        // We need to add payload with containment type "attachment" to user message,
+        // because PartInfoElement does not read the "containment" attribute
+        // value of the PartInfo tag from file now (23-Feb-2017 T.S.)
+        Payload payload = new Payload();
+        payload.setContainment(IPayload.Containment.ATTACHMENT);
+        ArrayList<IProperty> props = new ArrayList<>();
+        Property p = new Property();
+        p.setName(CompressionFeature.FEATURE_PROPERTY_NAME);
+        p.setValue(CompressionFeature.COMPRESSED_CONTENT_TYPE);
+        props.add(p);
+        p = new Property();
+        p.setName(CompressionFeature.MIME_TYPE_PROPERTY_NAME);
+        p.setValue("jpeg");
+        props.add(p);
+        payload.setProperties(props);
+        String payloadPath = "file://./uncompressed.jpg";
+        payload.setPayloadURI(payloadPath);
+        userMessage.addPayload(payload);
+
+        Attachments attachments = new Attachments();
+        attachments.addDataHandler(payloadPath,
+                new DataHandler(new URL(payload.getPayloadURI())));
+        mc.setAttachmentMap(attachments);
+
+        String pmodeId =
+                userMessage.getCollaborationInfo().getAgreement().getPModeId();
+        // Copy pmodeId of the agreement to the user message
         userMessage.setPModeId(pmodeId);
-
-        String msgId = userMessage.getMessageId();
-
         pmode.setId(pmodeId);
 
         core.getPModeSet().add(pmode);
 
-        // Setting token configuration
-        UsernameTokenConfig tokenConfig = new UsernameTokenConfig();
-        tokenConfig.setUsername("username");
-        tokenConfig.setPassword("secret");
-
-        mc.setProperty(SecurityConstants.EBMS_USERNAMETOKEN, tokenConfig);
-
-        // Setting security configuration
-        SecurityConfig secConfig = new SecurityConfig();
-        secConfig.setUsernameTokenConfiguration(
-                ISecurityConfiguration.WSSHeaderTarget.EBMS, tokenConfig);
-
-        PartnerConfig responder = new PartnerConfig();
-        responder.setSecurityConfiguration(secConfig);
-
-        pmode.setResponder(responder);
-
-        final Map<String, IAuthenticationInfo> authInfo = new HashMap<>();
-        authInfo.put(SecurityConstants.EBMS_USERNAMETOKEN, tokenConfig);
-
-        mc.setProperty(SecurityConstants.MC_AUTHENTICATION_INFO, authInfo);
-
-        StorageManager updateManager = core.getStorageManager();
-
+        // Setting input message property
         IUserMessageEntity userMessageEntity =
-                updateManager.storeIncomingMessageUnit(userMessage);
+                core.getStorageManager().storeIncomingMessageUnit(userMessage);
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
                 userMessageEntity);
 
@@ -174,12 +175,10 @@ public class AuthorizeMessageTest {
             fail(e.getMessage());
         }
 
-        verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
-        LoggingEvent loggingEvent = captorLoggingEvent.getValue();
-        //Check log level
-        assertThat(loggingEvent.getLevel(), is(Level.INFO));
-        //Check the message being logged
-        assertThat(loggingEvent.getRenderedMessage(),
-                is("Message [Primary msg msgId="+msgId+"] successfully authorized"));
+        verify(mockAppender, atLeastOnce())
+                .doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+        String expLogMsg = "Replaced DataHandler to enable decompression";
+        assertTrue(eventContainsMsg(events, Level.DEBUG, expLogMsg));
     }
 }
