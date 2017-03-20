@@ -37,6 +37,8 @@ import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.InMemoryPModeSet;
 import org.holodeckb2b.pmode.PModeManager;
 
+import static org.mockito.Mockito.mock;
+
 /**
  * Is utility class for testing the e-SENS connector that simulates the Holodeck B2B Core.
  *
@@ -110,7 +112,8 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
     public IMessageDeliverer getMessageDeliverer(
             final IDeliverySpecification deliverySpec)
             throws MessageDeliveryException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        IMessageDeliverer messageDeliverer = mock(IMessageDeliverer.class);
+        return messageDeliverer;
     }
 
     @Override
