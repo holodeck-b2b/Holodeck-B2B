@@ -153,7 +153,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
 
                         if (sendError) {
                             log.debug("This error signal should be sent"
-                                        + (asResponse ?  "as a response" : "a using callback"));
+                                        + (asResponse ?  " as a response" : " a using callback"));
                             if (asResponse) {
                                 MessageContextUtils.addErrorSignalToSend(mc, errorMessage);
                                 mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
