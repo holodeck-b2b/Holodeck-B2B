@@ -134,15 +134,23 @@ public class AddPayloadsTest {
 
         Attachments attachments = new Attachments();
 
+        // Programmatically added payload
         Payload payload = new Payload();
         payload.setContainment(IPayload.Containment.ATTACHMENT);
-        String payloadPath = "file://./flower.jpg";
+        String payloadPath = "flower.jpg";
         payload.setPayloadURI(payloadPath);
         payload.setContentLocation(baseDir + "/flower.jpg");
-
         userMessage.addPayload(payload);
-        attachments.addDataHandler(payloadPath,
-                new DataHandler(new URL(payload.getPayloadURI())));
+
+        // todo test IPayload.Containment.BODY
+
+        // Adding data handler for the programmatically added payload
+        DataHandler dh = new DataHandler(new URL("file://" + baseDir + "/flower.jpg"));
+        attachments.addDataHandler(payloadPath, dh);
+
+        // Adding data handler for the payload loaded described in mmd
+        dh = new DataHandler(new URL("file://" + baseDir + "/dandelion.jpg"));
+        attachments.addDataHandler("dandelion.jpg", dh);
 
         // todo test body payload
 //        payload = new Payload();
