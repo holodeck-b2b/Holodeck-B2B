@@ -82,7 +82,7 @@ public class BasicHeaderValidationTest {
 
     private static HolodeckB2BTestCore core;
 
-    private BasicHeaderValidation handler;
+    private HeaderValidation handler;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -93,7 +93,7 @@ public class BasicHeaderValidationTest {
     }
     @Before
     public void setUp() throws Exception {
-        handler = new BasicHeaderValidation();
+        handler = new HeaderValidation();
         // Adding appender to the FindPModes logger
         Logger logger = LogManager.getRootLogger();
         logger.addAppender(mockAppender);

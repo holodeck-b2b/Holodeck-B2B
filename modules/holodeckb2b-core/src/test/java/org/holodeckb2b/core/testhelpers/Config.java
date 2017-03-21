@@ -28,6 +28,7 @@ public class Config implements InternalConfiguration {
     private String  hb2b_home;
     private String  pmodeValidatorClass = null;
     private String  pmodeStorageClass = null;
+    private boolean useStrictHeaderValidation = false;
 
     Config(final String homeDir) {
         hb2b_home = homeDir;
@@ -45,6 +46,11 @@ public class Config implements InternalConfiguration {
         this.pmodeStorageClass = pmodeStorageClass;
     }
 
+    Config(final String homeDir, final boolean useStrictValidation) {
+        hb2b_home = homeDir;
+        useStrictHeaderValidation = useStrictValidation;
+    }
+    
     @Override
     public String getHolodeckB2BHome() {
         return hb2b_home;
@@ -142,5 +148,10 @@ public class Config implements InternalConfiguration {
     @Override
     public String getPersistencyProviderClass() {
         return "org.holodeckb2b.persistency.DefaultProvider";
+    }
+
+    @Override
+    public boolean useStrictHeaderValidation() {
+        return useStrictHeaderValidation;
     }
 }

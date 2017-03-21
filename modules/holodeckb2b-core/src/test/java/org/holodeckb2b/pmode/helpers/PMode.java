@@ -32,6 +32,7 @@ public class PMode implements IPMode {
 
     private String          id;
     private Boolean         include;
+    private boolean         useStrictHeaderValidation = false;
     private String          mep;
     private String          mepBinding;
     private Agreement       agreement;
@@ -103,6 +104,15 @@ public class PMode implements IPMode {
     }
 
     @Override
+    public boolean useStrictHeaderValidation() {
+        return useStrictHeaderValidation;
+    }
+
+    public void setUseStrictHeaderValidation(final boolean strict) {
+        useStrictHeaderValidation = strict;
+    }
+
+    @Override
     public List<? extends ILeg> getLegs() {
         return legs;
     }
@@ -136,5 +146,6 @@ public class PMode implements IPMode {
     public void removeLegs() {
         this.legs = null;
     }
+
 
 }

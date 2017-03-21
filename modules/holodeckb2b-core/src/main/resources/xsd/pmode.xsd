@@ -20,7 +20,7 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
     targetNamespace="http://holodeck-b2b.org/schemas/2014/10/pmode"
     attributeFormDefault="unqualified" xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
-    version="2.1.0">
+    version="2.2.0">
     <xs:annotation>
         <xs:documentation><p>The ebMS specification only defines an abstract P-Mode model, the actual P-Mode definition is left up to implementations. This schema defines the XML structure for the representation of a P-Mode as used by the default implementation for maintaining the P-Mode set. In this implementation the P-Mode set consists of all XML documents in a directory. Each XML document represents one P-Mode and must conform to this schema. See the package <code>org.holodeckb2b.pmode.xml</code> for more info on the default implementation of P-Modes.</p></xs:documentation>
         <xs:documentation><p>In version 2.1.0 of the schema the <code>EventHandler</code> and <code>AddActorOrRoleAttribute</code> elements were added. As these are optional elements P-Mode documents constructed using the old version are still valid and result in unchanged processing. Therefore the same namespace is used and only the version has been increased</p> 
@@ -112,6 +112,12 @@ In the P-Mode model described in the ebMS specification a leg can be identified 
                 </xs:annotation>
             </xs:element>
         </xs:sequence>
+        <xs:attribute default="false" name="useStrictHeaderValidation" type="xs:boolean">
+            <xs:annotation>
+                <xs:documentation><p>This optional attribute indicates whether the ebMS header meta-data should be strictly checked against the requirements stated in the ebMS Specifications (value=<i>true</i>) or whether a basic validation to ensure that Holodeck B2B can process the message is enough (value=<i>false</i>). The default value is <i>false</i>.</p>
+<p>NOTE: The strict validation of the ebMS header meta-data can also be specified on a global level in the Holodeck B2B configuration. This P-Mode setting can only be used to make the validation more strict, not more relaxed, i.e. if global setting is strict this attribute is just ignored.</p></xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
     <xs:complexType name="TradingPartner">
         <xs:annotation>

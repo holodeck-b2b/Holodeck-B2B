@@ -22,11 +22,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
-
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
@@ -46,6 +46,9 @@ import org.simpleframework.xml.core.Persister;
  */
 @Root (name="PMode", strict=false)
 public class PMode implements IPMode {
+
+    @Attribute (name = "useStrictHeaderValidation", required = false)
+    private boolean useStrictHeaderValidation = false;
 
     @Element (name = "id", required = true)
     private PModeId pmodeId;
@@ -206,6 +209,25 @@ public class PMode implements IPMode {
         return this.agreement;
     }
 
+    /**
+     * Gets the setting for whether Holodeck B2B should perform a strict validation of the ebMS header meta-data
+     * as specified in the ebMS Specifications for messages processed under this P-Mode.
+     * <p>For Holodeck B2B to be able to process a message unit it does not need to conform to all the requirements as
+     * stated in the ebMS Specifications, for example the formatting of values is mostly irrelevant to Holodeck B2B.
+     * Therefore two validation modes are offered, <i>basic</i> and <i>strict</i>.
+     * <p>Note that there is also a global setting for the validation mode ({@link
+     * IConfiguration#useStrictHeaderValidation()}. This P-Mode setting can only be used to make the validation more
+     * strict, not more relaxed, i.e. if the global setting is to use strict validation the P-Mode setting is ignored.
+     *
+     * @return <code>true</code> if a strict validation of the ebMS header meta-data should be performed for message
+     *         units which processing is governed by this P-Mode,<br>
+     *         <code>false</code> if a basic validation is enough
+     * @since HB2B_NEXT_VERSION
+     */
+    @Override
+    public boolean useStrictHeaderValidation() {
+        return useStrictHeaderValidation;
+    }
 
     /**
      * Creates a new <code>PMode</code> object based from a XML Document in the given file. The XML document in the
