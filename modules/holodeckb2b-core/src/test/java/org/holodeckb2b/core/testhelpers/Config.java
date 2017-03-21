@@ -76,7 +76,7 @@ public class Config implements InternalConfiguration {
 
     @Override
     public String getTempDirectory() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getHolodeckB2BHome() + "/temp/";
     }
 
     @Override
