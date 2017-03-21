@@ -165,7 +165,7 @@ public class ProcessGeneratedErrorsTest {
 
         verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String msg1 = "This error signal should be sentas a response";
+        String msg1 = "This error signal should be sent as a response";
         assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg1));
     }
 }
