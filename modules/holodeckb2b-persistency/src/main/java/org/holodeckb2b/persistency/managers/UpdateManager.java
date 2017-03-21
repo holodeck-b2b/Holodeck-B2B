@@ -91,10 +91,6 @@ public class UpdateManager implements IUpdateManager {
             // Check that the current state equals the required state
             MessageUnitProcessingState currentState = (MessageUnitProcessingState)
                                                                                 jpaMsgUnit.getCurrentProcessingState();
-
-            System.out.println("currentState: " + currentState.getState());
-            System.out.println("currentProcState: " + currentProcState);
-
             if (currentState.getState() != currentProcState) {
                 // Not in the required state, stop execution
                 em.getTransaction().rollback();
