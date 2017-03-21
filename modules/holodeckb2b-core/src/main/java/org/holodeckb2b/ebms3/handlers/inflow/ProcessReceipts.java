@@ -101,9 +101,6 @@ public class ProcessReceipts extends BaseHandler {
                     + "] for referenced message with msgId=" + refToMsgId);
         Collection<IMessageUnitEntity> refdMsgs = HolodeckB2BCore.getQueryManager()
                                                                  .getMessageUnitsWithId(refToMsgId);
-
-        System.out.println("refdMsgs: " + refdMsgs);
-
         if (Utils.isNullOrEmpty(refdMsgs)) {
             // This error SHOULD NOT occur because the reference is already checked when finding the P-Mode
             log.error("Receipt [msgId=" + receipt.getMessageId() + "] contains unknown refToMessageId ["
@@ -119,9 +116,6 @@ public class ProcessReceipts extends BaseHandler {
             if (ackedMessage instanceof IUserMessage) {
                 // Check if the found message unit expects a receipt
                 final IPMode pmode = HolodeckB2BCore.getPModeSet().get(ackedMessage.getPModeId());
-
-                System.out.println("pmode: " + pmode);
-
                 if (pmode == null || pmode.getLeg(ackedMessage.getLeg()).getReceiptConfiguration() == null) {
                     // The P-Mode is not configured for receipts, generate error
                     updateManager.setProcessingState(receipt, ProcessingState.FAILURE);
@@ -179,9 +173,6 @@ public class ProcessReceipts extends BaseHandler {
         ProcessingState prevState = null, curState = mu.getCurrentProcessingState().getState();
         if (mu.getProcessingStates().size() > 1)
             prevState = states.get(states.size() - 2).getState();
-
-        System.out.println("curState: " + curState);
-
         return curState == ProcessingState.AWAITING_RECEIPT
                || (( curState == ProcessingState.AWAITING_PULL || curState == ProcessingState.READY_TO_PUSH )
                     && prevState == ProcessingState.AWAITING_RECEIPT );
