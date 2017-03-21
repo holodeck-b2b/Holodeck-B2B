@@ -181,7 +181,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
                     final OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new FileReader(f));
                     final OMElement documentElement = builder.getDocumentElement();
 
-                    // Check that refence and id are equal if both specified
+                    // Check that reference and id are equal if both specified
                     final String href = p.getPayloadURI();
                     final String xmlId = documentElement.getAttributeValue(new QName("id"));
                     if( href != null && xmlId != null && !href.equals(xmlId)) {
@@ -208,6 +208,4 @@ public class AddPayloads extends AbstractUserMessageHandler {
                 return;
         }
     }
-
-
 }

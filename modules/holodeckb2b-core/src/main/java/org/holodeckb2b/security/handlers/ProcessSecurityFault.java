@@ -36,7 +36,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
 /**
  * Is the <i>IN_FLOW</i> handler that checks for faults that occurred during processing of the WS-Security headers. If
  * processing of the WS-Security header fails on elements used for ebMS processing, i.e. encryption, signature and
- * username tokens, the message must not be processed. Therefor the processing state of all message units contained in
+ * username tokens, the message must not be processed. Therefore the processing state of all message units contained in
  * the message must be set to <i>FAILED</i> and ebMS Errors must be generated.
  * <p>The ebMS error to be generated depends on the WS-Security element that caused the problem. Problems in the
  * signature or username token will result in a <i>FailedAuthentication</i>; problems with decryption in a
