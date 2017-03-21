@@ -19,67 +19,54 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.ReceiptElement;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.helpers.DeliverySpecification;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
-import org.holodeckb2b.pmode.helpers.ReceiptConfiguration;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.xml.namespace.QName;
-import java.util.ArrayList;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Created at 12:05 15.03.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class DeliverReceiptsTest {
-    private static final QName RECEIPT_CHILD_ELEMENT_NAME =
-            new QName(EbMSConstants.EBMS3_NS_URI, "ReceiptChild");
+public class DeliverUserMessageTest {
 
     private static String baseDir;
 
     private static HolodeckB2BTestCore core;
 
-    private ProcessReceipts processReceiptsHandler;
-
-    private DeliverReceipts handler;
+    private DeliverUserMessage handler;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = DeliverErrorsTest.class.getClassLoader()
+        baseDir = DeliverUserMessageTest.class.getClassLoader()
                 .getResource("handlers").getPath();
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
     @Before
     public void setUp() throws Exception {
-        processReceiptsHandler = new ProcessReceipts();
-        // Executed after org.holodeckb2b.ebms3.handlers.inflow.ProcessReceipts handler
-        handler = new DeliverReceipts();
+        // Executed after org.holodeckb2b.as4.receptionawareness.DetectDuplicateUserMessages handler
+        handler = new DeliverUserMessage();
     }
 
     @Test
@@ -92,82 +79,36 @@ public class DeliverReceiptsTest {
         // Adding UserMessage from mmd
         OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
 
-        PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+        MessageContext mc = new MessageContext();
 
-        String msgId = "org.holodeckb2b.ebms3.handlers.inflow.ProcessReceiptsTest_01";
-        UserMessage userMessage = UserMessageElement.readElement(umElement);
-
+        UserMessage userMessage
+                = UserMessageElement.readElement(umElement);
         String pmodeId =
                 userMessage.getCollaborationInfo().getAgreement().getPModeId();
         userMessage.setPModeId(pmodeId);
-        userMessage.setMessageId(msgId);
 
+        PMode pmode = new PMode();
         pmode.setId(pmodeId);
 
-        MessageContext mc = new MessageContext();
-        mc.setServerSide(true);
-        mc.setFLOW(MessageContext.IN_FLOW);
-
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
-
         Leg leg = new Leg();
-        ReceiptConfiguration receiptConfig = new ReceiptConfiguration();
-        receiptConfig.setNotifyReceiptToBusinessApplication(true);
         DeliverySpecification deliverySpec = new DeliverySpecification();
         deliverySpec.setId("some_delivery_spec_01");
-        receiptConfig.setReceiptDelivery(deliverySpec);
-        leg.setReceiptConfiguration(receiptConfig);
+        leg.setDefaultDelivery(deliverySpec);
 
         pmode.addLeg(leg);
 
         core.getPModeSet().add(pmode);
 
-        StorageManager storageManager = core.getStorageManager();
-
-        // Setting input message property
+        StorageManager updateManager = core.getStorageManager();
         IUserMessageEntity userMessageEntity =
-                storageManager.storeIncomingMessageUnit(userMessage);
+                updateManager.storeIncomingMessageUnit(userMessage);
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
                 userMessageEntity);
 
-        storageManager.setProcessingState(userMessageEntity, ProcessingState.AWAITING_RECEIPT);
-
-        // Setting input receipts property
-        Receipt receipt = new Receipt();
-        OMElement receiptChildElement =
-                env.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
-        ArrayList<OMElement> content = new ArrayList<>();
-        content.add(receiptChildElement);
-        receipt.setContent(content);
-        receipt.setRefToMessageId(msgId);
-        receipt.setMessageId("receipt_id");
-        receipt.setPModeId(pmodeId);
-
-        ReceiptElement.createElement(headerBlock, receipt);
-
-        IReceiptEntity receiptEntity =
-                storageManager.storeIncomingMessageUnit(receipt);
-        ArrayList<IReceiptEntity> receiptEntities = new ArrayList<>();
-        receiptEntities.add(receiptEntity);
-        mc.setProperty(MessageContextProperties.IN_RECEIPTS, receiptEntities);
-
-        assertEquals(ProcessingState.RECEIVED,
-                receiptEntity.getCurrentProcessingState().getState());
-
-        try {
-            Handler.InvocationResponse invokeResp = processReceiptsHandler.invoke(mc);
-            assertNotNull(invokeResp);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
+        updateManager.setProcessingState(userMessageEntity, ProcessingState.READY_FOR_DELIVERY);
 
         assertEquals(ProcessingState.READY_FOR_DELIVERY,
-                receiptEntity.getCurrentProcessingState().getState());
+                userMessageEntity.getCurrentProcessingState().getState());
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
@@ -176,7 +117,7 @@ public class DeliverReceiptsTest {
             fail(e.getMessage());
         }
 
-        assertEquals(ProcessingState.DONE,
-                receiptEntity.getCurrentProcessingState().getState());
+        assertEquals(ProcessingState.DELIVERED,
+                userMessageEntity.getCurrentProcessingState().getState());
     }
 }
