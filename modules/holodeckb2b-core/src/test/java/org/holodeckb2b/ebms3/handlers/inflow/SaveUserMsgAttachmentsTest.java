@@ -120,19 +120,19 @@ public class SaveUserMsgAttachmentsTest {
         // Programmatically added payload
         Payload payload = new Payload();
         payload.setContainment(IPayload.Containment.ATTACHMENT);
-        String payloadPath = "flower.jpg";
-        payload.setPayloadURI(payloadPath);
+        String payloadURI = "some_URI_02";
+        payload.setPayloadURI(payloadURI);
         userMessage.addPayload(payload);
 
         // todo test IPayload.Containment.BODY
 
         // Adding data handler for the programmatically added payload
         DataHandler dh = new DataHandler(new URL("file://" + baseDir + "/flower.jpg"));
-        attachments.addDataHandler(payloadPath, dh);
+        attachments.addDataHandler(payloadURI, dh);
 
         // Adding data handler for the payload loaded described in mmd
         dh = new DataHandler(new URL("file://" + baseDir + "/dandelion.jpg"));
-        attachments.addDataHandler("dandelion.jpg", dh);
+        attachments.addDataHandler("some_URI_01", dh);
 
         mc.setAttachmentMap(attachments);
 

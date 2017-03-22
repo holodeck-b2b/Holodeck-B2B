@@ -39,7 +39,7 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
  * same message unit, i.e. contain the same value for the <code>refToMessageInError</code> attribute.
  * <br>If you want to use the more strict check as defined in the specification you can turn this on by setting the
  * value of the <i>StrictErrorReferencesCheck</i> parameter in the Holodeck B2B configuration to <i>"true"</i>.
- *
+ * todo Rename to ErrorSignalValidator
  * @author Sander Fieten <sander at chasquis-services.com>
  * @since  HB2B_NEXT_VERSION
  */

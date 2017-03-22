@@ -105,7 +105,7 @@ public class AddPayloadsTest {
 
     @Test
     public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
+        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd_add_payloads.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
@@ -137,8 +137,8 @@ public class AddPayloadsTest {
         // Programmatically added payload
         Payload payload = new Payload();
         payload.setContainment(IPayload.Containment.ATTACHMENT);
-        String payloadPath = "flower.jpg";
-        payload.setPayloadURI(payloadPath);
+        String payloadURI = "some_URI_01";
+        payload.setPayloadURI(payloadURI);
         payload.setContentLocation(baseDir + "/flower.jpg");
         userMessage.addPayload(payload);
 
@@ -146,11 +146,11 @@ public class AddPayloadsTest {
 
         // Adding data handler for the programmatically added payload
         DataHandler dh = new DataHandler(new URL("file://" + baseDir + "/flower.jpg"));
-        attachments.addDataHandler(payloadPath, dh);
+        attachments.addDataHandler(payloadURI, dh);
 
         // Adding data handler for the payload loaded described in mmd
         dh = new DataHandler(new URL("file://" + baseDir + "/dandelion.jpg"));
-        attachments.addDataHandler("dandelion.jpg", dh);
+        attachments.addDataHandler("some_URI_02", dh);
 
         // todo test body payload
 //        payload = new Payload();

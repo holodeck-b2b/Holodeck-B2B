@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  * the Receipt contains information. Because the specification does not state which information the Receipt should
  * contain, this class only checks there is content. If an error is detected an ebMS <i>InvalidHeader</i> is created and
  * reported back.
- *
+ * todo Rename to ReceiptValidator
  * @author Sander Fieten <sander at chasquis-services.com>
  * @since  HB2B_NEXT_VERSION
  */
@@ -45,17 +45,24 @@ public class Receipt {
     public static InvalidHeader validate(final IReceipt receiptInfo) {
         StringBuilder    errDetails = new StringBuilder();
 
+        System.out.println("[Receipt.validate()][1]");
+
         // First validate the general meta-data
         errDetails.append(MessageUnit.validate(receiptInfo));
+
+        System.out.println("[Receipt.validate()][2] receiptInfo.getContent(): " + receiptInfo.getContent());
 
         // Check that a RefToMessageId is included
         if (Utils.isNullOrEmpty(receiptInfo.getRefToMessageId()))
             errDetails.append("RefToMessageId is missing\n");
-        if (receiptInfo.getContent().isEmpty())
+        if (Utils.isNullOrEmpty(receiptInfo.getContent()))
             errDetails.append("Receipt content is missing\n");
+
+        System.out.println("[Receipt.validate()][3]");
 
         // Create the ebMS error if any problems were found
         String errorDetails = errDetails.toString().trim();
+        System.out.println("[Receipt.validate()][4] errorDetails: " + errorDetails);
         if (!errorDetails.isEmpty())
             return new InvalidHeader(errorDetails);
         else

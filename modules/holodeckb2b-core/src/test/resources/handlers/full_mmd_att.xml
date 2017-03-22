@@ -47,7 +47,7 @@
     </MessageProperties>
     <PayloadInfo>
         <PartInfo containment="attachment" mimeType="I8ZVs6G2P"
-                  location="dandelion.jpg" uri="dandelion.jpg"/>
+                  location="dandelion.jpg" uri="some_URI_01"/>
         <PartInfo containment="external" uri="http://pcVJBuTT/" mimeType="CoL9">
             <Schema location="http://KFfZaFTi/" version="uC" namespace="E9eUYc92"/>
             <Description xml:lang="en-CA">XDbQu5r2xVbSEW57D32O5lw</Description>
