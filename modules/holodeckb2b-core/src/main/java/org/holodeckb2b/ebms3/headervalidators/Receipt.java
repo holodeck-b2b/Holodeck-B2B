@@ -44,13 +44,8 @@ public class Receipt {
      */
     public static InvalidHeader validate(final IReceipt receiptInfo) {
         StringBuilder    errDetails = new StringBuilder();
-
-        System.out.println("[Receipt.validate()][1]");
-
         // First validate the general meta-data
         errDetails.append(MessageUnit.validate(receiptInfo));
-
-        System.out.println("[Receipt.validate()][2] receiptInfo.getContent(): " + receiptInfo.getContent());
 
         // Check that a RefToMessageId is included
         if (Utils.isNullOrEmpty(receiptInfo.getRefToMessageId()))
@@ -58,11 +53,8 @@ public class Receipt {
         if (Utils.isNullOrEmpty(receiptInfo.getContent()))
             errDetails.append("Receipt content is missing\n");
 
-        System.out.println("[Receipt.validate()][3]");
-
         // Create the ebMS error if any problems were found
         String errorDetails = errDetails.toString().trim();
-        System.out.println("[Receipt.validate()][4] errorDetails: " + errorDetails);
         if (!errorDetails.isEmpty())
             return new InvalidHeader(errorDetails);
         else
