@@ -44,7 +44,7 @@ public interface IProtocol {
      *
      * @return  <code>true</code> if the SOAP target role/actor must be added to the ebMS message header,<br>
      *          <code>false</code> if the default target should be used.
-     * @todo: Set version number
+     * todo: Set version number
      * @since 
      */
     public boolean shouldAddActorOrRoleAttribute();
@@ -53,7 +53,7 @@ public interface IProtocol {
      * Gets the SOAP version to use for packaging the ebMS message.
      *
      * @return  "1.1" when SOAP 1.1 should be used, "1.2" for SOAP 1.2
-     * @todo: Consider using enum?
+     * todo: Consider using enum?
      */
     public String getSOAPVersion();
 
