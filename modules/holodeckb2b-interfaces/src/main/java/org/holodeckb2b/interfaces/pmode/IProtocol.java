@@ -26,7 +26,7 @@ package org.holodeckb2b.interfaces.pmode;
  * P-Mode parameter <b>AddActorOrRoleAttribute</b> is introduced. It indicates if the ebMS message header
  * (<code>eb:Messaging</code> element) must be targeted to a specific SOAP target role/actor.
  *
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IProtocol {

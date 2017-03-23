@@ -30,7 +30,7 @@ import org.holodeckb2b.interfaces.config.IConfiguration;
  * certifcate is used and if it is not revoked (depending on the revocation setting, {@link #enableRevocationCheck()}).
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 public interface ISigningConfiguration {
 

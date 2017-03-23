@@ -102,7 +102,7 @@ import org.w3c.dom.Element;
  * {@link ProcessSecurityFault} handler.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 public class ProcessWSSHeaders extends BaseHandler {
 

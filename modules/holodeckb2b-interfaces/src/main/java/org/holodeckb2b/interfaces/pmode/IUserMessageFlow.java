@@ -22,7 +22,7 @@ package org.holodeckb2b.interfaces.pmode;
  * Represents the P-Mode parameters for the exchange of a user message message unit and related error signal message
  * units.
  *
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IUserMessageFlow {

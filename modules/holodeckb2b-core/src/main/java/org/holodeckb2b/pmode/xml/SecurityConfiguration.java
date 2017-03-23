@@ -36,7 +36,7 @@ import org.simpleframework.xml.core.Validate;
  * messages from one trading partner within the exchange will use the same security settings.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @aurhor Bram Bakx <bram at holodeck-b2b.org>
+ * @aurhor Bram Bakx (bram at holodeck-b2b.org)
  */
 @Root
 public class SecurityConfiguration implements ISecurityConfiguration {

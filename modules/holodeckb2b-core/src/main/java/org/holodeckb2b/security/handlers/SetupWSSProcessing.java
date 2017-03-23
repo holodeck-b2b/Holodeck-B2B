@@ -49,7 +49,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * Specification and the AS4 profile do not mention replay attack detection, so this does not influence conformance.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  * @since 2.1.0 Use of separate <i>trust store</i> for certificates of trusted CA's.
  */
 public class SetupWSSProcessing extends BaseHandler {

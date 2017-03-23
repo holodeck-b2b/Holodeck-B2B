@@ -20,7 +20,7 @@ import org.holodeckb2b.interfaces.general.IService;
 import org.simpleframework.xml.Element;
 
 /**
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 class Service implements IService {
 
