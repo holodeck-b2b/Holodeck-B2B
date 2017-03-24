@@ -21,7 +21,7 @@ package org.holodeckb2b.interfaces.events;
  * This exception can be thrown because a event processing handler can not be successfully instantiated, i.e. the factory class can not be
  * initialized or during the actual handling of the of a processing event.
  *
- * @author Jerry Dimitriou <jerouris at unipi.gr>
+ * @author Jerry Dimitriou (jerouris at unipi.gr)
  * @see IMessageProcessingEventHandler
  * @see IMessageProcessingEventHandlerFactory
  */

@@ -139,7 +139,7 @@ public class ITHelper {
     }
 
     /**
-     * Starts sender & receiver HolodeckB2B instances
+     * Starts sender &amp; receiver HolodeckB2B instances
      * @param dADirName initiator HolodeckB2B instance folder name
      * @param dBDirName responder HolodeckB2B instance folder name
      */
@@ -284,7 +284,7 @@ public class ITHelper {
     }
 
     /**
-     * Deletes contents of msg_out & msg_in folders of the HolodeckB2B instance
+     * Deletes contents of msg_out &amp; msg_in folders of the HolodeckB2B instance
      * @param distrDirName HolodeckB2B instance folder name
      */
     void clearMsgOutAndMsgInDirs(String distrDirName) {
