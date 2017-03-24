@@ -314,6 +314,7 @@
                     <configuration>
                         <!-- all javadoc of common and core together, so use aggregate -->
                         <aggregate>true</aggregate>
+                        <additionalparam>-Xdoclint:none</additionalparam>
                     </configuration>
                     <executions>
                         <execution>
