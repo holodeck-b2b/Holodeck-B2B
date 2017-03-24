@@ -22,7 +22,7 @@ import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 
 /**
  *
- * @author Sander Fieten <sander at chasquis-services.com>
+ * @author Sander Fieten (sander at chasquis-services.com)
  */
 public class PullRequestFlow implements IPullRequestFlow {
 

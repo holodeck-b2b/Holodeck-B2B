@@ -21,7 +21,7 @@ import org.junit.runners.MethodSorters;
 
 /**
  *
- * @author Sander Fieten <sander at chasquis-services.com>
+ * @author Sander Fieten (sander at chasquis-services.com)
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class PurgeOldMessagesWorkerTest {

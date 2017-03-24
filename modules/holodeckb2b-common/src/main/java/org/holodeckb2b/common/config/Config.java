@@ -38,7 +38,7 @@ import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
  * src/main/resources/xsd/hb2b-config.xsd</code>.
  * <p>NOTE: Current implementation does not encrypt the keystore passwords! Therefore access to the config file
  * SHOULD be limited to the account that is used to run Holodeck B2B.
- * @todo Encryption of keystore passwords
+ * todo Encryption of keystore passwords
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */

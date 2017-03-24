@@ -42,7 +42,7 @@ import java.util.Collection;
  * validations for User Message message units can be implemented in custom @todo: IMessageValidators and configured through
  * the P-Mode.
  *
- * @author Sander Fieten <sander at chasquis-services.com>
+ * @author Sander Fieten (sander at chasquis-services.com)
  * @since HB2B_NEXT_VERSION
  */
 public class BasicHeaderValidation extends BaseHandler {
