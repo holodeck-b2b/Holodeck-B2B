@@ -65,7 +65,7 @@ import org.w3c.dom.Document;
  * <tr><td>{@link SecurityConstants#EBMS_USERNAMETOKEN}</td>
  *              <td>{@link IUsernameTokenConfiguration}</td>
  *              <td>The <code>UsernameToken</code> targeted at the <i>ebms</i> role</td></tr>
- * <tr><td>{@link SecurityConstants#DEFAULT_USERNAMETOKEN}</td
+ * <tr><td>{@link SecurityConstants#DEFAULT_USERNAMETOKEN}</td>
  *              <td>{@link IUsernameTokenConfiguration}</td>
  *              <td>The <code>UsernameToken</code> targeted at the <i>default</i> role</td></tr>
  * <tr><td>{@link SecurityConstants#SIGNATURE}</td>

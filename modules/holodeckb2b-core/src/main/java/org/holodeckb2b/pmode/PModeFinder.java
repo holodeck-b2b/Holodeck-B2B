@@ -92,10 +92,10 @@ public class PModeFinder {
      * see <a href="https://issues.oasis-open.org/browse/EBXMLMSG-48?jql=project%20%3D%20EBXMLMSG">issue 48 in the TC
      * issue tracker</a>. In the issue two suggestion for matching the P-Mode are given.
      * <p>Based on these we CompareUtils the meta-data from the message with all P-Modes and return the best matching P-Mode.
- The following table shows the information that is used for matching and their importance (expressed as a weight).
- The match of a P-Mode is the sum of the weights for the elements that are equal to the corresponding P-Mode
- parameter.
- <p><table border="1">
+     * The following table shows the information that is used for matching and their importance (expressed as a weight).
+     * The match of a P-Mode is the sum of the weights for the elements that are equal to the corresponding P-Mode
+     * parameter.
+     * <p><table border="1">
      * <tr><th>Element</th><th>Weight</th></tr>
      * <tr><td>PMode id</td><td>37</td></tr>
      * <tr><td>From Party Id's</td><td>7</td></tr>
@@ -106,8 +106,8 @@ public class PModeFinder {
      * <tr><td>Action</td><td>5</td></tr>
      * <tr><td>Agreement ref</td><td>1</td></tr>
      * <tr><td>MPC</td><td>1</td></tr>
-     * </table>
-     * <p>If there is a mismatch for one of the elements the P-Mode is considered as a mismatch.
+     * </table> </p>
+     * <p>If there is a mismatch for one of the elements the P-Mode is considered as a mismatch.</p>
      *
      * @param mu        The user message message unit to find the P-Mode for
      * @return          The P-Mode for the message unit if the message unit can be matched to a P-Mode,
