@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
  * instance, which is available through {@link HolodeckB2BCoreInterface#getPModeSet()}.
  * <p>Implementations of this interface MUST ensure that at least the operations that modify the set are thread safe.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IPModeSet {
 

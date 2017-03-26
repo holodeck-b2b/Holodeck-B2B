@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
  * Is a helper class for handling the ebMS <code>PartInfo</code> element in the ebMS SOAP header.
  * <p>This element is specified in section 5.2.2.13 of the ebMS 3 Core specification.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PartInfoElement {
 
@@ -134,6 +134,7 @@ public class PartInfoElement {
                 plData.setContainment(IPayload.Containment.EXTERNAL);
 
             plData.setPayloadURI(href);
+            plData.setContentLocation(href);
         }
 
         // Read and process Schema element (optional)

@@ -23,7 +23,7 @@ import org.simpleframework.xml.Text;
 /**
  * Represents a <code>Property</code> element in the MMD document.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class Property implements IProperty {
 

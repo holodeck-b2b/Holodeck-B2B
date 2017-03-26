@@ -42,8 +42,8 @@ import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
  * Is the JPA persistency class to store the generic information that applies to all ebMS message unit types as
  * described by the {@link IMessageUnit} interface in the Holodeck B2B messaging model.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since 2.2
  */
 @Entity
 @Table(name = "MSG_UNIT")

@@ -33,12 +33,12 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * Is the <i>IN_FLOW</i> handler responsible for the delivery of the User message message unit to the business
  * application.
  * <p>To prevent that the message unit is delivered twice in parallel delivery only takes place when the processing
- * state can be successfully changed from {@link ProcessingStates#READY_FOR_DELIVERY} to
- * {@link ProcessingStates#OUT_FOR_DELIVERY}.
+ * state can be successfully changed from {@link ProcessingState#READY_FOR_DELIVERY} to
+ * {@link ProcessingState#OUT_FOR_DELIVERY}.
  * <p>NOTE: The actual delivery to the business application is done through a <i>DeliveryMethod</i> which is specified
  * in the P-Mode for this message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class DeliverUserMessage extends AbstractUserMessageHandler {
 

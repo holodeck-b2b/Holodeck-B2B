@@ -29,7 +29,7 @@ import org.simpleframework.xml.ElementList;
  * element name to use is defined in {@see PartyInfo} which is the representation
  * of the parent element.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class TradingPartner implements ITradingPartner {
 

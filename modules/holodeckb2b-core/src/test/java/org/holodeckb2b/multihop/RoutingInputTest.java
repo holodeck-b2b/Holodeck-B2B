@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Test if correct ebint:RoutingInput element is created
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class RoutingInputTest {
 

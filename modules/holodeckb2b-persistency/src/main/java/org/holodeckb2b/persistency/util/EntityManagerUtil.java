@@ -26,8 +26,8 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
  * unit meta-data is stored. This default persistency provider uses <i>holodeckb2b-core</i> as name for the JPA
  * persistency unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since 2.2
  */
 public class EntityManagerUtil {
     // We use SingletonHolder pattern for the reference to the EntityManagerFactory object

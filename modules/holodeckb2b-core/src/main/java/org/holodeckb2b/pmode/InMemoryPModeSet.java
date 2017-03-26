@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.pmode.PModeSetException;
 /**
  * Is the default implementation of {@link IPModeSet} that maintains the set of P-Modes in memory.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class InMemoryPModeSet implements IPModeSet {
 

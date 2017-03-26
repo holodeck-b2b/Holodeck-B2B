@@ -22,7 +22,7 @@ import javax.xml.namespace.QName;
 /**
  * Is a placeholder for constants holding values defined in or directly related to the ebMS Specifications.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public final class EbMSConstants {
 

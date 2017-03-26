@@ -36,8 +36,8 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
  * <li><i>ErrorMessage.findResponsesTo</i> finds all Error Signals that are a response to another message unit, i.e.
  *              which refer to the given message id.</li></ul>
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since 2.2
  */
 @Entity
 @Table(name="ERROR_MESSAGE")

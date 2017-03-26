@@ -27,6 +27,6 @@
  * <p>Implementations must ensure that all methods are thread-safe and the necessary locking is implemented both in the
  * Java code as well as in the database operations.
  *
- * @since HB2B_NEXT_VERSION
+ * @since 2.2
  */
 package org.holodeckb2b.interfaces.persistency.dao;

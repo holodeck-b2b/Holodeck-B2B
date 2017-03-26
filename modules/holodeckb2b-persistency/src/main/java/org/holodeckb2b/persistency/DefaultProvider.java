@@ -28,8 +28,8 @@ import org.holodeckb2b.persistency.managers.UpdateManager;
 /**
  *
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since 2.2
  */
 public class DefaultProvider implements IPersistencyProvider {
 

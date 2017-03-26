@@ -40,7 +40,7 @@ import org.holodeckb2b.security.tokens.IAuthenticationInfo;
  * of P-Mode finding for a PullRequest is a collection of P-Mode that a user message may be pulled from.
  * <p>Finding the P-Mode for a User Message is done by the {@link PModeFinder} utility class.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class FindPModesForPullRequest extends BaseHandler {
 

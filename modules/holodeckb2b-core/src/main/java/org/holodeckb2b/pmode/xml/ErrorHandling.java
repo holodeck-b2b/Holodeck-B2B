@@ -32,7 +32,7 @@ import org.simpleframework.xml.core.Validate;
  * request flow is more limited this object is used for both elements as the pull request ones is a restriction of the
  * one in the user message flow.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IErrorHandling
  */
 @Root

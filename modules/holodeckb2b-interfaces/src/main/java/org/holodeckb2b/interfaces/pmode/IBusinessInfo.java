@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.general.IService;
  * especially if they do not contain the P-Mode id.
  *
  * @author Bram Bakx <bram at holodeck-b2b.org>
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IBusinessInfo {
 

@@ -44,7 +44,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * it will only provide the meta-data to the event handler. The payload data associated with the User Message message
  * unit will already be deleted by the worker.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PurgeOldMessagesWorker extends AbstractWorkerTask {
 

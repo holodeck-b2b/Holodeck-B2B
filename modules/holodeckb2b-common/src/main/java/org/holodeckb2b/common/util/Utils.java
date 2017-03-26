@@ -48,7 +48,7 @@ import org.holodeckb2b.common.exceptions.ObjectSerializationException;
 /**
  * Is a container for some generic helper methods.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public final class Utils {
 

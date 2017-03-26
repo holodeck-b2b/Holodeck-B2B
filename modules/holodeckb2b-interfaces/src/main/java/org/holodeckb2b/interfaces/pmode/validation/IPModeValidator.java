@@ -30,8 +30,8 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
  * deployed. Note however that the PModeManager may always execute some basic validations regardless of the used
  * validator implementation.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since  HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since  2.2
  */
 public interface IPModeValidator {
 

@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
  * indicate that no receipt signal was received for a message. For more information on this error and the reception
  * awareness feature see section 3.2 of the AS4 profile.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IReceptionAwareness
  * @see RetransmissionWorker
  * @see CreateReceipt

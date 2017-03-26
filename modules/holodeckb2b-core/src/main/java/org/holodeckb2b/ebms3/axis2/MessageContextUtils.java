@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 /**
  * Contains some utility methods related to handling the message units available in the Axis2 {@link MessageContext}.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class MessageContextUtils {
 

@@ -41,7 +41,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * in flow prepared message units that should be sent as response. If they did the entity objects for the message units
  * are copied to the out flow message context to make them available to the other handlers in the out flow.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PrepareResponseMessage extends BaseHandler {
 
@@ -172,9 +172,9 @@ public class PrepareResponseMessage extends BaseHandler {
 
     /**
      * Helper method to change the processing state of the error signals that can not be included in the response
-     * to {@link ProcessingStates#FAILURE}.
+     * to {@link ProcessingState#FAILURE}.
      *
-     * @param errors    The collection of {@link ErrorMessage}s that can not be included in the response.
+     * @param errors    The collection of {@link IErrorMessageEntity}s that can not be included in the response.
      */
     private void setFailed(final Collection<IErrorMessageEntity> errors) {
         StorageManager updateManager = HolodeckB2BCore.getStoreManager();

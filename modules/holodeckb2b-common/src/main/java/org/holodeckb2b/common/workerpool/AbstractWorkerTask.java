@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
  * naming of the task, a logging facility and exception management to prevent the task to halt further execution due to
  * an unexpected exception during execution.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public abstract class AbstractWorkerTask implements IWorkerTask {
 

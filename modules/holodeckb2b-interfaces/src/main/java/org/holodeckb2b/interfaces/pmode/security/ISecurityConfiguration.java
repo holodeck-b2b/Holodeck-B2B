@@ -32,7 +32,7 @@ package org.holodeckb2b.interfaces.pmode.security;
  * sub-channel MPC. In that case however only the user name token for the "ebms" role/actor and signature configuration
  * are needed.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @aurhor Bram Bakx <bram at holodeck-b2b.org>
  */
 public interface ISecurityConfiguration {

@@ -29,7 +29,7 @@ import org.simpleframework.xml.core.Persister;
 /**
  * Test the <code>EventHanlder</code> from P-Mode
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class EventHandlerConfigTest {
 

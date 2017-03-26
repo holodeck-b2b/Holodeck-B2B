@@ -39,7 +39,7 @@ import org.holodeckb2b.interfaces.general.ReplyPattern;
  * of the profile). Future version of this interface may introduce the option to specify the <i>"receipt content
  * generator"</i>.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IReceiptConfiguration {
 

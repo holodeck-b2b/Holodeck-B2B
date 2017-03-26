@@ -38,7 +38,7 @@ import org.apache.wss4j.common.ext.AttachmentResultCallback;
  * Is the callback handler that provides the WSS4J library access to the attachments of the message. It converts between
  * the WSS4J and Axis2 format.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class AttachmentCallbackHandler implements CallbackHandler {
 

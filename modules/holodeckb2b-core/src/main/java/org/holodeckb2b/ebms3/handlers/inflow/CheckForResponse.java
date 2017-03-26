@@ -30,7 +30,7 @@ import org.holodeckb2b.ebms3.constants.MessageContextProperties;
  * architecture. In Holodeck B2B its only job is to check whether a HTTP response
  * is required and if so start it.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CheckForResponse extends AbstractMessageReceiver {
 

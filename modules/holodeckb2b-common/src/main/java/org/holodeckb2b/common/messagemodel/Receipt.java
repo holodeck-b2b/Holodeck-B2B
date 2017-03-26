@@ -27,8 +27,8 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  * Is an in memory only implementation of {@link IReceipt} to temporarily store the meta-data information on a Receipt
  * Signal message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since 2.2
  */
 public class Receipt extends MessageUnit implements IReceipt {
 

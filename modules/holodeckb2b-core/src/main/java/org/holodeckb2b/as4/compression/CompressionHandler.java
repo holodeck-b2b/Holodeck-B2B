@@ -47,7 +47,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * <p>NOTE: Although the AS4 profiles states that payloads containing already compressed data do not need to be
  * compressed Holodeck B2B will compress all payloads regardless of their content.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CompressionHandler extends AbstractUserMessageHandler {
 

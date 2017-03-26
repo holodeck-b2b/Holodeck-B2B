@@ -35,8 +35,8 @@ import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
  * <p>As an individual ebMS Error is always part of an Error Signal message unit this class is defined as <i>
  * embeddable</i>.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since 2.2
  */
 @Embeddable
 public class EbmsError implements IEbmsError, Serializable {

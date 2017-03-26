@@ -22,7 +22,7 @@ import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandlerFactory;
 
 /**
  * An implementation of {@link IMessageProcessingEventHandlerFactory} for testing the event handler configuration
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class EventHandlerFactory implements IMessageProcessingEventHandlerFactory<EventHandler>{
 

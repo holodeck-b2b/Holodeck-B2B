@@ -20,7 +20,7 @@ package org.holodeckb2b.as4.compression;
  * Represent the <i>DeCompressionFailure</i> error as defined in section 3.1 of the AS4 profile and signals that a
  * payload compressed using the AS4 Compression Feature could not be decompressed successfully.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class DeCompressionFailure extends org.holodeckb2b.common.messagemodel.EbmsError {
 

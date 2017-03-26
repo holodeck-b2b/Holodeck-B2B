@@ -31,7 +31,7 @@ import org.holodeckb2b.interfaces.events.IMessageProcessingEventConfiguration;
  * The leg defines the common and default parameters like the protocol to use and if and how receipts should be used.
  *
  * @author Bram Bakx <bram at holodeck-b2b.org>
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface ILeg {
 

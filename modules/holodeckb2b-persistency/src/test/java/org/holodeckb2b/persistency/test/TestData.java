@@ -40,8 +40,8 @@ import java.util.Date;
 /**
  * Helper class to create a set of message unit meta-data for testing.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since 2.2
  */
 public class TestData {
 

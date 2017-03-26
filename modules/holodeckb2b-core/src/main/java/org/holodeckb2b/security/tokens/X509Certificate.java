@@ -26,7 +26,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * authentication information will be made available outside the Holodeck B2B Core, i.e. included in delivery of message
  * units, then this class needs to be extended.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class X509Certificate implements IAuthenticationInfo {
 

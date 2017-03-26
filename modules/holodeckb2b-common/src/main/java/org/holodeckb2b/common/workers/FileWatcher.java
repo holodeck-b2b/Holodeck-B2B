@@ -25,7 +25,7 @@ import java.io.File;
  * <p>This worker has one parameter: <i>watchedPath</i>, the path to the file to watch for changes.
  *
  * @see PathWatcher
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public abstract class FileWatcher extends PathWatcher {
 

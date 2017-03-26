@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  * Core implementation to provide a clean separation of interface and implementation. Although this class is more
  * interface than class it needs to be a class to get an object instance on run time.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class HolodeckB2BCoreInterface {
 
@@ -138,7 +138,7 @@ public class HolodeckB2BCoreInterface {
      * <p>Note that the DAO itself is provided by the persistency provider.
      *
      * @return  The {@link IQueryManager} that should use to query the meta-data of message units
-     * @since HB2B_NEXT_VERSION
+     * @since 2.2
      */
     public static IQueryManager getQueryManager() {
         assertInitialized();

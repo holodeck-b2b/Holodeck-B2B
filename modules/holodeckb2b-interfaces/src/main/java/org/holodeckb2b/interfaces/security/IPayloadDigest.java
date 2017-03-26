@@ -23,7 +23,7 @@ package org.holodeckb2b.interfaces.security;
  * The reference to the payload is provided by the URI that identifies the payload in the MIME package. As a result
  * objects of this type need to be related to the actual payload through the context in which they are used.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
 public interface IPayloadDigest {

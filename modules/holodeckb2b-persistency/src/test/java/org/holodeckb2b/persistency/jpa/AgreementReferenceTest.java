@@ -29,8 +29,8 @@ import org.junit.Test;
  * Test of {@link AgreementReference} JPA class. Because {@link AgreementReference} is an <i>"embeddable"</i> a wrapper
  * class is used for testing.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since 2.2
  */
 public class AgreementReferenceTest {
 

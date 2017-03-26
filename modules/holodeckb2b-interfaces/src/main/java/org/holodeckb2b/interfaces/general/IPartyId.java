@@ -21,7 +21,7 @@ package org.holodeckb2b.interfaces.general;
  * Is used to identify a business partner. Consist of an id value and an optional id type. Corresponds to the
  * <code>eb:PartyId</code> element in the ebMS header and is defined in section 5.2.2.4 of the ebMS Core Specification.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IPartyId {
 

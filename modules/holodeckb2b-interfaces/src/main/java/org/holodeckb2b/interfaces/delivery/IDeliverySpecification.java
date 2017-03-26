@@ -30,7 +30,7 @@ import java.util.Map;
  * configured delivered method) the [optional] id of a delivery specification will be used by Holodeck B2B to determine
  * if it can reuse an existing factory.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IMessageDelivererFactory
  * @see IMessageDeliverer
  */

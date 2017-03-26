@@ -36,10 +36,10 @@ import org.holodeckb2b.module.HolodeckB2BCore;
 /**
  * Is the <i>IN_FLOW</i> handler responsible for retrieving a message unit waiting to be pulled and which can be
  * returned in response to a pull request.
- * <p>The {@link CheckAndAuthorizePullRequest} handler has already determined from which P-Modes messages may be
+ * <p>The {@link FindPModesForPullRequest} handler has already determined from which P-Modes messages may be
  * selected. This handler will select the user message message unit that is waiting as longest to get pulled.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class GetMessageUnitForPulling extends BaseHandler {
 

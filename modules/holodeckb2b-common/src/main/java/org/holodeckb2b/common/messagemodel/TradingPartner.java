@@ -27,8 +27,8 @@ import org.holodeckb2b.interfaces.general.ITradingPartner;
  * Is an in memory only implementation of {@link ITradingPartner} to temporarily store the information on a trading
  * partner that is involved in the exchange of a User Message message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since 2.2
  */
 public class TradingPartner implements ITradingPartner {
 

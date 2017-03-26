@@ -45,7 +45,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
 /**
  * Is the default implementation of {@see IMessageSubmitter}.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class MessageSubmitter implements IMessageSubmitter {
 

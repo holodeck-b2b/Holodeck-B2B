@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  * element the XML content is returned.
  * <p>The Receipt signal message unit is specified in section 5.2.3.3 of the ebMS 3 Core specification.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ReceiptElement {
 

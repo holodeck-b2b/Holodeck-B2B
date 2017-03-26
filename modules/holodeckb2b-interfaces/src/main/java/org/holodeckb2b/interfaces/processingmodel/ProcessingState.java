@@ -19,8 +19,8 @@ package org.holodeckb2b.interfaces.processingmodel;
 /**
  * Enumerates all the <i>processing states</i> a message unit can be in during its processing by Holodeck B2B.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since  HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since  2.2
  */
 public enum ProcessingState {
 

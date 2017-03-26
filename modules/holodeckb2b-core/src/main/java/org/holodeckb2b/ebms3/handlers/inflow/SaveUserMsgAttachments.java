@@ -16,20 +16,6 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.zip.ZipException;
-import javax.activation.DataHandler;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axis2.AxisFault;
@@ -53,15 +39,25 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 
+import javax.activation.DataHandler;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.zip.ZipException;
+
 /**
  * Is the <i>IN_FLOW</i> handler responsible for reading the payload content from the SOAP message. The payloads are
  * stored temporarily on the file system.
  * <p>Once the payloads are successfully read the UserMessage is ready for delivery to the business application. So this
- * handler changes the processing state to {@link ProcessingStates#READY_FOR_DELIVERY}.
- * <p>As this handler is only useful when a {@link UserMessage} object is already available in the message context this
+ * handler changes the processing state to {@link ProcessingState#READY_FOR_DELIVERY}.
+ * <p>As this handler is only useful when a {@link IUserMessageEntity} object is already available in the message context this
  * handler extends from {@link AbstractUserMessageHandler} to ensure it only runs when a UserMessage is available.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
 
@@ -260,7 +256,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
 
     /**
      * Creates a <i>ValueInconsistent</i> or <i>MimeInconsistency</i> ebMS error as the reference in the user message
-     * is invalid. Also changes the processing state of the user message to {@link ProcessingStates#FAILURE} to
+     * is invalid. Also changes the processing state of the user message to {@link ProcessingState#FAILURE} to
      * indicate the message can not be processed.
      *
      * @param mc            The current message context

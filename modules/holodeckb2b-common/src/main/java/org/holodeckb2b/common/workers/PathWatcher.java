@@ -35,7 +35,7 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  * <p><b>NOTE:</b> When comparing files for changes the timestamp of the file system is used. This can lead to problems
  * if the file system does not handle these timestamps in milliseconds and changes occur very quickly.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see WorkerPool
  */
 public abstract class PathWatcher extends AbstractWorkerTask {

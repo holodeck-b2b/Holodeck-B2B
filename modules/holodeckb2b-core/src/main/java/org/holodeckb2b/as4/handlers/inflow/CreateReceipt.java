@@ -53,7 +53,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * signing must be enabled. Which type of receipt is created is determined by whether the received message is signed or
  * not. If it is signed the NRR receipt is created, as specified in section 5.1.8 of the AS4 Profile.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CreateReceipt extends AbstractUserMessageHandler {
 

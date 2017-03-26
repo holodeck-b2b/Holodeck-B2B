@@ -88,8 +88,9 @@ import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
             <eb:Payload>
                 <eb:PartProperties>
                     <eb:Property name="originalFileName">simpletest.xml</eb:Property>
-                    <eb:Property name="org:holodeckb2b:location"
-                        >/Users/safi/holodeck-test/pl-d6a19bec-4ffa-4e9c-862b-6dc127b00077_mountain-lion.fritz.box-body-16.xml</eb:Property>
+                    <eb:Property name="org:holodeckb2b:location">
+                        /Users/safi/holodeck-test/pl-d6a19bec-4ffa-4e9c-862b-6dc127b00077_mountain-lion.fritz.box-body-16.xml
+                    </eb:Property>
                 </eb:PartProperties>
             </eb:Payload>
         </eb:PayloadInfo>
@@ -114,7 +115,7 @@ import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 </eb:Messaging>
 }</pre>
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see FileDeliveryFactory
  */
 public class SimpleFileDeliverer extends AbstractFileDeliverer {

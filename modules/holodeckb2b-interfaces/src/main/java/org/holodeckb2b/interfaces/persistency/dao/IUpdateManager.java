@@ -35,8 +35,8 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * updates are performed, i.e. when all information of the updated message unit entity was loaded before the update it
  * should still be loaded after performing the update.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since 2.2
  */
 public interface IUpdateManager {
 

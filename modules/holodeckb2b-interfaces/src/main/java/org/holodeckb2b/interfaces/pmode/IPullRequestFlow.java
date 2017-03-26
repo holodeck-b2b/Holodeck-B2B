@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
  * authorization. The sub-channel information should then be contained in this PullRequestFlow.
  *
  * @author Bram Bakx <bram at holodeck-b2b.org>
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IPullRequestFlow {
 

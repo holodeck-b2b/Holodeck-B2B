@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
  * the event is handled as configured in the P-Mode that governs the processing of the message unit. To get access to
  * the running event processor use the {@link HolodeckB2BCoreInterface#getEventProcessor()} method.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
 public interface IMessageProcessingEventProcessor {

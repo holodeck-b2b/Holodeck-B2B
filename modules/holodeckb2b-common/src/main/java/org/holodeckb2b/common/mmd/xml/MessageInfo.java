@@ -36,7 +36,7 @@ import org.simpleframework.xml.Element;
  * supplied value is a globally unique identifier conforming to <i>MessageId</i>
  * as defined in [RFC2822].
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class MessageInfo {
 

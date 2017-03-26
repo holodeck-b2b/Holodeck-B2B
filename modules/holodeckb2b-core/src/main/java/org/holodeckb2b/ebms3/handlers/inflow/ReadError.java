@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import java.util.Iterator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
@@ -24,11 +23,15 @@ import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
+import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
+
+import java.util.Iterator;
 
 
 /**
@@ -36,11 +39,11 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * more <code>eb:SignalMessage</code> elements that have a <code>eb:Error</code> child. When such signal message units
  * are found the information is read from the message into a array of {@link ErrorMessage} objects and stored in the
  * database and in the message context (under key {@link MessageContextProperties#IN_ERRORS}). Its processing state will
- * be set to {@link ProcessingStates#RECEIVED}.
+ * be set to {@link ProcessingState#RECEIVED}.
  * <p><b>NOTE: </b>This handler will process all error signals that are in the message although the ebMS Core
  * Specification does not allow more than one.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ReadError extends BaseHandler {
 

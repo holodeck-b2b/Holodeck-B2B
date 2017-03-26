@@ -48,7 +48,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * <p><b>NOTE:</b> Replay attack detection (for Username Tokens) is currently not supported! Both the ebMS V3 Core
  * Specification and the AS4 profile do not mention replay attack detection, so this does not influence conformance.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @author Bram Bakx <bram at holodeck-b2b.org>
  * @since 2.1.0 Use of separate <i>trust store</i> for certificates of trusted CA's.
  */
@@ -163,7 +163,7 @@ public class SetupWSSProcessing extends BaseHandler {
             mc.setProperty(ConfigurationConstants.PW_CALLBACK_REF, pwdCBHandler);
 
             // The password to access the certificate in the keystore, alias converted to lower case because JKS
-            // aliasses are case insensitive and in lower case
+            // aliases are case insensitive and in lower case
             pwdCBHandler.addUser(encConfig.getKeystoreAlias().toLowerCase(), encConfig.getCertificatePassword());
         } else {
             log.debug("Encryption configuration is NULL! No access to private key.");

@@ -37,7 +37,7 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
  * @see IMessageDelivererFactory
  * @see IPMode
  * @see IDeliverySpecification
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IMessageDeliverer {
 

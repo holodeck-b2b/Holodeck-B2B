@@ -22,7 +22,7 @@ import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
  * Defines constants for <code>MessageContext</code> properties used by the Holodeck B2B Core to store information about
  * the processed ebMS message.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class MessageContextProperties {
 

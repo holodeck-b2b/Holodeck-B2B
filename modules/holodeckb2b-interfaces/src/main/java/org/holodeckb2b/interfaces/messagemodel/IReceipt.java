@@ -28,7 +28,7 @@ import org.apache.axiom.om.OMElement;
  * <i>RefToMessageId</i> which indicates the User Message being acknowledged.<br>
  * The contents of the Receipt, i.e. the child element of <code>eb:Receipt</code> can be retrieved as
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IMessageUnit
  */
 public interface IReceipt extends ISignalMessage {

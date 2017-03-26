@@ -24,7 +24,7 @@ import org.apache.wss4j.dom.WSSecurityEngineResult;
 /**
  * EbMSConstants used in the security related processing of the messages.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public final class SecurityConstants {
 

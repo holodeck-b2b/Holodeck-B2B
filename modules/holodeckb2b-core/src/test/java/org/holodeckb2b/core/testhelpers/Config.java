@@ -21,7 +21,7 @@ import org.holodeckb2b.common.config.InternalConfiguration;
 
 /**
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class Config implements InternalConfiguration {
 
@@ -76,7 +76,7 @@ public class Config implements InternalConfiguration {
 
     @Override
     public String getTempDirectory() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getHolodeckB2BHome() + "/temp/";
     }
 
     @Override
@@ -111,7 +111,7 @@ public class Config implements InternalConfiguration {
 
     @Override
     public boolean shouldCheckCertificateRevocation() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return true;
     }
 
     @Override

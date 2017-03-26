@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  * Defines the interface the Holodeck B2B Core implementation has to provide to the outside world, like submitters
  * delivery methods and extensions for dynamic configuration.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IHolodeckB2BCore {
 
@@ -107,7 +107,7 @@ public interface IHolodeckB2BCore {
      * <p>Note that the DAO itself is provided by the persistency provider.
      *
      * @return  The {@link IQueryManager} that should use to query the meta-data of message units
-     * @since HB2B_NEXT_VERSION
+     * @since 2.2
      */
     public IQueryManager getQueryManager();
 }

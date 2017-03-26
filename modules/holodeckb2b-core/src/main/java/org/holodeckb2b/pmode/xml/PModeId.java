@@ -22,7 +22,7 @@ import org.simpleframework.xml.Text;
 /**
  * Represents the configuration for the <b>PMode.id</b> parameter.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @author Bram Bakx <bram at holodeck-b2b.org>
  */
 class PModeId {

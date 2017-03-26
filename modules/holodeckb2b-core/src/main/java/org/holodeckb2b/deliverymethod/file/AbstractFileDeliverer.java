@@ -43,7 +43,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * <p>This deliverer also does not implement the delivery of signal messages. If signals have to be delivered to the
  * business application this should also be implemented in the subclass by overriding {@link #deliverSignalMessage(org.holodeckb2b.common.messagemodel.IMessageUnit)}
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public abstract class AbstractFileDeliverer implements IMessageDeliverer {
 

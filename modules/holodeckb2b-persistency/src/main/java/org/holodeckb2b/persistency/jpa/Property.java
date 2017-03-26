@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.general.IProperty;
  * <p>This class is <i>embeddable</i> as a property is always bound specifically to one instance of an object.
  *
  * @author Sander Fieten <sander at holodeckb2b.org>
- * @since HB2B_NEXT_VERSION
+ * @since 2.2
  */
 @Embeddable
 public class Property implements IProperty, Serializable {

@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  * signals. How often en for which P-Modes this must be done is configurable by the user in a configuration file.
  * This worker detects changes to this configuration file and applies them to the pull worker pool.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see WorkerPool
  * @see PullConfiguration
  */

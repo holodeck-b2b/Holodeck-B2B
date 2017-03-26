@@ -35,7 +35,7 @@ import org.simpleframework.xml.core.Validate;
  * <p>NOTE: Security settings are part of the trading partner configuration in Holodeck B2B as it assumed that all
  * messages from one trading partner within the exchange will use the same security settings.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @aurhor Bram Bakx <bram at holodeck-b2b.org>
  */
 @Root

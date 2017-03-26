@@ -29,7 +29,7 @@ import org.apache.wss4j.common.ext.WSPasswordCallback;
  * Is used to hand over passwords to the WSS4J library. The callback handler does not retrieve the passwords from the
  * configuration itself. Username password combinations should be set before WSS4J starts processing the message.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PasswordCallbackHandler implements CallbackHandler {
 

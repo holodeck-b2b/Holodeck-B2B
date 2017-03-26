@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import java.util.Iterator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
@@ -26,7 +25,10 @@ import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
+
+import java.util.Iterator;
 
 /**
  * Is the handler in the <i>IN_FLOW</i> responsible for reading the meta data on an user message message unit from the
@@ -36,13 +38,13 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * it. This is done later in the {@link BasicHeaderValidation} and optionally in custom validators specified in the
  * P-Mode. The meta data is stored in an {@link UserMessageElement} entity object which is stored in the database and added to
  * the message context under key {@link MessageContextProperties#IN_USER_MESSAGE}. The processing state of the user
- * message is set to {@link ProcessingStates#PROCESSING}.
+ * message is set to {@link ProcessingState#PROCESSING}.
  * <p><b>NOTE:</b> The XML schema definition from the ebMS specification allows for multiple <code>eb:UserMessage</code>
  * elements in the ebMS header. In the Core Specification however the number of user message units in the message
  * is limited to just one. Holodeck B2B therefor only uses the first occurrence of <code>eb:UserMessage</code> and
  * ignores others.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ReadUserMessage extends BaseHandler {
 

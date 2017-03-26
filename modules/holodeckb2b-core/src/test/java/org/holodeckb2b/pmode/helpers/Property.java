@@ -19,7 +19,7 @@ package org.holodeckb2b.pmode.helpers;
 import org.holodeckb2b.interfaces.general.IProperty;
 
 /**
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class Property extends TypedName implements IProperty {
 

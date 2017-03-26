@@ -25,7 +25,7 @@ package org.holodeckb2b.security.tokens;
  * <p>Because the format for transferring this info is not specified in detail by the ebMS specifications this interface
  * is just a placeholder to indicate such information can / should be available.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IAuthenticationInfo  {
 }

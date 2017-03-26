@@ -83,12 +83,12 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
         </eb:PayloadInfo>
     </eb:UserMessage>
     <Payloads>
-        <Payload xml:id="pl-1">«base64 encoded data»/Payload>
+        <Payload xml:id="pl-1">«base64 encoded data»</Payload>
     </Payloads>
 </ebmsMessage>
 }</pre>
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see FileDeliveryFactory
  */
 public class SingleXMLDeliverer extends SimpleFileDeliverer {

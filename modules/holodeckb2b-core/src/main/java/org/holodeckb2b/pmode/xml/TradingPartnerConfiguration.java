@@ -38,7 +38,7 @@ import org.simpleframework.xml.core.Validate;
  * it is assumed in Holodeck B2B that the security is specified on the trading partner level and that all messages from
  * one trading partner within an exchange use the same security settings.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 @Root
 public class TradingPartnerConfiguration implements ITradingPartnerConfiguration {

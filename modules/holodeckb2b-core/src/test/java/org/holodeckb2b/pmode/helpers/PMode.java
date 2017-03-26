@@ -26,7 +26,7 @@ import static org.holodeckb2b.interfaces.pmode.ILeg.Label.REQUEST;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PMode implements IPMode {
 

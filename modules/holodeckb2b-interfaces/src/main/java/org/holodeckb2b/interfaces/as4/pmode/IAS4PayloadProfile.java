@@ -21,7 +21,7 @@ import org.holodeckb2b.interfaces.pmode.IPayloadProfile;
 /**
  * Extends the default {@link IPayloadProfile} interface to include setting for the AS4 Compression Feature.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IAS4PayloadProfile extends IPayloadProfile {
 

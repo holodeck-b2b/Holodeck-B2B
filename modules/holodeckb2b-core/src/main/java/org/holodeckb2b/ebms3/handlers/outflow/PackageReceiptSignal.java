@@ -39,7 +39,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * message of the same type. It is the responsibility of the other handlers not to insert more than one receipt if
  * conformance is required.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PackageReceiptSignal extends BaseHandler {
 

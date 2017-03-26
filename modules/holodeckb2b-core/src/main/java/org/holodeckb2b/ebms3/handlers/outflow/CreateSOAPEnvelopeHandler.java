@@ -36,7 +36,7 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
  * eb:Messaging</code> element. When running in a <i>response</i> flow the SOAP Envelope probably already  exists and
  * creation can therefor be skipped.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CreateSOAPEnvelopeHandler extends BaseHandler {
 

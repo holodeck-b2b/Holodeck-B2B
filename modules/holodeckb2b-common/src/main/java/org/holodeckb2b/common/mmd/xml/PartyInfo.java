@@ -25,7 +25,7 @@ import org.simpleframework.xml.Element;
  * <p>The <code>To</code> and <code>From</code> elements share the same datatype,
  * so there is also one class ({@see TradingPartner}) used to represents these elements.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PartyInfo {
 

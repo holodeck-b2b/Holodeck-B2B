@@ -51,7 +51,7 @@ import org.holodeckb2b.interfaces.submit.MessageSubmitException;
  * set of meta-data.
  * <p>This class is to be used only by the internal message submitter, therefore its visibility is limited to package.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 final class MMDCompleter {
 

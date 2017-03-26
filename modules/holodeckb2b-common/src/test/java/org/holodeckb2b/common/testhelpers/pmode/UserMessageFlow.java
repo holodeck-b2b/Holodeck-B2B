@@ -22,7 +22,7 @@ import org.holodeckb2b.interfaces.pmode.IPayloadProfile;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 
 /**
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class UserMessageFlow implements IUserMessageFlow {
 

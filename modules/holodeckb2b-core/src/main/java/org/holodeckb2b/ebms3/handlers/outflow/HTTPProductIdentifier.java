@@ -28,7 +28,7 @@ import org.holodeckb2b.common.handler.BaseHandler;
  * that executes or handles a request, i.e. the <code>Server</code> respectively <code>User-Agent</code> header. The
  * value of these header is the string constructed from the information provided in the {@link ProductId} interface.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.0.1
  */
 public class HTTPProductIdentifier extends BaseHandler {

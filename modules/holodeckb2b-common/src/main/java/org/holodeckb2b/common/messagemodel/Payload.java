@@ -29,8 +29,8 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
  * is contained in a User Message message unit. The actual content of the payload is stored by the Holodeck B2B Core on
  * the file system.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since 2.2
  */
 public class Payload implements IPayload {
 

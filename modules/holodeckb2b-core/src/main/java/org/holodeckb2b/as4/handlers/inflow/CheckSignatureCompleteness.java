@@ -46,7 +46,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * <p>If a payload is not signed a <i>ValueInconsistent</i> error will be generated and reported to the sender of the
  * user message.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
 

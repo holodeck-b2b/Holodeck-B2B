@@ -20,7 +20,7 @@ package org.holodeckb2b.multihop;
  * Defines common literals in handling multi-hop messaging. See section 2 of the ebMS V3 Part 2 specification for more
  * information about the ebMS 3 multi-hop function.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public final class MultiHopConstants {
 

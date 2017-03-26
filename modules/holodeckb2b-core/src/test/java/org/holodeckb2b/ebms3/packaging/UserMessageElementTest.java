@@ -50,6 +50,8 @@ public class UserMessageElementTest {
             new QName(EbMSConstants.EBMS3_NS_URI, "UserMessage");
     private static final QName MESSAGE_INFO_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "MessageInfo");
+    private static final QName TIMESTAMP_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "Timestamp");
     private static final QName MESSAGE_ID_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "MessageId");
     private static final QName COLLABORATION_INFO_ELEMENT_NAME =
@@ -91,7 +93,9 @@ public class UserMessageElementTest {
         assertEquals(USER_MESSAGE_ELEMENT_NAME, userMessageElement.getQName());
         OMElement miElement = MessageInfoElement.getElement(userMessageElement);
         assertEquals(MESSAGE_INFO_ELEMENT_NAME, miElement.getQName());
-        Iterator it = miElement.getChildrenWithName(MESSAGE_ID_ELEMENT_NAME);
+        Iterator it = miElement.getChildrenWithName(TIMESTAMP_ELEMENT_NAME);
+        assertTrue(it.hasNext());
+        it = miElement.getChildrenWithName(MESSAGE_ID_ELEMENT_NAME);
         assertTrue(it.hasNext());
         if(it.hasNext()) {
             OMElement idElement = (OMElement)it.next();

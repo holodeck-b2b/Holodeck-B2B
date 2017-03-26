@@ -20,7 +20,7 @@ import org.holodeckb2b.interfaces.general.IService;
 
 /**
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class Service extends TypedName implements IService {
 

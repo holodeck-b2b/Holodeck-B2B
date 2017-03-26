@@ -44,7 +44,7 @@ import org.holodeckb2b.interfaces.pmode.ILeg.Label;
  * <p><b>NOTE 2: </b>The current version does not contain all P-Mode parameters described by the Core Specification and
  * AS4 profile. When new functionality is implemented parameters will be added to this interface.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IPMode {
 

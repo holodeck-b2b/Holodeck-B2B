@@ -22,8 +22,8 @@ import org.holodeckb2b.interfaces.general.ISchemaReference;
  * Is an in memory only implementation of {@link ISchemaReference} to temporarily store the information about the schema
  * defining the structure of a payload from a User Message message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since 2.2
  */
 public class SchemaReference implements ISchemaReference {
 

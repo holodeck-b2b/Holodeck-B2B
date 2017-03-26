@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.general.IDescription;
  * <p>Corresponds to a <code>eb:Error</code> child element of <code>eb:SignalMessage</code>. The structure of this
  * element is specified in section 6.2 of the ebMS Core Specification.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IEbmsError {
 

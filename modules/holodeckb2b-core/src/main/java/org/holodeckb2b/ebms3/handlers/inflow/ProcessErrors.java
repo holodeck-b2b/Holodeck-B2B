@@ -16,9 +16,6 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,12 +34,16 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received error signals. For each error contained in one of
- * the {@link ErrorMessage}s available in the message context property {@link MessageContextProperties#IN_ERRORS} it
- * will check if there is a {@link MessageUnit} in the database and mark that message as failed.
+ * the {@link IErrorMessageEntity}s available in the message context property {@link MessageContextProperties#IN_ERRORS} it
+ * will check if there is a {@link IMessageUnitEntity} in the database and mark that message as failed.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ProcessErrors extends BaseHandler {
 
@@ -81,13 +82,13 @@ public class ProcessErrors extends BaseHandler {
      * <p>First the referenced message id is checked for correctness meaning that it refers to an existing message unit.
      * <p>If it refers to non existing message units an <i>ValueInconsistent</i> error will be generated and added to
      * the message context. The processing state of the error signal itself will be set to
-     * {@link ProcessingStates#FAILURE}.
+     * {@link ProcessingState#FAILURE}.
      * <p>If the referenced id is valid the referenced message units processing state will be changed to {@link
-     * ProcessingStates#FAILURE}. The processing state of the error signal itself is set to {@link
-     * ProcessingStates#READY_FOR_DELIVERY} to indicate that the error can be delivered to the business application if
+     * ProcessingState#FAILURE}. The processing state of the error signal itself is set to {@link
+     * ProcessingState#READY_FOR_DELIVERY} to indicate that the error can be delivered to the business application if
      * needed.
      *
-     * @param errSignalProxy    The {@link IErrorMessageEntity} object representing the Error Signal to process
+     * @param errSignal    The {@link IErrorMessageEntity} object representing the Error Signal to process
      * @param mc                The current message context
      * @throws PersistenceException When a database error occurs while processing the Error Signal
      */
