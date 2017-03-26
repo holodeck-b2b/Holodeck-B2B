@@ -4,18 +4,18 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 2.1.2
 ###### 2016-12-21
-###Fixed
+### Fixed
 * References in Error Signals are not checked correctly [#38](https://github.com/holodeck-b2b/Holodeck-B2B/issues/38)
 * Database connection leak [#39](https://github.com/holodeck-b2b/Holodeck-B2B/issues/39)
 * The dependency on Java 8 is removed again [#40](https://github.com/holodeck-b2b/Holodeck-B2B/issues/40)
 
 ## 2.1.1
 ###### 2016-11-11
-###Changed
+### Changed
 * It is now possible to not only configure whether _Error Signals_ should be logged but also if all signals
   should be logged or only the ones that contain an Error with severity _failure_ (see `log4j2.xml` for more info).
 
-###Fixed
+### Fixed
 * Database connection not closed [#34](https://github.com/holodeck-b2b/Holodeck-B2B/issues/34)
 * ebMS errors are only logged when log level is ERROR [#35](https://github.com/holodeck-b2b/Holodeck-B2B/issues/35)
 * Exceptions in processing of WSS header not handled correctly [#36](https://github.com/holodeck-b2b/Holodeck-B2B/issues/36)
