@@ -97,14 +97,18 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
                     final Collection<IPayload> payloads = tmpUserMessage.getPayloads();
                     if (!Utils.isNullOrEmpty(payloads)) {
                         for (final IPayload pl : payloads) {
-                            final File plFile = new File(pl.getContentLocation());
-                            if (plFile.exists() && plFile.delete()) {
-                                log.debug("Removed payload data file " + pl.getContentLocation());
-                                // Clear the payload location
-                                ((Payload) pl).setContentLocation(null);
-                            }  else if (plFile.exists())
-                                log.error("Could not remove payload data file " + pl.getContentLocation()
-                                            + ". Remove manually");
+                            if (Utils.isNullOrEmpty(pl.getContentLocation()))
+                                log.debug("No payload location provided for payload [" + pl.getPayloadURI() + "]");
+                            else {
+                                final File plFile = new File(pl.getContentLocation());
+                                if (plFile.exists() && plFile.delete()) {
+                                    log.debug("Removed payload data file " + pl.getContentLocation());
+                                    // Clear the payload location
+                                    ((Payload) pl).setContentLocation(null);
+                                }  else if (plFile.exists())
+                                    log.error("Could not remove payload data file " + pl.getContentLocation()
+                                                + ". Remove manually");
+                            }
                         }
                     } else
                         log.debug("User Message [" + msgUnit.getMessageId() + "] has no payloads");
