@@ -36,7 +36,7 @@ import org.simpleframework.xml.core.Persister;
 /**
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 public class SecurityConfigurationTest {
 

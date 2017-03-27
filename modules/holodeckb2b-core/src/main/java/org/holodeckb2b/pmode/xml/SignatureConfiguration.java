@@ -26,7 +26,7 @@ import org.simpleframework.xml.Root;
  * parameters for including a WSS signature in the message.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 @Root
 public class SignatureConfiguration implements ISigningConfiguration {

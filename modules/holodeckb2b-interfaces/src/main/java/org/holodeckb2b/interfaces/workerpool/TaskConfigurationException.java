@@ -20,7 +20,7 @@ package org.holodeckb2b.interfaces.workerpool;
  * Is thrown by {@link IWorkerTask#setParameters(java.util.Map)} to indicates a problem with the configuration of a task
  * that should executed by a worker in a WorkerPool.
  *
- * @author Sander Fieten <sander@holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class TaskConfigurationException extends Exception {
 

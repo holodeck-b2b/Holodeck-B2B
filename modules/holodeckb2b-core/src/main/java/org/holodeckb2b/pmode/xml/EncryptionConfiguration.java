@@ -24,7 +24,7 @@ import org.simpleframework.xml.Root;
  * Represents the <code>EncryptionConfiguration</code> element in the P-Mode
  * XML document that contains the P-Mode parameters for message encryption.
  *
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 @Root
 public class EncryptionConfiguration implements IEncryptionConfiguration {

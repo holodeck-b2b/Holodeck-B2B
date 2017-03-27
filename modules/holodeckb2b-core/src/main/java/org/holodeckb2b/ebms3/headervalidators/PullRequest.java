@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
  * required to be in the Pull Request (see section 5.2.3.1 of the ebMS V3 Core Spec). If an error is detected an ebMS
  * <i>InvalidHeader</i> is created and reported back.
  * todo Rename to PullRequestValidator
- * @author Sander Fieten <sander at chasquis-services.com>
+ * @author Sander Fieten (sander at chasquis-services.com)
  * @since  HB2B_NEXT_VERSION
  */
 public class PullRequest {

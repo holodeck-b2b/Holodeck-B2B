@@ -25,7 +25,7 @@ package org.holodeckb2b.interfaces.pmode.security;
  * <p>As noted in <a href="https://issues.oasis-open.org/browse/EBXMLMSG-45">issue 45 of the OASIS TC issue tracker</a>
  * there are no P-Mode parameters defined in the ebMS specification for configuration of key transport.
  *
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IKeyTransport {

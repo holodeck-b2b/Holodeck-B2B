@@ -85,7 +85,7 @@ public abstract class AbstractUserMessageHandler extends BaseHandler {
      * Abstract method that implementations must use to do the actual user message processing.
      *
      * @param mc            The Axis2 {@link MessageContext} of the processed message
-     * @param userMessage   The currently processed User Messsge as a {@links IUserMessageEntity}
+     * @param userMessage   The currently processed User Messsge as a {@link IUserMessageEntity}
      * @return              How to continue processing of the message. If message processing should not continue, it is
      *                      RECOMMENDED to throw an AxisFault instead of returning <code>InvocationResponse.ABORT</code>
      *                      because this enables sending a response.

@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * as well as business information like service and action are available. If an error is detected an ebMS
  * <i>InvalidHeader</i> is created and reported back.
  * todo Rename to UserMessageValidator
- * @author Sander Fieten <sander at chasquis-services.com>
+ * @author Sander Fieten (sander at chasquis-services.com)
  * @since  HB2B_NEXT_VERSION
  */
 public class UserMessage {

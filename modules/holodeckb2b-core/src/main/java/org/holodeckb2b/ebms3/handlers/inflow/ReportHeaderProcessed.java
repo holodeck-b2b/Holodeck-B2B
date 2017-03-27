@@ -27,7 +27,7 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
  * Is the handler responsible for checking if a EBMS SOAPHeaderBlock is present
  * and setting it as processed.
  *
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 public class ReportHeaderProcessed extends BaseHandler {
 

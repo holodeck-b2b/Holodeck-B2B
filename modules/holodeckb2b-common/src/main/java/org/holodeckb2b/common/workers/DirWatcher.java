@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  * </ul>
  *
  * @see PathWatcher
- * @author Sander Fieten <sander@holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public abstract class DirWatcher extends PathWatcher {
 

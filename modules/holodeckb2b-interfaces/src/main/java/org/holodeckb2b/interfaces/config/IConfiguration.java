@@ -104,7 +104,7 @@ public interface IConfiguration {
      * Indicates if the references in an Error signal message unit should be checked using the strict requirements
      * defined in the Core Specification (all references equal) or if a bit more relaxed check can be used (signal level
      * reference empty, but individual errors have the same reference).
-     * <p>Default the more relaxed check is used. To change this set the value of the <i>StrictErrorReferencesCheck<i>
+     * <p>Default the more relaxed check is used. To change this set the value of the <i>StrictErrorReferencesCheck</i>
      * parameter to <i>"true"</i>.
      *
      * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>

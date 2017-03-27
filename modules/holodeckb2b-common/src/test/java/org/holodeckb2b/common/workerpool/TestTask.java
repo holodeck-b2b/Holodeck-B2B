@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * Simple task used in test of the Worker pool
  *
- * @author Sander Fieten <sander@holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class TestTask extends AbstractWorkerTask {
 

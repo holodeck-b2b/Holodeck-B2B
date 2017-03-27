@@ -26,7 +26,7 @@ import org.simpleframework.xml.ElementList;
 
 /**
  * Implements a BusinessInfo class which describes a trading partner.
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 public class BusinessInfo implements IBusinessInfo {
 

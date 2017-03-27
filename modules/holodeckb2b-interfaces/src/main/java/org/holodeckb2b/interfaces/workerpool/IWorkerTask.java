@@ -30,7 +30,7 @@ import java.util.Map;
  * {@link #run()} method as these will stop the thread and prevent repeated executing!</li>
  * </ul>
  *
- * @author Sander Fieten <sander@holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IWorkerTask extends Runnable {
 

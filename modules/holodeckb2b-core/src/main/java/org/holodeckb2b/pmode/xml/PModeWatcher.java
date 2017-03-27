@@ -38,7 +38,7 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  * "xml".
  *
  * @see PMode
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PModeWatcher extends DirWatcher {

@@ -23,7 +23,7 @@ package org.holodeckb2b.interfaces.pmode;
  * <p><b>NOTE: </b>Currently the payload profile is not used by Holodeck B2B to restrict the payloads that can be
  * included in a user message. Therefore this interface currently does not define any methods.
  *
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 public interface IPayloadProfile {
 

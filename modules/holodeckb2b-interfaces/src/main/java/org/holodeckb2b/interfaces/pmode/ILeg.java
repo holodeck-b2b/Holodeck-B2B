@@ -30,7 +30,7 @@ import org.holodeckb2b.interfaces.events.IMessageProcessingEventConfiguration;
  * Therefore the leg configuration is split into <i>flows</i> that configure the pull request and user message.<br>
  * The leg defines the common and default parameters like the protocol to use and if and how receipts should be used.
  *
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface ILeg {
@@ -42,7 +42,7 @@ public interface ILeg {
 
     /**
      * Gets the <i>label</i> of this leg.
-     * <p>Used in a Two-Way MEP to identify whether leg contains the <i>request</i> or </i>reply</i> user message.
+     * <p>Used in a Two-Way MEP to identify whether leg contains the <i>request</i> or <i>reply</i> user message.
      *
      * @return The {@link Label} of this leg. Can be <code>null</code> if this leg is part of a One-Way MEP.
      */
@@ -79,7 +79,7 @@ public interface ILeg {
      *         be <code>null</code> for the receiving side. Can be <code>null</code> on the sending side when errors
      *         and receipts responses do not need to be delivered to the business application or use their own
      *         delivery specification
-     * @see    org.holodeckb2b.common.delivery
+     * @see    org.holodeckb2b.interfaces.delivery
      */
     public IDeliverySpecification getDefaultDelivery();
 

@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * Represents a time interval defined by the length of the interval and the unit of time
  * the length is specified in.
  *
- * @author Sander Fieten <sander@holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class Interval {
 

@@ -33,7 +33,7 @@ package org.holodeckb2b.interfaces.pmode.security;
  * are needed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @aurhor Bram Bakx <bram at holodeck-b2b.org>
+ * @aurhor Bram Bakx (bram at holodeck-b2b.org)
  */
 public interface ISecurityConfiguration {
 

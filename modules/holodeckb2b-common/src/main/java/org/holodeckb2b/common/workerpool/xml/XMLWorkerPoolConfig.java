@@ -35,7 +35,7 @@ import org.simpleframework.xml.core.Persister;
  * and one or more <code>worker</code> child that specify the workers to be in the pool.
  *
  * @see XMLWorkerConfig
- * @author Sander Fieten <sander@holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 @Root(name = "workers", strict=false)
 public class XMLWorkerPoolConfig implements IWorkerPoolConfiguration {

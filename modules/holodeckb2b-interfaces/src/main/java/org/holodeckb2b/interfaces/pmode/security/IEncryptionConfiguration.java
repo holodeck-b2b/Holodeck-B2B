@@ -23,7 +23,7 @@ package org.holodeckb2b.interfaces.pmode.security;
  * <b>PMode[1].Security.X509.Encryption</b>.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 public interface IEncryptionConfiguration {
 
