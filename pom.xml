@@ -96,7 +96,7 @@
     <dependencyManagement>
         <dependencies>
             <!--===============================================================
-                First the modules of Holodeck itself
+                First the modules of Holodeck B2B itself
             =============================================================== -->
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
@@ -125,7 +125,7 @@
             </dependency>
 
             <!--===============================================================
-                Holodeck is built on Axis2, so include all relevant Axis2
+                Holodeck B2B is built on Axis2, so include all relevant Axis2
                 modules
             =============================================================== -->
             <dependency>
@@ -219,7 +219,7 @@
                 Security libraries used to implement signing and encryption
                 of the messages.
                 The WSS4J framework is used to implement WS-Security and
-                BouncyCastle is included as security provided
+                BouncyCastle is included as security provider
             =============================================================== -->
             <dependency>
                 <groupId>org.apache.santuario</groupId>
