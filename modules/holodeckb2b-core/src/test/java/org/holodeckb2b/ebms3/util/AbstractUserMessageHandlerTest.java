@@ -108,7 +108,6 @@ public class AbstractUserMessageHandlerTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umElement);
         try {
             mc.setEnvelope(env);
         } catch (AxisFault axisFault) {

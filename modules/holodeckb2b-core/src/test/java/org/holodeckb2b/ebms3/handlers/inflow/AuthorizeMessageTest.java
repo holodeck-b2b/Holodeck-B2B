@@ -110,8 +110,7 @@ public class AuthorizeMessageTest {
 //        System.out.println("umElement: " + umElement);
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        // Setting input message property
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umElement);
+
         try {
             mc.setEnvelope(env);
         } catch (AxisFault axisFault) {
