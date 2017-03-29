@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
  * persistency unit.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 2.2
  */
 public class EntityManagerUtil {
     // We use SingletonHolder pattern for the reference to the EntityManagerFactory object

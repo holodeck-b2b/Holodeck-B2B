@@ -138,7 +138,7 @@ public class HolodeckB2BCoreInterface {
      * <p>Note that the DAO itself is provided by the persistency provider.
      *
      * @return  The {@link IQueryManager} that should use to query the meta-data of message units
-     * @since HB2B_NEXT_VERSION
+     * @since 2.2
      */
     public static IQueryManager getQueryManager() {
         assertInitialized();

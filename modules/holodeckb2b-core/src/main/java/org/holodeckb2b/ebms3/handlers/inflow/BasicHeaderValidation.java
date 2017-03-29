@@ -43,7 +43,7 @@ import java.util.Collection;
  * the P-Mode.
  *
  * @author Sander Fieten (sander at chasquis-services.com)
- * @since HB2B_NEXT_VERSION
+ * @since 2.2
  */
 public class BasicHeaderValidation extends BaseHandler {
 

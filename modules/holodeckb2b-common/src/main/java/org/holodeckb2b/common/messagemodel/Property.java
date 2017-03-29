@@ -23,7 +23,7 @@ import org.holodeckb2b.interfaces.general.IProperty;
  * message header of a message unit.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 2.2
  */
 public class Property implements IProperty {
 

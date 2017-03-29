@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  * reported back.
  * todo Rename to ReceiptValidator
  * @author Sander Fieten (sander at chasquis-services.com)
- * @since  HB2B_NEXT_VERSION
+ * @since  2.2
  */
 public class Receipt {
 

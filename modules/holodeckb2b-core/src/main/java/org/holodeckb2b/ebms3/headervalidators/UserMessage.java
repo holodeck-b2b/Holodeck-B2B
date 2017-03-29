@@ -33,7 +33,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * <i>InvalidHeader</i> is created and reported back.
  * todo Rename to UserMessageValidator
  * @author Sander Fieten (sander at chasquis-services.com)
- * @since  HB2B_NEXT_VERSION
+ * @since  2.2
  */
 public class UserMessage {
 

@@ -132,19 +132,19 @@ public class Config implements InternalConfiguration {
 
     /*
      * The class name of the component that should be used to validate P-Modes before deploying them
-     * @since HB2B_NEXT_VERSION
+     * @since 2.2
      */
     private String pmodeValidatorClass = null;
 
     /*
      * The class name of the component that should be used to store deployed P-Modes
-     * @since HB2B_NEXT_VERSION
+     * @since 2.2
      */
     private String pmodeStorageClass = null;
 
     /*
      * The class name of the persistency provider that should be used to store the meta-data on processed message units
-     * @since HB2B_NEXT_VERSION
+     * @since 2.2
      */
     private String persistencyProviderClass = null;
 
@@ -515,7 +515,7 @@ public class Config implements InternalConfiguration {
      *
      * @return  The class name of the {@link org.holodeckb2b.interfaces.pmode.validation.IPModeValidator}
      *          implementation
-     * @since  HB2B_NEXT_VERSION
+     * @since  2.2
      */
     @Override
     public String getPModeValidatorImplClass() {
@@ -530,7 +530,7 @@ public class Config implements InternalConfiguration {
      *
      * @return  The class name of the {@link org.holodeckb2b.interfaces.pmode.IPModeSet} implementation to use for
      *          storing deployed P-Modes
-     * @since  HB2B_NEXT_VERSION
+     * @since  2.2
      */
     @Override
     public String getPModeStorageImplClass() {
@@ -544,7 +544,7 @@ public class Config implements InternalConfiguration {
      * in the <i>PersistencyProvider</i> parameter.
      *
      * @return  The class name of the {@link IPersistencyProvider} implementation to use for storing meta-data
-     * @since  HB2B_NEXT_VERSION
+     * @since  2.2
      */
     @Override
     public String getPersistencyProviderClass() {

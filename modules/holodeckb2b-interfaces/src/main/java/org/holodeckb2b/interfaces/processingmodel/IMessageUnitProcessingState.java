@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see    ProcessingState
- * @since  HB2B_NEXT_VERSION
+ * @since  2.2
  */
 public interface IMessageUnitProcessingState {
 

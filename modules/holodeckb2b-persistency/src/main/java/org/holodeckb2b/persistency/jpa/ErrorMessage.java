@@ -37,7 +37,7 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
  *              which refer to the given message id.</li></ul>
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 2.2
  */
 @Entity
 @Table(name="ERROR_MESSAGE")

@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
  * request signal that can be <i>lazily loaded</i>.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 2.2
  * @see   IMessageUnitEntity
  */
 public interface IPullRequestEntity extends IMessageUnitEntity, IPullRequest {

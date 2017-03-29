@@ -23,7 +23,7 @@ import org.holodeckb2b.interfaces.general.ISchemaReference;
  * defining the structure of a payload from a User Message message unit.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 2.2
  */
 public class SchemaReference implements ISchemaReference {
 

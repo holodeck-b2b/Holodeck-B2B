@@ -82,7 +82,7 @@ public class MessageUnitUtils {
      * @param msgUnit   The message unit to get the reference from
      * @return  The messageId of the referenced message unit if it is available in the given message unit, or<br>
      *          <code>null</code> if not available.
-     * @since HB2B_NEXT_VERSION
+     * @since 2.2
      */
     public static String getRefToMessageId(final IMessageUnit msgUnit) {
         String refToMessageId = msgUnit.getRefToMessageId();

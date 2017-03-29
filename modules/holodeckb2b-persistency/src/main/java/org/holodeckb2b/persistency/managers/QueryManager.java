@@ -44,7 +44,7 @@ import org.holodeckb2b.persistency.util.JPAEntityHelper;
  * Is the default persistency provider's implementation of the {@link IQueryManager} interface.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 2.2
  */
 public class QueryManager implements IQueryManager {
 

@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * to another message unit.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 2.2
  */
 public interface IQueryManager {
 

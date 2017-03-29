@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.general.IPartyId;
  * partner meta-data it relates to.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 2.2
  */
 @Embeddable
 public class PartyId implements IPartyId, Serializable {

@@ -23,7 +23,7 @@ import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
  * data of a User Message message unit.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 2.2
  */
 public class AgreementReference implements IAgreementReference {
 

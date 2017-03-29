@@ -30,7 +30,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
  * the file system.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 2.2
  */
 public class Payload implements IPayload {
 
