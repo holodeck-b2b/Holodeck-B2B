@@ -53,9 +53,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -174,11 +176,11 @@ public class AuthorizeMessageTest {
         }
 
         verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
-        LoggingEvent loggingEvent = captorLoggingEvent.getValue();
-        //Check log level
-        assertThat(loggingEvent.getLevel(), is(Level.INFO));
+
+        verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
         //Check the message being logged
-        assertThat(loggingEvent.getRenderedMessage(),
-                is("Message [Primary msg msgId="+msgId+"] successfully authorized"));
+        assertTrue(eventContainsMsg(events, Level.INFO,
+                "Message [Primary msg msgId="+msgId+"] successfully authorized"));
     }
 }
