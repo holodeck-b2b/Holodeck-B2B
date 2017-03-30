@@ -188,6 +188,9 @@ public class CreateWSSHeaders extends BaseHandler {
             return InvocationResponse.ABORT;
         }
 
+        // The call of the Document.normalizeDocument() method is to fix the exception described here:
+        // http://apache-xml-project.6118.n7.nabble.com/Undeclared-namespace-prefix-quot-ds-quot-error-td36346.html
+        domEnvelope.normalizeDocument();
         // Convert the processed SOAP envelope back to the Axiom representation for further processing
         final SOAPEnvelope SOAPenv = Axis2Utils.convertToAxiom(domEnvelope);
 
@@ -285,8 +288,12 @@ public class CreateWSSHeaders extends BaseHandler {
      */
     private void setupEncryption(final MessageContext mc, final IEncryptionConfiguration encCfg,
                                  final PasswordCallbackHandler pwdCBHandler) {
+        System.out.println("[setupEncryption]>");
         // Set up crypto engine
         final Properties encProperties = SecurityUtils.createCryptoConfig(SecurityUtils.CertType.pub);
+
+        System.out.println("encProperties: " + encProperties);
+
         mc.setProperty(ConfigurationConstants.ENC_PROP_REF_ID, "" + encProperties.hashCode());
         mc.setProperty("" + encProperties.hashCode(), encProperties);
 
@@ -333,6 +340,7 @@ public class CreateWSSHeaders extends BaseHandler {
         mc.setProperty(ConfigurationConstants.ENC_KEY_ID, SecurityUtils.getWSS4JX509KeyId(ktKeyReference));
         mc.setProperty(ConfigurationConstants.ENC_DIGEST_ALGO, ktDigest);
         mc.setProperty(ConfigurationConstants.ENC_KEY_TRANSPORT, ktAlgorithm);
+        System.out.println("<[setupEncryption]");
     }
 
     /**
