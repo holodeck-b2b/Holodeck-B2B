@@ -197,7 +197,6 @@ public class BasicHeaderValidationTest {
         assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 
-    // todo the following test fails. Correct it and uncomment
     @Test
     public void testDoProcessingOfReciepts() throws Exception {
         // Creating SOAP envelope
