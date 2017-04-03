@@ -53,8 +53,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * Created at 15:46 27.02.17
@@ -126,15 +125,10 @@ public class PackageErrorSignalsTest {
         StorageManager updateManager = core.getStorageManager();
         IErrorMessageEntity errorMessageEntity =
                 updateManager.storeIncomingMessageUnit(errorMessage);
-        System.out.println("shouldHaveSOAPFault: " + errorMessageEntity.shouldHaveSOAPFault());
         ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
         errorMessageEntities.add(errorMessageEntity);
         mc.setProperty(MessageContextProperties.OUT_ERRORS,
                 errorMessageEntities);
-
-        // todo We also need to test the case when the
-        // todo org.holodeckb2b.persistency.jpa.ErrorMessage.shouldHaveSOAPFault()
-        // todo option is set to true. I don't know how to set it for now (TS)
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
@@ -152,6 +146,81 @@ public class PackageErrorSignalsTest {
         messages.put("Make sure that all meta-data on the error is loaded", false);
         messages.put("Add eb:SignalMessage element to the existing eb:Messaging header", false);
         messages.put("eb:SignalMessage element succesfully added to header", false);
+
+        Set<String> keys = messages.keySet();
+        for(LoggingEvent e : events) {
+            if(e.getLevel().equals(Level.DEBUG)) {
+                String key = e.getRenderedMessage();
+                if(keys.contains(key)) {
+                    messages.put(key, true);
+                }
+            }
+        }
+        boolean containsAllMessages = true;
+        for(Boolean flag : messages.values()) {
+            containsAllMessages &= flag;
+        }
+        assertTrue(containsAllMessages);
+    }
+
+    @Test
+    public void testDoProcessingIfShouldHaveSOAPFault() throws Exception {
+        // Creating SOAP envelope
+        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        // Adding header
+        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
+
+        MessageContext mc = new MessageContext();
+        mc.setFLOW(MessageContext.OUT_FLOW);
+
+        try {
+            mc.setEnvelope(env);
+        } catch (AxisFault axisFault) {
+            fail(axisFault.getMessage());
+        }
+
+        ErrorMessage errorMessage = new ErrorMessage();
+        ArrayList<IEbmsError> errors = new ArrayList<>();
+        EbmsError ebmsError = new EbmsError();
+        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setErrorCode("some_error_code");
+        errors.add(ebmsError);
+        errorMessage.setErrors(errors);
+
+        ErrorSignalElement.createElement(headerBlock, errorMessage);
+
+        StorageManager updateManager = core.getStorageManager();
+        IErrorMessageEntity errorMessageEntity =
+                updateManager.storeIncomingMessageUnit(errorMessage);
+
+        IErrorMessageEntity errMESpy = spy(errorMessageEntity);
+        doReturn(true).when(errMESpy).shouldHaveSOAPFault();
+
+        ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
+        errorMessageEntities.add(errMESpy);
+        mc.setProperty(MessageContextProperties.OUT_ERRORS,
+                errorMessageEntities);
+
+        try {
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        verify(mockAppender, atLeastOnce())
+                .doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+        HashMap<String, Boolean> messages = new HashMap<>();
+        messages.put("Adding " + 1 + " error signal(s) to the message", false);
+        messages.put("Get the eb:Messaging header from the message", false);
+        messages.put("Make sure that all meta-data on the error is loaded", false);
+        messages.put("Add eb:SignalMessage element to the existing eb:Messaging header", false);
+        messages.put("eb:SignalMessage element succesfully added to header", false);
+        messages.put("A SOAPFaults should be added to message, "
+                + "check if possible due to UserMessage with body payload", false);
+        messages.put("SOAPFault can be added to message", false);
+        messages.put("SOAPFault added to message", false);
         Set<String> keys = messages.keySet();
         for(LoggingEvent e : events) {
             if(e.getLevel().equals(Level.DEBUG)) {
