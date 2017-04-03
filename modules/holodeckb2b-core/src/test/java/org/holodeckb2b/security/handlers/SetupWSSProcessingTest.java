@@ -199,9 +199,8 @@ public class SetupWSSProcessingTest {
         }
         assertTrue(containsAllMessages);
 
-        // todo check the presence of the mc properties. In this case checking only messages does not fit.
         assertNotNull(mc.getProperty(MessageContextProperties.IN_USER_MESSAGE));
-        assertNotNull(mc.getProperty(ConfigurationConstants.ENABLE_REVOCATION));  // optional
+        assertNotNull(mc.getProperty(ConfigurationConstants.ENABLE_REVOCATION)); // optional
         assertNotNull(mc.getProperty(ConfigurationConstants.PW_CALLBACK_REF));
     }
 }

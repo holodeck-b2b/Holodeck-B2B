@@ -91,6 +91,7 @@ public class BasicHeaderValidationTest {
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
+
     @Before
     public void setUp() throws Exception {
         handler = new BasicHeaderValidation();

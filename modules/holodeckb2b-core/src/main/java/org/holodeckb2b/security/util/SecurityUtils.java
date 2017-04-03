@@ -257,7 +257,6 @@ public class SecurityUtils {
                     signedInfoElement.getChildrenWithName(new QName(SecurityConstants.DSIG_NAMESPACE_URI, "Reference"))
                 ; it.hasNext() ;)
                 references.add(it.next());
-
         }
 
         return references;
