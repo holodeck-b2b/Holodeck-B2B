@@ -1,7 +1,22 @@
+/*
+ * Copyright (C) 2016 The Holodeck B2B Team, Sander Fieten
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.holodeckb2b.security.util;
 
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
@@ -41,7 +56,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -136,25 +150,12 @@ public class WSSProcessingEngineTest {
             fail(e.getMessage());
         }
 
-        env = mc.getEnvelope();
-
-        SOAPHeader header = env.getHeader();
-        ArrayList securityHeaders =
-                header.getHeaderBlocksWithNSURI(
-                        SecurityConstants.WSS_NAMESPACE_URI);
-
-        System.out.println("securityHeaders amount: " + securityHeaders.size());
-
         Document domEnvelope = Axis2Utils.convertToDOM(mc);
-
-        System.out.println("domEnvelope: " + domEnvelope);
 
         // First method parameter value
         final Element securityHeader =
                 WSSecurityUtil.getSecurityHeader(domEnvelope,
                         SecurityConstants.EBMS_WSS_HEADER);
-
-        System.out.println("securityHeader: " + securityHeader);
 
         final WSSConfig config = WSSConfig.getNewInstance();
         config.setValidator(WSSecurityEngine.USERNAME_TOKEN, new NoOpValidator());
@@ -171,8 +172,8 @@ public class WSSProcessingEngineTest {
         assertNotNull(result);
         assertTrue(result.size()>0);
 
-        System.out.println("result amount:" + result.size());
-        WSSecurityEngineResult r = result.iterator().next();
-        System.out.println("r: " + r);
+//        System.out.println("result amount:" + result.size());
+//        WSSecurityEngineResult r = result.iterator().next();
+//        System.out.println("r: " + r);
     }
 }
