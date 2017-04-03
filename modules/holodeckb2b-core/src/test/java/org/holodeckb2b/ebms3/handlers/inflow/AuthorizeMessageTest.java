@@ -128,9 +128,9 @@ public class AuthorizeMessageTest {
 
         String pmodeId = userMessage.getCollaborationInfo().getAgreement().getPModeId();
 
-        // todo It seems strange that we need to set the PMode id value separately
-        // todo when it is contained within the agreement
-        // todo But if we don't set it the value returned by userMessage.getPModeId() is null now
+        // We need to set the PMode id value separately because
+        // the agreement pmode & userMessage pmode are different
+        // Currently we just set the same value
         userMessage.setPModeId(pmodeId);
 
         String msgId = userMessage.getMessageId();
