@@ -130,9 +130,9 @@ public class PackageErrorSignals extends BaseHandler {
         boolean onlyErrorMU = true;
         final Iterator<IMessageUnitEntity> msgUnitsIt = MessageContextUtils.getSentMessageUnits(mc).iterator();
 
-        do {
+        while (onlyErrorMU && msgUnitsIt.hasNext()) {
             onlyErrorMU = msgUnitsIt.next() instanceof IErrorMessage;
-        } while (onlyErrorMU && msgUnitsIt.hasNext());
+        }
 
         return onlyErrorMU;
     }
