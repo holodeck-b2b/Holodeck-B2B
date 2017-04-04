@@ -77,7 +77,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
         if (Utils.isNullOrEmpty(errors)) {
             log.debug("No errors were generated during this in flow, nothing to do");
         } else {
-            StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+            StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             log.debug(errors.size() + " error(s) were generated during this in flow");
 
             // First bundle the errors per message in error

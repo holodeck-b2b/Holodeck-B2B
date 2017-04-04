@@ -66,7 +66,7 @@ public class CheckSentResult extends BaseHandler {
         // Get all message units in this message
         final Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
         // And change their processing state
-        final StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+        final StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         for (final IMessageUnitEntity mu : msgUnits) {
             updateManager.setProcessingState(mu, ProcessingState.SENDING);
             log.info(MessageUnitUtils.getMessageUnitName(mu) + " with msg-id ["
@@ -100,7 +100,7 @@ public class CheckSentResult extends BaseHandler {
 
             //Change processing state of all message units in the message accordingly
             final Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
-            final StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+            final StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             for (final IMessageUnitEntity mu : msgUnits) {
                 try {
                     if (!success) {

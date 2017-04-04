@@ -132,7 +132,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
             final boolean asResponse = rcptConfig.getPattern() == ReplyPattern.RESPONSE;
             log.debug("Store the receipt signal in database");
             try {
-                IReceiptEntity receipt = (IReceiptEntity) HolodeckB2BCore.getStoreManager()
+                IReceiptEntity receipt = (IReceiptEntity) HolodeckB2BCore.getStorageManager()
                                                                                 .storeOutGoingMessageUnit(rcptData);
                 if (asResponse) {
                     log.debug("Store the receipt in the MessageContext");
@@ -141,7 +141,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
                 } else {
                     if (rcptConfig.getTo() != null && !rcptConfig.getTo().isEmpty()) {
                         log.debug("The Receipt should be sent separately");
-                        HolodeckB2BCore.getStoreManager().setProcessingState(receipt, ProcessingState.READY_TO_PUSH);
+                        HolodeckB2BCore.getStorageManager().setProcessingState(receipt, ProcessingState.READY_TO_PUSH);
                     } else {
                         log.debug("Receipt will be piggybacked on next PullRequest");
                     }

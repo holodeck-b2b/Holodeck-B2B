@@ -49,7 +49,7 @@ public class HolodeckB2BCore extends HolodeckB2BCoreInterface {
      * @return  The {@link StorageManager} that Core classes should use to update meta-data of message units
      * @since 2.2
      */
-    public static StorageManager getStoreManager() {
+    public static StorageManager getStorageManager() {
         return ((HolodeckB2BCoreImpl) coreImplementation).getStorageManager();
     }
 }

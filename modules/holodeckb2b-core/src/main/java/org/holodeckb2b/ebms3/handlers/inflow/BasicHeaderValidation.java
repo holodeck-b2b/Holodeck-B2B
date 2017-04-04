@@ -122,7 +122,7 @@ public class BasicHeaderValidation extends BaseHandler {
         log.debug("Save the error to message context");
         MessageContextUtils.addGeneratedError(mc, invalidHeaderError);
         log.debug("Set processing state for invalid message to failure");
-        HolodeckB2BCore.getStoreManager().setProcessingState(messageUnit, ProcessingState.FAILURE);
+        HolodeckB2BCore.getStorageManager().setProcessingState(messageUnit, ProcessingState.FAILURE);
         log.debug("Processed InvalidHeader error");
     }
 }

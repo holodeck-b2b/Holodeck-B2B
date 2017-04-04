@@ -95,7 +95,7 @@ public class ProcessErrors extends BaseHandler {
     protected void processErrorSignal(final IErrorMessageEntity errSignal, final MessageContext mc)
                                                                                         throws PersistenceException {
         log.debug("Start processing Error Signal [msgId=" + errSignal.getMessageId() + "]");
-        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Change processing state to indicate we start processing the error. Also checks that the error is not
         // already being processed
         if (!updateManager.setProcessingState(errSignal, ProcessingState.RECEIVED, ProcessingState.PROCESSING)) {

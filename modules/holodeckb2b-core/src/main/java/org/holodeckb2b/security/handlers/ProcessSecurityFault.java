@@ -102,7 +102,7 @@ public class ProcessSecurityFault extends BaseHandler {
     private void handleDecryptionFailure(final MessageContext mc) throws PersistenceException {
         final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
         if (!Utils.isNullOrEmpty(rcvdMsgUnits)) {
-            StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+            StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             for (final IMessageUnitEntity mu : rcvdMsgUnits) {
                 final FailedDecryption authError = new FailedDecryption();
                 authError.setRefToMessageInError(mu.getMessageId());
@@ -127,7 +127,7 @@ public class ProcessSecurityFault extends BaseHandler {
     private void handleAuthenticationFailure(final MessageContext mc) throws PersistenceException {
         final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
         if (!Utils.isNullOrEmpty(rcvdMsgUnits)) {
-            StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+            StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             for (final IMessageUnitEntity mu : rcvdMsgUnits) {
                 final FailedAuthentication authError = new FailedAuthentication();
                 authError.setRefToMessageInError(mu.getMessageId());
@@ -152,7 +152,7 @@ public class ProcessSecurityFault extends BaseHandler {
         // Set the processing state of all message units in message to FAILED
         final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
         if (!Utils.isNullOrEmpty(rcvdMsgUnits)) {
-            StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+            StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             for (final IMessageUnitEntity mu : rcvdMsgUnits) 
                 updateManager.setProcessingState(mu, ProcessingState.FAILURE);
         }
@@ -174,7 +174,7 @@ public class ProcessSecurityFault extends BaseHandler {
         // Set the processing state of all message units in message to FAILED
         final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
         if (!Utils.isNullOrEmpty(rcvdMsgUnits)) {
-            StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+            StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             for (final IMessageUnitEntity mu : rcvdMsgUnits)
                 updateManager.setProcessingState(mu, ProcessingState.FAILURE);
         }

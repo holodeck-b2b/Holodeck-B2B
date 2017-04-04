@@ -115,7 +115,7 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
         // If not all payloads are referenced the UserMessage should not be processed further, so change it processing
         // state to failed
         if (!allRefd)
-            HolodeckB2BCore.getStoreManager().setProcessingState(um, ProcessingState.FAILURE);
+            HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.FAILURE);
 
         return InvocationResponse.CONTINUE;
     }

@@ -50,7 +50,7 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
                                                                                         throws PersistenceException {
-        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Prepare message for delivery by checking it is still ready for delivery and then
         // change its processing state to "out for delivery"
         log.debug("Prepare message [" + um.getMessageId() + "] for delivery");

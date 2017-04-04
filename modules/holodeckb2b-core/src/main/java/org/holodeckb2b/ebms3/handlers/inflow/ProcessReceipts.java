@@ -88,7 +88,7 @@ public class ProcessReceipts extends BaseHandler {
      * @throws PersistenceException When a database error occurs while processing the Receipt Signal
      */
     protected void processReceipt(final IReceiptEntity receipt, final MessageContext mc) throws PersistenceException {
-        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Change processing state to indicate we start processing the receipt. Also checks that the receipt is not
         // already being processed
         if (!updateManager.setProcessingState(receipt, ProcessingState.RECEIVED, ProcessingState.PROCESSING)) {

@@ -64,7 +64,7 @@ public class ReadPullRequest extends BaseHandler {
                 // And store in database and message context for further processing
                 log.debug("Store PullRequest in database and message context");
                 mc.setProperty(MessageContextProperties.IN_PULL_REQUEST,
-                               HolodeckB2BCore.getStoreManager().storeIncomingMessageUnit(pullRequest));
+                               HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(pullRequest));
                 log.info("PullRequest [msgId=" + pullRequest.getMessageId() + "] for MPC " + pullRequest.getMPC()
                         + " received.");
             } else

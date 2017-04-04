@@ -177,7 +177,7 @@ public class PrepareResponseMessage extends BaseHandler {
      * @param errors    The collection of {@link IErrorMessageEntity}s that can not be included in the response.
      */
     private void setFailed(final Collection<IErrorMessageEntity> errors) {
-        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         for(final IErrorMessageEntity e : errors)
             try {
                 updateManager.setProcessingState(e, ProcessingState.FAILURE);
