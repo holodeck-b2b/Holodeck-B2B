@@ -1,5 +1,11 @@
 package org.holodeckb2b.core.testhelpers;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.List;
+import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LoggingEvent;
@@ -10,14 +16,6 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
-
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -98,7 +96,7 @@ public class TestUtils {
         if(experidMsgUnits != null) {
             amount = experidMsgUnits.size();
             for (final IMessageUnitEntity msgUnit : experidMsgUnits) {
-                HolodeckB2BCore.getStoreManager().deleteMessageUnit(msgUnit);
+                HolodeckB2BCore.getStorageManager().deleteMessageUnit(msgUnit);
             }
         }
         System.out.println("[TestUtils] Deleted " + amount
