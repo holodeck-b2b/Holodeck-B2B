@@ -113,12 +113,11 @@ public class UserMessage extends MessageUnit implements IUserMessage {
     }
 
     public void setMessageProperties(final Collection<IProperty> msgProps) {
+        this.msgProperties = new ArrayList<>(msgProps != null ? msgProps.size() : 0);
         if(!Utils.isNullOrEmpty(msgProps)) {
-            this.msgProperties = new ArrayList<>(msgProps.size());
             for(final IProperty p : msgProps)
                 this.msgProperties.add(new Property(p));
-        } else
-            this.msgProperties = null;
+        }
     }
 
     public void addMessageProperty(final IProperty prop) {
