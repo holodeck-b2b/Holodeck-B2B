@@ -22,7 +22,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
@@ -81,7 +80,7 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
             return;
         }
 
-        log.debug("Removing " + experidMsgUnits + " expired message units.");
+        log.debug("Removing " + experidMsgUnits.size() + " expired message units.");
         for(final EntityProxy<MessageUnit> p : experidMsgUnits) {
             final MessageUnit mu = p.entity;
             log.debug("Removing " + MessageUnitUtils.getMessageUnitName(mu) + " with msgId: " + mu.getMessageId());
@@ -93,14 +92,18 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
                     final Collection<IPayload> payloads = ((UserMessage) p.entity).getPayloads();
                     if (!Utils.isNullOrEmpty(payloads)) {
                         for (final IPayload pl : payloads) {
-                            final File plFile = new File(pl.getContentLocation());
-                            if (plFile.exists() && plFile.delete()) {
-                                log.debug("Removed payload data file " + pl.getContentLocation());
-                                // Clear the payload location
-                                ((Payload) pl).setContentLocation(null);
-                            }  else if (plFile.exists())
-                                log.error("Could not remove payload data file " + pl.getContentLocation()
-                                            + ". Remove manually");
+                            if (Utils.isNullOrEmpty(pl.getContentLocation()))
+                                log.debug("No payload location provided for payload [" + pl.getPayloadURI() + "]");
+                            else {
+                                final File plFile = new File(pl.getContentLocation());
+                                if (plFile.exists() && plFile.delete()) {
+                                    log.debug("Removed payload data file " + pl.getContentLocation());
+                                    // Clear the payload location
+                                    ((Payload) pl).setContentLocation(null);
+                                }  else if (plFile.exists())
+                                    log.error("Could not remove payload data file " + pl.getContentLocation()
+                                                + ". Remove manually");
+                            }
                         }
                     } else
                         log.debug("User Message [" + mu.getMessageId() + "] has no payloads");
