@@ -18,7 +18,6 @@ package org.holodeckb2b.events;
 
 import java.util.Collection;
 import java.util.Collections;
-
 import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
 import org.holodeckb2b.common.security.PayloadDigest;
 import org.holodeckb2b.interfaces.events.types.ISignatureCreatedEvent;
@@ -46,7 +45,8 @@ public class SignatureCreatedEvent extends AbstractMessageProcessingEvent implem
      */
     public SignatureCreatedEvent(final IUserMessage subject, final Collection<PayloadDigest> digests) {
         super(subject);
-        this.digests = Collections.unmodifiableCollection((Collection<? extends IPayloadDigest>) digests);
+        this.digests = (Collection<IPayloadDigest>)
+                                Collections.unmodifiableCollection((Collection<? extends IPayloadDigest>) digests);
     }
 
     /**
