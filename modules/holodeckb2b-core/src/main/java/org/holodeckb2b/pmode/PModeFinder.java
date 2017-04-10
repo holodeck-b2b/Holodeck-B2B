@@ -145,9 +145,13 @@ public class PModeFinder {
             // Check agreement info
             final IAgreement agreementPMode = p.getAgreement();
             if (agreementPMode != null) {
-                final int i = Utils.compareStrings(agreementRef.getName(), agreementPMode.getName());
+                final int i = Utils.compareStrings(agreementRef != null ? agreementRef.getName() : null
+                                                  , agreementPMode.getName());
                 switch (i) {
-
+                    case -2 :
+                    case 2 :
+                        // mismatch on agreement name, either because different or one defined in P-Mode but not in msg
+                        continue;
                     case 0 :
                         // names equal, but for match also types must be equal
                         final int j = Utils.compareStrings(agreementRef.getType(), agreementPMode.getType());
