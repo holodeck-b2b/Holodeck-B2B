@@ -7,7 +7,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 * NPE in CreateSOAPEnvelopeHandler when sending async Error with unknown P-Mode [#45](https://github.com/holodeck-b2b/Holodeck-B2B/issues/45)
 * NPE in purge operation when payload location is not available [#46](https://github.com/holodeck-b2b/Holodeck-B2B/issues/46)
-* P-Mode finding does not take into account MPC defined in PullRequesFlow [#47](https://github.com/holodeck-b2b/Holodeck-B2B/issues/47)
+* P-Mode finding does not take into account MPC defined in PullRequestFlow [#47](https://github.com/holodeck-b2b/Holodeck-B2B/issues/47)
 * NPE in P-Mode finding process when only declaring SecurityConfiguration for a TradingPartner [#48](https://github.com/holodeck-b2b/Holodeck-B2B/issues/48)
 
 ## 2.1.2
