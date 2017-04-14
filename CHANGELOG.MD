@@ -2,8 +2,8 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
-###### 2017-04-xx
+## 2.1.3
+###### 2017-04-14
 ### Fixed
 * NPE in CreateSOAPEnvelopeHandler when sending async Error with unknown P-Mode [#45](https://github.com/holodeck-b2b/Holodeck-B2B/issues/45)
 * NPE in purge operation when payload location is not available [#46](https://github.com/holodeck-b2b/Holodeck-B2B/issues/46)
