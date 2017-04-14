@@ -515,7 +515,7 @@ public class Config implements InternalConfiguration {
      *
      * @return  The class name of the {@link org.holodeckb2b.interfaces.pmode.validation.IPModeValidator}
      *          implementation
-     * @since  2.2
+     * @since  3.0.0
      */
     @Override
     public String getPModeValidatorImplClass() {
@@ -530,7 +530,7 @@ public class Config implements InternalConfiguration {
      *
      * @return  The class name of the {@link org.holodeckb2b.interfaces.pmode.IPModeSet} implementation to use for
      *          storing deployed P-Modes
-     * @since  2.2
+     * @since  3.0.0
      */
     @Override
     public String getPModeStorageImplClass() {
@@ -544,7 +544,7 @@ public class Config implements InternalConfiguration {
      * in the <i>PersistencyProvider</i> parameter.
      *
      * @return  The class name of the {@link IPersistencyProvider} implementation to use for storing meta-data
-     * @since  2.2
+     * @since  3.0.0
      */
     @Override
     public String getPersistencyProviderClass() {

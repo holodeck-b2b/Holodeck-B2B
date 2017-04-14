@@ -102,7 +102,7 @@ public interface IMessageUnit {
      * with the last processing state in the list  (i.e. with the highest index) being the current processing state.
      *
      * @return  List of {@link IMessageUnitProcessingState} in the order they applied to this message unit
-     * @since  2.2
+     * @since  3.0.0
      */
     List<IMessageUnitProcessingState>   getProcessingStates();
 
@@ -113,7 +113,7 @@ public interface IMessageUnit {
      * processing state.
      *
      * @return  The {@link IMessageUnitProcessingState} the message unit is currently in
-     * @since  2.2
+     * @since  3.0.0
      */
     IMessageUnitProcessingState getCurrentProcessingState();
 }

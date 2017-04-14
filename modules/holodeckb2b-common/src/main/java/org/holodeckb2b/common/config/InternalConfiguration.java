@@ -59,7 +59,7 @@ public interface InternalConfiguration extends IConfiguration {
      * </code> must use to validate P-Modes before they are deployed.
      *
      * @return  The class name of the {@link IPModeValidator} implementation
-     * @since  2.2
+     * @since  3.0.0
      */
     public String getPModeValidatorImplClass();
 
@@ -68,7 +68,7 @@ public interface InternalConfiguration extends IConfiguration {
      * </code> must use to store the set of deployed P-Modes.
      *
      * @return  The class name of the {@link IPModeSet} implementation to use for storing deployed P-Modes
-     * @since  2.2
+     * @since  3.0.0
      */
     public String getPModeStorageImplClass();
 

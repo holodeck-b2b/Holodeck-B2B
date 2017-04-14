@@ -38,7 +38,7 @@ import org.holodeckb2b.interfaces.pmode.validation.PModeValidationError;
  * influence each other and changing either implementation may affect the other.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since  2.2
+ * @since  3.0.0
  * @see InternalConfiguration#getPModeStorageImplClass()
  * @see InMemoryPModeSet
  * @see InternalConfiguration#getPModeValidatorImplClass()

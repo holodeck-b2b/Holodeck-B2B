@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * is created and reported back.
  * todo Rename to MessageUnitValidator
  * @author Sander Fieten <sander at chasquis-services.com>
- * @since  2.2
+ * @since  3.0.0
  */
 public abstract class MessageUnit {
 
