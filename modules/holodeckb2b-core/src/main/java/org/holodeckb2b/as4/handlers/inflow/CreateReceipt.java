@@ -139,12 +139,8 @@ public class CreateReceipt extends AbstractUserMessageHandler {
                     mc.setProperty(MessageContextProperties.RESPONSE_RECEIPT, receipt);
                     mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
                 } else {
-                    if (rcptConfig.getTo() != null && !rcptConfig.getTo().isEmpty()) {
-                        log.debug("The Receipt should be sent separately");
-                        HolodeckB2BCore.getStorageManager().setProcessingState(receipt, ProcessingState.READY_TO_PUSH);
-                    } else {
-                        log.debug("Receipt will be piggybacked on next PullRequest");
-                    }
+                    log.debug("The Receipt should be sent separately");
+                    HolodeckB2BCore.getStorageManager().setProcessingState(receipt, ProcessingState.READY_TO_PUSH);
                 }
                 log.debug("Receipt for message [msgId=" + um.getMessageId() + "] created successfully");
                 // Trigger event to signal that the event was created
