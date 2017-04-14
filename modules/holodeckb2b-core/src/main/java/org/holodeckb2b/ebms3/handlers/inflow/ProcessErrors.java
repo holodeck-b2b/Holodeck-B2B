@@ -16,6 +16,9 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,10 +36,6 @@ import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received error signals. For each error contained in one of
@@ -104,7 +103,10 @@ public class ProcessErrors extends BaseHandler {
         }
 
         // Always log the error signal, even if its processing may fail later
-        errorLog.error(MessageUnitUtils.errorSignalToString(errSignal));
+        if (isWarning(errSignal))
+            errorLog.warn(MessageUnitUtils.errorSignalToString(errSignal));
+        else
+            errorLog.error(MessageUnitUtils.errorSignalToString(errSignal));
 
         log.debug("Get referenced message unit(s)");
         Collection<IMessageUnitEntity> refdMessages = null;
