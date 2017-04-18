@@ -23,7 +23,7 @@ import org.holodeckb2b.persistency.jpa.PullRequest;
  * Is the {@link IPullRequestEntity} implementation of the default persistency provider of Holodeck B2B.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.2
+ * @since  3.0.0
  */
 public class PullRequestEntity extends MessageUnitEntity<PullRequest> implements IPullRequestEntity {
 

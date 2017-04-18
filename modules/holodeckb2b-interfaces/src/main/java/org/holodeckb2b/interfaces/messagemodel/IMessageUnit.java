@@ -46,7 +46,7 @@ public interface IMessageUnit {
     /**
      * Enumeration to define the direction in which the message unit flows.
      *
-     * @since 2.2
+     * @since  3.0.0
      */
     enum Direction { IN, OUT };
 
@@ -54,7 +54,7 @@ public interface IMessageUnit {
      * Gets the direction in which this message unit is sent, i.e. received or sent by Holodeck B2B.
      *
      * @return The direction in which this message unit flows
-     * @since 2.2
+     * @since  3.0.0
      */
     Direction getDirection();
 

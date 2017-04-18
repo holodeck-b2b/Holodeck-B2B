@@ -78,7 +78,7 @@ public interface InternalConfiguration extends IConfiguration {
      * Holodeck B2B Core will use a default implementation.
      *
      * @return  The class name of the {@link IPersistencyProvider} implementation to use for storing meta-data
-     * @since 2.2
+     * @since  3.0.0
      */
     public String getPersistencyProviderClass();
 }

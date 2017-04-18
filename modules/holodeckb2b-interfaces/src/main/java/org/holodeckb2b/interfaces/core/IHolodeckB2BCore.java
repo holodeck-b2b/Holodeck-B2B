@@ -107,7 +107,7 @@ public interface IHolodeckB2BCore {
      * <p>Note that the DAO itself is provided by the persistency provider.
      *
      * @return  The {@link IQueryManager} that should use to query the meta-data of message units
-     * @since 2.2
+     * @since  3.0.0
      */
     public IQueryManager getQueryManager();
 }

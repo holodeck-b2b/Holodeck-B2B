@@ -30,7 +30,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * unit.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.2
+ * @since  3.0.0
  */
 public abstract class MessageUnit implements IMessageUnit {
 

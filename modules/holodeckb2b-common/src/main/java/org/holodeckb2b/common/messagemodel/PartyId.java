@@ -23,7 +23,7 @@ import org.holodeckb2b.interfaces.general.IPartyId;
  * partner that is involved in the exchange of a User Message message unit.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.2
+ * @since  3.0.0
  */
 public class PartyId implements IPartyId {
 

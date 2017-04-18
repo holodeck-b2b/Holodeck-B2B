@@ -37,7 +37,7 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
  * NOTE</b> that implementations MUST return the current processing state even if the object is not completely loaded.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.2
+ * @since  3.0.0
  */
 public interface IMessageUnitEntity extends IMessageUnit {
 

@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
  * the {@link #isLoadedCompletely()} should be executed to check if all  information is loaded.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.2
+ * @since  3.0.0
  * @see   IMessageUnitEntity
  */
 public interface IErrorMessageEntity extends IMessageUnitEntity, IErrorMessage {

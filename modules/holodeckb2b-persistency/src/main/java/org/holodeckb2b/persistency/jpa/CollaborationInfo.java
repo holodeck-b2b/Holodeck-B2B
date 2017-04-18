@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
  * User Message.
  *
  * @author Sander Fieten <sander at holodeckb2b.org>
- * @since 2.2
+ * @since  3.0.0
  */
 @Embeddable
 public class CollaborationInfo implements ICollaborationInfo, Serializable {

@@ -50,7 +50,7 @@ import org.junit.Test;
  * Is the test class for the {@link IQueryManager} implementation of the default persistency provider.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.2
+ * @since  3.0.0
  */
 public class QueryManagerTest {
 

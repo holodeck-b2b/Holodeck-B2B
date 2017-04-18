@@ -20,7 +20,7 @@ package org.holodeckb2b.common.constants;
  * Defines constants that identify the Holodeck B2B product name and version.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.2 (previously in <code>org.holodeckb2b.ebms3.constants</code>)
+ * @since  3.0.0 (previously in <code>org.holodeckb2b.ebms3.constants</code>)
  */
 public interface ProductId {
 
