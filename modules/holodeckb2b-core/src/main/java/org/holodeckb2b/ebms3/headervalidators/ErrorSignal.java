@@ -41,7 +41,7 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
  * value of the <i>StrictErrorReferencesCheck</i> parameter in the Holodeck B2B configuration to <i>"true"</i>.
  * todo Rename to ErrorSignalValidator
  * @author Sander Fieten (sander at chasquis-services.com)
- * @since  2.2
+ * @since  3.0.0
  */
 public class ErrorSignal {
 

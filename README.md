@@ -39,7 +39,7 @@ The Holodeck B2B core is licensed under the General Public License V3 (GPLv3) wh
 This means you are not allowed to integrate Holodeck B2B in a closed source product. You can however use Holodeck B2B together with your closed source product as long as you only use the provided interfaces (API's) to communicate with the Holodeck B2B core. 
 For this purpose, the interfaces module is licensed under the Lesser General Public License V3 (LGPLv3).
 
-To implement the cryptographic algorithms Holodeck B2B uses the Bouncy Castle library provided by [The Legion of the Bouncy Castle Inc.](http://www.bouncycastle.org). Please see the bc_license.txt file.
+To implement the cryptographic algorithms Holodeck B2B uses the Bouncy Castle library provided by [The Legion of the Bouncy Castle Inc.](http://www.bouncycastle.org), see the bc_license.txt file.
 
 ## Support
-Commercial Holodeck B2B support is provided by Chasquis Consulting. Please visit [Chasquis-Consulting.com](http://chasquis-consulting.com/holodeck-b2b-support/) for more information.
+Commercial Holodeck B2B support is provided by Chasquis Consulting. Visit [Chasquis-Consulting.com](http://chasquis-consulting.com/holodeck-b2b-support/) for more information.

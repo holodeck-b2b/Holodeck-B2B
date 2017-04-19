@@ -103,16 +103,21 @@ recommended to raise log levels to at least INFO.
         
         <!--
             Logging of received ebMS Errors
-        
-        Holodeck B2B will by default log all received ebMS Errors to 
-        this log. This is independent from the notification of the
-        Error to the business application which is configured in the
-        P-Mode of the message in error.
-        To disable this log, set the log level to OFF. To enable
-        set it to INFO.
+
+        Holodeck B2B will by default log all received ebMS Errors Signals to
+        this log. This is independent from the notification to the business
+        application which is configured in the P-Mode of the message in error.
+
+        To disable this log, set the log level to OFF. To enable set it to
+        WARN to log all Error Signals or set it to ERROR to log only Error
+        Signals that contain a error with severity FAILURE.
+
+        The WARN log level is RECOMMENDED in case pulling is used to receive
+        messages as each "empty MPC" response will otherwise create a new
+        log entry.
         -->
-        <Logger name="org.holodeckb2b.msgproc.errors" 
-            level="INFO" additivity="false">
+        <Logger name="org.holodeckb2b.msgproc.errors"
+            level="WARN" additivity="false">
             <AppenderRef ref="ebmsErrors"/>
         </Logger>        
     </Loggers>

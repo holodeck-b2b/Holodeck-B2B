@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.general.IDescription;
  * therefor can be easily stored together with that object.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.2
+ * @since  3.0.0
  */
 @Embeddable
 public class Description implements IDescription, Serializable {

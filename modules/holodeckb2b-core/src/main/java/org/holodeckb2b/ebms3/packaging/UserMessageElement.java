@@ -74,7 +74,7 @@ public class UserMessageElement {
         CollaborationInfoElement.createElement(usermessage, data.getCollaborationInfo());
         // Create the MessageProperties element (if there are message properties)
         final Collection<IProperty> msgProps = data.getMessageProperties();
-        if (Utils.isNullOrEmpty(msgProps))
+        if (!Utils.isNullOrEmpty(msgProps))
             MessagePropertiesElement.createElement(usermessage, msgProps);
 
         // Create the eb:PayloadInfo element (if there are payloads)

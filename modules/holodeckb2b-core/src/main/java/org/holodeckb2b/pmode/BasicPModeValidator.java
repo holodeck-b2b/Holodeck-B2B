@@ -43,7 +43,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * specific requirements in a certain domain a custom validator can be used.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.2
+ * @since  3.0.0
  */
 public class BasicPModeValidator implements IPModeValidator {
 

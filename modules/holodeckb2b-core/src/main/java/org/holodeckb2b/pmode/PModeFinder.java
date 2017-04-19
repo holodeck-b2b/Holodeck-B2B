@@ -22,13 +22,13 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IAgreement;
+import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
 import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
@@ -89,9 +89,9 @@ public class PModeFinder {
     /**
      * Finds the P-Mode for a received user message message unit.
      * <p>The ebMS specifications do not describe or recommend how the P-Mode for a user message should be determined,
-     * see <a href="https://issues.oasis-open.org/browse/EBXMLMSG-48?jql=project%20%3D%20EBXMLMSG">issue 48 in the TC
-     * issue tracker</a>. In the issue two suggestion for matching the P-Mode are given.
-     * <p>Based on these we CompareUtils the meta-data from the message with all P-Modes and return the best matching P-Mode.
+     * see also <a href="https://issues.oasis-open.org/browse/EBXMLMSG-48">issue 48 in the OASIS TC issue tracker</a>.
+     * In the issue two suggestions for matching the P-Mode are given.
+     * <p>Based on these we compare the meta-data from the message with all P-Modes and return the best matching P-Mode.
      * The following table shows the information that is used for matching and their importance (expressed as a weight).
      * The match of a P-Mode is the sum of the weights for the elements that are equal to the corresponding P-Mode
      * parameter.
@@ -102,7 +102,7 @@ public class PModeFinder {
      * <tr><td>From.Role</td><td>2</td></tr>
      * <tr><td>To Party Id's</td><td>7</td></tr>
      * <tr><td>To.Role</td><td>2</td></tr>
-     * <tr><td>areEqual</td><td>5</td></tr>
+     * <tr><td>Service</td><td>5</td></tr>
      * <tr><td>Action</td><td>5</td></tr>
      * <tr><td>Agreement ref</td><td>1</td></tr>
      * <tr><td>MPC</td><td>1</td></tr>
@@ -133,28 +133,36 @@ public class PModeFinder {
             // P-Mode id and agreement info are contained in optional element
             final IAgreementReference agreementRef = mu.getCollaborationInfo().getAgreement();
 
-            if (agreementRef != null) {
-                // Check P-Mode id, do only when id is expected to be included
-                final String pid = agreementRef.getPModeId();
-                if (pid != null && !pid.isEmpty() && (p.includeId() != null && p.includeId())) {
-                    if (pid.equals(p.getId()))
+            if (p.includeId() != null && p.includeId()) {
+                // The P-Mode id can be used for matching, so check if one is given in message
+                if (agreementRef != null) {
+                    final String pid = agreementRef.getPModeId();
+                    if (!Utils.isNullOrEmpty(pid) && pid.equals(p.getId()))
                         cValue = MATCH_WEIGHTS.get(PARAMETERS.ID);
-                    else
-                        continue; // mis-match on P-Mode id
                 }
+            }
 
-                // Check agreement info
-                final IAgreement agreementPMode = p.getAgreement();
-                if (agreementPMode != null) {
-                    if (Utils.compareStrings(agreementRef.getName(), agreementPMode.getName()) == 0) {
+            // Check agreement info
+            final IAgreement agreementPMode = p.getAgreement();
+            if (agreementPMode != null) {
+                final int i = Utils.compareStrings(agreementRef != null ? agreementRef.getName() : null
+                                                  , agreementPMode.getName());
+                switch (i) {
+                    case -2 :
+                    case 2 :
+                        // mismatch on agreement name, either because different or one defined in P-Mode but not in msg
+                        continue;
+                    case 0 :
                         // names equal, but for match also types must be equal
-                        final int i = Utils.compareStrings(agreementRef.getType(), agreementPMode.getType());
-                        if (i == -1 || i == 0)
+                        final int j = Utils.compareStrings(agreementRef.getType(), agreementPMode.getType());
+                        if (j == -1 || j == 0)
                             cValue += MATCH_WEIGHTS.get(PARAMETERS.AGREEMENT);
                         else
                             continue; // mis-match on agreement type
-                    } else
-                        continue; // mis-match on agreement name
+                    case -1 :
+                        // both P-Mode and message agreement ref are empty, ignore
+                    case 1 :
+                        // the message contains agreement ref, but P-Mode does not, ignore
                 }
             }
 
@@ -170,66 +178,93 @@ public class PModeFinder {
             // Check To info
             if (toPMode != null) {
                 final int c = Utils.compareStrings(to.getRole(), toPMode.getRole());
-                if ( -1 <= c && c <= 1)
+                if ( c == -1 || c == 0)
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.TO_ROLE);
-                else
+                else if (c != 1)
                     continue; // mis-match on To party role
-                if (CompareUtils.areEqual(to.getPartyIds(), toPMode.getPartyIds()))
-                    cValue += MATCH_WEIGHTS.get(PARAMETERS.TO);
-                else
-                    continue; // mis-match on To party id('s)
+                Collection<IPartyId> pmodeToIds = toPMode.getPartyIds();
+                if (!Utils.isNullOrEmpty(pmodeToIds))
+                    if (CompareUtils.areEqual(to.getPartyIds(), pmodeToIds))
+                        cValue += MATCH_WEIGHTS.get(PARAMETERS.TO);
+                    else
+                        continue; // mis-match on To party id('s)
             }
 
             // Check From info
             if (fromPMode != null) {
                 final int c = Utils.compareStrings(from.getRole(), fromPMode.getRole());
-                if ( -1 <= c && c <= 1)
+                if ( c == -1 || c == 0)
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.FROM_ROLE);
-                else
+                else if (c != 1)
                     continue; // mis-match on From party role
-                if (CompareUtils.areEqual(from.getPartyIds(), fromPMode.getPartyIds()))
-                    cValue += MATCH_WEIGHTS.get(PARAMETERS.FROM);
-                else
-                    continue;  // mis-match on From party id('s)
+                Collection<IPartyId> pmodeFromIds = fromPMode.getPartyIds();
+                if (!Utils.isNullOrEmpty(pmodeFromIds))
+                    if (CompareUtils.areEqual(from.getPartyIds(), pmodeFromIds))
+                        cValue += MATCH_WEIGHTS.get(PARAMETERS.FROM);
+                    else
+                        continue;  // mis-match on From party id('s)
             }
 
             // Next info items are defined per Leg basis, for now we only have one-way MEP, so only one leg to check
             // Within the leg all relevant information is contained in the user message flow.
-            final IUserMessageFlow    flow = p.getLegs().iterator().next().getUserMessageFlow();
-
-            if (flow != null) {
-                final IBusinessInfo pmBI = flow.getBusinessInfo();
-                if (pmBI != null) {
-                    // Check areEqual
-                    final IService svcPMode = pmBI.getService();
-                    if (svcPMode != null) {
-                        final IService svc = mu.getCollaborationInfo().getService();
-                        if (svc.getName().equals(svcPMode.getName())) {
-                            final int i = Utils.compareStrings(svc.getType(), svcPMode.getType());
-                            if (i == -1 || i == 0)
-                                cValue += MATCH_WEIGHTS.get(PARAMETERS.SERVICE);
-                            else
-                                continue; // mis-match on service type
-                        } else
-                            continue; // mis-match on service name
-                    }
-                    // Check Action
-                    final int i = Utils.compareStrings(mu.getCollaborationInfo().getAction(), pmBI.getAction());
-                    if (i == 0)
-                        cValue += MATCH_WEIGHTS.get(PARAMETERS.ACTION);
-                    else if (i == -2)
-                        continue; // mis-match on action
-                    // Check MPC, should handle default MPC when none is given
-                    String mpc = mu.getMPC(); String mpcPMode = pmBI.getMpc();
-                    if (mpc == null || mpc.isEmpty())
-                        mpc = EbMSConstants.DEFAULT_MPC;
-                    if (mpcPMode == null || mpcPMode.isEmpty())
-                        mpcPMode = EbMSConstants.DEFAULT_MPC;
-                    if (mpc.equalsIgnoreCase(mpcPMode))
-                        cValue += MATCH_WEIGHTS.get(PARAMETERS.MPC);
-                    else
-                        continue; // mis-match on MPC
+            final IUserMessageFlow  flow = p.getLeg(ILeg.Label.REQUEST).getUserMessageFlow();
+            final IBusinessInfo     pmBI = flow != null ? flow.getBusinessInfo() : null;
+            if (pmBI != null) {
+                // Check Service
+                final IService svcPMode = pmBI.getService();
+                if (svcPMode != null) {
+                    final IService svc = mu.getCollaborationInfo().getService();
+                    if (svc.getName().equals(svcPMode.getName())) {
+                        final int i = Utils.compareStrings(svc.getType(), svcPMode.getType());
+                        if (i == -1 || i == 0)
+                            cValue += MATCH_WEIGHTS.get(PARAMETERS.SERVICE);
+                        else
+                            continue; // mis-match on service type
+                    } else
+                        continue; // mis-match on service name
                 }
+                // Check Action
+                final int i = Utils.compareStrings(mu.getCollaborationInfo().getAction(), pmBI.getAction());
+                if (i == 0)
+                    cValue += MATCH_WEIGHTS.get(PARAMETERS.ACTION);
+                else if (i == -2)
+                    continue; // mis-match on action
+            }
+
+            // Check MPC, first check the MPC defined in the User Message flow, and if there is none there, check
+            // if there is maybe on in Pull Request flow
+            String mpc = mu.getMPC();
+            if (Utils.isNullOrEmpty(mpc))
+                mpc = EbMSConstants.DEFAULT_MPC;
+            String mpcPMode = pmBI != null ? pmBI.getMpc() : null;
+            // If no MPC is provided in User Message flow, check if this P-Mode is for pulling messages and if it is
+            // use the MPC defined in PR flow
+            if (Utils.isNullOrEmpty(mpcPMode) && p.getMepBinding().equals(EbMSConstants.ONE_WAY_PULL)
+                && p.getLeg(ILeg.Label.REQUEST).getProtocol() != null
+                && !Utils.isNullOrEmpty(p.getLeg(ILeg.Label.REQUEST).getProtocol().getAddress()))
+            {
+                try {
+                    mpcPMode = p.getLeg(ILeg.Label.REQUEST).getPullRequestFlows().iterator().next().getMPC();
+                } catch (NullPointerException npe) {
+                    mpcPMode = null;
+                }
+                if (Utils.isNullOrEmpty(mpcPMode))
+                    mpcPMode = EbMSConstants.DEFAULT_MPC;
+                // Now compare MPC, but take into account that MPC from P-Mode can be a sub MPC, so a message that
+                // contains parent MPC does match
+                if (mpcPMode.startsWith(mpc))
+                    cValue += MATCH_WEIGHTS.get(PARAMETERS.MPC);
+                else
+                    continue; // mis-match on MPC
+            } else {
+                // If no MPC is given in P-Mode, it uses the default
+                if (Utils.isNullOrEmpty(mpcPMode))
+                    mpcPMode = EbMSConstants.DEFAULT_MPC;
+                // Now compare the MPC values
+                if (mpc.equalsIgnoreCase(mpcPMode))
+                    cValue += MATCH_WEIGHTS.get(PARAMETERS.MPC);
+                else
+                    continue; // mis-match on MPC
             }
 
             // Does this P-Mode better match to the message meta data than the current highest match?

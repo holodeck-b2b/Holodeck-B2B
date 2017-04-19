@@ -16,6 +16,9 @@
  */
 package org.holodeckb2b.ebms3.packaging;
 
+import java.util.Collection;
+import java.util.Iterator;
+import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
@@ -24,18 +27,14 @@ import org.holodeckb2b.common.messagemodel.AgreementReference;
 import org.holodeckb2b.common.messagemodel.CollaborationInfo;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
-import javax.xml.namespace.QName;
-import java.util.Collection;
-import java.util.Iterator;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 13:14 15.10.16
@@ -165,11 +164,11 @@ public class UserMessageElementTest {
 //        assertEquals(IPayload.Containment.ATTACHMENT, p1.getContainment()); // fails
 //        assertEquals("I8ZVs6G2P", p1.getMimeType());    // fails
 //        assertEquals("http://sxGTnZjm/", p1.getContentLocation()); // fails
-        assertNull(p1.getProperties());
+        assertTrue(Utils.isNullOrEmpty(p1.getProperties()));
         org.holodeckb2b.interfaces.messagemodel.IPayload p2 = it.next();
         assertEquals(IPayload.Containment.EXTERNAL, p2.getContainment());
 //        assertEquals("CoL9", p2.getMimeType());  // fails
 //        assertEquals("http://pcVJBuTT/", p2.getPayloadURI()); // fails
-        assertNotNull(p2.getProperties());
+        assertFalse(Utils.isNullOrEmpty(p2.getProperties()));
     }
 }

@@ -56,7 +56,7 @@ public class CheckFromICloud extends BaseHandler {
 
             if (isMultiHop) {
                 log.debug("Message received through I-Cloud, update message units");
-                StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+                StorageManager updateManager = HolodeckB2BCore.getStorageManager();
                 for (final IMessageUnitEntity mu : MessageContextUtils.getReceivedMessageUnits(mc))
                     updateManager.setMultiHop(mu, isMultiHop);
             }

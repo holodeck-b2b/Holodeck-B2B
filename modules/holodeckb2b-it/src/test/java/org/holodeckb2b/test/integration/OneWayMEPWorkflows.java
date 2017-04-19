@@ -19,10 +19,9 @@ package org.holodeckb2b.test.integration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.*;
-import org.junit.experimental.categories.Category;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import org.junit.experimental.categories.Category;
 
 /**
  * Integration test. Tests the One Way Message Exchange Patterns communications
@@ -158,7 +157,7 @@ public class OneWayMEPWorkflows {
         System.out.println("Message to pull is placed into msg_out dir."
                 + " Waiting for message processing ... ");
         try {
-            Thread.sleep(40000);
+            Thread.sleep(50000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

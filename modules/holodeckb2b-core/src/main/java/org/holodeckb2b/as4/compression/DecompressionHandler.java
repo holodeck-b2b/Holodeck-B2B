@@ -75,7 +75,7 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
                             + p.getPayloadURI() + "]!");
                     decompressFailure.setRefToMessageInError(um.getMessageId());
                     MessageContextUtils.addGeneratedError(mc, decompressFailure);
-                    HolodeckB2BCore.getStoreManager().setProcessingState(um, ProcessingState.FAILURE);
+                    HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.FAILURE);
                 } else {
                     // Replace DataHandler to enable decompression
                     try {

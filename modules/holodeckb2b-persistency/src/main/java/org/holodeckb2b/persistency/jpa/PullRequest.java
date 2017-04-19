@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
  * IPullRequest} interface in the Holodeck B2B messaging model. The maximum length of the MPC URL is 1024 characters.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.2
+ * @since  3.0.0
  */
 @Entity
 @Table(name="PULLREQUEST")

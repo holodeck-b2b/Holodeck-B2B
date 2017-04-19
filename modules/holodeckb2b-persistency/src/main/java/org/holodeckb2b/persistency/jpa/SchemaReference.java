@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.general.ISchemaReference;
  * Message.
  *
  * @author Sander Fieten <sander at holodeckb2b.org>
- * @since 2.2
+ * @since  3.0.0
  */
 @Embeddable
 public class SchemaReference implements ISchemaReference, Serializable {

@@ -77,7 +77,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
         if (Utils.isNullOrEmpty(errors)) {
             log.debug("No errors were generated during this in flow, nothing to do");
         } else {
-            StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+            StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             log.debug(errors.size() + " error(s) were generated during this in flow");
 
             // First bundle the errors per message in error
@@ -85,10 +85,10 @@ public class ProcessGeneratedErrors extends BaseHandler {
             final HashMap<String, Collection<IEbmsError>> segmentedErrors = segmentErrors(errors);
             // Create Error signal for each bundle, i.e. each referenced message
             for(final String refToMsgId : segmentedErrors.keySet()) {
-                final Collection<IEbmsError> errForMsg = segmentedErrors.get(refToMsgId);
                 log.debug("Create the Error Signal and save to database");
-                final IErrorMessageEntity errorMessage =
-                                                    updateManager.storeOutGoingMessageUnit(new ErrorMessage(errForMsg));
+                ErrorMessage tErrorMessage = new ErrorMessage(segmentedErrors.get(refToMsgId));
+                tErrorMessage.setRefToMessageId(refToMsgId.equals("null") ? null : refToMsgId);
+                final IErrorMessageEntity errorMessage = updateManager.storeOutGoingMessageUnit(tErrorMessage);
                 if (refToMsgId.equals("null")) {
                     // This collection of errors does not reference a specific message unit, should therefor be sent
                     // as a response.

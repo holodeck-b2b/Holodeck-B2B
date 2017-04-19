@@ -30,7 +30,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
  * the file system.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.2
+ * @since  3.0.0
  */
 public class Payload implements IPayload {
 
@@ -45,7 +45,9 @@ public class Payload implements IPayload {
     /**
      * Default constructor creates empty object
      */
-    public Payload() {}
+    public Payload() {
+        this.properties = new ArrayList<>();
+    }
 
     /**
      * Creates a new <code>PartInfo</code> object using the source from the given source as source
@@ -88,12 +90,11 @@ public class Payload implements IPayload {
 
     public void setProperties(final Collection<IProperty> props) {
         // Copy the properties to a new list
+        this.properties = new ArrayList<>(props != null ? props.size() : 0);
         if (!Utils.isNullOrEmpty(props)) {
-            this.properties = new ArrayList<>(props.size());
             for(final IProperty p : props)
                 this.properties.add(new Property(p));
-        } else
-            this.properties = null;
+        }
     }
 
     /**

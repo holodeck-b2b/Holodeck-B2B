@@ -38,7 +38,7 @@ import org.holodeckb2b.interfaces.general.ITradingPartner;
  * {@link UserMessage} will have its own two <code>TradingPartner</code> instances for sender and receiver.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.2
+ * @since  3.0.0
  */
 @Entity
 public class TradingPartner implements ITradingPartner, Serializable {

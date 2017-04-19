@@ -46,7 +46,7 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  *              which refer to the given message id.</li></ul>
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.2
+ * @since  3.0.0
  */
 @Entity
 @Table(name="RECEIPT")

@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
  * contained in an Error Signal message unit.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.2
+ * @since  3.0.0
  */
 public class EbmsError implements IEbmsError {
 

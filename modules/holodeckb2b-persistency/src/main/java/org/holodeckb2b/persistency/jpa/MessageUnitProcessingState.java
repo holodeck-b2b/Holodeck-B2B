@@ -36,7 +36,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * IMessageUnitProcessingState} interface from the Holodeck B2B messaging model.
  *
  * @author Sander Fieten <sander at holodeckb2b.org>
- * @since 2.2
+ * @since  3.0.0
  */
 @Entity
 @Table(name="MSG_STATE")

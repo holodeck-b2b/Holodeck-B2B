@@ -33,7 +33,7 @@ import org.holodeckb2b.persistency.managers.QueryManager;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @param <T>   The class of the proxied JPA entity object
- * @since 2.2
+ * @since  3.0.0
  */
 public abstract class MessageUnitEntity<T extends MessageUnit> implements IMessageUnitEntity {
 

@@ -70,7 +70,7 @@ public class ReadReceipt extends BaseHandler {
 
                     // And store in database and message context for further processing
                     log.debug("Store Receipt in database");
-                    MessageContextUtils.addRcvdReceipt(mc, (IReceiptEntity) HolodeckB2BCore.getStoreManager()
+                    MessageContextUtils.addRcvdReceipt(mc, (IReceiptEntity) HolodeckB2BCore.getStorageManager()
                                                                                   .storeIncomingMessageUnit(receipt));
                     log.info("Receipt [msgId=" + receipt.getMessageId() + "] received for message with id:"
                              + receipt.getRefToMessageId());

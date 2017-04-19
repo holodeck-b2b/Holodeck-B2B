@@ -40,11 +40,10 @@ import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.Protocol;
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 13:32 12.09.16
@@ -95,7 +94,7 @@ public class ConfigureMultihopTest {
         OMElement userMessage = UserMessageElement.createElement(headerBlock, mmd);
 
         IUserMessageEntity userMessageEntity =
-                HolodeckB2BCore.getStoreManager().storeIncomingMessageUnit(
+                HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(
                         UserMessageElement.readElement(userMessage));
 
         OMElement ciElement = CollaborationInfoElement.getElement(userMessage);
@@ -126,7 +125,7 @@ public class ConfigureMultihopTest {
         //Adding PMode to the managed PMode set.
         core.getPModeSet().add(pmode);
 
-        HolodeckB2BCore.getStoreManager().setPModeId(userMessageEntity, ar.getPModeId());
+        HolodeckB2BCore.getStorageManager().setPModeId(userMessageEntity, ar.getPModeId());
         // Setting out message property
         mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, userMessageEntity);
         try {

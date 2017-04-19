@@ -143,7 +143,7 @@ public class AuthorizeMessage extends BaseHandler {
                 authError.setRefToMessageInError(mu.getMessageId());
                 authError.setErrorDetail("Authentication of message unit failed!");
                 MessageContextUtils.addGeneratedError(mc, authError);
-                HolodeckB2BCore.getStoreManager().setProcessingState(mu, ProcessingState.FAILURE);
+                HolodeckB2BCore.getStorageManager().setProcessingState(mu, ProcessingState.FAILURE);
             }
         }
     }

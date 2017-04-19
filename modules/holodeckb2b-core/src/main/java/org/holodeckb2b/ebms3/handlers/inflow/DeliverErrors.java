@@ -71,7 +71,7 @@ public class DeliverErrors extends BaseHandler {
             return InvocationResponse.CONTINUE;
 
         log.debug("Message contains " + errorSignals.size() + " Error Signals");
-        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Process each signal
         for(final IErrorMessageEntity errorSignal : errorSignals) {
             // Prepare message for delivery by checking it is still ready for delivery and then

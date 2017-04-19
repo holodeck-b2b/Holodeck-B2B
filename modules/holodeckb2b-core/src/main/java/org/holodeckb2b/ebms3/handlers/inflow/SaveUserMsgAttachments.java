@@ -81,7 +81,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
                                                                             throws AxisFault, PersistenceException {
-        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
 
         final Collection<IPayload> payloads = um.getPayloads();
         // If there are no payloads in the UserMessage directly continue processing
@@ -282,7 +282,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
         log.debug("Error stored in message context for further processing");
 
         log.debug("Change processing state of the user message");
-        HolodeckB2BCore.getStoreManager().setProcessingState(um, ProcessingState.FAILURE);
+        HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.FAILURE);
     }
 
 

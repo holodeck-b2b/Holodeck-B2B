@@ -64,7 +64,7 @@ public class DeliverReceipts extends BaseHandler {
             return InvocationResponse.CONTINUE;
 
         log.debug("Message contains " + rcptSignals.size() + " Receipt Signals");
-        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Process each signal
         for(final IReceiptEntity receipt : rcptSignals) {
             // Prepare message for delivery by checking it is still ready for delivery and then

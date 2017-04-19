@@ -30,7 +30,7 @@ import org.junit.Test;
  * class is used for testing.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.2
+ * @since  3.0.0
  */
 public class AgreementReferenceTest {
 

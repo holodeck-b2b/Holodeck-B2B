@@ -43,7 +43,7 @@ import java.util.Collection;
  * the P-Mode.
  *
  * @author Sander Fieten (sander at chasquis-services.com)
- * @since 2.2
+ * @since  3.0.0
  */
 public class BasicHeaderValidation extends BaseHandler {
 
@@ -122,7 +122,7 @@ public class BasicHeaderValidation extends BaseHandler {
         log.debug("Save the error to message context");
         MessageContextUtils.addGeneratedError(mc, invalidHeaderError);
         log.debug("Set processing state for invalid message to failure");
-        HolodeckB2BCore.getStoreManager().setProcessingState(messageUnit, ProcessingState.FAILURE);
+        HolodeckB2BCore.getStorageManager().setProcessingState(messageUnit, ProcessingState.FAILURE);
         log.debug("Processed InvalidHeader error");
     }
 }

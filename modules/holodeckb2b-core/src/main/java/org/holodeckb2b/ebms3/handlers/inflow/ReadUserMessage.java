@@ -73,7 +73,7 @@ public class ReadUserMessage extends BaseHandler {
                 // Store it in both database and message context for further processing
                 log.debug("Saving user message meta data to database and message context");
                 mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                               HolodeckB2BCore.getStoreManager().storeIncomingMessageUnit(userMessage));
+                               HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
                 log.debug("User message with msgId " + userMessage.getMessageId() + " succesfully read");
             }
         }

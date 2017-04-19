@@ -81,8 +81,16 @@ public class SenderWorker extends AbstractWorkerTask {
             if (!Utils.isNullOrEmpty(newMsgs)) {
                 log.info("Found " + newMsgs.size() + " message units to send");
                 for (final IMessageUnitEntity msgUnit : newMsgs) {
+                    // Only message units associated with a P-Mode can be send
+                    if (Utils.isNullOrEmpty(msgUnit.getPModeId())) {
+                        log.error("Can not sent message [" + msgUnit.getMessageId()
+                                    + "] because it has no associated P-Mode");
+                        HolodeckB2BCore.getStorageManager().setProcessingState(msgUnit, ProcessingState.FAILURE);
+                        continue;
+                    }
+
                     // Indicate that processing will start
-                    if (HolodeckB2BCore.getStoreManager().setProcessingState(msgUnit, ProcessingState.READY_TO_PUSH,
+                    if (HolodeckB2BCore.getStorageManager().setProcessingState(msgUnit, ProcessingState.READY_TO_PUSH,
                                                                               ProcessingState.PROCESSING)) {
                         // only when we could succesfully set processing state really start processing
                         log.debug("Start processing " + MessageUnitUtils.getMessageUnitName(msgUnit)

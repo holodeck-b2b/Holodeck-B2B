@@ -35,11 +35,10 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 23:10 17.09.16
@@ -81,7 +80,7 @@ public class CheckFromICloudTest {
         OMElement userMessage = UserMessageElement.createElement(headerBlock, mmd);
 
         IUserMessageEntity userMessageEntity =
-                HolodeckB2BCore.getStoreManager().storeIncomingMessageUnit(
+                HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(
                                 UserMessageElement.readElement(userMessage));
 
         MessageContext mc = new MessageContext();

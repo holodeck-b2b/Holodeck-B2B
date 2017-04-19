@@ -99,8 +99,7 @@ public class CompressionHandler extends AbstractUserMessageHandler {
         // First ensure that there do not exists properties with this name
 
         // partProperties should not be null here
-        final Collection<IProperty> partProperties =
-                ((p.getProperties() != null) ? p.getProperties() : new ArrayList<IProperty>());
+        final Collection<IProperty> partProperties = p.getProperties();
         final Collection<IProperty> remove = new ArrayList<>();
         for(final IProperty pp : partProperties)
             if (CompressionFeature.FEATURE_PROPERTY_NAME.equals(pp.getName())
