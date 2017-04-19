@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
  * Is a general representation for all types of ebMS message units and defines methods to access the information
  * available to all ebMS message units. This is the information contained in the <code>eb:MessageInfo</code> and child
  * elements of the ebMS messaging header. See ebMS V3 Core specification, section 5 for more information on the message
- * header. Added is the relation to the P-Mode that governs the processing of the message unit and, since 2.2
+ * header. Added is the relation to the P-Mode that governs the processing of the message unit and, since 3.0.0
  * the list of processing states that the message unit is/was in.
  * <p>Descendants of this base interface define how information specific for a type of message unit can be accessed.
  * Together they are used in Holodeck B2B to define the interfaces between the Core and the external <i>business</i>
