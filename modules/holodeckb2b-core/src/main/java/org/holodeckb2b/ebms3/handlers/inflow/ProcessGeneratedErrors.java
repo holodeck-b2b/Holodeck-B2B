@@ -111,6 +111,11 @@ public class ProcessGeneratedErrors extends BaseHandler {
                     // This collection of errors references one of the received message units.
                     log.debug("Check type of the message unit in error");
                     final IMessageUnitEntity muInError = getRefdMessageUnit(mc, refToMsgId);
+                    final String pmodeId = muInError.getPModeId();
+                    if (!Utils.isNullOrEmpty(pmodeId)) {
+                        log.debug("Set P-Mode Id [" + pmodeId + "] for generated Error Message");
+                        updateManager.setPModeId(errorMessage, pmodeId);
+                    }
                     if (muInError instanceof IPullRequest) {
                         /* The message unit in error is a PullRequest. Because the PullRequest is not necessarily
                         bound to one P-Mode we can only sent the error as a response.
@@ -123,7 +128,6 @@ public class ProcessGeneratedErrors extends BaseHandler {
                     } else {
                         log.debug("Get P-Mode information to determine how new signal must be processed");
                         // Errorhandling config is contained in flow
-                        final String pmodeId = muInError.getPModeId();
                         final IUserMessageFlow flow = pmodeId == null ? null :
                                                             HolodeckB2BCoreInterface.getPModeSet().get(pmodeId)
                                                                    .getLeg(muInError.getLeg()).getUserMessageFlow();
