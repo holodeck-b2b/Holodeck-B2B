@@ -20,7 +20,7 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
     targetNamespace="http://holodeck-b2b.org/schemas/2014/10/pmode"
     attributeFormDefault="unqualified" xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
-    version="2.1.0">
+    version="3.0.0">
     <xs:annotation>
         <xs:documentation><p>The ebMS specification only defines an abstract P-Mode model, the actual P-Mode definition is left up to implementations. This schema defines the XML structure for the representation of a P-Mode as used by the default implementation for maintaining the P-Mode set. In this implementation the P-Mode set consists of all XML documents in a directory. Each XML document represents one P-Mode and must conform to this schema. See the package <code>org.holodeckb2b.pmode.xml</code> for more info on the default implementation of P-Modes.</p></xs:documentation>
         <xs:documentation><p>In version 2.1.0 of the schema the <code>EventHandler</code> and <code>AddActorOrRoleAttribute</code> elements were added. As these are optional elements P-Mode documents constructed using the old version are still valid and result in unchanged processing. Therefore the same namespace is used and only the version has been increased</p> 
