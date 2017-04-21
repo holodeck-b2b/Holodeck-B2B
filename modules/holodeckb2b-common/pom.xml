@@ -85,7 +85,7 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- This specific log4j lib is used by mockito. We should check if we can skip this dependency -->
+        <!-- This specific log4j lib is used by mockito. @todo: We should check if we can skip this dependency -->
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
