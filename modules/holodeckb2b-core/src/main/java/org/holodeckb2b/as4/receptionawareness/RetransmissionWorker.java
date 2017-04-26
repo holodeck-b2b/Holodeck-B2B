@@ -174,13 +174,12 @@ public class RetransmissionWorker extends AbstractWorkerTask {
 
         log.debug("Create and store MissingReceipt error");
         // Create the error and set reference to user message
-        final MissingReceipt missingReceiptError = new MissingReceipt();
-        missingReceiptError.setRefToMessageInError(um.getMessageId());
+        final ErrorMessage missingReceiptError = new ErrorMessage(new MissingReceipt());
+        missingReceiptError.setRefToMessageId(um.getMessageId());
 
         IErrorMessageEntity   errorMessage;
         try {
-            errorMessage = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(
-                                                                                new ErrorMessage(missingReceiptError));
+            errorMessage = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(missingReceiptError);
         } catch (final PersistenceException ex) {
             log.error("An error occured while saving the MissingReceipt error in database!"
                         + "Details: " + ex.getMessage());
