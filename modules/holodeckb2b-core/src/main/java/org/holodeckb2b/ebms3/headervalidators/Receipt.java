@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  * contain, this class only checks there is content. If an error is detected an ebMS <i>InvalidHeader</i> is created and
  * reported back.
  * todo Rename to ReceiptValidator
- * @author Sander Fieten <sander at chasquis-services.com>
+ * @author Sander Fieten (sander at chasquis-services.com)
  * @since  3.0.0
  */
 public class Receipt {

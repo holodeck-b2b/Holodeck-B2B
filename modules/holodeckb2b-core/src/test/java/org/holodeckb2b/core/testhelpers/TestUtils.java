@@ -64,7 +64,7 @@ public class TestUtils {
         boolean flag = false;
         for(LoggingEvent e : events) {
             if(e.getLevel().equals(logLevel)) {
-                if(e.getRenderedMessage().equals(msg)) {
+                if(e.getRenderedMessage().trim().equals(msg)) {
                     flag = true;
                 }
             }

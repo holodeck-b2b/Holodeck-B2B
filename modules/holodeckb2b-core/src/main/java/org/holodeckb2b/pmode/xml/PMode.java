@@ -40,7 +40,7 @@ import org.simpleframework.xml.core.Persister;
  * <a href="http://holodeck-b2b.org/schemas/2014/10/pmode">http://holodeck-b2b.org/schemas/2014/10/pmode</a> XSD which
  * is contained in <code>pmode.xsd</code>.
  *
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IPMode
  */

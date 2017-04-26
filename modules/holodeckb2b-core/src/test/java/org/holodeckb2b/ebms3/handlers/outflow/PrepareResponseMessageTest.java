@@ -29,11 +29,13 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
+import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.core.testhelpers.Config;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
@@ -56,6 +58,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.xml.namespace.QName;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -226,9 +229,6 @@ public class PrepareResponseMessageTest {
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
 
-        // todo We also need to test multiple errors handling
-        // todo I'm going to implement this test later (TS)
-
         ErrorSignalElement.createElement(headerBlock, errorMessage);
 
         StorageManager updateManager = core.getStorageManager();
@@ -259,6 +259,84 @@ public class PrepareResponseMessageTest {
                 .doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
         String msg = "Response does contain one error signal";
+        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
+    }
+
+    @Test
+    public void testDoProcessingOfMultipleErrors() throws Exception {
+        // Creating SOAP envelope
+        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        // Adding header
+        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
+
+        MessageContext mc = new MessageContext();
+        mc.setServerSide(true);
+        mc.setFLOW(MessageContext.OUT_FLOW);
+
+        try {
+            mc.setEnvelope(env);
+        } catch (AxisFault axisFault) {
+            fail(axisFault.getMessage());
+        }
+
+        StorageManager updateManager = core.getStorageManager();
+
+        ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
+
+        // Adding first error message
+        ErrorMessage errorMessage = new ErrorMessage();
+        ArrayList<IEbmsError> errors = new ArrayList<>();
+        EbmsError ebmsError = new EbmsError();
+        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setErrorCode("some_error_code1");
+        errors.add(ebmsError);
+        errorMessage.setErrors(errors);
+        ErrorSignalElement.createElement(headerBlock, errorMessage);
+        IErrorMessageEntity errorMessageEntity =
+                updateManager.storeIncomingMessageUnit(errorMessage);
+        errorMessageEntities.add(errorMessageEntity);
+
+        // Adding second error message
+        errorMessage = new ErrorMessage();
+        errors = new ArrayList<>();
+        ebmsError = new EbmsError();
+        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setErrorCode("some_error_code2");
+        errors.add(ebmsError);
+        errorMessage.setErrors(errors);
+        ErrorSignalElement.createElement(headerBlock, errorMessage);
+        errorMessageEntity =
+                updateManager.storeIncomingMessageUnit(errorMessage);
+        errorMessageEntities.add(errorMessageEntity);
+
+        mc.setProperty(MessageContextProperties.OUT_ERRORS,
+                errorMessageEntities);
+
+        // Mocking the Axis2 Operation Context
+        OperationContext operationContext = mock(OperationContext.class);
+        when(operationContext
+                .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
+                .thenReturn(mc);
+
+        mc.setOperationContext(operationContext);
+
+        InternalConfiguration config = core.getConfiguration();
+
+        Field f = Config.class.getDeclaredField("allowSignalBundling");
+        f.setAccessible(true);
+        f.setBoolean(config, true);
+
+        try {
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertNotNull(invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        verify(mockAppender, atLeastOnce())
+                .doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+        String msg = "Response contains multiple error signals";
         assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 }

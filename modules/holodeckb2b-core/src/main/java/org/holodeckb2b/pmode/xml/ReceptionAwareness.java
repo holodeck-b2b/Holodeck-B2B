@@ -30,7 +30,7 @@ import org.simpleframework.xml.core.ValueRequiredException;
  * for the reception awareness feature.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  *
  * @see IReceptionAwareness
  */

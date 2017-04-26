@@ -21,6 +21,7 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
@@ -96,17 +97,14 @@ public class UserMessageElement {
 
     /**
      * Reads the meta data of a User Message message unit from the given <code>eb:UserMessage</code> element and returns
-     * it as a {@link org.holodeckb2b.common.messagemodel.UserMessage} object.
+     * it as a {@link UserMessage} object.
      *
      * @param   umElement   The <code>UserMessage</code> element that contains the meta data to read
-     * @return              A new {@link org.holodeckb2b.common.messagemodel.UserMessage} object
+     * @return              A new {@link UserMessage} object
      */
-    public static org.holodeckb2b.common.messagemodel.UserMessage readElement(final OMElement umElement) {
+    public static UserMessage readElement(final OMElement umElement) {
         // Create a new entity object to store the information in
-        final org.holodeckb2b.common.messagemodel.UserMessage umData =
-                                                                new org.holodeckb2b.common.messagemodel.UserMessage();
-
-        // todo maybe we need to set PmodeId here, because it is not set now
+        final UserMessage umData = new UserMessage();
 
         // Read the [optional] mpc attribute
         final String  mpc = umElement.getAttributeValue(new QName(MPC_ATTR));

@@ -20,6 +20,7 @@ import org.apache.axiom.attachments.Attachments;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.apache.log4j.Appender;
@@ -116,6 +117,13 @@ public class AddPayloadsTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
 
+        // Envelope is needed to add body payload
+        try {
+            mc.setEnvelope(env);
+        } catch (AxisFault axisFault) {
+            fail(axisFault.getMessage());
+        }
+
         PMode pmode = new PMode();
 
         Leg leg = new Leg();
@@ -134,7 +142,11 @@ public class AddPayloadsTest {
 
         Attachments attachments = new Attachments();
 
-        // Programmatically added payload
+        // Adding data handler for the payload loaded described in mmd
+        DataHandler dh = new DataHandler(new URL("file://" + baseDir + "/dandelion.jpg"));
+        attachments.addDataHandler("some_URI_02", dh);
+
+        // Programmatically added attachment payload
         Payload payload = new Payload();
         payload.setContainment(IPayload.Containment.ATTACHMENT);
         String payloadURI = "some_URI_01";
@@ -142,26 +154,20 @@ public class AddPayloadsTest {
         payload.setContentLocation(baseDir + "/flower.jpg");
         userMessage.addPayload(payload);
 
-        // todo test IPayload.Containment.BODY
-
-        // Adding data handler for the programmatically added payload
-        DataHandler dh = new DataHandler(new URL("file://" + baseDir + "/flower.jpg"));
+        // Adding data handler for the programmatically added attachment payload
+        dh = new DataHandler(new URL("file://" + baseDir + "/flower.jpg"));
         attachments.addDataHandler(payloadURI, dh);
 
-        // Adding data handler for the payload loaded described in mmd
-        dh = new DataHandler(new URL("file://" + baseDir + "/dandelion.jpg"));
-        attachments.addDataHandler("some_URI_02", dh);
+        // Programmatically added body payload
+        payload = new Payload();
+        payload.setContainment(IPayload.Containment.BODY);
+        payload.setPayloadURI("some_URI_03");
+        payload.setContentLocation(baseDir + "/document.xml");
+        userMessage.addPayload(payload);
 
-        // todo test body payload
-//        payload = new Payload();
-//        payload.setContainment(IPayload.Containment.BODY);
-//        payloadPath = "file://./document.xml";
-//        payload.setPayloadURI(payloadPath);
-//        payload.setContentLocation(baseDir + "/document.xml");
-//
-//        userMessage.addPayload(payload);
-//        attachments.addDataHandler(payloadPath,
-//                new DataHandler(new URL(payload.getPayloadURI())));
+        // Adding data handler for the programmatically added body payload
+        dh = new DataHandler(new URL("file://" + baseDir + "/document.xml"));
+        attachments.addDataHandler("some_URI_03", dh);
 
         mc.setAttachmentMap(attachments);
 

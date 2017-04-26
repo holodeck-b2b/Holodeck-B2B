@@ -23,7 +23,6 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.as4.compression.CompressionFeature;
-import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
@@ -33,7 +32,6 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.pmode.helpers.Leg;
@@ -83,7 +81,8 @@ public class SaveUserMsgAttachmentsTest {
 
     @After
     public void tearDown() throws Exception {
-        // todo remove temporary attachment files from target/test-classes/handlers/temp/plcin
+        // Removal of temporary attachment files from target/test-classes/handlers/temp/plcin
+        // if performed in DeliverErrorsTest. No more removal needed here
     }
 
     @Test
@@ -117,21 +116,8 @@ public class SaveUserMsgAttachmentsTest {
 
         Attachments attachments = new Attachments();
 
-        // Programmatically added payload
-        Payload payload = new Payload();
-        payload.setContainment(IPayload.Containment.ATTACHMENT);
-        String payloadURI = "some_URI_02";
-        payload.setPayloadURI(payloadURI);
-        userMessage.addPayload(payload);
-
-        // todo test IPayload.Containment.BODY
-
-        // Adding data handler for the programmatically added payload
-        DataHandler dh = new DataHandler(new URL("file://" + baseDir + "/flower.jpg"));
-        attachments.addDataHandler(payloadURI, dh);
-
-        // Adding data handler for the payload loaded described in mmd
-        dh = new DataHandler(new URL("file://" + baseDir + "/dandelion.jpg"));
+        // Adding data handler for the payload described in mmd
+        DataHandler dh = new DataHandler(new URL("file://" + baseDir + "/dandelion.jpg"));
         attachments.addDataHandler("some_URI_01", dh);
 
         mc.setAttachmentMap(attachments);

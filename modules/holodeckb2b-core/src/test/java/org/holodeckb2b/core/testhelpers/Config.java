@@ -29,6 +29,8 @@ public class Config implements InternalConfiguration {
     private String  pmodeValidatorClass = null;
     private String  pmodeStorageClass = null;
 
+    private boolean allowSignalBundling = false;
+
     Config(final String homeDir) {
         hb2b_home = homeDir;
     }
@@ -81,7 +83,8 @@ public class Config implements InternalConfiguration {
 
     @Override
     public boolean allowSignalBundling() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        System.out.println("[Config.allowSignalBundling()]: " + this.toString());
+        return allowSignalBundling;
     }
 
     @Override

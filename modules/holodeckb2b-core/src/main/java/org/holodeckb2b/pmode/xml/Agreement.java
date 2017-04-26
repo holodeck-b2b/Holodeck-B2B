@@ -21,7 +21,7 @@ import org.simpleframework.xml.Element;
 
 /**
  * Implements a PMode agreement.
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 public class Agreement implements IAgreement {
 

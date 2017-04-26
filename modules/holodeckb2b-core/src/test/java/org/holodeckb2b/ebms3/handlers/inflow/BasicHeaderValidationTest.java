@@ -91,6 +91,7 @@ public class BasicHeaderValidationTest {
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
+
     @Before
     public void setUp() throws Exception {
         handler = new BasicHeaderValidation();
@@ -197,7 +198,6 @@ public class BasicHeaderValidationTest {
         assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 
-    // todo the following test fails. Correct it and uncomment
     @Test
     public void testDoProcessingOfReciepts() throws Exception {
         // Creating SOAP envelope

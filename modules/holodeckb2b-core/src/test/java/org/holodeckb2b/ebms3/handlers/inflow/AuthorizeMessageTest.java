@@ -53,9 +53,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -110,8 +112,7 @@ public class AuthorizeMessageTest {
 //        System.out.println("umElement: " + umElement);
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        // Setting input message property
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umElement);
+
         try {
             mc.setEnvelope(env);
         } catch (AxisFault axisFault) {
@@ -127,9 +128,9 @@ public class AuthorizeMessageTest {
 
         String pmodeId = userMessage.getCollaborationInfo().getAgreement().getPModeId();
 
-        // todo It seems strange that we need to set the PMode id value separately
-        // todo when it is contained within the agreement
-        // todo But if we don't set it the value returned by userMessage.getPModeId() is null now
+        // We need to set the PMode id value separately because
+        // the agreement pmode & userMessage pmode are different
+        // Currently we just set the same value
         userMessage.setPModeId(pmodeId);
 
         String msgId = userMessage.getMessageId();
@@ -175,11 +176,11 @@ public class AuthorizeMessageTest {
         }
 
         verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
-        LoggingEvent loggingEvent = captorLoggingEvent.getValue();
-        //Check log level
-        assertThat(loggingEvent.getLevel(), is(Level.INFO));
+
+        verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
         //Check the message being logged
-        assertThat(loggingEvent.getRenderedMessage(),
-                is("Message [Primary msg msgId="+msgId+"] successfully authorized"));
+        assertTrue(eventContainsMsg(events, Level.INFO,
+                "Message [Primary msg msgId="+msgId+"] successfully authorized"));
     }
 }

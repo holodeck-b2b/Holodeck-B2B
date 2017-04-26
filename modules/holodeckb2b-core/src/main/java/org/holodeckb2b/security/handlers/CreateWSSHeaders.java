@@ -65,7 +65,7 @@ import org.w3c.dom.Document;
  * <tr><td>{@link SecurityConstants#EBMS_USERNAMETOKEN}</td>
  *              <td>{@link IUsernameTokenConfiguration}</td>
  *              <td>The <code>UsernameToken</code> targeted at the <i>ebms</i> role</td></tr>
- * <tr><td>{@link SecurityConstants#DEFAULT_USERNAMETOKEN}</td
+ * <tr><td>{@link SecurityConstants#DEFAULT_USERNAMETOKEN}</td>
  *              <td>{@link IUsernameTokenConfiguration}</td>
  *              <td>The <code>UsernameToken</code> targeted at the <i>default</i> role</td></tr>
  * <tr><td>{@link SecurityConstants#SIGNATURE}</td>
@@ -188,6 +188,9 @@ public class CreateWSSHeaders extends BaseHandler {
             return InvocationResponse.ABORT;
         }
 
+        // The call of the Document.normalizeDocument() method is to fix the exception described here:
+        // http://apache-xml-project.6118.n7.nabble.com/Undeclared-namespace-prefix-quot-ds-quot-error-td36346.html
+        domEnvelope.normalizeDocument();
         // Convert the processed SOAP envelope back to the Axiom representation for further processing
         final SOAPEnvelope SOAPenv = Axis2Utils.convertToAxiom(domEnvelope);
 

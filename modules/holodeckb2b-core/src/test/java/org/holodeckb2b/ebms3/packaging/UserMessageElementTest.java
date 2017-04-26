@@ -105,6 +105,18 @@ public class UserMessageElementTest {
         OMElement arElement = AgreementRefElement.getElement(ciElement);
         assertEquals(AGREEMENT_REF_INFO_ELEMENT_NAME, arElement.getQName());
 
+        // Check the UserMessage for MessageProperties presence
+        OMElement mpElement =
+                MessagePropertiesElement.getElement(userMessageElement);
+        it = mpElement.getChildElements();
+        assertTrue(it.hasNext());
+        if(it.hasNext()) {
+            OMElement pElement = (OMElement)it.next();
+            assertEquals("y1", pElement.getText());
+            pElement = (OMElement)it.next();
+            assertEquals("sWkOqek8-iNy_kNLcpS_jBiM.Q_", pElement.getText());
+        }
+
         // Check the UserMessage for PayloadInfo properties presence
         OMElement piElement = PayloadInfoElement.getElement(userMessageElement);
         System.out.println("piElement: " + piElement);

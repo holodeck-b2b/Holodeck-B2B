@@ -23,21 +23,34 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+import org.apache.log4j.Appender;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.apache.log4j.spi.LoggingEvent;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
+import org.holodeckb2b.ebms3.handlers.inflow.BasicHeaderValidation;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.pmode.helpers.EncryptionConfig;
+import org.holodeckb2b.pmode.helpers.KeyTransportConfig;
 import org.holodeckb2b.pmode.helpers.SigningConfig;
 import org.holodeckb2b.pmode.helpers.UsernameTokenConfig;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.xml.namespace.QName;
 import java.security.Security;
@@ -51,6 +64,7 @@ import static org.junit.Assert.*;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
+@RunWith(MockitoJUnitRunner.class)
 public class CreateWSSHeadersTest {
 
     static final QName SECURITY_ELEMENT_NAME =
@@ -87,6 +101,14 @@ public class CreateWSSHeadersTest {
     static final QName PASSWORD_ELEMENT_NAME =
             new QName(SecurityConstants.WSS_NAMESPACE_URI, "Password");
 
+    // Appender to control logging events
+    @Mock
+    private Appender mockAppender;
+    @Captor
+    private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
+
+    static final QName RECEIPT_CHILD_ELEMENT_NAME = new QName("ReceiptChild");
+
     private static String baseDir;
 
     private static HolodeckB2BTestCore core;
@@ -107,6 +129,15 @@ public class CreateWSSHeadersTest {
     @Before
     public void setUp() throws Exception {
         handler = new CreateWSSHeaders();
+        // Adding appender to the FindPModes logger
+        Logger logger = LogManager.getRootLogger();
+        logger.addAppender(mockAppender);
+        logger.setLevel(Level.DEBUG);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        LogManager.getRootLogger().removeAppender(mockAppender);
     }
 
     @Test
@@ -142,8 +173,7 @@ public class CreateWSSHeadersTest {
 
         mc.setProperty(SecurityConstants.SIGNATURE, sigConfig);
 
-// todo Setting encription causes NPE now for unknown reason. I'll check this later (T.S.)
-//        mc.setProperty(SecurityConstants.ENCRYPTION, encConfig);
+        mc.setProperty(SecurityConstants.ENCRYPTION, encConfig);
         mc.setProperty(SecurityConstants.EBMS_USERNAMETOKEN, tokenConfig);
         mc.setProperty(SecurityConstants.DEFAULT_USERNAMETOKEN, tokenConfig);
 

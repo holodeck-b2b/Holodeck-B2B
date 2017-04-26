@@ -41,7 +41,7 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  * @todo Optimize the number of threads in the pool. Now equal to the number of worker instances to prevent that some workers will take all threads
  * @todo Add a mechanism to warn caller when an error occurs starting a task
  *
- * @author Sander Fieten <sander@holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class WorkerPool {
 

@@ -42,7 +42,7 @@ import org.junit.Test;
 /**
  * Tests correct loading of XML configuration for the worker pool
  *
- * @author Sander Fieten <sander@holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class XMLWorkerPoolConfigTest {
 

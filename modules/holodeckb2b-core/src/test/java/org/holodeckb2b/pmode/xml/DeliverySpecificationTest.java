@@ -27,7 +27,7 @@ import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
 /**
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 public class DeliverySpecificationTest {
 

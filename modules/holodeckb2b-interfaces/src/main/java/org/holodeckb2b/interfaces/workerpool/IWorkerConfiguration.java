@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.general.Interval;
  * Defines the configuration of a worker in the worker pool. Consists of the task the worker should execute and the
  * parameters needed for successful execution and parameters for scheduling of the task.
  *
- * @author Sander Fieten <sander@holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IWorkerTask
  */
 public interface IWorkerConfiguration {

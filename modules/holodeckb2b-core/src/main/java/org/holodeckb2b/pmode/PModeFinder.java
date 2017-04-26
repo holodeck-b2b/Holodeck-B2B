@@ -106,8 +106,8 @@ public class PModeFinder {
      * <tr><td>Action</td><td>5</td></tr>
      * <tr><td>Agreement ref</td><td>1</td></tr>
      * <tr><td>MPC</td><td>1</td></tr>
-     * </table>
-     * <p>If there is a mismatch for one of the elements the P-Mode is considered as a mismatch.
+     * </table> </p>
+     * <p>If there is a mismatch for one of the elements the P-Mode is considered as a mismatch.</p>
      *
      * @param mu        The user message message unit to find the P-Mode for
      * @return          The P-Mode for the message unit if the message unit can be matched to a P-Mode,

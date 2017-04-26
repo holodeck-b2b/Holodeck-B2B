@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * <p>It will check that the MessageId and timestamp are available. If an error is detected an ebMS <i>InvalidHeader</i>
  * is created and reported back.
  * todo Rename to MessageUnitValidator
- * @author Sander Fieten <sander at chasquis-services.com>
+ * @author Sander Fieten (sander at chasquis-services.com)
  * @since  3.0.0
  */
 public abstract class MessageUnit {

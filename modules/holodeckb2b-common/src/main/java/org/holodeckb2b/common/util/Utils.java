@@ -420,6 +420,7 @@ public final class Utils {
      *        First object. May be <code>null</code>.
      * @param o2
      *        Second object. May be <code>null</code>.
+     * @param <T>
      * @return <code>true</code> if both are <code>null</code> or if both are
      *         equal.
      */

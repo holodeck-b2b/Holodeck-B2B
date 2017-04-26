@@ -38,7 +38,7 @@ import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
  * src/main/resources/xsd/hb2b-config.xsd</code>.
  * <p>NOTE: Current implementation does not encrypt the keystore passwords! Therefore access to the config file
  * SHOULD be limited to the account that is used to run Holodeck B2B.
- * @todo Encryption of keystore passwords
+ * todo Encryption of keystore passwords
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
@@ -395,7 +395,7 @@ public class Config implements InternalConfiguration {
      * Indicates if the references in an Error signal message unit should be checked using the strict requirements
      * defined in the Core Specification (all references equal) or if a bit more relaxed check can be used (signal level
      * reference empty, but individual errors have the same reference).
-     * <p>Default the more relaxed check is used. To change this set the value of the <i>StrictErrorReferencesCheck<i>
+     * <p>Default the more relaxed check is used. To change this set the value of the <i>StrictErrorReferencesCheck</i>
      * parameter to <i>"true"</i>.
      *
      * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
