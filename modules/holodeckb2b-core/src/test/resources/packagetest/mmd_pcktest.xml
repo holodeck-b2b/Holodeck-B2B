@@ -46,6 +46,8 @@
         <Property name="LuJUQ0J1-" type="Roc0X">sWkOqek8-iNy_kNLcpS_jBiM.Q_</Property>
     </MessageProperties>
     <PayloadInfo>
+        <!-- FYI attributes containment&mimeType&location are ignored
+            by org.holodeckb2b.ebms.packaging.PartInfoElement-->
         <PartInfo containment="attachment" mimeType="I8ZVs6G2P" location="http://sxGTnZjm/"/>
         <PartInfo containment="external" uri="http://pcVJBuTT/" mimeType="CoL9">
             <Schema location="http://KFfZaFTi/" version="uC" namespace="E9eUYc92"/>
