@@ -21,7 +21,7 @@ import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 
 /**
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ErrorHandlingConfig implements IErrorHandling {
 

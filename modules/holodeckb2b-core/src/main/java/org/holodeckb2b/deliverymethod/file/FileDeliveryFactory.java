@@ -46,7 +46,7 @@ import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
  * specified the <i>"ebms"</i> format will be used as default.<br>
  * Furthermore the directory where to write the files MUST be specified using the "<i>deliveryDirectoy</i>" setting.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see MMDDeliverer
  * @see SimpleFileDeliverer
  * @see SingleXMLDeliverer

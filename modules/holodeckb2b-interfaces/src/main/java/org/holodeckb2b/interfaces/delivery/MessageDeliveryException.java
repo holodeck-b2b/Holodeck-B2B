@@ -21,7 +21,7 @@ package org.holodeckb2b.interfaces.delivery;
  * be thrown because a delivery method can not be successfully instantiated, i.e. the factory class can not be
  * initialized or during the actual delivery of a message.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IMessageDeliverer
  * @see IMessageDelivererFactory
  */

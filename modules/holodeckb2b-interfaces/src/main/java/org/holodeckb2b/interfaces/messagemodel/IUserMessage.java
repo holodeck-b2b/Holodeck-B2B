@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.general.ITradingPartner;
  * content of the user message. This interface follows the message model as defined in section 5.2.2 of the ebMS Core
  * Specification.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IMessageUnit
  */
 public interface IUserMessage extends IMessageUnit {

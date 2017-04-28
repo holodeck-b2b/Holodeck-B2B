@@ -27,7 +27,7 @@ import org.holodeckb2b.common.handler.BaseHandler;
  * depending whether the message is in or outbound: <i>org.holodeckb2b.msgproc.soapenvlog.</i>(<i>IN|OUT</i>). The
  * log level used is INFO, so the logging can be enabled or disabled by setting the log level.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class SOAPEnvelopeLogger extends BaseHandler {
 

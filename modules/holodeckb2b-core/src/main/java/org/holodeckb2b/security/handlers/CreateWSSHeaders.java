@@ -65,7 +65,7 @@ import org.w3c.dom.Document;
  * <tr><td>{@link SecurityConstants#EBMS_USERNAMETOKEN}</td>
  *              <td>{@link IUsernameTokenConfiguration}</td>
  *              <td>The <code>UsernameToken</code> targeted at the <i>ebms</i> role</td></tr>
- * <tr><td>{@link SecurityConstants#DEFAULT_USERNAMETOKEN}</td
+ * <tr><td>{@link SecurityConstants#DEFAULT_USERNAMETOKEN}</td>
  *              <td>{@link IUsernameTokenConfiguration}</td>
  *              <td>The <code>UsernameToken</code> targeted at the <i>default</i> role</td></tr>
  * <tr><td>{@link SecurityConstants#SIGNATURE}</td>
@@ -73,7 +73,7 @@ import org.w3c.dom.Document;
  *              <td>The <code>Signature</code> to create in the <i>default</i> header</td></tr>
  * </table>
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CreateWSSHeaders extends BaseHandler {
 
@@ -82,8 +82,7 @@ public class CreateWSSHeaders extends BaseHandler {
     protected static final String WSS4J_PART_S11_BODY = "{}{http://schemas.xmlsoap.org/soap/envelope/}Body;";
     protected static final String WSS4J_PART_S12_BODY = "{}{http://www.w3.org/2003/05/soap-envelope}Body;";
 
-    protected static final String WSS4J_PART_UT =
-                "{}{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd}UsernameToken;";
+    protected static final String WSS4J_PART_UT = "{}{" + SecurityConstants.WSS_NAMESPACE_URI + "}UsernameToken;";
 
     protected static final String WSS4J_PART_ATTACHMENTS = "{}cid:Attachments;";
 
@@ -189,6 +188,9 @@ public class CreateWSSHeaders extends BaseHandler {
             return InvocationResponse.ABORT;
         }
 
+        // The call of the Document.normalizeDocument() method is to fix the exception described here:
+        // http://apache-xml-project.6118.n7.nabble.com/Undeclared-namespace-prefix-quot-ds-quot-error-td36346.html
+        domEnvelope.normalizeDocument();
         // Convert the processed SOAP envelope back to the Axiom representation for further processing
         final SOAPEnvelope SOAPenv = Axis2Utils.convertToAxiom(domEnvelope);
 

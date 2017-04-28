@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
@@ -35,8 +34,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Created at 23:28 21.09.16
@@ -72,26 +70,26 @@ public class ReadUserMessageTest {
      */
     @Test
     public void testProcessing() {
-        MessageMetaData mmd = TestUtils.getMMD("multihop/icloud/full_mmd.xml", this);
+        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding UserMessage from mmd
-        OMElement userMessage = UserMessageElement.createElement(headerBlock, mmd);
+        UserMessageElement.createElement(headerBlock, mmd);
 
         MessageContext mc = new MessageContext();
-        // Setting input message property
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessage);
         try {
             mc.setEnvelope(env);
         } catch (AxisFault axisFault) {
             fail(axisFault.getMessage());
         }
 
+        assertNull(mc.getProperty(MessageContextProperties.IN_USER_MESSAGE));
+
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertNotNull(invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }

@@ -25,7 +25,7 @@ import java.util.Collection;
  * and <code>eb:To</code> elements in the ebMS message header. See also sections 5.2.2.3 and 5.2.2.4 of the ebMS Core
  * Specification.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface ITradingPartner {
 

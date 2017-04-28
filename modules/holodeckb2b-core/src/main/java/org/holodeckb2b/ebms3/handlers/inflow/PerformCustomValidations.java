@@ -65,7 +65,7 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
                                                         buildErrorDetailText(validationResult.getValidationErrors()),
                                                         userMessage.getMessageId());
                 MessageContextUtils.addGeneratedError(mc, otherError);
-                HolodeckB2BCore.getStoreManager().setProcessingState(userMessage, ProcessingState.FAILURE);
+                HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, ProcessingState.FAILURE);
             }
         } catch (MessageValidationException ve) {
             log.error("An error occurred when performing the validation of User Message [" + userMessage.getMessageId()
@@ -75,7 +75,7 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
                                                     "An error occurred when performing the validation of User Message",
                                                     userMessage.getMessageId());
             MessageContextUtils.addGeneratedError(mc, otherError);
-            HolodeckB2BCore.getStoreManager().setProcessingState(userMessage, ProcessingState.FAILURE);
+            HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, ProcessingState.FAILURE);
         }
 
         return InvocationResponse.CONTINUE;

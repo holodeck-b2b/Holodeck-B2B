@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * By decoupling the internal and external interface it is easier to implement different protocols for accepting
  * messages from the client applications without these "acceptors" needing to know about the Holodeck B2B internals.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IMessageSubmitter {
 

@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
@@ -32,29 +31,27 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.pmode.IErrorHandling;
-import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.pmode.IPMode;
-import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
-import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.interfaces.pmode.*;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeUtils;
 
+import java.util.Collection;
+
 /**
  * Is the <i>IN_FLOW</i> handler responsible for checking if error message should be delivered to the business
  * application and if so to hand them over to the responsible {@link IMessageDeliverer}.
  * <p>To prevent that errors in the error message unit are delivered twice in parallel delivery only takes place when
- * the processing state of the unit can be successfully changed from {@link ProcessingStates#READY_FOR_DELIVERY} to
- * {@link ProcessingStates#OUT_FOR_DELIVERY}.
+ * the processing state of the unit can be successfully changed from {@link ProcessingState#READY_FOR_DELIVERY} to
+ * {@link ProcessingState#OUT_FOR_DELIVERY}.
  * <p>To enable easy monitoring all received error signals will always be logged to a separate log
  * (<code>org.holodeckb2b.msgproc.errors.received</code>).
  * <p>NOTE: The actual delivery to the business application is done through a {@link IMessageDeliverer} which is
  * specified in the P-Mode for this message unit. That P-Mode is the same as the P-Mode of the referenced message or
  * if no message is referenced and this message unit is received as a response the primary message unit in the request.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class DeliverErrors extends BaseHandler {
 
@@ -74,7 +71,7 @@ public class DeliverErrors extends BaseHandler {
             return InvocationResponse.CONTINUE;
 
         log.debug("Message contains " + errorSignals.size() + " Error Signals");
-        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Process each signal
         for(final IErrorMessageEntity errorSignal : errorSignals) {
             // Prepare message for delivery by checking it is still ready for delivery and then
@@ -195,7 +192,7 @@ public class DeliverErrors extends BaseHandler {
      * How the error is delivered is defined by the delivery specification linked to the error handling configuration.
      * If that is not set the default delivery specification [of the Leg] will be used.
      *
-     * @param entity    The message unit referenced by the error
+     * @param refdMU    The message unit referenced by the error
      * @return          When the error should be delivered to the business application, the {@link
      *                  IDeliverySpecification} that should be used for the delivery,<br>
      *                  <code>null</code> otherwise

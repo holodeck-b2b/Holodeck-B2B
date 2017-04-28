@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.general.IProperty;
  * href="https://tools.oasis-open.org/issues/browse/EBXMLMSG-2">issue number 2</a>. As noted there the schema will be
  * changed to include this attribute. Until the issue is fixed Holodeck B2B will not add the type.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PropertyElement {
 

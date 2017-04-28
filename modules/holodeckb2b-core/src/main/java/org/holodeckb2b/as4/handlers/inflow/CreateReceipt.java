@@ -53,7 +53,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * signing must be enabled. Which type of receipt is created is determined by whether the received message is signed or
  * not. If it is signed the NRR receipt is created, as specified in section 5.1.8 of the AS4 Profile.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CreateReceipt extends AbstractUserMessageHandler {
 
@@ -132,19 +132,15 @@ public class CreateReceipt extends AbstractUserMessageHandler {
             final boolean asResponse = rcptConfig.getPattern() == ReplyPattern.RESPONSE;
             log.debug("Store the receipt signal in database");
             try {
-                IReceiptEntity receipt = (IReceiptEntity) HolodeckB2BCore.getStoreManager()
+                IReceiptEntity receipt = (IReceiptEntity) HolodeckB2BCore.getStorageManager()
                                                                                 .storeOutGoingMessageUnit(rcptData);
                 if (asResponse) {
                     log.debug("Store the receipt in the MessageContext");
                     mc.setProperty(MessageContextProperties.RESPONSE_RECEIPT, receipt);
                     mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
                 } else {
-                    if (rcptConfig.getTo() != null && !rcptConfig.getTo().isEmpty()) {
-                        log.debug("The Receipt should be sent separately");
-                        HolodeckB2BCore.getStoreManager().setProcessingState(receipt, ProcessingState.READY_TO_PUSH);
-                    } else {
-                        log.debug("Receipt will be piggybacked on next PullRequest");
-                    }
+                    log.debug("The Receipt should be sent separately");
+                    HolodeckB2BCore.getStorageManager().setProcessingState(receipt, ProcessingState.READY_TO_PUSH);
                 }
                 log.debug("Receipt for message [msgId=" + um.getMessageId() + "] created successfully");
                 // Trigger event to signal that the event was created

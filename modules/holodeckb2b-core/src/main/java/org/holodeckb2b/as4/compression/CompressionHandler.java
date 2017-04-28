@@ -47,7 +47,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * <p>NOTE: Although the AS4 profiles states that payloads containing already compressed data do not need to be
  * compressed Holodeck B2B will compress all payloads regardless of their content.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CompressionHandler extends AbstractUserMessageHandler {
 
@@ -99,8 +99,7 @@ public class CompressionHandler extends AbstractUserMessageHandler {
         // First ensure that there do not exists properties with this name
 
         // partProperties should not be null here
-        final Collection<IProperty> partProperties =
-                ((p.getProperties() != null) ? p.getProperties() : new ArrayList<IProperty>());
+        final Collection<IProperty> partProperties = p.getProperties();
         final Collection<IProperty> remove = new ArrayList<>();
         for(final IProperty pp : partProperties)
             if (CompressionFeature.FEATURE_PROPERTY_NAME.equals(pp.getName())

@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.security.IPayloadDigest;
  * User Message. The information on the digest must be supplied when the object is created and can not be modified
  * afterwards.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
 public class PayloadDigest implements IPayloadDigest {

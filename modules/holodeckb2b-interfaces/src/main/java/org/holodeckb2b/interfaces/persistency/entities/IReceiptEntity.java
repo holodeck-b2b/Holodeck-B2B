@@ -25,8 +25,8 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  * information on the <b>receipt content <i>lazily</i></b>, i.e. before  calling {@link #getContent()} to get this info
  * the {@link #isLoadedCompletely()} should be executed to check if all  information is loaded.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since  3.0.0
  * @see   IMessageUnitEntity
  */
 public interface IReceiptEntity extends IMessageUnitEntity, IReceipt {

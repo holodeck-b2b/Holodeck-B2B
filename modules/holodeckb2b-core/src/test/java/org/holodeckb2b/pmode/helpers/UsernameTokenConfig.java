@@ -21,7 +21,7 @@ import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 import org.holodeckb2b.security.tokens.UsernameToken;
 
 /**
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class UsernameTokenConfig extends UsernameToken
         implements IUsernameTokenConfiguration {

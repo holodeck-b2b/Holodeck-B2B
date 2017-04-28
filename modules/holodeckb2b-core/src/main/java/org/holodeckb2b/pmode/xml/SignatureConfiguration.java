@@ -25,8 +25,8 @@ import org.simpleframework.xml.Root;
  * Represents the <code>SignatureConfiguration</code> element in the P-Mode XML document that contains the P-Mode
  * parameters for including a WSS signature in the message.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 @Root
 public class SignatureConfiguration implements ISigningConfiguration {

@@ -19,7 +19,7 @@ package org.holodeckb2b.interfaces.submit;
 /**
  * Describes the interface of the factory class to create instances of {@link IMessageSubmitter}
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 @Deprecated
 public interface IMessageSubmitterFactory {

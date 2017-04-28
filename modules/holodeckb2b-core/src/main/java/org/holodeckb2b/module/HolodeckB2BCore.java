@@ -27,8 +27,8 @@ import org.holodeckb2b.customvalidation.ICustomValidationExecutor;
  * of the public interface the Core offers to extensions and adds methods that are intended for internal use only. Note
  * that this is just a <i>facade</i> to the actual Core implementation that is still one object.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since  3.0.0
  */
 public class HolodeckB2BCore extends HolodeckB2BCoreInterface {
 
@@ -48,9 +48,9 @@ public class HolodeckB2BCore extends HolodeckB2BCoreInterface {
      * changes in the message unit meta-data are managed correctly.
      *
      * @return  The {@link StorageManager} that Core classes should use to update meta-data of message units
-     * @since HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
-    public static StorageManager getStoreManager() {
+    public static StorageManager getStorageManager() {
         return ((HolodeckB2BCoreImpl) coreImplementation).getStorageManager();
     }
 

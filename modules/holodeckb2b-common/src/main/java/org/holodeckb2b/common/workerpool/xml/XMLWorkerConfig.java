@@ -42,7 +42,7 @@ import org.simpleframework.xml.Root;
  *      &lt;/worker&gt;<br>
  * </pre>
  *
- * @author Sander Fieten <sander@holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 @Root (name="worker")
 public class XMLWorkerConfig implements IWorkerConfiguration {

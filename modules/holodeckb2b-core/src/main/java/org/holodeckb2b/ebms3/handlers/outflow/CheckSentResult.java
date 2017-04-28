@@ -35,12 +35,12 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * Is the <i>OUT_FLOW</i> handler responsible for changing the processing state of message units that are and have been
  * sent out in the current SOAP message.
  * <p>When the handler is executed in the flow the processing state of all message units contained in the message is
- * set to {@link ProcessingStates#SENDING}. When {@link #flowComplete(org.apache.axis2.context.MessageContext)} is
+ * set to {@link ProcessingState#SENDING}. When {@link #flowComplete(org.apache.axis2.context.MessageContext)} is
  * executed the handler checks if the sent operation was successful and changes the processing state accordingly to
- * either {@link ProcessingStates#TRANSPORT_FAILURE} or {@link ProcessingStates#DELIVERED} /
- * {@link ProcessingStates#AWAITING_RECEIPT} (for User Message that should be acknowledged through a Receipt).
+ * either {@link ProcessingState#TRANSPORT_FAILURE} or {@link ProcessingState#DELIVERED} /
+ * {@link ProcessingState#AWAITING_RECEIPT} (for User Message that should be acknowledged through a Receipt).
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CheckSentResult extends BaseHandler {
 
@@ -53,7 +53,7 @@ public class CheckSentResult extends BaseHandler {
     }
 
     /**
-     * This method changes the processing state of the message units to {@link ProcessingStates#SENDING} to indicate
+     * This method changes the processing state of the message units to {@link ProcessingState#SENDING} to indicate
      * they are being sent to the other MSH.
      *
      * @param mc            The current message
@@ -66,7 +66,7 @@ public class CheckSentResult extends BaseHandler {
         // Get all message units in this message
         final Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
         // And change their processing state
-        final StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+        final StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         for (final IMessageUnitEntity mu : msgUnits) {
             updateManager.setProcessingState(mu, ProcessingState.SENDING);
             log.info(MessageUnitUtils.getMessageUnitName(mu) + " with msg-id ["
@@ -79,12 +79,12 @@ public class CheckSentResult extends BaseHandler {
     /**
      * This method is called after the message was sent out. Depending on the result (success or fault) the processing
      * state of the message units contained in the message is changed. When a fault occurred during sending the state
-     * is set to {@link ProcessingStates#TRANSPORT_FAILURE}. When the SOAP message is sent out successfully the change
+     * is set to {@link ProcessingState#TRANSPORT_FAILURE}. When the SOAP message is sent out successfully the change
      * depends on the type of message unit:<ul>
-     * <li><i>Signal message units</i> : the processing state will be changed to {@link ProcessingStates#DELIVERED}</li>
+     * <li><i>Signal message units</i> : the processing state will be changed to {@link ProcessingState#DELIVERED}</li>
      * <li><i>User message unit</i> : the new processing state depends on whether a receipt is expected. If a receipt
-     *  is expected, the new state will be {@link ProcessingStates#AWAITING_RECEIPT}, otherwise it will be
-     *  {@link ProcessingStates#DELIVERED}.</li></ul>
+     *  is expected, the new state will be {@link ProcessingState#AWAITING_RECEIPT}, otherwise it will be
+     *  {@link ProcessingState#DELIVERED}.</li></ul>
      *
      * @param mc    The current message that was sent out
      */
@@ -100,7 +100,7 @@ public class CheckSentResult extends BaseHandler {
 
             //Change processing state of all message units in the message accordingly
             final Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
-            final StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+            final StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             for (final IMessageUnitEntity mu : msgUnits) {
                 try {
                     if (!success) {

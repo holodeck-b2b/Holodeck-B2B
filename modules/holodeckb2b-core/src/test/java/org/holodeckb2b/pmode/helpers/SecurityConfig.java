@@ -20,7 +20,7 @@ import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration.WSSHeaderTarget;
 
 /**
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class SecurityConfig implements ISecurityConfiguration {
 

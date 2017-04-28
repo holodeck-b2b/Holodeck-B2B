@@ -16,8 +16,6 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import java.util.Collection;
-import java.util.List;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -37,21 +35,24 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received receipt signals.
- * <p>For each {@link Receipt} in the message (indicated by message context property
- * {@link MessageContextProperties#IN_RECEIPTS}) it will check if the referenced {@link UserMessage} expects a Receipt
+ * <p>For each {@link IReceiptEntity} in the message (indicated by message context property
+ * {@link MessageContextProperties#IN_RECEIPTS}) it will check if the referenced {@link IMessageUnitEntity} expects a Receipt
  * anyway. This is done by checking the <i>ReceiptConfiguration</i> for the leg ({@link ILeg#getReceiptConfiguration()}.
  * If no configuration exists Receipt are not expected and a <i>ProcessingModeMismatch</i> error is generated for the
- * Receipt and its processing state is set to {@link ProcessingStates#FAILURE}.<br>
+ * Receipt and its processing state is set to {@link ProcessingState#FAILURE}.<br>
  * If a receipt configuration exists and if the user message is waiting for a receipt it will be marked as delivered and
- * the Receipt's state will be set to {@link ProcessingStates#READY_FOR_DELIVERY} to indicate that it can be delivered
+ * the Receipt's state will be set to {@link ProcessingState#READY_FOR_DELIVERY} to indicate that it can be delivered
  * to the business application. The actual delivery is done by the {@link DeliverReceipts} handler.<br>
  * If a receipt configuration exists but the user message is not waiting for a receipt anymore (because it is already
  * acknowledged by another Receipt or it has failed due to an Error) the Receipt's processing state will be changed to
- * {@link ProcessingStates#DONE}.
+ * {@link ProcessingState#DONE}.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ProcessReceipts extends BaseHandler {
 
@@ -87,7 +88,7 @@ public class ProcessReceipts extends BaseHandler {
      * @throws PersistenceException When a database error occurs while processing the Receipt Signal
      */
     protected void processReceipt(final IReceiptEntity receipt, final MessageContext mc) throws PersistenceException {
-        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Change processing state to indicate we start processing the receipt. Also checks that the receipt is not
         // already being processed
         if (!updateManager.setProcessingState(receipt, ProcessingState.RECEIVED, ProcessingState.PROCESSING)) {
@@ -172,7 +173,6 @@ public class ProcessReceipts extends BaseHandler {
         ProcessingState prevState = null, curState = mu.getCurrentProcessingState().getState();
         if (mu.getProcessingStates().size() > 1)
             prevState = states.get(states.size() - 2).getState();
-
         return curState == ProcessingState.AWAITING_RECEIPT
                || (( curState == ProcessingState.AWAITING_PULL || curState == ProcessingState.READY_TO_PUSH )
                     && prevState == ProcessingState.AWAITING_RECEIPT );

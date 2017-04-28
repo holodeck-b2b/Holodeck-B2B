@@ -25,8 +25,8 @@ import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
  * contained in this and sub packages {@link org.holodeckb2b.interfaces.persistency.dao} and {@link
  * org.holodeckb2b.interfaces.persistency.entities}.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since  3.0.0
  */
 public interface IPersistencyProvider {
 

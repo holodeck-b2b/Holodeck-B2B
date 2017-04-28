@@ -47,7 +47,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * can occur in the processing of ebMS messages. These errors should all result in an ebMS error and handled
  * accordingly.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class CatchAxisFault extends BaseHandler {
 
@@ -83,7 +83,7 @@ public class CatchAxisFault extends BaseHandler {
                     if (ProcessingState.DELIVERED != curState && ProcessingState.AWAITING_RECEIPT != curState) {
                         log.error(MessageUnitUtils.getMessageUnitName(mu) + " with msg-id [" + mu.getMessageId()
                                     + "] could not be processed due to an internal error.");
-                        HolodeckB2BCore.getStoreManager().setProcessingState(mu, ProcessingState.FAILURE);
+                        HolodeckB2BCore.getStorageManager().setProcessingState(mu, ProcessingState.FAILURE);
                     }
                 } catch (final PersistenceException ex) {
                     // Unable to change the processing state, log the error.
@@ -120,7 +120,7 @@ public class CatchAxisFault extends BaseHandler {
         errorMessage.addError(otherError);
         try {
             log.debug("Create the Error signal message");
-            IErrorMessageEntity storedError = (IErrorMessageEntity) HolodeckB2BCore.getStoreManager()
+            IErrorMessageEntity storedError = (IErrorMessageEntity) HolodeckB2BCore.getStorageManager()
                                                                                 .storeOutGoingMessageUnit(errorMessage);
             log.debug("Created a new Error signal message");
             mc.setProperty(MessageContextProperties.OUT_ERRORS, Collections.singletonList(storedError));

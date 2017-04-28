@@ -56,8 +56,8 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * <li><i>UserMessage.findResponsesTo</i> finds all User Messages that are a response to another User Message, i.e.
  *              which refer to the given message id.</li></ul>
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since  3.0.0
  */
 @Entity
 @Table(name="USER_MESSAGE")

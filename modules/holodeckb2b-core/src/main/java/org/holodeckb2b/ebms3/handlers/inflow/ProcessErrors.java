@@ -39,10 +39,10 @@ import org.holodeckb2b.persistency.dao.StorageManager;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received error signals. For each error contained in one of
- * the {@link ErrorMessage}s available in the message context property {@link MessageContextProperties#IN_ERRORS} it
- * will check if there is a {@link MessageUnit} in the database and mark that message as failed.
+ * the {@link IErrorMessageEntity}s available in the message context property {@link MessageContextProperties#IN_ERRORS} it
+ * will check if there is a {@link IMessageUnitEntity} in the database and mark that message as failed.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ProcessErrors extends BaseHandler {
 
@@ -81,20 +81,20 @@ public class ProcessErrors extends BaseHandler {
      * <p>First the referenced message id is checked for correctness meaning that it refers to an existing message unit.
      * <p>If it refers to non existing message units an <i>ValueInconsistent</i> error will be generated and added to
      * the message context. The processing state of the error signal itself will be set to
-     * {@link ProcessingStates#FAILURE}.
+     * {@link ProcessingState#FAILURE}.
      * <p>If the referenced id is valid the referenced message units processing state will be changed to {@link
-     * ProcessingStates#FAILURE}. The processing state of the error signal itself is set to {@link
-     * ProcessingStates#READY_FOR_DELIVERY} to indicate that the error can be delivered to the business application if
+     * ProcessingState#FAILURE}. The processing state of the error signal itself is set to {@link
+     * ProcessingState#READY_FOR_DELIVERY} to indicate that the error can be delivered to the business application if
      * needed.
      *
-     * @param errSignalProxy    The {@link IErrorMessageEntity} object representing the Error Signal to process
+     * @param errSignal    The {@link IErrorMessageEntity} object representing the Error Signal to process
      * @param mc                The current message context
      * @throws PersistenceException When a database error occurs while processing the Error Signal
      */
     protected void processErrorSignal(final IErrorMessageEntity errSignal, final MessageContext mc)
                                                                                         throws PersistenceException {
         log.debug("Start processing Error Signal [msgId=" + errSignal.getMessageId() + "]");
-        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Change processing state to indicate we start processing the error. Also checks that the error is not
         // already being processed
         if (!updateManager.setProcessingState(errSignal, ProcessingState.RECEIVED, ProcessingState.PROCESSING)) {
@@ -103,7 +103,10 @@ public class ProcessErrors extends BaseHandler {
         }
 
         // Always log the error signal, even if its processing may fail later
-        errorLog.error(MessageUnitUtils.errorSignalToString(errSignal));
+        if (isWarning(errSignal))
+            errorLog.warn(MessageUnitUtils.errorSignalToString(errSignal));
+        else
+            errorLog.error(MessageUnitUtils.errorSignalToString(errSignal));
 
         log.debug("Get referenced message unit(s)");
         Collection<IMessageUnitEntity> refdMessages = null;

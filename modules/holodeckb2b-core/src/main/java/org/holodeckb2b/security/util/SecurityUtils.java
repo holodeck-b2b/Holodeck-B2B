@@ -44,7 +44,7 @@ import org.holodeckb2b.security.tokens.UsernameToken;
 /**
  * Is a container for general security related functions.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class SecurityUtils {
 
@@ -257,7 +257,6 @@ public class SecurityUtils {
                     signedInfoElement.getChildrenWithName(new QName(SecurityConstants.DSIG_NAMESPACE_URI, "Reference"))
                 ; it.hasNext() ;)
                 references.add(it.next());
-
         }
 
         return references;
@@ -270,7 +269,7 @@ public class SecurityUtils {
      * @param keyPassword   The password to access the private key
      * @return      <code>true</code> if there is a private key in the keystore and it can be accessed using the
      *              given password,<br> <code>false</code> otherwise
-     * @since HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
     public static boolean isPrivateKeyAvailable(final String alias, final String keyPassword) {
         final   IConfiguration config = HolodeckB2BCoreInterface.getConfiguration();
@@ -302,7 +301,7 @@ public class SecurityUtils {
      *                      keys keystore
      * @return       <code>true</code> if there is a certificate in the public keys or trust keystore (if <code>
      *               checkTrust == true</code>,<br> <code>false</code> otherwise
-     * @since HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
     public static boolean isCertificateAvailable(final String alias, final boolean checkTrust) {
         final   IConfiguration config = HolodeckB2BCoreInterface.getConfiguration();

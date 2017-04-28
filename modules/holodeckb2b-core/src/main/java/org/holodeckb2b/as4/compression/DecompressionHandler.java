@@ -41,7 +41,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * original <code>DataHandler</code> that contains the payload data. This way the decompression is only executed at the
  * moment the payload data is written to an output stream and an extra operation is prevented.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class DecompressionHandler extends AbstractUserMessageHandler {
 
@@ -75,7 +75,7 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
                             + p.getPayloadURI() + "]!");
                     decompressFailure.setRefToMessageInError(um.getMessageId());
                     MessageContextUtils.addGeneratedError(mc, decompressFailure);
-                    HolodeckB2BCore.getStoreManager().setProcessingState(um, ProcessingState.FAILURE);
+                    HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.FAILURE);
                 } else {
                     // Replace DataHandler to enable decompression
                     try {

@@ -27,7 +27,7 @@ import org.junit.Test;
 /**
  * Tests the reading of the Holodeck B2B configuration file.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ConfigXmlFileTest {
 

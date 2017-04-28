@@ -40,7 +40,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
  * described by the {@link IPayload} interface from the Holodeck B2B messaging model.
  *
  * @author Sander Fieten <sander at holodeckb2b.org>
- * @since HB2B_NEXT_VERSION
+ * @since  3.0.0
  */
 @Entity
 @Table(name="PAYLOAD")
@@ -74,12 +74,11 @@ public class Payload implements IPayload, Serializable {
 
     public void setProperties(final Collection<IProperty> props) {
         // Copy the properties to a new list
+        this.properties = new ArrayList<>(props != null ? props.size() : 0);
         if (!Utils.isNullOrEmpty(props)) {
-            this.properties = new ArrayList<>(props.size());
             for(final IProperty p : props)
                 this.properties.add(new Property(p));
-        } else
-            this.properties = null;
+        }
     }
 
     public void addProperty(final IProperty p) {
@@ -130,7 +129,9 @@ public class Payload implements IPayload, Serializable {
     /**
      * Default constructor creates empty object
      */
-    public Payload() {}
+    public Payload() {
+        this.properties = new ArrayList<>();
+    }
 
     /**
      * Creates a new <code>PartInfo</code> object using the source from the given source as source

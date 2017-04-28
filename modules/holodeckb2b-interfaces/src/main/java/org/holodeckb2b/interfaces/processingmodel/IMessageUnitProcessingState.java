@@ -25,9 +25,9 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * order of the states and what is the <i>current</i> state is maintained through the list of states in the
  * {@link IMessageUnit} itself.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see    ProcessingState
- * @since  HB2B_NEXT_VERSION
+ * @since  3.0.0
  */
 public interface IMessageUnitProcessingState {
 

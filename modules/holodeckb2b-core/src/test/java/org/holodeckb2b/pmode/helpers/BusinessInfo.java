@@ -23,7 +23,7 @@ import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.pmode.IBusinessInfo;
 
 /**
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class BusinessInfo implements IBusinessInfo {
 

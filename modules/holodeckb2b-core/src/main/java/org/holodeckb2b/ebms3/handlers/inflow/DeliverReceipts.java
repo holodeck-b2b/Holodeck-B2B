@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -32,18 +31,20 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 
+import java.util.Collection;
+
 /**
  * Is the <i>IN_FLOW</i> handler responsible for checking if receipt messages should be delivered to the business
  * application and if so to hand them over to the responsible {@link IMessageDeliverer}.
  * <p>To prevent that a Receipt is delivered twice (in parallel) delivery only takes place when the processing state of
- * the unit can be successfully changed from {@link ProcessingStates#READY_FOR_DELIVERY} to
- * {@link ProcessingStates#OUT_FOR_DELIVERY}.
+ * the unit can be successfully changed from {@link ProcessingState#READY_FOR_DELIVERY} to
+ * {@link ProcessingState#OUT_FOR_DELIVERY}.
  * <p>NOTE: The actual delivery to the business application is done through a {@link IMessageDeliverer} which is
  * specified in the P-Mode for the referenced user message. If available, the delivery method specification specific for
  * Receipt {@link IReceiptConfiguration#getReceiptDelivery()}) will be used, otherwise the default delivery method
  * ({@link ILeg#getDefaultDelivery())} will be used.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class DeliverReceipts extends BaseHandler {
 
@@ -63,7 +64,7 @@ public class DeliverReceipts extends BaseHandler {
             return InvocationResponse.CONTINUE;
 
         log.debug("Message contains " + rcptSignals.size() + " Receipt Signals");
-        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Process each signal
         for(final IReceiptEntity receipt : rcptSignals) {
             // Prepare message for delivery by checking it is still ready for delivery and then

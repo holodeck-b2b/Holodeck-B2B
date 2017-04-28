@@ -28,7 +28,7 @@ import org.apache.wss4j.dom.validate.Validator;
  * the P-Mode. The P-Mode however is not known at the time of processing the security header so the validation is
  * skipped and executed later.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class NoOpValidator implements Validator {
 

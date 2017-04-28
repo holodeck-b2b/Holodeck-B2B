@@ -16,19 +16,7 @@
  */
 package org.holodeckb2b.ebms3.handlers.outflow;
 
-import java.util.Collection;
-import java.util.Iterator;
-import javax.xml.namespace.QName;
-import org.apache.axiom.soap.SOAP11Version;
-import org.apache.axiom.soap.SOAPBody;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPFactory;
-import org.apache.axiom.soap.SOAPFault;
-import org.apache.axiom.soap.SOAPFaultCode;
-import org.apache.axiom.soap.SOAPFaultReason;
-import org.apache.axiom.soap.SOAPFaultText;
-import org.apache.axiom.soap.SOAPFaultValue;
-import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.apache.axiom.soap.*;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -43,11 +31,15 @@ import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
+import javax.xml.namespace.QName;
+import java.util.Collection;
+import java.util.Iterator;
+
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:SignalMessage</code> and child element for an
  * Error Signal in the ebMS messaging header when Error Signals must be sent.
  * <p>If there are error signal message units to be sent, the corresponding entity objects MUST be included in the
- * <code>MessageContext</code> property {@link MessageContextProperties#SEND_ERROR_SIGNALS}.<br>
+ * <code>MessageContext</code> property {@link MessageContextProperties#OUT_ERRORS}.<br>
  * Section 5.2.4 of the ebMS Core specification specifies that a message MUST NOT contain more than one <code>
  * SignalMessage</code> message per signal type. This handler does however support adding multiple error signals to the
  * message, which would create an ebMS message that <b>does not conform</b> to the ebMS V3 Core and AS4 specifications.
@@ -68,7 +60,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * B2B will only add the SOAP Fault when the error signal(s) is/are not bundled with another message unit to prevent
  * interop issues mentioned above.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IErrorHandling
  */
 public class PackageErrorSignals extends BaseHandler {
@@ -138,9 +130,9 @@ public class PackageErrorSignals extends BaseHandler {
         boolean onlyErrorMU = true;
         final Iterator<IMessageUnitEntity> msgUnitsIt = MessageContextUtils.getSentMessageUnits(mc).iterator();
 
-        do {
+        while (onlyErrorMU && msgUnitsIt.hasNext()) {
             onlyErrorMU = msgUnitsIt.next() instanceof IErrorMessage;
-        } while (onlyErrorMU && msgUnitsIt.hasNext());
+        }
 
         return onlyErrorMU;
     }

@@ -27,7 +27,7 @@ package org.holodeckb2b.interfaces.pmode.security;
  * <p>Depending on the target (default or ebms) this interface corresponds with the P-Mode parameter groups
  * <b>PMode.[Initiator|Responder].Authorization</b> ("ebms") or <b>PMode[1].Security.UsernameToken</b> (default).
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IUsernameTokenConfiguration {
 

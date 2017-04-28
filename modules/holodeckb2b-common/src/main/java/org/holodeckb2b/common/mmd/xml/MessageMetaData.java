@@ -44,7 +44,7 @@ import org.simpleframework.xml.core.Persister;
  * successful submission to the Holodeck B2B Core. (Note that this class only enables exchange of the indicator, it is
  * upto submitter implementations to use it!). This new attribute is defined in version 1.1 of the XSD.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 @Root(name = "MessageMetaData",strict = false)
 @Namespace(reference="http://holodeck-b2b.org/schemas/2014/06/mmd")

@@ -24,8 +24,8 @@ import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
  * Is an in memory only implementation of {@link ICollaborationInfo} to temporarily store the business information meta-
  * data of a User Message message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since  3.0.0
  */
 public class CollaborationInfo implements ICollaborationInfo {
 

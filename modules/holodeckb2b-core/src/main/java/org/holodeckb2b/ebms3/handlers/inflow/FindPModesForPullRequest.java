@@ -40,7 +40,7 @@ import org.holodeckb2b.security.tokens.IAuthenticationInfo;
  * of P-Mode finding for a PullRequest is a collection of P-Mode that a user message may be pulled from.
  * <p>Finding the P-Mode for a User Message is done by the {@link PModeFinder} utility class.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class FindPModesForPullRequest extends BaseHandler {
 
@@ -73,7 +73,7 @@ public class FindPModesForPullRequest extends BaseHandler {
                 noPmodeIdError.setErrorDetail("Can not process pull request because no P-Mode was found!");
                 MessageContextUtils.addGeneratedError(mc, noPmodeIdError);
                 log.debug("Set the processing state of this PullRequest to failure");
-                HolodeckB2BCore.getStoreManager().setProcessingState(pullRequest, ProcessingState.FAILURE);
+                HolodeckB2BCore.getStorageManager().setProcessingState(pullRequest, ProcessingState.FAILURE);
             } else {
                 log.debug("Store the list of " + pmodes.size()
                             + " authorized PModes so next handler can retrieve message unit to return");

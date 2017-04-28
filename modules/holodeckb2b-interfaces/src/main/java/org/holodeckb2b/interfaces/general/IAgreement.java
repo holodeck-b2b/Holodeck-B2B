@@ -19,7 +19,7 @@ package org.holodeckb2b.interfaces.general;
 
 /**
  *
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 public interface IAgreement {
 

@@ -23,7 +23,7 @@ import org.simpleframework.xml.Text;
 /**
  * Represents the <code>AgreementRef</code> element from the MMD document.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class AgreementReference implements IAgreementReference {
 

@@ -40,7 +40,7 @@ import org.simpleframework.xml.Transient;
  * class does not know for which type of delivery it is used the class representing the parent element is responsible
  * for setting the id.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IMessageDelivererFactory
  * @see IMessageDeliverer
  */

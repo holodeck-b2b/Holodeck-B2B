@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 /**
  * Is a container class for helper methods around message units.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
 public class MessageUnitUtils {
@@ -82,7 +82,7 @@ public class MessageUnitUtils {
      * @param msgUnit   The message unit to get the reference from
      * @return  The messageId of the referenced message unit if it is available in the given message unit, or<br>
      *          <code>null</code> if not available.
-     * @since HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
     public static String getRefToMessageId(final IMessageUnit msgUnit) {
         String refToMessageId = msgUnit.getRefToMessageId();

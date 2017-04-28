@@ -23,7 +23,7 @@ import org.simpleframework.xml.core.Validate;
 
 /**
  *
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 public class Protocol implements IProtocol {
 

@@ -37,7 +37,7 @@ import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
  * This means that the security configuration of trading partner for which Holodeck B2B is the MSH contains the
  * <b>private keys</b> and that the security configuration for the other partner contains the <b>public keys</b>.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see ITradingPartner
  */
 public interface ITradingPartnerConfiguration extends ITradingPartner {

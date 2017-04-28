@@ -24,7 +24,7 @@ import org.simpleframework.xml.Attribute;
  * contained in this element is intended for use by the business applications that
  * handle the payload. It is not used by Holodeck B2B in processing the message.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class SchemaReference implements ISchemaReference {
 

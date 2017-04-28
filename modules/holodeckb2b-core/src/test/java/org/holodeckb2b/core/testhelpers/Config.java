@@ -21,7 +21,7 @@ import org.holodeckb2b.common.config.InternalConfiguration;
 
 /**
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class Config implements InternalConfiguration {
 
@@ -29,6 +29,8 @@ public class Config implements InternalConfiguration {
     private String  pmodeValidatorClass = null;
     private String  pmodeStorageClass = null;
     private boolean useStrictHeaderValidation = false;
+
+    private boolean allowSignalBundling = false;
 
     Config(final String homeDir) {
         hb2b_home = homeDir;
@@ -82,12 +84,13 @@ public class Config implements InternalConfiguration {
 
     @Override
     public String getTempDirectory() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getHolodeckB2BHome() + "/temp/";
     }
 
     @Override
     public boolean allowSignalBundling() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        System.out.println("[Config.allowSignalBundling()]: " + this.toString());
+        return allowSignalBundling;
     }
 
     @Override
@@ -117,7 +120,7 @@ public class Config implements InternalConfiguration {
 
     @Override
     public boolean shouldCheckCertificateRevocation() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return true;
     }
 
     @Override

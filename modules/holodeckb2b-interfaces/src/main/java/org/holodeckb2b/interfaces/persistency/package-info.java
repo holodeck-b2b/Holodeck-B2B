@@ -20,6 +20,6 @@
  * <p>The persistency implementation is decoupled from the Core processing to allow it to be optimised for the target
  * environment.
  *
- * @since HB2B_NEXT_VERSION
+ * @since  3.0.0
  */
 package org.holodeckb2b.interfaces.persistency;

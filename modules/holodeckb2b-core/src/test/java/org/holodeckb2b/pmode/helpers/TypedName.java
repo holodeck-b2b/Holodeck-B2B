@@ -17,7 +17,7 @@
 package org.holodeckb2b.pmode.helpers;
 
 /**
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public abstract class TypedName {
 

@@ -37,9 +37,13 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.pmode.helpers.*;
+import org.holodeckb2b.pmode.helpers.Leg;
+import org.holodeckb2b.pmode.helpers.PMode;
+import org.holodeckb2b.pmode.helpers.PayloadProfile;
+import org.holodeckb2b.pmode.helpers.UserMessageFlow;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -52,6 +56,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.activation.DataHandler;
 import java.net.URL;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -137,8 +143,10 @@ public class CompressionHandlerTest {
         userMessage.addPayload(payload);
 
         Attachments attachments = new Attachments();
-        attachments.addDataHandler(payloadPath,
-                new DataHandler(new URL(payload.getPayloadURI())));
+
+        DataHandler attDataHandler = new DataHandler(new URL(payload.getPayloadURI()));
+
+        attachments.addDataHandler(payloadPath, attDataHandler);
         mc.setAttachmentMap(attachments);
 
         String pmodeId =
@@ -157,9 +165,29 @@ public class CompressionHandlerTest {
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertNotNull(invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
+        }
+
+        // Check that attachment payload contains compression enabling properties
+        for (final IPayload p : userMessageEntity.getPayloads()) {
+            // Only payloads contained in attachment can use compression
+            if (p.getContainment() == IPayload.Containment.ATTACHMENT) {
+                Collection<IProperty> properties = p.getProperties();
+                assertNotNull(properties);
+                Iterator<IProperty> it = properties.iterator();
+                IProperty property = it.next();
+                assertEquals(CompressionFeature.FEATURE_PROPERTY_NAME,
+                        property.getName());
+                assertEquals(CompressionFeature.COMPRESSED_CONTENT_TYPE,
+                        property.getValue());
+                property = it.next();
+                assertEquals(CompressionFeature.MIME_TYPE_PROPERTY_NAME,
+                        property.getName());
+                assertEquals(attDataHandler.getContentType(),
+                        property.getValue());
+            }
         }
 
         verify(mockAppender, atLeastOnce())

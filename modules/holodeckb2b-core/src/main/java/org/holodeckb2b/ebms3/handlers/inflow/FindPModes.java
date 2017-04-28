@@ -16,8 +16,6 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -38,6 +36,9 @@ import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeFinder;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 /**
  * Is the <i>IN_FLOW</i> handler responsible for determining the P-Modes that define how the received message units
  * should be processed.
@@ -55,7 +56,7 @@ import org.holodeckb2b.pmode.PModeFinder;
  * ebMS specification is not very clear if a specific error must be used. Current choice is based on discussion on <a
  * href="https://issues.oasis-open.org/browse/EBXMLMSG-67">issue 67 of ebMS TC</a>.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class FindPModes extends BaseHandler {
 
@@ -66,7 +67,7 @@ public class FindPModes extends BaseHandler {
 
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
-        StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         log.debug("Check for UserMessage message unit in received message");
         final IUserMessageEntity userMsg =
                                           (IUserMessageEntity) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
@@ -139,7 +140,7 @@ public class FindPModes extends BaseHandler {
      * HTTP response to an outgoing ebMS message containing just one message unit, that message unit is the referenced
      * message and its message id can be used.
      * <p><b>NOTE: </b> When the referenced message id is derived from the outgoing message the <code>refToMessageId
-     * </code> attribute of the {@link ErrorMessage} is also set.
+     * </code> attribute of the {@link IErrorMessageEntity} is also set.
      *
      * @param e     The received Error signal message unit
      * @param mc    The message context of the Error signal
@@ -187,7 +188,7 @@ public class FindPModes extends BaseHandler {
 
     /**
      * Helper method to create a Error to signal that no P-Mode can be found for a message unit and to change the
-     * processing state of the message unit to {@link ProcessingStates#FAILURE}.
+     * processing state of the message unit to {@link ProcessingState#FAILURE}.
      *
      * @param mc    The message context
      * @param mu    The message unit for which the P-Mode could not be found

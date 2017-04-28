@@ -26,9 +26,9 @@ import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is the <i>IN_FLOW</i> handler that starts the process of delivering the user message message unit to the business
- * application by changing the message units processing state to {@link ProcessingStates#PROCESSING}.
+ * application by changing the message units processing state to {@link ProcessingState#PROCESSING}.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class StartProcessingUsrMessage extends AbstractUserMessageHandler {
 
@@ -42,7 +42,7 @@ public class StartProcessingUsrMessage extends AbstractUserMessageHandler {
                                                                                         throws PersistenceException {
         final String msgId = um.getMessageId();
         log.debug("Change processing state to indicate start of processing of message [" + msgId + "]" );
-        if (!HolodeckB2BCore.getStoreManager().setProcessingState(um, ProcessingState.RECEIVED,
+        if (!HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.RECEIVED,
                                                                        ProcessingState.PROCESSING)) {
             // Changing the state failed which indicates that the message unit is already being processed
             log.warn("User message [msgId= " + msgId + "] is already being processed");

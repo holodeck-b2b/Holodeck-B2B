@@ -19,8 +19,11 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.engine.Handler;
+import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -50,9 +53,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.List;
 
+import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * Created at 23:42 29.01.17
@@ -116,9 +119,7 @@ public class CreateSOAPEnvelopeHandlerTest {
 
         String pmodeId =
                 userMessage.getCollaborationInfo().getAgreement().getPModeId();
-        // todo the pmodeId should be set to userMessage in the UserMessageElement.readElement() method
         userMessage.setPModeId(pmodeId);
-//        System.out.println("userMessage pmode id: " + userMessage.getPModeId());
         pmode.setId(pmodeId);
 
         core.getPModeSet().add(pmode);
@@ -131,7 +132,7 @@ public class CreateSOAPEnvelopeHandlerTest {
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertNotNull(invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -139,17 +140,63 @@ public class CreateSOAPEnvelopeHandlerTest {
         verify(mockAppender, atLeastOnce())
                 .doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "Added SOAP envelope to message context";
-        boolean containsExpLogMsg = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                if(e.getRenderedMessage().equals(expLogMsg)) {
-                    containsExpLogMsg = true;
-                }
-            }
-        }
-        assertTrue(containsExpLogMsg);
+        String msg = "Added SOAP envelope to message context";
+        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 
-    //todo we need to add test of the empty response case
+    @Test
+    public void testDoProcessingIfResponder() throws Exception {
+        MessageContext mc = new MessageContext();
+        mc.setServerSide(true);
+        mc.setFLOW(MessageContext.OUT_FLOW);
+
+        // Mocking the Axis2 Operation Context
+        OperationContext operationContext = mock(OperationContext.class);
+        when(operationContext
+                .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
+                .thenReturn(mc);
+
+        mc.setOperationContext(operationContext);
+
+        try {
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        verify(mockAppender, atLeastOnce())
+                .doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+        String msg = "Added SOAP envelope to message context";
+        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
+    }
+
+    @Test
+    public void testDoProcessingIfResponderWithExistingEnvelope() throws Exception {
+        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+
+        MessageContext mc = new MessageContext();
+        mc.setServerSide(true);
+        mc.setFLOW(MessageContext.OUT_FLOW);
+
+        try {
+            mc.setEnvelope(env);
+        } catch (AxisFault axisFault) {
+            fail(axisFault.getMessage());
+        }
+
+        try {
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        verify(mockAppender, atLeastOnce())
+                .doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+        String msg = "Check that ebMS namespace is declared on the SOAP envelope";
+        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
+    }
 }

@@ -19,7 +19,7 @@ package org.holodeckb2b.common.testhelpers.pmode;
 import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 
 /**
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class UsernameTokenConfig implements IUsernameTokenConfiguration {
 

@@ -31,7 +31,7 @@ import org.simpleframework.xml.ElementList;
  * <p>NOTE: This class only creates the possibility to exchange the <i>"delete flag"</i>, it is up to the actual submit
  * implementation to use it, i.e. really ensure files are deleted.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 class PayloadInfo {
 

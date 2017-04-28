@@ -29,7 +29,7 @@ import java.util.Collection;
  * errors that occurred. See section 6 of the ebMS Core Specification for more information on error handling and the
  * structure of the error signal message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see ISignalMessage
  * @see IMessageUnit
  */

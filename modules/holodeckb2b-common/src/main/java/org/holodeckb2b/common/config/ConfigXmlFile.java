@@ -32,7 +32,7 @@ import org.simpleframework.xml.core.Validate;
  * Is responsible for reading the Holodeck B2B configuration parameters from an XML file. The structure of the config
  * file is defined by the XML Schema Definition <code>http://holodeck-b2b.org/schemas/2015/10/config</code>
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 @Root(name = "holodeckb2b-org")
 @Namespace(reference = "http://holodeck-b2b.org/schemas/2015/10/config")

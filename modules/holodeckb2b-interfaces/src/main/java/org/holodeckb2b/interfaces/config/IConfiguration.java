@@ -22,7 +22,7 @@ import org.apache.axis2.context.ConfigurationContext;
  * Defines the interface to access the Holodeck B2B <i>public</i> configuration. This public configuration contains
  * settings that may be used by extensions.
  *
- * @author Sander Fieten (sander at chasquis-services.com)
+ * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface IConfiguration {
 

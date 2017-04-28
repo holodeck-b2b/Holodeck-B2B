@@ -18,14 +18,16 @@ package org.holodeckb2b.common.config;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.holodeckb2b.interfaces.config.IConfiguration;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
 
 /**
  * Extends the public configuration interface with some settings only to be used by the Holodeck B2B Core itself.
  * <p>An interface is used to make it easier to use a different implementation when testing.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  2.1.0
  */
 public interface InternalConfiguration extends IConfiguration {
@@ -59,7 +61,7 @@ public interface InternalConfiguration extends IConfiguration {
      * </code> must use to validate P-Modes before they are deployed.
      *
      * @return  The class name of the {@link IPModeValidator} implementation
-     * @since  HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
     public String getPModeValidatorImplClass();
 
@@ -68,7 +70,7 @@ public interface InternalConfiguration extends IConfiguration {
      * </code> must use to store the set of deployed P-Modes.
      *
      * @return  The class name of the {@link IPModeSet} implementation to use for storing deployed P-Modes
-     * @since  HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
     public String getPModeStorageImplClass();
 
@@ -78,7 +80,7 @@ public interface InternalConfiguration extends IConfiguration {
      * Holodeck B2B Core will use a default implementation.
      *
      * @return  The class name of the {@link IPersistencyProvider} implementation to use for storing meta-data
-     * @since HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
     public String getPersistencyProviderClass();
 }

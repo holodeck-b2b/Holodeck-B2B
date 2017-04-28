@@ -19,7 +19,7 @@ package org.holodeckb2b.as4.compression;
 /**
  * Holds constants for AS4 Compression Feature.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public final class CompressionFeature {
 

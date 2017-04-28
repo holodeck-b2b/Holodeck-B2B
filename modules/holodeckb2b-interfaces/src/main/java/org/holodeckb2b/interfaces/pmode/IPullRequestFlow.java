@@ -28,8 +28,8 @@ import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
  * (described in section 3.5 of the AS4 profile) is used each sub-channel can have its own authentication and
  * authorization. The sub-channel information should then be contained in this PullRequestFlow.
  *
- * @author Bram Bakx <bram at holodeck-b2b.org>
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IPullRequestFlow {
 

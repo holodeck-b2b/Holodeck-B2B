@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.general.ISchemaReference;
  * memory. This interface therefor only defines a method to get the location where the actual content is located. This
  * can be used to read the actual document.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IPayload {
 

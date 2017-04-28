@@ -38,9 +38,9 @@ import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
  * src/main/resources/xsd/hb2b-config.xsd</code>.
  * <p>NOTE: Current implementation does not encrypt the keystore passwords! Therefore access to the config file
  * SHOULD be limited to the account that is used to run Holodeck B2B.
- * @todo Encryption of keystore passwords
+ * todo Encryption of keystore passwords
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class Config implements InternalConfiguration {
 
@@ -132,19 +132,19 @@ public class Config implements InternalConfiguration {
 
     /*
      * The class name of the component that should be used to validate P-Modes before deploying them
-     * @since HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
     private String pmodeValidatorClass = null;
 
     /*
      * The class name of the component that should be used to store deployed P-Modes
-     * @since HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
     private String pmodeStorageClass = null;
 
     /*
      * The class name of the persistency provider that should be used to store the meta-data on processed message units
-     * @since HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
     private String persistencyProviderClass = null;
 
@@ -405,7 +405,7 @@ public class Config implements InternalConfiguration {
      * Indicates if the references in an Error signal message unit should be checked using the strict requirements
      * defined in the Core Specification (all references equal) or if a bit more relaxed check can be used (signal level
      * reference empty, but individual errors have the same reference).
-     * <p>Default the more relaxed check is used. To change this set the value of the <i>StrictErrorReferencesCheck<i>
+     * <p>Default the more relaxed check is used. To change this set the value of the <i>StrictErrorReferencesCheck</i>
      * parameter to <i>"true"</i>.
      *
      * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
@@ -526,7 +526,7 @@ public class Config implements InternalConfiguration {
      *
      * @return  The class name of the {@link org.holodeckb2b.interfaces.pmode.validation.IPModeValidator}
      *          implementation
-     * @since  HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
     @Override
     public String getPModeValidatorImplClass() {
@@ -541,7 +541,7 @@ public class Config implements InternalConfiguration {
      *
      * @return  The class name of the {@link org.holodeckb2b.interfaces.pmode.IPModeSet} implementation to use for
      *          storing deployed P-Modes
-     * @since  HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
     @Override
     public String getPModeStorageImplClass() {
@@ -555,7 +555,7 @@ public class Config implements InternalConfiguration {
      * in the <i>PersistencyProvider</i> parameter.
      *
      * @return  The class name of the {@link IPersistencyProvider} implementation to use for storing meta-data
-     * @since  HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
     @Override
     public String getPersistencyProviderClass() {

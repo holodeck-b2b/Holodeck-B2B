@@ -20,7 +20,7 @@ import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 
 /**
  * An extension of the {@link IMessageProcessingEvent} interface for testing the event handler configuration
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface TestEvent2 extends IMessageProcessingEvent {
 

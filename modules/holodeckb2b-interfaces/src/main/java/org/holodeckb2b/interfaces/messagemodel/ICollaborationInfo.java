@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.general.IService;
  * <p>The information accessed through this interface corresponds with the <code>//eb:UserMessage/eb:CollaborationInfo</code>
  * and child elements. See sections 5.2.2.6 to 5.2.2.10 of the ebMS Core Specification for more information.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface ICollaborationInfo {
 

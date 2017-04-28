@@ -19,7 +19,7 @@ package org.holodeckb2b.interfaces.submit;
 /**
  * Indicates a problem that occurred when a message was submitted to Holodeck B2B.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class MessageSubmitException extends Exception {
 

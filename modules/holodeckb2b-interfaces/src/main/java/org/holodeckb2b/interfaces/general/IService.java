@@ -22,7 +22,7 @@ package org.holodeckb2b.interfaces.general;
  * to find the correct P-Mode. Corresponds with the information contained in the <code>eb:Service</code> element in the
  * ebMS message header. See also section 5.2.2.8 of the ebMS Core Specification.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IService {
 

@@ -52,7 +52,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * response. This can result in multiple error signals ready to be sent. The {@link PrepareResponseMessage} handler in
  * the out flow is responsible to decide which signal(s) should be included in the response message.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ProcessGeneratedErrors extends BaseHandler {
 
@@ -77,7 +77,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
         if (Utils.isNullOrEmpty(errors)) {
             log.debug("No errors were generated during this in flow, nothing to do");
         } else {
-            StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+            StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             log.debug(errors.size() + " error(s) were generated during this in flow");
 
             // First bundle the errors per message in error
@@ -85,10 +85,10 @@ public class ProcessGeneratedErrors extends BaseHandler {
             final HashMap<String, Collection<IEbmsError>> segmentedErrors = segmentErrors(errors);
             // Create Error signal for each bundle, i.e. each referenced message
             for(final String refToMsgId : segmentedErrors.keySet()) {
-                final Collection<IEbmsError> errForMsg = segmentedErrors.get(refToMsgId);
                 log.debug("Create the Error Signal and save to database");
-                final IErrorMessageEntity errorMessage =
-                                                    updateManager.storeOutGoingMessageUnit(new ErrorMessage(errForMsg));
+                ErrorMessage tErrorMessage = new ErrorMessage(segmentedErrors.get(refToMsgId));
+                tErrorMessage.setRefToMessageId(refToMsgId.equals("null") ? null : refToMsgId);
+                final IErrorMessageEntity errorMessage = updateManager.storeOutGoingMessageUnit(tErrorMessage);
                 if (refToMsgId.equals("null")) {
                     // This collection of errors does not reference a specific message unit, should therefor be sent
                     // as a response.
@@ -111,6 +111,11 @@ public class ProcessGeneratedErrors extends BaseHandler {
                     // This collection of errors references one of the received message units.
                     log.debug("Check type of the message unit in error");
                     final IMessageUnitEntity muInError = getRefdMessageUnit(mc, refToMsgId);
+                    final String pmodeId = muInError.getPModeId();
+                    if (!Utils.isNullOrEmpty(pmodeId)) {
+                        log.debug("Set P-Mode Id [" + pmodeId + "] for generated Error Message");
+                        updateManager.setPModeId(errorMessage, pmodeId);
+                    }
                     if (muInError instanceof IPullRequest) {
                         /* The message unit in error is a PullRequest. Because the PullRequest is not necessarily
                         bound to one P-Mode we can only sent the error as a response.
@@ -123,7 +128,6 @@ public class ProcessGeneratedErrors extends BaseHandler {
                     } else {
                         log.debug("Get P-Mode information to determine how new signal must be processed");
                         // Errorhandling config is contained in flow
-                        final String pmodeId = muInError.getPModeId();
                         final IUserMessageFlow flow = pmodeId == null ? null :
                                                             HolodeckB2BCoreInterface.getPModeSet().get(pmodeId)
                                                                    .getLeg(muInError.getLeg()).getUserMessageFlow();
@@ -153,7 +157,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
 
                         if (sendError) {
                             log.debug("This error signal should be sent"
-                                        + (asResponse ?  "as a response" : "a using callback"));
+                                        + (asResponse ?  " as a response" : " a using callback"));
                             if (asResponse) {
                                 MessageContextUtils.addErrorSignalToSend(mc, errorMessage);
                                 mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);

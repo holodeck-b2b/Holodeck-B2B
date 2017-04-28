@@ -24,7 +24,7 @@ package org.holodeckb2b.interfaces.messagemodel;
  * ebMS specification.
  * <p>The type of a signal message is determined by the child element(s) of the <code>eb:SignalMessage</code> element.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IErrorMessage
  * @see IPullRequest
  * @see IReceipt

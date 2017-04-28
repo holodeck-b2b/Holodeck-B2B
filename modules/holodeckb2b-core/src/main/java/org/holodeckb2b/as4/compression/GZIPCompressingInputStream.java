@@ -27,7 +27,7 @@ import java.util.zip.DeflaterInputStream;
  * Is an {@link InputStream} implementation with on the fly GZIP compression.
  * <p>It uses the compression of the {@link DeflaterInputStream} and adds the GZIP header and trailer.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class GZIPCompressingInputStream extends DeflaterInputStream {
 

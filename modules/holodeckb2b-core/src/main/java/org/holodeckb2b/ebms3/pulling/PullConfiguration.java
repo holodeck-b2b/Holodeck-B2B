@@ -43,7 +43,7 @@ import org.simpleframework.xml.core.Validate;
  * pull worker will not be activated and pulling will be disabled.
  * <p>The configuration of the pool is read from an XML document defined by the schema <code>http://holodeck-b2b.org/schemas/2014/05/pullconfiguration</code>
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see WorkerPool
  * @see PullWorker
  * @see PullerConfig

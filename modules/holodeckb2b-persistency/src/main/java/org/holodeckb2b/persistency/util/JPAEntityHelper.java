@@ -39,8 +39,8 @@ import org.holodeckb2b.persistency.jpa.UserMessage;
 /**
  * Is a helper class that provides some utility methods to handle the JPA entity objects.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since  3.0.0
  */
 public class JPAEntityHelper {
 

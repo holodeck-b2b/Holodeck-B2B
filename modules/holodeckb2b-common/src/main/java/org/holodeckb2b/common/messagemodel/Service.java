@@ -22,8 +22,8 @@ import org.holodeckb2b.interfaces.general.IService;
  * Is an in memory only implementation of {@link IService} to temporarily store the meta-data about the Service
  * specified in the header of a User Message message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since  3.0.0
  */
 public class Service implements IService {
 

@@ -24,6 +24,6 @@
  * because changes to a stored meta-data must be performed through the data access objects so they can manage (and
  * optimize) them.
  * 
- * @since HB2B_NEXT_VERSION
+ * @since  3.0.0
  */
 package org.holodeckb2b.interfaces.persistency.entities;

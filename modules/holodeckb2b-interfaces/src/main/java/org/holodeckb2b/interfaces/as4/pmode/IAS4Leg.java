@@ -23,7 +23,7 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
  * awareness feature defines how the ebMS Receipt signal can be used for reliable messaging. See sections 3.2 and 3.4
  * of the AS4 profile for more information on this feature.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IAS4Leg extends ILeg {
 

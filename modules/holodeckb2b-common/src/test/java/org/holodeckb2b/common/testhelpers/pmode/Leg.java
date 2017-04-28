@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class Leg implements IAS4Leg {
 

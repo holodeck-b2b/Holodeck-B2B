@@ -31,9 +31,9 @@ import org.holodeckb2b.persistency.managers.QueryManager;
  * This is the generic base class that contains the functionality that applies to all message units types. For each
  * specific message unit type there is a non-generic sub class.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @param <T>   The class of the proxied JPA entity object
- * @since HB2B_NEXT_VERSION
+ * @since  3.0.0
  */
 public abstract class MessageUnitEntity<T extends MessageUnit> implements IMessageUnitEntity {
 

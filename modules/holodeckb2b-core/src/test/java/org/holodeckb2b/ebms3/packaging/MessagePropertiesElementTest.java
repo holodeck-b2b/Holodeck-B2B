@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.messagemodel.Property;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.junit.Before;
@@ -69,15 +70,9 @@ public class MessagePropertiesElementTest {
                 mpElement.getChildrenWithName(PROPERTY_ELEMENT_NAME);
         assertTrue(it.hasNext());
         OMElement pElem = (OMElement)it.next();
-        assertEquals("some_property01", pElem.getAttributeValue(new QName("name")));
-        assertEquals("some_value01", pElem.getText());
-        // todo see PropertyElement.createElement() method implementation
-        //assertEquals("some_type01", pElem.getAttributeValue(new QName("type"))); //fail
+        TestUtils.checkPropertyElementContent(pElem, "some_property01", "some_value01", "some_type01");
         pElem = (OMElement)it.next();
-        assertEquals("some_property02", pElem.getAttributeValue(new QName("name")));
-        assertEquals("some_value02", pElem.getText());
-        // todo see PropertyElement.createElement() method implementation
-        //assertEquals("some_type02", pElem.getAttributeValue(new QName("type"))); //fail
+        TestUtils.checkPropertyElementContent(pElem, "some_property02", "some_value02", "some_type02");
     }
 
     @Test
@@ -93,15 +88,9 @@ public class MessagePropertiesElementTest {
                 mpElement.getChildrenWithName(PROPERTY_ELEMENT_NAME);
         assertTrue(it.hasNext());
         OMElement pElem = (OMElement)it.next();
-        assertEquals("some_property01", pElem.getAttributeValue(new QName("name")));
-        assertEquals("some_value01", pElem.getText());
-        // todo see PropertyElement.createElement() method implementation
-        //assertEquals("some_type01", pElem.getAttributeValue(new QName("type"))); //fail
+        TestUtils.checkPropertyElementContent(pElem, "some_property01", "some_value01", "some_type01");
         pElem = (OMElement)it.next();
-        assertEquals("some_property02", pElem.getAttributeValue(new QName("name")));
-        assertEquals("some_value02", pElem.getText());
-        // todo see PropertyElement.createElement() method implementation
-        //assertEquals("some_type02", pElem.getAttributeValue(new QName("type"))); //fail
+        TestUtils.checkPropertyElementContent(pElem, "some_property02", "some_value02", "some_type02");
     }
 
     @Test
@@ -116,12 +105,8 @@ public class MessagePropertiesElementTest {
                 MessagePropertiesElement.readElement(mpElement);
         Iterator<IProperty> it = readProperties.iterator();
         IProperty p = it.next();
-        assertEquals("some_property01", p.getName());
-        assertEquals("some_value01", p.getValue());
-//        assertEquals("some_type01", p.getType()); // fail
+        TestUtils.checkPropertyContent(p, "some_property01", "some_value01", "some_type01");
         p = it.next();
-        assertEquals("some_property02", p.getName());
-        assertEquals("some_value02", p.getValue());
-//        assertEquals("some_type02", p.getType()); // fail
+        TestUtils.checkPropertyContent(p, "some_property02", "some_value02", "some_type02");
     }
 }

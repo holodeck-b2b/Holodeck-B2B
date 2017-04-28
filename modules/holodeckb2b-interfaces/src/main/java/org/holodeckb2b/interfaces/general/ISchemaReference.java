@@ -23,7 +23,7 @@ package org.holodeckb2b.interfaces.general;
  * <p>Corresponds to the information contained in the <code>//eb:UserMessage//eb:PartInfo/eb:Schema</code> element. See
  * section 5.2.2.13 of the ebMS Core Specification for more information.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface ISchemaReference {
 

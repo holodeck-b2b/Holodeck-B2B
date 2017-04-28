@@ -21,7 +21,7 @@ import java.util.Map;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 
 /**
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class DeliverySpecification implements IDeliverySpecification {
 

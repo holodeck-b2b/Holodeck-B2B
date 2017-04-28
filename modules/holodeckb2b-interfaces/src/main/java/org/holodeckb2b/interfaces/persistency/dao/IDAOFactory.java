@@ -20,8 +20,8 @@ package org.holodeckb2b.interfaces.persistency.dao;
  * Defines the interface of the factory object that a <i>persistency implementation</i> has to provide to the Holodeck
  * B2B Core so it can persist and access the meta-data of the processed message units.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since  3.0.0
  */
 public interface IDAOFactory {
 

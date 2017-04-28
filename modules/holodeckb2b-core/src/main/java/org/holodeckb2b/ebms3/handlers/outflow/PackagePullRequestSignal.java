@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
  * MessageContextProperties#OUT_PULL_REQUEST}. It contains the entity object representing the Pull Request signal to
  * include.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PackagePullRequestSignal extends BaseHandler {
 

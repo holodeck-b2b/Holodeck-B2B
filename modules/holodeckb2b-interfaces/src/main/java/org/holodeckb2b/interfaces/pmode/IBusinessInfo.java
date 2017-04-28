@@ -27,8 +27,8 @@ import org.holodeckb2b.interfaces.general.IService;
  * This information is also used by Holodeck B2B to determine which P-Mode defines the processing of a received message,
  * especially if they do not contain the P-Mode id.
  *
- * @author Bram Bakx <bram at holodeck-b2b.org>
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IBusinessInfo {
 

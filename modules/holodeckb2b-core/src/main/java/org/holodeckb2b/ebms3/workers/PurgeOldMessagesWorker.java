@@ -44,7 +44,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * it will only provide the meta-data to the event handler. The payload data associated with the User Message message
  * unit will already be deleted by the worker.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PurgeOldMessagesWorker extends AbstractWorkerTask {
 
@@ -97,20 +97,24 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
                     final Collection<IPayload> payloads = tmpUserMessage.getPayloads();
                     if (!Utils.isNullOrEmpty(payloads)) {
                         for (final IPayload pl : payloads) {
-                            final File plFile = new File(pl.getContentLocation());
-                            if (plFile.exists() && plFile.delete()) {
-                                log.debug("Removed payload data file " + pl.getContentLocation());
-                                // Clear the payload location
-                                ((Payload) pl).setContentLocation(null);
-                            }  else if (plFile.exists())
-                                log.error("Could not remove payload data file " + pl.getContentLocation()
-                                            + ". Remove manually");
+                            if (Utils.isNullOrEmpty(pl.getContentLocation()))
+                                log.debug("No payload location provided for payload [" + pl.getPayloadURI() + "]");
+                            else {
+                                final File plFile = new File(pl.getContentLocation());
+                                if (plFile.exists() && plFile.delete()) {
+                                    log.debug("Removed payload data file " + pl.getContentLocation());
+                                    // Clear the payload location
+                                    ((Payload) pl).setContentLocation(null);
+                                }  else if (plFile.exists())
+                                    log.error("Could not remove payload data file " + pl.getContentLocation()
+                                                + ". Remove manually");
+                            }
                         }
                     } else
                         log.debug("User Message [" + msgUnit.getMessageId() + "] has no payloads");
                 }
                 // Remove meta-data from database
-                HolodeckB2BCore.getStoreManager().deleteMessageUnit(msgUnit);
+                HolodeckB2BCore.getStorageManager().deleteMessageUnit(msgUnit);
                 log.info(MessageUnitUtils.getMessageUnitName(msgUnit)
                          + " [msgId=" + msgUnit.getMessageId() + "] is removed");
 

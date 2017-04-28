@@ -51,7 +51,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * documents in the SOAP body. Alternatively the content can be external to message, for example stored on a web site,
  * in which case this handler does nothing.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class AddPayloads extends AbstractUserMessageHandler {
 
@@ -109,7 +109,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
                 }
             }
             if (cidGenerated) {
-                HolodeckB2BCore.getStoreManager().setPayloadInformation(um, newPayloadInfo);
+                HolodeckB2BCore.getStorageManager().setPayloadInformation(um, newPayloadInfo);
                 log.debug("Generated MIME Content-Id(s) saved to database");
             }
             log.debug("Payloads successfully added to message");
@@ -181,7 +181,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
                     final OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new FileReader(f));
                     final OMElement documentElement = builder.getDocumentElement();
 
-                    // Check that refence and id are equal if both specified
+                    // Check that reference and id are equal if both specified
                     final String href = p.getPayloadURI();
                     final String xmlId = documentElement.getAttributeValue(new QName("id"));
                     if( href != null && xmlId != null && !href.equals(xmlId)) {
@@ -208,6 +208,4 @@ public class AddPayloads extends AbstractUserMessageHandler {
                 return;
         }
     }
-
-
 }

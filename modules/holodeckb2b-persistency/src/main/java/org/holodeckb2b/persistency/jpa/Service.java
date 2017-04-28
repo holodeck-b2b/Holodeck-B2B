@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.general.IService;
  * <p>This class is <i>embeddable</i> as the service meta-data is always specific to one instance of a  User Message.
  *
  * @author Sander Fieten <sander at holodeckb2b.org>
- * @since HB2B_NEXT_VERSION
+ * @since  3.0.0
  */
 @Embeddable
 public class Service implements IService, Serializable {

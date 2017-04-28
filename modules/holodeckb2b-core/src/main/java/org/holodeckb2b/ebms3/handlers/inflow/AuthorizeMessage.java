@@ -50,7 +50,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * also implies that a message containing an unexpected username token is not rejected.
  * <p>The P-Mode of the <i>primary</i> message unit is used to determine whether the message must be authorized.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class AuthorizeMessage extends BaseHandler {
 
@@ -143,7 +143,7 @@ public class AuthorizeMessage extends BaseHandler {
                 authError.setRefToMessageInError(mu.getMessageId());
                 authError.setErrorDetail("Authentication of message unit failed!");
                 MessageContextUtils.addGeneratedError(mc, authError);
-                HolodeckB2BCore.getStoreManager().setProcessingState(mu, ProcessingState.FAILURE);
+                HolodeckB2BCore.getStorageManager().setProcessingState(mu, ProcessingState.FAILURE);
             }
         }
     }

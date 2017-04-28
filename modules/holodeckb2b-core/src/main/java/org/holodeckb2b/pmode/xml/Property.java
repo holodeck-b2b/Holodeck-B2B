@@ -25,7 +25,7 @@ import org.simpleframework.xml.Element;
 
 /**
  * Implements a Property class with name value pairs.
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 public class Property implements IProperty {
 

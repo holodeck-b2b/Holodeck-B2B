@@ -16,17 +16,19 @@
  */
 package org.holodeckb2b.ebms3.packaging;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.messagemodel.EbmsError;
+import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Is a helper class for handling the ebMS Error Signal message units in the ebMS SOAP header. The Error Signal message
@@ -36,7 +38,7 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
  * <p>NOTE: The naming of this class differs from the other classes in this packages because <code>Error</code> is a
  * reserved class name.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ErrorSignalElement {
 
@@ -84,17 +86,16 @@ public class ErrorSignalElement {
 
     /**
      * Reads the information from a <code>eb:SignalMessage</code> and its child elements that contain the Error Signal
-     * message unit and stores it a {@link org.holodeckb2b.common.messagemodel.ErrorMessage} object.
+     * message unit and stores it a {@link ErrorMessage} object.
      *
      * @param sigElement    The parent <code>eb:SignalMessage</code> element that contains the <code>eb:Error</code>
      *                      and <code>MessageInfo</code> elements
-     * @return              The {@link org.holodeckb2b.common.messagemodel.ErrorMessage} object containing the
+     * @return              The {@link ErrorMessage} object containing the
      *                      information on the Error Signal
      */
-    public static org.holodeckb2b.common.messagemodel.ErrorMessage readElement(final OMElement sigElement) {
+    public static ErrorMessage readElement(final OMElement sigElement) {
         // Create a new EbmsError entity object to store the information in
-        final org.holodeckb2b.common.messagemodel.ErrorMessage errData =
-                                                        new org.holodeckb2b.common.messagemodel.ErrorMessage();
+        final ErrorMessage errData = new ErrorMessage();
 
         // First read general information from the MessageInfo child
         MessageInfoElement.readElement(MessageInfoElement.getElement(sigElement), errData);

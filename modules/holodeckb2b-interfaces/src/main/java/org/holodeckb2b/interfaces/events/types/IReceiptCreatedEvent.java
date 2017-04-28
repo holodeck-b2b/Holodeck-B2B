@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  * business application. It depends on the mechanisms used to deliver the User Message and the event in which order they
  * will arrive.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
 public interface IReceiptCreatedEvent extends IMessageProcessingEvent {

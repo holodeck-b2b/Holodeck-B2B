@@ -46,8 +46,9 @@
         <Property name="LuJUQ0J1-" type="Roc0X">sWkOqek8-iNy_kNLcpS_jBiM.Q_</Property>
     </MessageProperties>
     <PayloadInfo>
-        <PartInfo containment="attachment" mimeType="I8ZVs6G2P" location="http://sxGTnZjm/"/>
-        <PartInfo containment="external" uri="http://pcVJBuTT/" mimeType="CoL9">
+        <PartInfo containment="attachment" mimeType="I8ZVs6G2P"
+                  location="target/test-classes/handlers/dandelion.jpg"/>
+        <PartInfo containment="external" mimeType="CoL9">
             <Schema location="http://KFfZaFTi/" version="uC" namespace="E9eUYc92"/>
             <Description xml:lang="en-CA">XDbQu5r2xVbSEW57D32O5lw</Description>
             <PartProperties>

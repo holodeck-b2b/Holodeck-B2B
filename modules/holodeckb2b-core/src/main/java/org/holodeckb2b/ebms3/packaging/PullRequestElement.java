@@ -30,7 +30,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
  * <code>eb:PullRequest</code> element and its sibling <code>eb:MessageInfo</code>.
  * <p>This element is specified in section 5.2.3.1 of the ebMS 3 Core specification.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PullRequestElement {
 

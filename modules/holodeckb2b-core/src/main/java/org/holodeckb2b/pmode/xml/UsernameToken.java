@@ -29,7 +29,7 @@ import org.simpleframework.xml.Text;
  * <p>The XML element also contains a <code>target</code> attribute that identifies the target of WSS header in which
  * the username token should be added.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 @Root
 public class UsernameToken implements IUsernameTokenConfiguration {

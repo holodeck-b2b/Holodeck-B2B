@@ -28,7 +28,7 @@ import org.simpleframework.xml.core.Validate;
  * Represents the <code>KeyTransport</code> element in the P-Mode XML document
  * that contains the P-Mode parameters for key transport when encrypting message.
  *
- * @author Bram Bakx <bram at holodeck-b2b.org>
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 public class KeyTransport implements IKeyTransport {
 

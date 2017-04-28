@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
  * It contains methods for creating the and accessing the child elements in the <code>Messaging</code> element.
  * <p>The messaging element is specified in section 5.2.1 of the ebMS 3 Core specification.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class Messaging {
 

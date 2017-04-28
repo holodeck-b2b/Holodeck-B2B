@@ -29,8 +29,8 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * Is an in memory only implementation of {@link IUserMessage} to temporarily store the meta-data information on a User
  * Message message unit.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since  3.0.0
  */
 public class UserMessage extends MessageUnit implements IUserMessage {
 
@@ -113,12 +113,11 @@ public class UserMessage extends MessageUnit implements IUserMessage {
     }
 
     public void setMessageProperties(final Collection<IProperty> msgProps) {
+        this.msgProperties = new ArrayList<>(msgProps != null ? msgProps.size() : 0);
         if(!Utils.isNullOrEmpty(msgProps)) {
-            this.msgProperties = new ArrayList<>(msgProps.size());
             for(final IProperty p : msgProps)
                 this.msgProperties.add(new Property(p));
-        } else
-            this.msgProperties = null;
+        }
     }
 
     public void addMessageProperty(final IProperty prop) {

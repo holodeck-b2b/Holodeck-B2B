@@ -3,7 +3,7 @@
     <!--                                                                 -->
     <!--                   Holodeck B2B parameters                       -->
     <!--                                                                 -->
-    
+
     <!-- ====================================================================
     - During the message processing a host name may be needed, for example
     - for generating a message id. Because the host name of the machine
@@ -13,9 +13,20 @@
     <!-- <parameter name="ExternalHostName"/> -->
 
     <!-- ====================================================================
-
+    - Holodeck B2B uses workers to execute recurring tasks like for example
+    - cleaning up the message meta-data for old messages. These "workers"
+    - are configured in a separate configuration file which is pointed to
+    - by the following parameter. If no value is specified here,
+    - «HB2B_HOME»/conf/workers.xml will be used
     ===================================================================== -->
-    <!-- <parameter name="WorkerConfig">conf/workers.xml</parameter> -->
+    <!-- <parameter name="WorkerConfig"/>-->
+
+    <!-- ====================================================================
+    - This parameter defines which persistency provider Holodeck B2B should
+    - use for storing the meta-data on processed messages. If not specified
+    - a default implementation using an internal database is used.
+    ===================================================================== -->
+    <!-- <parameter name="PersistencyProvider"/> -->
 
     <!-- ====================================================================
     - This parameter sets the directory that should be used for temporarily
@@ -23,6 +34,30 @@
     - in the "repository" directory of the Holodeck B2B install
     ===================================================================== -->
     <!-- <parameter name="TempDir"/> -->
+
+    <!-- ====================================================================
+    - This parameter specifies the custom P-Mode storage implementation that
+    - Holodeck B2B should use. By default the P-Modes are stored in-memory,
+    - but in certain environments it may be necessary to have a permanent
+    - storage.
+    ===================================================================== -->
+    <!-- <parameter name="PModeStorageImplementation"/> -->
+
+    <!-- ====================================================================
+    - Before P-Modes are deployed to the Holodeck B2B Core they are validated
+    - to make sure they can be used for message processing. The default basic
+    - checks are normally fine, but in some deployments you may want to use
+    - domain specific validation of certain P-Mode parameters. Using a custom
+    - P-Mode validator these checks can be performed. This parameter is used
+    - to specify which non-default P-Mode validator should be used.
+    ===================================================================== -->
+    <!-- <parameter name="PModeValidator"/>-->
+
+    <!-- ====================================================================
+    - This parameter specifies the custom processor of message processing
+    - events. If not specified the default implementation will be used.
+    ===================================================================== -->
+    <!-- <parameter name="MessageProcessingEventProcessor"/>-->
 
     <!-- ====================================================================
     - This parameter enables bundling of multiple signal message units in of
@@ -98,17 +133,7 @@
     <!-- <parameter name="TrustKeyStorePath"/> -->
 
     <!-- ====================================================================
-    - The password for the Java keystore holding the trsted CA certificates
+    - The password for the Java keystore holding the trusted CA certificates
     ===================================================================== -->
     <parameter name="TrustKeyStorePassword">trusted</parameter>
-
-    <!-- ====================================================================
-    - This parameter contains the default setting whether the revocation of
-    - certifcates should be checked.
-    - NOTE: As an error that occurs during the revocation check will result
-    - in rejection of the complete ebMS message the revocation check should
-    - only be enable if the PKI is correctly and fully implemented.
-    - If required the revocation check can be enable in the P-Mode.
-    ===================================================================== -->
-    <parameter name="CertificateRevocationCheck">false</parameter>
 </holodeckb2b-config>

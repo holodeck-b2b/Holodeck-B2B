@@ -63,7 +63,7 @@ import org.holodeckb2b.customvalidation.ICustomValidationExecutor;
  * <p>This class is responsible for the initialization and shutdown of the ebMS module. This includes
  * starting and stopping the workers needed to drive the message exchanges.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     private static final class SubmitterSingletonHolder {
@@ -121,7 +121,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     /**
      * The DAO factory object of the persistency provider that manages the storage of the meta-data on processed
      * message units.
-     * @since HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
     private IDAOFactory    daoFactory = null;
 
@@ -407,7 +407,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * changes in the message unit meta-data are managed correctly.
      *
      * @return  The {@link StorageManager} that Core classes should use to update meta-data of message units
-     * @since HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
     public StorageManager getStorageManager() {
         return new StorageManager(daoFactory.getUpdateManager());
@@ -418,7 +418,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * <p>Note that the DAO itself is provided by the persistency provider.
      *
      * @return  The {@link IQueryManager} that should use to query the meta-data of message units
-     * @since HB2B_NEXT_VERSION
+     * @since  3.0.0
      */
     @Override
     public IQueryManager getQueryManager() {

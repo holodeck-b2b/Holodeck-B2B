@@ -48,7 +48,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
 /**
  * Is the default implementation of {@see IMessageSubmitter}.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class MessageSubmitter implements IMessageSubmitter {
 
@@ -118,23 +118,23 @@ public class MessageSubmitter implements IMessageSubmitter {
 
             log.debug("Add message to database");
             final IUserMessageEntity newUserMessage = (IUserMessageEntity)
-                                        HolodeckB2BCore.getStoreManager().storeOutGoingMessageUnit(completedMetadata);
+                                        HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(completedMetadata);
             try {
                 moveOrCopyPayloads(newUserMessage, movePayloads);
             } catch (final IOException ex) {
                 log.error("Could not move/copy payload(s) to the internal storage! Unable to process message!"
                             + "\n\tError details: " + ex.getMessage());
-                HolodeckB2BCore.getStoreManager().setProcessingState(newUserMessage, ProcessingState.FAILURE);
+                HolodeckB2BCore.getStorageManager().setProcessingState(newUserMessage, ProcessingState.FAILURE);
                 throw new MessageSubmitException("Could not move/copy payload(s) to the internal storage!", ex);
             }
 
             //Use P-Mode to find out if this message is to be pulled or pushed to receiver
             if (EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(pmode.getMepBinding())) {
                 log.debug("Message is to be pulled by receiver, change ProcessingState to wait for pull");
-                HolodeckB2BCore.getStoreManager().setProcessingState(newUserMessage, ProcessingState.AWAITING_PULL);
+                HolodeckB2BCore.getStorageManager().setProcessingState(newUserMessage, ProcessingState.AWAITING_PULL);
             } else {
                 log.debug("Message is to be pushed to receiver, change ProcessingState to trigger push");
-                HolodeckB2BCore.getStoreManager().setProcessingState(newUserMessage, ProcessingState.READY_TO_PUSH);
+                HolodeckB2BCore.getStorageManager().setProcessingState(newUserMessage, ProcessingState.READY_TO_PUSH);
             }
 
             log.info("User Message succesfully submitted");
@@ -174,7 +174,7 @@ public class MessageSubmitter implements IMessageSubmitter {
             log.debug("Create and add PullRequest to database");
             PullRequest submission = new PullRequest(pullRequest);
             submission.setProcessingState(ProcessingState.SUBMITTED);
-            prMessageId = HolodeckB2BCore.getStoreManager().storeOutGoingMessageUnit(submission).getMessageId();
+            prMessageId = HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(submission).getMessageId();
             log.info("Submitted PullRequest, assigned messageId=" + prMessageId);
         } catch (final PersistenceException ex) {
             log.error("Could not create the PullRequest because a error occurred in the database! Details: "
@@ -317,7 +317,7 @@ public class MessageSubmitter implements IMessageSubmitter {
                 }
             }
             log.debug("Update the stored information with new locations");
-            HolodeckB2BCore.getStoreManager().setPayloadInformation(um, internalPayloadInfo);
+            HolodeckB2BCore.getStorageManager().setPayloadInformation(um, internalPayloadInfo);
         }
     }
 

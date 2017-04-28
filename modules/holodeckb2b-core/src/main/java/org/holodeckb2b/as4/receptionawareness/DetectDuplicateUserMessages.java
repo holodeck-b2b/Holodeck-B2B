@@ -34,15 +34,15 @@ import org.holodeckb2b.module.HolodeckB2BCore;
 /**
  * Is the <i>IN_FLOW</i> handler responsible for detecting and when requested eliminating duplicate <i>user messages</i>.
  * This functionality is part of the <i>Reception Awareness</i> feature specified in the AS4 profile (see section 3.2).
- * <p>The detection of duplicates is done by checking for an existing {@link UserMessage} with the same
- * <code>MessageId</code> and which is in {@link ProcessingStates#DELIVERED} state. This means the detection window
+ * <p>The detection of duplicates is done by checking for an existing {@link IUserMessageEntity} with the same
+ * <code>MessageId</code> and which is in {@link ProcessingState#DELIVERED} state. This means the detection window
  * is determined by the time messages stay in the message log.
  * <p>How a duplicate should be handled is configured by the P-Mode parameter <b>ReceptionAwareness.DuplicateDetection.Eliminate</b>.
- * When set to <code>true</code> the duplicate will not be processed and its processing state set to {@link ProcessingStates#DUPLICATE}.
+ * When set to <code>true</code> the duplicate will not be processed and its processing state set to {@link ProcessingState#DUPLICATE}.
  * Because the duplicate may be a retry due to a missing Receipt signal a new Receipt will be sent as response. This is
  * done by marking this message unit as delivered.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
 
@@ -109,7 +109,7 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
                                             + "] is a duplicate of an already delivered message");
 
                 log.debug("Update processing state to duplicate");
-                HolodeckB2BCore.getStoreManager().setProcessingState(um, ProcessingState.DUPLICATE);
+                HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.DUPLICATE);
 
                 // To prevent repeated delivery but still send a receipt set message as delivered
                 mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);

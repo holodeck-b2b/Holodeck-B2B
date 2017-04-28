@@ -95,8 +95,9 @@
 
     <dependencyManagement>
         <dependencies>
+            
             <!--===============================================================
-                First the modules of Holodeck itself
+                First the modules of Holodeck B2B itself
             =============================================================== -->
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
@@ -125,7 +126,7 @@
             </dependency>
 
             <!--===============================================================
-                Holodeck is built on Axis2, so include all relevant Axis2
+                Holodeck B2B is built on Axis2, so include all relevant Axis2
                 modules
             =============================================================== -->
             <dependency>
@@ -158,6 +159,7 @@
                 <artifactId>axiom-dom</artifactId>
                 <version>${axiom-version}</version>
             </dependency>
+            
             <!--===============================================================
                 Hibernate is used to store configuration and message meta data
                 in database
@@ -219,7 +221,7 @@
                 Security libraries used to implement signing and encryption
                 of the messages.
                 The WSS4J framework is used to implement WS-Security and
-                BouncyCastle is included as security provided
+                BouncyCastle is included as security provider
             =============================================================== -->
             <dependency>
                 <groupId>org.apache.santuario</groupId>
@@ -255,7 +257,8 @@
                 <artifactId>log4j-core</artifactId>
                 <version>${log4j.version}</version>
             </dependency>
-            <!-- Axis2 and currently also Holodeck B2B uses Commons logging, so add log4j binding -->
+            
+            <!-- Axis2 and currently also Holodeck B2B use Commons logging, so add log4j binding -->
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-jcl</artifactId>
@@ -314,6 +317,7 @@
                     <configuration>
                         <!-- all javadoc of common and core together, so use aggregate -->
                         <aggregate>true</aggregate>
+                        <additionalparam>-Xdoclint:none</additionalparam>
                     </configuration>
                     <executions>
                         <execution>

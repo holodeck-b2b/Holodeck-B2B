@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
 /**
  * Tests the {@link BasicPModeValidator}
  *
- * @author Sander Fieten <sander at chasquis-services.com>
+ * @author Sander Fieten (sander at chasquis-services.com)
  */
 public class BasicPModeValidatorTest {
 

@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
  * Is a helper class for handling the ebMS <code>AgreementRef</code> element in the ebMS SOAP header.
  * <p>This element is specified in section 5.2.2.7 of the ebMS 3 Core specification.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class AgreementRefElement {
 

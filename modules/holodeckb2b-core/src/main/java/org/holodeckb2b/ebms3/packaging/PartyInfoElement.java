@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * child elements in the ebMS SOAP header.
  * <p>This elements are specified in sections 5.2.2.2 to 5.2.2.5 of the ebMS 3 Core specification.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PartyInfoElement {
 

@@ -19,7 +19,7 @@ package org.holodeckb2b.ebms3.errors;
 /**
  * Represent the standard <i>FailedDecryption</i> error as defined in section 6.7 of the Core specification.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class FailedDecryption extends org.holodeckb2b.common.messagemodel.EbmsError {
 

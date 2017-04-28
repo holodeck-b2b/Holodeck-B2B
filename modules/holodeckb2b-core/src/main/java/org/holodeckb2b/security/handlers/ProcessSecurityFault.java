@@ -36,14 +36,14 @@ import org.holodeckb2b.persistency.dao.StorageManager;
 /**
  * Is the <i>IN_FLOW</i> handler that checks for faults that occurred during processing of the WS-Security headers. If
  * processing of the WS-Security header fails on elements used for ebMS processing, i.e. encryption, signature and
- * username tokens, the message must not be processed. Therefor the processing state of all message units contained in
+ * username tokens, the message must not be processed. Therefore the processing state of all message units contained in
  * the message must be set to <i>FAILED</i> and ebMS Errors must be generated.
  * <p>The ebMS error to be generated depends on the WS-Security element that caused the problem. Problems in the
  * signature or username token will result in a <i>FailedAuthentication</i>; problems with decryption in a
  * <i>FailedDecryption<i>. If the problem is caused by another element in the header it is ignored because this element
  * is irrelevant for the ebMS processing.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ProcessSecurityFault extends BaseHandler {
 
@@ -102,7 +102,7 @@ public class ProcessSecurityFault extends BaseHandler {
     private void handleDecryptionFailure(final MessageContext mc) throws PersistenceException {
         final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
         if (!Utils.isNullOrEmpty(rcvdMsgUnits)) {
-            StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+            StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             for (final IMessageUnitEntity mu : rcvdMsgUnits) {
                 final FailedDecryption authError = new FailedDecryption();
                 authError.setRefToMessageInError(mu.getMessageId());
@@ -127,7 +127,7 @@ public class ProcessSecurityFault extends BaseHandler {
     private void handleAuthenticationFailure(final MessageContext mc) throws PersistenceException {
         final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
         if (!Utils.isNullOrEmpty(rcvdMsgUnits)) {
-            StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+            StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             for (final IMessageUnitEntity mu : rcvdMsgUnits) {
                 final FailedAuthentication authError = new FailedAuthentication();
                 authError.setRefToMessageInError(mu.getMessageId());
@@ -152,7 +152,7 @@ public class ProcessSecurityFault extends BaseHandler {
         // Set the processing state of all message units in message to FAILED
         final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
         if (!Utils.isNullOrEmpty(rcvdMsgUnits)) {
-            StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+            StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             for (final IMessageUnitEntity mu : rcvdMsgUnits) 
                 updateManager.setProcessingState(mu, ProcessingState.FAILURE);
         }
@@ -174,7 +174,7 @@ public class ProcessSecurityFault extends BaseHandler {
         // Set the processing state of all message units in message to FAILED
         final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
         if (!Utils.isNullOrEmpty(rcvdMsgUnits)) {
-            StorageManager updateManager = HolodeckB2BCore.getStoreManager();
+            StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             for (final IMessageUnitEntity mu : rcvdMsgUnits)
                 updateManager.setProcessingState(mu, ProcessingState.FAILURE);
         }

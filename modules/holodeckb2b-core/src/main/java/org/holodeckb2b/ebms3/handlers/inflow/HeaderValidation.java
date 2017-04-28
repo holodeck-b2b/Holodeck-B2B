@@ -77,7 +77,7 @@ public class HeaderValidation extends BaseHandler {
                             + "] is invalid!\n\tDetails: " + validationResult);
                     InvalidHeader invalidHeaderError = new InvalidHeader(validationResult, m.getMessageId());
                     MessageContextUtils.addGeneratedError(mc, invalidHeaderError);
-                    HolodeckB2BCore.getStoreManager().setProcessingState(m, ProcessingState.FAILURE);
+                    HolodeckB2BCore.getStorageManager().setProcessingState(m, ProcessingState.FAILURE);
                 } else
                     log.debug("Header of " + MessageUnitUtils.getMessageUnitName(m) + " [" + m.getMessageId()
                             + "] successfully validated");
@@ -103,7 +103,7 @@ public class HeaderValidation extends BaseHandler {
         log.debug("Save the error to message context");
         MessageContextUtils.addGeneratedError(mc, invalidHeaderError);
         log.debug("Set processing state for invalid message to failure");
-        HolodeckB2BCore.getStoreManager().setProcessingState(messageUnit, ProcessingState.FAILURE);
+        HolodeckB2BCore.getStorageManager().setProcessingState(messageUnit, ProcessingState.FAILURE);
         log.debug("Processed InvalidHeader error");
     }
 

@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
  * Is a helper class for handling the SOAP envelope for an ebMS V3 message.
  * <p>NOTE: This class is named SOAPEnv to avoid confusion with the SOAPEnvelope class of the Axis2/Axiom framework.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class SOAPEnv {
 
