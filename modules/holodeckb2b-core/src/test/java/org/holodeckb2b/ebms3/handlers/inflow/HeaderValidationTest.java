@@ -16,10 +16,12 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import java.util.ArrayList;
+import java.util.Date;
+import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.apache.log4j.Appender;
@@ -44,6 +46,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -53,22 +56,13 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
-
 /**
  * Created at 23:49 29.01.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
-public class BasicHeaderValidationTest {
+public class HeaderValidationTest {
 
     // Appender to control logging events
     @Mock
@@ -86,7 +80,7 @@ public class BasicHeaderValidationTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = BasicHeaderValidationTest.class.getClassLoader()
+        baseDir = HeaderValidationTest.class.getClassLoader()
                 .getResource("handlers").getPath();
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
@@ -119,11 +113,14 @@ public class BasicHeaderValidationTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
+//      SaFi: I think it isn't necessary to set the SOAP envelope for this test as the handler only uses objects set in
+//          the message context
+//
+//        try {
+//            mc.setEnvelope(env);
+//        } catch (AxisFault axisFault) {
+//            fail(axisFault.getMessage());
+//        }
 
         UserMessage userMessage
                 = UserMessageElement.readElement(umElement);
@@ -140,22 +137,24 @@ public class BasicHeaderValidationTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+        // When validation is succesful there should be no error in the message context
+        assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
 
-        // Checking log messages to make sure handler validated
-        // the user message successfully
-        verify(mockAppender, atLeastOnce())
-                .doAppend(captorLoggingEvent.capture());
-        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "Received User Message satisfies basic validations";
-        boolean containsExpLogMsg = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                if(e.getRenderedMessage().equals(expLogMsg)) {
-                    containsExpLogMsg = true;
-                }
-            }
-        }
-        assertTrue(containsExpLogMsg);
+//        // Checking log messages to make sure handler validated
+//        // the user message successfully
+//        verify(mockAppender, atLeastOnce())
+//                .doAppend(captorLoggingEvent.capture());
+//        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+//        String expLogMsg = "Received User Message satisfies basic validations";
+//        boolean containsExpLogMsg = false;
+//        for(LoggingEvent e : events) {
+//            if(e.getLevel().equals(Level.DEBUG)) {
+//                if(e.getRenderedMessage().equals(expLogMsg)) {
+//                    containsExpLogMsg = true;
+//                }
+//            }
+//        }
+//        assertTrue(containsExpLogMsg);
     }
 
     @Test
@@ -176,11 +175,11 @@ public class BasicHeaderValidationTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
+//        try {
+//            mc.setEnvelope(env);
+//        } catch (AxisFault axisFault) {
+//            fail(axisFault.getMessage());
+//        }
 
         // Setting input PullRequest property
         StorageManager updateManager = core.getStorageManager();
@@ -195,22 +194,24 @@ public class BasicHeaderValidationTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+        // When validation is succesful there should be no error in the message context
+        assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
 
-        // Checking log messages to make sure handler validated
-        // the pull request successfully
-        verify(mockAppender, atLeastOnce())
-                .doAppend(captorLoggingEvent.capture());
-        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "Received Pull Request satisfies basic validations";
-        boolean containsExpLogMsg = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                if(e.getRenderedMessage().equals(expLogMsg)) {
-                    containsExpLogMsg = true;
-                }
-            }
-        }
-        assertTrue(containsExpLogMsg);
+//        // Checking log messages to make sure handler validated
+//        // the pull request successfully
+//        verify(mockAppender, atLeastOnce())
+//                .doAppend(captorLoggingEvent.capture());
+//        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+//        String expLogMsg = "Received Pull Request satisfies basic validations";
+//        boolean containsExpLogMsg = false;
+//        for(LoggingEvent e : events) {
+//            if(e.getLevel().equals(Level.DEBUG)) {
+//                if(e.getRenderedMessage().equals(expLogMsg)) {
+//                    containsExpLogMsg = true;
+//                }
+//            }
+//        }
+//        assertTrue(containsExpLogMsg);
     }
 
     // todo the following test fails. Correct it and uncomment
@@ -239,11 +240,11 @@ public class BasicHeaderValidationTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
+//        try {
+//            mc.setEnvelope(env);
+//        } catch (AxisFault axisFault) {
+//            fail(axisFault.getMessage());
+//        }
 
         // Setting input Receipt property
         StorageManager updateManager = core.getStorageManager();
@@ -261,22 +262,24 @@ public class BasicHeaderValidationTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+        // When validation is succesful there should be no error in the message context
+        assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
 
-        // Checking log messages to make sure handler validated
-        // the pull request successfully
-        verify(mockAppender, atLeastOnce())
-                .doAppend(captorLoggingEvent.capture());
-        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "Received Receipt satisfies basic validations";
-        boolean containsExpLogMsg = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                if(e.getRenderedMessage().equals(expLogMsg)) {
-                    containsExpLogMsg = true;
-                }
-            }
-        }
-        assertTrue(containsExpLogMsg);
+//        // Checking log messages to make sure handler validated
+//        // the pull request successfully
+//        verify(mockAppender, atLeastOnce())
+//                .doAppend(captorLoggingEvent.capture());
+//        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+//        String expLogMsg = "Received Receipt satisfies basic validations";
+//        boolean containsExpLogMsg = false;
+//        for(LoggingEvent e : events) {
+//            if(e.getLevel().equals(Level.DEBUG)) {
+//                if(e.getRenderedMessage().equals(expLogMsg)) {
+//                    containsExpLogMsg = true;
+//                }
+//            }
+//        }
+//        assertTrue(containsExpLogMsg);
     }
 
     @Test
@@ -308,21 +311,23 @@ public class BasicHeaderValidationTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+        // When validation is succesful there should be no error in the message context
+        assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
 
-        // Checking log messages to make sure handler validated
-        // the pull request successfully
-        verify(mockAppender, atLeastOnce())
-                .doAppend(captorLoggingEvent.capture());
-        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String expLogMsg = "Received Error satisfies basic validations";
-        boolean containsExpLogMsg = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(Level.DEBUG)) {
-                if(e.getRenderedMessage().equals(expLogMsg)) {
-                    containsExpLogMsg = true;
-                }
-            }
-        }
-        assertTrue(containsExpLogMsg);
+//        // Checking log messages to make sure handler validated
+//        // the pull request successfully
+//        verify(mockAppender, atLeastOnce())
+//                .doAppend(captorLoggingEvent.capture());
+//        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+//        String expLogMsg = "Received Error satisfies basic validations";
+//        boolean containsExpLogMsg = false;
+//        for(LoggingEvent e : events) {
+//            if(e.getLevel().equals(Level.DEBUG)) {
+//                if(e.getRenderedMessage().equals(expLogMsg)) {
+//                    containsExpLogMsg = true;
+//                }
+//            }
+//        }
+//        assertTrue(containsExpLogMsg);
     }
 }

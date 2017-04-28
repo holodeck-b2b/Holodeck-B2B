@@ -23,7 +23,6 @@ import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
-import org.holodeckb2b.ebms3.errors.OtherContentError;
 import org.holodeckb2b.ebms3.headervalidation.HeaderValidatorFactory;
 import org.holodeckb2b.ebms3.headervalidation.IHeaderValidator;
 import org.holodeckb2b.interfaces.config.IConfiguration;
@@ -67,17 +66,7 @@ public class HeaderValidation extends BaseHandler {
             for (IMessageUnitEntity m : msgUnits) {
                 // Determine the validation to use
                 boolean useStrictValidation;
-                try {
-                    useStrictValidation = shouldUseStrictMode(m);
-                } catch (NullPointerException pModeNotAvailable) {
-                    // Signal problem of non available P-Mode in log and raise Other error
-                    log.error("P-Mode [" + m.getPModeId() + "] of message unit not available any more!");
-                    OtherContentError otherError = new OtherContentError("Internal processing error", m.getMessageId());
-                    // Change processing state of messsage unit
-                    HolodeckB2BCore.getStoreManager().setProcessingState(m, ProcessingState.FAILURE);
-                    MessageContextUtils.addGeneratedError(mc, otherError);
-                    continue;
-                }
+                useStrictValidation = shouldUseStrictMode(m);
 
                 log.debug("Validate " + MessageUnitUtils.getMessageUnitName(m) + " header meta-data using "
                          + (useStrictValidation ? "strict" : "basic") + " validation");
@@ -123,12 +112,11 @@ public class HeaderValidation extends BaseHandler {
      *
      * @param m     The message unit for which the validation mode should be determined
      * @return      <code>true</code> if strict validation should be used,<code>false</code> otherwise
-     * @throws NullPointerException  When the P-Mode that was found for the message unit isn't available anymore.
      */
     private boolean shouldUseStrictMode(IMessageUnitEntity m) throws NullPointerException {
         // First get global setting which may be enough when it is set to strict
         boolean useStrictValidation = HolodeckB2BCore.getConfiguration().useStrictHeaderValidation();
-        if (!useStrictValidation)
+        if (!useStrictValidation && !Utils.isNullOrEmpty(m.getPModeId()))
             useStrictValidation = HolodeckB2BCore.getPModeSet().get(m.getPModeId()).useStrictHeaderValidation();
 
         return useStrictValidation;
