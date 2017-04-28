@@ -19,10 +19,10 @@ package org.holodeckb2b.interfaces.config;
 import org.apache.axis2.context.ConfigurationContext;
 
 /**
- * Defines the interface of the Holodeck B2B configuration.
- * <p>This interface must be used by extension when they need access to the Holodeck B2B settings.
+ * Defines the interface to access the Holodeck B2B <i>public</i> configuration. This public configuration contains
+ * settings that may be used by extensions.
  *
- * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface IConfiguration {
 
@@ -32,7 +32,7 @@ public interface IConfiguration {
      * @return The Axis2 configuration context.
      * @deprecated This method is intended for <b>internal use only</b>.
      */
-    public ConfigurationContext getAxisConfigurationContext();
+    ConfigurationContext getAxisConfigurationContext();
 
     /**
      * Gets the host name. During the message processing a host name may be needed,
@@ -45,14 +45,14 @@ public interface IConfiguration {
      *
      * @return  The host name
      */
-    public String getHostName();
+    String getHostName();
 
     /**
      * Gets the Holodeck B2B home directory.
      *
      * @return  The Holodeck B2B home directory.
      */
-    public String getHolodeckB2BHome ();
+    String getHolodeckB2BHome ();
 
     /**
      * Gets the directory to use for temporarily storing files.
@@ -65,7 +65,7 @@ public interface IConfiguration {
      * @return  The absolute path to the temp directory. Ends with a directory
      *          separator.
      */
-    public String getTempDirectory();
+    String getTempDirectory();
 
     /**
      * Indicates whether bundling of signal message units in a response message is allowed. When enabled Holodeck B2B
@@ -76,7 +76,7 @@ public interface IConfiguration {
      *
      * @return Indication whether bundling of signals in a response is allowed
      */
-    public boolean allowSignalBundling();
+    boolean allowSignalBundling();
 
     /**
      * Gets the default setting whether Errors on Errors should be reported to the sender of the faulty error. This
@@ -87,7 +87,7 @@ public interface IConfiguration {
      * @return <code>true</code> if generated errors on errors should by default be reported to the sender,<br>
      *         <code>false</code> otherwise
      */
-    public boolean shouldReportErrorOnError();
+    boolean shouldReportErrorOnError();
 
     /**
      * Gets the default setting whether Errors on Receipts should be reported to the sender of the faulty receipt. This
@@ -98,7 +98,7 @@ public interface IConfiguration {
      * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
      *         <code>false</code> otherwise
      */
-    public boolean shouldReportErrorOnReceipt();
+    boolean shouldReportErrorOnReceipt();
 
     /**
      * Indicates if the references in an Error signal message unit should be checked using the strict requirements
@@ -109,8 +109,10 @@ public interface IConfiguration {
      *
      * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
      *         <code>false</code> otherwise
+     * @deprecated To use strict validation of error reference use the strict validation mode of the ebMS header
+     *             (see {@link #useStrictHeaderValidation()}).
      */
-    public boolean useStrictErrorRefCheck();
+    boolean useStrictErrorRefCheck();
 
     /**
      * Gets the path to the keystore containing the private keys and related certificates that are used for signing
@@ -118,14 +120,14 @@ public interface IConfiguration {
      *
      * @return The path to the <i>"private"</i> keystore.
      */
-    public String getPrivateKeyStorePath();
+    String getPrivateKeyStorePath();
 
     /**
      * Gets the password for the keystore that holds the certificates with the private keys.
      *
      * @return  The password for accessing the keystore with the private keys
      */
-    public String getPrivateKeyStorePassword();
+    String getPrivateKeyStorePassword();
 
     /**
      * Gets the path to the keystore containing the certificates (i.e. public keys) that are used for encrypting
@@ -133,14 +135,14 @@ public interface IConfiguration {
      *
      * @return The path to the <i>"public"</i> keystore.
      */
-    public String getPublicKeyStorePath();
+    String getPublicKeyStorePath();
 
     /**
      * Gets the password for the keystore that holds the certificates with the public keys.
      *
      * @return  The password for accessing the keystore with the public keys
      */
-    public String getPublicKeyStorePassword();
+    String getPublicKeyStorePassword();
 
     /**
      * Gets the path to the keystore containing the CA certificates that should be trusted when validating the
@@ -153,7 +155,7 @@ public interface IConfiguration {
      * @return The path to the <i>"trust"</i> keystore.
      * @since 2.1.0
      */
-    public String getTrustKeyStorePath();
+    String getTrustKeyStorePath();
 
     /**
      * Gets the password for the keystore that holds the trusted CA certificates.
@@ -161,7 +163,7 @@ public interface IConfiguration {
      * @return  The password for accessing the keystore with the trusted certificates.
      * @since 2.1.0
      */
-    public String getTrustKeyStorePassword();
+    String getTrustKeyStorePassword();
 
     /**
      * Gets the global setting whether Holodeck B2B should check if a certificate is revoked. As an error that occurs
@@ -173,5 +175,22 @@ public interface IConfiguration {
      * @return <code>true</code> if the revocation of certificates should by default be checked,<br>
      *         <code>false</code> otherwise
      */
-    public boolean shouldCheckCertificateRevocation();
+    boolean shouldCheckCertificateRevocation();
+
+    /**
+     * Gets the global setting for whether Holodeck B2B should perform a strict validation of the ebMS header meta-data
+     * as specified in the ebMS Specifications.
+     * <p>For Holodeck B2B to be able to process a message unit it does not need to conform to all the requirements as
+     * stated in the ebMS Specifications, for example the formatting of values is mostly irrelevant to Holodeck B2B.
+     * Therefore two validation modes are offered, <i>basic</i> and <i>strict</i>. This setting configures whether the
+     * strict validation mode should be used for all messages. The default is to use only basic validation.
+     * <p>Note that the P-Mode also includes a similar setting which can be used to specify the use of strict validation
+     * per P-Mode.
+     *
+     * @return <code>true</code> if a strict validation of the ebMS header meta-data should be performed for all
+     *         message units,<br>
+     *         <code>false</code> if a basic validation is enough and strict validation can be configured on P-Mode base
+     * @since HB2B_NEXT_VERSION
+     */
+    boolean useStrictHeaderValidation();
 }

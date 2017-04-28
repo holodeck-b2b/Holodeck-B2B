@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.common.testhelpers.pmode;
 
+import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
 import org.holodeckb2b.interfaces.pmode.IBusinessInfo;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.interfaces.pmode.IPayloadProfile;
@@ -55,6 +56,11 @@ public class UserMessageFlow implements IUserMessageFlow {
 
     public void setErrorHandlingConfiguration(final ErrorHandlingConfig errorHandlingConfig) {
         this.errorHandlingCfg = errorHandlingConfig;
+    }
+
+    @Override
+    public IMessageValidationSpecification getCustomValidationConfiguration() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

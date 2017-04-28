@@ -32,6 +32,7 @@ import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.WorkerPool;
 import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
+import org.holodeckb2b.customvalidation.DefaultValidationExecutor;
 import org.holodeckb2b.ebms3.pulling.PullConfiguration;
 import org.holodeckb2b.ebms3.pulling.PullConfigurationWatcher;
 import org.holodeckb2b.ebms3.pulling.PullWorker;
@@ -55,6 +56,7 @@ import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeManager;
+import org.holodeckb2b.customvalidation.ICustomValidationExecutor;
 
 /**
  * Axis2 module class for the Holodeck B2B Core module.
@@ -199,22 +201,6 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         // From this point on other components can be started which need access to the Core
         log.debug("Make Core available to outside world");
         HolodeckB2BCore.setImplementation(this);
-
-//                // Special ClassLoader required for correct Hibernate init!
-//        {
-//          final ClassLoader aOldCL = Thread.currentThread ().getContextClassLoader ();
-//          Thread.currentThread ().setContextClassLoader (JPAUtil.class.getClassLoader ());
-//          try
-//          {
-//            JPAUtil.getEntityManager ();
-//          }
-//          catch (final Exception ex)
-//          {}
-//          finally
-//          {
-//            Thread.currentThread ().setContextClassLoader (aOldCL);
-//          }
-//        }
 
         log.debug("Initialize worker pool");
         final IWorkerPoolConfiguration poolCfg =
@@ -439,4 +425,16 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         return daoFactory.getQueryManager();
     }
 
+    /**
+     * Gets the {@link ICustomValidationExecutor} implementation that should be used for the execution of the custom
+     * message validations.<br>
+     * Currently the executor is not configurable and a simple, i.e. non-optimized, executor is used, see {@link
+     * DefaultValidationExecutor}
+     *
+     * @return  The component responsible for execution of the custom validations.
+     * @since HB2B_NEXT_VERSION
+     */
+    public ICustomValidationExecutor getValidationExecutor() {
+        return new DefaultValidationExecutor();
+    }
 }

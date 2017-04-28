@@ -19,7 +19,7 @@ package org.holodeckb2b.interfaces.pmode;
 
 
 import java.util.List;
-
+import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IAgreement;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
@@ -152,4 +152,21 @@ public interface IPMode {
      * @return          A {@link ILeg} object containing the configuration of the leg
      */
     public ILeg getLeg(Label label);
+
+    /**
+     * Gets the setting for whether Holodeck B2B should perform a strict validation of the ebMS header meta-data
+     * as specified in the ebMS Specifications for messages processed under this P-Mode.
+     * <p>For Holodeck B2B to be able to process a message unit it does not need to conform to all the requirements as
+     * stated in the ebMS Specifications, for example the formatting of values is mostly irrelevant to Holodeck B2B.
+     * Therefore two validation modes are offered, <i>basic</i> and <i>strict</i>.
+     * <p>Note that there is also a global setting for the validation mode ({@link
+     * IConfiguration#useStrictHeaderValidation()}. This P-Mode setting can only be used to make the validation more
+     * strict, not more relaxed, i.e. if the global setting is to use strict validation the P-Mode setting is ignored.
+     *
+     * @return <code>true</code> if a strict validation of the ebMS header meta-data should be performed for message
+     *         units which processing is governed by this P-Mode,<br>
+     *         <code>false</code> if a basic validation is enough
+     * @since HB2B_NEXT_VERSION
+     */
+    boolean useStrictHeaderValidation();
 }

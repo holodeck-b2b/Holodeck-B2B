@@ -20,7 +20,7 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
     targetNamespace="http://holodeck-b2b.org/schemas/2014/10/pmode"
     attributeFormDefault="unqualified" xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
-    version="3.0.0">
+    version="HB2B_NEXT_VERSION">
     <xs:annotation>
         <xs:documentation><p>The ebMS specification only defines an abstract P-Mode model, the actual P-Mode definition is left up to implementations. This schema defines the XML structure for the representation of a P-Mode as used by the default implementation for maintaining the P-Mode set. In this implementation the P-Mode set consists of all XML documents in a directory. Each XML document represents one P-Mode and must conform to this schema. See the package <code>org.holodeckb2b.pmode.xml</code> for more info on the default implementation of P-Modes.</p></xs:documentation>
         <xs:documentation><p>In version 2.1.0 of the schema the <code>EventHandler</code> and <code>AddActorOrRoleAttribute</code> elements were added. As these are optional elements P-Mode documents constructed using the old version are still valid and result in unchanged processing. Therefore the same namespace is used and only the version has been increased</p> 
@@ -112,6 +112,12 @@ In the P-Mode model described in the ebMS specification a leg can be identified 
                 </xs:annotation>
             </xs:element>
         </xs:sequence>
+        <xs:attribute default="false" name="useStrictHeaderValidation" type="xs:boolean">
+            <xs:annotation>
+                <xs:documentation><p>This optional attribute indicates whether the ebMS header meta-data should be strictly checked against the requirements stated in the ebMS Specifications (value=<i>true</i>) or whether a basic validation to ensure that Holodeck B2B can process the message is enough (value=<i>false</i>). The default value is <i>false</i>.</p>
+<p>NOTE: The strict validation of the ebMS header meta-data can also be specified on a global level in the Holodeck B2B configuration. This P-Mode setting can only be used to make the validation more strict, not more relaxed, i.e. if global setting is strict this attribute is just ignored.</p></xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
     <xs:complexType name="TradingPartner">
         <xs:annotation>
@@ -349,6 +355,11 @@ The last child element is the <code>Parameter</code> element that can occur zero
                 </xs:annotation>
             </xs:element>
             <xs:element name="PayloadProfile" type="tns:PayloadProfile" minOccurs="0"/>
+            <xs:element minOccurs="0" name="CustomValidation" type="tns:ValidationConfiguration">
+                <xs:annotation>
+                    <xs:documentation>This element defines the custom validations that should be performed for User Messages that are processed in this message flow. Custom validations can be configured for both submitted and received User Messages. The custom validation will be executed when the message is submitted to the Core or before a Receipt is created an the message is delivered to the business application. Whether the message will be further processed, i.e. accepted or delivered, depends on the configuration.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="PullRequestFlowType">
@@ -846,6 +857,72 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
         <xs:sequence>
             <xs:element name="name" type="tns:non-empty-string"/>
             <xs:element name="value" type="tns:non-empty-string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="ValidationConfiguration">
+        <xs:annotation>
+            <xs:documentation>This type defines the structure of the configuration for the custom validation to apply to User Messages</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element default="false" minOccurs="0" name="ExecuteInOrder" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>This optional indicator defines whether the validators MUST be executed in order. It is NOT RECOMMENDED to require in order execution as it may slow down the message processing. If in order execution is used it is RECOMMENDED to stop validation as soon as an error is detected.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element default="NONE" minOccurs="0" name="StopValidationOn"
+                type="tns:ValidationErrorLevelTreshold">
+                <xs:annotation>
+                    <xs:documentation>This optional indicator defines whether the validation of a message unit should stop after a validation error with the specified severity level has been found. By default the validation never stopped and all validators are executed. </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element default="NONE" minOccurs="0" name="RejectMessageOn"
+                type="tns:ValidationErrorLevelTreshold">
+                <xs:annotation>
+                    <xs:documentation><p>This optional indicator defines whether the message unit should be rejected and further messaage processing should stop after a validation error with the specified severity level has been found. If the message is rejected an ebMS Error with ErrorCode EBMS:0004 (Other) will be generated that includes the description of the found errors. By default message will not be rejected because of validation errors.</p>
+<p>NOTE: If validation errors occur they will always trigger a <code>ICustomValidationFailedEvent</code></p></xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="unbounded" name="Validator" type="tns:ValidatorConfiguration">
+                <xs:annotation>
+                    <xs:documentation>This element which must occur at least once specifies which validations should be executed for all User Messages processed in this flow.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="ValidationErrorLevelTreshold">
+        <xs:annotation>
+            <xs:documentation>Enumerates the error treshold levels as used in the configuration of custom validations.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:whiteSpace value="collapse"/>
+            <xs:enumeration value="NONE"/>
+            <xs:enumeration value="INFO"/>
+            <xs:enumeration value="WARN"/>
+            <xs:enumeration value="FAILURE"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="ValidatorConfiguration">
+        <xs:annotation>
+            <xs:documentation>This type defines the structure of the configuration of one custom validator.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="id" type="tns:non-empty-string">
+                <xs:annotation>
+                    <xs:documentation><p>This element contains the identifier of this validator configuration. This id is used by Holodeck B2B for logging purposes and inclusion in <i>message processing events</i> and may also be used to determine whether it must create and configure a new Factory object.</p>
+<p><b>NOTE: </b>Configurations MUST be uniquely identified as Holodeck B2B will only use the id to check for equivalence.</p></xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="ValidatorFactoryClass" type="tns:non-empty-string">
+                <xs:annotation>
+                    <xs:documentation>This element should contain the class name of the factory class that should be used to create actual instances of the validator.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="Parameter"
+                type="tns:ParameterType">
+                <xs:annotation>
+                    <xs:documentation><p>This element can be used to configure the factory object to create a correctly configured message validator.</p></xs:documentation>
+                </xs:annotation>
+            </xs:element>
         </xs:sequence>
     </xs:complexType>
 </xs:schema>

@@ -148,6 +148,12 @@ public class Config implements InternalConfiguration {
      */
     private String persistencyProviderClass = null;
 
+    /*
+     * Indicator whether strict header validation should be applied to all messages
+     * @since HB2B_NEXT_VERSION
+     */
+    private boolean useStrictHeaderValidation = false;
+
     private boolean isTrue (final String s) {
       return "on".equalsIgnoreCase(s) || "true".equalsIgnoreCase(s) || "1".equalsIgnoreCase(s);
     }
@@ -263,6 +269,10 @@ public class Config implements InternalConfiguration {
 
         // The class name of the persistency provider
         persistencyProviderClass = configFile.getParameter("PersistencyProvider");
+
+        // Indicator whether strict header validation should be performed
+        final String strictHeaderValidation = configFile.getParameter("StrictHeaderValidation");
+        useStrictHeaderValidation = isTrue(strictHeaderValidation);
     }
 
     /**
@@ -400,7 +410,8 @@ public class Config implements InternalConfiguration {
      *
      * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
      *         <code>false</code> otherwise
-     */
+     * @deprecated To use strict validation of error reference use the strict validation mode of the ebMS header
+     *             (see {@link #useStrictHeaderValidation()}).     */
     @Override
     public boolean useStrictErrorRefCheck() {
         return useStrictErrorReferencesCheck;
@@ -549,5 +560,25 @@ public class Config implements InternalConfiguration {
     @Override
     public String getPersistencyProviderClass() {
         return persistencyProviderClass;
+    }
+
+    /**
+     * Gets the global setting for whether Holodeck B2B should perform a strict validation of the ebMS header meta-data
+     * as specified in the ebMS Specifications.
+     * <p>For Holodeck B2B to be able to process a message unit it does not need to conform to all the requirements as
+     * stated in the ebMS Specifications, for example the formatting of values is mostly irrelevant to Holodeck B2B.
+     * Therefore two validation modes are offered, <i>basic</i> and <i>strict</i>. This setting configures whether the
+     * strict validation mode should be used for all messages. The default is to use only basic validation.
+     * <p>Note that the P-Mode also includes a similar setting which can be used to specify the use of strict validation
+     * per P-Mode.
+     *
+     * @return <code>true</code> if a strict validation of the ebMS header meta-data should be performed for all
+     *         message units,<br>
+     *         <code>false</code> if a basic validation is enough and strict validation can be configured on P-Mode base
+     * @since HB2B_NEXT_VERSION
+     */
+    @Override
+    public boolean useStrictHeaderValidation() {
+        return useStrictHeaderValidation;
     }
 }

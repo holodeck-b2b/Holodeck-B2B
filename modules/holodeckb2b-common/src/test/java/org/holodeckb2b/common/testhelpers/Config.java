@@ -28,6 +28,7 @@ public class Config implements InternalConfiguration {
     private String hb2b_home;
     private String pmodeValidatorClass = null;
     private String pmodeStorageClass = null;
+    private boolean useStrictHeaderValidation = false;
 
     Config(final String homeDir) {
         hb2b_home = homeDir;
@@ -43,6 +44,11 @@ public class Config implements InternalConfiguration {
         hb2b_home = homeDir;
         this.pmodeValidatorClass = pmodeValidatorClass;
         this.pmodeStorageClass = pmodeStorageClass;
+    }
+
+    Config(final String homeDir, final boolean useStrictValidation) {
+        hb2b_home = homeDir;
+        useStrictHeaderValidation = useStrictValidation;
     }
 
     @Override
@@ -142,5 +148,9 @@ public class Config implements InternalConfiguration {
     @Override
     public String getPersistencyProviderClass() {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean useStrictHeaderValidation() {
+        return useStrictHeaderValidation;
     }
 }

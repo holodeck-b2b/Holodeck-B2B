@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.interfaces.pmode;
 
+import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
 
 
 /**
@@ -36,7 +37,7 @@ public interface IUserMessageFlow {
      *         P-Mode, or<br>
      *         <code>null</code> when not specified.
      */
-    public IBusinessInfo getBusinessInfo();
+    IBusinessInfo getBusinessInfo();
 
     /**
      * Gets the payload profile which defines what and how payloads are to be included in the message.
@@ -47,7 +48,7 @@ public interface IUserMessageFlow {
      * @return An {@link IPayloadProfile} object containing the payload profile, or<br>
      *         <code>null</code> when not specified.
      */
-    public IPayloadProfile getPayloadProfile();
+    IPayloadProfile getPayloadProfile();
 
     /**
      * Gets the configuration for handling errors which are caused by user message exchanged in this flow.
@@ -57,6 +58,19 @@ public interface IUserMessageFlow {
      * @return An {@link IErrorHandling} object representing the error handling configuration, or<br>
      *         <code>null</code> when not specified
      */
-    public IErrorHandling getErrorHandlingConfiguration();
+    IErrorHandling getErrorHandlingConfiguration();
 
+    /**
+     * Gets the configuration of the custom validations that should be performed for User Messages that are processed
+     * in this message flow.
+     * <p>Custom validations can be configured for both submitted and received User Messages. The custom validation will
+     * be executed when the message is submitted to the Core or before a Receipt is created an the message is delivered
+     * to the business application. Whether the message will be further processed, i.e. accepted or delivered, depends
+     * on the configuration.
+     *
+     * @return An {@link IMessageValidationSpecification} object representing the custom validation configuration,or<br>
+     *         <code>null</code> when no custom validation is needed
+     * @since HB2B_NEXT_VERSION
+     */
+    IMessageValidationSpecification getCustomValidationConfiguration();
 }

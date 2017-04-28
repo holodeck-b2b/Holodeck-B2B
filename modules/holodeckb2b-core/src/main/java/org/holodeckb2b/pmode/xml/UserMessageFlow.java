@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.pmode.xml;
 
+import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
@@ -36,6 +37,9 @@ public class UserMessageFlow implements IUserMessageFlow {
 
     @Element (name = "PayloadProfile", required = false)
     private PayloadProfile payloadProfile;
+
+    @Element (name = "CustomValidation", required = false)
+    private CustomValidationSpecification customValidations;
 
     /**
      * Gets the business information
@@ -62,4 +66,8 @@ public class UserMessageFlow implements IUserMessageFlow {
         return this.payloadProfile;
     }
 
+    @Override
+    public IMessageValidationSpecification getCustomValidationConfiguration() {
+        return customValidations;
+    }
 }
