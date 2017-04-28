@@ -30,6 +30,8 @@ import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.customvalidation.ValidationResult;
+import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
@@ -37,6 +39,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.submit.MessageSubmitException;
@@ -62,13 +65,14 @@ public class MessageSubmitter implements IMessageSubmitter {
      * <p>Whether the message will be sent immediately depends on the P-Mode that applies and the MEP being specified
      * therein. If the MEP is Push the Holodeck B2B will try to send the message immediately. When the MEP is Pull the
      * message is stored for retrieval by the receiving MSH.
+     * <p>It is REQUIRED that the meta data contains a reference to the P-Mode that should be used to handle the
+     * message. If the P-Mode specifies custom validation (in the User Message flow, see {@link
+     * IUserMessageFlow#getCustomValidationConfiguration()}) the submitted message will be validated and only accepted
+     * when successfully validated.
      * <p><b>NOTE:</b> This method MAY return before the message is actually sent to the receiver. Successful return
      * ONLY GUARANTEES that the message CAN be sent to the receiver and that Holodeck B2B will try to do so.
-     * <p>It is NOT REQUIRED that the meta data contains a reference to the P-Mode that should be used to handle the
-     * message. The first action of a <i>MessageSubmitter</i> is to find the correct P-Mode for the user message. It is
-     * however RECOMMENDED to include the P-Mode id to prevent mismatches.
      *
-     * @param um                    The meta data on the user message to be sent to the other trading partner.
+     * @param submission            The meta data on the user message to be sent to the other trading partner.
      * @param movePayloads          Indicator whether the files containing the payload data must be deleted or not
      * @return                      The ebMS message-id assigned to the user message.
      * @throws MessageSubmitException   When the user message can not be submitted successfully. Reasons for failure can
@@ -76,12 +80,12 @@ public class MessageSubmitter implements IMessageSubmitter {
      *                                  conflicts with supplied meta-data.
      */
     @Override
-    public String submitMessage(final IUserMessage um, final boolean movePayloads) throws MessageSubmitException {
+    public String submitMessage(final IUserMessage submission, final boolean movePayloads) throws MessageSubmitException {
         log.trace("Start submission of new User Message");
 
         try {
             log.debug("Get the P-Mode for the message");
-            final IPMode  pmode = HolodeckB2BCore.getPModeSet().get(um.getPModeId());
+            final IPMode  pmode = HolodeckB2BCore.getPModeSet().get(submission.getPModeId());
 
             if (pmode == null) {
                 log.warn("No P-Mode found for submitted message, rejecting message!");
@@ -91,14 +95,30 @@ public class MessageSubmitter implements IMessageSubmitter {
 
             log.debug("Check for completeness: combined with P-Mode all info must be known");
             // The complete operation will throw aMessageSubmitException if meta-data is not complete
-            final UserMessage completedMMD = MMDCompleter.complete(um, pmode);
+            final UserMessage completedMetadata = MMDCompleter.complete(submission, pmode);
 
             log.debug("Checking availability of payloads");
-            checkPayloads(completedMMD, pmode); // Throws MessageSubmitException if there is a problem with a specified submissionPayloadInfo
+            checkPayloads(completedMetadata, pmode); // Throws MessageSubmitException if there is a problem with a specified submissionPayloadInfo
+
+            log.debug("Validate submitted message if specified");
+            try {
+                ValidationResult validationResult = HolodeckB2BCore.getValidationExecutor().validate(completedMetadata);
+                if (validationResult == null || Utils.isNullOrEmpty(validationResult.getValidationErrors()))
+                    log.debug("Submitted message is valid or no custom validation specified");
+                else if (!validationResult.shouldRejectMessage())
+                    log.warn("Submitted message contains validation errors, but can be processed");
+                else {
+                    log.warn("Submitted message is not valid and must be rejected!");
+                    throw new MessageSubmitException("Message rejected due to fatal validation errors!");
+                }
+            } catch (MessageValidationException ex) {
+                log.error("Could not execute the validation of the submitted message!\n\tDetails: " + ex.getMessage());
+                throw new MessageSubmitException("Could not execute the validation of the submitted message!", ex);
+            }
 
             log.debug("Add message to database");
             final IUserMessageEntity newUserMessage = (IUserMessageEntity)
-                                            HolodeckB2BCore.getStoreManager().storeOutGoingMessageUnit(completedMMD);
+                                        HolodeckB2BCore.getStoreManager().storeOutGoingMessageUnit(completedMetadata);
             try {
                 moveOrCopyPayloads(newUserMessage, movePayloads);
             } catch (final IOException ex) {

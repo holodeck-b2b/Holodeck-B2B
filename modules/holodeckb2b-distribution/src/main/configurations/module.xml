@@ -61,7 +61,7 @@
         <!--
             Perform basic validation of the message units read from the message
         -->
-        <handler name="BasicValidation" class="org.holodeckb2b.ebms3.handlers.inflow.BasicHeaderValidation">
+        <handler name="HeaderValidation" class="org.holodeckb2b.ebms3.handlers.inflow.HeaderValidation">
             <order phase="ebms3InPhase" after="CheckForMultiHop"/>
         </handler>
 
@@ -111,8 +111,11 @@
         <handler name="DuplicateCheck" class="org.holodeckb2b.as4.receptionawareness.DetectDuplicateUserMessages">
             <order phase="ebms3InPhase" after="SavePayloads"/>
         </handler>
-        <handler name="DeliverUserMessage" class="org.holodeckb2b.ebms3.handlers.inflow.DeliverUserMessage">
+        <handler name="CustomValidation" class="org.holodeckb2b.ebms3.handlers.inflow.PerformCustomValidations">
             <order phase="ebms3InPhase" after="DuplicateCheck"/>
+        </handler>
+        <handler name="DeliverUserMessage" class="org.holodeckb2b.ebms3.handlers.inflow.DeliverUserMessage">
+            <order phase="ebms3InPhase" after="CustomValidation"/>
         </handler>
         <handler name="CreateReceipt" class="org.holodeckb2b.as4.handlers.inflow.CreateReceipt">
             <order phase="ebms3InPhase" after="DeliverUserMessage"/>
@@ -192,7 +195,7 @@
         <!--
             Perform basic validation of the message units read from the message
         -->
-        <handler name="BasicValidation" class="org.holodeckb2b.ebms3.handlers.inflow.BasicHeaderValidation">
+        <handler name="HeaderValidation" class="org.holodeckb2b.ebms3.handlers.inflow.HeaderValidation">
             <order phase="ebms3InPhase" after="CheckForMultiHop"/>
         </handler>
 
@@ -241,8 +244,11 @@
         <handler name="DuplicateCheck" class="org.holodeckb2b.as4.receptionawareness.DetectDuplicateUserMessages">
             <order phase="ebms3InPhase" after="SavePayloads"/>
         </handler>
-        <handler name="DeliverUserMessage" class="org.holodeckb2b.ebms3.handlers.inflow.DeliverUserMessage">
+        <handler name="CustomValidation" class="org.holodeckb2b.ebms3.handlers.inflow.PerformCustomValidations">
             <order phase="ebms3InPhase" after="DuplicateCheck"/>
+        </handler>
+        <handler name="DeliverUserMessage" class="org.holodeckb2b.ebms3.handlers.inflow.DeliverUserMessage">
+            <order phase="ebms3InPhase" after="CustomValidation"/>
         </handler>
         <handler name="CreateReceipt" class="org.holodeckb2b.as4.handlers.inflow.CreateReceipt">
             <order phase="ebms3InPhase" after="DeliverUserMessage"/>

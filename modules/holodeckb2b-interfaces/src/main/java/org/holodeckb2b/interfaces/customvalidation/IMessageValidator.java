@@ -28,9 +28,8 @@ import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
  * validators however have access to the payloads of the User Message they can also validate the business meta-data.
  * <p>Whether User Messages should be validated is configured in the <i>User Message flow</i> of the P-Mode, see {@link
  * IUserMessageFlow#getCustomValidationConfiguration()}.
- * <p>The <i>{@link IMessageValidationExecutor validation executor}</i> manages the execution of the validations and may
- * decide to run multiple validators in parallel. Therefore validator implementations MUST NOT lock the payload files in
- * any way.
+ * <p>The <i>validation executor</i> manages the execution of the validations and may decide to run multiple validators
+ * in parallel. Therefore validator implementations MUST NOT lock the payload files in any way.
  * <p>NOTE: As these custom validation are performed in the normal processing pipe line they influence the performance
  * of the message processing. Custom validation overhead should therefore be minimized.
  *

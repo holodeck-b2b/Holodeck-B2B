@@ -47,7 +47,7 @@ public interface IMessageValidationSpecification {
     List<IMessageValidatorConfiguration> getValidators();
 
     /**
-     * Indicates whether the validations must be in the order specified.
+     * Indicates whether the validations must be executed in the order specified.
      *
      * @return  <code>Boolean.TRUE</code> if the validation must be executed in the specified order,<br>
      *          <code>Boolean.FALSE</code> or <code>null</code> otherwise.

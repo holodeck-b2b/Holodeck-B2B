@@ -20,6 +20,7 @@ import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.persistency.dao.StorageManager;
+import org.holodeckb2b.customvalidation.ICustomValidationExecutor;
 
 /**
  * Provides access to the Holodeck B2B Core of a running instance to the Holodeck B2B Core classes. It is an extension
@@ -51,5 +52,16 @@ public class HolodeckB2BCore extends HolodeckB2BCoreInterface {
      */
     public static StorageManager getStoreManager() {
         return ((HolodeckB2BCoreImpl) coreImplementation).getStorageManager();
+    }
+
+    /**
+     * Gets the {@link ICustomValidationExecutor} implementation that should be used for the execution of the custom
+     * message validations.
+     *
+     * @return  The component responsible for execution of the custom validations.
+     * @since HB2B_NEXT_VERSION
+     */
+    public static ICustomValidationExecutor getValidationExecutor() {
+        return ((HolodeckB2BCoreImpl) coreImplementation).getValidationExecutor();
     }
 }
