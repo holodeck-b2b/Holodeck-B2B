@@ -16,14 +16,13 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import java.util.ArrayList;
-import java.util.Date;
-import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.engine.Handler;
+import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -46,7 +45,6 @@ import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -56,8 +54,18 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.Date;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 /**
  * Created at 23:49 29.01.17
+ *
+ * Checked for compliance (29.04.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -113,15 +121,6 @@ public class HeaderValidationTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
 
-//      SaFi: I think it isn't necessary to set the SOAP envelope for this test as the handler only uses objects set in
-//          the message context
-//
-//        try {
-//            mc.setEnvelope(env);
-//        } catch (AxisFault axisFault) {
-//            fail(axisFault.getMessage());
-//        }
-
         UserMessage userMessage
                 = UserMessageElement.readElement(umElement);
         // Setting input message property
@@ -131,13 +130,24 @@ public class HeaderValidationTest {
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
                 userMessageEntity);
 
+        // Mocking the Axis2 Operation Context
+        // Without Operation Context the validator won't be initialised
+        OperationContext operationContext = mock(OperationContext.class);
+        when(operationContext
+                .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
+                .thenReturn(mc);
+
+        mc.setOperationContext(operationContext);
+
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertNotNull(invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
-        // When validation is succesful there should be no error in the message context
+        // If the Operation Context is null we can't be sure that the validator was initialised
+        assertNotNull(mc.getOperationContext());
+        // When validation is successful there should be no error in the message context
         assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
 
 //        // Checking log messages to make sure handler validated
@@ -175,12 +185,6 @@ public class HeaderValidationTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
 
-//        try {
-//            mc.setEnvelope(env);
-//        } catch (AxisFault axisFault) {
-//            fail(axisFault.getMessage());
-//        }
-
         // Setting input PullRequest property
         StorageManager updateManager = core.getStorageManager();
         IPullRequestEntity pullRequestEntity =
@@ -188,12 +192,22 @@ public class HeaderValidationTest {
         mc.setProperty(MessageContextProperties.IN_PULL_REQUEST,
                 pullRequestEntity);
 
+        // Mocking the Axis2 Operation Context
+        OperationContext operationContext = mock(OperationContext.class);
+        when(operationContext
+                .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
+                .thenReturn(mc);
+
+        mc.setOperationContext(operationContext);
+
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertNotNull(invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
+        // If the Operation Context is null we can't be sure that the validator was initialised
+        assertNotNull(mc.getOperationContext());
         // When validation is succesful there should be no error in the message context
         assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
 
@@ -214,7 +228,6 @@ public class HeaderValidationTest {
 //        assertTrue(containsExpLogMsg);
     }
 
-    // todo the following test fails. Correct it and uncomment
     @Test
     public void testDoProcessingOfReciepts() throws Exception {
         // Creating SOAP envelope
@@ -240,12 +253,6 @@ public class HeaderValidationTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
 
-//        try {
-//            mc.setEnvelope(env);
-//        } catch (AxisFault axisFault) {
-//            fail(axisFault.getMessage());
-//        }
-
         // Setting input Receipt property
         StorageManager updateManager = core.getStorageManager();
 
@@ -256,13 +263,24 @@ public class HeaderValidationTest {
         mc.setProperty(MessageContextProperties.IN_RECEIPTS,
                 receiptEntities);
 
+        // Mocking the Axis2 Operation Context
+        // Without Operation Context the validator won't be initialised
+        OperationContext operationContext = mock(OperationContext.class);
+        when(operationContext
+                .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
+                .thenReturn(mc);
+
+        mc.setOperationContext(operationContext);
+
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertNotNull(invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
-        // When validation is succesful there should be no error in the message context
+        // If the Operation Context is null we can't be sure that the validator was initialised
+        assertNotNull(mc.getOperationContext());
+        // When validation is successful there should be no error in the message context
         assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
 
 //        // Checking log messages to make sure handler validated
@@ -305,13 +323,24 @@ public class HeaderValidationTest {
         mc.setProperty(MessageContextProperties.IN_ERRORS,
                 errorMessageEntities);
 
+        // Mocking the Axis2 Operation Context
+        // Without Operation Context the validator won't be initialised
+        OperationContext operationContext = mock(OperationContext.class);
+        when(operationContext
+                .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
+                .thenReturn(mc);
+
+        mc.setOperationContext(operationContext);
+
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertNotNull(invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
-        // When validation is succesful there should be no error in the message context
+        // If the Operation Context is null we can't be sure that the validator was initialised
+        assertNotNull(mc.getOperationContext());
+        // When validation is successful there should be no error in the message context
         assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
 
 //        // Checking log messages to make sure handler validated
