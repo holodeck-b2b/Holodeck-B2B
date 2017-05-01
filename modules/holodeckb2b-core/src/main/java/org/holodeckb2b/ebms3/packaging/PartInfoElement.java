@@ -73,7 +73,8 @@ public class PartInfoElement {
             piElement.addAttribute(HREF_ATTR, href, null);
         }
 
-        // todo we need to add filling of the other attributes: containment and mimeType ?
+        // containment, mimeType and location attributes are used internally
+        // they are retrieved separately. We don't need to get data from them here
 
         // Create the Schema element (if schema reference is provided)
         final ISchemaReference schemaRef = data.getSchemaReference();
