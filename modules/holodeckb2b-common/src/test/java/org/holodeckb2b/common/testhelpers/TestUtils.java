@@ -1,20 +1,13 @@
 package org.holodeckb2b.common.testhelpers;
 
-import org.apache.axiom.om.OMElement;
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.general.IProperty;
 
-import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-
-//import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Created at 15:22 19.02.17
