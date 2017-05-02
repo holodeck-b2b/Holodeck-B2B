@@ -153,6 +153,16 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Dependency from common test util classes -->
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-common</artifactId>
+            <version>next-201704-SNAPSHOT-1</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
         <!--Used to parse pom.xml and get project properties, such as version-->
         <dependency>
             <groupId>org.apache.maven</groupId>

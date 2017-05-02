@@ -35,7 +35,7 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.pmode.helpers.*;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.core.testhelpers.TestEventProcessor;
+import org.holodeckb2b.common.testhelpers.TestEventProcessor;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;

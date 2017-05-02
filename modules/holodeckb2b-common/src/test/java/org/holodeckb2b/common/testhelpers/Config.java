@@ -30,23 +30,25 @@ public class Config implements InternalConfiguration {
     private String pmodeStorageClass = null;
     private boolean useStrictHeaderValidation = false;
 
-    Config(final String homeDir) {
+    private boolean allowSignalBundling = false;
+
+    public Config(final String homeDir) {
         hb2b_home = homeDir;
     }
 
-    Config(final String homeDir, final String pmodeValidatorClass) {
+    public Config(final String homeDir, final String pmodeValidatorClass) {
         hb2b_home = homeDir;
         this.pmodeValidatorClass = pmodeValidatorClass;
     }
 
-    Config(final String homeDir, final String pmodeValidatorClass,
+    public Config(final String homeDir, final String pmodeValidatorClass,
            final String pmodeStorageClass) {
         hb2b_home = homeDir;
         this.pmodeValidatorClass = pmodeValidatorClass;
         this.pmodeStorageClass = pmodeStorageClass;
     }
 
-    Config(final String homeDir, final boolean useStrictValidation) {
+    public Config(final String homeDir, final boolean useStrictValidation) {
         hb2b_home = homeDir;
         useStrictHeaderValidation = useStrictValidation;
     }
@@ -82,12 +84,13 @@ public class Config implements InternalConfiguration {
 
     @Override
     public String getTempDirectory() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getHolodeckB2BHome() + "/temp/";
     }
 
     @Override
     public boolean allowSignalBundling() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        System.out.println("[Config.allowSignalBundling()]: " + this.toString());
+        return allowSignalBundling;
     }
 
     @Override
@@ -102,7 +105,7 @@ public class Config implements InternalConfiguration {
 
     @Override
     public boolean useStrictErrorRefCheck() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return false;
     }
 
     @Override
@@ -117,7 +120,7 @@ public class Config implements InternalConfiguration {
 
     @Override
     public boolean shouldCheckCertificateRevocation() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return true;
     }
 
     @Override
@@ -147,9 +150,10 @@ public class Config implements InternalConfiguration {
 
     @Override
     public String getPersistencyProviderClass() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return "org.holodeckb2b.persistency.DefaultProvider";
     }
 
+    @Override
     public boolean useStrictHeaderValidation() {
         return useStrictHeaderValidation;
     }

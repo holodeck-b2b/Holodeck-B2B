@@ -37,6 +37,8 @@ import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.InMemoryPModeSet;
 import org.holodeckb2b.pmode.PModeManager;
 
+import org.holodeckb2b.common.testhelpers.Config;
+
 import static org.mockito.Mockito.mock;
 
 /**
