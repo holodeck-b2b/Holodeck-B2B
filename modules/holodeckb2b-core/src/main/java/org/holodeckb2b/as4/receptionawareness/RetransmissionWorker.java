@@ -63,7 +63,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
     @Override
     public void doProcessing() {
 
-        // Get all the message id's for unacknowlegded user messages
+        // Get all the message id's for unacknowledged user messages
         log.debug("Get all user messages that may need to be resent");
         Collection<IUserMessageEntity> waitingForRcpt = null;
         try {
