@@ -35,7 +35,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * Created at 23:16 29.01.17
  *
- * todo move piElement initialisation out of the test methods
+ * Checked for cases coverage (30.04.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */

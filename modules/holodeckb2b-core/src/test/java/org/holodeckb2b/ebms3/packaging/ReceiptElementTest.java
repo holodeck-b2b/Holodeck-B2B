@@ -34,6 +34,8 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created at 15:17 19.02.17
  *
+ * Checked for cases coverage (30.04.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class ReceiptElementTest {

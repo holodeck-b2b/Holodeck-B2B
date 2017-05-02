@@ -37,6 +37,8 @@ import static org.junit.Assert.*;
 /**
  * Created at 23:18 29.01.17
  *
+ * Checked for cases coverage (27.04.2017)
+ *
  * We should test both use cases of the Description element
  * 1. inside Signal element
  * 2. inside PartInfo element
