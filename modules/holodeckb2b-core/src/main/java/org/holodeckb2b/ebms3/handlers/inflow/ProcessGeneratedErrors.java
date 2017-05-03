@@ -77,7 +77,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
         if (Utils.isNullOrEmpty(errors)) {
             log.debug("No errors were generated during this in flow, nothing to do");
         } else {
-            StorageManager updateManager = HolodeckB2BCore.getStorageManager();
+            StorageManager storageManager = HolodeckB2BCore.getStorageManager();
             log.debug(errors.size() + " error(s) were generated during this in flow");
 
             // First bundle the errors per message in error
@@ -88,7 +88,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
                 log.debug("Create the Error Signal and save to database");
                 ErrorMessage tErrorMessage = new ErrorMessage(segmentedErrors.get(refToMsgId));
                 tErrorMessage.setRefToMessageId(refToMsgId.equals("null") ? null : refToMsgId);
-                final IErrorMessageEntity errorMessage = updateManager.storeOutGoingMessageUnit(tErrorMessage);
+                final IErrorMessageEntity errorMessage = storageManager.storeOutGoingMessageUnit(tErrorMessage);
                 if (refToMsgId.equals("null")) {
                     // This collection of errors does not reference a specific message unit, should therefor be sent
                     // as a response.
@@ -105,7 +105,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
                         log.warn("Error without reference can not be sent because successfull message units exist"
                                 + " or message received as response");
                         // As we can not do anything with the error change its processing state to DONE
-                        updateManager.setProcessingState(errorMessage, ProcessingState.WARNING);
+                        storageManager.setProcessingState(errorMessage, ProcessingState.WARNING);
                     }
                 } else {
                     // This collection of errors references one of the received message units.
@@ -114,7 +114,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
                     final String pmodeId = muInError.getPModeId();
                     if (!Utils.isNullOrEmpty(pmodeId)) {
                         log.debug("Set P-Mode Id [" + pmodeId + "] for generated Error Message");
-                        updateManager.setPModeId(errorMessage, pmodeId);
+                        storageManager.setPModeId(errorMessage, pmodeId);
                     }
                     if (muInError instanceof IPullRequest) {
                         /* The message unit in error is a PullRequest. Because the PullRequest is not necessarily
@@ -162,10 +162,10 @@ public class ProcessGeneratedErrors extends BaseHandler {
                                 MessageContextUtils.addErrorSignalToSend(mc, errorMessage);
                                 mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
                             } else
-                                updateManager.setProcessingState(errorMessage, ProcessingState.READY_TO_PUSH);
+                                storageManager.setProcessingState(errorMessage, ProcessingState.READY_TO_PUSH);
                         } else {
                             log.debug("Error doesn't need to be sent. Processing completed.");
-                            updateManager.setProcessingState(errorMessage, ProcessingState.DONE);
+                            storageManager.setProcessingState(errorMessage, ProcessingState.DONE);
                         }
                     }
                 }
