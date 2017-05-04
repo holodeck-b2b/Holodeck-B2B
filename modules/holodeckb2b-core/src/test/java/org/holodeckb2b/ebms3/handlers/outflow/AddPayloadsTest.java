@@ -67,6 +67,8 @@ import static org.mockito.Mockito.verify;
 /**
  * Created at 23:39 29.01.17
  *
+ * Checked for cases coverage (04.05.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
@@ -102,6 +104,7 @@ public class AddPayloadsTest {
     @After
     public void tearDown() throws Exception {
         LogManager.getRootLogger().removeAppender(mockAppender);
+        core.getPModeSet().removeAll();
     }
 
     @Test

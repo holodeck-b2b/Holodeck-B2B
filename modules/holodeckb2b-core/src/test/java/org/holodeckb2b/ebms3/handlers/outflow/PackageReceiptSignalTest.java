@@ -60,6 +60,8 @@ import static org.mockito.Mockito.verify;
 /**
  * Created at 15:45 27.02.17
  *
+ * Checked for cases coverage (04.05.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)

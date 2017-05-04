@@ -44,6 +44,8 @@ import static org.junit.Assert.*;
 /**
  * Created at 23:23 29.01.17
  *
+ * Checked for cases coverage (04.05.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class ReadErrorTest {
