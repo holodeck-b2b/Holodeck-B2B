@@ -26,7 +26,7 @@ import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
-import org.holodeckb2b.ebms3.errors.ValueInconsistent;
+import org.holodeckb2b.ebms3.errors.PolicyNoncompliance;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -43,7 +43,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * <i>"When signed receipts are requested in AS4 that make use of default conventions, the Sending message handler
  * (i.e. the MSH sending messages for which signed receipts are expected) MUST identify message parts (referenced in
  * eb:PartInfo elements in the received User Message) and MUST sign the SOAP body and all attachments"</i>
- * <p>If a payload is not signed a <i>ValueInconsistent</i> error will be generated and reported to the sender of the
+ * <p>If a payload is not signed a <i>PolicyNoncompliance</i> error will be generated and reported to the sender of the
  * user message.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
@@ -107,8 +107,8 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
                     log.warn("Payload with reference [" + plRef + "] is not signed in user message ["
                                 + um.getMessageId() + "]");
                     // If no ds:Reference is found for this payload the message does not conform to the AS4 requirements
-                    // that all payloads should be signed. Therefore create the ValueInconsistent error
-                    createValueInconsistentError(mc, um.getMessageId(), payload.getPayloadURI());
+                    // that all payloads should be signed. Therefore create the PolicyNoncompliance error
+                    createPolicyNoncomplianceError(mc, um.getMessageId(), payload.getPayloadURI());
                 }
             }
         }
@@ -154,14 +154,14 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
     }
 
     /**
-     * Helper method to create a <i>ValueInconsistent</i> error to indicate that a payload is not signed.
+     * Helper method to create a <i>PolicyNoncompliance</i> error to indicate that a payload is not signed.
      *
      * @param mc        The current message context
      * @param msgId     The message id of the user message for which the signature is not complete
      * @param plRef     The reference for which no ds:Reference was found in the signature
      */
-    private void createValueInconsistentError(final MessageContext mc, final String msgId, final String plRef) {
-        final ValueInconsistent   error = new ValueInconsistent();
+    private void createPolicyNoncomplianceError(final MessageContext mc, final String msgId, final String plRef) {
+        final PolicyNoncompliance   error = new PolicyNoncompliance();
         error.setRefToMessageInError(msgId);
         error.setErrorDetail("Payload with href=" + plRef + " is not included in Signature");
 
