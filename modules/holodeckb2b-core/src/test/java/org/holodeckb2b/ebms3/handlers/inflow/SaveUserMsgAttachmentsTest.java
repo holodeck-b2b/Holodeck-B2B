@@ -54,6 +54,8 @@ import static org.junit.Assert.fail;
 /**
  * Created at 12:09 15.03.17
  *
+ * Checked for cases coverage (05.05.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
@@ -81,8 +83,8 @@ public class SaveUserMsgAttachmentsTest {
 
     @After
     public void tearDown() throws Exception {
-        // Removal of temporary attachment files from target/test-classes/handlers/temp/plcin
-        // if performed in DeliverErrorsTest. No more removal needed here
+        TestUtils.cleanOldMessageUnitEntities();
+        core.getPModeSet().removeAll();
     }
 
     @Test
