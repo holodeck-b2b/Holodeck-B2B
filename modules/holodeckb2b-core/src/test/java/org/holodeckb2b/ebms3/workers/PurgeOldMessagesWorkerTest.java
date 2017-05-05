@@ -79,6 +79,11 @@ public class PurgeOldMessagesWorkerTest {
         HolodeckB2BCoreInterface.setImplementation(core);
 
         try {
+            // todo The next line is temporary. We need to clean tests resources correctly
+            // todo Currently some tests does not correctly clean the resources which leads
+            // todo to failure of this test without pre cleaning of the resources while running tests altogether
+            TestUtils.cleanOldMessageUnitEntities();
+
             final EntityManager em = EntityManagerUtil.getEntityManager();
 
             em.getTransaction().begin();
