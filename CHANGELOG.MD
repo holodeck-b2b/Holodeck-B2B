@@ -4,20 +4,27 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 ###Added
-* Added option to apply _strict_ validation of ebMS header meta-data. By default Holodeck B2B only validates 
+* Option to apply _strict_ validation of ebMS header meta-data. By default Holodeck B2B only validates
 that it is able to process the message. When applying _strict_ validation mode it will check that the header
-meta-data conforms to all requirements as stated in the ebMS Specifications. 
-The use of the _strict_ validation mode can be configured both globally on Holodeck B2B instance level 
+meta-data conforms to all requirements as stated in the ebMS Specifications.
+The use of the _strict_ validation mode can be configured both globally on Holodeck B2B instance level
 (`IConfiguation.useStrictHeaderValidation()`) or on a per P-Mode basis (`IPMode.useStrictHeaderValidation()`).
-* 
+* It is now possible to perform custom validations of _User Message_ message units before delivery to
+the _Consumer_. Depending on the configuration validation problems may result in rejection of the message
+unit and return an ebMS _Error Signal_ to the sender of the message. The configuration of the custom validation
+is done in the _User Message flow_ of the P-Mode, see
+`org.holodeckb2b.interfaces.pmode.IUserMessageFlow.getCustomValidationConfiguration()`
+*
 
 ###Changed
 * Refactored the validation of the ebMS header meta-data validation classes and handler
+* The ebMS Error returned to the sender in case the signature of a _User Message_ does not include all
+payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonCompliance_.
 
 ###Deprecated
 * The configuration parameter (`IConfiguation.useStrictErrorRefCheck()`) to apply a strict validation on the
  references in the Error signal is replaced by the generic strict header validation mode.
- *
+*
 
 ###Removed
 
@@ -125,4 +132,3 @@ version.
 * Database doesn't save long meta data strings [#8](https://github.com/holodeck-b2b/Holodeck-B2B/issues/8)
 * NPE when using PullRequestFlow without security configuration [#9](https://github.com/holodeck-b2b/Holodeck-B2B/issues/9)
 * IOException possible on parallel submission to Holodeck B2B Core [#10](https://github.com/holodeck-b2b/Holodeck-B2B/issues/10)
-
