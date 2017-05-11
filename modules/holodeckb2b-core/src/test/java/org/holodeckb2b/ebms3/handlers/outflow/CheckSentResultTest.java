@@ -36,16 +36,22 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.dao.StorageManager;
+import org.holodeckb2b.pmode.helpers.Leg;
+import org.holodeckb2b.pmode.helpers.PMode;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * Created at 23:40 29.01.17
+ *
+ * Checked for cases coverage (11.05.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -68,6 +74,11 @@ public class CheckSentResultTest {
     @Before
     public void setUp() throws Exception {
         handler = new CheckSentResult();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        core.getPModeSet().removeAll();
     }
 
     @Test
@@ -99,6 +110,15 @@ public class CheckSentResultTest {
             fail(axisFault.getMessage());
         }
 
+        PMode pmode = new PMode();
+        Leg leg = new Leg();
+        pmode.addLeg(leg);
+        String pmodeId =
+                userMessage.getCollaborationInfo().getAgreement().getPModeId();
+        userMessage.setPModeId(pmodeId);
+        pmode.setId(pmodeId);
+        core.getPModeSet().add(pmode);
+
         StorageManager storageManager = core.getStorageManager();
         // Setting input message property
         IUserMessageEntity userMessageEntity =
@@ -114,6 +134,15 @@ public class CheckSentResultTest {
         }
 
         assertEquals(ProcessingState.SENDING,
+                userMessageEntity.getCurrentProcessingState().getState());
+
+        try {
+            handler.flowComplete(mc);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        assertEquals(ProcessingState.DELIVERED,
                 userMessageEntity.getCurrentProcessingState().getState());
     }
 }

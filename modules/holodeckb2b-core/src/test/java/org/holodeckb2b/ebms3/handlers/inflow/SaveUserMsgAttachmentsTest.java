@@ -38,10 +38,7 @@ import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.PayloadProfile;
 import org.holodeckb2b.pmode.helpers.UserMessageFlow;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -75,16 +72,16 @@ public class SaveUserMsgAttachmentsTest {
         HolodeckB2BCoreInterface.setImplementation(core);
     }
 
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+        TestUtils.cleanOldMessageUnitEntities();
+        core.getPModeSet().removeAll();
+    }
+
     @Before
     public void setUp() throws Exception {
         // Executed after org.holodeckb2b.as4.compression.DecompressionHandler
         handler = new SaveUserMsgAttachments();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        TestUtils.cleanOldMessageUnitEntities();
-        core.getPModeSet().removeAll();
     }
 
     @Test
