@@ -92,7 +92,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
                 if (refToMsgId.equals("null")) {
                     // This collection of errors does not reference a specific message unit, should therefor be sent
                     // as a response.
-                    // If however the message contained multiple message units some can be processed succesfully and
+                    // If however the message contained multiple message units some can be processed successfully and
                     // returning an non referenceable error creates ambiguity as the sender can only set all sent
                     // message units to failed.
                     // Therefor we only sent out this error if there no message unit with a processing state
@@ -102,7 +102,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
                         MessageContextUtils.addErrorSignalToSend(mc, errorMessage);
                         mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
                     } else {
-                        log.warn("Error without reference can not be sent because successfull message units exist"
+                        log.warn("Error without reference can not be sent because successful message units exist"
                                 + " or message received as response");
                         // As we can not do anything with the error change its processing state to DONE
                         storageManager.setProcessingState(errorMessage, ProcessingState.WARNING);
@@ -214,6 +214,9 @@ public class ProcessGeneratedErrors extends BaseHandler {
         if (!Utils.isNullOrEmpty(allRcvdMessageUnits))
             for(final IMessageUnitEntity m : allRcvdMessageUnits)
                 onlyFailed &= m.getCurrentProcessingState().getState() == ProcessingState.FAILURE;
+
+        System.out.println("[]onlyFailed: " + onlyFailed);
+
         return onlyFailed;
     }
 
