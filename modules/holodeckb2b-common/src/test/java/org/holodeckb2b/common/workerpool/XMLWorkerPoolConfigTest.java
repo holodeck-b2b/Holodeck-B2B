@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
