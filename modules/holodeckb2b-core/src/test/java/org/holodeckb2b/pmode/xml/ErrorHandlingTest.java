@@ -25,6 +25,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
@@ -43,7 +44,8 @@ public class ErrorHandlingTest {
 
         try {
             // retrieve the resource from the pmodetest directory.
-            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/eh/" + fName).getPath());
+            final String filePath = TestUtils.getPath(this.getClass(), "pmodetest/eh/" + fName);
+            final File f = new File(filePath);
 
             final Serializer  serializer = new Persister();
             return serializer.read(ErrorHandling.class, f);
