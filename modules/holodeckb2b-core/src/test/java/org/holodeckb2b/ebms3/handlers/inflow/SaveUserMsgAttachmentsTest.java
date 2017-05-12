@@ -66,7 +66,9 @@ public class SaveUserMsgAttachmentsTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = TestUtils.getPath(SaveUserMsgAttachmentsTest.class, "handlers");
+        // When we need to create directories this method causes the emerge of the UnknownHostException.
+//        baseDir = TestUtils.getPath(SaveUserMsgAttachmentsTest.class, "handlers");
+        baseDir = SaveUserMsgAttachmentsTest.class.getClassLoader().getResource("handlers").getPath();
         System.out.println("baseDir: " + baseDir);
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
