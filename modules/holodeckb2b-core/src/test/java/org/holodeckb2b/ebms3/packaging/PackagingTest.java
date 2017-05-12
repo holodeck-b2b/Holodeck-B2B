@@ -90,7 +90,7 @@ public class PackagingTest {
         // The SOAP enveloppe should be valid according to the ebMS schema, write the
         // xml to file and validate it using Xerces
 //        final String xmlPath = this.getClass().getClassLoader().getResource("packagetest").getPath() + "/xml_testUserMessageOnly.xml";
-        final String xmlPath = TestUtils.getPath(this.getClass(), "packagetest/xml_testUserMessageOnly.xml");
+        final String xmlPath = TestUtils.getPath(this.getClass(), "packagetest") + "/xml_testUserMessageOnly.xml";
         final File   xmlFile = new File(xmlPath);
         try {
             final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(new FileWriter(xmlFile));

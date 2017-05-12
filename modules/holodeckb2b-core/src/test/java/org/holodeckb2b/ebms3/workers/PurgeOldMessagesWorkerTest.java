@@ -77,15 +77,19 @@ public class PurgeOldMessagesWorkerTest {
     private static final String MSGID_6 = "um6-msg-id@test";
 
     private static String basePath =
-            TestUtils.getPath(PurgeOldMessagesWorkerTest.class, "purgetest/");
+            TestUtils.getPath(PurgeOldMessagesWorkerTest.class, "purgetest");
     //PurgeOldMessagesWorkerTest.class.getClassLoader().getResource("purgetest/").getPath();
 
     public PurgeOldMessagesWorkerTest() {
     }
 
+    private static HolodeckCore core;
 
     @BeforeClass
     public static void setUpClass() {
+        core = new HolodeckCore(basePath);
+        HolodeckB2BCoreInterface.setImplementation(core);
+
         try {
             final EntityManager em = JPAUtil.getEntityManager();
 
@@ -97,7 +101,7 @@ public class PurgeOldMessagesWorkerTest {
             Calendar stateTime = Calendar.getInstance();
 
             // Ensure tmp directory is available
-            new File(basePath + "tmp").mkdir();
+            new File(basePath + "/tmp").mkdir();
 
             um = new UserMessage();
             um.setMessageId(MSGID_1);
