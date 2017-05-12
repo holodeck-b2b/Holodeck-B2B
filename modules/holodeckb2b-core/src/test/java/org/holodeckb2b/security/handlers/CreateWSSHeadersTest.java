@@ -98,8 +98,7 @@ public class CreateWSSHeadersTest {
         Security.addProvider(new BouncyCastleProvider());
 
         // The baseDir folder should contain publickeys.jks file
-        baseDir = CreateWSSHeadersTest.class
-                .getClassLoader().getResource("security").getPath();
+        baseDir = TestUtils.getPath(CreateWSSHeadersTest.class, "security");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

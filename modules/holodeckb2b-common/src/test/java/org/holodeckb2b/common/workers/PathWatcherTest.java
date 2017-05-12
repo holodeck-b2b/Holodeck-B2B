@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.common.workers;
 
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.junit.After;
 import org.junit.Before;
@@ -36,7 +37,8 @@ public class PathWatcherTest {
 
     @Before
     public void setUp() {
-        baseDir = this.getClass().getClassLoader().getResource("workers").getPath();
+        baseDir = TestUtils.getPath(this.getClass(), "workers");
+//        baseDir = this.getClass().getClassLoader().getResource("workers").getPath();
     }
 
     @After

@@ -70,8 +70,7 @@ public class DeliverReceiptsTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = DeliverErrorsTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(DeliverReceiptsTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

@@ -81,8 +81,7 @@ public class AuthorizeMessageTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = AuthorizeMessageTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(AuthorizeMessageTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

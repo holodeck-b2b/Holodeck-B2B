@@ -69,8 +69,8 @@ public class SaveUserMsgAttachmentsTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = SaveUserMsgAttachmentsTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(SaveUserMsgAttachmentsTest.class, "handlers");
+        System.out.println("baseDir: " + baseDir);
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

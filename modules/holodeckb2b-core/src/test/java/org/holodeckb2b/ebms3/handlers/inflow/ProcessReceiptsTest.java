@@ -85,8 +85,7 @@ public class ProcessReceiptsTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = ProcessReceiptsTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(ProcessReceiptsTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

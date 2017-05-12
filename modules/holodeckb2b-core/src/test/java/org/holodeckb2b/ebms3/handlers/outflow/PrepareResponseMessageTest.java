@@ -87,8 +87,7 @@ public class PrepareResponseMessageTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = PrepareResponseMessageTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(PrepareResponseMessageTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
