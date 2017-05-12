@@ -49,7 +49,6 @@ public class DeliverySpecificationTest {
             final String filePath = TestUtils.getPath(this.getClass(),
                     "pmodetest/deliveryspecification/" + fName);
             final File f = new File(filePath);
-//            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/deliveryspecification/" + fName).getPath());
 
             final Serializer  serializer = new Persister();
             return serializer.read(DeliverySpecification.class, f);

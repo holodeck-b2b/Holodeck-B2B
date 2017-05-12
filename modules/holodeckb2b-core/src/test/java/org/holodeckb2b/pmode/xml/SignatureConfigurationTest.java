@@ -45,7 +45,6 @@ public class SignatureConfigurationTest {
             // retrieve the resource from the pmodetest directory.
             final String filePath = TestUtils.getPath(this.getClass(), "pmodetest/sig/" + fName);
             final File f = new File(filePath);
-//            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/sig/" + fName).getPath());
 
             final Serializer  serializer = new Persister();
             return serializer.read(SignatureConfiguration.class, f);

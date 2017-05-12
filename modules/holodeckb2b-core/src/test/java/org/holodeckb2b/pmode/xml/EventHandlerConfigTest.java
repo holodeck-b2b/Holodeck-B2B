@@ -40,7 +40,6 @@ public class EventHandlerConfigTest {
             // retrieve the resource from the pmodetest directory.
             final String filePath = TestUtils.getPath(this.getClass(), "pmodetest/events/" + fName);
             final File f = new File(filePath);
-//            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/events/" + fName).getPath());
 
             final Serializer  serializer = new Persister();
             return serializer.read(EventHandlerConfig.class, f);

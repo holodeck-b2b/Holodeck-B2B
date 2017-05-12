@@ -50,7 +50,6 @@ public class PModeIdTest {
             // retrieve the resource from the pmodetest directory.
             final String filePath = TestUtils.getPath(this.getClass(), "pmodetest/pmodeid/" + fName);
             final File f = new File(filePath);
-//            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/pmodeid/" + fName).getPath());
 
             final Serializer  serializer = new Persister();
             return serializer.read(PMode.class, f);

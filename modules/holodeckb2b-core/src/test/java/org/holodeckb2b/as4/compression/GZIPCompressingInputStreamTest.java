@@ -56,7 +56,6 @@ public class GZIPCompressingInputStreamTest {
     @Before
     public void setUp() {
         try {
-//            final File out = new File(this.getClass().getClassLoader().getResource("compression/compressed.gz").getPath());
             final File out = new File(cPath + "/compressed.gz");
             if (out.exists())
                 out.delete();

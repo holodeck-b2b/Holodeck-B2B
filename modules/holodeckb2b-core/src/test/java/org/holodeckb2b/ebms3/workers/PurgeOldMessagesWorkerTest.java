@@ -78,7 +78,6 @@ public class PurgeOldMessagesWorkerTest {
 
     private static String basePath =
             TestUtils.getPath(PurgeOldMessagesWorkerTest.class, "purgetest");
-    //PurgeOldMessagesWorkerTest.class.getClassLoader().getResource("purgetest/").getPath();
 
     public PurgeOldMessagesWorkerTest() {
     }

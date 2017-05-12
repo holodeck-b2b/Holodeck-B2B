@@ -45,7 +45,6 @@ public class RoutingInputTest {
     public void testFullUserMessageHeader() {
         // Use filled mmd document for testing
         final String mmdPath = TestUtils.getPath(this.getClass(), "multihop/ri/full_mmd.xml");
-//        final String mmdPath = this.getClass().getClassLoader().getResource("multihop/ri/full_mmd.xml").getPath();
         final File   f = new File(mmdPath);
         MessageMetaData mmd = null;
         try {

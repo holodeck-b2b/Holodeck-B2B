@@ -53,7 +53,6 @@ public class DirWatcherTest {
     @Before
     public void setUp() {
         instance = new DirWatcherImpl();
-//        basePath = this.getClass().getClassLoader().getResource("dirwatcher").getPath();
         basePath = TestUtils.getPath(this.getClass(), "dirwatcher");
 
         testDir = new File(basePath + "/checkdir");

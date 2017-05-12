@@ -52,7 +52,6 @@ public class EncryptionConfigurationTest {
 
             final String filePath = TestUtils.getPath(this.getClass(), "pmodetest/encr/" + fName);
             final File f = new File(filePath);
-//            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/encr/" + fName).getPath());
 
             final Serializer  serializer = new Persister();
             return serializer.read(EncryptionConfiguration.class, f);

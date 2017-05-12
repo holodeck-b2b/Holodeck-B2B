@@ -57,7 +57,7 @@ public class PullConfigurationTest {
      */
     @Test
     public void testLoad_DefaultOnly() {
-        final String path = basePath + "/pullcfg1.xml";//this.getClass().getClassLoader().getResource("pulltest/pullcfg1.xml").getPath();
+        final String path = basePath + "/pullcfg1.xml";
 
         try {
             final PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);
@@ -80,7 +80,7 @@ public class PullConfigurationTest {
     @SuppressWarnings ("unchecked")
     @Test
     public void testLoad_CompleteConfig() {
-        final String path = basePath + "/pullcfg2.xml"; //this.getClass().getClassLoader().getResource("pulltest/pullcfg2.xml").getPath();
+        final String path = basePath + "/pullcfg2.xml";
 
         try {
             final PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);
@@ -128,7 +128,6 @@ public class PullConfigurationTest {
     @Test
     public void testLoad_ErrorConfig() {
         final String path = basePath + "/pullcfg3.xml";
-//        final String path = this.getClass().getClassLoader().getResource("pulltest/pullcfg3.xml").getPath();
 
         try {
             final PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);

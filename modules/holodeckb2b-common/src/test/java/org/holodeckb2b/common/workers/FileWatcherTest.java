@@ -48,7 +48,6 @@ public class FileWatcherTest {
     @Before
     public void setUp() {
         instance = new FileWatcherImpl();
-//        final String basePath = this.getClass().getClassLoader().getResource("filewatcher").getPath();
         final String basePath = TestUtils.getPath(this.getClass(), "filewatcher");
         testFile = basePath + "/testfile.tst";
 

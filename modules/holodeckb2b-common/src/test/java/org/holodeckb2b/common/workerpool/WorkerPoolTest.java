@@ -65,7 +65,6 @@ public class WorkerPoolTest {
      */
     @Test
     public void testReconfPool() {
-//        String path = this.getClass().getClassLoader().getResource("workerpool/wp_create.xml").getPath();
         String path = TestUtils.getPath(this.getClass(), "workerpool/wp_create.xml");
 
         final IWorkerPoolConfiguration cfg = XMLWorkerPoolConfig.loadFromFile(path);
@@ -78,7 +77,7 @@ public class WorkerPoolTest {
 
             System.out.println("Reconfigure the pool");
 
-            path = this.getClass().getClassLoader().getResource("workerpool/wp_reconf.xml").getPath();
+            path = TestUtils.getPath(this.getClass(), "workerpool/wp_reconf.xml");
             pool.setConfiguration(XMLWorkerPoolConfig.loadFromFile(path));
 
             Thread.sleep(5000);

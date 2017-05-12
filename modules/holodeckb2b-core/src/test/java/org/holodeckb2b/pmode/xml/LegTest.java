@@ -50,7 +50,6 @@ public class LegTest {
             // retrieve the resource from the pmodetest directory.
             final String filePath = TestUtils.getPath(this.getClass(), "pmodetest/leg/" + fName);
             final File f = new File(filePath);
-//            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/leg/" + fName).getPath());
 
             final Serializer serializer = new Persister();
             return serializer.read(Leg.class, f);
