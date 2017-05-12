@@ -33,6 +33,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
 import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
 import org.holodeckb2b.ebms3.persistency.entities.Payload;
@@ -75,7 +76,9 @@ public class PurgeOldMessagesWorkerTest {
     private static final String MSGID_5 = "e1-msg-id@test";
     private static final String MSGID_6 = "um6-msg-id@test";
 
-    private static String basePath = PurgeOldMessagesWorkerTest.class.getClassLoader().getResource("purgetest/").getPath();
+    private static String basePath =
+            TestUtils.getPath(PurgeOldMessagesWorkerTest.class, "purgetest/");
+    //PurgeOldMessagesWorkerTest.class.getClassLoader().getResource("purgetest/").getPath();
 
     public PurgeOldMessagesWorkerTest() {
     }

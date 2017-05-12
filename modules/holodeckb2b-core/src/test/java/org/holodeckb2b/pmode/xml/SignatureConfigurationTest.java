@@ -24,6 +24,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
@@ -42,7 +43,9 @@ public class SignatureConfigurationTest {
 
         try {
             // retrieve the resource from the pmodetest directory.
-            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/sig/" + fName).getPath());
+            final String filePath = TestUtils.getPath(this.getClass(), "pmodetest/sig/" + fName);
+            final File f = new File(filePath);
+//            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/sig/" + fName).getPath());
 
             final Serializer  serializer = new Persister();
             return serializer.read(SignatureConfiguration.class, f);

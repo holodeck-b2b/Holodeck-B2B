@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,7 +44,9 @@ public class UsernameTokenTest {
 
         try {
             // retrieve the resource from the pmodetest directory.
-            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/ut/" + fName).getPath());
+            final String filePath = TestUtils.getPath(this.getClass(), "pmodetest/ut/" + fName);
+            final File f = new File(filePath);
+//            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/ut/" + fName).getPath());
 
             final Serializer  serializer = new Persister();
             return serializer.read(UsernameToken.class, f);

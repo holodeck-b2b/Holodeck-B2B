@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
@@ -47,7 +48,9 @@ public class LegTest {
 
         try {
             // retrieve the resource from the pmodetest directory.
-            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/leg/" + fName).getPath());
+            final String filePath = TestUtils.getPath(this.getClass(), "pmodetest/leg/" + fName);
+            final File f = new File(filePath);
+//            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/leg/" + fName).getPath());
 
             final Serializer serializer = new Persister();
             return serializer.read(Leg.class, f);

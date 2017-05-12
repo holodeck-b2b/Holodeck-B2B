@@ -35,6 +35,7 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -54,12 +55,14 @@ public class PackagingTest {
     private final String    SOAP11schemaFile;
     private final String    SOAP12schemaFile;
 
-
-
     public PackagingTest() {
-        ebMSschemaFile = this.getClass().getClassLoader().getResource("xsd/ebms-header-3_0-200704_refactored.xsd").getPath();
-        SOAP11schemaFile = this.getClass().getClassLoader().getResource("xsd/soap11-envelope.xsd").getPath();
-        SOAP12schemaFile = this.getClass().getClassLoader().getResource("xsd/soap12-envelope.xsd").getPath();
+//        ebMSschemaFile = this.getClass().getClassLoader().getResource("xsd/ebms-header-3_0-200704_refactored.xsd").getPath();
+//        SOAP11schemaFile = this.getClass().getClassLoader().getResource("xsd/soap11-envelope.xsd").getPath();
+//        SOAP12schemaFile = this.getClass().getClassLoader().getResource("xsd/soap12-envelope.xsd").getPath();
+
+        ebMSschemaFile = TestUtils.getPath(this.getClass(), "xsd/ebms-header-3_0-200704_refactored.xsd");
+        SOAP11schemaFile  = TestUtils.getPath(this.getClass(), "xsd/soap11-envelope.xsd");
+        SOAP12schemaFile  = TestUtils.getPath(this.getClass(), "xsd/soap12-envelope.xsd");
     }
 
     /**
@@ -72,7 +75,8 @@ public class PackagingTest {
         final SOAPHeaderBlock messaging = Messaging.createElement(env);
 
         // Use correctly filled mmd document for testing
-        final String mmdPath = this.getClass().getClassLoader().getResource("packagetest/mmd_pcktest.xml").getPath();
+//        final String mmdPath = this.getClass().getClassLoader().getResource("packagetest/mmd_pcktest.xml").getPath();
+        final String mmdPath = TestUtils.getPath(this.getClass(), "packagetest/mmd_pcktest.xml");
         final File   f = new File(mmdPath);
         MessageMetaData mmd = null;
         try {
@@ -85,7 +89,8 @@ public class PackagingTest {
 
         // The SOAP enveloppe should be valid according to the ebMS schema, write the
         // xml to file and validate it using Xerces
-        final String xmlPath = this.getClass().getClassLoader().getResource("packagetest").getPath() + "/xml_testUserMessageOnly.xml";
+//        final String xmlPath = this.getClass().getClassLoader().getResource("packagetest").getPath() + "/xml_testUserMessageOnly.xml";
+        final String xmlPath = TestUtils.getPath(this.getClass(), "packagetest/xml_testUserMessageOnly.xml");
         final File   xmlFile = new File(xmlPath);
         try {
             final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(new FileWriter(xmlFile));

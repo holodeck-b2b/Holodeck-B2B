@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
+
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertArrayEquals;
@@ -38,6 +40,8 @@ import org.junit.Test;
  */
 public class GZIPCompressingInputStreamTest {
 
+    private final String cPath = TestUtils.getPath(this.getClass(), "compression");
+
     public GZIPCompressingInputStreamTest() {
     }
 
@@ -52,7 +56,8 @@ public class GZIPCompressingInputStreamTest {
     @Before
     public void setUp() {
         try {
-            final File out = new File(this.getClass().getClassLoader().getResource("compression/compressed.gz").getPath());
+//            final File out = new File(this.getClass().getClassLoader().getResource("compression/compressed.gz").getPath());
+            final File out = new File(cPath + "/compressed.gz");
             if (out.exists())
                 out.delete();
         } catch (final Exception e)
@@ -65,15 +70,17 @@ public class GZIPCompressingInputStreamTest {
 
     @Test
     public void testCompression() {
-        final File comF = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "compressed.gz");
-        final File decF = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "decompressed.jpg");
+//        final String cPath = TestUtils.getPath(this.getClass(), "compression/");
+        final File comF = new File(cPath + "/compressed.gz");
+        final File decF = new File(cPath + "/decompressed.jpg");
 
         try {
-            final File uncF = new File(this.getClass().getClassLoader().getResource("compression/uncompressed.jpg").getPath());
+            final File uncF = new File(cPath + "/uncompressed.jpg");
             final byte[] buffer = new byte[512];
 
             //Compress
-            try (GZIPCompressingInputStream cfis = new GZIPCompressingInputStream(new FileInputStream(uncF));
+            try (GZIPCompressingInputStream cfis =
+                         new GZIPCompressingInputStream(new FileInputStream(uncF));
                  FileOutputStream fos = new FileOutputStream(comF))
             {
               int r = 0;

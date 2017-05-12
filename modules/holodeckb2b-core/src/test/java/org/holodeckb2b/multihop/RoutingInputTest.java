@@ -25,6 +25,7 @@ import java.util.Iterator;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.mmd.xml.MessageMetaData;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -43,7 +44,8 @@ public class RoutingInputTest {
     @Test
     public void testFullUserMessageHeader() {
         // Use filled mmd document for testing
-        final String mmdPath = this.getClass().getClassLoader().getResource("multihop/ri/full_mmd.xml").getPath();
+        final String mmdPath = TestUtils.getPath(this.getClass(), "multihop/ri/full_mmd.xml");
+//        final String mmdPath = this.getClass().getClassLoader().getResource("multihop/ri/full_mmd.xml").getPath();
         final File   f = new File(mmdPath);
         MessageMetaData mmd = null;
         try {
