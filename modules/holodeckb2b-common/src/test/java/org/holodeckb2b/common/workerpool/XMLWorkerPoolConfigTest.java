@@ -133,7 +133,8 @@ public class XMLWorkerPoolConfigTest {
     @Test
     public void testLoadInvalidFile() {
         System.out.println("loadFromFile");
-        final String path = this.getClass().getClassLoader().getResource("workerpoolcfg/wp_config2.xml").getPath();
+//        final String path = this.getClass().getClassLoader().getResource("workerpoolcfg/wp_config2.xml").getPath();
+        final String path = TestUtils.getPath(this.getClass(), "workerpoolcfg/wp_config2.xml");
 
         final IWorkerPoolConfiguration result = XMLWorkerPoolConfig.loadFromFile(path);
 
@@ -159,7 +160,8 @@ public class XMLWorkerPoolConfigTest {
     @Test
     public void testLoadUnnamedFile() {
         System.out.println("loadFromFile");
-        final String path = this.getClass().getClassLoader().getResource("workerpoolcfg/wp_config3.xml").getPath();
+//        final String path = this.getClass().getClassLoader().getResource("workerpoolcfg/wp_config3.xml").getPath();
+        final String path = TestUtils.getPath(this.getClass(), "workerpoolcfg/wp_config3.xml");
 
         final IWorkerPoolConfiguration result = XMLWorkerPoolConfig.loadFromFile(path);
 
