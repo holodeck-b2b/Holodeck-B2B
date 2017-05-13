@@ -96,7 +96,7 @@ public class CheckSentResult extends BaseHandler {
         if (messaging != null) {
             log.debug("Check result of sent operation");
             final boolean   success = (mc.getFailureReason() == null);
-            log.debug("The sent operation was " + (success ? "" : "not ") + "successfull");
+            log.debug("The sent operation was " + (success ? "" : "not ") + "successful");
 
             //Change processing state of all message units in the message accordingly
             final Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getSentMessageUnits(mc);

@@ -24,10 +24,13 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
  * Created at 13:12 15.10.16
+ *
+ * Checked for cases coverage (25.04.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -39,11 +42,27 @@ public class MessagingTest {
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
         Messaging.createElement(env);
-
         // Check if header contains Messaging header block with mustUnderstand=true
         SOAPHeader header = env.getHeader();
-        ArrayList blocks = header.getHeaderBlocksWithNSURI(EbMSConstants.EBMS3_NS_URI);
+        ArrayList blocks =
+                header.getHeaderBlocksWithNSURI(EbMSConstants.EBMS3_NS_URI);
         assertTrue(blocks.size()>0);
         assertTrue(((SOAPHeaderBlock) blocks.get(0)).getMustUnderstand());
+    }
+
+    @Test
+    public void testGetElement() throws Exception {
+        // Creating SOAP envelope
+        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        // Adding header
+        SOAPHeaderBlock soapHeaderBlock = Messaging.createElement(env);
+
+        SOAPHeaderBlock newSoapHeaderBlock = Messaging.getElement(env);
+        assertEquals(soapHeaderBlock.getMustUnderstand(),
+                newSoapHeaderBlock.getMustUnderstand());
+        assertEquals(soapHeaderBlock.getRelay(), newSoapHeaderBlock.getRelay());
+        assertEquals(soapHeaderBlock.getRole(), newSoapHeaderBlock.getRole());
+        assertEquals(soapHeaderBlock.getVersion(),
+                newSoapHeaderBlock.getVersion());
     }
 }

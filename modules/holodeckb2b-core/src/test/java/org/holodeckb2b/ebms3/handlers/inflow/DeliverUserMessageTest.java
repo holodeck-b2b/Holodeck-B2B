@@ -36,6 +36,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.helpers.DeliverySpecification;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,6 +46,8 @@ import static org.junit.Assert.fail;
 
 /**
  * Created at 12:05 15.03.17
+ *
+ * Checked for cases coverage (24.04.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -58,15 +61,20 @@ public class DeliverUserMessageTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = DeliverUserMessageTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(DeliverUserMessageTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
+
     @Before
     public void setUp() throws Exception {
         // Executed after org.holodeckb2b.as4.receptionawareness.DetectDuplicateUserMessages handler
         handler = new DeliverUserMessage();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        core.getPModeSet().removeAll();
     }
 
     @Test

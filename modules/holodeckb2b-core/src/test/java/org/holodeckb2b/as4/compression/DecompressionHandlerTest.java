@@ -82,8 +82,7 @@ public class DecompressionHandlerTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = DecompressionHandlerTest.class.getClassLoader()
-                .getResource("compression").getPath();
+        baseDir = TestUtils.getPath(DecompressionHandlerTest.class, "compression");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

@@ -16,9 +16,6 @@
  */
 package org.holodeckb2b.ebms3.packaging;
 
-import java.util.Collection;
-import java.util.Iterator;
-import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
@@ -31,13 +28,19 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.xml.namespace.QName;
+import java.util.Collection;
+import java.util.Iterator;
+
+import static org.junit.Assert.*;
+
 /**
  * Created at 13:14 15.10.16
+ *
+ * Checked for cases coverage (30.04.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -73,11 +76,6 @@ public class UserMessageElementTest {
         soapEnvelope = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
         headerBlock = Messaging.createElement(soapEnvelope);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-
     }
 
     @Test
@@ -172,15 +170,10 @@ public class UserMessageElementTest {
         org.holodeckb2b.interfaces.messagemodel.IPayload p1 = it.next();
         assertEquals("org.holodeckb2b.common.messagemodel.Payload",
                 p1.getClass().getName());
-//        assertEquals("attachment", p1.getContainment().toString());  // fails
-//        assertEquals(IPayload.Containment.ATTACHMENT, p1.getContainment()); // fails
-//        assertEquals("I8ZVs6G2P", p1.getMimeType());    // fails
-//        assertEquals("http://sxGTnZjm/", p1.getContentLocation()); // fails
+        assertEquals(IPayload.Containment.BODY, p1.getContainment());
         assertTrue(Utils.isNullOrEmpty(p1.getProperties()));
         org.holodeckb2b.interfaces.messagemodel.IPayload p2 = it.next();
         assertEquals(IPayload.Containment.EXTERNAL, p2.getContainment());
-//        assertEquals("CoL9", p2.getMimeType());  // fails
-//        assertEquals("http://pcVJBuTT/", p2.getPayloadURI()); // fails
         assertFalse(Utils.isNullOrEmpty(p2.getProperties()));
     }
 }

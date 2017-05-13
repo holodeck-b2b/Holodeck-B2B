@@ -39,6 +39,8 @@ import static org.junit.Assert.*;
 /**
  * Created at 23:28 21.09.16
  *
+ * Checked for cases coverage (04.05.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class ReadUserMessageTest {
@@ -49,19 +51,13 @@ public class ReadUserMessageTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = ReadUserMessageTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(ReadUserMessageTest.class, "handlers");
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
     }
 
     @Before
     public void setUp() throws Exception {
         handler = new ReadUserMessage();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-
     }
 
     /**

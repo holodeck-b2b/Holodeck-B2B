@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -45,7 +46,8 @@ public class UserMessageFlowTest {
 
         try {
             // retrieve the resource from the pmodetest directory.
-            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/usermessageflow/" + fName).getPath());
+            final String filePath = TestUtils.getPath(this.getClass(), "pmodetest/usermessageflow/" + fName);
+            final File f = new File(filePath);
 
             final Serializer  serializer = new Persister();
             return serializer.read(UserMessageFlow.class, f);

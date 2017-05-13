@@ -54,6 +54,8 @@ import static org.mockito.Mockito.verify;
 /**
  * Created at 22:19 09.03.17
  *
+ * Checked for cases coverage (05.05.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
@@ -72,8 +74,7 @@ public class StartProcessingUsrMessageTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = StartProcessingUsrMessageTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(StartProcessingUsrMessageTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

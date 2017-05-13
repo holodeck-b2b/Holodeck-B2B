@@ -58,8 +58,7 @@ public class RaiseSignatureCreatedEventTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = RaiseSignatureCreatedEventTest.class
-                .getClassLoader().getResource("security").getPath();
+        baseDir = TestUtils.getPath(RaiseSignatureCreatedEventTest.class, "security");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

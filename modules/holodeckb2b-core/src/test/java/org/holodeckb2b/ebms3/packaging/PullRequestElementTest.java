@@ -56,7 +56,6 @@ public class PullRequestElementTest {
         SOAPEnvelope soapEnvelope = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
         headerBlock = Messaging.createElement(soapEnvelope);
-//        System.out.println("headerBlock: " + headerBlock);
     }
 
     @Test

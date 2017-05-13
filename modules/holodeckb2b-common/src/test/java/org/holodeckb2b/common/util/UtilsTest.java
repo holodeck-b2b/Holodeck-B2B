@@ -25,6 +25,7 @@ import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
 import org.holodeckb2b.common.exceptions.ObjectSerializationException;
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -103,8 +104,8 @@ public class UtilsTest {
 
     @Test
     public void testPreventDuplicateFileName() {
-        String baseDir =
-                UtilsTest.class.getClassLoader().getResource("utils").getPath();
+        String baseDir = TestUtils.getPath(UtilsTest.class, "utils");
+//                UtilsTest.class.getClassLoader().getResource("utils").getPath();
         try {
             File dir = new File(baseDir);
             assertTrue(dir.isDirectory());

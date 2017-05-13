@@ -32,6 +32,8 @@ import static org.junit.Assert.*;
 /**
  * Created at 15:18 19.02.17
  *
+ * Checked for cases coverage (30.04.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class SignalMessageElementTest {

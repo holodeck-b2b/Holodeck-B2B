@@ -34,6 +34,8 @@ import static org.junit.Assert.assertNotNull;
 /**
  * Created at 23:18 29.01.17
  *
+ * Checked for cases coverage (25.04.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class AgreementRefElementTest {
@@ -60,7 +62,12 @@ public class AgreementRefElementTest {
 
     @Test
     public void testCreateElement() throws Exception {
-        AgreementReference agreementReference = new AgreementReference();
+        String name = "agreement_name";
+        String type = "agreement_type";
+        String pmodeId = "some pmode id string";
+        AgreementReference agreementReference =
+                new AgreementReference(name, type, pmodeId);
+
         OMElement agreementRefElement =
                 AgreementRefElement.createElement(ciElement, agreementReference);
         checkContainsInnerElements(agreementRefElement);
@@ -75,15 +82,18 @@ public class AgreementRefElementTest {
 
     @Test
     public void testReadElement() throws Exception {
-        AgreementReference agreementReference = new AgreementReference();
+        String name = "agreement_name";
+        String type = "agreement_type";
         String pmodeId = "some pmode id string";
-        agreementReference.setPModeId(pmodeId);
+        AgreementReference agreementReference =
+                new AgreementReference(name, type, pmodeId);
+
         OMElement agreementRefElement =
                 AgreementRefElement.createElement(ciElement, agreementReference);
 
         agreementReference =
                 AgreementRefElement.readElement(agreementRefElement);
-        checkContainsData(agreementReference, pmodeId);
+        checkContainsData(agreementReference, name, type, pmodeId);
     }
 
     private void checkContainsInnerElements(OMElement arElement) {
@@ -91,8 +101,10 @@ public class AgreementRefElementTest {
     }
 
     private void checkContainsData(AgreementReference agreementReference,
-                                   String pmodeId) {
+                                   String name, String type, String pmodeId) {
         assertNotNull(agreementReference);
+        assertEquals(name, agreementReference.getName());
+        assertEquals(type, agreementReference.getType());
         assertEquals(pmodeId, agreementReference.getPModeId());
     }
 }

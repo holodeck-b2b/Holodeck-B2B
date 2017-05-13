@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PullRequestElement;
@@ -58,6 +59,8 @@ import static org.mockito.Mockito.verify;
 /**
  * Created at 15:45 27.02.17
  *
+ * Checked for cases coverage (04.05.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
@@ -76,8 +79,7 @@ public class PackagePullRequestSignalTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = PackagePullRequestSignalTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(PackagePullRequestSignalTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

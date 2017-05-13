@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.IProperty;
@@ -46,6 +47,8 @@ import org.junit.Test;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class MessageMetaDataTest {
+
+    private final String basePath = TestUtils.getPath(this.getClass(), "mmdtest");
 
     private static final String T_UM1_MPC = "http://holodeck-b2b/test";
     private static final String T_UM1_TIMESTAMP = "2013-07-15T00:00:00.000+02:00";
@@ -75,7 +78,6 @@ public class MessageMetaDataTest {
     private static final IPayload.Containment T_UM1_PAYLD2_CONTAINMENT = IPayload.Containment.EXTERNAL;
     private static final String T_UM1_PAYLD2_LOC = "/files/out/testsample2.xml";
 
-
     public MessageMetaDataTest() {
     }
 
@@ -96,7 +98,7 @@ public class MessageMetaDataTest {
      */
     @Test
     public void test_Minimal() throws Exception {
-        final String path = this.getClass().getClassLoader().getResource("mmdtest/minimal.xml").getPath();
+        final String path = basePath + "/minimal.xml";
         final File   f = new File(path);
 
         try {
@@ -120,7 +122,7 @@ public class MessageMetaDataTest {
      */
     @Test
     public void test_CreateFromFile() throws Exception {
-        final String path = this.getClass().getClassLoader().getResource("mmdtest/mmdtest2.xml").getPath();
+        final String path = basePath + "/mmdtest2.xml";
         final File   f = new File(path);
 
         try {
@@ -225,7 +227,7 @@ public class MessageMetaDataTest {
     @Test
     public void test_DeleteIndicator() throws Exception {
         try {
-            final String path = this.getClass().getClassLoader().getResource("mmdtest/mmdtest2.xml").getPath();
+            final String path = basePath + "/mmdtest2.xml";
             final File   f = new File(path);
             final MessageMetaData mmd = MessageMetaData.createFromFile(f);
             assertNotNull(mmd);
@@ -240,7 +242,7 @@ public class MessageMetaDataTest {
         }
 
         try {
-            final String path = this.getClass().getClassLoader().getResource("mmdtest/mmdtest3.xml").getPath();
+            final String path = basePath + "/mmdtest3.xml";
             final File   f = new File(path);
             final MessageMetaData mmd = MessageMetaData.createFromFile(f);
             assertNotNull(mmd);
@@ -320,8 +322,8 @@ public class MessageMetaDataTest {
         um.setCollaborationInfo(ci);
 
         MessageMetaData mmd = new MessageMetaData(um);
-        final String path = this.getClass().getClassLoader().getResource("mmdtest").getPath();
-        final File   f = new File(path+"/mmd_writetest.xml");
+        final String path = basePath + "/mmd_writetest.xml";
+        final File   f = new File(path);
 
         if (f.exists())
             f.delete();

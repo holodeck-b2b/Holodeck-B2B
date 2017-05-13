@@ -45,6 +45,8 @@ import static org.junit.Assert.*;
 /**
  * Created at 23:21 29.01.17
  *
+ * Checked for cases coverage (04.05.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class ReadReceiptTest {
@@ -58,8 +60,7 @@ public class ReadReceiptTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = ReadReceiptTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(ReadReceiptTest.class, "handlers");
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
     }
 

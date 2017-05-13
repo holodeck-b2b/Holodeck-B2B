@@ -43,6 +43,7 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.junit.After;
@@ -65,6 +66,8 @@ import static org.mockito.Mockito.verify;
 /**
  * Created at 12:06 15.03.17
  *
+ * Checked for cases coverage (05.05.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
@@ -83,8 +86,7 @@ public class ProcessErrorsTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = ProcessErrorsTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(ProcessErrorsTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
@@ -103,6 +105,9 @@ public class ProcessErrorsTest {
         LogManager.getRootLogger().removeAppender(mockAppender);
     }
 
+    /**
+     * Test the case when the message unit is present and is referenced in error
+     */
     @Test
     public void testDoProcessing() throws Exception {
         MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
@@ -127,12 +132,6 @@ public class ProcessErrorsTest {
         MessageContext mc = new MessageContext();
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
-
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
 
         String errorId = "error_id";
         ErrorMessage errorMessage = new ErrorMessage();
@@ -176,6 +175,67 @@ public class ProcessErrorsTest {
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
         String msg1 = "Processed Error Signal ["+errorId+"]";
         assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg1));
+        String msg2 = "All Error Signals processed";
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg2));
+    }
+
+    /**
+     * Test the case when there is no reference to message unit in error
+     */
+    @Test
+    public void testDoProcessingIfNoRefToMsgId() throws Exception {
+        // Creating SOAP envelope
+        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        // Adding header
+        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
+
+        PMode pmode = new PMode();
+        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+
+        MessageContext mc = new MessageContext();
+        mc.setServerSide(true);
+        mc.setFLOW(MessageContext.IN_FLOW);
+
+        String errorId = "error_id";
+        ErrorMessage errorMessage = new ErrorMessage();
+        ArrayList<IEbmsError> errors = new ArrayList<>();
+        EbmsError ebmsError = new EbmsError();
+        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setErrorCode("some_error_code");
+//        ebmsError.setRefToMessageInError(msgId);
+        ebmsError.setMessage("some error message");
+
+        errors.add(ebmsError);
+        errorMessage.setErrors(errors);
+        errorMessage.setMessageId("error_id");
+
+        StorageManager storageManager = core.getStorageManager();
+
+        // Setting input errors property
+        ErrorSignalElement.createElement(headerBlock, errorMessage);
+        IErrorMessageEntity errorMessageEntity =
+                storageManager.storeIncomingMessageUnit(errorMessage);
+        ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
+        errorMessageEntities.add(errorMessageEntity);
+        mc.setProperty(MessageContextProperties.IN_ERRORS,
+                errorMessageEntities);
+
+        try {
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        assertNotNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+        assertEquals(ProcessingState.FAILURE,
+                errorMessageEntity.getCurrentProcessingState().getState());
+
+        verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+        String msg1 = "Error Signal [" + errorId
+                + "] does not reference a known message unit!";
+        assertTrue(TestUtils.eventContainsMsg(events, Level.WARN, msg1));
         String msg2 = "All Error Signals processed";
         assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg2));
     }

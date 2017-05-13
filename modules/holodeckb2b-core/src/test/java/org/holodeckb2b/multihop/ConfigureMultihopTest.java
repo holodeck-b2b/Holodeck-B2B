@@ -62,8 +62,7 @@ public class ConfigureMultihopTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = CheckFromICloudTest.class
-                .getClassLoader().getResource("multihop").getPath();
+        baseDir = TestUtils.getPath(CheckFromICloudTest.class, "multihop");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
         InternalConfiguration initialConf =

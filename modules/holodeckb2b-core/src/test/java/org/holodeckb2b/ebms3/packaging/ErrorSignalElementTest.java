@@ -19,6 +19,7 @@ package org.holodeckb2b.ebms3.packaging;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.holodeckb2b.common.messagemodel.Description;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -36,6 +37,8 @@ import static org.junit.Assert.*;
 /**
  * Created at 23:19 29.01.17
  *
+ * Checked for cases coverage (29.04.2017)
+ *
  * todo There are many different IEbmsErrors
  * todo (file:///Users/timur/IdeaProjects/freedom/mockertim/Holodeck-B2B/javadoc/index.html)
  * todo Maybe it's worth to test all of them ?
@@ -50,10 +53,21 @@ public class ErrorSignalElementTest {
     static final QName  ERROR_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "Error");
 
-    static final QName  ERROR_CODE_ATTR_NAME =
-            new QName("errorCode");
-    static final QName  SEVERITY_ATTR_NAME =
-            new QName("severity");
+    static final QName  Q_ERROR_DETAIL =
+            new QName(EbMSConstants.EBMS3_NS_URI, "ErrorDetail");
+
+    static final QName  ERROR_CODE_ATTR_NAME = new QName("errorCode");
+    static final QName  SEVERITY_ATTR_NAME = new QName("severity");
+
+    static final QName CATEGORY_ATTR_NAME = new QName("category");
+    static final QName REF_TO_ATTR_NAME = new QName("refToMessageInError");
+    static final QName ORIGIN_ATTR_NAME = new QName("origin");
+    static final QName SHORT_DESCR_ATTR_NAME = new QName("shortDescription");
+
+    private static final QName DESCRIPTION_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "Description");
+    private static final QName LANG_ATTR_NAME =
+            new QName("http://www.w3.org/XML/1998/namespace", "lang");
 
     private SOAPHeaderBlock headerBlock;
 
@@ -93,6 +107,7 @@ public class ErrorSignalElementTest {
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
+        ebmsError.setCategory("");
         ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
         ebmsError.setErrorCode("some_error_code");
         errors.add(ebmsError);
@@ -116,6 +131,7 @@ public class ErrorSignalElementTest {
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
+        ebmsError.setCategory("");
         ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
         ebmsError.setErrorCode("some_error_code");
         errors.add(ebmsError);
@@ -142,8 +158,10 @@ public class ErrorSignalElementTest {
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
+        // Set required attributes
         ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
         ebmsError.setErrorCode("some_error_code");
+
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
 
@@ -151,17 +169,46 @@ public class ErrorSignalElementTest {
                 ErrorSignalElement.createElement(headerBlock, errorMessage);
 
         EbmsError newEbmsError = new EbmsError();
+        // Set required attributes
         newEbmsError.setSeverity(IEbmsError.Severity.FAILURE);
         newEbmsError.setErrorCode("some_new_error_code");
+        // Set optonal attributes
+        newEbmsError.setCategory("some_category");
+        newEbmsError.setOrigin("some_error_origin");
+        newEbmsError.setMessage("some_message");
+        newEbmsError.setRefToMessageInError("ref_to_some_message");
+        newEbmsError.setErrorDetail("some_error_detail");
+        Description description = new Description("some_text", "en-CA");
+        newEbmsError.setDescription(description);
 
         OMElement eElement =
                 ErrorSignalElement.createErrorElement(esElement, newEbmsError);
 
+        System.out.println("eElement: " + eElement);
+
         assertEquals(ERROR_ELEMENT_NAME, eElement.getQName());
+
         assertEquals(IEbmsError.Severity.FAILURE.toString(),
                 eElement.getAttributeValue(SEVERITY_ATTR_NAME));
         assertEquals("some_new_error_code",
                 eElement.getAttributeValue(ERROR_CODE_ATTR_NAME));
+
+        assertEquals("some_category",
+                eElement.getAttributeValue(CATEGORY_ATTR_NAME));
+        assertEquals("some_error_origin",
+                eElement.getAttributeValue(ORIGIN_ATTR_NAME));
+        assertEquals("some_message",
+                eElement.getAttributeValue(SHORT_DESCR_ATTR_NAME));
+        assertEquals("ref_to_some_message",
+                eElement.getAttributeValue(REF_TO_ATTR_NAME));
+        OMElement errDetailElement = eElement.getFirstElement();
+        assertEquals(Q_ERROR_DETAIL, errDetailElement.getQName());
+        assertEquals("some_error_detail", errDetailElement.getText());
+        OMElement dElement = DescriptionElement.getElement(eElement);
+        assertEquals(DESCRIPTION_ELEMENT_NAME, dElement.getQName());
+        assertEquals("some_text", dElement.getText());
+        assertEquals("en-CA",
+                dElement.getAttributeValue(LANG_ATTR_NAME));
     }
 
     @Test
@@ -169,8 +216,18 @@ public class ErrorSignalElementTest {
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
+        // Required attributes
         ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
         ebmsError.setErrorCode("some_error_code");
+        // Optional attributes
+        ebmsError.setCategory("some_category");
+        ebmsError.setOrigin("some_error_origin");
+        ebmsError.setMessage("some_message");
+        ebmsError.setRefToMessageInError("ref_to_some_message");
+        ebmsError.setErrorDetail("some_error_detail");
+        Description description = new Description("some_text", "en-CA");
+        ebmsError.setDescription(description);
+
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
 
@@ -180,7 +237,16 @@ public class ErrorSignalElementTest {
                 (OMElement) esElement.getChildrenWithName(ERROR_ELEMENT_NAME).next();
 
         ebmsError = ErrorSignalElement.readErrorElement(eElement);
+
         assertEquals(IEbmsError.Severity.FAILURE, ebmsError.getSeverity());
         assertEquals("some_error_code", ebmsError.getErrorCode());
+
+        assertEquals("some_category", ebmsError.getCategory());
+        assertEquals("some_error_origin", ebmsError.getOrigin());
+        assertEquals("some_message", ebmsError.getMessage());
+        assertEquals("ref_to_some_message", ebmsError.getRefToMessageInError());
+        assertEquals("some_error_detail", ebmsError.getErrorDetail());
+        assertEquals("some_text", ebmsError.getDescription().getText());
+        assertEquals("en-CA", ebmsError.getDescription().getLanguage());
     }
 }

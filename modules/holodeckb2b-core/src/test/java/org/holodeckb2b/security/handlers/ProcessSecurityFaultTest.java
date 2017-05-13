@@ -79,8 +79,7 @@ public class ProcessSecurityFaultTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = ProcessSecurityFaultTest.class.getClassLoader()
-                .getResource("security").getPath();
+        baseDir = TestUtils.getPath(ProcessSecurityFaultTest.class, "security");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

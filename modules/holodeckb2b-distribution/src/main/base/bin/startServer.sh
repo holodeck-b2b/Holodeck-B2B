@@ -60,7 +60,7 @@ while [ $# -ge 1 ]; do
     esac
 done
 
-cd $AXIS2_HOME
+cd "$AXIS2_HOME"
 
 java $JAVA_OPTS -classpath "$AXIS2_CLASSPATH" \
     -Djava.endorsed.dirs="$AXIS2_HOME/lib/endorsed":"$JAVA_HOME/jre/lib/endorsed":"$JAVA_HOME/lib/endorsed" \

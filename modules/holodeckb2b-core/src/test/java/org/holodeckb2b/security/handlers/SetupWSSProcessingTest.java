@@ -80,8 +80,7 @@ public class SetupWSSProcessingTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = SetupWSSProcessingTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(SetupWSSProcessingTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
