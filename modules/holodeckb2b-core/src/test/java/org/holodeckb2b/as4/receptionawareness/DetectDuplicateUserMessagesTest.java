@@ -131,6 +131,7 @@ public class DetectDuplicateUserMessagesTest {
 
         Leg leg = new Leg();
 
+        // Needed to emulate the message delivery
         DeliverySpecification deliverySpec = new DeliverySpecification();
         deliverySpec.setId("some_delivery_spec_01");
         leg.setDefaultDelivery(deliverySpec);
@@ -160,21 +161,20 @@ public class DetectDuplicateUserMessagesTest {
         assertEquals(ProcessingState.RECEIVED,
                 userMessageEntity.getCurrentProcessingState().getState());
 
+        // Delivering message
         updateManager.setProcessingState(userMessageEntity, ProcessingState.READY_FOR_DELIVERY);
-
         assertEquals(ProcessingState.READY_FOR_DELIVERY,
                 userMessageEntity.getCurrentProcessingState().getState());
-
         try {
             Handler.InvocationResponse invokeResp = deliverUserMessageHandler.invoke(mc);
             assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
-
         assertEquals(ProcessingState.DELIVERED,
                 userMessageEntity.getCurrentProcessingState().getState());
 
+        // Checking that the message with userMessage id was already delivered
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
