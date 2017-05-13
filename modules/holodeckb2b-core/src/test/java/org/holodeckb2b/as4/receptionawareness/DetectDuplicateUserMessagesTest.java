@@ -136,6 +136,7 @@ public class DetectDuplicateUserMessagesTest {
         deliverySpec.setId("some_delivery_spec_01");
         leg.setDefaultDelivery(deliverySpec);
 
+        // Turning on duplicate detection
         ReceptionAwarenessConfig rac = new ReceptionAwarenessConfig();
         rac.setDuplicateDetection(true);
         leg.setReceptionAwareness(rac);
