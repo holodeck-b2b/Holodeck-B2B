@@ -70,8 +70,7 @@ public class PurgeOldMessagesWorkerTest {
 
     private static HolodeckB2BTestCore core;
 
-    private static String basePath = PurgeOldMessagesWorkerTest.class
-            .getClassLoader().getResource("purgetest/").getPath();
+    private static String basePath = TestUtils.getPath(PurgeOldMessagesWorkerTest.class, "purgetest");
 
     @BeforeClass
     public static void setUpClass() {
@@ -94,7 +93,7 @@ public class PurgeOldMessagesWorkerTest {
             Calendar stateTime = Calendar.getInstance();
 
             // Ensure tmp directory is available
-            new File(basePath + "tmp").mkdir();
+            new File(basePath + "/tmp").mkdir();
 
             um = new UserMessage();
             um.setMessageId(MSGID_1);

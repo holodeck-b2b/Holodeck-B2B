@@ -51,9 +51,7 @@ public class TestUtils {
      * @return
      */
     public static MessageMetaData getMMD(String resource, Object testInstance) {
-        final String mmdPath =
-                testInstance.getClass().getClassLoader()
-                        .getResource(resource).getPath();
+        final String mmdPath = testInstance.getClass().getClassLoader().getResource(resource).getPath();
         final File f = new File(mmdPath);
         MessageMetaData mmd = null;
         try {
