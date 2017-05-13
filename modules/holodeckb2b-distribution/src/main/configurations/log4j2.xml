@@ -1,17 +1,17 @@
 ﻿<!-- =====================================================================================
 <?xml version="1.0" encoding="UTF-8"?>
-    
-                        Holodeck B2B Logging Configuration   	
+
+                        Holodeck B2B Logging Configuration
 
 Holodeck B2B uses the Log4j v2 logging framework, see the Log4j website for more
-information about configuration. When deploying in a production environment it is 
+information about configuration. When deploying in a production environment it is
 recommended to raise log levels to at least INFO.
 ===================================================================================== -->
 <Configuration status="warn" monitorInterval="30">
-  
-    <Appenders>        
-        <!-- 
-            The main log file for all Holodeck B2B related logging 
+
+    <Appenders>
+        <!--
+            The main log file for all Holodeck B2B related logging
         -->
         <RollingFile name="holodeckb2b-main" fileName="logs/holodeckb2b.log"
             filePattern="logs/archive/holodeckb2b-%d{MM-dd-yyyy}-%i.log.gz">
@@ -21,7 +21,7 @@ recommended to raise log levels to at least INFO.
             <Policies>
                 <SizeBasedTriggeringPolicy size="500MB"/>
             </Policies>
-        </RollingFile>        
+        </RollingFile>
         <!--
             Log file for received ebMS errors
         -->
@@ -32,11 +32,11 @@ recommended to raise log levels to at least INFO.
             </PatternLayout>
             <Policies>
                 <SizeBasedTriggeringPolicy size="500MB"/>
-            </Policies>            
-        </RollingFile>        
+            </Policies>
+        </RollingFile>
         <!--
             Log file for the SOAP Envelopes of outgoing messages.
-        -->        
+        -->
         <RollingFile name="soapout" fileName="logs/soap_out.log"
             filePattern="logs/archive/soap_out-%d{MM-dd-yyyy}-%i.log.gz">
             <PatternLayout>
@@ -45,11 +45,11 @@ recommended to raise log levels to at least INFO.
             <Policies>
                 <TimeBasedTriggeringPolicy/>
                 <SizeBasedTriggeringPolicy size="1GB"/>
-            </Policies>            
-        </RollingFile>        
+            </Policies>
+        </RollingFile>
         <!--
             Log file for the SOAP Envelopes of received messages.
-        -->        
+        -->
         <RollingFile name="soapin" fileName="logs/soap_in.log"
             filePattern="logs/archive/soap_in-%d{MM-dd-yyyy}-%i.log.gz">
             <PatternLayout>
@@ -58,8 +58,8 @@ recommended to raise log levels to at least INFO.
             <Policies>
                 <TimeBasedTriggeringPolicy/>
                 <SizeBasedTriggeringPolicy size="1GB"/>
-            </Policies>            
-        </RollingFile>        
+            </Policies>
+        </RollingFile>
     </Appenders>
     <Loggers>
         <!--
@@ -67,40 +67,40 @@ recommended to raise log levels to at least INFO.
         -->
         <Root level="ERROR">
             <AppenderRef ref="holodeckb2b-main"/>
-        </Root>        
+        </Root>
 
         <!--
             Default log level for Holodeck B2B is set to ALL so
-            messaging processing can be followed in detail. 
-            When deploying in production it is RECOMMENDED to 
+            messaging processing can be followed in detail.
+            When deploying in production it is RECOMMENDED to
             raise log level to at least INFO.
         -->
-        <Logger name="org.holodeckb2b" level="ALL" />        
-        <!-- Some logging of often recurring tasks is already 
-            reduced to prevent clutter         
+        <Logger name="org.holodeckb2b" level="ALL" />
+        <!-- Some logging of often recurring tasks is already
+            reduced to prevent clutter
         -->
         <Logger name="org.holodeckb2b.pmode.xml.PModeWatcher" level="INFO"/>
-        <Logger name="org.holodeckb2b.as4.receptionawareness.RetransmissionWorker" level="INFO"/>        
+        <Logger name="org.holodeckb2b.as4.receptionawareness.RetransmissionWorker" level="INFO"/>
         <Logger name="org.holodeckb2b.ebms3.workers" level="WARN"/>
         <Logger name="org.holodeckb2b.as4.workers" level="WARN"/>
         <Logger name="org.holodeckb2b.ebms3.pulling" level="WARN"/>
         <Logger name="org.holodeckb2b.common.handler.BaseHandler" level="WARN"/>
-        
+
         <!--
             SOAP Envelope logging
-            
-        The next two logs are used to log the SOAP envelopes of sent and received 
+
+        The next two logs are used to log the SOAP envelopes of sent and received
         messages. To enable set the log level to INFO, to disable set to OFF.
         -->
-        <Logger name="org.holodeckb2b.msgproc.soapenvlog.IN" 
+        <Logger name="org.holodeckb2b.msgproc.soapenvlog.IN"
                 level="INFO" additivity="false">
             <AppenderRef ref="soapin"/>
         </Logger>
-        <Logger name="org.holodeckb2b.msgproc.soapenvlog.OUT" 
+        <Logger name="org.holodeckb2b.msgproc.soapenvlog.OUT"
             level="INFO" additivity="false">
             <AppenderRef ref="soapout"/>
         </Logger>
-        
+
         <!--
             Logging of received ebMS Errors
 
@@ -119,6 +119,6 @@ recommended to raise log levels to at least INFO.
         <Logger name="org.holodeckb2b.msgproc.errors"
             level="WARN" additivity="false">
             <AppenderRef ref="ebmsErrors"/>
-        </Logger>        
+        </Logger>
     </Loggers>
 </Configuration>

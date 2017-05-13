@@ -23,6 +23,7 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.server.AxisHttpResponse;
 import org.holodeckb2b.common.constants.ProductId;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -53,8 +54,7 @@ public class HTTPProductIdentifierTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = HTTPProductIdentifierTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(HTTPProductIdentifierTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

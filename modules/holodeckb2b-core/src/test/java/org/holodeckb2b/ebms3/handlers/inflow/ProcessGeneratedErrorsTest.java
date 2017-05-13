@@ -81,8 +81,7 @@ public class ProcessGeneratedErrorsTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = ProcessGeneratedErrorsTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(ProcessGeneratedErrorsTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

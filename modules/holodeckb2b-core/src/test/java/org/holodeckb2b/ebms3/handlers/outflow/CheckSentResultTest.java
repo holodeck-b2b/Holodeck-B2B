@@ -65,8 +65,7 @@ public class CheckSentResultTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = CheckSentResultTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(CheckSentResultTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

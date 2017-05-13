@@ -25,6 +25,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
@@ -54,7 +55,8 @@ public class SecurityConfigurationTest {
 
         try {
             // retrieve the resource from the pmodetest directory.
-            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/sec/" + fName).getPath());
+            final String filePath = TestUtils.getPath(this.getClass(), "pmodetest/sec/" + fName);
+            final File f = new File(filePath);
 
             final Serializer  serializer = new Persister();
             return serializer.read(SecurityConfiguration.class, f);

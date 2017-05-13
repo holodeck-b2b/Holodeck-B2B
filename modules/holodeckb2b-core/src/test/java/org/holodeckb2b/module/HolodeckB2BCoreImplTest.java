@@ -25,8 +25,7 @@ public class HolodeckB2BCoreImplTest {
 
     @BeforeClass
     public static void setUpClass() {
-        repoUrl = HolodeckB2BCoreImplTest.class.getClassLoader()
-                .getResource("moduletest/repository");
+        repoUrl = HolodeckB2BCoreImplTest.class.getClassLoader().getResource("moduletest/repository");
 
         AxisConfiguration ac = new AxisConfiguration();
         ac.setRepository(repoUrl);

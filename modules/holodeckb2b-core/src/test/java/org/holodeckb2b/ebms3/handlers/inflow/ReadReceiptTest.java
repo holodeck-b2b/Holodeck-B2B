@@ -60,8 +60,7 @@ public class ReadReceiptTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = ReadReceiptTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(ReadReceiptTest.class, "handlers");
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
     }
 

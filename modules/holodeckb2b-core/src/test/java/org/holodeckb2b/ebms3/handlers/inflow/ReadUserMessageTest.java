@@ -51,8 +51,7 @@ public class ReadUserMessageTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = ReadUserMessageTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(ReadUserMessageTest.class, "handlers");
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
     }
 

@@ -23,6 +23,10 @@ import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import java.io.File;
 import java.util.List;
 
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
+
 import static org.junit.Assert.fail;
 
 /**
@@ -51,13 +55,32 @@ public class TestUtils {
 
     public static boolean eventContainsMsg(List<LoggingEvent> events, Level logLevel, String msg) {
         boolean flag = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(logLevel)) {
-                if(e.getRenderedMessage().trim().equals(msg)) {
+        for (LoggingEvent e : events) {
+            if (e.getLevel().equals(logLevel)) {
+                if (e.getRenderedMessage().trim().equals(msg)) {
                     flag = true;
                 }
             }
         }
         return flag;
+    }
+    
+    /**
+     * Returns multiplatform path
+     * Is needed mainly in Windows OS to bypass the problem discribed here:
+     * http://stackoverflow.com/questions/6164448/convert-url-to-normal-windows-filename-java
+     * @param clazz Class instance to get class loader from
+     * @param resourceName the name of the resource, which path we want to get
+     * @return
+     */
+    public static String getPath(Class clazz, String resourceName) {
+        String basePath = null;
+        try {
+            URL url = clazz.getClassLoader().getResource(resourceName);
+            basePath = Paths.get(url.toURI()).toString();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return basePath;
     }
 }

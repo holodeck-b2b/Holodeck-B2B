@@ -58,8 +58,7 @@ public class ProcessWSSHeadersTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         // The baseDir folder should contain publickeys.jks file
-        baseDir = ProcessWSSHeadersTest.class.getClassLoader()
-                .getResource("security").getPath();
+        baseDir = TestUtils.getPath(ProcessWSSHeadersTest.class, "security");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
