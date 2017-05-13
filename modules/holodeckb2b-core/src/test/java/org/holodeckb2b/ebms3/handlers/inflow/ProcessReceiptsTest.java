@@ -85,8 +85,7 @@ public class ProcessReceiptsTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = ProcessReceiptsTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(ProcessReceiptsTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
@@ -94,7 +93,7 @@ public class ProcessReceiptsTest {
     public void setUp() throws Exception {
         // Executed after org.holodeckb2b.ebms3.handlers.inflow.GetMessageUnitForPulling handler
         handler = new ProcessReceipts();
-        // Adding appender to the FindPModes logger
+        // Adding appender to the ProcessReceipts logger
         Logger logger = LogManager.getRootLogger();
         logger.addAppender(mockAppender);
         logger.setLevel(Level.DEBUG);

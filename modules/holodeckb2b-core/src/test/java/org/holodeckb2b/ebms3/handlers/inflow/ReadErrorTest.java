@@ -56,8 +56,7 @@ public class ReadErrorTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = ReadErrorTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(ReadErrorTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

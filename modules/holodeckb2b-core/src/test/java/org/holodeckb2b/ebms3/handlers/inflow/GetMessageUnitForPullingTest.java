@@ -69,8 +69,7 @@ public class GetMessageUnitForPullingTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = GetMessageUnitForPullingTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(GetMessageUnitForPullingTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

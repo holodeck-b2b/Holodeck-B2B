@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
@@ -86,7 +87,7 @@ public class XMLWorkerPoolConfigTest {
     @Test
     public void testLoadCorrectFile() {
         System.out.println("loadFromFile");
-        final String path = this.getClass().getClassLoader().getResource("workerpoolcfg/wp_config1.xml").getPath();
+        final String path = TestUtils.getPath(this.getClass(), "workerpoolcfg/wp_config1.xml");
 
         final IWorkerPoolConfiguration result = XMLWorkerPoolConfig.loadFromFile(path);
 
@@ -131,7 +132,7 @@ public class XMLWorkerPoolConfigTest {
     @Test
     public void testLoadInvalidFile() {
         System.out.println("loadFromFile");
-        final String path = this.getClass().getClassLoader().getResource("workerpoolcfg/wp_config2.xml").getPath();
+        final String path = TestUtils.getPath(this.getClass(), "workerpoolcfg/wp_config2.xml");
 
         final IWorkerPoolConfiguration result = XMLWorkerPoolConfig.loadFromFile(path);
 
@@ -157,7 +158,7 @@ public class XMLWorkerPoolConfigTest {
     @Test
     public void testLoadUnnamedFile() {
         System.out.println("loadFromFile");
-        final String path = this.getClass().getClassLoader().getResource("workerpoolcfg/wp_config3.xml").getPath();
+        final String path = TestUtils.getPath(this.getClass(), "workerpoolcfg/wp_config3.xml");
 
         final IWorkerPoolConfiguration result = XMLWorkerPoolConfig.loadFromFile(path);
 

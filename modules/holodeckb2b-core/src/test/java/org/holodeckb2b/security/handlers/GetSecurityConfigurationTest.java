@@ -76,8 +76,7 @@ public class GetSecurityConfigurationTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = GetSecurityConfigurationTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(GetSecurityConfigurationTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

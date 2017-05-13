@@ -76,8 +76,7 @@ public class CreateSOAPEnvelopeHandlerTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = CreateSOAPEnvelopeHandlerTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(CreateSOAPEnvelopeHandlerTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

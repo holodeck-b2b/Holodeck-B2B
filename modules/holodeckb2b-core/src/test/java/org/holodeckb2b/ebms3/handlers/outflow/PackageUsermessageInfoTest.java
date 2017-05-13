@@ -77,8 +77,7 @@ public class PackageUsermessageInfoTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = PackageUsermessageInfoTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(PackageUsermessageInfoTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

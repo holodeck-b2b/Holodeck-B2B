@@ -84,8 +84,7 @@ public class AddPayloadsTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = AddPayloadsTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(AddPayloadsTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

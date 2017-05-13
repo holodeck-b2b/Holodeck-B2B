@@ -18,6 +18,7 @@ package org.holodeckb2b.pmode;
 
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -50,8 +51,7 @@ public class PModeFinderTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = PModeFinderTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(PModeFinderTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
