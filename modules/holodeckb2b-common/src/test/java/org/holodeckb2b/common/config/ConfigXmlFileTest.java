@@ -21,7 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.junit.Test;
 
@@ -34,7 +33,7 @@ public class ConfigXmlFileTest {
 
 
     public ConfigXmlFile readConfigFile(final String path) throws Exception {
-        final String absPath = TestUtils.getPath(this.getClass(), "cfgxml/" + path);
+        final String absPath = this.getClass().getClassLoader().getResource("cfgxml/" + path).getPath();
         return ConfigXmlFile.loadFromFile(absPath);
     }
 

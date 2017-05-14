@@ -25,7 +25,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.util.List;
 
-import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
@@ -44,8 +43,7 @@ public class TradingPartnerConfigurationTest {
 
         try {
             // retrieve the resource from the pmodetest directory.
-            final String filePath = TestUtils.getPath(this.getClass(), "pmodetest/tp/" + fName);
-            final File f = new File(filePath);
+            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/tp/" + fName).getPath());
 
             final Serializer  serializer = new Persister();
             return serializer.read(TradingPartnerConfiguration.class, f);

@@ -24,7 +24,6 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
-import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
@@ -45,8 +44,7 @@ public class PullSecurityConfigurationTest {
 
         try {
             // retrieve the resource from the pmodetest directory.
-            final String filePath = TestUtils.getPath(this.getClass(), "pmodetest/pullsec/" + fName);
-            final File f = new File(filePath);
+            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/pullsec/" + fName).getPath());
 
             final Serializer  serializer = new Persister();
             return serializer.read(PullSecurityConfiguration.class, f);

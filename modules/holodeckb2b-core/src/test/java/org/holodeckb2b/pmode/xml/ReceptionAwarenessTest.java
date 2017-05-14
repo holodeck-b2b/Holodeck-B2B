@@ -22,7 +22,6 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
-import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -45,8 +44,7 @@ public class ReceptionAwarenessTest {
 
         try {
             // retrieve the resource from the pmodetest directory.
-            final String filePath = TestUtils.getPath(this.getClass(), "pmodetest/receptionawareness/" + fName);
-            final File f = new File(filePath);
+            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/receptionawareness/" + fName).getPath());
 
             final Serializer  serializer = new Persister();
             return serializer.read(ReceptionAwareness.class, f);
