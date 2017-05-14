@@ -84,8 +84,7 @@ public class FindPModesTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = FindPModesTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(FindPModesTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

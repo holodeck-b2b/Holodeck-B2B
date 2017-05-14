@@ -72,8 +72,7 @@ public class StartProcessingUsrMessageTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = StartProcessingUsrMessageTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(StartProcessingUsrMessageTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

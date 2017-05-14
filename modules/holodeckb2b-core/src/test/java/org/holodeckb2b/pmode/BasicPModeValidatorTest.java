@@ -17,6 +17,7 @@
 package org.holodeckb2b.pmode;
 
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
@@ -49,7 +50,7 @@ public class BasicPModeValidatorTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = BasicPModeValidatorTest.class.getClassLoader().getResource("pmode_validation").getPath();
+        baseDir = TestUtils.getPath(BasicPModeValidatorTest.class, "pmode_validation");
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
     }
 

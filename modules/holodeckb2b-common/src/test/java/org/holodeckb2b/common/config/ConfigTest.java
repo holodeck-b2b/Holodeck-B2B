@@ -20,6 +20,8 @@ import java.net.URL;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import static org.junit.Assert.*;
+
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

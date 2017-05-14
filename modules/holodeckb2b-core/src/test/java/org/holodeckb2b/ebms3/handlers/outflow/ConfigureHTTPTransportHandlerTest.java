@@ -83,8 +83,7 @@ public class ConfigureHTTPTransportHandlerTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = ConfigureHTTPTransportHandlerTest.class.getClassLoader()
-                .getResource("security").getPath();
+        baseDir = TestUtils.getPath(ConfigureHTTPTransportHandlerTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

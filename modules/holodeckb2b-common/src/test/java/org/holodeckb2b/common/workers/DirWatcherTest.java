@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.junit.After;
 import org.junit.Before;
@@ -48,7 +49,7 @@ public class DirWatcherTest {
     @Before
     public void setUp() {
         instance = new DirWatcherImpl();
-        basePath = this.getClass().getClassLoader().getResource("dirwatcher").getPath();
+        basePath = TestUtils.getPath(this.getClass(), "dirwatcher");
 
         testDir = new File(basePath + "/checkdir");
 

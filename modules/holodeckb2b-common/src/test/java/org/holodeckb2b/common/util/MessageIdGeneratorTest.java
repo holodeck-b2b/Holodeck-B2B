@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.common.util;
 
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.junit.BeforeClass;
@@ -38,8 +39,7 @@ public class MessageIdGeneratorTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = MessageIdGeneratorTest.class
-                .getClassLoader().getResource("utils").getPath();
+        baseDir = TestUtils.getPath(MessageIdGenerator.class, "utils");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
         hostname =
