@@ -43,6 +43,7 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.helpers.*;
 import org.junit.After;
@@ -65,6 +66,8 @@ import static org.mockito.Mockito.verify;
 
 /**
  * Created at 12:04 15.03.17
+ *
+ * Checked for cases coverage (24.04.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -89,8 +92,7 @@ public class DeliverErrorsTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = DeliverErrorsTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(DeliverErrorsTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
@@ -109,6 +111,7 @@ public class DeliverErrorsTest {
     public void tearDown() throws Exception {
         TestUtils.cleanOldMessageUnitEntities();
         LogManager.getRootLogger().removeAppender(mockAppender);
+        core.getPModeSet().removeAll();
     }
 
     @Test
@@ -196,6 +199,9 @@ public class DeliverErrorsTest {
             fail(e.getMessage());
         }
 
+        assertEquals(ProcessingState.READY_FOR_DELIVERY,
+                errorMessageEntity.getCurrentProcessingState().getState());
+
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
@@ -203,10 +209,15 @@ public class DeliverErrorsTest {
             fail(e.getMessage());
         }
 
+        assertEquals(ProcessingState.DONE,
+                errorMessageEntity.getCurrentProcessingState().getState());
+
         verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+        // Check that error is successfully processed by ProcessErrors handler
         String msg1 = "Processed Error Signal ["+errorId+"]";
         assertTrue(eventContainsMsg(events, Level.DEBUG, msg1));
+        // Check that error is successfully delivered by DeliverErrors handler
         String msg2 = "Error successfully delivered!";
         assertTrue(eventContainsMsg(events, Level.DEBUG, msg2));
     }

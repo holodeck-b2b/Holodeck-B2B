@@ -88,8 +88,7 @@ public class HeaderValidationTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = HeaderValidationTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(HeaderValidationTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

@@ -56,7 +56,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.atLeastOnce;
@@ -64,6 +63,8 @@ import static org.mockito.Mockito.verify;
 
 /**
  * Created at 23:44 29.01.17
+ *
+ * Checked for cases coverage (24.04.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -83,8 +84,7 @@ public class AuthorizeMessageTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = AuthorizeMessageTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(AuthorizeMessageTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
@@ -98,6 +98,7 @@ public class AuthorizeMessageTest {
     @After
     public void tearDown() throws Exception {
         LogManager.getRootLogger().removeAppender(mockAppender);
+        core.getPModeSet().removeAll();
     }
 
     @Test

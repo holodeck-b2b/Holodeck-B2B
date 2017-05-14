@@ -60,6 +60,8 @@ import static org.mockito.Mockito.*;
 /**
  * Created at 23:42 29.01.17
  *
+ * Checked for cases coverage (04.05.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
@@ -78,8 +80,7 @@ public class CreateSOAPEnvelopeHandlerTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = CreateSOAPEnvelopeHandlerTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(CreateSOAPEnvelopeHandlerTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
@@ -95,6 +96,7 @@ public class CreateSOAPEnvelopeHandlerTest {
     @After
     public void tearDown() throws Exception {
         LogManager.getRootLogger().removeAppender(mockAppender);
+        core.getPModeSet().removeAll();
     }
 
     @Test

@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.ebms3.workers;
 
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
@@ -35,8 +36,7 @@ import static org.junit.Assert.*;
  */
 public class SubmitFromFileTest {
 
-    private String basePath =
-            SubmitFromFileTest.class.getClassLoader().getResource("submitfromfiletest").getPath();
+    private String basePath = TestUtils.getPath(SubmitFromFileTest.class, "submitfromfiletest");
 
     private static SubmitFromFileImpl worker;
 

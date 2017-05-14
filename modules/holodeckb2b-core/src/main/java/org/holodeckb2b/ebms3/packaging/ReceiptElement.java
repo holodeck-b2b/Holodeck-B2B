@@ -23,6 +23,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.common.messagemodel.Receipt;
 
 /**
  * Is a helper class for handling the ebMS Receipt Signal message units in the ebMS SOAP header, i.e the
@@ -68,17 +69,16 @@ public class ReceiptElement {
 
     /**
      * Reads the information from a <code>eb:SignalMessage</code> and its child elements that contain the Receipt signal
-     * message unit and stores it a {@link org.holodeckb2b.common.messagemodel.Receipt} object.
+     * message unit and stores it a {@link Receipt} object.
      *
      * @param sigElement    The parent <code>eb:SignalMessage</code> element that contains the <code>eb:Receipt</code>
      *                      element
-     * @return              The {@link org.holodeckb2b.common.messagemodel.Receipt} object containing the information on
+     * @return              The {@link Receipt} object containing the information on
      *                      the receipt
      */
-    public static org.holodeckb2b.common.messagemodel.Receipt readElement(final OMElement sigElement) {
+    public static Receipt readElement(final OMElement sigElement) {
         // Create a new Receipt entity object to store the information in
-        final org.holodeckb2b.common.messagemodel.Receipt rcptData =
-                                                              new org.holodeckb2b.common.messagemodel.Receipt();
+        final Receipt rcptData = new Receipt();
 
         // First read general information from the MessageInfo child
         MessageInfoElement.readElement(MessageInfoElement.getElement(sigElement), rcptData);

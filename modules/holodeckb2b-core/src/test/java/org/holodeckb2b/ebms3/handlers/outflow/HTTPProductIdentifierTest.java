@@ -23,6 +23,7 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.server.AxisHttpResponse;
 import org.holodeckb2b.common.constants.ProductId;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -35,6 +36,8 @@ import static org.mockito.Mockito.verify;
 
 /**
  * Created at 15:47 27.02.17
+ *
+ * Checked for cases coverage (04.05.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -51,8 +54,7 @@ public class HTTPProductIdentifierTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = HTTPProductIdentifierTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(HTTPProductIdentifierTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

@@ -38,6 +38,8 @@ import static org.junit.Assert.*;
 /**
  * Created at 18:03 02.03.17
  *
+ * Checked for cases coverage (25.04.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class PartPropertiesElementTest {
@@ -60,16 +62,13 @@ public class PartPropertiesElementTest {
                 .createOMElement(Q_ELEMENT_NAME, headerBlock);
     }
 
-    @After
-    public void tearDown() throws Exception {
-
-    }
-
     @Test
     public void testCreateElement() throws Exception {
         ArrayList<IProperty> properties = new ArrayList<>();
-        properties.add(new Property("some_property01", "some_value01", "some_type01"));
-        properties.add(new Property("some_property02", "some_value02", "some_type02"));
+        properties.add(new Property("some_property01", "some_value01",
+                "some_type01"));
+        properties.add(new Property("some_property02", "some_value02",
+                "some_type02"));
         OMElement ppElement =
                 PartPropertiesElement.createElement(umElement, properties);
         assertNotNull(ppElement);
@@ -77,16 +76,20 @@ public class PartPropertiesElementTest {
                 ppElement.getChildrenWithName(PROPERTY_ELEMENT_NAME);
         assertTrue(it.hasNext());
         OMElement pElem = (OMElement)it.next();
-        TestUtils.checkPropertyElementContent(pElem, "some_property01", "some_value01", "some_type01");
+        TestUtils.checkPropertyElementContent(pElem, "some_property01",
+                "some_value01", "some_type01");
         pElem = (OMElement)it.next();
-        TestUtils.checkPropertyElementContent(pElem, "some_property02", "some_value02", "some_type02");
+        TestUtils.checkPropertyElementContent(pElem, "some_property02",
+                "some_value02", "some_type02");
     }
 
     @Test
     public void testGetElement() throws Exception {
         ArrayList<IProperty> properties = new ArrayList<>();
-        properties.add(new Property("some_property01", "some_value01", "some_type01"));
-        properties.add(new Property("some_property02", "some_value02", "some_type02"));
+        properties.add(new Property("some_property01", "some_value01",
+                "some_type01"));
+        properties.add(new Property("some_property02", "some_value02",
+                "some_type02"));
         PartPropertiesElement.createElement(umElement, properties);
 
         OMElement ppElement = PartPropertiesElement.getElement(umElement);
@@ -95,16 +98,20 @@ public class PartPropertiesElementTest {
                 ppElement.getChildrenWithName(PROPERTY_ELEMENT_NAME);
         assertTrue(it.hasNext());
         OMElement pElem = (OMElement)it.next();
-        TestUtils.checkPropertyElementContent(pElem, "some_property01", "some_value01", "some_type01");
+        TestUtils.checkPropertyElementContent(pElem, "some_property01",
+                "some_value01", "some_type01");
         pElem = (OMElement)it.next();
-        TestUtils.checkPropertyElementContent(pElem, "some_property02", "some_value02", "some_type02");
+        TestUtils.checkPropertyElementContent(pElem, "some_property02",
+                "some_value02", "some_type02");
     }
 
     @Test
     public void testReadElement() throws Exception {
         ArrayList<IProperty> properties = new ArrayList<>();
-        properties.add(new Property("some_property01", "some_value01", "some_type01"));
-        properties.add(new Property("some_property02", "some_value02", "some_type02"));
+        properties.add(new Property("some_property01", "some_value01",
+                "some_type01"));
+        properties.add(new Property("some_property02", "some_value02",
+                "some_type02"));
         OMElement ppElement =
                 PartPropertiesElement.createElement(umElement, properties);
 
@@ -112,8 +119,10 @@ public class PartPropertiesElementTest {
                 PartPropertiesElement.readElement(ppElement);
         Iterator<IProperty> it = readProperties.iterator();
         IProperty p = it.next();
-        TestUtils.checkPropertyContent(p, "some_property01", "some_value01", "some_type01");
+        TestUtils.checkPropertyContent(p, "some_property01", "some_value01",
+                "some_type01");
         p = it.next();
-        TestUtils.checkPropertyContent(p, "some_property02", "some_value02", "some_type02");
+        TestUtils.checkPropertyContent(p, "some_property02", "some_value02",
+                "some_type02");
     }
 }

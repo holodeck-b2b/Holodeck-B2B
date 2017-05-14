@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.IProperty;

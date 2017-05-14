@@ -29,6 +29,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.EbmsError;
+import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
@@ -36,19 +37,18 @@ import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.packaging.PullRequestElement;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.UserMessageFlow;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -81,16 +81,20 @@ public class ProcessGeneratedErrorsTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = ProcessGeneratedErrorsTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(ProcessGeneratedErrorsTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+        TestUtils.cleanOldMessageUnitEntities();
     }
 
     @Before
     public void setUp() throws Exception {
         handler = new ProcessGeneratedErrors();
-
+        // Adding appender to the FindPModes logger
         Logger logger = LogManager.getRootLogger();
         logger.addAppender(mockAppender);
         logger.setLevel(Level.DEBUG);
@@ -99,10 +103,15 @@ public class ProcessGeneratedErrorsTest {
     @After
     public void tearDown() throws Exception {
         LogManager.getRootLogger().removeAppender(mockAppender);
+        core.getPModeSet().removeAll();
     }
 
+    /**
+     * Test the case when there is a single error that references the specific
+     * message unit, which is not a pull request
+     */
     @Test
-    public void testDoProcessing() throws Exception {
+    public void testDoProcessingTheErrorRefsUserMessage() throws Exception {
         MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
@@ -153,7 +162,6 @@ public class ProcessGeneratedErrorsTest {
         when(operationContext
                 .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
                 .thenReturn(mc);
-
         mc.setOperationContext(operationContext);
 
         try {
@@ -165,7 +173,303 @@ public class ProcessGeneratedErrorsTest {
 
         verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String msg1 = "This error signal should be sent as a response";
+        String msg0 = "1 error(s) were generated during this in flow";
+        String msg1 = "Create the Error Signal and save to database";
+        String msg2 = "Check type of the message unit in error";
+        String msg3 = "This error signal should be sent as a response";
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg0));
         assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg1));
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg2));
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg3));
+    }
+
+    /**
+     * Test the case when there is a single error that references the pull request
+     */
+    @Test
+    public void testDoProcessingTheErrorRefsPullRequest() throws Exception {
+        // Creating SOAP envelope
+        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        // Adding header
+        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
+
+        MessageContext mc = new MessageContext();
+        mc.setServerSide(true);
+        mc.setFLOW(MessageContext.IN_FLOW);
+
+        String msgId = "some_msg_id_01";
+        PullRequest pullRequest = new PullRequest();
+        pullRequest.setMPC("some_mpc");
+        pullRequest.setMessageId(msgId);
+
+        PullRequestElement.createElement(headerBlock, pullRequest);
+
+        StorageManager storageManager = core.getStorageManager();
+        IPullRequestEntity pullRequestEntity =
+                storageManager.storeIncomingMessageUnit(pullRequest);
+        mc.setProperty(MessageContextProperties.IN_PULL_REQUEST, pullRequestEntity);
+
+        EbmsError error1 = new EbmsError();
+        error1.setRefToMessageInError(pullRequestEntity.getMessageId());
+        error1.setErrorDetail("Some error for testing.");
+
+        // Adding generated error
+        MessageContextUtils.addGeneratedError(mc, error1);
+
+        // Mocking the Axis2 Operation Context
+        OperationContext operationContext = mock(OperationContext.class);
+        when(operationContext
+                .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
+                .thenReturn(mc);
+        mc.setOperationContext(operationContext);
+
+        try {
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        assertTrue((Boolean)mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
+
+        verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+        String msg0 = "1 error(s) were generated during this in flow";
+        String msg1 = "Create the Error Signal and save to database";
+        String msg2 = "Check type of the message unit in error";
+        String msg3 = "Message unit in error is PullRequest, error must be sent as response";
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg0));
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg1));
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg2));
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg3));
+    }
+
+    /**
+     * Test the case when there is a single error that has no reference to the specific
+     * message unit
+     * @throws Exception
+     */
+    @Test
+    public void testDoProcessingIfNoRefToMU() throws Exception {
+        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
+        // Creating SOAP envelope
+        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        // Adding header
+        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
+        // Adding UserMessage from mmd
+        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
+
+        String msgId = "some_msg_id_01";
+        UserMessage userMessage = UserMessageElement.readElement(umElement);
+
+        String pmodeId =
+                userMessage.getCollaborationInfo().getAgreement().getPModeId();
+        userMessage.setPModeId(pmodeId);
+        userMessage.setMessageId(msgId);
+
+        PMode pmode = new PMode();
+        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+        pmode.setId(pmodeId);
+
+        Leg leg = new Leg();
+        leg.setUserMessageFlow(new UserMessageFlow());
+        pmode.addLeg(leg);
+
+        core.getPModeSet().add(pmode);
+
+        MessageContext mc = new MessageContext();
+        mc.setServerSide(true);
+        mc.setFLOW(MessageContext.IN_FLOW);
+
+        StorageManager storageManager = core.getStorageManager();
+
+        // Setting input message property
+        IUserMessageEntity userMessageEntity =
+                storageManager.storeIncomingMessageUnit(userMessage);
+        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
+                userMessageEntity);
+
+        EbmsError error1 = new EbmsError();
+        // We test the case when ref to message unit is not set
+//        error1.setRefToMessageInError(userMessageEntity.getMessageId());
+        error1.setErrorDetail("Some error for testing.");
+
+        // Adding generated error
+        MessageContextUtils.addGeneratedError(mc, error1);
+
+        // Mocking the Axis2 Operation Context
+        OperationContext operationContext = mock(OperationContext.class);
+        when(operationContext
+                .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
+                .thenReturn(mc);
+        mc.setOperationContext(operationContext);
+
+        try {
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        assertNotNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+
+        verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+        String msg0 = "1 error(s) were generated during this in flow";
+        String msg1 = "Create the Error Signal and save to database";
+        String msg2 = "Error without reference can not be sent because "
+                + "successful message units exist or message received as response";
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg0));
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg1));
+        assertTrue(TestUtils.eventContainsMsg(events, Level.WARN, msg2));
+    }
+
+    /**
+     * Test the case when there is a single error that has no reference to the specific
+     * message unit and we are initiating the flow
+     * @throws Exception
+     */
+    @Test
+    public void testDoProcessingIfNoRefToMUAndInflow() throws Exception {
+        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
+        // Creating SOAP envelope
+        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        // Adding header
+        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
+        // Adding UserMessage from mmd
+        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
+
+        String msgId = "some_msg_id_01";
+        UserMessage userMessage = UserMessageElement.readElement(umElement);
+
+        String pmodeId =
+                userMessage.getCollaborationInfo().getAgreement().getPModeId();
+        userMessage.setPModeId(pmodeId);
+        userMessage.setMessageId(msgId);
+
+        PMode pmode = new PMode();
+        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+        pmode.setId(pmodeId);
+
+        Leg leg = new Leg();
+        leg.setUserMessageFlow(new UserMessageFlow());
+        pmode.addLeg(leg);
+
+        core.getPModeSet().add(pmode);
+
+        MessageContext mc = new MessageContext();
+        mc.setFLOW(MessageContext.IN_FLOW);
+
+        StorageManager storageManager = core.getStorageManager();
+
+        // Setting input message property
+        IUserMessageEntity userMessageEntity =
+                storageManager.storeIncomingMessageUnit(userMessage);
+        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
+                userMessageEntity);
+
+        EbmsError error1 = new EbmsError();
+        // We test the case when ref to message unit is not set
+//        error1.setRefToMessageInError(userMessageEntity.getMessageId());
+        error1.setErrorDetail("Some error for testing.");
+
+        // Adding generated error
+        MessageContextUtils.addGeneratedError(mc, error1);
+
+        try {
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        assertNotNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+
+        assertTrue((Boolean)mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
+
+        verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+        String msg0 = "1 error(s) were generated during this in flow";
+        String msg1 = "Create the Error Signal and save to database";
+        String msg2 = "All message units failed to process successfully, "
+                + "anonymous error can be sent";
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg0));
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg1));
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg2));
+    }
+
+    /**
+     * Test the case when there is a single error that has no reference to the specific
+     * message unit and all message unit failed to process successfully
+     * @throws Exception
+     */
+    @Test
+    public void testDoProcessingIfNoRefToMUAndAllMUFailed() throws Exception {
+        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
+        // Creating SOAP envelope
+        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        // Adding header
+        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
+        // Adding UserMessage from mmd
+        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
+
+        String msgId = "some_msg_id_01";
+        UserMessage userMessage = UserMessageElement.readElement(umElement);
+
+        String pmodeId =
+                userMessage.getCollaborationInfo().getAgreement().getPModeId();
+        userMessage.setPModeId(pmodeId);
+        userMessage.setMessageId(msgId);
+
+        PMode pmode = new PMode();
+        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+        pmode.setId(pmodeId);
+
+        Leg leg = new Leg();
+        leg.setUserMessageFlow(new UserMessageFlow());
+        pmode.addLeg(leg);
+
+        core.getPModeSet().add(pmode);
+
+        MessageContext mc = new MessageContext();
+        mc.setServerSide(true);
+        mc.setFLOW(MessageContext.IN_FLOW);
+
+        StorageManager storageManager = core.getStorageManager();
+
+        // Setting input message property
+        IUserMessageEntity userMessageEntity =
+                storageManager.storeIncomingMessageUnit(userMessage);
+        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
+                userMessageEntity);
+
+        EbmsError error1 = new EbmsError();
+        // We test the case when ref to message unit is not set
+//        error1.setRefToMessageInError(userMessageEntity.getMessageId());
+        error1.setErrorDetail("Some error for testing.");
+
+        // Adding generated error
+        MessageContextUtils.addGeneratedError(mc, error1);
+
+        try {
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        assertNotNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+
+        assertTrue((Boolean)mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
+
+        verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+        String msg0 = "1 error(s) were generated during this in flow";
+        String msg1 = "Create the Error Signal and save to database";
+        String msg2 = "All message units failed to process successfully, "
+                + "anonymous error can be sent";
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg0));
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg1));
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg2));
     }
 }

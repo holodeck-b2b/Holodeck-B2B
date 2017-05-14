@@ -89,8 +89,7 @@ public class CheckSignatureCompletenessTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         // launched after org.holodeckb2b.ebms3.handlers.inflow.StartProcessingUsrMessage handler
-        baseDir = CheckSignatureCompletenessTest.class.getClassLoader()
-                .getResource("security").getPath();
+        baseDir = TestUtils.getPath(CheckSignatureCompletenessTest.class, "security");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }

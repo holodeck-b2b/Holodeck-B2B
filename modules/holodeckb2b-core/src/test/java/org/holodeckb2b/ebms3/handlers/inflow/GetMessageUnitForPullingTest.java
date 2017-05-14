@@ -41,6 +41,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.helpers.*;
 import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.tokens.X509Certificate;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -48,12 +49,12 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Created at 15:57 28.02.17
+ *
+ * Checked for cases coverage (05.05.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -69,8 +70,7 @@ public class GetMessageUnitForPullingTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = GetMessageUnitForPullingTest.class.getClassLoader()
-                .getResource("handlers").getPath();
+        baseDir = TestUtils.getPath(GetMessageUnitForPullingTest.class, "handlers");
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
@@ -78,10 +78,18 @@ public class GetMessageUnitForPullingTest {
     @Before
     public void setUp() throws Exception {
         findPModesForPullRequestHandler = new FindPModesForPullRequest();
-
         handler = new GetMessageUnitForPulling();
     }
 
+    @After
+    public void tearDown() throws Exception {
+        core.getPModeSet().removeAll();
+    }
+
+    /**
+     * Tests the case when the pulled message is present
+     * @throws Exception
+     */
     @Test
     public void testDoProcessing() throws Exception {
         MessageContext mc = new MessageContext();
@@ -138,7 +146,8 @@ public class GetMessageUnitForPullingTest {
                 pullRequestEntity);
 
         try {
-            Handler.InvocationResponse invokeResp = findPModesForPullRequestHandler.invoke(mc);
+            Handler.InvocationResponse invokeResp =
+                    findPModesForPullRequestHandler.invoke(mc);
             assertNotNull(invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
@@ -154,7 +163,8 @@ public class GetMessageUnitForPullingTest {
 
         UserMessage userMessage
                 = UserMessageElement.readElement(umElement);
-        String pmodeId = userMessage.getCollaborationInfo().getAgreement().getPModeId();
+        String pmodeId = userMessage.getCollaborationInfo().getAgreement()
+                .getPModeId();
         userMessage.setPModeId(pmodeId);
         userMessage.setMPC(commonMPC);
         pmode.setId(pmodeId);
@@ -166,7 +176,8 @@ public class GetMessageUnitForPullingTest {
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
                 userMessageEntity);
 
-        updateManager.setProcessingState(userMessageEntity, ProcessingState.AWAITING_PULL);
+        updateManager.setProcessingState(userMessageEntity,
+                ProcessingState.AWAITING_PULL);
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
@@ -176,5 +187,88 @@ public class GetMessageUnitForPullingTest {
         }
 
         assertNotNull(mc.getProperty(MessageContextProperties.OUT_USER_MESSAGE));
+        assertTrue((Boolean)mc.getProperty(
+                MessageContextProperties.RESPONSE_REQUIRED));
+    }
+
+    /**
+     * Test the case when pulled message is missing
+     */
+    @Test
+    public void testDoProcessingWhenMsgIsNull() throws Exception {
+        MessageContext mc = new MessageContext();
+        mc.setFLOW(MessageContext.IN_FLOW);
+
+        PMode pmode = new PMode();
+        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+        pmode.setMepBinding(EbMSConstants.ONE_WAY_PULL);
+
+        // Setting token configuration
+        UsernameTokenConfig tokenConfig = new UsernameTokenConfig();
+        tokenConfig.setUsername("username");
+        tokenConfig.setPassword("secret");
+
+        PartnerConfig initiator = new PartnerConfig();
+        SecurityConfig secConfig = new SecurityConfig();
+        X509Certificate sigConfig = new X509Certificate(null);
+        EncryptionConfig encConfig = new EncryptionConfig();
+        encConfig.setKeystoreAlias("exampleca");
+        secConfig.setEncryptionConfiguration(encConfig);
+        secConfig.setUsernameTokenConfiguration(
+                ISecurityConfiguration.WSSHeaderTarget.EBMS, tokenConfig);
+        initiator.setSecurityConfiguration(secConfig);
+        pmode.setInitiator(initiator);
+
+        Leg leg = new Leg();
+        PullRequestFlow prFlow = new PullRequestFlow();
+        prFlow.setSecurityConfiguration(secConfig);
+        leg.addPullRequestFlow(prFlow);
+
+        pmode.addLeg(leg);
+
+        final Map<String, IAuthenticationInfo> authInfo = new HashMap<>();
+        authInfo.put(SecurityConstants.EBMS_USERNAMETOKEN, tokenConfig);
+        authInfo.put(SecurityConstants.SIGNATURE, sigConfig);
+
+        mc.setProperty(SecurityConstants.MC_AUTHENTICATION_INFO, authInfo);
+
+        // Pull request and corresponding user message should have similar MPC
+        String commonMPC = "some_mpc";
+
+        PullRequest pullRequest = new PullRequest();
+        pullRequest.setMPC(commonMPC);
+
+        core.getPModeSet().add(pmode);
+
+        // Setting input message property
+        StorageManager storageManager = core.getStorageManager();
+        System.out.println("um: " + storageManager.getClass());
+
+        IPullRequestEntity pullRequestEntity =
+                storageManager.storeIncomingMessageUnit(pullRequest);
+        mc.setProperty(MessageContextProperties.IN_PULL_REQUEST,
+                pullRequestEntity);
+
+        try {
+            Handler.InvocationResponse invokeResp =
+                    findPModesForPullRequestHandler.invoke(mc);
+            assertNotNull(invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        // setting the pmodeId of some message
+        pmode.setId("some_pmode_id");
+
+        try {
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        assertNotNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+        assertEquals(ProcessingState.DONE,
+                pullRequestEntity.getCurrentProcessingState().getState());
     }
 }

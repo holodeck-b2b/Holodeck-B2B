@@ -32,6 +32,7 @@ import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.holodeckb2b.ebms3.handlers.inflow.DeliverUserMessage;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
@@ -40,6 +41,7 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.dao.StorageManager;
+import org.holodeckb2b.pmode.helpers.DeliverySpecification;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.ReceptionAwarenessConfig;
@@ -77,6 +79,8 @@ public class DetectDuplicateUserMessagesTest {
 
     private static HolodeckB2BTestCore core;
 
+    private DeliverUserMessage deliverUserMessageHandler;
+
     private DetectDuplicateUserMessages handler;
 
     @BeforeClass
@@ -89,6 +93,8 @@ public class DetectDuplicateUserMessagesTest {
 
     @Before
     public void setUp() throws Exception {
+        deliverUserMessageHandler = new DeliverUserMessage();
+
         handler = new DetectDuplicateUserMessages();
         Logger logger = LogManager.getRootLogger();
         logger.addAppender(mockAppender);
@@ -124,6 +130,13 @@ public class DetectDuplicateUserMessagesTest {
         pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
 
         Leg leg = new Leg();
+
+        // Needed to emulate the message delivery
+        DeliverySpecification deliverySpec = new DeliverySpecification();
+        deliverySpec.setId("some_delivery_spec_01");
+        leg.setDefaultDelivery(deliverySpec);
+
+        // Turning on duplicate detection
         ReceptionAwarenessConfig rac = new ReceptionAwarenessConfig();
         rac.setDuplicateDetection(true);
         leg.setReceptionAwareness(rac);
@@ -149,6 +162,20 @@ public class DetectDuplicateUserMessagesTest {
         assertEquals(ProcessingState.RECEIVED,
                 userMessageEntity.getCurrentProcessingState().getState());
 
+        // Delivering message
+        updateManager.setProcessingState(userMessageEntity, ProcessingState.READY_FOR_DELIVERY);
+        assertEquals(ProcessingState.READY_FOR_DELIVERY,
+                userMessageEntity.getCurrentProcessingState().getState());
+        try {
+            Handler.InvocationResponse invokeResp = deliverUserMessageHandler.invoke(mc);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+        assertEquals(ProcessingState.DELIVERED,
+                userMessageEntity.getCurrentProcessingState().getState());
+
+        // Checking that the message with userMessage id was already delivered
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
