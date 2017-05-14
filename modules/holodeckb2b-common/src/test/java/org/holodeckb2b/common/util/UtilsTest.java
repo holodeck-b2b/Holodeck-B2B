@@ -105,7 +105,6 @@ public class UtilsTest {
     @Test
     public void testPreventDuplicateFileName() {
         String baseDir = TestUtils.getPath(UtilsTest.class, "utils");
-//                UtilsTest.class.getClassLoader().getResource("utils").getPath();
         try {
             File dir = new File(baseDir);
             assertTrue(dir.isDirectory());

@@ -17,6 +17,9 @@
 package org.holodeckb2b.core.testhelpers;
 
 import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
@@ -41,6 +44,26 @@ import static org.junit.Assert.fail;
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class TestUtils {
+
+    /**
+     * Returns multiplatform path
+     * Is needed mainly in Windows OS to bypass the problem discribed here:
+     * http://stackoverflow.com/questions/6164448/convert-url-to-normal-windows-filename-java
+     * @param clazz Class instance to get class loader from
+     * @param resourceName the name of the resource, which path we want to get
+     * @return
+     */
+     public static String getPath(Class clazz, String resourceName) {
+         String basePath = null;
+         try {
+             URL url = clazz.getClassLoader().getResource(resourceName);
+             basePath = Paths.get(url.toURI()).toString();
+         } catch (URISyntaxException e) {
+             e.printStackTrace();
+         }
+         return basePath;
+     }
+
     /**
      * Get filled mmd document for testing
      * @return
