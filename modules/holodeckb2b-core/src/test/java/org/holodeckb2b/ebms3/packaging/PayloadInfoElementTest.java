@@ -35,6 +35,8 @@ import static org.junit.Assert.*;
 /**
  * Created at 17:41 29.01.17
  *
+ * Checked for cases coverage (27.04.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class PayloadInfoElementTest {
@@ -84,7 +86,7 @@ public class PayloadInfoElementTest {
     }
 
     /**
-     *
+     * Checks that PartInfo element contains expected data
      * @param piElement
      */
     private void checkContainsPayloads(OMElement piElement) {
@@ -105,22 +107,25 @@ public class PayloadInfoElementTest {
     }
 
     /**
-     *
+     * Checks the payloads data
      * @param payloads
      */
     private void checkPayloads(Collection<IPayload> payloads) {
         Iterator<IPayload> payloadsIt = payloads.iterator();
         assertTrue(payloadsIt.hasNext());
         IPayload p = payloadsIt.next();
-        // todo It seems that createElement() method does not fully initialize the payloads
-        // assertEquals(IPayload.Containment.ATTACHMENT, p.getContainment()); // fail
-        // assertEquals("I8ZVs6G2P", p.getMimeType()); // fail
-        // assertEquals("http://sxGTnZjm/", p.getContentLocation()); // fail
+        assertEquals(IPayload.Containment.BODY, p.getContainment());
+        // createElement() method does not fully initialize
+        // the containment&mimeType&location payload attributes
+        // and it should not do this, because those attributes are used internally
+        // assertEquals(IPayload.Containment.ATTACHMENT, p.getContainment()); // should fail
+        // assertEquals("I8ZVs6G2P", p.getMimeType()); // should fail
+        // assertEquals("http://sxGTnZjm/", p.getContentLocation()); // should fail
         assertTrue(payloadsIt.hasNext());
         p = payloadsIt.next();
         assertEquals(IPayload.Containment.EXTERNAL, p.getContainment());
-        // assertEquals("CoL9", p.getMimeType()); // fail
-        // assertEquals("http://pcVJBuTT/", p.getPayloadURI()); // fail
+        // assertEquals("CoL9", p.getMimeType()); // should fail
+        // assertEquals("http://pcVJBuTT/", p.getPayloadURI()); // should fail
         assertNotNull(p.getSchemaReference());
         assertNotNull(p.getDescription());
         assertNotNull(p.getProperties());

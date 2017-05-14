@@ -24,13 +24,16 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.PullRequest;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.helpers.*;
 import org.holodeckb2b.security.tokens.IAuthenticationInfo;
@@ -45,6 +48,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +60,8 @@ import static org.mockito.Mockito.verify;
 
 /**
  * Created at 16:00 28.02.17
+ *
+ * Checked for cases coverage (03.05.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -96,6 +102,9 @@ public class FindPModesForPullRequestTest {
         LogManager.getRootLogger().removeAppender(mockAppender);
     }
 
+    /**
+     * Test the case when pmode was correctly initialized and found in the storage
+     */
     @Test
     public void testDoProcessing() throws Exception {
         MessageContext mc = new MessageContext();
@@ -162,5 +171,55 @@ public class FindPModesForPullRequestTest {
         String msg = "Store the list of " + 1
                 + " authorized PModes so next handler can retrieve message unit to return";
         assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
+    }
+
+    /**
+     * Test the case when pmode was not found for the PullRequest
+     */
+    @Test
+    public void testDoProcessingIfPModeNotFound() throws Exception {
+        MessageContext mc = new MessageContext();
+        mc.setFLOW(MessageContext.IN_FLOW);
+
+        PullRequest pullRequest = new PullRequest();
+        pullRequest.setMessageId("some_msg_id");
+
+        // Setting input message property
+        StorageManager storageManager = core.getStorageManager();
+        System.out.println("um: " + storageManager.getClass());
+
+        IPullRequestEntity pullRequestEntity =
+                storageManager.storeIncomingMessageUnit(pullRequest);
+        mc.setProperty(MessageContextProperties.IN_PULL_REQUEST,
+                pullRequestEntity);
+
+        try {
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        assertEquals(ProcessingState.FAILURE,
+                pullRequestEntity.getCurrentProcessingState().getState());
+
+        ArrayList<IEbmsError> errList =
+                (ArrayList<IEbmsError>)mc.getProperty(
+                        MessageContextProperties.GENERATED_ERRORS);
+        assertTrue(!Utils.isNullOrEmpty(errList));
+
+        IEbmsError error = errList.get(0);
+        assertEquals(IEbmsError.Severity.FAILURE, error.getSeverity());
+        assertEquals("EBMS:0010", error.getErrorCode());
+        assertEquals("Processing", error.getCategory());
+        assertEquals("ProcessingModeMismatch", error.getMessage());
+
+        // Checking log messages to make sure handler found pmode
+        verify(mockAppender, atLeastOnce())
+                .doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+        String msg = "No P-Mode found for PullRequest ["
+                + "some_msg_id" + "], unable to process it!";
+        assertTrue(eventContainsMsg(events, Level.ERROR, msg));
     }
 }

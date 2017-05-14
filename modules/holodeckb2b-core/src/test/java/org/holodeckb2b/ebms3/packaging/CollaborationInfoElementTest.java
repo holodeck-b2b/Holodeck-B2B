@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.ebms3.packaging;
 
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -35,6 +36,8 @@ import static org.junit.Assert.assertNotNull;
 
 /**
  * Created at 23:17 29.01.17
+ *
+ * Checked for cases coverage (25.04.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -67,21 +70,27 @@ public class CollaborationInfoElementTest {
     @Test
     public void testCreateElement() throws Exception {
         CollaborationInfo ciData = new CollaborationInfo();
-        ciData.setAgreement(new AgreementReference());
+        String aName = "agreement_name";
+        String aType = "agreement_type";
+        String aPmode = "some_pmode_id";
+        ciData.setAgreement(new AgreementReference(aName, aType, aPmode));
         ciData.setService(new Service());
         ciData.setAction("some action");
         ciData.setConversationId("conv id");
         OMElement ciElement =
                 CollaborationInfoElement.createElement(umElement, ciData);
         assertNotNull(ciElement);
-        checkContainsInnerElements(ciElement);
+        checkContainsInnerElements(ciElement, aName, aType, aPmode);
     }
 
     @Test
     public void testGetElement() throws Exception {
         OMElement ciElement = CollaborationInfoElement.getElement(umElement);
         assertNotNull(ciElement);
-        checkContainsInnerElements(ciElement);
+        String aName = "yklQbULTiTmY-b6pXztLqtbU9H2uUW";
+        String aType = "sdbLV";
+        String aPmode = "QtzizhtL.QZg3UXFvby7tXDE2FL";
+        checkContainsInnerElements(ciElement, aName, aType, aPmode);
     }
 
     @Test
@@ -100,10 +109,16 @@ public class CollaborationInfoElementTest {
         checkContainsData(collaborationInfo, pmodeId);
     }
 
-    private void checkContainsInnerElements(OMElement ciElement) {
+    private void checkContainsInnerElements(OMElement ciElement, String aName,
+                                            String aType, String aPmode) {
         assertEquals(COLLABORATION_INFO_ELEMENT_NAME, ciElement.getQName());
         OMElement arElement = AgreementRefElement.getElement(ciElement);
         assertEquals(AGREEMENT_REF_INFO_ELEMENT_NAME, arElement.getQName());
+        assertEquals(aName, arElement.getText());
+        assertEquals(aType,
+                arElement.getAttribute(new QName("type")).getAttributeValue());
+        assertEquals(aPmode,
+                arElement.getAttribute(new QName("pmode")).getAttributeValue());
         OMElement sElement = ServiceElement.getElement(ciElement);
         assertEquals(SERVICE_ELEMENT_NAME, sElement.getQName());
 

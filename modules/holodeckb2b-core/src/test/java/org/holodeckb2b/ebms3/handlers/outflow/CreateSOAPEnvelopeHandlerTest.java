@@ -60,6 +60,8 @@ import static org.mockito.Mockito.*;
 /**
  * Created at 23:42 29.01.17
  *
+ * Checked for cases coverage (04.05.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
@@ -95,6 +97,7 @@ public class CreateSOAPEnvelopeHandlerTest {
     @After
     public void tearDown() throws Exception {
         LogManager.getRootLogger().removeAppender(mockAppender);
+        core.getPModeSet().removeAll();
     }
 
     @Test

@@ -35,6 +35,8 @@ import static org.junit.Assert.*;
 /**
  * Created at 15:16 19.02.17
  *
+ * Checked for cases coverage (29.04.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class PropertyElementTest {

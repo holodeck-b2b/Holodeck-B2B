@@ -22,9 +22,13 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.messagemodel.*;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.TestUtils;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -33,68 +37,228 @@ import static org.junit.Assert.*;
 /**
  * Created at 15:15 19.02.17
  *
+ * Checked for cases coverage (30.04.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class MessageInfoElementTest {
 
-    private OMElement umElement;
+    private MessageMetaData mmd;
+    private SOAPEnvelope soapEnvelope;
+    private SOAPHeaderBlock headerBlock;
+
+    private static final QName MESSAGE_INFO_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "MessageInfo");
+    private static final QName TIMESTAMP_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "Timestamp");
+    private static final QName MESSAGE_ID_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "MessageId");
+    private static final QName RECEIPT_CHILD_ELEMENT_NAME =
+            new QName(EbMSConstants.EBMS3_NS_URI, "ReceiptChild");
 
     @Before
     public void setUp() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("packagetest/mmd_pcktest.xml", this);
+        mmd = TestUtils.getMMD("packagetest/mmd_pcktest.xml", this);
         // Creating SOAP envelope
-        SOAPEnvelope soapEnvelope = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        soapEnvelope = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(soapEnvelope);
-        // Adding UserMessage from mmd
-        umElement = UserMessageElement.createElement(headerBlock, mmd);
+        headerBlock = Messaging.createElement(soapEnvelope);
     }
 
     @Test
     public void testCreateElement() throws Exception {
+        // Test MessageInfoElement.createElement on all possible variants
+        // of the MessageUnit implementations
+
+        // UserMessage
+
         UserMessage userMessage = new UserMessage();
+        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
         OMElement miElement = MessageInfoElement.createElement(umElement, userMessage);
+        verifyMessageInfoElement(miElement);
 
-        assertNotNull(miElement);
-        Iterator<OMElement> it = miElement.getChildElements();
-        assertTrue(it.hasNext());
-        OMElement tsElement = it.next();
-        assertNotNull(tsElement);
-        OMElement midElement = it.next();
-        assertNotNull(midElement);
+        // PullRequest
 
-        // todo test all possible variants of MessageUnit implementations
         PullRequest pullRequest = new PullRequest();
+        pullRequest.setMPC("some_mpc");
+        OMElement prSignalElement =
+                PullRequestElement.createElement(headerBlock, pullRequest);
+        miElement = MessageInfoElement.createElement(prSignalElement, pullRequest);
+        verifyMessageInfoElement(miElement);
+
+        // Receipt
+
         Receipt receipt = new Receipt();
+        OMElement receiptChildElement =
+                soapEnvelope.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
+        ArrayList<OMElement> content = new ArrayList<>();
+        content.add(receiptChildElement);
+        receipt.setContent(content);
+        OMElement rElement = ReceiptElement.createElement(headerBlock, receipt);
+        miElement = MessageInfoElement.createElement(rElement, receipt);
+        verifyMessageInfoElement(miElement);
+
+        // ErrorMessage
+
         ErrorMessage errorMessage = new ErrorMessage();
+        ArrayList<IEbmsError> errors = new ArrayList<>();
+        EbmsError ebmsError = new EbmsError();
+        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setErrorCode("some_error_code");
+        errors.add(ebmsError);
+        errorMessage.setErrors(errors);
+        OMElement esElement =
+                ErrorSignalElement.createElement(headerBlock, errorMessage);
+        miElement = MessageInfoElement.createElement(esElement, errorMessage);
+        verifyMessageInfoElement(miElement);
     }
 
     @Test
     public void testGetElement() throws Exception {
-        OMElement miElement = MessageInfoElement.getElement(umElement);
+        // Test MessageInfoElement.getElement on all possible variants
+        // of the MessageUnit implementations
 
-        assertNotNull(miElement);
-        Iterator<OMElement> it = miElement.getChildElements();
-        assertTrue(it.hasNext());
-        OMElement tsElement = it.next();
-        assertNotNull(tsElement);
-        OMElement midElement = it.next();
-        assertNotNull(midElement);
+        // UserMessage
+
+        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
+        OMElement miElement = MessageInfoElement.getElement(umElement);
+        verifyMessageInfoElement(miElement);
+
+        // PullRequest
+
+        PullRequest pullRequest = new PullRequest();
+        pullRequest.setMPC("some_mpc");
+        OMElement prSignalElement =
+                PullRequestElement.createElement(headerBlock, pullRequest);
+        miElement = MessageInfoElement.getElement(prSignalElement);
+        verifyMessageInfoElement(miElement);
+
+        // Receipt
+
+        Receipt receipt = new Receipt();
+        OMElement receiptChildElement =
+                soapEnvelope.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
+        ArrayList<OMElement> content = new ArrayList<>();
+        content.add(receiptChildElement);
+        receipt.setContent(content);
+        OMElement rElement = ReceiptElement.createElement(headerBlock, receipt);
+        miElement = MessageInfoElement.getElement(rElement);
+        verifyMessageInfoElement(miElement);
+
+        // ErrorMessage
+
+        ErrorMessage errorMessage = new ErrorMessage();
+        ArrayList<IEbmsError> errors = new ArrayList<>();
+        EbmsError ebmsError = new EbmsError();
+        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setErrorCode("some_error_code");
+        errors.add(ebmsError);
+        errorMessage.setErrors(errors);
+        OMElement esElement =
+                ErrorSignalElement.createElement(headerBlock, errorMessage);
+        miElement = MessageInfoElement.getElement(esElement);
+        verifyMessageInfoElement(miElement);
     }
 
     @Test
     public void testReadElement() throws Exception {
+        // Test MessageInfoElement.readElement on all possible variants
+        // of the MessageUnit implementations
+
+        // UserMessage
+
         UserMessage userMessage = new UserMessage();
         userMessage.setTimestamp(new Date());
         userMessage.setMessageId("some_id");
+        userMessage.setRefToMessageId("some_ref_id");
+        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
         OMElement miElement = MessageInfoElement.createElement(umElement, userMessage);
 
         userMessage = new UserMessage();
-        assertNull(userMessage.getTimestamp());
-        assertNull(userMessage.getMessageId());
         MessageInfoElement.readElement(miElement, userMessage);
 
-        assertNotNull(userMessage.getTimestamp());
-        assertEquals("some_id", userMessage.getMessageId());
+        verifyMessageUnit(userMessage, "some_id", "some_ref_id");
+
+        // PullRequest
+
+        PullRequest pullRequest = new PullRequest();
+        pullRequest.setTimestamp(new Date());
+        pullRequest.setMessageId("some_id");
+        pullRequest.setRefToMessageId("some_ref_id");
+        OMElement prSignalElement =
+                PullRequestElement.createElement(headerBlock, pullRequest);
+        miElement = MessageInfoElement.createElement(prSignalElement, pullRequest);
+
+        pullRequest = new PullRequest();
+        MessageInfoElement.readElement(miElement, pullRequest);
+
+        verifyMessageUnit(pullRequest, "some_id", "some_ref_id");
+
+        // Receipt
+
+        Receipt receipt = new Receipt();
+        receipt.setTimestamp(new Date());
+        receipt.setMessageId("some_id");
+        receipt.setRefToMessageId("some_ref_id");
+        OMElement receiptChildElement =
+                soapEnvelope.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
+        ArrayList<OMElement> content = new ArrayList<>();
+        content.add(receiptChildElement);
+        receipt.setContent(content);
+        OMElement rElement = ReceiptElement.createElement(headerBlock, receipt);
+        miElement = MessageInfoElement.createElement(rElement, receipt);
+
+        receipt = new Receipt();
+        MessageInfoElement.readElement(miElement, receipt);
+
+        verifyMessageUnit(receipt, "some_id", "some_ref_id");
+
+        // ErrorMessage
+
+        ErrorMessage errorMessage = new ErrorMessage();
+        errorMessage.setTimestamp(new Date());
+        errorMessage.setMessageId("some_id");
+        errorMessage.setRefToMessageId("some_ref_id");
+
+        ArrayList<IEbmsError> errors = new ArrayList<>();
+        EbmsError ebmsError = new EbmsError();
+        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setErrorCode("some_error_code");
+        errors.add(ebmsError);
+        errorMessage.setErrors(errors);
+
+        OMElement esElement =
+                ErrorSignalElement.createElement(headerBlock, errorMessage);
+        miElement = MessageInfoElement.createElement(esElement, errorMessage);
+
+        errorMessage = new ErrorMessage();
+        MessageInfoElement.readElement(miElement, errorMessage);
+
+        verifyMessageUnit(errorMessage, "some_id", "some_ref_id");
+    }
+
+    /**
+     * Verifies the structure of the MessageInfo OMElement
+     * @param miElement
+     */
+    private void verifyMessageInfoElement(OMElement miElement) {
+        assertEquals(MESSAGE_INFO_ELEMENT_NAME, miElement.getQName());
+        Iterator<OMElement> it = miElement.getChildElements();
+        assertTrue(it.hasNext());
+        OMElement tsElement = it.next();
+        assertEquals(TIMESTAMP_ELEMENT_NAME, tsElement.getQName());
+        OMElement midElement = it.next();
+        assertEquals(MESSAGE_ID_ELEMENT_NAME, midElement.getQName());
+    }
+
+    /**
+     * Verifies that the MessageUnit fields are initialised
+     * @param mu
+     * @param muId
+     */
+    private void verifyMessageUnit(MessageUnit mu, String muId, String muRefId) {
+        assertNotNull(mu.getTimestamp());
+        assertEquals(muId, mu.getMessageId());
+        assertEquals(muRefId, mu.getRefToMessageId());
     }
 }

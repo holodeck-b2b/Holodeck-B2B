@@ -29,6 +29,8 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created at 13:09 15.10.16
  *
+ * Checked for cases coverage (30.04.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class SOAPEnvTest {
