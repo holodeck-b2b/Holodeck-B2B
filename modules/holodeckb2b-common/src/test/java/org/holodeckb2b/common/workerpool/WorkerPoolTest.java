@@ -65,7 +65,6 @@ public class WorkerPoolTest {
      */
     @Test
     public void testReconfPool() {
-//        String path = this.getClass().getClassLoader().getResource("workerpool/wp_create.xml").getPath();
         String path = TestUtils.getPath(this.getClass(), "workerpool/wp_create.xml");
 
         final IWorkerPoolConfiguration cfg = XMLWorkerPoolConfig.loadFromFile(path);

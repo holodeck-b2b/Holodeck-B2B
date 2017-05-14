@@ -40,8 +40,6 @@ public class MessageIdGeneratorTest {
     @BeforeClass
     public static void setUpClass() {
         baseDir = TestUtils.getPath(MessageIdGenerator.class, "utils");
-//                MessageIdGeneratorTest.class
-//                .getClassLoader().getResource("utils").getPath();
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
         hostname =

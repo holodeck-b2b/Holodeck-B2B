@@ -34,7 +34,6 @@ public class ConfigXmlFileTest {
 
 
     public ConfigXmlFile readConfigFile(final String path) throws Exception {
-//        final String absPath = this.getClass().getClassLoader().getResource("cfgxml/" + path).getPath();
         final String absPath = TestUtils.getPath(this.getClass(), "cfgxml/" + path);
         return ConfigXmlFile.loadFromFile(absPath);
     }
