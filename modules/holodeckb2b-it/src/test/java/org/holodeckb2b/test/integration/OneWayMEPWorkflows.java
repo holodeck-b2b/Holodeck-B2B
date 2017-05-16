@@ -100,20 +100,16 @@ public class OneWayMEPWorkflows {
     public void testOneWayPush() throws Exception {
         String msgFileName = "ex-mmd-push";
         System.out.println("The OneWay/Push integration test started ... ");
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        Thread.sleep(5000);
+
         assertTrue(itHelper.changeMsgExtensionToMMD(msgFileName+".accepted",
                 dADirName));
         System.out.println("Message to push is placed into msg_out dir."
                 + " Waiting for message processing ... ");
-        try {
-            Thread.sleep(40000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        Thread.sleep(40000);
+
         System.out.println("Message should be processed now."
                 + " Checking the results ...");
 
@@ -141,27 +137,22 @@ public class OneWayMEPWorkflows {
         // receipt message xml should be present
         assertTrue(itHelper.dirIsNotEmpty(dADirName + "/data/msg_in"));
         System.out.println("The OneWay/Push integration test finished.");
-        Thread.sleep(1000);
     }
 
     @Test
     public void testOneWayPull() throws Exception {
         String msgFileName = "ex-mmd-pull-ut";
         System.out.println("The OneWay/Pull integration test started ... ");
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        Thread.sleep(5000);
+
         assertTrue(itHelper.changeMsgExtensionToMMD(msgFileName+".accepted",
                 dBDirName));
         System.out.println("Message to pull is placed into msg_out dir."
                 + " Waiting for message processing ... ");
-        try {
-            Thread.sleep(50000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        Thread.sleep(50000);
+
         System.out.println("Message should be processed now."
                 + " Checking the results ...");
 
@@ -187,6 +178,5 @@ public class OneWayMEPWorkflows {
         // receipt message xml should be present
         assertTrue(itHelper.dirIsNotEmpty(dADirName + "/data/msg_in"));
         System.out.println("The OneWay/Pull integration test finished.");
-        Thread.sleep(1000);
     }
 }
