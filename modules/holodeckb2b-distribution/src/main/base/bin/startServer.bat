@@ -7,9 +7,9 @@ REM  regarding copyright ownership. The ASF licenses this file
 REM  to you under the Apache License, Version 2.0 (the
 REM  "License"); you may not use this file except in compliance
 REM  with the License. You may obtain a copy of the License at
-REM  
+REM
 REM  http://www.apache.org/licenses/LICENSE-2.0
-REM  
+REM
 REM  Unless required by applicable law or agreed to in writing,
 REM  software distributed under the License is distributed on an
 REM  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,11 +22,11 @@ rem Startup script for the Simple Axis Server (with default parameters)
 rem
 rem Environment Variable Prequisites
 rem
-rem   AXIS2_HOME      Must point at your AXIS2 directory 
+rem   AXIS2_HOME      Must point at your AXIS2 directory
 rem
 rem   JAVA_HOME       Must point at your Java Development Kit installation.
 rem
-rem   JAVA_OPTS       (Optional) Java runtime options 
+rem   JAVA_OPTS       (Optional) Java runtime options
 rem ---------------------------------------------------------------------------
 
 if "%OS%"=="Windows_NT" @setlocal
@@ -56,8 +56,8 @@ goto loop
 
 :help
 echo  Usage: axis2server.bat
-   
-echo  commands:    
+
+echo  commands:
 echo   -xdebug    Start Axis2 Server under JPDA debugger
 echo   -security  Enable Java 2 security
 echo   -h         help
@@ -71,7 +71,7 @@ rem by the user or the %0 problem on Windows 9x
 if exist "%AXIS2_HOME%\conf\axis2.xml" goto checkJava
 
 :noAxis2Home
-echo AXIS2_HOME environment variable is set incorrectly or AXIS2 could not be located. 
+echo AXIS2_HOME environment variable is set incorrectly or AXIS2 could not be located.
 echo Please set the AXIS2_HOME variable appropriately
 goto end
 
@@ -104,7 +104,7 @@ FOR %%c in ("%AXIS2_HOME%\lib\*.jar") DO set AXIS2_CLASS_PATH=!AXIS2_CLASS_PATH!
 echo Using JAVA_HOME    %JAVA_HOME%
 echo Using AXIS2_HOME   %AXIS2_HOME%
 
-cd %AXIS2_HOME%
+cd "%AXIS2_HOME%"
 "%_JAVACMD%" %JAVA_OPTS% -cp "!AXIS2_CLASS_PATH!" -Djava.endorsed.dirs="%AXIS2_HOME%\lib\endorsed";"%JAVA_HOME%\jre\lib\endorsed";"%JAVA_HOME%\lib\endorsed" org.apache.axis2.transport.SimpleAxis2Server %AXIS2_CMD_LINE_ARGS%
 goto end
 
