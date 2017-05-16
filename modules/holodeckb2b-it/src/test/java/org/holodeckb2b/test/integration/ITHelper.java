@@ -159,7 +159,6 @@ public class ITHelper {
 
                 ProcessBuilder pb =
                         new ProcessBuilder("/bin/bash", "./startServer.sh");
-                //pb.redirectOutput(new File(workingDirPath + "/output.log"));
                 pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                 pb.redirectError(new File(workingDirPath + "/error.log"));
 
@@ -170,17 +169,17 @@ public class ITHelper {
                         new File(workingDirPath + "/" + dBDirName + "/" + "bin"));
                 processB = pb.start();
             } else if (SystemUtils.IS_OS_WINDOWS) {
-                // todo check this in Windows OS if needed
-                ProcessBuilder pb =
-                        new ProcessBuilder("startServer.bat");
-                pb.redirectOutput(new File(workingDirPath + "/output.log"));
-                pb.redirectError(new File(workingDirPath + "/error.log"));
-                pb.directory(
-                        new File(workingDirPath + "/" + dADirName + "/" + "bin"));
-                processA = pb.start();
-                pb.directory(
-                        new File(workingDirPath + "/" + dBDirName + "/" + "bin"));
-                processB = pb.start();
+                ProcessBuilder pbA = new ProcessBuilder(workingDirPath + File.separator + dADirName + File.separator
+                                + "bin" + File.separator + "startServer.bat");
+                pbA.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                pbA.redirectError(new File(workingDirPath + File.separator + "error.log"));
+                processA = pbA.start();
+
+                ProcessBuilder pbB = new ProcessBuilder(workingDirPath + File.separator + dBDirName + File.separator
+                                + "bin" + File.separator + "startServer.bat");
+                pbB.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                pbB.redirectError(new File(workingDirPath + File.separator + "error.log"));
+                processB = pbB.start();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -210,7 +209,8 @@ public class ITHelper {
                 }
                 p.waitFor();
             } else if (SystemUtils.IS_OS_WINDOWS) {
-                // todo add logic for Windows if needed
+                Process p = Runtime.getRuntime().exec("wmic process where \"CommandLine Like '%SimpleAxis2Server%'\" call terminate");
+                p.waitFor();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -222,16 +222,16 @@ public class ITHelper {
      * @param distrDirName HolodeckB2B instance folder name
      */
     void copyExampleDataToMsgOutDir(String distrDirName) {
-        File msgsDir = new File(workingDirPath + "/" + distrDirName + "/"
-                + "examples" + "/" + "msgs");
+        File msgsDir = new File(workingDirPath + File.separator + distrDirName + File.separator
+                + "examples" + File.separator + "msgs");
         File msgOutDir =
-                new File(workingDirPath + "/" + distrDirName
-                        + "/" + "data" + "/" + "msg_out");
+                new File(workingDirPath + File.separator + distrDirName
+                        + File.separator + "data" + File.separator + "msg_out");
         File[] msgsFiles = msgsDir.listFiles();
         try {
             for (int i = 0; i < msgsFiles.length; i++) {
                 File newMsgsFile =
-                        new File(msgOutDir.getPath() + "/"
+                        new File(msgOutDir.getPath() + File.separator
                                 + msgsFiles[i].getName());
                 Files.copy(msgsFiles[i].toPath(), newMsgsFile.toPath(),
                         StandardCopyOption.REPLACE_EXISTING);
@@ -239,9 +239,9 @@ public class ITHelper {
                     File[] files = msgsFiles[i].listFiles();
                     for(int j = 0; j < files.length;j ++) {
                         newMsgsFile =
-                                new File(msgOutDir.getPath() + "/"
+                                new File(msgOutDir.getPath() + File.separator
                                         + msgsFiles[i].getName()
-                                        + "/" + files[j].getName());
+                                        + File.separator + files[j].getName());
                         Files.copy(files[j].toPath(), newMsgsFile.toPath(),
                                 StandardCopyOption.REPLACE_EXISTING);
                     }

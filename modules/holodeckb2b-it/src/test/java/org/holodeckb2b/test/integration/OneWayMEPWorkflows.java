@@ -97,7 +97,7 @@ public class OneWayMEPWorkflows {
     }
 
     @Test
-    public void testOneWayPush() {
+    public void testOneWayPush() throws Exception {
         String msgFileName = "ex-mmd-push";
         System.out.println("The OneWay/Push integration test started ... ");
         try {
@@ -110,7 +110,7 @@ public class OneWayMEPWorkflows {
         System.out.println("Message to push is placed into msg_out dir."
                 + " Waiting for message processing ... ");
         try {
-            Thread.sleep(30000);
+            Thread.sleep(40000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -141,10 +141,11 @@ public class OneWayMEPWorkflows {
         // receipt message xml should be present
         assertTrue(itHelper.dirIsNotEmpty(dADirName + "/data/msg_in"));
         System.out.println("The OneWay/Push integration test finished.");
+        Thread.sleep(1000);
     }
 
     @Test
-    public void testOneWayPull() {
+    public void testOneWayPull() throws Exception {
         String msgFileName = "ex-mmd-pull-ut";
         System.out.println("The OneWay/Pull integration test started ... ");
         try {
@@ -186,5 +187,6 @@ public class OneWayMEPWorkflows {
         // receipt message xml should be present
         assertTrue(itHelper.dirIsNotEmpty(dADirName + "/data/msg_in"));
         System.out.println("The OneWay/Pull integration test finished.");
+        Thread.sleep(1000);
     }
 }
