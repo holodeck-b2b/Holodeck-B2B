@@ -2,8 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 3.0.0
-###### 2017-04-18
+## 3.0.0-SNAPSHOT-2 (Unreleased)
 ### Added
 * P-Mode validation feature which separates the validation of P-Modes from both their internal and external storage
 * The direction and processing states of a message unit are now available through the interfaces
@@ -34,6 +33,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * NPE in purge operation when payload location is not available [#46](https://github.com/holodeck-b2b/Holodeck-B2B/issues/46)
 * P-Mode finding does not take into account MPC defined in PullRequesFlow [#47](https://github.com/holodeck-b2b/Holodeck-B2B/issues/47)
 * NPE in P-Mode finding process when only declaring SecurityConfiguration for a TradingPartner [#48](https://github.com/holodeck-b2b/Holodeck-B2B/issues/48)
+* Server starts with error message if Holodeck B2B directory name includes space [#54](https://github.com/holodeck-b2b/Holodeck-B2B/issues/54)
+* Resolved build issues in unit tests on Windows platform
 
 ### Security
 
@@ -102,4 +103,3 @@ version.
 * Database doesn't save long meta data strings [#8](https://github.com/holodeck-b2b/Holodeck-B2B/issues/8)
 * NPE when using PullRequestFlow without security configuration [#9](https://github.com/holodeck-b2b/Holodeck-B2B/issues/9)
 * IOException possible on parallel submission to Holodeck B2B Core [#10](https://github.com/holodeck-b2b/Holodeck-B2B/issues/10)
-
