@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
-###Added
+### Added
 * Option to apply _strict_ validation of ebMS header meta-data. By default Holodeck B2B only validates
 that it is able to process the message. When applying _strict_ validation mode it will check that the header
 meta-data conforms to all requirements as stated in the ebMS Specifications.
@@ -16,25 +16,25 @@ is done in the _User Message flow_ of the P-Mode, see
 `org.holodeckb2b.interfaces.pmode.IUserMessageFlow.getCustomValidationConfiguration()`
 *
 
-###Changed
+### Changed
 * Refactored the validation of the ebMS header meta-data validation classes and handler
 * The ebMS Error returned to the sender in case the signature of a _User Message_ does not include all
 payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonCompliance_.
 
-###Deprecated
+### Deprecated
 * The configuration parameter (`IConfiguation.useStrictErrorRefCheck()`) to apply a strict validation on the
  references in the Error signal is replaced by the generic strict header validation mode.
 *
 
-###Removed
+### Removed
 
-###Fixed
+### Fixed
 
-###Security
+### Security
 
 ## 3.0.0
-###### 2017-04-18
-###Added
+###### 2017-05-10
+### Added
 * P-Mode validation feature which separates the validation of P-Modes from both their internal and external storage
 * The direction and processing states of a message unit are now available through the interfaces
 * Unit tests to improve test coverage
