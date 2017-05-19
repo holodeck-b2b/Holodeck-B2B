@@ -37,12 +37,16 @@ import org.holodeckb2b.pmode.helpers.*;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestEventProcessor;
 import static org.junit.Assert.*;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  * Created at 22:57 13.09.16
+ *
+ * Checked for cases coverage (19.05.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -70,6 +74,12 @@ public class RaiseSignatureCreatedEventTest {
         handler = new RaiseSignatureCreatedEvent();
     }
 
+    @After
+    public void tearDown() throws Exception {
+        TestUtils.cleanOldMessageUnitEntities();
+        core.getPModeSet().removeAll();
+    }
+
     @Test
     public void testDoProcessing() throws Exception {
         MessageMetaData mmd = TestUtils.getMMD("security/handlers/full_mmd.xml", this);
@@ -81,7 +91,7 @@ public class RaiseSignatureCreatedEventTest {
         // Adding UserMessage from mmd
         OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
 
-        System.out.println("[1] umElement: " + umElement.toString());
+        //System.out.println("[1] umElement: " + umElement.toString());
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
@@ -135,7 +145,7 @@ public class RaiseSignatureCreatedEventTest {
 
         pmode.setId(pmodeId);
 
-        System.out.println("[2] umElement: " + umElement.toString());
+        //System.out.println("[2] umElement: " + umElement.toString());
 
         //Adding PMode to the managed PMode set.
         core.getPModeSet().add(pmode);
