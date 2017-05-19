@@ -151,7 +151,7 @@ public class OneWayMEPWorkflows {
         System.out.println("Message to pull is placed into msg_out dir."
                 + " Waiting for message processing ... ");
 
-        Thread.sleep(50000);
+        Thread.sleep(60000);
 
         System.out.println("Message should be processed now."
                 + " Checking the results ...");
