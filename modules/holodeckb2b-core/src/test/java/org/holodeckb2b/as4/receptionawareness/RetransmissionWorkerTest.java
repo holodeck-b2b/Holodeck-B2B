@@ -61,8 +61,6 @@ import static org.mockito.Mockito.verify;
 /**
  * Created at 17:54 30.04.17
  *
- * todo [] complete the test
- *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
