@@ -28,7 +28,6 @@ import org.holodeckb2b.interfaces.events.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandlerFactory;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 
@@ -79,12 +78,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
         try {
             log.info("A " + eventType + " event [" + event.getId() + "] was raised for " + msgUnitType + " with msgId="
                      + messageId);
-            // Check that the referenced event is an entity object
-            if (!(event.getSubject() instanceof IMessageUnitEntity)) {
-                log.error("This processor can only handle event that include an entity object reference!");
-                return;
-            }
-            final IMessageUnitEntity subject = (IMessageUnitEntity) event.getSubject();
+            final IMessageUnit subject = event.getSubject();
             final String pmodeId = subject.getPModeId();
             if (Utils.isNullOrEmpty(pmodeId)) {
                 // No P-Mode available for this message unit => no handler config
@@ -99,7 +93,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
                 log.error("The P-Mode for the message unit [" + pmodeId + "] is not available!");
                 return;
             }
-            final ILeg leg = pmode.getLeg(subject.getLeg() != null ? subject.getLeg() : ILeg.Label.REQUEST);
+            final ILeg leg = pmode.getLeg(ILeg.Label.REQUEST);
             final List<IMessageProcessingEventConfiguration> eventHandlers = leg.getMessageProcessingEventConfiguration();
             if (Utils.isNullOrEmpty(eventHandlers)) {
                 log.debug(leg.getLabel() != null ? leg.getLabel().toString() : "REQUEST" + " leg of P-Mode [" + pmodeId
