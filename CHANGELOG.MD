@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * P-Mode validation feature which separates the validation of P-Modes from both their internal and external storage
 * The direction and processing states of a message unit are now available through the interfaces
 * Unit tests to improve test coverage
-* Integration tests. These tests set up two Holodeck B2B instances and execute both a push and pull exchange to check
+* Integration tests. These tests set up two Holodeck B2B instances and execute both a push and a pull exchange to check
   that everything works on run time
 * A default implementation of the message model interface (in Common module)
 * Interfaces for separation of Core functionality and storage of message unit meta-data
