@@ -2,7 +2,8 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 3.0.0-SNAPSHOT-2 (Unreleased)
+## 3.0.0
+###### 2017-06-13
 ### Added
 * P-Mode validation feature which separates the validation of P-Modes from both their internal and external storage
 * The direction and processing states of a message unit are now available through the interfaces
@@ -20,8 +21,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * It is now possible to not only configure whether _Error Signals_ should be logged but also if all signals
   should be logged or only the ones that contain an Error with severity _failure_ (see `log4j2.xml` for more info)
 
-### Deprecated
-
 ### Removed
 * Exceptions `org.holodeckb2b.common.exceptions.DatabaseException` and `org.holodeckb2b.common.exceptions.DuplicateMessageIdError`
   which were bound to the specific persistency implementation of previous versions
@@ -36,8 +35,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Server starts with error message if Holodeck B2B directory name includes space [#54](https://github.com/holodeck-b2b/Holodeck-B2B/issues/54)
 * Unable to start on Windows when using very long base path [#64](https://github.com/holodeck-b2b/Holodeck-B2B/issues/64)
 * Resolved build issues in unit tests on Windows platform
-
-### Security
 
 ## 2.1.0
 ###### 2016-10-18

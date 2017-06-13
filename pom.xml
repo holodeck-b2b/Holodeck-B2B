@@ -23,7 +23,7 @@
     <groupId>org.holodeckb2b</groupId>
     <artifactId>holodeckb2b</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.0-SNAPSHOT-2</version>
+    <version>3.0.0</version>
     <name>Holodeck B2B</name>
     <url>http://www.holodeck-b2b.org/</url>
     <inceptionYear>2015</inceptionYear>
@@ -95,7 +95,7 @@
 
     <dependencyManagement>
         <dependencies>
-            
+
             <!--===============================================================
                 First the modules of Holodeck B2B itself
             =============================================================== -->
@@ -159,7 +159,7 @@
                 <artifactId>axiom-dom</artifactId>
                 <version>${axiom-version}</version>
             </dependency>
-            
+
             <!--===============================================================
                 Hibernate is used to store configuration and message meta data
                 in database
@@ -257,7 +257,7 @@
                 <artifactId>log4j-core</artifactId>
                 <version>${log4j.version}</version>
             </dependency>
-            
+
             <!-- Axis2 and currently also Holodeck B2B use Commons logging, so add log4j binding -->
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
