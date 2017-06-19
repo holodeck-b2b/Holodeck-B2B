@@ -98,13 +98,12 @@ goto end
 :runAxis2
 rem set the classes by looping through the libs
 setlocal EnableDelayedExpansion
-set AXIS2_CLASS_PATH=%AXIS2_HOME%;%AXIS2_HOME%\conf;%JAVA_HOME%\lib\tools.jar;
-FOR %%c in ("%AXIS2_HOME%\lib\*.jar") DO set AXIS2_CLASS_PATH=!AXIS2_CLASS_PATH!;%%c
+set AXIS2_CLASS_PATH=%AXIS2_HOME%;%AXIS2_HOME%\conf;%JAVA_HOME%\lib\tools.jar;%AXIS2_HOME%\lib\*
 
 echo Using JAVA_HOME    %JAVA_HOME%
 echo Using AXIS2_HOME   %AXIS2_HOME%
 
-cd %AXIS2_HOME%
+cd "%AXIS2_HOME%"
 "%_JAVACMD%" %JAVA_OPTS% -cp "!AXIS2_CLASS_PATH!" -Djava.endorsed.dirs="%AXIS2_HOME%\lib\endorsed";"%JAVA_HOME%\jre\lib\endorsed";"%JAVA_HOME%\lib\endorsed" org.apache.axis2.transport.SimpleAxis2Server %AXIS2_CMD_LINE_ARGS%
 goto end
 

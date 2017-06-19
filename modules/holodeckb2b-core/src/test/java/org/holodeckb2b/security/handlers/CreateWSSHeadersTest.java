@@ -60,6 +60,8 @@ import static org.junit.Assert.*;
 /**
  * Created at 20:31 16.10.16
  *
+ * Checked for cases coverage (19.05.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
@@ -135,9 +137,14 @@ public class CreateWSSHeadersTest {
 
     @After
     public void tearDown() throws Exception {
+        TestUtils.cleanOldMessageUnitEntities();
         LogManager.getRootLogger().removeAppender(mockAppender);
     }
 
+    /**
+     * Test the user message for the presence of supported WSS headers.
+     * @throws Exception
+     */
     @Test
     public void testDoProcessing () throws Exception {
         System.out.println("[testDoProcessing]>");
@@ -196,6 +203,9 @@ public class CreateWSSHeadersTest {
         ArrayList securityHeaders =
                 header.getHeaderBlocksWithNSURI(
                         SecurityConstants.WSS_NAMESPACE_URI);
+
+        System.out.println("securityHeaders amount: " + securityHeaders.size());
+
         assertNotNull(securityHeaders);
         // Should contain two security headers,
         // one for the hb2b-sec:ebms:UsernameToken

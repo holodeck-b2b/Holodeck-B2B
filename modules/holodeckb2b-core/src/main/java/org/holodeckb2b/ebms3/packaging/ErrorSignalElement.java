@@ -21,6 +21,7 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
@@ -74,7 +75,7 @@ public class ErrorSignalElement {
         // the Error elements containing the error info
         final OMElement signalmessage = SignalMessageElement.createElement(messaging);
 
-        // Create the generice MessageInfo element
+        // Create the generic MessageInfo element
         MessageInfoElement.createElement(signalmessage, errorMU);
 
         // Now create an Error element for each error in the error message unit
@@ -157,24 +158,24 @@ public class ErrorSignalElement {
 
         // origin attribute
         final String origin = error.getOrigin();
-        if (origin != null && !origin.isEmpty())
+        if (!Utils.isNullOrEmpty(origin))
             errorElement.addAttribute(ORIGIN_ATTR, origin, null);
         // category attribute
         final String category = error.getCategory();
-        if (category != null && !category.isEmpty())
+        if (!Utils.isNullOrEmpty(category))
             errorElement.addAttribute(CATEGORY_ATTR, category, null);
         // refToMessageInError attribute
         final String refToMsg = error.getRefToMessageInError();
-        if (refToMsg != null && !refToMsg.isEmpty())
+        if (!Utils.isNullOrEmpty(refToMsg))
             errorElement.addAttribute(REF_TO_ATTR, refToMsg, null);
         // shortDescription attribute
         final String errMsg = error.getMessage();
-        if (errMsg != null && !errMsg.isEmpty())
+        if (!Utils.isNullOrEmpty(errMsg))
             errorElement.addAttribute(SHORT_DESCR_ATTR, errMsg, null);
 
         // Add ErrorDetail element directly as it very closely related to Error element
         final String errDetailText = error.getErrorDetail();
-        if (errDetailText != null && !errDetailText.isEmpty()) {
+        if (!Utils.isNullOrEmpty(errDetailText)) {
             final OMElement errorDetail = f.createOMElement(Q_ERROR_DETAIL, errorElement);
             errorDetail.setText(errDetailText);
         }
@@ -214,7 +215,8 @@ public class ErrorSignalElement {
             error.setErrorDetail(errDetailElement.getText());
 
         // Read the description element (if it exists)
-        error.setDescription(DescriptionElement.readElement(DescriptionElement.getElement(errorElement)));
+        error.setDescription(DescriptionElement.readElement(
+                DescriptionElement.getElement(errorElement)));
 
         return error;
     }

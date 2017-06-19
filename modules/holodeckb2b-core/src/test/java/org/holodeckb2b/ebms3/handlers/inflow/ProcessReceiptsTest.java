@@ -19,7 +19,6 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.apache.log4j.Appender;
@@ -65,6 +64,8 @@ import static org.mockito.Mockito.verify;
 /**
  * Created at 12:07 15.03.17
  *
+ * Checked for cases coverage (05.05.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
@@ -103,8 +104,12 @@ public class ProcessReceiptsTest {
     @After
     public void tearDown() throws Exception {
         LogManager.getRootLogger().removeAppender(mockAppender);
+        core.getPModeSet().removeAll();
     }
 
+    /**
+     * Test the case when the message unit is present and is referenced in the receipt
+     */
     @Test
     public void testDoProcessing() throws Exception {
         MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
@@ -132,14 +137,7 @@ public class ProcessReceiptsTest {
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
-
         Leg leg = new Leg();
-
         ReceiptConfiguration receiptConfiguration = new ReceiptConfiguration();
         leg.setReceiptConfiguration(receiptConfiguration);
         pmode.addLeg(leg);
@@ -183,7 +181,65 @@ public class ProcessReceiptsTest {
 
         verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
         List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String msg1 = "Mark Receipt as ready for delivery to business application";
+        String msg1 = "Message contains 1 Receipts signals, start processing";
+        String msg2 = "Mark Receipt as ready for delivery to business application";
+        String msg3 = "Done processing Receipt";
         assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg1));
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg2));
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg3));
+    }
+
+    /**
+     * Test the case when there is no reference to message unit in the receipt
+     */
+    @Test
+    public void testDoProcessingIfNoRefToMsgId() throws Exception {
+        // Creating SOAP envelope
+        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        // Adding header
+        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
+
+        MessageContext mc = new MessageContext();
+        mc.setServerSide(true);
+        mc.setFLOW(MessageContext.IN_FLOW);
+
+        // Setting input receipts property
+        Receipt receipt = new Receipt();
+        OMElement receiptChildElement =
+                env.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
+        ArrayList<OMElement> content = new ArrayList<>();
+        content.add(receiptChildElement);
+        receipt.setContent(content);
+//        receipt.setRefToMessageId(msgId);
+        receipt.setMessageId("receipt_id");
+
+        ReceiptElement.createElement(headerBlock, receipt);
+
+        StorageManager storageManager = core.getStorageManager();
+        IReceiptEntity receiptEntity =
+                storageManager.storeIncomingMessageUnit(receipt);
+        ArrayList<IReceiptEntity> receiptEntities = new ArrayList<>();
+        receiptEntities.add(receiptEntity);
+        mc.setProperty(MessageContextProperties.IN_RECEIPTS, receiptEntities);
+
+        try {
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        assertNotNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+        assertEquals(ProcessingState.FAILURE,
+                receiptEntity.getCurrentProcessingState().getState());
+
+        verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
+        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
+        String msg1 = "Message contains 1 Receipts signals, start processing";
+        String msg2 = "Receipt [msgId=receipt_id] contains unknown refToMessageId [null]!";
+        String msg3 = "Done processing Receipt";
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg1));
+        assertTrue(TestUtils.eventContainsMsg(events, Level.ERROR, msg2));
+        assertTrue(TestUtils.eventContainsMsg(events, Level.DEBUG, msg3));
     }
 }

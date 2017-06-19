@@ -99,10 +99,10 @@ public class ITHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        File distrDir = new File(workingDirPath +"/"+ dDirName);
+        File distrDir = new File(workingDirPath +File.separator+ dDirName);
         assertTrue(distrDir.exists());
         if(distrDir.exists()) {
-            distrDir.renameTo(new File(workingDirPath +"/"+ distrDirName));
+            distrDir.renameTo(new File(workingDirPath +File.separator+ distrDirName));
         }
     }
 
@@ -112,10 +112,10 @@ public class ITHelper {
      * @param pmodeFileName pmode configuration file name
      */
     void copyPModeDescriptor(String distrDirName, String pmodeFileName) {
-        File pmodeXml = new File(workingDirPath + "/" + distrDirName + "/"
-                + "examples" + "/" + "pmodes" + "/" + pmodeFileName);
-        File newPmodeXml = new File(workingDirPath + "/" + distrDirName + "/"
-                + "conf" + "/" + "pmodes" + "/" + pmodeFileName);
+        File pmodeXml = new File(workingDirPath + File.separator + distrDirName + File.separator
+                + "examples" + File.separator + "pmodes" + File.separator + pmodeFileName);
+        File newPmodeXml = new File(workingDirPath + File.separator + distrDirName + File.separator
+                + "conf" + File.separator + "pmodes" + File.separator + pmodeFileName);
         try {
             Files.copy(pmodeXml.toPath(), newPmodeXml.toPath(),
                     StandardCopyOption.REPLACE_EXISTING);
@@ -130,8 +130,8 @@ public class ITHelper {
      * @param port
      */
     void modifyAxisServerPort(String distrDirName, String port) {
-        File axisXml = new File(workingDirPath + "/" + distrDirName + "/"
-                + "conf" + "/" + "axis2.xml");
+        File axisXml = new File(workingDirPath + File.separator + distrDirName + File.separator
+                + "conf" + File.separator + "axis2.xml");
         assertTrue(axisXml.exists());
         if(axisXml.exists()) {
             changePortInAxis2Xml(axisXml.getPath(), port);
@@ -159,7 +159,6 @@ public class ITHelper {
 
                 ProcessBuilder pb =
                         new ProcessBuilder("/bin/bash", "./startServer.sh");
-                //pb.redirectOutput(new File(workingDirPath + "/output.log"));
                 pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                 pb.redirectError(new File(workingDirPath + "/error.log"));
 
@@ -170,17 +169,17 @@ public class ITHelper {
                         new File(workingDirPath + "/" + dBDirName + "/" + "bin"));
                 processB = pb.start();
             } else if (SystemUtils.IS_OS_WINDOWS) {
-                // todo check this in Windows OS if needed
-                ProcessBuilder pb =
-                        new ProcessBuilder("startServer.bat");
-                pb.redirectOutput(new File(workingDirPath + "/output.log"));
-                pb.redirectError(new File(workingDirPath + "/error.log"));
-                pb.directory(
-                        new File(workingDirPath + "/" + dADirName + "/" + "bin"));
-                processA = pb.start();
-                pb.directory(
-                        new File(workingDirPath + "/" + dBDirName + "/" + "bin"));
-                processB = pb.start();
+                ProcessBuilder pbA = new ProcessBuilder(workingDirPath + File.separator + dADirName + File.separator
+                                + "bin" + File.separator + "startServer.bat");
+                pbA.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                pbA.redirectError(new File(workingDirPath + File.separator + "error.log"));
+                processA = pbA.start();
+
+                ProcessBuilder pbB = new ProcessBuilder(workingDirPath + File.separator + dBDirName + File.separator
+                                + "bin" + File.separator + "startServer.bat");
+                pbB.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                pbB.redirectError(new File(workingDirPath + File.separator + "error.log"));
+                processB = pbB.start();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -210,7 +209,8 @@ public class ITHelper {
                 }
                 p.waitFor();
             } else if (SystemUtils.IS_OS_WINDOWS) {
-                // todo add logic for Windows if needed
+                Process p = Runtime.getRuntime().exec("wmic process where \"CommandLine Like '%SimpleAxis2Server%'\" call terminate");
+                p.waitFor();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -222,16 +222,16 @@ public class ITHelper {
      * @param distrDirName HolodeckB2B instance folder name
      */
     void copyExampleDataToMsgOutDir(String distrDirName) {
-        File msgsDir = new File(workingDirPath + "/" + distrDirName + "/"
-                + "examples" + "/" + "msgs");
+        File msgsDir = new File(workingDirPath + File.separator + distrDirName + File.separator
+                + "examples" + File.separator + "msgs");
         File msgOutDir =
-                new File(workingDirPath + "/" + distrDirName
-                        + "/" + "data" + "/" + "msg_out");
+                new File(workingDirPath + File.separator + distrDirName
+                        + File.separator + "data" + File.separator + "msg_out");
         File[] msgsFiles = msgsDir.listFiles();
         try {
             for (int i = 0; i < msgsFiles.length; i++) {
                 File newMsgsFile =
-                        new File(msgOutDir.getPath() + "/"
+                        new File(msgOutDir.getPath() + File.separator
                                 + msgsFiles[i].getName());
                 Files.copy(msgsFiles[i].toPath(), newMsgsFile.toPath(),
                         StandardCopyOption.REPLACE_EXISTING);
@@ -239,9 +239,9 @@ public class ITHelper {
                     File[] files = msgsFiles[i].listFiles();
                     for(int j = 0; j < files.length;j ++) {
                         newMsgsFile =
-                                new File(msgOutDir.getPath() + "/"
+                                new File(msgOutDir.getPath() + File.separator
                                         + msgsFiles[i].getName()
-                                        + "/" + files[j].getName());
+                                        + File.separator + files[j].getName());
                         Files.copy(files[j].toPath(), newMsgsFile.toPath(),
                                 StandardCopyOption.REPLACE_EXISTING);
                     }
@@ -257,11 +257,11 @@ public class ITHelper {
      * @param distrDirName HolodeckB2B instance folder name
      */
     void copyKeystores(String distrDirName) {
-        File keysDir = new File(workingDirPath + "/" + distrDirName + "/"
-                + "examples" + "/" + "certs");
+        File keysDir = new File(workingDirPath + File.separator + distrDirName + File.separator
+                + "examples" + File.separator + "certs");
         File repoKeysDir =
-                new File(workingDirPath + "/" + distrDirName
-                        + "/" + "repository" + "/" + "certs");
+                new File(workingDirPath + File.separator + distrDirName
+                        + File.separator + "repository" + File.separator + "certs");
         File[] keysFiles = keysDir.listFiles();
 //                keysDir.listFiles(new FilenameFilter() {
 //            @Override
@@ -274,7 +274,7 @@ public class ITHelper {
         try {
             for (File f : keysFiles) {
                 File newF =
-                        new File(repoKeysDir.getPath() + "/" + f.getName());
+                        new File(repoKeysDir.getPath() + File.separator + f.getName());
                 Files.copy(f.toPath(), newF.toPath(),
                         StandardCopyOption.REPLACE_EXISTING);
             }
@@ -289,17 +289,17 @@ public class ITHelper {
      */
     void clearMsgOutAndMsgInDirs(String distrDirName) {
         File msgOutDir =
-                new File(workingDirPath + "/" + distrDirName
-                        + "/" + "data" + "/" + "msg_out");
+                new File(workingDirPath + File.separator + distrDirName
+                        + File.separator + "data" + File.separator + "msg_out");
         File msgInDir =
-                new File(workingDirPath + "/" + distrDirName
-                        + "/" + "data" + "/" + "msg_in");
+                new File(workingDirPath + File.separator + distrDirName
+                        + File.separator + "data" + File.separator + "msg_in");
         FilesUtility fu = new FilesUtility();
         try {
             fu.deleteFolderContent(msgOutDir.toPath(), false);
             fu.deleteFolderContent(msgInDir.toPath(), false);
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 
@@ -310,13 +310,13 @@ public class ITHelper {
      */
     boolean changeMsgExtensionToMMD(String msgFileName,
                                                   String distrDirName) {
-        File file = new File(workingDirPath + "/" + distrDirName
-                + "/data/msg_out/" + msgFileName);
+        File file = new File(workingDirPath + File.separator + distrDirName
+                + File.separator + "data"+ File.separator + "msg_out" + File.separator + msgFileName);
         int index = file.getName().lastIndexOf(".");
         String fileName = file.getName().substring(0, index);
         String newFileName = fileName + ".mmd";
         File newFile = new File(file.getParentFile().getAbsolutePath()
-                + "/" + newFileName);
+                + File.separator + newFileName);
         return file.renameTo(newFile);
     }
 
@@ -326,7 +326,7 @@ public class ITHelper {
      */
     void deleteDistDir(String distrDirName) {
         FilesUtility fu = new FilesUtility();
-        File distrDir = new File(workingDirPath+"/"+distrDirName);
+        File distrDir = new File(workingDirPath+File.separator+distrDirName);
         if(distrDir.exists()) {
             try {
                 fu.deleteFolderContent(distrDir.toPath(), true);
@@ -380,8 +380,8 @@ public class ITHelper {
      * @param interval time interval in seconds
      */
     void setPullingInterval(String distrDirName, int interval) {
-        File axisXml = new File(workingDirPath + "/" + distrDirName + "/"
-                + "conf" + "/" + "pulling_configuration.xml");
+        File axisXml = new File(workingDirPath + File.separator + distrDirName + File.separator
+                + "conf" + File.separator + "pulling_configuration.xml");
         assertTrue(axisXml.exists());
         if(axisXml.exists()) {
             changeIntervalInPullingConfigurationXml(axisXml.getPath(), interval);
@@ -434,7 +434,7 @@ public class ITHelper {
      * @return
      */
     boolean fileExistsInDirectory(String fileName, String dirName) {
-        File file = new File(workingDirPath + "/" + dirName + "/" + fileName);
+        File file = new File(workingDirPath + File.separator + dirName + File.separator + fileName);
         return file.exists();
     }
 
@@ -446,7 +446,7 @@ public class ITHelper {
      */
     boolean dirIsNotEmpty(String dirName) {
         boolean res = false;
-        File dir = new File(workingDirPath + "/" + dirName);
+        File dir = new File(workingDirPath + File.separator + dirName);
         if(dir.exists()) {
             res = dir.listFiles().length > 0;
         }

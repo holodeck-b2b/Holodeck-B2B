@@ -22,6 +22,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.common.messagemodel.Property;
 
 /**
  * Is a helper class for handling the <code>Property</code> elements that occur in the ebMS SOAP header. This element is
@@ -87,14 +88,14 @@ public class PropertyElement {
     }
 
     /**
-     * Reads the information from the <code>Property</code> object and returns it in a new {@link
-     * org.holodeckb2b.common.messagemodel.Property} object.
+     * Reads the information from the <code>Property</code> object and returns it in a new
+     * {@link Property} object.
      *
      * @param   propElement     The <code>Property</code> element to read the info from
-     * @return                  A new {@link org.holodeckb2b.ebms3.persistency.entities.Property} object containing the
+     * @return                  A new {@link Property} object containing the
      *                          service info from the element
      */
-    public static org.holodeckb2b.common.messagemodel.Property readElement(final OMElement propElement) {
+    public static Property readElement(final OMElement propElement) {
         if (propElement == null)
             return null;
 
@@ -107,6 +108,6 @@ public class PropertyElement {
 //        String type = propElement.getAttributeValue(new QName(LN_ATTR_TYPE));
 
         // Create and return the entity object
-        return new org.holodeckb2b.common.messagemodel.Property(name, value);
+        return new Property(name, value);
     }
 }

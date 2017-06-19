@@ -21,8 +21,11 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
+import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -65,6 +68,8 @@ import static org.mockito.Mockito.verify;
 /**
  * Created at 15:48 27.02.17
  *
+ * Checked for cases coverage (11.05.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)
@@ -101,8 +106,13 @@ public class ConfigureHTTPTransportHandlerTest {
     @After
     public void tearDown() throws Exception {
         LogManager.getRootLogger().removeAppender(mockAppender);
+        core.getPModeSet().removeAll();
     }
 
+    /**
+     *
+     * @throws Exception
+     */
     @Test
     public void testDoProcessing() throws Exception {
         MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
@@ -127,7 +137,8 @@ public class ConfigureHTTPTransportHandlerTest {
         Leg leg = new Leg();
         // Setting all protocol configurations checked by the tested handler
         Protocol protocolConfig = new Protocol();
-        protocolConfig.setAddress("address");
+        String destUrl = "http://example.com";
+        protocolConfig.setAddress(destUrl);
         protocolConfig.setHTTPCompression(true);
         protocolConfig.setChunking(true);
         leg.setProtocol(protocolConfig);
@@ -167,6 +178,14 @@ public class ConfigureHTTPTransportHandlerTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+
+        assertEquals(destUrl, mc.getProperty(Constants.Configuration.TRANSPORT_URL));
+
+        Options options = mc.getOptions();
+        assertNotNull(options);
+        assertTrue((Boolean) options.getProperty(HTTPConstants.MC_GZIP_REQUEST));
+        assertTrue((Boolean) options.getProperty(HTTPConstants.CHUNKED));
+        assertNull(options.getProperty(Constants.Configuration.ENABLE_SWA));
 
         verify(mockAppender, atLeastOnce())
                 .doAppend(captorLoggingEvent.capture());

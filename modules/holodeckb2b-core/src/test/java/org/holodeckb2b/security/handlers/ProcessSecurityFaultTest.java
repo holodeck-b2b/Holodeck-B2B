@@ -40,6 +40,7 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.dao.StorageManager;
@@ -53,13 +54,20 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * Created at 17:26 31.01.17
+ *
+ * Checked for cases coverage (19.05.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -99,8 +107,12 @@ public class ProcessSecurityFaultTest {
         LogManager.getRootLogger().removeAppender(mockAppender);
     }
 
+    /**
+     * Test decription error
+     * @throws Exception
+     */
     @Test
-    public void testDoProcessing() throws Exception {
+    public void testDoProcessingOfDecriptionError() throws Exception {
         MessageMetaData mmd = TestUtils.getMMD("security/handlers/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env =
@@ -110,20 +122,17 @@ public class ProcessSecurityFaultTest {
         // Adding UserMessage from mmd
         OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
 
-        MessageContext mc = new MessageContext();
+        UserMessage userMessage = UserMessageElement.readElement(umElement);
 
-        System.out.println("mc: " + mc);
+        MessageContext mc = new MessageContext();
 
         mc.setFLOW(MessageContext.IN_FLOW);
         mc.setProperty(SecurityConstants.ADD_SECURITY_HEADERS, Boolean.TRUE);
-
-        UserMessage userMessage = UserMessageElement.readElement(umElement);
 
         OperationContext operationContext = mock(OperationContext.class);
         when(operationContext
                 .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
                 .thenReturn(mc);
-
         mc.setOperationContext(operationContext);
 
         try {
@@ -152,6 +161,148 @@ public class ProcessSecurityFaultTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+
+        ArrayList<IEbmsError> errList = (ArrayList<IEbmsError>)
+                mc.getProperty(MessageContextProperties.GENERATED_ERRORS);
+        assertNotNull(errList);
+        Iterator<IEbmsError> it = errList.iterator();
+        assertTrue(it.hasNext());
+        assertTrue(it.next().getErrorDetail()
+                .equals("Decryption of the message [unit] failed!"));
+
+        assertEquals(ProcessingState.FAILURE,
+                userMessageEntity.getCurrentProcessingState().getState());
+    }
+
+    /**
+     * Test singature error
+     * @throws Exception
+     */
+    @Test
+    public void testDoProcessingOfSignatureError() throws Exception {
+        MessageMetaData mmd = TestUtils.getMMD("security/handlers/full_mmd.xml", this);
+        // Creating SOAP envelope
+        SOAPEnvelope env =
+                SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        // Adding header
+        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
+        // Adding UserMessage from mmd
+        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
+
+        UserMessage userMessage = UserMessageElement.readElement(umElement);
+
+        MessageContext mc = new MessageContext();
+
+        mc.setFLOW(MessageContext.IN_FLOW);
+        mc.setProperty(SecurityConstants.ADD_SECURITY_HEADERS, Boolean.TRUE);
+
+        OperationContext operationContext = mock(OperationContext.class);
+        when(operationContext
+                .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
+                .thenReturn(mc);
+        mc.setOperationContext(operationContext);
+
+        try {
+            mc.setEnvelope(env);
+        } catch (AxisFault axisFault) {
+            fail(axisFault.getMessage());
+        }
+
+        StorageManager storageManager = core.getStorageManager();
+        // Setting input message property
+        IUserMessageEntity userMessageEntity =
+                storageManager.storeIncomingMessageUnit(userMessage);
+        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
+                userMessageEntity);
+
+        SecurityConstants.WSS_FAILURES part =
+                SecurityConstants.WSS_FAILURES.SIGNATURE;
+        String errorMessage = "some error message";
+
+        mc.setProperty(SecurityConstants.INVALID_DEFAULT_HEADER,
+                new KeyValuePair<>(part, errorMessage));
+
+        try {
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        ArrayList<IEbmsError> errList = (ArrayList<IEbmsError>)
+                mc.getProperty(MessageContextProperties.GENERATED_ERRORS);
+        assertNotNull(errList);
+        Iterator<IEbmsError> it = errList.iterator();
+        assertTrue(it.hasNext());
+        assertTrue(it.next().getErrorDetail()
+                .equals("Authentication of message unit failed!"));
+
+        assertEquals(ProcessingState.FAILURE,
+                userMessageEntity.getCurrentProcessingState().getState());
+    }
+
+    /**
+     * Test unknown error
+     * @throws Exception
+     */
+    @Test
+    public void testDoProcessingOfUnknownError() throws Exception {
+        MessageMetaData mmd = TestUtils.getMMD("security/handlers/full_mmd.xml", this);
+        // Creating SOAP envelope
+        SOAPEnvelope env =
+                SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        // Adding header
+        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
+        // Adding UserMessage from mmd
+        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
+
+        UserMessage userMessage = UserMessageElement.readElement(umElement);
+
+        MessageContext mc = new MessageContext();
+
+        mc.setFLOW(MessageContext.IN_FLOW);
+        mc.setProperty(SecurityConstants.ADD_SECURITY_HEADERS, Boolean.TRUE);
+
+        OperationContext operationContext = mock(OperationContext.class);
+        when(operationContext
+                .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
+                .thenReturn(mc);
+        mc.setOperationContext(operationContext);
+
+        try {
+            mc.setEnvelope(env);
+        } catch (AxisFault axisFault) {
+            fail(axisFault.getMessage());
+        }
+
+        StorageManager storageManager = core.getStorageManager();
+        // Setting input message property
+        IUserMessageEntity userMessageEntity =
+                storageManager.storeIncomingMessageUnit(userMessage);
+        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
+                userMessageEntity);
+
+        SecurityConstants.WSS_FAILURES part =
+                SecurityConstants.WSS_FAILURES.UNKNOWN;
+        String errorMessage = "some error message";
+
+        mc.setProperty(SecurityConstants.INVALID_DEFAULT_HEADER,
+                new KeyValuePair<>(part, errorMessage));
+
+        try {
+            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        ArrayList<IEbmsError> errList = (ArrayList<IEbmsError>)
+                mc.getProperty(MessageContextProperties.GENERATED_ERRORS);
+        assertNotNull(errList);
+        Iterator<IEbmsError> it = errList.iterator();
+        assertTrue(it.hasNext());
+        assertTrue(it.next().getErrorDetail()
+                .equals("The WS-Security header(s) of the message could not be processed!"));
 
         assertEquals(ProcessingState.FAILURE,
                 userMessageEntity.getCurrentProcessingState().getState());

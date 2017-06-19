@@ -39,6 +39,8 @@ import static org.junit.Assert.*;
 /**
  * Created at 22:42 28.01.17
  *
+ * Checked for cases coverage (29.04.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class PartInfoElementTest {
@@ -73,48 +75,68 @@ public class PartInfoElementTest {
     }
 
     @Test
-    public void testCreateElement() throws Exception {
+    public void testCreateElementForAttachmentContainmentType() throws Exception {
         Payload partInfo = new Payload();
-        partInfo.setContainment(IPayload.Containment.ATTACHMENT);
 
-        SchemaReference sr = new SchemaReference();
-        sr.setLocation("somewhere");
-        sr.setNamespace("namespace");
-        sr.setVersion("test");
-        partInfo.setSchemaReference(sr);
-        Description description = new Description();
-        description.setText("description");
-        partInfo.setDescription(description);
-        Collection<IProperty> properties = new ArrayList<>();
-        properties.add(new Property("name1", "value1", "type1"));
-        partInfo.setProperties(properties);
+        // check attachment
+        partInfo.setContainment(IPayload.Containment.ATTACHMENT);
+        String payloadURI = "path_to_file";
+        partInfo.setPayloadURI(payloadURI);
 
         OMElement piElement = PartInfoElement.createElement(plElement, partInfo);
         assertNotNull(piElement);
-        OMElement schema = SchemaElement.getElement(piElement);
-        assertNotNull(schema);
-        OMElement descr = DescriptionElement.getElement(piElement);
-        assertNotNull(descr);
-        OMElement partProps = PartPropertiesElement.getElement(piElement);
-        assertNotNull(partProps);
+
+        // check the presence of the href attribute
+        assertEquals("cid:" + payloadURI,
+                piElement.getAttribute(new QName("href")).getAttributeValue());
+    }
+
+    @Test
+    public void testCreateElementForExternalContainmentType() throws Exception {
+        Payload partInfo = new Payload();
+
+        addOptionalAttributesToPartInfo(partInfo);
+
+        // check attachment
+        partInfo.setContainment(IPayload.Containment.EXTERNAL);
+        String payloadURI = "path_to_file";
+        partInfo.setPayloadURI(payloadURI);
+
+        OMElement piElement = PartInfoElement.createElement(plElement, partInfo);
+        assertNotNull(piElement);
+
+        // check the presence of the href attribute
+        assertEquals(payloadURI,
+                piElement.getAttribute(new QName("href")).getAttributeValue());
+
+        checkPresenceOfOptionalOMElements(piElement);
+    }
+
+    @Test
+    public void testCreateElementForBodyContainmentType() throws Exception {
+        Payload partInfo = new Payload();
+
+        addOptionalAttributesToPartInfo(partInfo);
+
+        // check attachment
+        partInfo.setContainment(IPayload.Containment.BODY);
+        String payloadURI = "path_to_file";
+        partInfo.setPayloadURI(payloadURI);
+
+        OMElement piElement = PartInfoElement.createElement(plElement, partInfo);
+        assertNotNull(piElement);
+
+        // check the presence of the href attribute
+        assertEquals("#" + payloadURI,
+                piElement.getAttribute(new QName("href")).getAttributeValue());
+
+        checkPresenceOfOptionalOMElements(piElement);
     }
 
     @Test
     public void testGetElements() throws Exception {
         Payload partInfo = new Payload();
-        partInfo.setContainment(IPayload.Containment.ATTACHMENT);
 
-        SchemaReference sr = new SchemaReference();
-        sr.setLocation("somewhere");
-        sr.setNamespace("namespace");
-        sr.setVersion("test");
-        partInfo.setSchemaReference(sr);
-        Description description = new Description();
-        description.setText("description");
-        partInfo.setDescription(description);
-        Collection<IProperty> properties = new ArrayList<>();
-        properties.add(new Property("name1", "value1", "type1"));
-        partInfo.setProperties(properties);
         PartInfoElement.createElement(plElement, partInfo);
 
         Iterator<OMElement> it = PartInfoElement.getElements(plElement);
@@ -131,10 +153,38 @@ public class PartInfoElementTest {
     }
 
     @Test
-    public void testReadElement() throws Exception {
+    public void testReadElementForAttachmentContainmentType() throws Exception {
         Payload partInfo = new Payload();
-        partInfo.setContainment(IPayload.Containment.ATTACHMENT);
 
+        // check attachment
+        partInfo.setContainment(IPayload.Containment.ATTACHMENT);
+        partInfo.setPayloadURI("path_to_file");
+
+        OMElement piElement = PartInfoElement.createElement(plElement, partInfo);
+
+        Payload payload = PartInfoElement.readElement(piElement);
+        assertNotNull(payload);
+        assertEquals(IPayload.Containment.ATTACHMENT, payload.getContainment());
+    }
+
+    @Test
+    public void testReadElementForExternalContainmentType() throws Exception {
+        Payload partInfo = new Payload();
+
+        addOptionalAttributesToPartInfo(partInfo);
+
+        // check external
+        partInfo.setContainment(IPayload.Containment.EXTERNAL);
+        partInfo.setPayloadURI("path_to_file");
+
+        OMElement piElement = PartInfoElement.createElement(plElement, partInfo);
+
+        Payload payload = PartInfoElement.readElement(piElement);
+        assertNotNull(payload);
+        checkPresenceOfOptionalAttributes(payload);
+    }
+
+    private void addOptionalAttributesToPartInfo(Payload partInfo) {
         SchemaReference sr = new SchemaReference();
         sr.setLocation("somewhere");
         sr.setNamespace("namespace");
@@ -146,16 +196,23 @@ public class PartInfoElementTest {
         Collection<IProperty> properties = new ArrayList<>();
         properties.add(new Property("name1", "value1", "type1"));
         partInfo.setProperties(properties);
+    }
 
-        OMElement piElement = PartInfoElement.createElement(plElement, partInfo);
+    private void checkPresenceOfOptionalOMElements(OMElement piElement) {
+        OMElement schema = SchemaElement.getElement(piElement);
+        assertNotNull(schema);
+        OMElement descr = DescriptionElement.getElement(piElement);
+        assertNotNull(descr);
+        OMElement partProps = PartPropertiesElement.getElement(piElement);
+        assertNotNull(partProps);
+    }
 
-        Payload payload = PartInfoElement.readElement(piElement);
-        assertNotNull(payload);
-//        assertEquals(IPayload.Containment.ATTACHMENT, payload.getContainment()); // fails
-        assertEquals("somewhere", partInfo.getSchemaReference().getLocation());
-        assertEquals("namespace", partInfo.getSchemaReference().getNamespace());
-        assertEquals("test", partInfo.getSchemaReference().getVersion());
-        assertEquals("description", partInfo.getDescription().getText());
-        assertNotNull(partInfo.getProperties());
+    private void checkPresenceOfOptionalAttributes(Payload payload) {
+        assertEquals(IPayload.Containment.EXTERNAL, payload.getContainment());
+        assertEquals("somewhere", payload.getSchemaReference().getLocation());
+        assertEquals("namespace", payload.getSchemaReference().getNamespace());
+        assertEquals("test", payload.getSchemaReference().getVersion());
+        assertEquals("description", payload.getDescription().getText());
+        assertNotNull(payload.getProperties());
     }
 }

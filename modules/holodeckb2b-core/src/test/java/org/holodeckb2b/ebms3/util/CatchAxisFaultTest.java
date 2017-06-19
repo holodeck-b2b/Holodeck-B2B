@@ -101,10 +101,6 @@ public class CatchAxisFaultTest {
 
     @Test
     public void testDoProcessing() throws Exception {
-
-        // The CatchAxisFault.doFlowComplete() doesn't called
-        // Why?
-
         MessageMetaData mmd = TestUtils.getMMD("security/handlers/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
@@ -156,7 +152,6 @@ public class CatchAxisFaultTest {
 
         try {
             handler.flowComplete(mc);
-            //assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }

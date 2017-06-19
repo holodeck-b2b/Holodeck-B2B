@@ -42,6 +42,7 @@ import org.holodeckb2b.pmode.helpers.DeliverySpecification;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.ReceiptConfiguration;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -53,6 +54,8 @@ import static org.junit.Assert.*;
 
 /**
  * Created at 12:05 15.03.17
+ *
+ * Checked for cases coverage (24.04.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
@@ -75,11 +78,17 @@ public class DeliverReceiptsTest {
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
+
     @Before
     public void setUp() throws Exception {
         processReceiptsHandler = new ProcessReceipts();
         // Executed after org.holodeckb2b.ebms3.handlers.inflow.ProcessReceipts handler
         handler = new DeliverReceipts();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        core.getPModeSet().removeAll();
     }
 
     @Test

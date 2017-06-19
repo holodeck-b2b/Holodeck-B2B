@@ -94,10 +94,10 @@ public class ProcessErrors extends BaseHandler {
     protected void processErrorSignal(final IErrorMessageEntity errSignal, final MessageContext mc)
                                                                                         throws PersistenceException {
         log.debug("Start processing Error Signal [msgId=" + errSignal.getMessageId() + "]");
-        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
         // Change processing state to indicate we start processing the error. Also checks that the error is not
         // already being processed
-        if (!updateManager.setProcessingState(errSignal, ProcessingState.RECEIVED, ProcessingState.PROCESSING)) {
+        if (!storageManager.setProcessingState(errSignal, ProcessingState.RECEIVED, ProcessingState.PROCESSING)) {
             log.debug("Error Signal [msgId=" + errSignal.getMessageId() + "] is already being processed, skipping");
             return;
         }
@@ -132,23 +132,23 @@ public class ProcessErrors extends BaseHandler {
             viError.setRefToMessageInError(errSignal.getMessageId());
             MessageContextUtils.addGeneratedError(mc, viError);
             // The message processing of the error fails
-            updateManager.setProcessingState(errSignal, ProcessingState.FAILURE);
+            storageManager.setProcessingState(errSignal, ProcessingState.FAILURE);
         } else {
             // Change the processing state of the found message unit(s)
             for (final IMessageUnitEntity mu : refdMessages) {
                 if (isWarning(errSignal)) {
                     log.debug("Error level is warning, set processing state of referenced message ["
                               + mu.getMessageId() + "] to warning");
-                    updateManager.setProcessingState(mu, ProcessingState.WARNING);
+                    storageManager.setProcessingState(mu, ProcessingState.WARNING);
                 } else {
                     log.debug("Error level is warning, set processing state of referenced message ["
                               + mu.getMessageId() + "] to failure");
-                    updateManager.setProcessingState(mu, ProcessingState.FAILURE);
+                    storageManager.setProcessingState(mu, ProcessingState.FAILURE);
                 }
             }
             log.debug("Processed Error Signal [" + errSignal.getMessageId() + "]");
             // Errors may need to be delivered to bussiness app which can be done now
-            updateManager.setProcessingState(errSignal, ProcessingState.READY_FOR_DELIVERY);
+            storageManager.setProcessingState(errSignal, ProcessingState.READY_FOR_DELIVERY);
         }
     }
 

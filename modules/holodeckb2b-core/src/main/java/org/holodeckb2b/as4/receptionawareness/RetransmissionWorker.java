@@ -63,7 +63,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
     @Override
     public void doProcessing() {
 
-        // Get all the message id's for unacknowlegded user messages
+        // Get all the message id's for unacknowledged user messages
         log.debug("Get all user messages that may need to be resent");
         Collection<IUserMessageEntity> waitingForRcpt = null;
         try {
@@ -81,7 +81,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
         if (!Utils.isNullOrEmpty(waitingForRcpt)) {
             log.debug(waitingForRcpt.size() + " messages may be waiting for a Receipt");
 
-            StorageManager   updManager = HolodeckB2BCore.getStorageManager();
+            StorageManager storageManager = HolodeckB2BCore.getStorageManager();
             // For each message check if it should be retransmitted or not
             for (final IUserMessageEntity um : waitingForRcpt) {
                 try {
@@ -105,7 +105,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                                     + " Awareness configuration in P-Mode [" + um.getPModeId() + "]");
                         // Because we don't know how to process this message further the only thing we can do is set
                         // the processing to failed
-                        updManager.setProcessingState(um, ProcessingState.FAILURE);
+                        storageManager.setProcessingState(um, ProcessingState.FAILURE);
                         continue; // with next message
                     }
 
@@ -125,7 +125,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                             missingReceiptsLog.error("No Receipt received for UserMessage with messageId="
                                                         + um.getMessageId());
                             // Change processing state accordingly
-                            updManager.setProcessingState(um, ProcessingState.FAILURE);
+                            storageManager.setProcessingState(um, ProcessingState.FAILURE);
                             log.debug("Changed processing state of user message to reflect failure");
                             // Generate and report (if requested) MissingReceipt
                             generateMissingReceiptError(um, leg);
@@ -133,10 +133,10 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                             // Message can be resend, is the message to be pushed or pulled?
                             if (PModeUtils.doesHolodeckB2BTrigger(leg)) {
                                 log.debug("Message must be pushed to receiver again");
-                                updManager.setProcessingState(um, ProcessingState.READY_TO_PUSH);
+                                storageManager.setProcessingState(um, ProcessingState.READY_TO_PUSH);
                             } else {
                                 log.debug("Message must be pulled by receiver again");
-                                updManager.setProcessingState(um, ProcessingState.AWAITING_PULL);
+                                storageManager.setProcessingState(um, ProcessingState.AWAITING_PULL);
                             }
                             log.debug("Message unit is ready for retransmission");
                         }

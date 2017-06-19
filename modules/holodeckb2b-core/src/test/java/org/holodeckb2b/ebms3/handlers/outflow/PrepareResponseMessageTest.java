@@ -69,6 +69,8 @@ import static org.mockito.Mockito.*;
 /**
  * Created at 15:44 27.02.17
  *
+ * Checked for cases coverage (04.05.2017)
+ *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 @RunWith(MockitoJUnitRunner.class)

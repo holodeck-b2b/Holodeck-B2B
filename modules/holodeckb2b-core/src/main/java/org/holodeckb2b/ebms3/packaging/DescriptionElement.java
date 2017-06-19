@@ -22,6 +22,7 @@ import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IDescription;
+import org.holodeckb2b.common.messagemodel.Description;
 
 /**
  * Is a helper class for handling the <code>Description</code> element in the ebMS SOAP header.
@@ -66,12 +67,12 @@ public class DescriptionElement {
 
         // Fill it based on the given data
         final String content = data.getText();
-        if (content != null && !content.isEmpty())
+        if (!Utils.isNullOrEmpty(content))
             description.setText(content);
 
         // Set attributes if data is specified for it
         final String lang = data.getLanguage();
-        if ( lang != null && !lang.isEmpty())
+        if (!Utils.isNullOrEmpty(lang))
             description.addAttribute(LN_ATTR_LANG, lang, f.createOMNamespace(NS_URI_ATTR_LANG, NS_PREFIX_ATTR_LANG));
 
         return description;
@@ -90,14 +91,14 @@ public class DescriptionElement {
     }
 
     /**
-     * Reads the information from a <code>eb:Description</code> element and returns it in a {@link
-     * org.holodeckb2b.common.messagemodel.Description} object.
+     * Reads the information from a <code>eb:Description</code> element and returns it in a
+     * {@link Description} object.
      *
      * @param descrElement  The element that contains the description to read
-     * @return              A {@link org.holodeckb2b.common.messagemodel.Description} object containing the
+     * @return              A {@link Description} object containing the
      *                      information from the specified <code>Description</code> element
      */
-    public static org.holodeckb2b.common.messagemodel.Description readElement(final OMElement descrElement) {
+    public static Description readElement(final OMElement descrElement) {
         // Check if there was a Description element to read
         if (descrElement == null)
             return null;
@@ -108,6 +109,6 @@ public class DescriptionElement {
         final String language = descrElement.getAttributeValue(new QName(NS_URI_ATTR_LANG, LN_ATTR_LANG));
 
         // Create and return new entity object
-        return new org.holodeckb2b.common.messagemodel.Description(text, language);
+        return new Description(text, language);
     }
 }
