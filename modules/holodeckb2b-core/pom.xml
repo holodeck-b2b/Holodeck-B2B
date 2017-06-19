@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>next-201704-SNAPSHOT-1</version>
+        <version>next-201702-SNAPSHOT-2</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -158,7 +158,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-common</artifactId>
-            <version>next-201704-SNAPSHOT-1</version>
+            <version>next-201702-SNAPSHOT-2</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
