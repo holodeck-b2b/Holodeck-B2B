@@ -83,7 +83,7 @@ public class SubmitFromFile extends DirWatcher {
             if( !f.renameTo(new File(tFileName)))
                 // Renaming failed, so file already processed by another worker or externally
                 // changed
-                log.info(f.getName() + " is not processed because it could be renamed");
+                log.info(f.getName() + " is not processed because it could not be renamed");
             else {
                 // The file can be processed
                 log.debug("Read message meta data from " + f.getName());

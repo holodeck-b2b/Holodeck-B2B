@@ -57,7 +57,6 @@ public class PModeManager implements IPModeSet {
      * The P-Mode validator in use to check P-Modes before being deployed
      */
     private IPModeValidator validator;
-    private final String pmodeStorageClass;
 
     /**
      * Creates a new <code>PModeManager</code> which will use the given {@link IPModeSet} and {@link IPModeValidator}
@@ -109,7 +108,6 @@ public class PModeManager implements IPModeSet {
         logMsg.append("\tP-Mode validator    : ").append(validator.getClass().getName()).append('\n')
               .append("\tP-Mode storage impl.: ").append(deployedPModes.getClass().getName()).append('\n');
         log.info(logMsg.toString());
-        this.pmodeStorageClass = pmodeStorageClass;
     }
 
     @Override

@@ -54,4 +54,18 @@ public class InvalidPModeException extends PModeSetException {
         return errors;
     }
 
+    /**
+     * Gets the default error message listing all found errors.
+     *
+     * @return A list of all errors found in the P-Mode
+     */
+    @Override
+    public String getMessage() {
+        StringBuilder   msg = new StringBuilder("Invalid P-Mode. Found ");
+        msg.append(errors.size()).append(" errors: {");
+        for (PModeValidationError e : errors)
+            msg.append(e.getParameterInError()).append(":").append(e.getErrorDescription()).append(',');
+        msg.deleteCharAt(msg.length() - 1).append('}');
+        return msg.toString();
+    }
 }

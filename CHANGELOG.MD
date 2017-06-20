@@ -32,13 +32,17 @@ payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonC
 
 ### Security
 
+## 3.0.1-SNAPSHOT-1 (Unreleased)
+### Fixed
+* Confusing log message in SubmitFromFile worker when MMD file can not be renamed [#69](https://github.com/holodeck-b2b/Holodeck-B2B/issues/69)
+
 ## 3.0.0
-###### 2017-05-10
+###### 2017-04-18
 ### Added
 * P-Mode validation feature which separates the validation of P-Modes from both their internal and external storage
 * The direction and processing states of a message unit are now available through the interfaces
 * Unit tests to improve test coverage
-* Integration tests. These tests set up two Holodeck B2B instances and execute both a push and pull exchange to check
+* Integration tests. These tests set up two Holodeck B2B instances and execute both a push and a pull exchange to check
   that everything works on run time
 * A default implementation of the message model interface (in Common module)
 * Interfaces for separation of Core functionality and storage of message unit meta-data
@@ -51,8 +55,6 @@ payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonC
 * It is now possible to not only configure whether _Error Signals_ should be logged but also if all signals
   should be logged or only the ones that contain an Error with severity _failure_ (see `log4j2.xml` for more info)
 
-### Deprecated
-
 ### Removed
 * Exceptions `org.holodeckb2b.common.exceptions.DatabaseException` and `org.holodeckb2b.common.exceptions.DuplicateMessageIdError`
   which were bound to the specific persistency implementation of previous versions
@@ -64,8 +66,9 @@ payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonC
 * NPE in purge operation when payload location is not available [#46](https://github.com/holodeck-b2b/Holodeck-B2B/issues/46)
 * P-Mode finding does not take into account MPC defined in PullRequesFlow [#47](https://github.com/holodeck-b2b/Holodeck-B2B/issues/47)
 * NPE in P-Mode finding process when only declaring SecurityConfiguration for a TradingPartner [#48](https://github.com/holodeck-b2b/Holodeck-B2B/issues/48)
-
-### Security
+* Server starts with error message if Holodeck B2B directory name includes space [#54](https://github.com/holodeck-b2b/Holodeck-B2B/issues/54)
+* Unable to start on Windows when using very long base path [#64](https://github.com/holodeck-b2b/Holodeck-B2B/issues/64)
+* Resolved build issues in unit tests on Windows platform
 
 ## 2.1.0
 ###### 2016-10-18
