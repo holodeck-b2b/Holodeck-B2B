@@ -181,7 +181,7 @@ public class GetSecurityConfiguration extends BaseHandler {
                 final Collection<IPayload> payloads = (Collection<IPayload>) ((IUserMessage) primaryMU).getPayloads();
                 if (!Utils.isNullOrEmpty(payloads))
                     for (final IPayload pl : payloads)
-                        includesBodyPl = pl.getContainment() == IPayload.Containment.BODY;
+                        includesBodyPl |= pl.getContainment() == IPayload.Containment.BODY;
                 mc.setProperty(SecurityConstants.ENCRYPT_BODY, includesBodyPl);
             }
 
