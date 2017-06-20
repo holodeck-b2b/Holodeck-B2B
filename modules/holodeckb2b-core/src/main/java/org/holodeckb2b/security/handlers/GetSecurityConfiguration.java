@@ -17,7 +17,6 @@
 package org.holodeckb2b.security.handlers;
 
 import java.util.Collection;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
@@ -181,7 +180,7 @@ public class GetSecurityConfiguration extends BaseHandler {
                 final Collection<IPayload> payloads = ((UserMessage) primaryMU).getPayloads();
                 if (!Utils.isNullOrEmpty(payloads))
                     for (final IPayload pl : payloads)
-                        includesBodyPl = pl.getContainment() == IPayload.Containment.BODY;
+                        includesBodyPl |= pl.getContainment() == IPayload.Containment.BODY;
                 mc.setProperty(SecurityConstants.ENCRYPT_BODY, includesBodyPl);
             }
 

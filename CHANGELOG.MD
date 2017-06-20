@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Server starts with error message if Holodeck B2B directory name includes space [#54](https://github.com/holodeck-b2b/Holodeck-B2B/issues/54)
 * Unable to start on Windows when using very long base path [#64](https://github.com/holodeck-b2b/Holodeck-B2B/issues/64)
 * Confusing log message in SubmitFromFile worker when MMD file can not be renamed [#69](https://github.com/holodeck-b2b/Holodeck-B2B/issues/69)
+* Body payload(s) not encrypted when message also contains other payloads [#70](https://github.com/holodeck-b2b/Holodeck-B2B/issues/70)
 
 ## 2.1.3
 ###### 2017-04-14
