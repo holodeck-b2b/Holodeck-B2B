@@ -30,6 +30,7 @@ public class UserMessageFlow implements IUserMessageFlow {
     private BusinessInfo       businessInfo;
     private PayloadProfile      payloadProfile;
     private ErrorHandlingConfig errorHandlingCfg;
+    private CustomValidationSpec validationSpec;
 
     @Override
     public IBusinessInfo getBusinessInfo() {
@@ -60,7 +61,10 @@ public class UserMessageFlow implements IUserMessageFlow {
 
     @Override
     public IMessageValidationSpecification getCustomValidationConfiguration() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return validationSpec;
     }
 
+    public void setCustomValidationConfiguration(final CustomValidationSpec validationSpec) {
+        this.validationSpec = validationSpec;
+    }
 }

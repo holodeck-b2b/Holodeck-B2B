@@ -55,6 +55,9 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
         log.debug("Validate user message if specified");
         try {
             ValidationResult validationResult = HolodeckB2BCore.getValidationExecutor().validate(userMessage);
+
+            System.out.println("validationResult: " + validationResult);
+
             if (validationResult == null || Utils.isNullOrEmpty(validationResult.getValidationErrors()))
                 log.debug("User message is valid or no custom validation specified");
             else if (!validationResult.shouldRejectMessage())
