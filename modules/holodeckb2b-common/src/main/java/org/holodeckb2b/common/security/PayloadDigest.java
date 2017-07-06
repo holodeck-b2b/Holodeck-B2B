@@ -16,8 +16,9 @@
  */
 package org.holodeckb2b.common.security;
 
+import java.util.List;
+import javax.xml.crypto.dsig.Transform;
 import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMElement;
 import org.holodeckb2b.interfaces.security.IPayloadDigest;
 
@@ -86,5 +87,10 @@ public class PayloadDigest implements IPayloadDigest {
     @Override
     public String getDigestAlgorithm() {
         return algorithm;
+    }
+
+    @Override
+    public List<Transform> getTransforms() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

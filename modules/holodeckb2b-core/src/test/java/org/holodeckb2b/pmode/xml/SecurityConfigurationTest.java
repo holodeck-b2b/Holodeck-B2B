@@ -16,19 +16,18 @@
  */
 package org.holodeckb2b.pmode.xml;
 
+import java.io.File;
+import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.security.UTPasswordType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.io.File;
-
-import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -78,7 +77,7 @@ public class SecurityConfigurationTest {
             assertNotNull(defUT);
             assertEquals("FBXBcTNKQugmw4HyW0.aM", defUT.getUsername());
             assertEquals("q2TxAH81QeG", defUT.getPassword());
-            assertEquals(IUsernameTokenConfiguration.PasswordType.DIGEST, defUT.getPasswordType());
+            assertEquals(UTPasswordType.DIGEST, defUT.getPasswordType());
             assertTrue(defUT.includeNonce());
             assertTrue(defUT.includeCreated());
 
@@ -88,7 +87,7 @@ public class SecurityConfigurationTest {
             assertNotNull(ebmsUT);
             assertEquals("DmTnJLxXFgEsuQX", ebmsUT.getUsername());
             assertEquals("ymjl8hCo0BdTvcRf", ebmsUT.getPassword());
-            assertEquals(IUsernameTokenConfiguration.PasswordType.TEXT, ebmsUT.getPasswordType());
+            assertEquals(UTPasswordType.TEXT, ebmsUT.getPasswordType());
             assertFalse(ebmsUT.includeNonce());
             assertFalse(ebmsUT.includeCreated());
 
@@ -147,7 +146,7 @@ public class SecurityConfigurationTest {
             assertNotNull(ebmsUT);
             assertEquals("DmTnJLxXFgEsuQX", ebmsUT.getUsername());
             assertEquals("ymjl8hCo0BdTvcRf", ebmsUT.getPassword());
-            assertEquals(IUsernameTokenConfiguration.PasswordType.TEXT, ebmsUT.getPasswordType());
+            assertEquals(UTPasswordType.TEXT, ebmsUT.getPasswordType());
             assertFalse(ebmsUT.includeNonce());
             assertFalse(ebmsUT.includeCreated());
 

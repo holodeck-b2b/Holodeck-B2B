@@ -33,12 +33,12 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.WorkerPool;
 import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
 import org.holodeckb2b.customvalidation.DefaultValidationExecutor;
+import org.holodeckb2b.customvalidation.ICustomValidationExecutor;
 import org.holodeckb2b.ebms3.pulling.PullConfiguration;
 import org.holodeckb2b.ebms3.pulling.PullConfigurationWatcher;
 import org.holodeckb2b.ebms3.pulling.PullWorker;
 import org.holodeckb2b.ebms3.submit.core.MessageSubmitter;
 import org.holodeckb2b.events.SyncEventProcessor;
-import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
@@ -49,14 +49,15 @@ import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
-import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.security.ICertificateManager;
+import org.holodeckb2b.interfaces.security.ISecurityProvider;
+import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeManager;
-import org.holodeckb2b.customvalidation.ICustomValidationExecutor;
 
 /**
  * Axis2 module class for the Holodeck B2B Core module.
@@ -126,6 +127,12 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     private IDAOFactory    daoFactory = null;
 
     /**
+     * The installed security provider responsible for the processing of the WS-Security header of messages.
+     * @since HB2B_NEXT_VERSION
+     */
+    private ISecurityProvider securityProvider = null;
+
+    /**
      * Initializes the Holodeck B2B Core module.
      *
      * @param cc
@@ -173,7 +180,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
             eventProcessor = new SyncEventProcessor();
         log.debug("Created " + eventProcessor.getClass().getSimpleName() + " event processor");
 
-        log.debug("Load the persistency provided for storing meta-data on message units");
+        log.debug("Load the persistency provider for storing meta-data on message units");
         String persistencyProviderClassname = instanceConfiguration.getPersistencyProviderClass();
         if (Utils.isNullOrEmpty(persistencyProviderClassname))
             persistencyProviderClassname = "org.holodeckb2b.persistency.DefaultProvider";
@@ -182,21 +189,39 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         try {
            persistencyProvider = (IPersistencyProvider) Class.forName(persistencyProviderClassname).newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
-           // Could not create the specified event processor, fall back to default implementation
-           log.error("Could not load the persistency provider: " + persistencyProviderClassname
-                    + ". Using default implementation instead.");
+           log.fatal("Could not load the persistency provider: " + persistencyProviderClassname);
+           throw new AxisFault("Unable to load required persistency provider!");
         }
         log.debug("Using " + persistencyProvider.getName() + " as persistency provider");
-
         try {
              persistencyProvider.init();
              daoFactory = persistencyProvider.getDAOFactory();
         } catch (PersistenceException initializationFailure) {
             log.fatal("Could not initialize the persistency provider " + persistencyProvider.getName()
                       + "! Unable to start Holodeck B2B. \n\tError details: " + initializationFailure.getMessage());
-            throw new AxisFault("Holodeck B2B could not be initialized!");
+            throw new AxisFault("Unable to initialize required persistency provider!");
         }
-        log.debug("Succesfully loaded " + persistencyProvider.getName() + " as persistency provider");
+        log.info("Succesfully loaded " + persistencyProvider.getName() + " as persistency provider");
+
+        log.debug("Load the security provider for storing meta-data on message units");
+        String securityProviderClassname = instanceConfiguration.getSecurityProviderClass();
+        if (Utils.isNullOrEmpty(securityProviderClassname))
+            securityProviderClassname = "org.holodeckb2b.security.DefaultProvider";
+        try {
+           securityProvider = (ISecurityProvider) Class.forName(securityProviderClassname).newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
+           log.fatal("Could not load the security provider: " + securityProviderClassname);
+           throw new AxisFault("Unable to load required security provider!");
+        }
+        log.debug("Using security provider: " + securityProvider.getName());
+        try {
+             securityProvider.init();
+        } catch (SecurityProcessingException initializationFailure) {
+            log.fatal("Could not initialize the security provider " + securityProvider.getName()
+                      + "! Unable to start Holodeck B2B. \n\tError details: " + initializationFailure.getMessage());
+            throw new AxisFault("Unable to initialize required security provider!");
+        }
+        log.info("Succesfully loaded " + securityProvider.getName() + " as security provider");
 
         // From this point on other components can be started which need access to the Core
         log.debug("Make Core available to outside world");
@@ -259,11 +284,9 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     }
 
     /**
-     * Returns the current configuration of this Holodeck B2B instance. The configuration parameters can be used
-     * by extension to integrate their functionality with the core.
-     *
-     * @return  The current configuration as a {@link IConfiguration} object
+     * {@inheritDoc}
      */
+    @Override
     public InternalConfiguration getConfiguration() {
         if (instanceConfiguration == null) {
             log.fatal("Missing configuration for this Holodeck B2B instance!");
@@ -273,24 +296,17 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     }
 
     /**
-     * Gets a {@link IMessageSubmitter} object that can be used by the <i>Producer</i> business application for
-     * submitting User Messages to the Holodeck B2B Core.
-     *
-     * @return  A {@link IMessageSubmitter} object to use for submission of User Messages
+     * {@inheritDoc}
      */
+    @Override
     public IMessageSubmitter getMessageSubmitter() {
         return SubmitterSingletonHolder.instance;
     }
 
     /**
-     * Gets a {@link IMessageDeliverer} object configured as specified that can be used to deliver message units to the
-     * business application.
-     *
-     * @param deliverySpec      Specification of the delivery method for which a deliver must be returned.
-     * @return                  A {@link IMessageDeliverer} object for the given delivery specification
-     * @throws MessageDeliveryException When no delivery specification is given or when the message deliverer can not
-     *                                  be created
+     * {@inheritDoc}
      */
+    @Override
     public IMessageDeliverer getMessageDeliverer(final IDeliverySpecification deliverySpec)
                                                         throws MessageDeliveryException {
         if (deliverySpec == null) {
@@ -345,26 +361,15 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     }
 
     /**
-     * Gets the set of currently configured P-Modes.
-     * <p>The P-Modes define how Holodeck B2B should process the messages. The set of P-Modes is therefor the most
-     * important configuration item in Holodeck B2B, without P-Modes it will not be possible to send and receive
-     * messages.
-     *
-     * @return  The current set of P-Modes as a {@link IPModeSet}
-     * @see IPMode
+     * {@inheritDoc}
      */
+    @Override
     public IPModeSet getPModeSet() {
         return pmodeManager;
     }
 
     /**
-     * Gets the core component that is responsible for processing <i>"events"</i> that are raised while processing a
-     * message unit.
-     * <p>By default the {@link SyncEventProcessor} implementation is used for processing events, but the processor to
-     * use can be configured by setting the <i>"MessageProcessingEventProcessor"</i> parameter in the Holodeck B2B
-     * configuration file.
-     *
-     * @return  The {@link IMessageProcessingEventProcessor} managing the event processing
+     * {@inheritDoc}
      * @since 2.1.0
      */
     @Override
@@ -373,17 +378,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     }
 
     /**
-     * Sets the configuration of the <i>pull worker pool</i> which contains the <i>Workers</i> that are responsible for
-     * sending the Pull Request signal messages.
-     * <p>If no new configuration is provided the worker pool will be stopped. NOTE that this will also stop Holodeck
-     * B2B from pulling for User Messages (unless some other worker(s) in the regular worker pool take over, which is
-     * <b>not recommended</b>).
-     *
-     * @param pullConfiguration             The new pool configuration to use. If <code>null</code> the worker pool
-     *                                      will be stopped.
-     * @throws TaskConfigurationException   When the provided configuration could not be activated. This is probably
-     *                                      caused by an issue in the configuration of the workers but it can also be
-     *                                      that the worker pool itself could not be started correctly.
+     * {@inheritDoc}
      * @since 2.1.0
      */
     @Override
@@ -409,15 +404,12 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * @return  The {@link StorageManager} that Core classes should use to update meta-data of message units
      * @since  3.0.0
      */
-    public StorageManager getStorageManager() {
+    StorageManager getStorageManager() {
         return new StorageManager(daoFactory.getUpdateManager());
     }
 
     /**
-     * Gets the data access object that should be used to query the meta-data on processed message units.
-     * <p>Note that the DAO itself is provided by the persistency provider.
-     *
-     * @return  The {@link IQueryManager} that should use to query the meta-data of message units
+     * {@inheritDoc}
      * @since  3.0.0
      */
     @Override
@@ -434,7 +426,27 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * @return  The component responsible for execution of the custom validations.
      * @since HB2B_NEXT_VERSION
      */
-    public ICustomValidationExecutor getValidationExecutor() {
+    ICustomValidationExecutor getValidationExecutor() {
         return new DefaultValidationExecutor();
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since HB2B_NEXT_VERSION
+     */
+    @Override
+    public ICertificateManager getCertificateManager() {
+        return securityProvider.getCertifcateManager();
+    }
+
+    /**
+     * Gets the active <i>security provider</i> of this Holodeck B2B instance.
+     *
+     * @return The active security provider
+     * @since HB2B_NEXT_VERSION
+     * @see ISecurityProvider
+     */
+    ISecurityProvider getSecurityProvider() {
+        return securityProvider;
     }
 }

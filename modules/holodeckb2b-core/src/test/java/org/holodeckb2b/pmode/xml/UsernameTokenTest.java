@@ -16,15 +16,13 @@
  */
 package org.holodeckb2b.pmode.xml;
 
+import java.io.File;
+import org.holodeckb2b.interfaces.security.UTPasswordType;
+import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
-
-import java.io.File;
-
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
-import org.junit.Assert;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -63,7 +61,7 @@ public class UsernameTokenTest {
             assertEquals("ebms", ut.target);
             assertEquals("captain", ut.getUsername());
             assertEquals("1234567890", ut.getPassword());
-            assertEquals(IUsernameTokenConfiguration.PasswordType.DIGEST, ut.getPasswordType());
+            assertEquals(UTPasswordType.DIGEST, ut.getPasswordType());
             Assert.assertTrue(ut.includeNonce());
             Assert.assertFalse(ut.includeCreated());
 
@@ -81,7 +79,7 @@ public class UsernameTokenTest {
             assertNull(ut.target);
             assertEquals("captain", ut.getUsername());
             assertEquals("0987654321", ut.getPassword());
-            assertEquals(IUsernameTokenConfiguration.PasswordType.DIGEST, ut.getPasswordType());
+            assertEquals(UTPasswordType.DIGEST, ut.getPasswordType());
             Assert.assertTrue(ut.includeNonce());
             Assert.assertTrue(ut.includeCreated());
 
@@ -98,7 +96,7 @@ public class UsernameTokenTest {
             assertNotNull(ut);
             assertEquals("captain", ut.getUsername());
             assertEquals("0129384756", ut.getPassword());
-            assertEquals(IUsernameTokenConfiguration.PasswordType.TEXT, ut.getPasswordType());
+            assertEquals(UTPasswordType.TEXT, ut.getPasswordType());
             Assert.assertTrue(ut.includeNonce());
             Assert.assertTrue(ut.includeCreated());
 
@@ -115,7 +113,7 @@ public class UsernameTokenTest {
             assertNotNull(ut);
             assertEquals("captain", ut.getUsername());
             assertEquals("0129384756", ut.getPassword());
-            assertEquals(IUsernameTokenConfiguration.PasswordType.TEXT, ut.getPasswordType());
+            assertEquals(UTPasswordType.TEXT, ut.getPasswordType());
             Assert.assertFalse(ut.includeNonce());
             Assert.assertFalse(ut.includeCreated());
 

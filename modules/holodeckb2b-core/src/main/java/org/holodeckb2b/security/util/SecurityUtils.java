@@ -39,6 +39,7 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
+import org.holodeckb2b.interfaces.security.UTPasswordType;
 import org.holodeckb2b.security.tokens.UsernameToken;
 
 /**
@@ -89,7 +90,7 @@ public class SecurityUtils {
         // Check password, starting with type
         verified &= (expected.getPasswordType() == actual.getPasswordType());
 
-        if (verified && (expected.getPasswordType() == IUsernameTokenConfiguration.PasswordType.DIGEST)) {
+        if (verified && (expected.getPasswordType() == UTPasswordType.DIGEST)) {
             // Recreate the digest based on expected password and actual created and nonce values
             // Convert to UsernameToken object to get full access
             final String passDigest = org.apache.wss4j.dom.message.token.UsernameToken.doPasswordDigest(actual.getNonce(),

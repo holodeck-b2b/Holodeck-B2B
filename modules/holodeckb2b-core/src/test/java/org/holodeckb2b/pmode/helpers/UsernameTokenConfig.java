@@ -18,6 +18,7 @@ package org.holodeckb2b.pmode.helpers;
 
 import org.apache.wss4j.common.principal.UsernameTokenPrincipal;
 import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.security.UTPasswordType;
 import org.holodeckb2b.security.tokens.UsernameToken;
 
 /**
@@ -28,7 +29,7 @@ public class UsernameTokenConfig extends UsernameToken
 
     private String          username;
     private String          password;
-    private PasswordType    pwdType;
+    private UTPasswordType  pwdType;
     private boolean         includeNonce;
     private boolean         includeCreated;
 
@@ -65,11 +66,11 @@ public class UsernameTokenConfig extends UsernameToken
     }
 
     @Override
-    public PasswordType getPasswordType() {
+    public UTPasswordType getPasswordType() {
         return pwdType;
     }
 
-    public void setPasswordType(final PasswordType pwdType) {
+    public void setPasswordType(final UTPasswordType pwdType) {
         this.pwdType = pwdType;
     }
 

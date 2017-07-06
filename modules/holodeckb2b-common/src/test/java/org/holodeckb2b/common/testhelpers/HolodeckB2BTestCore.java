@@ -24,6 +24,7 @@ import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.security.ICertificateManager;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
@@ -98,6 +99,11 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
 
     @Override
     public IQueryManager getQueryManager() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public ICertificateManager getCertificateManager() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

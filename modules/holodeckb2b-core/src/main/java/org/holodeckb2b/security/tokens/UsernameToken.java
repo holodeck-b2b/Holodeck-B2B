@@ -18,6 +18,7 @@ package org.holodeckb2b.security.tokens;
 
 import org.apache.wss4j.common.principal.UsernameTokenPrincipal;
 import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.security.UTPasswordType;
 
 /**
  * Is used to represent a WSS UsernameToken that is included in the security header of the message as an
@@ -29,7 +30,7 @@ public class UsernameToken implements IAuthenticationInfo {
 
     private final String username;
     private final String password;
-    private final IUsernameTokenConfiguration.PasswordType passwordType;
+    private final UTPasswordType passwordType;
     private final String nonce;
     private final String created;
 
@@ -43,10 +44,10 @@ public class UsernameToken implements IAuthenticationInfo {
         this.username = principal.getName();
         this.password = principal.getPassword();
 
-        if (IUsernameTokenConfiguration.PWD_TYPE_DIGEST_URI.equalsIgnoreCase(principal.getPasswordType()))
-            this.passwordType = IUsernameTokenConfiguration.PasswordType.DIGEST;
+        if (UTPasswordType.DIGEST.URI().equalsIgnoreCase(principal.getPasswordType()))
+            this.passwordType = UTPasswordType.DIGEST;
         else
-            this.passwordType = IUsernameTokenConfiguration.PasswordType.TEXT;
+            this.passwordType = UTPasswordType.TEXT;
 
         this.nonce = org.apache.commons.codec.binary.Base64.encodeBase64String(principal.getNonce());
         this.created = principal.getCreatedTime();
@@ -74,7 +75,7 @@ public class UsernameToken implements IAuthenticationInfo {
      * @return  The type of password being provided expressed using the {@link IUsernameTokenConfiguration#PasswordType}
      *          enumeration.
      */
-    public IUsernameTokenConfiguration.PasswordType getPasswordType() {
+    public UTPasswordType getPasswordType() {
         return passwordType;
     }
 

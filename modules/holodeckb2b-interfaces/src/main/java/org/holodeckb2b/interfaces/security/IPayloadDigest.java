@@ -16,12 +16,19 @@
  */
 package org.holodeckb2b.interfaces.security;
 
+import java.util.List;
+import javax.xml.crypto.dsig.Transform;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+
 /**
  * Represents a digest that was calculated for a payload of a <i>User Message</i>. It contains the information that is
- * available in the <code>ds:Reference</code> elements in the Signature of the message, which beside the digest itself
- * is also the digest and transform algorithms.<br>
- * The reference to the payload is provided by the URI that identifies the payload in the MIME package. As a result
- * objects of this type need to be related to the actual payload through the context in which they are used.
+ * available in the <code>ds:SignedInfo/ds:Reference</code> elements in the Signature of the message, which beside the
+ * digest itself is also the digest and transform algorithms.
+ * <p>It is assumed that each payload contained in the message is signed separately, i.e. has its own <code>
+ * ds:SignedInfo/ds:Reference</code> element, so the <code>URI</code> attribute of the <code>ds:Reference</code> element
+ * can be used to identify the payload.<br>
+ * Note that this URI may be different from the URI that is assigned to the payload ({@link IPayload#getPayloadURI()})
+ * when it is included in the SOAP Body and the SOAP Body is signed as a whole.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
@@ -34,7 +41,7 @@ public interface IPayloadDigest {
      *
      * @return String containing the URI that point to the payload in the MIME package.
      */
-    public String getURI();
+    String getURI();
 
     /**
      * Gets the base64 encoded digest value that was calculated for the payload. This is the value from the <code>
@@ -42,7 +49,7 @@ public interface IPayloadDigest {
      *
      * @return String containing the base64 encoded digest value
      */
-    public String getDigestValue();
+    String getDigestValue();
 
     /**
      * Gets the identifier of the algorithm that was used to calculate the digest. The identifiers are defined in the
@@ -51,5 +58,16 @@ public interface IPayloadDigest {
      *
      * @return String containing the algorithm that was used to calculate the digest value.
      */
-    public String getDigestAlgorithm();
+    String getDigestAlgorithm();
+
+    /**
+     * Gets the list of transformations that were applied to the payload content before the digest was calculated. The
+     * <i>Web Services Security: SOAP Message Security</i> specification defines how transformation should be used when
+     * signing SOAP messages. The returned list of transforms corresponds to <code>ds:Transform</code> descendants of
+     * the <code>ds:Reference</code> element.
+     *
+     * @return List of the transforms applied to the payload before calculating the digest value.
+     * @since HB2B_NEXT_VERSION
+     */
+    List<Transform> getTransforms();
 }

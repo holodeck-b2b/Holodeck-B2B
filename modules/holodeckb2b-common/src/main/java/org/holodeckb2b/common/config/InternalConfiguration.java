@@ -22,6 +22,7 @@ import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
+import org.holodeckb2b.interfaces.security.ISecurityProvider;
 
 /**
  * Extends the public configuration interface with some settings only to be used by the Holodeck B2B Core itself.
@@ -37,7 +38,7 @@ public interface InternalConfiguration extends IConfiguration {
      *
      * @return The Axis2 configuration context.
      */
-    public ConfigurationContext getAxisConfigurationContext();
+    ConfigurationContext getAxisConfigurationContext();
 
     /**
      * Gets the location of the workerpool configuration file. This an optional configuration parameter and when not
@@ -45,7 +46,7 @@ public interface InternalConfiguration extends IConfiguration {
      *
      * @return The absolute path to the worker pool configuration file.
      */
-    public String getWorkerPoolCfgFile();
+    String getWorkerPoolCfgFile();
 
     /**
      * Gets the configured class name of the component that is responsible for the processing of event that are raised
@@ -54,7 +55,7 @@ public interface InternalConfiguration extends IConfiguration {
      *
      * @return String containing the class name of the {@link IMessageProcessingEventProcessor} implementation to use
      */
-    public String getMessageProcessingEventProcessor();
+    String getMessageProcessingEventProcessor();
 
     /**
      * Gets the class name of the {@link IPModeValidator} implementation that the Holodeck B2B Core's <code>PModeManager
@@ -63,7 +64,7 @@ public interface InternalConfiguration extends IConfiguration {
      * @return  The class name of the {@link IPModeValidator} implementation
      * @since  3.0.0
      */
-    public String getPModeValidatorImplClass();
+    String getPModeValidatorImplClass();
 
     /**
      * Gets the class name of the {@link IPModeSet} implementation that the Holodeck B2B Core's <code>PModeManager
@@ -72,15 +73,26 @@ public interface InternalConfiguration extends IConfiguration {
      * @return  The class name of the {@link IPModeSet} implementation to use for storing deployed P-Modes
      * @since  3.0.0
      */
-    public String getPModeStorageImplClass();
+    String getPModeStorageImplClass();
 
     /**
      * Gets the class name of the {@link IPersistencyProvider} implementation that the Holodeck B2B Core should use to
      * store meta-data of processed message units. This is an optional configuration parameter and when not set the
-     * Holodeck B2B Core will use a default implementation.
+     * Holodeck B2B Core will use the default implementation.
      *
      * @return  The class name of the {@link IPersistencyProvider} implementation to use for storing meta-data
      * @since  3.0.0
      */
-    public String getPersistencyProviderClass();
+    String getPersistencyProviderClass();
+
+    /**
+     * Gets the class name of the {@link ISecurityProvider} implementation that the Holodeck B2B Core should use to
+     * process the WS-Security headers in the messages. This is an optional configuration parameter and when not set the
+     * Holodeck B2B Core will use the default implementation.
+     *
+     * @return The class name of the {@link ISecurityProvider} implementation to use for handling the WS-Security
+     *         headers in messages
+     * @since HB2B_NEXT_VERSION
+     */
+    String getSecurityProviderClass();
 }

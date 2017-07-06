@@ -26,8 +26,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.axis2.context.ConfigurationContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
-import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 
 /**
  * Contains the configuration of the Holodeck B2B Core.
@@ -147,6 +145,12 @@ public class Config implements InternalConfiguration {
      * @since  3.0.0
      */
     private String persistencyProviderClass = null;
+
+    /*
+     * The class name of the security provider that should be used to process the WS-Security header of messages
+     * @since HB2B_NEXT_VERSION
+     */
+    private String securityProviderClass = null;
 
     /*
      * Indicator whether strict header validation should be applied to all messages
@@ -270,6 +274,9 @@ public class Config implements InternalConfiguration {
         // The class name of the persistency provider
         persistencyProviderClass = configFile.getParameter("PersistencyProvider");
 
+        // The class name of the security provider
+        securityProviderClass = configFile.getParameter("SecurityProvider");
+
         // Indicator whether strict header validation should be performed
         final String strictHeaderValidation = configFile.getParameter("StrictHeaderValidation");
         useStrictHeaderValidation = isTrue(strictHeaderValidation);
@@ -295,9 +302,7 @@ public class Config implements InternalConfiguration {
 
 
     /**
-     * Gets the Axis2 configuration context. This context is used for processing messages.
-     *
-     * @return The Axis2 configuration context.
+     * {@inheritDoc}
      */
     @Override
     public ConfigurationContext getAxisConfigurationContext() {
@@ -305,15 +310,7 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the host name. During the message processing a host name may be needed,
-     * for example for generating a message id. Because the host name of the machine
-     * Holodeck B2B runs on may be for internal use only it is possible to set an
-     * <i>external</i> host name using the <i>ExternalHostName</i> parameter.
-     * <p>When no host name is specified in the configuration the first host name bound to
-     * a network interface (not being the loopback adapter) will be used. If there
-     * is still no host name a random id will be used.
-     *
-     * @return  The host name
+     * {@inheritDoc}
      */
     @Override
     public String getHostName () {
@@ -321,9 +318,7 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the Holodeck B2B home directory.
-     *
-     * @return  The Holodeck B2B home directory.
+     * {@inheritDoc}
      */
     @Override
     public String getHolodeckB2BHome () {
@@ -331,12 +326,7 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the location of the workerpool configuration file.
-     * <p>By default the configuration file named <code>workers.xml</code> in the
-     * <code>conf</code> directory is used. But it is possible to specify another
-     * location using the <i>WorkerConfig</i> parameter.
-     *
-     * @return The absolute path to the worker pool configuration file.
+     * {@inheritDoc}
      */
     @Override
     public String getWorkerPoolCfgFile() {
@@ -344,15 +334,7 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the directory to use for temporarily storing files.
-     * <p>By default this the <code>temp</code> directory in the Holodeck B2B
-     * installation. The directory to use can also be specified using the
-     * <i>TempDir</i> parameter.
-     * <p>It is RECOMMENDED to create a subdirectory in this directory when
-     * regularly storing files in the temp directory.
-     *
-     * @return  The absolute path to the temp directory. Ends with a directory
-     *          separator.
+     * {@inheritDoc}
      */
     @Override
     public String getTempDirectory() {
@@ -360,13 +342,7 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Indicates whether bundling of signal message units in a response message is allowed. When enabled Holodeck B2B
-     * can add multiple signal message units generated during the processing of the request message to the response.
-     * This however will create ebMS messages that DO NOT conform to the ebMS v3 Core Spec and AS4 profile.
-     * <p>The default setting is not to allow this bundling to ensure Core Spec and AS4 compliant ebMS messages. To
-     * enable the feature set the <i>AllowSignalBundling</i> to "on" or "true".
-     *
-     * @return Indication whether bundling of signals in a response is allowed
+     * {@inheritDoc}
      */
     @Override
     public boolean allowSignalBundling() {
@@ -374,13 +350,7 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the default setting whether Errors on Errors should be reported to the sender of the faulty error. This
-     * setting can be overriden in the P-Mode configuration. However the problem that causes an error to be in error is
-     * often an invalid message reference. In such cases the error can not be assigned a P-Mode, so the P-Mode can not
-     * configure the behaviour.
-     *
-     * @return <code>true</code> if generated errors on errors should by default be reported to the sender,<br>
-     *         <code>false</code> otherwise
+     * {@inheritDoc}
      */
     @Override
     public boolean shouldReportErrorOnError() {
@@ -388,13 +358,7 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the default setting whether Errors on Receipts should be reported to the sender of the faulty receipt. This
-     * setting can be overriden in the P-Mode configuration. However the problem that causes an error to be in error is
-     * often an invalid message reference. In such cases the receipt can not be assigned a P-Mode, so the P-Mode can not
-     * configure the behaviour.
-     *
-     * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
-     *         <code>false</code> otherwise
+     * {@inheritDoc}
      */
     @Override
     public boolean shouldReportErrorOnReceipt() {
@@ -402,26 +366,17 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Indicates if the references in an Error signal message unit should be checked using the strict requirements
-     * defined in the Core Specification (all references equal) or if a bit more relaxed check can be used (signal level
-     * reference empty, but individual errors have the same reference).
-     * <p>Default the more relaxed check is used. To change this set the value of the <i>StrictErrorReferencesCheck</i>
-     * parameter to <i>"true"</i>.
-     *
-     * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
-     *         <code>false</code> otherwise
+     * {@inheritDoc}
      * @deprecated To use strict validation of error reference use the strict validation mode of the ebMS header
-     *             (see {@link #useStrictHeaderValidation()}).     */
+     *             (see {@link #useStrictHeaderValidation()}).
+     */
     @Override
     public boolean useStrictErrorRefCheck() {
         return useStrictErrorReferencesCheck;
     }
 
     /**
-     * Gets the path to the keystore containing the private keys and related certificates that are used for signing
-     * and decryption of messages.
-     *
-     * @return The path to the <i>"private"</i> keystore.
+     * {@inheritDoc}
      */
     @Override
     public String getPrivateKeyStorePath() {
@@ -429,9 +384,7 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the password for the keystore that holds the certificates with the private keys.
-     *
-     * @return  The password for accessing the keystore with the private keys
+     * {@inheritDoc}
      */
     @Override
     public String getPrivateKeyStorePassword() {
@@ -439,10 +392,7 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the path to the keystore containing the certificates (i.e. public keys) that are used for encrypting
-     * messages and verification of a signed messages.
-     *
-     * @return The path to the <i>"public"</i> keystore.
+     * {@inheritDoc}
      */
     @Override
     public String getPublicKeyStorePath() {
@@ -450,9 +400,7 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the password for the keystore that holds the certificates with the public keys.
-     *
-     * @return  The password for accessing the keystore with the public keys
+     * {@inheritDoc}
      */
     @Override
     public String getPublicKeyStorePassword() {
@@ -460,14 +408,7 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the path to the keystore containing the CA certificates that should be trusted when validating the
-     * certificate that was used for signing a received message.
-     * <p>This "trust" keystore should be used to store certificates that are not directly related to a specific trading
-     * partner but are needed to validate the trading partners certificate. By using the trust store the trading
-     * partners certificate doesn't need to be registered in Holodeck B2B but can be included in the message itself
-     * using a <code>BinarySecurityToken</code> element.
-     *
-     * @return The path to the <i>"trust"</i> keystore.
+     * {@inheritDoc}
      * @since 2.1.0
      */
     @Override
@@ -476,9 +417,7 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the password for the keystore that holds the trusted CA certificates.
-     *
-     * @return  The password for accessing the keystore with the trusted certificates.
+     * {@inheritDoc}
      * @since 2.1.0
      */
     @Override
@@ -487,14 +426,7 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the global setting whether Holodeck B2B should check if a certificate is revoked. As an error that occurs
-     * during the revocation check will result in rejection of the complete ebMS message the default value is <i>false
-     * </i>. If required the revocation check can be enable in the P-Mode configuration.
-     * <p>To change the default setting for the revocation check change the value of the <i>CertificateRevocationCheck
-     * </i> parameter to <i>"true"</i>.
-     *
-     * @return <code>true</code> if the revocation of certificates should by default be checked,<br>
-     *         <code>false</code> otherwise
+     * {@inheritDoc}
      */
     @Override
     public boolean shouldCheckCertificateRevocation() {
@@ -502,12 +434,7 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the configured class name of the component that is responsible for the processing of event that are raised
-     * during the message processing. This is an optional configuration parameter and when not set the Holodeck B2B Core
-     * will use a default implementation. To use a custom implementation set class name in the
-     * <i>MessageProcessingEventProcessor</i> parameter
-     *
-     * @return String containing the class name of the {@link IMessageProcessingEventProcessor} implementation to use
+     * {@inheritDoc}
      * @since 2.1.0
      */
     @Override
@@ -516,17 +443,8 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the class name of the {@link org.holodeckb2b.interfaces.pmode.validation.IPModeValidator}
-     * implementation that the Holodeck B2B Core's <code>PModeManager
-     * </code> must use to validate P-Modes before they are deployed. This is an optional configuration parameter and
-     * when not set the Holodeck B2B Core will use a default implementation. To use a custom implementation set class
-     * name in the <i>PModeValidator</i> parameter.
-     * <b>NOTE:</b> The configured validator will be used to validate all P-Modes and should therefore only be used if
-     * Holodeck B2B is deployed in a specific domain.
-     *
-     * @return  The class name of the {@link org.holodeckb2b.interfaces.pmode.validation.IPModeValidator}
-     *          implementation
-     * @since  3.0.0
+     * {@inheritDoc}
+     * @since 3.0.0
      */
     @Override
     public String getPModeValidatorImplClass() {
@@ -534,14 +452,8 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the class name of the {@link org.holodeckb2b.interfaces.pmode.IPModeSet} implementation that the Holodeck
-     * B2B Core's <code>PModeManager</code> must use to store the set of deployed P-Modes. This is an optional
-     * configuration parameter and when not set the Holodeck B2B Core will use a default implementation. To use a custom
-     * implementation set class name in the <i>PModeStorageImplementation</i> parameter.
-     *
-     * @return  The class name of the {@link org.holodeckb2b.interfaces.pmode.IPModeSet} implementation to use for
-     *          storing deployed P-Modes
-     * @since  3.0.0
+     * {@inheritDoc}
+     * @since 3.0.0
      */
     @Override
     public String getPModeStorageImplClass() {
@@ -549,13 +461,8 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the class name of the {@link IPersistencyProvider} implementation that the Holodeck B2B Core should use to
-     * store the meta-data on processed message units. Note that this is an optional configuration parameter and when
-     * not set the Holodeck B2B Core will use a default implementation. To use a custom implementation set class name
-     * in the <i>PersistencyProvider</i> parameter.
-     *
-     * @return  The class name of the {@link IPersistencyProvider} implementation to use for storing meta-data
-     * @since  3.0.0
+     * {@inheritDoc}
+     * @since 3.0.0
      */
     @Override
     public String getPersistencyProviderClass() {
@@ -563,22 +470,20 @@ public class Config implements InternalConfiguration {
     }
 
     /**
-     * Gets the global setting for whether Holodeck B2B should perform a strict validation of the ebMS header meta-data
-     * as specified in the ebMS Specifications.
-     * <p>For Holodeck B2B to be able to process a message unit it does not need to conform to all the requirements as
-     * stated in the ebMS Specifications, for example the formatting of values is mostly irrelevant to Holodeck B2B.
-     * Therefore two validation modes are offered, <i>basic</i> and <i>strict</i>. This setting configures whether the
-     * strict validation mode should be used for all messages. The default is to use only basic validation.
-     * <p>Note that the P-Mode also includes a similar setting which can be used to specify the use of strict validation
-     * per P-Mode.
-     *
-     * @return <code>true</code> if a strict validation of the ebMS header meta-data should be performed for all
-     *         message units,<br>
-     *         <code>false</code> if a basic validation is enough and strict validation can be configured on P-Mode base
+     * {@inheritDoc}
      * @since HB2B_NEXT_VERSION
      */
     @Override
     public boolean useStrictHeaderValidation() {
         return useStrictHeaderValidation;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since HB2B_NEXT_VERSION
+     */
+    @Override
+    public String getSecurityProviderClass() {
+        return securityProviderClass;
     }
 }

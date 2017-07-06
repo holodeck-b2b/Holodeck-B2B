@@ -157,4 +157,9 @@ public class Config implements InternalConfiguration {
     public boolean useStrictHeaderValidation() {
         return useStrictHeaderValidation;
     }
+
+    @Override
+    public String getSecurityProviderClass() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

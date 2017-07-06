@@ -45,6 +45,7 @@ import org.holodeckb2b.interfaces.pmode.security.IKeyTransport;
 import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
+import org.holodeckb2b.interfaces.security.UTPasswordType;
 import org.holodeckb2b.security.callbackhandlers.AttachmentCallbackHandler;
 import org.holodeckb2b.security.callbackhandlers.PasswordCallbackHandler;
 import org.holodeckb2b.security.util.SecurityUtils;
@@ -221,7 +222,7 @@ public class CreateWSSHeaders extends BaseHandler {
         mc.setProperty(ConfigurationConstants.ADD_USERNAMETOKEN_NONCE, Boolean.toString(utConfig.includeNonce()));
 
         mc.setProperty(ConfigurationConstants.PASSWORD_TYPE,
-                                        utConfig.getPasswordType() == IUsernameTokenConfiguration.PasswordType.DIGEST ?
+                                        utConfig.getPasswordType() == UTPasswordType.DIGEST ?
                                         WSConstants.PW_DIGEST : WSConstants.PW_TEXT);
 
         pwdCBHandler.addUser(utConfig.getUsername(), utConfig.getPassword());

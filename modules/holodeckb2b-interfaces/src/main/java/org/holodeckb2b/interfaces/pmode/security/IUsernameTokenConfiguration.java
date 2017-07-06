@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.interfaces.pmode.security;
 
+import org.holodeckb2b.interfaces.security.UTPasswordType;
+
 /**
  * Defines the configuration of a WSS UsernameToken contained in the security header of the ebMS message. Depending on
  * the direction (incoming or outgoing) of the message the information is used to set or validate the UsernameToken in
@@ -47,43 +49,15 @@ public interface IUsernameTokenConfiguration {
      */
     public String getPassword();
 
-    /**
-     * Enumeration defining the supported password types as defined in the Web Services Security Username Token Profile
-     * Version 1.1.1, section 3.1
-     */
-    public enum PasswordType {
-        /**
-         * Indicates the password is included in clear text. NOT RECOMMENDED!
-         */
-        TEXT,
-
-        /**
-         * Indicates the password is included as a digest, optionally including nonce and/or creation timestamp
-         */
-        DIGEST
-    }
-
-    /**
-     * Constant for the URI used to identify the clear text password type in the WSSE UsernameToken element.
-     */
-    public static final String PWD_TYPE_TEXT_URI =
-                "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText";
-
-    /**
-     * Constant for the URI used to identify the digested password type in the WSSE UsernameToken element.
-     */
-    public static final String PWD_TYPE_DIGEST_URI =
-                "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest";
-
 
     /**
      * Gets how the password should be included in the token as defined in the <i>WSS UsernameToken Profile</i>.
      * <p>Currently supported are the types defined in version 1.1.1 of the profile: plain text and digest as defined
      * in the enumeration above.
      *
-     * @return The {@link PasswordType} to use for including the password in the username token
+     * @return The {@link UTPasswordType} to use for including the password in the username token
      */
-    public PasswordType getPasswordType();
+    public UTPasswordType getPasswordType();
 
     /**
      * Returns indication whether the <code>wsse:Nonce</code> element should be (when sending the message) or is

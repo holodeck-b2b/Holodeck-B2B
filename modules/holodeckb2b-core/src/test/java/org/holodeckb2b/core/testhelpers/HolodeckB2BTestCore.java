@@ -17,6 +17,7 @@
 package org.holodeckb2b.core.testhelpers;
 
 import org.holodeckb2b.common.config.InternalConfiguration;
+import org.holodeckb2b.common.testhelpers.Config;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.submit.core.MessageSubmitter;
 import org.holodeckb2b.events.SyncEventProcessor;
@@ -36,9 +37,6 @@ import org.holodeckb2b.module.HolodeckB2BCoreImpl;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.InMemoryPModeSet;
 import org.holodeckb2b.pmode.PModeManager;
-
-import org.holodeckb2b.common.testhelpers.Config;
-
 import static org.mockito.Mockito.mock;
 
 /**
@@ -100,7 +98,6 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
         }
     }
 
-    @Override
     public StorageManager getStorageManager() {
         return new StorageManager(daoFactory.getUpdateManager());
     }

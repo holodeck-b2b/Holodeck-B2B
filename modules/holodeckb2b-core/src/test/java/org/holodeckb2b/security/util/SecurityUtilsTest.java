@@ -16,6 +16,14 @@
  */
 package org.holodeckb2b.security.util;
 
+import java.io.FileInputStream;
+import java.security.KeyStore;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Properties;
+import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
@@ -35,11 +43,12 @@ import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
+import org.holodeckb2b.interfaces.security.UTPasswordType;
 import org.holodeckb2b.pmode.helpers.UsernameTokenConfig;
 import org.holodeckb2b.security.tokens.UsernameToken;
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -47,19 +56,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import javax.xml.namespace.QName;
-import java.io.FileInputStream;
-import java.security.KeyStore;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Properties;
-
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Created at 22:02 06.03.17
@@ -104,7 +102,7 @@ public class SecurityUtilsTest {
         UsernameTokenConfig tokenConfig = new UsernameTokenConfig();
         tokenConfig.setUsername("username");
         tokenConfig.setPassword("secret");
-        tokenConfig.setPasswordType(IUsernameTokenConfiguration.PasswordType.TEXT);
+        tokenConfig.setPasswordType(UTPasswordType.TEXT);
 
         UsernameTokenPrincipal principalMock = mock(UsernameTokenPrincipal.class);
         when(principalMock.getName()).thenReturn("username");
