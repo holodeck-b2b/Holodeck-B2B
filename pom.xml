@@ -80,9 +80,9 @@
     <modules>
         <module>modules/holodeckb2b-interfaces</module>
         <module>modules/holodeckb2b-common</module>
+        <module>modules/holodeckb2b-persistency</module>
         <module>modules/holodeckb2b-core</module>
         <module>modules/holodeckb2b-distribution</module>
-        <module>modules/holodeckb2b-persistency</module>
         <module>modules/holodeckb2b-it</module>
     </modules>
 
@@ -158,22 +158,6 @@
                 <groupId>org.apache.ws.commons.axiom</groupId>
                 <artifactId>axiom-dom</artifactId>
                 <version>${axiom-version}</version>
-            </dependency>
-            
-            <!--===============================================================
-                Hibernate is used to store configuration and message meta data
-                in database
-            =============================================================== -->
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-core</artifactId>
-                <version>${hibernate.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-entitymanager</artifactId>
-                <version>${hibernate.version}</version>
-                <scope>runtime</scope>
             </dependency>
 
              <!--===============================================================

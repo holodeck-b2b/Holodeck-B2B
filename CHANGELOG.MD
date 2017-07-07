@@ -32,9 +32,15 @@ payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonC
 
 ### Security
 
-## 3.0.1-SNAPSHOT-1 (Unreleased)
+## 3.0.1
+###### 2017-07-07
+### Changed
+* Refactored database configuration in default persistency module
+* Removed database related code from other modules
+
 ### Fixed
 * Confusing log message in SubmitFromFile worker when MMD file can not be renamed [#69](https://github.com/holodeck-b2b/Holodeck-B2B/issues/69)
+* Body payload(s) not encrypted when message also contains other payloads [#70](https://github.com/holodeck-b2b/Holodeck-B2B/issues/70)
 
 ## 3.0.0
 ###### 2017-04-18
