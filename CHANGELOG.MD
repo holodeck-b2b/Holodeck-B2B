@@ -2,7 +2,8 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 3.0.1-SNAPSHOT-2 (Unreleased)
+## 3.0.1
+###### 2017-07-07
 ### Changed
 * Refactored database configuration in default persistency module
 * Removed database related code from other modules
