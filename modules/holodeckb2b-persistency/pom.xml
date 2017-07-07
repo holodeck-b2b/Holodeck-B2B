@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.1</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -30,6 +30,10 @@
     <artifactId>holodeckb2b-persistency</artifactId>
     <packaging>jar</packaging>
     <name>Holodeck B2B - Default Persistency Provider</name>
+
+    <properties>
+        <hibernate.version>5.0.9.Final</hibernate.version>
+    </properties>
 
     <dependencies>
         <!-- The other Holodeck B2B libraries -->
@@ -42,14 +46,19 @@
             <artifactId>holodeckb2b-interfaces</artifactId>
         </dependency>
 
-        <!-- Hibernate JPA libraries -->
+        <!--===============================================================
+            Hibernate is used to store configuration and message meta data
+            in database
+        =============================================================== -->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
+            <version>${hibernate.version}</version>
         </dependency>
 
         <!--===============================================================
