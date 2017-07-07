@@ -32,7 +32,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -265,11 +264,7 @@ public final class Utils {
      */
     public static void sortFiles(final File array[]) {
         if (array != null && array.length > 1)
-            Arrays.sort (array, new Comparator <File>(){
-                public int compare (File aO1, File aO2) {
-                    return aO1.getName ().compareTo (aO2.getName ());
-                }
-            });
+            Arrays.sort (array, (File aO1, File aO2) -> aO1.getName ().compareTo (aO2.getName ()));
     }
 
     /**

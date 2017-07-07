@@ -16,6 +16,13 @@
  */
 package org.holodeckb2b.persistency.managers;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import javax.persistence.OptimisticLockException;
+import javax.persistence.RollbackException;
 import org.holodeckb2b.common.messagemodel.MessageProcessingState;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
@@ -34,14 +41,6 @@ import org.holodeckb2b.persistency.jpa.MessageUnitProcessingState;
 import org.holodeckb2b.persistency.jpa.UserMessage;
 import org.holodeckb2b.persistency.util.EntityManagerUtil;
 import org.holodeckb2b.persistency.util.JPAEntityHelper;
-
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.OptimisticLockException;
-import javax.persistence.RollbackException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 
 /**
  * Is the default persistency provider's implementation of the {@link IUpdateManager} interface.
@@ -166,53 +165,38 @@ public class UpdateManager implements IUpdateManager {
 
     @Override
     public void setPModeId(final IMessageUnitEntity msgUnit, final String pmodeId) throws PersistenceException {
-        performUpdate((MessageUnitEntity) msgUnit, new UpdateCallback() {
-            @Override
-            public void perform(MessageUnit jpaObject) {
-                jpaObject.setPModeId(pmodeId);
-            }
+        performUpdate((MessageUnitEntity) msgUnit, (MessageUnit jpaObject) -> {
+            jpaObject.setPModeId(pmodeId);
         });
     }
 
     @Override
     public void setMultiHop(final IMessageUnitEntity msgUnit, final boolean isMultihop) throws PersistenceException {
-        performUpdate((MessageUnitEntity) msgUnit, new UpdateCallback() {
-            @Override
-            public void perform(MessageUnit jpaObject) {
-                jpaObject.setMultiHop(isMultihop);
-            }
+        performUpdate((MessageUnitEntity) msgUnit, (MessageUnit jpaObject) -> {
+            jpaObject.setMultiHop(isMultihop);
         });
     }
 
     @Override
     public void setLeg(final IMessageUnit msgUnit, final ILeg.Label legLabel) throws PersistenceException {
-        performUpdate((MessageUnitEntity) msgUnit, new UpdateCallback() {
-            @Override
-            public void perform(MessageUnit jpaObject) {
-                jpaObject.setLeg(legLabel);
-            }
+        performUpdate((MessageUnitEntity) msgUnit, (MessageUnit jpaObject) -> {
+            jpaObject.setLeg(legLabel);
         });
     }
 
     @Override
     public void setPayloadInformation(final IUserMessageEntity userMessage, final Collection<IPayload> payloadInfo)
                                                                                         throws PersistenceException {
-        performUpdate((MessageUnitEntity) userMessage, new UpdateCallback() {
-            @Override
-            public void perform(MessageUnit jpaObject) {
-                ((UserMessage) jpaObject).setPayloads(payloadInfo);
-            }
+        performUpdate((MessageUnitEntity) userMessage, (MessageUnit jpaObject) -> {
+            ((UserMessage) jpaObject).setPayloads(payloadInfo);
         });
     }
 
     @Override
     public void setAddSOAPFault(final IErrorMessageEntity errorMessage, final boolean addSOAPFault)
                                                                                         throws PersistenceException {
-        performUpdate((MessageUnitEntity) errorMessage, new UpdateCallback() {
-            @Override
-            public void perform(MessageUnit jpaObject) {
-                ((ErrorMessage) jpaObject).setAddSOAPFault(addSOAPFault);
-            }
+        performUpdate((MessageUnitEntity) errorMessage, (MessageUnit jpaObject) -> {
+            ((ErrorMessage) jpaObject).setAddSOAPFault(addSOAPFault);
         });
     }
 
