@@ -32,7 +32,8 @@ import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
@@ -143,7 +144,7 @@ public class ProcessGeneratedErrorsTest {
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        StorageManager storageManager = core.getStorageManager();
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
 
         // Setting input message property
         IUserMessageEntity userMessageEntity =
@@ -205,7 +206,7 @@ public class ProcessGeneratedErrorsTest {
 
         PullRequestElement.createElement(headerBlock, pullRequest);
 
-        StorageManager storageManager = core.getStorageManager();
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
         IPullRequestEntity pullRequestEntity =
                 storageManager.storeIncomingMessageUnit(pullRequest);
         mc.setProperty(MessageContextProperties.IN_PULL_REQUEST, pullRequestEntity);
@@ -282,7 +283,7 @@ public class ProcessGeneratedErrorsTest {
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        StorageManager storageManager = core.getStorageManager();
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
 
         // Setting input message property
         IUserMessageEntity userMessageEntity =
@@ -361,7 +362,7 @@ public class ProcessGeneratedErrorsTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        StorageManager storageManager = core.getStorageManager();
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
 
         // Setting input message property
         IUserMessageEntity userMessageEntity =
@@ -436,7 +437,7 @@ public class ProcessGeneratedErrorsTest {
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        StorageManager storageManager = core.getStorageManager();
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
 
         // Setting input message property
         IUserMessageEntity userMessageEntity =

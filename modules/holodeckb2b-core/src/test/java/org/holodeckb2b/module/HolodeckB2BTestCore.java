@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.core.testhelpers;
+package org.holodeckb2b.module;
 
 import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.common.testhelpers.Config;
@@ -33,7 +33,6 @@ import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
-import org.holodeckb2b.module.HolodeckB2BCoreImpl;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.InMemoryPModeSet;
 import org.holodeckb2b.pmode.PModeManager;
@@ -98,7 +97,8 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
         }
     }
 
-    public StorageManager getStorageManager() {
+    @Override
+    StorageManager getStorageManager() {
         return new StorageManager(daoFactory.getUpdateManager());
     }
 

@@ -17,7 +17,8 @@
 package org.holodeckb2b.security.callbackhandlers;
 
 import org.apache.wss4j.common.ext.WSPasswordCallback;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.junit.Before;
 import org.junit.BeforeClass;

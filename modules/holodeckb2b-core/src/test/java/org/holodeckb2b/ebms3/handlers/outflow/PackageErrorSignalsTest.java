@@ -28,7 +28,8 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -124,7 +125,7 @@ public class PackageErrorSignalsTest {
 
         ErrorSignalElement.createElement(headerBlock, errorMessage);
 
-        StorageManager updateManager = core.getStorageManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IErrorMessageEntity errorMessageEntity =
                 updateManager.storeIncomingMessageUnit(errorMessage);
         ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
@@ -191,7 +192,7 @@ public class PackageErrorSignalsTest {
 
         ErrorSignalElement.createElement(headerBlock, errorMessage);
 
-        StorageManager updateManager = core.getStorageManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IErrorMessageEntity errorMessageEntity =
                 updateManager.storeIncomingMessageUnit(errorMessage);
 

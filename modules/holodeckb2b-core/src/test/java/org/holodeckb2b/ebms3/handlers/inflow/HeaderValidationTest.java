@@ -30,7 +30,8 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.*;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -124,7 +125,7 @@ public class HeaderValidationTest {
         UserMessage userMessage
                 = UserMessageElement.readElement(umElement);
         // Setting input message property
-        StorageManager updateManager = core.getStorageManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IUserMessageEntity userMessageEntity =
                 updateManager.storeIncomingMessageUnit(userMessage);
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
@@ -170,7 +171,7 @@ public class HeaderValidationTest {
         mc.setFLOW(MessageContext.IN_FLOW);
 
         // Setting input PullRequest property
-        StorageManager updateManager = core.getStorageManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IPullRequestEntity pullRequestEntity =
                 updateManager.storeIncomingMessageUnit(pullRequest);
         mc.setProperty(MessageContextProperties.IN_PULL_REQUEST,
@@ -222,7 +223,7 @@ public class HeaderValidationTest {
         mc.setFLOW(MessageContext.IN_FLOW);
 
         // Setting input Receipt property
-        StorageManager updateManager = core.getStorageManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
 
         IReceiptEntity receiptEntity =
                 updateManager.storeIncomingMessageUnit(receipt);
@@ -265,7 +266,7 @@ public class HeaderValidationTest {
         MessageContext mc = new MessageContext();
 
         // Setting input Receipt property
-        StorageManager updateManager = core.getStorageManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
 
         IErrorMessageEntity errorMessageEntity =
                 updateManager.storeIncomingMessageUnit(error);

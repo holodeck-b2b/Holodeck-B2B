@@ -31,7 +31,8 @@ import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
@@ -148,7 +149,7 @@ public class ProcessErrorsTest {
         errorMessage.setRefToMessageId(msgId);
         errorMessage.setMessageId("error_id");
 
-        StorageManager storageManager = core.getStorageManager();
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
 
         // Setting input message property
         IUserMessageEntity userMessageEntity =
@@ -210,7 +211,7 @@ public class ProcessErrorsTest {
         errorMessage.setErrors(errors);
         errorMessage.setMessageId("error_id");
 
-        StorageManager storageManager = core.getStorageManager();
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
 
         // Setting input errors property
         ErrorSignalElement.createElement(headerBlock, errorMessage);

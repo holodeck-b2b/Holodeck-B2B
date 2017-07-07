@@ -24,7 +24,8 @@ import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.constants.SecurityConstants;
@@ -138,7 +139,7 @@ public class GetMessageUnitForPullingTest {
         core.getPModeSet().add(pmode);
 
         // Setting input message property
-        StorageManager storageManager = core.getStorageManager();
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
         System.out.println("um: " + storageManager.getClass());
 
         IPullRequestEntity pullRequestEntity =
@@ -171,7 +172,7 @@ public class GetMessageUnitForPullingTest {
         pmode.setId(pmodeId);
 
         // Setting input message property
-        StorageManager updateManager = core.getStorageManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IUserMessageEntity userMessageEntity =
                 updateManager.storeIncomingMessageUnit(userMessage);
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
@@ -242,7 +243,7 @@ public class GetMessageUnitForPullingTest {
         core.getPModeSet().add(pmode);
 
         // Setting input message property
-        StorageManager storageManager = core.getStorageManager();
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
         System.out.println("um: " + storageManager.getClass());
 
         IPullRequestEntity pullRequestEntity =

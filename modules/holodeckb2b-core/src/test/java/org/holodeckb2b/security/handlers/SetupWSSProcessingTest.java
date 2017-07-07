@@ -30,7 +30,8 @@ import org.apache.wss4j.common.ConfigurationConstants;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -171,7 +172,7 @@ public class SetupWSSProcessingTest {
         //Adding PMode to the managed PMode set.
         core.getPModeSet().add(pmode);
         IUserMessageEntity userMessageEntity =
-                core.getStorageManager()
+                HolodeckB2BCore.getStorageManager()
                         .storeIncomingMessageUnit(um);
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
                 userMessageEntity);
@@ -235,7 +236,7 @@ public class SetupWSSProcessingTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        StorageManager storageManager = core.getStorageManager();
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
 
         PMode pmode = new PMode();
         pmode.setId(pmodeId);
