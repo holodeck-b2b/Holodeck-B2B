@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
+import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 

@@ -19,10 +19,10 @@ package org.holodeckb2b.pmode.xml;
 import java.util.ArrayList;
 
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
+import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;

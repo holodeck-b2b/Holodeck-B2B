@@ -17,7 +17,7 @@
 package org.holodeckb2b.pmode.helpers;
 
 import org.apache.wss4j.common.principal.UsernameTokenPrincipal;
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
 import org.holodeckb2b.security.tokens.UsernameToken;
 

@@ -16,8 +16,8 @@
  */
 package org.holodeckb2b.pmode.helpers;
 
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration.WSSHeaderTarget;
+import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration.WSSHeaderTarget;
 
 /**
  * @author Sander Fieten (sander at holodeck-b2b.org)

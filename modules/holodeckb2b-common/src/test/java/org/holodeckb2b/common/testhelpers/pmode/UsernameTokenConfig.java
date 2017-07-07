@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.common.testhelpers.pmode;
 
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
 
 /**

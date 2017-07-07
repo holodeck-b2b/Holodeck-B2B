@@ -18,7 +18,7 @@ package org.holodeckb2b.common.testhelpers.pmode;
 
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 
 /**
  *

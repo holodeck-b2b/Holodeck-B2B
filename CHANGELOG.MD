@@ -20,6 +20,7 @@ is done in the _User Message flow_ of the P-Mode, see
 * Refactored the validation of the ebMS header meta-data validation classes and handler
 * The ebMS Error returned to the sender in case the signature of a _User Message_ does not include all
 payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonCompliance_.
+* Moved classes in `org.holodeckb2b.interfaces.pmode.security` to `org.holodeckb2b.interfaces.pmode`
 
 ### Deprecated
 * The configuration parameter (`IConfiguation.useStrictErrorRefCheck()`) to apply a strict validation on the

@@ -19,7 +19,7 @@ package org.holodeckb2b.pmode;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 import org.holodeckb2b.pmode.helpers.*;
 import org.holodeckb2b.security.util.SecurityUtils;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;

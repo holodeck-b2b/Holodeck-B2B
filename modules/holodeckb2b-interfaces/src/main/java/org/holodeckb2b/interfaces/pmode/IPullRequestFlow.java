@@ -16,9 +16,6 @@
  */
 package org.holodeckb2b.interfaces.pmode;
 
-
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-
 /**
  * Contains the P-Mode parameters for the exchange of a pull request and related error messages.
  * <p>As a pull request does not contain any business information other than the MPC the requested user message should

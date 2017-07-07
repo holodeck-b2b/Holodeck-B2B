@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.common.testhelpers.pmode;
 
-import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
+import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
 
 /**
  * @author Sander Fieten (sander at holodeck-b2b.org)

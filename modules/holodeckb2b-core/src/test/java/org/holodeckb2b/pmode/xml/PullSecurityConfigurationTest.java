@@ -17,9 +17,9 @@
 package org.holodeckb2b.pmode.xml;
 
 import java.io.File;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

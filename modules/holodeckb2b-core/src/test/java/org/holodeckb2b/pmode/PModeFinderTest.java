@@ -22,7 +22,7 @@ import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.IPMode;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 import org.holodeckb2b.pmode.helpers.*;
 import org.holodeckb2b.security.tokens.IAuthenticationInfo;
 import org.holodeckb2b.security.tokens.X509Certificate;

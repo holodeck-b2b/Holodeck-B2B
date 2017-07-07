@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.core.PersistenceException;
 import org.simpleframework.xml.core.Validate;

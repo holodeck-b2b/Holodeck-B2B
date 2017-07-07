@@ -18,7 +18,7 @@ package org.holodeckb2b.pmode.xml;
 
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 

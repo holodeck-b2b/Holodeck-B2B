@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.ebms3.constants;
 
-import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
+import org.holodeckb2b.interfaces.pmode.X509ReferenceType;
 
 /**
  * Defines constants containing the identifiers for the security algorithms that Holodeck B2B uses as a default when

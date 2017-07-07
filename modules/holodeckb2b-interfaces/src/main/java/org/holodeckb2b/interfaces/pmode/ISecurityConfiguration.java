@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.pmode.security;
+package org.holodeckb2b.interfaces.pmode;
 
 /**
  * Describes the P-Mode parameters related to the security processing of messages.

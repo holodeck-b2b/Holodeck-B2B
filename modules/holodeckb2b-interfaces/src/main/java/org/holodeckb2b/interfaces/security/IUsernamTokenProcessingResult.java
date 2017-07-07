@@ -17,7 +17,7 @@
 package org.holodeckb2b.interfaces.security;
 
 import java.time.LocalDateTime;
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 
 /**
  * Represents the results of processing of the username token part of the WS-Security header. It provides information on

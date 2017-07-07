@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.common.testhelpers.pmode;
 
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 
 /**
  * @author Sander Fieten (sander at holodeck-b2b.org)

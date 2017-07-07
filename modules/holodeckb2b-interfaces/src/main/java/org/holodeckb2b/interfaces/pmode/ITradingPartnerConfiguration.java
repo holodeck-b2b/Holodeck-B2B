@@ -19,7 +19,6 @@ package org.holodeckb2b.interfaces.pmode;
 
 
 import org.holodeckb2b.interfaces.general.ITradingPartner;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
 
 /**
  * Represents the configuration of a trading partner involved in the message exchange. Extends the general {@link
