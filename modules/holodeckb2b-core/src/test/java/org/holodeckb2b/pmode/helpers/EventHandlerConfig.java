@@ -41,7 +41,7 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration 
 
     public void setHandledEvents(final List<Class<? extends IMessageProcessingEvent>> newHandledEvents) {
         if (!Utils.isNullOrEmpty(handledEvents))
-            this.handledEvents = new ArrayList<>(handledEvents);
+            this.handledEvents = new ArrayList<>(newHandledEvents);
         else
             this.handledEvents = null;
     }

@@ -19,6 +19,11 @@ public class CustomValidationSpec implements IMessageValidationSpecification {
     private String  rejectMessageOn;
     private List<IMessageValidatorConfiguration> validators;
 
+    public CustomValidationSpec(String stopValidationOn, String rejectMessageOn) {
+        this.stopValidationOn = stopValidationOn;
+        this.rejectMessageOn = rejectMessageOn;
+    }
+
     @Override
     public List<IMessageValidatorConfiguration> getValidators() {
         return validators;
