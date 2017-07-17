@@ -96,8 +96,7 @@ public class TestUtils {
                                       String value, String type) {
         assertEquals(name, p.getName());
         assertEquals(value, p.getValue());
-        // todo see PropertyElement.createElement() method implementation
-        //assertEquals(type, p.getType());
+        assertEquals(type, p.getType());
     }
 
     public static boolean eventContainsMsg(List<LoggingEvent> events, Level logLevel, String msg) {
