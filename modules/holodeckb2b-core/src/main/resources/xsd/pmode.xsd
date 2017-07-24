@@ -20,17 +20,17 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
     targetNamespace="http://holodeck-b2b.org/schemas/2014/10/pmode"
     attributeFormDefault="unqualified" xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
-    version="3.0.0">
+    version="3.0.2">
     <xs:annotation>
         <xs:documentation><p>The ebMS specification only defines an abstract P-Mode model, the actual P-Mode definition is left up to implementations. This schema defines the XML structure for the representation of a P-Mode as used by the default implementation for maintaining the P-Mode set. In this implementation the P-Mode set consists of all XML documents in a directory. Each XML document represents one P-Mode and must conform to this schema. See the package <code>org.holodeckb2b.pmode.xml</code> for more info on the default implementation of P-Modes.</p></xs:documentation>
-        <xs:documentation><p>In version 2.1.0 of the schema the <code>EventHandler</code> and <code>AddActorOrRoleAttribute</code> elements were added. As these are optional elements P-Mode documents constructed using the old version are still valid and result in unchanged processing. Therefore the same namespace is used and only the version has been increased</p> 
+        <xs:documentation><p>In version 2.1.0 of the schema the <code>EventHandler</code> and <code>AddActorOrRoleAttribute</code> elements were added. As these are optional elements P-Mode documents constructed using the old version are still valid and result in unchanged processing. Therefore the same namespace is used and only the version has been increased</p>
         </xs:documentation>
     </xs:annotation>
     <xs:element name="PMode" type="tns:PMode">
         <xs:annotation>
             <xs:documentation><p>The P-Mode as defined in this schema is based on the structure described in appendix D of the Core Specification. As described in section D.2 one leg may involve two sets of P-Mode parameters if pulling is used as the pull request signal has its own set of parameters. This is reflected in this model by the <i>flow</i> concept. When a leg uses the pull binding it has two flows, one for the pull request and one for the user message.</p>
 
-<p>The P-Mode parameters are used to set values in the ebMS message header and determine how and where to send messages. All parameter values must be known when the message is sent, but it is not necessary to include them all in the P-Mode. This would require a P-Mode for each exchanged message while some messages only differ on specific configuration parameters. Therefor Holodeck B2B allows the P-Mode to define only the common parameters and supply the message specific ones when the message is submitted. It is RECOMMENDED to include at least the initiator or responder of the exchange and information about the user message. 
+<p>The P-Mode parameters are used to set values in the ebMS message header and determine how and where to send messages. All parameter values must be known when the message is sent, but it is not necessary to include them all in the P-Mode. This would require a P-Mode for each exchanged message while some messages only differ on specific configuration parameters. Therefor Holodeck B2B allows the P-Mode to define only the common parameters and supply the message specific ones when the message is submitted. It is RECOMMENDED to include at least the initiator or responder of the exchange and information about the user message.
 <br/>Security settings however can <b>only be specified in the P-Mode</b>. So if security must be applied to the messages governed by this P-Mode the configuration must be included in the Initiator and or Responder elements.</p></xs:documentation>
         </xs:annotation>
     </xs:element>
@@ -94,9 +94,9 @@
             </xs:element>
             <xs:element maxOccurs="1" name="Agreement" type="tns:Agreement" minOccurs="0">
                 <xs:annotation>
-                    <xs:documentation><p>This element contains the identification of the business level agreement between the trading partners. This agreement does not define how message should be processed and is therefor optional.</p> 
+                    <xs:documentation><p>This element contains the identification of the business level agreement between the trading partners. This agreement does not define how message should be processed and is therefor optional.</p>
 
-<p>However the P-Mode id is included in the message header as part of the agreement reference and therefor the information is required when the P-Mode id should be included. 
+<p>However the P-Mode id is included in the message header as part of the agreement reference and therefor the information is required when the P-Mode id should be included.
 It is therefor RECOMMENDED to include the agreement info when the include attribute has value "true". If not included in the P-Mode the submission of a user message must contain the agreement info.</p></xs:documentation>
                 </xs:annotation>
             </xs:element>
@@ -112,6 +112,12 @@ In the P-Mode model described in the ebMS specification a leg can be identified 
                 </xs:annotation>
             </xs:element>
         </xs:sequence>
+        <xs:attribute default="false" name="useStrictHeaderValidation" type="xs:boolean">
+            <xs:annotation>
+                <xs:documentation><p>This optional attribute indicates whether the ebMS header meta-data should be strictly checked against the requirements stated in the ebMS Specifications (value=<i>true</i>) or whether a basic validation to ensure that Holodeck B2B can process the message is enough (value=<i>false</i>). The default value is <i>false</i>.</p>
+<p>NOTE: The strict validation of the ebMS header meta-data can also be specified on a global level in the Holodeck B2B configuration. This P-Mode setting can only be used to make the validation more strict, not more relaxed, i.e. if global setting is strict this attribute is just ignored.</p></xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
     <xs:complexType name="TradingPartner">
         <xs:annotation>
@@ -172,7 +178,7 @@ Note that this is probably different then the role the MSH is playing in the MEP
                     <xs:documentation><p>This element indicates whether Receipts are used on this leg and contains the configuration for Receipt processing.<br/>
 The ebMS V3 Core Specification does not specify in detail when and how receipt signals should be used. It only specifies P-Mode parameters for whether the receipt should be send, the reply pattern to use and the address where to sent the receipts to if not sent as a response. The content of the signal are not strictly defined and are left open for further specification in profiles (like AS4). Currently Holodeck B2B will always generate a receipt signal as specified in the AS4 profile (see section 5.1.8 of the profile).</p>
 
-<p>The parameters for Receipt are defined in appendix D of the Core Specification as part of the P-Mode parameter group <b>Security</b>. As they are not directly related to security settings we moved them to a separate <i>"Receipt"</i> group and this element.<br/> 
+<p>The parameters for Receipt are defined in appendix D of the Core Specification as part of the P-Mode parameter group <b>Security</b>. As they are not directly related to security settings we moved them to a separate <i>"Receipt"</i> group and this element.<br/>
 The ebMS specification defines the <b>PMode[1].Security.SendReceipt</b> parameter that indicate whether a Receipt should be sent for a user message. This parameter is not directly implemented in this schema but its value derived from the existence of the <code>Receipt</code> element for a leg, i.e. <b>PMode[1].Security.Receipt</b> := <code>boolean(./Receipt)</code>.</p></xs:documentation>
                 </xs:annotation>
             </xs:element>
@@ -185,7 +191,7 @@ The ebMS specification defines the <b>PMode[1].Security.SendReceipt</b> paramete
             </xs:element>
             <xs:element name="DefaultDelivery" type="tns:DeliverySpecification" minOccurs="0">
                 <xs:annotation>
-                    <xs:documentation><p>With this element the delivery of received messages is configured. This element MUST be included when Holodeck B2B is the receiver of user messages on this leg.</p> 
+                    <xs:documentation><p>With this element the delivery of received messages is configured. This element MUST be included when Holodeck B2B is the receiver of user messages on this leg.</p>
 <p>If Holodeck B2B only sends messages on this leg the element may be ommited. If however the business application should be notified on errors or receipts it may be usefull to define one default delivery method instead of specifying it for errors and receipts separately.</p></xs:documentation>
                 </xs:annotation>
             </xs:element>
@@ -201,7 +207,7 @@ The ebMS specification defines the <b>PMode[1].Security.SendReceipt</b> paramete
             </xs:element>
             <xs:element name="UserMessageFlow" type="tns:UsermessageFlow" minOccurs="0">
                 <xs:annotation>
-                    <xs:documentation><p>This element configures the processing of user messages exchanged on this leg.</p> 
+                    <xs:documentation><p>This element configures the processing of user messages exchanged on this leg.</p>
 
 <p>Again all child elements are optional as default values can be used or information can be provided when a user message is submitted.</p> </xs:documentation>
                 </xs:annotation>
@@ -279,10 +285,10 @@ The last child element is the <code>Parameter</code> element that can occur zero
     </xs:complexType>
     <xs:complexType name="ReceiptType">
         <xs:annotation>
-            <xs:documentation><p>This type defines the configuration settings for Receipts. The configuration depends on whether Holodeck B2B is acting in the sending or receiving role: 
+            <xs:documentation><p>This type defines the configuration settings for Receipts. The configuration depends on whether Holodeck B2B is acting in the sending or receiving role:
 <ul>
 <li>When acting as the receiver the <code>ReplyPattern</code> and <code>To</code> child elements define how a Receipt signal must be sent back to the sender of the user message.</li>
-<li>When acting as the sender the <code>NotifyReceiptToBusinessApplication</code> and <code>ReceiptDelivery</code> elements define whether and how received Receipts should be notified to the producing business application.</li> 
+<li>When acting as the sender the <code>NotifyReceiptToBusinessApplication</code> and <code>ReceiptDelivery</code> elements define whether and how received Receipts should be notified to the producing business application.</li>
 </ul>
 </p>
 
@@ -349,6 +355,11 @@ The last child element is the <code>Parameter</code> element that can occur zero
                 </xs:annotation>
             </xs:element>
             <xs:element name="PayloadProfile" type="tns:PayloadProfile" minOccurs="0"/>
+            <xs:element minOccurs="0" name="CustomValidation" type="tns:ValidationConfiguration">
+                <xs:annotation>
+                    <xs:documentation>This element defines the custom validations that should be performed for User Messages that are processed in this message flow. Custom validations can be configured for both submitted and received User Messages. The custom validation will be executed when the message is submitted to the Core or before a Receipt is created an the message is delivered to the business application. Whether the message will be further processed, i.e. accepted or delivered, depends on the configuration.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="PullRequestFlowType">
@@ -390,7 +401,8 @@ The last child element is the <code>Parameter</code> element that can occur zero
             </xs:element>
             <xs:element maxOccurs="unbounded" minOccurs="0" name="Property" type="tns:Property">
                 <xs:annotation>
-                    <xs:documentation>This element defines a property to include in the set of MessageProperties. </xs:documentation>
+                    <xs:documentation><p>This element defines a property to include in the set of MessageProperties.</p>
+<p>NOTE: This definition allows to set the type of the property as sepecified in the ebMS V3 Core Specification. Due to an error in the XML Schema published with the ebMS V3 Specification adding the <code>type</code> attribute to a <code>Property</code> element will invalidate the message header! It is therefore RECOMMENDED to use this element only when it is known that the trading partner's MSH can handle this attribute.</p></xs:documentation>
                 </xs:annotation>
             </xs:element>
         </xs:sequence>
@@ -420,7 +432,7 @@ Note that this setting is generally only used when Holodeck B2B acts as in the r
             </xs:element>
             <xs:element minOccurs="0" name="ReceiverErrorsTo" type="tns:non-empty-string">
                 <xs:annotation>
-                    <xs:documentation>This element should contain the URL where generated errors for received messages should be sent to in case the reply pattern is CALLBACK. 
+                    <xs:documentation>This element should contain the URL where generated errors for received messages should be sent to in case the reply pattern is CALLBACK.
 
 Note that this setting is generally only used when Holodeck B2B acts as in the receiving role.</xs:documentation>
                 </xs:annotation>
@@ -447,7 +459,7 @@ NOTE: Even if this element has value true the SOAP Fault may not be added to the
             <xs:element name="NotifyErrorToBusinessApplication" type="xs:boolean" default="false"
                 minOccurs="0">
                 <xs:annotation>
-                    <xs:documentation>This element configures whether errors on user messages exchanged on this leg should be notified to the producer business application. 
+                    <xs:documentation>This element configures whether errors on user messages exchanged on this leg should be notified to the producer business application.
 
 The notification of errors uses the same delivery mechanism as user messages with a message deliver. If the business application should be notified on errors a specific delivery can be specified in the ErrorDelivery element. </xs:documentation>
                 </xs:annotation>
@@ -506,6 +518,7 @@ Although the specification allows implementations not to compress payloads using
         <xs:sequence>
             <xs:element name="name" type="tns:non-empty-string"/>
             <xs:element name="value" type="xs:string"/>
+            <xs:element minOccurs="0" name="type" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
     <xs:simpleType name="ReplyPatternType">
@@ -669,7 +682,7 @@ As this authorization is also based on WS-Security headers this type uses the ge
         <xs:sequence>
             <xs:element name="KeystoreAlias" type="tns:KeystoreAliasType">
                 <xs:annotation>
-                    <xs:documentation><p>This REQUIRED element contains the reference to the certificate in the Java keystore. It MUST contain the alias name that is used to store the certificate in the keystore. The OPTIONAL password attribute is used for accessing the private key in a certificate. This is only required when Holodeck B2B has to create the signature.</p> 
+                    <xs:documentation><p>This REQUIRED element contains the reference to the certificate in the Java keystore. It MUST contain the alias name that is used to store the certificate in the keystore. The OPTIONAL password attribute is used for accessing the private key in a certificate. This is only required when Holodeck B2B has to create the signature.</p>
 
 <p>NOTE: When the password contains special characters they may need to be encoded to get a well formed XML document!</p></xs:documentation>
                 </xs:annotation>
@@ -690,7 +703,7 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
                 <xs:element default="IssuerSerial" minOccurs="0" name="KeyReferenceMethod"
                     type="tns:KeyReferenceMethods">
                     <xs:annotation>
-                        <xs:documentation><p>This OPTIONAL element indicates how the certificate must be referenced in the WS-Security header. The options are specified in section 3.2 of the WS-Security X.509 Certificate Token Profile Version 1.1.1 specification.</p> 
+                        <xs:documentation><p>This OPTIONAL element indicates how the certificate must be referenced in the WS-Security header. The options are specified in section 3.2 of the WS-Security X.509 Certificate Token Profile Version 1.1.1 specification.</p>
 
 <p>If not specified <i>Issuer and Serial number</i> method will be used.</p></xs:documentation>
                     </xs:annotation>
@@ -737,7 +750,7 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
         <xs:sequence>
             <xs:element name="KeystoreAlias" type="tns:KeystoreAliasType">
                 <xs:annotation>
-                    <xs:documentation><p>This REQUIRED element contains the reference to the certificate in the Java keystore. It MUST contain the alias name that is used to store the certificate in the keystore. The OPTIONAL password attribute is used for accessing the private key in a certificate. This is only required when Holodeck B2B has to decrypt the message.</p> 
+                    <xs:documentation><p>This REQUIRED element contains the reference to the certificate in the Java keystore. It MUST contain the alias name that is used to store the certificate in the keystore. The OPTIONAL password attribute is used for accessing the private key in a certificate. This is only required when Holodeck B2B has to decrypt the message.</p>
 
 <p>NOTE: When the password contains special characters they may need to be encoded to get a well formed XML document!</p></xs:documentation>
                 </xs:annotation>
@@ -815,7 +828,7 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
             <xs:element default="IssuerSerial" minOccurs="0" name="KeyReferenceMethod"
                 type="tns:KeyReferenceMethods">
                 <xs:annotation>
-                    <xs:documentation><p>This OPTIONAL element indicates how the certificate must be referenced in the WS-Security header. The options are specified in section 3.2 of the WS-Security X.509 Certificate Token Profile Version 1.1.1 specification.</p> 
+                    <xs:documentation><p>This OPTIONAL element indicates how the certificate must be referenced in the WS-Security header. The options are specified in section 3.2 of the WS-Security X.509 Certificate Token Profile Version 1.1.1 specification.</p>
 
 <p>If not specified <i>Issuer and Serial number</i> method will be used.</p></xs:documentation>
                 </xs:annotation>
@@ -846,6 +859,72 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
         <xs:sequence>
             <xs:element name="name" type="tns:non-empty-string"/>
             <xs:element name="value" type="tns:non-empty-string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="ValidationConfiguration">
+        <xs:annotation>
+            <xs:documentation>This type defines the structure of the configuration for the custom validation to apply to User Messages</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element default="false" minOccurs="0" name="ExecuteInOrder" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>This optional indicator defines whether the validators MUST be executed in order. It is NOT RECOMMENDED to require in order execution as it may slow down the message processing. If in order execution is used it is RECOMMENDED to stop validation as soon as an error is detected.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element default="NONE" minOccurs="0" name="StopValidationOn"
+                type="tns:ValidationErrorLevelTreshold">
+                <xs:annotation>
+                    <xs:documentation>This optional indicator defines whether the validation of a message unit should stop after a validation error with the specified severity level has been found. By default the validation never stopped and all validators are executed. </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element default="NONE" minOccurs="0" name="RejectMessageOn"
+                type="tns:ValidationErrorLevelTreshold">
+                <xs:annotation>
+                    <xs:documentation><p>This optional indicator defines whether the message unit should be rejected and further messaage processing should stop after a validation error with the specified severity level has been found. If the message is rejected an ebMS Error with ErrorCode EBMS:0004 (Other) will be generated that includes the description of the found errors. By default message will not be rejected because of validation errors.</p>
+<p>NOTE: If validation errors occur they will always trigger a <code>ICustomValidationFailedEvent</code></p></xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="unbounded" name="Validator" type="tns:ValidatorConfiguration">
+                <xs:annotation>
+                    <xs:documentation>This element which must occur at least once specifies which validations should be executed for all User Messages processed in this flow.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="ValidationErrorLevelTreshold">
+        <xs:annotation>
+            <xs:documentation>Enumerates the error treshold levels as used in the configuration of custom validations.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:whiteSpace value="collapse"/>
+            <xs:enumeration value="NONE"/>
+            <xs:enumeration value="INFO"/>
+            <xs:enumeration value="WARN"/>
+            <xs:enumeration value="FAILURE"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="ValidatorConfiguration">
+        <xs:annotation>
+            <xs:documentation>This type defines the structure of the configuration of one custom validator.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="id" type="tns:non-empty-string">
+                <xs:annotation>
+                    <xs:documentation><p>This element contains the identifier of this validator configuration. This id is used by Holodeck B2B for logging purposes and inclusion in <i>message processing events</i> and may also be used to determine whether it must create and configure a new Factory object.</p>
+<p><b>NOTE: </b>Configurations MUST be uniquely identified as Holodeck B2B will only use the id to check for equivalence.</p></xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="ValidatorFactoryClass" type="tns:non-empty-string">
+                <xs:annotation>
+                    <xs:documentation>This element should contain the class name of the factory class that should be used to create actual instances of the validator.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="Parameter"
+                type="tns:ParameterType">
+                <xs:annotation>
+                    <xs:documentation><p>This element can be used to configure the factory object to create a correctly configured message validator.</p></xs:documentation>
+                </xs:annotation>
+            </xs:element>
         </xs:sequence>
     </xs:complexType>
 </xs:schema>
