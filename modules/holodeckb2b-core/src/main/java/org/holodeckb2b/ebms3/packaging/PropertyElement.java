@@ -20,10 +20,10 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.holodeckb2b.common.messagemodel.Property;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
-import org.holodeckb2b.common.messagemodel.Property;
 
 /**
  * Is a helper class for handling the <code>Property</code> elements that occur in the ebMS SOAP header. This element is
@@ -109,6 +109,6 @@ public class PropertyElement {
         final String type = propElement.getAttributeValue(new QName(LN_ATTR_TYPE));
 
         // Create and return the entity object
-        return new Property(name, value);
+        return new Property(name, value, type);
     }
 }
