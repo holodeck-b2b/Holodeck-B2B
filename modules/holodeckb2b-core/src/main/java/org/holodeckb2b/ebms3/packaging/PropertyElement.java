@@ -20,6 +20,7 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.common.messagemodel.Property;
@@ -28,10 +29,13 @@ import org.holodeckb2b.common.messagemodel.Property;
  * Is a helper class for handling the <code>Property</code> elements that occur in the ebMS SOAP header. This element is
  * used as a child of both <code>MessageProperties</code> and <code>PartProperties</code> specified in sections 5.2.2.11
  * and 5.2.2.13 respectively of the ebMS 3 Core specification.
- * <p><b>NOTE:</b> The current version of the ebMS spec does define the type attribute, but the schema does not. So
- * adding this to the XML document makes it invalid. This problem is known to the  OASIS ebXML Messaging TC under <a
- * href="https://tools.oasis-open.org/issues/browse/EBXMLMSG-2">issue number 2</a>. As noted there the schema will be
- * changed to include this attribute. Until the issue is fixed Holodeck B2B will not add the type.
+ * <p><b>NOTE:</b> The current version of the ebMS spec does define the <code>type</code> attribute, but the schema does
+ * not. Adding this attribute to the XML document will make it invalid. This problem is known to the  OASIS ebXML
+ * Messaging TC under <a href="https://tools.oasis-open.org/issues/browse/EBXMLMSG-2">issue number 2</a>. As noted there
+ * the schema will be changed to include this attribute.<br>
+ * Therefore support for this attribute is already implemented and if provided in the submitted message meta-data
+ * Holodeck B2B will add the the <code>type</code> attribute to the message. It is the responsibility of the <i>Producer
+ * </i> to only include the type when supported by the trading partner's MSH.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
@@ -67,10 +71,9 @@ public class PropertyElement {
         // Set attributes if data is specified for it
         property.addAttribute(LN_ATTR_NAME, data.getName(), null); // name attribute is required!
 
-        // @todo: When type attribute problem (spec problem, see above) is finally resolved, this comment can be removed
-        //String type = data.getType();
-        //if ( type != null && !type.isEmpty())
-        //    property.addAttribute(LN_ATTR_TYPE, type, null);
+        String type = data.getType();
+        if (!Utils.isNullOrEmpty(type))
+            property.addAttribute(LN_ATTR_TYPE, type, null);
 
         return property;
     }
@@ -102,10 +105,8 @@ public class PropertyElement {
         // Read property name and value
         final String name = propElement.getAttributeValue(new QName(LN_ATTR_NAME));
         final String value = propElement.getText();
-
-        //@todo: Uncomment when spec is changed and type is allowed
-//      // Read type attribute
-//        String type = propElement.getAttributeValue(new QName(LN_ATTR_TYPE));
+        // Read type attribute
+        final String type = propElement.getAttributeValue(new QName(LN_ATTR_TYPE));
 
         // Create and return the entity object
         return new Property(name, value);

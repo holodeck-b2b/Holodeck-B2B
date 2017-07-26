@@ -35,10 +35,7 @@ public class Property implements IProperty {
     @Element (name = "value", required = false)
     private String value;
 
-    // Type cannot appear in the message since it then would be
-    // no longer schema compliant. See also issue database at the Oasis organisation.
-    // Type is added here so that is is compliant with the specification, since the spec
-    // does describe the type.
+    @Element (name = "type", required = false)
     private String type;
 
     /**
@@ -53,7 +50,6 @@ public class Property implements IProperty {
      */
     @Override
     public String getType() {
-        // TODO this field is never written
         return this.type;
     }
 

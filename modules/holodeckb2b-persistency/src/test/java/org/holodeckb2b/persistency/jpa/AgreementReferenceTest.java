@@ -18,8 +18,8 @@ package org.holodeckb2b.persistency.jpa;
 
 import javax.persistence.EntityManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.persistency.test.EntityManagerUtil;
 import org.holodeckb2b.persistency.test.wrappers.WAgreementReference;
-import org.holodeckb2b.persistency.util.EntityManagerUtil;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import org.junit.BeforeClass;
