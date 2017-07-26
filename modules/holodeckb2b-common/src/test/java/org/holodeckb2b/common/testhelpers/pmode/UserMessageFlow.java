@@ -60,7 +60,7 @@ public class UserMessageFlow implements IUserMessageFlow {
 
     @Override
     public IMessageValidationSpecification getCustomValidationConfiguration() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

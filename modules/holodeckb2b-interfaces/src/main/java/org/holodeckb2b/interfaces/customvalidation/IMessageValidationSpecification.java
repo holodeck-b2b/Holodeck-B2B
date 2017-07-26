@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
  * and lists all <i>validators</i> that must be executed for each User Message message unit which processing is governed
  * by this P-Mode. Beside the validators that should be executed the configuration also includes indicators that
  * define whether the validations must be executed in order, whether they should be completed and whether the message
- * processing should fail when a validation error of a certian severity is detected.
+ * processing should fail when a validation error of a certain severity is detected.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION

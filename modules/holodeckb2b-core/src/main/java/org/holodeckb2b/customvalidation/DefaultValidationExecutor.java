@@ -70,7 +70,8 @@ public class DefaultValidationExecutor implements ICustomValidationExecutor {
         }
         // Execute the validators as specified in the specification and collect found errors
         ValidationResult result = new ValidationResult();
-        boolean stopValidation = false; boolean rejectMessage = false;
+        boolean stopValidation = false;
+        boolean rejectMessage = false;
         Iterator<IMessageValidatorConfiguration> validatorsToRun = validationSpec.getValidators().iterator();
         // Execute each validator unless specified otherwise
         do {
@@ -85,9 +86,9 @@ public class DefaultValidationExecutor implements ICustomValidationExecutor {
                 // Store the errors in result map
                 result.addValidationErrors(validatorCfg.getId(), errors);
                 // Check if validation should continue
-                stopValidation = containsErrorAboveTreshold(validationSpec.getStopSeverity(), errors);
+                stopValidation = containsErrorAboveThreshold(validationSpec.getStopSeverity(), errors);
                 // And check if message should be rejected
-                rejectMessage |= containsErrorAboveTreshold(validationSpec.getRejectionSeverity(), errors);
+                rejectMessage |= containsErrorAboveThreshold(validationSpec.getRejectionSeverity(), errors);
             }
         } while (!stopValidation && validatorsToRun.hasNext());
         result.setExecutedAllValidators(!stopValidation);
@@ -134,21 +135,21 @@ public class DefaultValidationExecutor implements ICustomValidationExecutor {
     /**
      * Determines whether one of the given errors has a severity level equal to or higher than the given treshold.
      *
-     * @param treshold  The treshold value
+     * @param threshold  The treshold value
      * @param errors    The found errors
      * @return          <code>true</code> when one of the errors has a severity level equal or higher than the trehsold,
      *                  ,<br><code>false</code> otherwise
      */
-    private boolean containsErrorAboveTreshold(final MessageValidationError.Severity treshold,
-                                               final Collection<MessageValidationError> errors) {
-        if (treshold == null)
-            // no treshold specified, which indicates that not in use
+    private boolean containsErrorAboveThreshold(final MessageValidationError.Severity threshold,
+                                                final Collection<MessageValidationError> errors) {
+        if (threshold == null)
+            // no threshold specified, which indicates that not in use
             return false;
         else {
-            // A treshold has been defined, check if reached by any of the found errors
+            // A threshold has been defined, check if reached by any of the found errors
             boolean stop = false;
             for(MessageValidationError e : errors)
-                stop = e.getSeverityLevel().compareTo(treshold) <= 0;
+                stop = e.getSeverityLevel().compareTo(threshold) <= 0;
             return stop;
         }
     }
