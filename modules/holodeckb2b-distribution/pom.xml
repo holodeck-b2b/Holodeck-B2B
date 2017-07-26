@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>3.0.2-SNAPSHOT-1</version>
+        <version>3.0.2-SNAPSHOT-2</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -41,19 +41,20 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-interfaces</artifactId>
         </dependency>
-        <!-- Common and Core classes -->
+        <!-- Common classes -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-core</artifactId>
         </dependency>
         <!-- The default persistency implementation -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-persistency</artifactId>
+        </dependency>
+        <!-- Core classes -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-core</artifactId>
         </dependency>
         <!--===============================================================
             Second the runtime only dependencies, not declared in the
@@ -84,6 +85,32 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-aar-maven-plugin</artifactId>
+                <version>${axis2-version}</version>
+                <configuration>
+                    <aarName>hb2b-msh</aarName>
+                    <fileSets>
+                        <fileSet>
+                          <directory>src/main/service/</directory>
+                          <outputDirectory>META-INF</outputDirectory>
+                          <includes>
+                            <include>**</include>
+                          </includes>
+                        </fileSet>
+                    </fileSets>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>create-hb2b-msh-service</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>aar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.6</version>

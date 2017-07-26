@@ -24,12 +24,13 @@
   </messageReceivers>
 
   <operation name="Receive">
-     <messageReceiver 
-         class="org.holodeckb2b.ebms3.handlers.inflow.CheckForResponse"/> 
+     <messageReceiver
+         class="org.holodeckb2b.ebms3.handlers.inflow.CheckForResponse"/>
   </operation>
 
   <parameter name="supportSingleOperation" locked="xsd:true">true</parameter>
 
+  <module ref="addressing"/>
   <module ref="holodeckb2b-core" />
 </service>
 </serviceGroup>

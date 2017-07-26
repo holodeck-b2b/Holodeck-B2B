@@ -161,186 +161,10 @@
     </transportSender>
 
     <!-- ================================================= -->
-    <!-- Global Modules  -->
-    <!-- ================================================= -->
-    <!-- Comment this to disable Addressing -->
-    <module ref="addressing"/>
-
-    <!--Configuring module , providing parameters for modules whether they refer or not-->
-    <!--<moduleConfig name="addressing">-->
-    <!--<parameter name="addressingPara">N/A</parameter>-->
-    <!--</moduleConfig>-->
-
-    <!-- ================================================= -->
-    <!-- Clustering  -->
-    <!-- ================================================= -->
-    <!--
-     To enable clustering for this node, set the value of "enable" attribute of the "clustering"
-     element to "true". The initialization of a node in the cluster is handled by the class
-     corresponding to the "class" attribute of the "clustering" element. It is also responsible for
-     getting this node to join the cluster.
-     -->
-    <clustering class="org.apache.axis2.clustering.tribes.TribesClusteringAgent" enable="false">
-
-        <!--
-           This parameter indicates whether the cluster has to be automatically initalized
-           when the AxisConfiguration is built. If set to "true" the initialization will not be
-           done at that stage, and some other party will have to explictly initialize the cluster.
-        -->
-        <parameter name="AvoidInitiation">true</parameter>
-
-        <!--
-           The membership scheme used in this setup. The only values supported at the moment are
-           "multicast" and "wka"
-
-           1. multicast - membership is automatically discovered using multicasting
-           2. wka - Well-Known Address based multicasting. Membership is discovered with the help
-                    of one or more nodes running at a Well-Known Address. New members joining a
-                    cluster will first connect to a well-known node, register with the well-known node
-                    and get the membership list from it. When new members join, one of the well-known
-                    nodes will notify the others in the group. When a member leaves the cluster or
-                    is deemed to have left the cluster, it will be detected by the Group Membership
-                    Service (GMS) using a TCP ping mechanism.
-        -->
-        <parameter name="membershipScheme">multicast</parameter>
-
-        <!--
-         The clustering domain/group. Nodes in the same group will belong to the same multicast
-         domain. There will not be interference between nodes in different groups.
-        -->
-        <parameter name="domain">wso2.carbon.domain</parameter>
-
-        <!--
-           When a Web service request is received, and processed, before the response is sent to the
-           client, should we update the states of all members in the cluster? If the value of
-           this parameter is set to "true", the response to the client will be sent only after
-           all the members have been updated. Obviously, this can be time consuming. In some cases,
-           such this overhead may not be acceptable, in which case the value of this parameter
-           should be set to "false"
-        -->
-        <parameter name="synchronizeAll">true</parameter>
-
-        <!--
-          The maximum number of times we need to retry to send a message to a particular node
-          before giving up and considering that node to be faulty
-        -->
-        <parameter name="maxRetries">10</parameter>
-
-        <!-- The multicast address to be used -->
-        <parameter name="mcastAddress">228.0.0.4</parameter>
-
-        <!-- The multicast port to be used -->
-        <parameter name="mcastPort">45564</parameter>
-
-        <!-- The frequency of sending membership multicast messages (in ms) -->
-        <parameter name="mcastFrequency">500</parameter>
-
-        <!-- The time interval within which if a member does not respond, the member will be
-         deemed to have left the group (in ms)
-         -->
-        <parameter name="memberDropTime">3000</parameter>
-
-        <!--
-           The IP address of the network interface to which the multicasting has to be bound to.
-           Multicasting would be done using this interface.
-        -->
-        <parameter name="mcastBindAddress">127.0.0.1</parameter>
-
-        <!-- The host name or IP address of this member -->
-        <parameter name="localMemberHost">127.0.0.1</parameter>
-
-        <!--
-        The TCP port used by this member. This is the port through which other nodes will
-        contact this member
-         -->
-        <parameter name="localMemberPort">4000</parameter>
-
-        <!--
-        Preserve message ordering. This will be done according to sender order.
-        -->
-        <parameter name="preserveMessageOrder">true</parameter>
-
-        <!--
-        Maintain atmost-once message processing semantics
-        -->
-        <parameter name="atmostOnceMessageSemantics">true</parameter>
-
-        <!--
-        Properties specific to this member
-        -->
-        <parameter name="properties">
-            <property name="backendServerURL" value="https://${hostName}:${httpsPort}/services/"/>
-            <property name="mgtConsoleURL" value="https://${hostName}:${httpsPort}/"/>
-        </parameter>
-
-        <!--
-           The list of static or well-known members. These entries will only be valid if the
-           "membershipScheme" above is set to "wka"
-        -->
-        <members>
-            <member>
-                <hostName>127.0.0.1</hostName>
-                <port>4000</port>
-            </member>
-            <member>
-                <hostName>127.0.0.1</hostName>
-                <port>4001</port>
-            </member>
-        </members>
-
-        <!--
-        Enable the groupManagement entry if you need to run this node as a cluster manager.
-        Multiple application domains with different GroupManagementAgent implementations
-        can be defined in this section.
-        -->
-        <groupManagement enable="false">
-            <applicationDomain name="apache.axis2.application.domain"
-                               description="Axis2 group"
-                               agent="org.apache.axis2.clustering.management.DefaultGroupManagementAgent"/>
-        </groupManagement>
-
-        <!--
-           This interface is responsible for handling management of a specific node in the cluster
-           The "enable" attribute indicates whether Node management has been enabled
-        -->
-        <nodeManager class="org.apache.axis2.clustering.management.DefaultNodeManager"
-                         enable="true"/>
-
-        <!--
-           This interface is responsible for handling state replication. The property changes in
-           the Axis2 context hierarchy in this node, are propagated to all other nodes in the cluster.
-
-           The "excludes" patterns can be used to specify the prefixes (e.g. local_*) or
-           suffixes (e.g. *_local) of the properties to be excluded from replication. The pattern
-           "*" indicates that all properties in a particular context should not be replicated.
-
-            The "enable" attribute indicates whether context replication has been enabled
-        -->
-        <stateManager class="org.apache.axis2.clustering.state.DefaultStateManager"
-                      enable="true">
-            <replication>
-                <defaults>
-                    <exclude name="local_*"/>
-                    <exclude name="LOCAL_*"/>
-                </defaults>
-                <context class="org.apache.axis2.context.ConfigurationContext">
-                    <exclude name="local_*"/>
-                </context>
-                <context class="org.apache.axis2.context.ServiceGroupContext">
-                    <exclude name="local_*"/>
-                </context>
-                <context class="org.apache.axis2.context.ServiceContext">
-                    <exclude name="local_*"/>
-                </context>
-            </replication>
-        </stateManager>
-    </clustering>
-
-    <!-- ================================================= -->
     <!-- Phases  -->
     <!-- ================================================= -->
     <phaseOrder type="InFlow">
-        <phase name="Transport"/>      
+        <phase name="Transport"/>
         <phase name="Logging"/>
         <phase name="Addressing"/>
         <phase name="Security"/>
@@ -360,7 +184,7 @@
                 class="org.apache.axis2.jaxws.dispatchers.GenericProviderDispatcher"/>
             <handler name="MustUnderstandValidationDispatcher"
                 class="org.apache.axis2.jaxws.dispatchers.MustUnderstandValidationDispatcher"/>
-            <handler name="HB2BDispatcher" class="org.holodeckb2b.ebms3.handlers.inflow.HolodeckB2BDispatcher"/>                            
+            <handler name="HB2BDispatcher" class="org.holodeckb2b.ebms3.handlers.inflow.HolodeckB2BDispatcher"/>
         </phase>
         <phase name="ebms3InPhase"/>
     </phaseOrder>
@@ -373,13 +197,13 @@
         <phase name="Logging"/>
     </phaseOrder>
     <phaseOrder type="InFaultFlow">
-        <phase name="Transport"/>      
+        <phase name="Transport"/>
         <phase name="Logging"/>
         <phase name="Addressing"/>
         <phase name="Security"/>
         <phase name="PreDispatch"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
-            <handler name="HB2BDispatcher" class="org.holodeckb2b.ebms3.handlers.inflow.HolodeckB2BDispatcher"/>                            
+            <handler name="HB2BDispatcher" class="org.holodeckb2b.ebms3.handlers.inflow.HolodeckB2BDispatcher"/>
         </phase>
         <phase name="ebms3InPhase"/>
     </phaseOrder>
@@ -390,6 +214,6 @@
             <handler name="HB2BIdentifier" class="org.holodeckb2b.ebms3.handlers.outflow.HTTPProductIdentifier"/>
         </phase>
         <phase name="Logging"/>
-    </phaseOrder>         
+    </phaseOrder>
 </axisconfig>
 

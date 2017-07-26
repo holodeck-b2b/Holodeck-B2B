@@ -81,29 +81,12 @@
                 <include>log4j2.xml</include>
             </includes>
         </fileSet>
-        <!-- Persistency configuration -->
-<!--        <fileSet>
-            <directory>src/main/configurations</directory>
-            <outputDirectory>holodeck-b2b-${project.version}/conf/META-INF</outputDirectory>
-            <includes>
-                <include>persistence.xml</include>
-            </includes>
-            <filtered>true</filtered>
-        </fileSet>-->
-        <!-- Core module configuration -->
-        <fileSet>
-            <directory>src/main/configurations</directory>
-            <outputDirectory>holodeck-b2b-${project.version}/repository/modules/holodeckb2b-core/META-INF</outputDirectory>
-            <includes>
-                <include>module.xml</include>
-            </includes>
-        </fileSet>
         <!-- Service configuration -->
         <fileSet>
-            <directory>src/main/configurations</directory>
-            <outputDirectory>holodeck-b2b-${project.version}/repository/services/msh/META-INF</outputDirectory>
+            <directory>target</directory>
+            <outputDirectory>holodeck-b2b-${project.version}/repository/services/</outputDirectory>
             <includes>
-                <include>services.xml</include>
+                <include>*.aar</include>
             </includes>
         </fileSet>
 
@@ -161,15 +144,8 @@
         <dependencySet>
             <outputDirectory>holodeck-b2b-${project.version}/lib</outputDirectory>
             <excludes>
-                <exclude>*:mar:*</exclude>
+                <exclude>*:pom:*</exclude>
             </excludes>
-            <scope>runtime</scope>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>holodeck-b2b-${project.version}/repository/modules</outputDirectory>
-            <includes>
-                <include>*:mar:*</include>
-            </includes>
             <scope>runtime</scope>
         </dependencySet>
     </dependencySets>
