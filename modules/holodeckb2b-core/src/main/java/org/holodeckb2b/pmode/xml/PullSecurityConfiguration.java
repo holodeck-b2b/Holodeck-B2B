@@ -17,6 +17,7 @@
 package org.holodeckb2b.pmode.xml;
 
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.core.PersistenceException;
 import org.simpleframework.xml.core.Validate;
@@ -57,7 +58,7 @@ public class PullSecurityConfiguration extends SecurityConfiguration {
      * @return          The UsernameTokenConfiguration specified specifically for this sub-channel
      */
     @Override
-    public IUsernameTokenConfiguration getUsernameTokenConfiguration(final WSSHeaderTarget target) {
+    public IUsernameTokenConfiguration getUsernameTokenConfiguration(final SecurityHeaderTarget target) {
         if (usernameTokens != null && usernameTokens.size() == 1)
             return usernameTokens.get(0);
         else

@@ -17,48 +17,29 @@
 package org.holodeckb2b.events;
 
 import java.util.Collection;
-import java.util.Collections;
-import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
-import org.holodeckb2b.common.security.PayloadDigest;
 import org.holodeckb2b.interfaces.events.types.ISignatureCreatedEvent;
+import org.holodeckb2b.interfaces.events.types.ISignatureVerifiedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.security.IPayloadDigest;
 
 /**
- * Is the implementation class of {@link ISignatureCreatedEvent} to indicate that a signature is created for a User
- * Message to be sent. The information about the digests canonly be set when the event is created and not be modified
- * afterwards.
+ * Is the implementation class of {@link ISignatureVerifiedEvent} to indicate that a signature for a received User
+ * Message is successfully verified. The information about the digests can only be set when the event is created and not
+ * be modified afterwards.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
-public class SignatureCreatedEvent extends AbstractMessageProcessingEvent implements ISignatureCreatedEvent {
-
-    private final Collection<IPayloadDigest>  digests;
+public class SignatureCreatedEvent extends AbstractSignatureProcessedEvent implements ISignatureCreatedEvent {
 
     /**
-     * Creates a new <code>SignatureCreatedEvent</code> for the given User Message and calculated payload digests.
+     * Creates a new <code>SignatureCreatedEvent</code> for the given User Message and payload digests.
      *
      * @param subject   The User Message that was signed
-     * @param digests   The information about the digests that were calculated for the payloads contained in the User
-     *                  Message
+     * @param digests   The information about the digests for the payloads that were part of the signature
      */
-    public SignatureCreatedEvent(final IUserMessage subject, final Collection<PayloadDigest> digests) {
-        super(subject);
-        this.digests = (Collection<IPayloadDigest>)
-                                    Collections.unmodifiableCollection((Collection<? extends IPayloadDigest>) digests);
-    }
-
-    /**
-     * Gets the information on the digests that were calculated for the payloads in the User Message that is the <i>
-     * subject</i> of this event.
-     *
-     * @return  A <b>unmodifiable</b> <code>Collection</code> of {@link IPayloadDigest} objects with information on the
-     *          calculated digests.
-     */
-    @Override
-    public Collection<IPayloadDigest> getPayloadDigests() {
-        return digests;
+    public SignatureCreatedEvent(final IUserMessage subject, final Collection<IPayloadDigest> digests) {
+        super(subject, digests);
     }
 
 }

@@ -17,6 +17,7 @@
 package org.holodeckb2b.common.testhelpers.pmode;
 
 import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 
 /**
  * @author Sander Fieten (sander at holodeck-b2b.org)
@@ -28,15 +29,15 @@ public class SecurityConfig implements ISecurityConfiguration {
     private EncryptionConfig        encryptionConfig;
 
     @Override
-    public UsernameTokenConfig getUsernameTokenConfiguration(WSSHeaderTarget target) {
-        if (target == WSSHeaderTarget.EBMS)
+    public UsernameTokenConfig getUsernameTokenConfiguration(SecurityHeaderTarget target) {
+        if (target == SecurityHeaderTarget.EBMS)
             return usernameTokens[1];
         else
             return usernameTokens[0];
     }
 
-    public void setUsernameTokenConfiguration(WSSHeaderTarget target, UsernameTokenConfig utConfig) {
-        if (target == WSSHeaderTarget.EBMS)
+    public void setUsernameTokenConfiguration(SecurityHeaderTarget target, UsernameTokenConfig utConfig) {
+        if (target == SecurityHeaderTarget.EBMS)
             this.usernameTokens[1] = utConfig;
         else
             this.usernameTokens[0] = utConfig;

@@ -53,7 +53,6 @@ public class Property implements IProperty {
      */
     @Override
     public String getType() {
-        // TODO this field is never written
         return this.type;
     }
 

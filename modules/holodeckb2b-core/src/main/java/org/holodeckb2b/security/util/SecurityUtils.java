@@ -18,29 +18,28 @@ package org.holodeckb2b.security.util;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.Base64;
 import java.util.Properties;
-import javax.xml.namespace.QName;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
-import org.holodeckb2b.interfaces.pmode.X509ReferenceType;
+import org.holodeckb2b.interfaces.security.ICertificateManager;
+import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
+import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
+import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
-import org.holodeckb2b.security.tokens.UsernameToken;
+import org.holodeckb2b.interfaces.security.X509ReferenceType;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is a container for general security related functions.
@@ -60,7 +59,7 @@ public class SecurityUtils {
 
 
     /**
-     * Verifies whether a WSS username token conforms to the configured values.
+     * Verifies whether a WSS username token found in the message conforms to the configured values.
      * <p>The check on nonce and created timestamp is whether they are contained in the username token as expected
      * because their actual values are dynamic. The expected password must be supplied in clear text to enable
      * recreation of the digest.
@@ -70,8 +69,11 @@ public class SecurityUtils {
      * @return          <code>true</code> if the received username token is successfully verified against the expected
      *                  username token,<br>
      *                  <code>false</code> otherwise
+     * @throws SecurityProcessingException When there is a problem in calculating the password digest value
      */
-    public static boolean verifyUsernameToken(final IUsernameTokenConfiguration expected, final UsernameToken actual) {
+    public static boolean verifyUsernameToken(final IUsernameTokenConfiguration expected,
+                                              final IUsernameTokenProcessingResult actual)
+                                                                                    throws SecurityProcessingException {
         boolean verified = false;
 
         if (expected == null && actual == null)
@@ -84,8 +86,8 @@ public class SecurityUtils {
         verified = (c == -1 || c == 0); // Both must either be empty or equal
 
         // Check for existence of created timestamp and nonce
-        verified &= (expected.includeCreated() == actual.includesCreated());
-        verified &= (expected.includeNonce() == actual.includesNonce());
+        verified &= !expected.includeCreated() || actual.getCreatedTimestamp() != null;
+        verified &= !expected.includeNonce() || !Utils.isNullOrEmpty(actual.getNonce());
 
         // Check password, starting with type
         verified &= (expected.getPasswordType() == actual.getPasswordType());
@@ -93,9 +95,8 @@ public class SecurityUtils {
         if (verified && (expected.getPasswordType() == UTPasswordType.DIGEST)) {
             // Recreate the digest based on expected password and actual created and nonce values
             // Convert to UsernameToken object to get full access
-            final String passDigest = org.apache.wss4j.dom.message.token.UsernameToken.doPasswordDigest(actual.getNonce(),
-                                                                                                actual.getCreated(),
-                                                                                                expected.getPassword());
+            final String passDigest = calculatePwdDigest(actual.getNonce(), actual.getCreatedTimestamp(),
+                                                         expected.getPassword());
             verified = passDigest.equals(actual.getPassword());
         } else if (verified) {
             // Plain text password, compare strings
@@ -107,24 +108,58 @@ public class SecurityUtils {
     }
 
     /**
+     * Calculates the password digest as specified in <a href=
+     * "http://docs.oasis-open.org/wss-m/wss/v1.1.1/os/wss-UsernameTokenProfile-v1.1.1-os.html#_Toc307415202"> section
+     * 3.1 of Web Services Security Username Token Profile Version 1.1.1</a>.
+     *
+     * @param nonce     The nonce value to include in the digest
+     * @param created   The creation timestamp to include in the digest
+     * @param password  The password itself to include in the digest
+     * @return          The calculated digest: Base64 ( SHA-1 ( nonce + created + password ) )
+     * @throws SecurityProcessingException When the input values can not be correctly transformed to a byte array or
+     *                                     when there is no SHA-1 digester available
+     * @since HB2B_NEXT_VERSION
+     */
+    private static String calculatePwdDigest(final String nonce, final String created, final String password)
+                                                                                    throws SecurityProcessingException {
+        try {
+            byte[] decodedNonce = nonce != null ? Base64.getDecoder().decode(nonce) : new byte[0];
+            byte[] bCreatedPwd  = (created + password).getBytes("UTF-8");
+            byte[] bDigestInput = new byte[decodedNonce.length + bCreatedPwd.length];
+            int offset = 0;
+            System.arraycopy(decodedNonce, 0, bDigestInput, offset, decodedNonce.length);
+            offset += decodedNonce.length;
+            System.arraycopy(bCreatedPwd, 0, bDigestInput, offset, bCreatedPwd.length);
+
+            byte[] digestBytes = MessageDigest.getInstance("SHA-1").digest(bDigestInput);
+            return Base64.getEncoder().encodeToString(digestBytes);
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
+            throw new SecurityProcessingException("Problem calculating password digest", ex);
+        }
+    }
+
+    /**
      * Verifies whether the X509 certificate used to sign the message is the one that is configured in the P-Mode.
      *
      * @param expected  The signature configuration as defined in the P-Mode
-     * @param actual    The actual certificate that was used to create the signature in the received username
+     * @param actual    The meta-data on the signature of the message
      * @return          <code>true</code> if the certificate is successfully verified against the configuration,<br>
      *                  <code>false</code> otherwise
+     * @throws SecurityProcessingException  When there is a problem to get the alias of the certificate used to create
+     *                                      the signature of the received message
+     * @since HB2B_NEXT_VERSION
      */
-    public static boolean verifySignature(final ISigningConfiguration expected,
-                                          final org.holodeckb2b.security.tokens.X509Certificate actual) {
-        final String expAlias = expected != null ? expected.getKeystoreAlias() : null;
-        final String actAlias = actual != null ? actual.getKeystoreAlias() : null;
-
-        if (expected == null && actAlias == null)
+    public static boolean verifySigningCertificate(final ISigningConfiguration expected,
+                                          final ISignatureProcessingResult actual) throws SecurityProcessingException {
+        if (expected == null)
             return true;
-        else if (actual == null)
-            return false; // A signature was expected but not there or it was created with an unknown certificate
-        else
-            return actAlias.equals(expAlias);
+
+        final String expAlias = expected.getKeystoreAlias();
+        final String actAlias = actual != null ? HolodeckB2BCore.getCertificateManager()
+                                                                .getCertificateAlias(
+                                                                        ICertificateManager.CertificateUsage.Signing,
+                                                                        actual.getSigningCertificate()) : null;
+        return expAlias.equals(actAlias);
     }
 
     /**
@@ -215,52 +250,6 @@ public class SecurityUtils {
         }
 
         return alias;
-    }
-
-    /**
-     * Gets all <code>ds:Reference</code> descendant elements from the signature in the default WS-Security header.
-     * <p>In an ebMS there may only be one <code>ds:Signature</code> element, so we can take the<code>
-     * ds:SignedInfo</code> of the first one to get access to the <code>ds:Reference</code> elements.
-     *
-     * @param mc    The {@link MessageContext} of the message to get the reference from
-     * @return      The {@link Collection} of <code>ds:Reference</code> elements contained in the signature,<br>
-     *              <code>null</code> or an empty collection if there is no signature in the default security header.
-     */
-    public static Collection<OMElement> getSignatureReferences(final MessageContext mc) {
-       // Get all WS-Security headers
-        final ArrayList<SOAPHeaderBlock> secHeaders = mc.getEnvelope().getHeader()
-                                                        .getHeaderBlocksWithNSURI(SecurityConstants.WSS_NAMESPACE_URI);
-        if (secHeaders == null || secHeaders.isEmpty())
-            return null; // No security headers in message
-
-        // There can be more than one security header, get the default header
-        SOAPHeaderBlock defHeader = null;
-        for(final SOAPHeaderBlock h : secHeaders) {
-            if (h.getRole() == null)
-                defHeader = h;
-        }
-        if (defHeader == null)
-            return null; // No default security header
-
-        // Get the ds:SignedInfo descendant in the default header.
-        final Iterator<OMElement> signatureElems = defHeader.getChildrenWithName(
-                                                          new QName(SecurityConstants.DSIG_NAMESPACE_URI, "Signature"));
-        if (signatureElems == null || !signatureElems.hasNext())
-            return null; // No Signature in default header
-
-        // The ds:SignedInfo element is the first child of ds:Signature
-        final OMElement signedInfoElement = signatureElems.next().getFirstElement();
-        // Collect all ds:Reference contained in it
-        Collection<OMElement> references = null;
-        if (signedInfoElement != null) {
-            references = new ArrayList<>();
-            for (final Iterator<OMElement> it =
-                    signedInfoElement.getChildrenWithName(new QName(SecurityConstants.DSIG_NAMESPACE_URI, "Reference"))
-                ; it.hasNext() ;)
-                references.add(it.next());
-        }
-
-        return references;
     }
 
     /**

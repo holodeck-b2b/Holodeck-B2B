@@ -23,6 +23,7 @@ import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 
 /**
  * Is a utility class that offers methods to check whether two message model objects are equal, i.e. refer to the same
@@ -122,6 +123,21 @@ public final class CompareUtils {
              Utils.nullSafeEqual (svc1.getType(), svc2.getType());
     }
 
+    /**
+     * Checks if two {@link IPayload} objects are equals, i.e. if they represent the same payload data.
+     *
+     * @param pl1   first payload
+     * @param pl2   second payload
+     * @return      <code>true</code> if the payloads are equal,
+     *              <code>false</code> otherwise
+     * @since HB2B_NEXT_VERSION
+     */
+    public static boolean areEqual(final IPayload pl1, final IPayload pl2) {
+        return Utils.nullSafeEqual(pl1.getContainment(), pl2.getContainment()) &&
+               Utils.nullSafeEqual(pl1.getPayloadURI(), pl2.getPayloadURI()) &&
+               Utils.nullSafeEqual(pl1.getContentLocation(), pl2.getContentLocation());
+    }
+    
     /*
      * This class only has static utility methods and should not be instantiated!
      */

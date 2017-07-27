@@ -14,11 +14,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.pmode;
+package org.holodeckb2b.interfaces.security;
 
 /**
- * Enumerates the methods to reference an X.509 certificate in the WS-Security header in a SOAP message. The allowed
- * methods are defined in the WS-Security X.509 Certificate Token Profile Version 1.1.1 specification, section 3.2.
+ * Enumerates the methods to reference a X.509 certificate in the WS-Security header in a SOAP message. The allowed
+ * methods are defined in the <a href=
+ * "http://docs.oasis-open.org/wss-m/wss/v1.1.1/os/wss-x509TokenProfile-v1.1.1-os.html#_Toc307416641">WS-Security X.509
+ * Certificate Token Profile Version 1.1.1 specification, section 3.2</a>.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */

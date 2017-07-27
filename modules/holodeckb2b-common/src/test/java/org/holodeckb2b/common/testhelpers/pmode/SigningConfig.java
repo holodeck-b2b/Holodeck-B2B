@@ -17,7 +17,7 @@
 package org.holodeckb2b.common.testhelpers.pmode;
 
 import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
-import org.holodeckb2b.interfaces.pmode.X509ReferenceType;
+import org.holodeckb2b.interfaces.security.X509ReferenceType;
 
 /**
  * @author Sander Fieten (sander at holodeck-b2b.org)

@@ -23,17 +23,18 @@ import java.util.List;
 import java.util.Set;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
-import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
-import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
-import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
 import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
 import org.holodeckb2b.interfaces.pmode.validation.PModeValidationError;
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.security.util.SecurityUtils;
 
 /**
@@ -145,7 +146,7 @@ public class BasicPModeValidator implements IPModeValidator {
         Collection<PModeValidationError>    errors = new ArrayList<>();
         if (parentSecurityCfg != null) {
             IUsernameTokenConfiguration utConfig =
-                        parentSecurityCfg.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.DEFAULT);
+                        parentSecurityCfg.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT);
             if (utConfig != null) {
                 if (Utils.isNullOrEmpty(utConfig.getUsername()))
                     errors.add(new PModeValidationError(parentParameterName + ".UsernameToken[default].username",
@@ -154,7 +155,7 @@ public class BasicPModeValidator implements IPModeValidator {
                     errors.add(new PModeValidationError(parentParameterName + ".UsernameToken[default].password",
                                                     "The configuration of a Username token must contain a password"));
             }
-            utConfig = parentSecurityCfg.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS);
+            utConfig = parentSecurityCfg.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS);
             if (utConfig != null) {
                 if (Utils.isNullOrEmpty(utConfig.getUsername()))
                     errors.add(new PModeValidationError(parentParameterName + ".UsernameToken[ebms].username",

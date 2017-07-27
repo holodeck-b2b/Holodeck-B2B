@@ -59,7 +59,7 @@ public class Receipt extends MessageUnit implements IReceipt {
     }
 
     public void setContent(final List<OMElement> content) {
-        setContent(content.iterator());
+        setContent(content != null ? content.iterator() : null);
     }
 
     public void setContent(final Iterator<OMElement> content) {

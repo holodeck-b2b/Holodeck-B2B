@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.interfaces.pmode;
 
+import org.holodeckb2b.interfaces.security.X509ReferenceType;
+
 
 /**
  * Defines the <i>KeyTransport</i> parameters within the encryption configuration of a P-Mode. This parameters are used

@@ -30,21 +30,29 @@ import java.util.Collection;
 public interface IEncryptionProcessingResult extends ISecurityProcessingResult {
 
     /**
-     * Gets the X509 certificate that was used for encryption of the message. This corresponds to the certificate
-     * referenced in the <code>xenc:EncryptedKey/ds:KeyInfo</code> element. Note that the certificate itself does
-     * not need to be included in the message to be returned here. It can be retrieved from the private keystore based
-     * on the reference included in the message.
+     * Gets the X509 certificate used for encryption of the message. This corresponds to the certificate referenced in
+     * the <code>xenc:EncryptedKey/ds:KeyInfo</code> element. Note that the certificate itself does not need to be
+     * included in the message to be returned here, it can be retrieved from the private keys managed by the security
+     * provider based on the reference included in the message.
      *
      * @return The certificate used for encryption.
      */
     X509Certificate getEncryptionCertificate();
 
     /**
+     * Gets the type of security token reference used to point to the certificate that includes the public key that was
+     * used to encrypt the message.
+     *
+     * @return The token reference type used
+     */
+    X509ReferenceType getCertificateReferenceType();
+
+    /**
      * Gets the <i>key transport</i> meta-data on how the <i>symmetric key</i> is included in the message.
      *
      * @return The key transport meta-data
      */
-    IEncryptedKeyInfo   getEncryptedKeyInfo();
+    IKeyTransportInfo   getKeyTransportInfo();
 
     /**
      * Gets the references to the encrypted payloads. These correspond to the URIs as specified in the <code>href</code>
@@ -65,7 +73,7 @@ public interface IEncryptionProcessingResult extends ISecurityProcessingResult {
      * @author Sander Fieten (sander at holodeck-b2b.org)
      * @since HB2B_NEXT_VERSION
      */
-    public interface IEncryptedKeyInfo {
+    public interface IKeyTransportInfo {
 
         /**
          * Gets the key transport algorithm that was used to protect the symmetric key that was used for the actual

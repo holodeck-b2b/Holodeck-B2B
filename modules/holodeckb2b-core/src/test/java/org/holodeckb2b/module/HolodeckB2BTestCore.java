@@ -57,7 +57,11 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
 
     private IMessageProcessingEventProcessor eventProcessor;
 
-    public HolodeckB2BTestCore(final String homeDir) {
+    public HolodeckB2BTestCore() {
+        this(null, null, null);
+    }
+    
+    public HolodeckB2BTestCore(String homeDir) {
         this(homeDir, null, null);
     }
 
@@ -69,7 +73,10 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
     public HolodeckB2BTestCore(final String homeDir,
                                final String pmodeValidatorClass,
                                final String pmodeStorageClass) {
-        config = new Config(homeDir, pmodeValidatorClass, pmodeStorageClass);
+        String homePath = homeDir;
+        if (Utils.isNullOrEmpty(homePath))
+            homePath = HolodeckB2BTestCore.class.getClassLoader().getResource("").getPath();
+        config = new Config(homePath, pmodeValidatorClass, pmodeStorageClass);
         pmodeSet = new InMemoryPModeSet();
         eventProcessor = new SyncEventProcessor();
         initDAOFactory();

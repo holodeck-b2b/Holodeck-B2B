@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.Map;
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.constants.SecurityConstants;
+import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IAgreement;
@@ -41,13 +41,15 @@ import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.IProtocol;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
-import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
-import org.holodeckb2b.security.tokens.IAuthenticationInfo;
-import org.holodeckb2b.security.tokens.UsernameToken;
-import org.holodeckb2b.security.tokens.X509Certificate;
+import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
+import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
+import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
+import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.security.util.SecurityUtils;
 
 /**
@@ -280,44 +282,46 @@ public class PModeFinder {
 
     /**
      * Gets the list of P-Modes for which Holodeck B2B is the responder in a pull operation for the given MPC and
-     * authentication info.
+     * authentication info which can consist of the signature and the username tokens in the security header targeted to
+     * the <i>default</i> and <i>ebms</i> role/actor.
      *
-     *
-     * @param mpc   The <i>MPC</i> that the message are exchanged on
-     * @return      A collection of {@link IPMode} objects for the P-Modes for which Holodeck B2B is the responder in
-     *              a pull operation for the given MPC
+     * @param authInfo  The authentication info included in the message.
+     * @param mpc       The <i>MPC</i> that the message are exchanged on
+     * @return          Collection of P-Modes for which Holodeck B2B is the responder in a pull operation for the given
+     *                  MPC and authentication info
+     * @throws SecurityProcessingException
      */
-    public static Collection<IPMode> findForPulling(final Map<String, IAuthenticationInfo> authInfo, final String mpc) {
+    public static Collection<IPMode> findForPulling(final Map<String, ISecurityProcessingResult> authInfo,
+                                                    final String mpc) throws SecurityProcessingException {
         final ArrayList<IPMode> pmodesForPulling = new ArrayList<>();
 
         for(final IPMode p : HolodeckB2BCoreInterface.getPModeSet().getAll()) {
             // Check if this P-Mode uses pulling with Holodeck B2B being the responder
-            final ILeg leg = p.getLegs().iterator().next();
-            if (EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(p.getMepBinding())
-               && ( leg.getProtocol() == null || leg.getProtocol().getAddress() == null )
-               ) {
-                // Leg uses pulling and Holodeck B2B is responder, check if given MPC matches P-Mode MPC defined for UM
-                if (!checkMainMPC(leg, mpc))
-                    // MPC does not match to one defined in P-Mode
-                    continue;
-
-                // Check if authentication info matches to one of the pull request flows
+            final ILeg leg = PModeUtils.getInPullRequestLeg(p);
+            if (leg != null) {
                 boolean authorized = false;
-                final ISecurityConfiguration initiatorSecCfg = p.getInitiator() == null ? null :
-                                                                            p.getInitiator().getSecurityConfiguration();
+                // Get the security configuration of the trading partner
+                ISecurityConfiguration tpSecCfg = null;
+                if (PModeUtils.isHolodeckB2BInitiator(p) && p.getResponder() != null)
+                    tpSecCfg = p.getResponder().getSecurityConfiguration();
+                else if (!PModeUtils.isHolodeckB2BInitiator(p) && p.getInitiator() != null)
+                    tpSecCfg = p.getInitiator().getSecurityConfiguration();
+
+                // Security config can also be defined per sub-channel in a PullRequestFlow, so these must be checked
+                // as well
                 final Collection<IPullRequestFlow> flows = leg.getPullRequestFlows();
-                if (flows == null || flows.isEmpty()) {
-                    // There is no specific configuration for pulling, so use security settings from initiator
-                    authorized = verifyPullRequestAuthorization(null, initiatorSecCfg, authInfo);
+                if (Utils.isNullOrEmpty(flows)) {
+                    // There is no specific configuration for pulling, so use trading partner security settings only
+                    // also means we need to check the MPC on leg level
+                    authorized = checkMainMPC(leg, mpc) && verifyPullRequestAuthorization(null, tpSecCfg, authInfo);
                 } else {
                     for (final Iterator<IPullRequestFlow> it = flows.iterator(); it.hasNext() && !authorized;) {
                         final IPullRequestFlow flow = it.next();
-                        if (checkSubMPC(flow, mpc)) {
-                            // Check if message satisfies to security config
-                            authorized = verifyPullRequestAuthorization(flow.getSecurityConfiguration(),
-                                                                        initiatorSecCfg,
+                        // Check if mpc matches to this specific PR-flow
+                        authorized = checkSubMPC(flow, mpc)
+                                     && verifyPullRequestAuthorization(flow.getSecurityConfiguration(),
+                                                                        tpSecCfg,
                                                                         authInfo);
-                        }
                     }
                 }
                 // If the info from the message is succesfully verified this P-Mode can be pulled
@@ -330,14 +334,14 @@ public class PModeFinder {
     }
 
     /**
-     * Checks if the given MPC is equal to or is a sub channel of the MPC on which user messages are exchanged for the
+     * Checks if the given MPC is equal to or a sub-channel of the MPC on which user messages are exchanged for the
      * given Leg.
      *
      * @param leg   The Leg
      * @param mpc   The mpc that must be checked
-     * @return      <code>true</code> if<br>
-     *                  an MPC is defined in the user message flow of the Leg and it is a prefix of the given MPC,<br>
-     *                  or when no MPC is defined for the user message flow,<br>
+     * @return      <code>true</code> if the given MPC starts with or is equal to the one defined in the Leg, taking
+     *              into account that a <code>null</code> value is equal to the default MPC, or if no MPC is specified
+     *              on the leg,<br>
      *              <code>false</code> otherwise
      */
     private static boolean checkMainMPC(final ILeg leg, final String mpc) {
@@ -348,10 +352,11 @@ public class PModeFinder {
             pModeMPC = null;
         }
 
-        if (pModeMPC != null && !pModeMPC.isEmpty())
-            return mpc.toLowerCase().startsWith(pModeMPC.toLowerCase());
-        else
-            return true;
+        return ((Utils.isNullOrEmpty(pModeMPC) || EbMSConstants.DEFAULT_MPC.equalsIgnoreCase(pModeMPC))
+                && ((Utils.isNullOrEmpty(mpc)) || EbMSConstants.DEFAULT_MPC.equalsIgnoreCase(mpc))
+               )
+               || (!Utils.isNullOrEmpty(pModeMPC) && !Utils.isNullOrEmpty(mpc)
+                     && mpc.toLowerCase().startsWith(pModeMPC.toLowerCase()));
     }
 
     /**
@@ -372,23 +377,23 @@ public class PModeFinder {
             pModeMPC = null;
         }
 
-        if (pModeMPC != null && !pModeMPC.isEmpty())
-            return mpc.equalsIgnoreCase(pModeMPC);
-        else
-            return true;
+        return ((Utils.isNullOrEmpty(pModeMPC) || EbMSConstants.DEFAULT_MPC.equalsIgnoreCase(pModeMPC))
+                && ((Utils.isNullOrEmpty(mpc)) || EbMSConstants.DEFAULT_MPC.equalsIgnoreCase(mpc))
+               )
+               || (!Utils.isNullOrEmpty(mpc) && mpc.equalsIgnoreCase(pModeMPC));
     }
 
     /**
-     * Helper method to verify that the required authentication defined for the pull request is correctly satisfied.
+     * Helper method to verify that the required authorization defined for the Pull Request is correctly satisfied.
      * <p>As described in the ebMS V3 Core Specification there are four option to include the authentication information
-     * for a pull request, that is using a:<ol>
+     * for a Pull Request, that is using a:<ol>
      * <li>Digital signature in the default WSS Header,</li>
      * <li>Username token in the default WSS header,</li>
      * <li>Username token in the WSS header addressed to the "ebms" actor/role,</li>
      * <li>Transfer-protocol-level identity-authentication mechanism (e.g. TLS)</li></ol>
      * Holodeck B2B supports the first three options, either on their own or as a combination. By default these settings
      * are defined on the trading partner level. But to support authentication for multiple sub-channels or only for
-     * the pull request it is possible to define the settings on the <i>pull request flow</i>. When settings are
+     * the Pull Request it is possible to define the settings on the <i>pull request flow</i>. When settings are
      * provided both at the trading partner and pull request flow the latter take precedence and will be used for the
      * verification of the supplied authentication info.
      * <p>NOTE: The pull request flow specific configuration only allows for authentication options 1 (signature in
@@ -407,33 +412,32 @@ public class PModeFinder {
      */
     private static boolean verifyPullRequestAuthorization(final ISecurityConfiguration pullSecCfg,
                                                           final ISecurityConfiguration tpSecCfg,
-                                                          final Map<String, IAuthenticationInfo> authInfo) {
+                                                          final Map<String, ISecurityProcessingResult> authInfo)
+                                                                                    throws SecurityProcessingException {
         boolean verified = true;
 
-        // If there are no security parameters specified there is authentication expected, so there should be no
+        // If there are no security parameters specified there is no authentication expected, so there should be no
         // authentication info in the message
         if (pullSecCfg == null && tpSecCfg == null)
-            return (authInfo == null || authInfo.isEmpty());
-        else if (authInfo == null || authInfo.isEmpty())
+            return Utils.isNullOrEmpty(authInfo);
+        else if (Utils.isNullOrEmpty(authInfo))
             return false;
 
         // Verify username token in ebms header, first check if pull request flow contains config for this UT
         IUsernameTokenConfiguration expectedUT = pullSecCfg == null ? null : pullSecCfg.getUsernameTokenConfiguration(
-                                                                        ISecurityConfiguration.WSSHeaderTarget.EBMS);
-        if (expectedUT == null) {
+                                                                                             SecurityHeaderTarget.EBMS);
+        if (expectedUT == null)
             // if not fall back to trading partner config
-            expectedUT = tpSecCfg == null ? null :
-                                    tpSecCfg.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS);
-        }
+            expectedUT = tpSecCfg == null ? null : tpSecCfg.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS);
 
         verified = SecurityUtils.verifyUsernameToken(expectedUT,
-                                                    (UsernameToken) authInfo.get(SecurityConstants.EBMS_USERNAMETOKEN));
+                                 (IUsernameTokenProcessingResult) authInfo.get(MessageContextProperties.EBMS_UT_RESULT));
 
         // Verify user name token in default header
         expectedUT = tpSecCfg == null ? null :
-                                tpSecCfg.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.DEFAULT);
+                                tpSecCfg.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT);
         verified &= SecurityUtils.verifyUsernameToken(expectedUT,
-                                                (UsernameToken) authInfo.get(SecurityConstants.DEFAULT_USERNAMETOKEN));
+                              (IUsernameTokenProcessingResult) authInfo.get(MessageContextProperties.DEFAULT_UT_RESULT));
 
         // Verify that the expected certificate was used for creating the signature, again start with configuration from
         // PR-flow and fall back to TP
@@ -441,8 +445,8 @@ public class PModeFinder {
         if (expectedSig == null)
             expectedSig = tpSecCfg == null ? null : tpSecCfg.getSignatureConfiguration();
 
-        verified &= SecurityUtils.verifySignature(expectedSig,
-                                                        (X509Certificate) authInfo.get(SecurityConstants.SIGNATURE));
+        verified &= SecurityUtils.verifySigningCertificate(expectedSig,
+                           (ISignatureProcessingResult) authInfo.get(MessageContextProperties.SIG_VERIFICATION_RESULT));
 
         return verified;
     }

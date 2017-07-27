@@ -36,12 +36,11 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
 public interface IPayloadDigest {
 
     /**
-     * Gets the reference to the payload this digest applies to. This is the value of the <code>URI</code> attribute of
-     * the <code>ds:Reference</code> element in the signature.
+     * Gets the payload this digest applies to.
      *
-     * @return String containing the URI that point to the payload in the MIME package.
+     * @return The payload
      */
-    String getURI();
+    IPayload getPayload();
 
     /**
      * Gets the base64 encoded digest value that was calculated for the payload. This is the value from the <code>

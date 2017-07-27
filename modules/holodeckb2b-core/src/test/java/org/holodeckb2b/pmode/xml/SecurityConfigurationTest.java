@@ -18,9 +18,9 @@ package org.holodeckb2b.pmode.xml;
 
 import java.io.File;
 import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
-import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -73,7 +73,7 @@ public class SecurityConfigurationTest {
 
             // Check the default UT
             final IUsernameTokenConfiguration defUT =
-                                sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.DEFAULT);
+                                sc.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT);
             assertNotNull(defUT);
             assertEquals("FBXBcTNKQugmw4HyW0.aM", defUT.getUsername());
             assertEquals("q2TxAH81QeG", defUT.getPassword());
@@ -83,7 +83,7 @@ public class SecurityConfigurationTest {
 
             // Check the ebms UT
             final IUsernameTokenConfiguration ebmsUT =
-                                sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS);
+                                sc.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS);
             assertNotNull(ebmsUT);
             assertEquals("DmTnJLxXFgEsuQX", ebmsUT.getUsername());
             assertEquals("ymjl8hCo0BdTvcRf", ebmsUT.getPassword());
@@ -137,12 +137,12 @@ public class SecurityConfigurationTest {
 
             // Check the default UT
             final IUsernameTokenConfiguration defUT =
-                                sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.DEFAULT);
+                                sc.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT);
             assertNull(defUT);
 
             // Check the ebms UT
             final IUsernameTokenConfiguration ebmsUT =
-                                sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS);
+                                sc.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS);
             assertNotNull(ebmsUT);
             assertEquals("DmTnJLxXFgEsuQX", ebmsUT.getUsername());
             assertEquals("ymjl8hCo0BdTvcRf", ebmsUT.getPassword());
@@ -164,8 +164,8 @@ public class SecurityConfigurationTest {
             assertNotNull(sc);
 
             // Check that there are no UT
-            assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS));
-            assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.DEFAULT));
+            assertNull(sc.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS));
+            assertNull(sc.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT));
 
             // Check the Signature config
             final ISigningConfiguration signatureCfg = sc.getSignatureConfiguration();
@@ -187,8 +187,8 @@ public class SecurityConfigurationTest {
             assertNotNull(sc);
 
             // Check that there are no UT
-            assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS));
-            assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.DEFAULT));
+            assertNull(sc.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS));
+            assertNull(sc.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT));
 
             // Check the Encryption config
             final IEncryptionConfiguration encryptionCfg = sc.getEncryptionConfiguration();
@@ -217,8 +217,8 @@ public class SecurityConfigurationTest {
             assertNotNull(sc);
 
             // Check that there are no UT
-            assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS));
-            assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.DEFAULT));
+            assertNull(sc.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS));
+            assertNull(sc.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT));
 
             // Check the Signature config
             final ISigningConfiguration signatureCfg = sc.getSignatureConfiguration();

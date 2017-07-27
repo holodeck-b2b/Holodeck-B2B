@@ -19,13 +19,11 @@ package org.holodeckb2b.pmode.helpers;
 import org.apache.wss4j.common.principal.UsernameTokenPrincipal;
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
-import org.holodeckb2b.security.tokens.UsernameToken;
 
 /**
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class UsernameTokenConfig extends UsernameToken
-        implements IUsernameTokenConfiguration {
+public class UsernameTokenConfig implements IUsernameTokenConfiguration {
 
     private String          username;
     private String          password;
@@ -33,21 +31,10 @@ public class UsernameTokenConfig extends UsernameToken
     private boolean         includeNonce;
     private boolean         includeCreated;
 
-    /**
-     * Creates a new <code>UsernameToken</code> based on a WSS4J {@link UsernameTokenPrincipal} that is read from
-     * the SOAP message.
-     *
-     * @param principal The data to construct the UsernameToken
-     */
-    public UsernameTokenConfig(UsernameTokenPrincipal principal) {
-        super(principal);
-    }
-
     public UsernameTokenConfig() {
-        super(new UsernameTokenPrincipalForTest());
     }
 
-        @Override
+    @Override
     public String getUsername() {
         return username;
     }

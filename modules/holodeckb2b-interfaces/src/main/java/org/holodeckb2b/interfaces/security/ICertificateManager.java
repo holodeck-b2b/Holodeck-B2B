@@ -56,8 +56,7 @@ public interface ICertificateManager {
      * @throws SecurityProcessingException  When there is a problem in registration of the key pair. This can be caused
      *                                      by a duplicate alias or missing information in the provided key pair.
      */
-    void registerPrivateKeyPair(final KeyStore.PrivateKeyEntry key, final String alias)
-                                                                                   throws SecurityProcessingException;
+    void registerKeyPair(final KeyStore.PrivateKeyEntry key, final String alias) throws SecurityProcessingException;
 
     /**
      * Registers a new X509v3 certificate for signature verification and/or encryption under the given alias. The alias
@@ -81,7 +80,7 @@ public interface ICertificateManager {
      *              alias
      * @throws SecurityProcessingException When there is a problem in retrieving the key pair.
      */
-    KeyStore.PrivateKeyEntry getPrivateKeyPair(final String alias) throws SecurityProcessingException;
+    KeyStore.PrivateKeyEntry getKeyPair(final String alias) throws SecurityProcessingException;
 
     /**
      * Gets the certificate registered under the given alias and for the specified usage.
@@ -95,6 +94,18 @@ public interface ICertificateManager {
     Certificate getCertificate(final CertificateUsage use, final String alias) throws SecurityProcessingException;
 
     /**
+     * Searches for the given certificate in the set of certificates registered by the certificate manager for the
+     * specified usage and returns the alias if found.
+     *
+     * @param use   The function for which the certificate can be used
+     * @param cert  The certificate to search for
+     * @return      The alias under which the certificate is registered if it was found, or<br><code>null</code> if the
+     *              certificate is not registered
+     * @throws SecurityProcessingException When there is a problem in searching for the certificate.
+     */
+    String getCertificateAlias(final CertificateUsage use, final Certificate cert) throws SecurityProcessingException;
+
+    /**
      * Removes the key pair registered under the given alias.
      * <p>NOTE: Removing a key pair should only be done when there is no active P-Mode referencing it as Holodeck B2B
      * will not be able to process messages under this P-Mode. An implementation may check that the key pair being
@@ -104,7 +115,7 @@ public interface ICertificateManager {
      * @throws SecurityProcessingException When there is a problem in retrieving the certificate. This can be caused by
      *                                     an unknown alias or the key pair still being used by a P-Mode.
      */
-    void removePrivateKeyPair(final String alias) throws SecurityProcessingException;
+    void removeKeyPair(final String alias) throws SecurityProcessingException;
 
     /**
      * Removes the certificate registered under the given alias and specified usage.

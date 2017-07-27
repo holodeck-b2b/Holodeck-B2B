@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.interfaces.security;
 
-import java.time.LocalDateTime;
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 
 /**
@@ -29,7 +28,7 @@ import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
-public interface IUsernamTokenProcessingResult extends ISecurityProcessingResult {
+public interface IUsernameTokenProcessingResult extends ISecurityProcessingResult {
 
     /**
      * Gets the timestamp that indicates when the username token was created. This corresponds to the <code>
@@ -37,7 +36,7 @@ public interface IUsernamTokenProcessingResult extends ISecurityProcessingResult
      *
      * @return  The timestamp when the username token was created
      */
-    LocalDateTime getCreated();
+    String getCreatedTimestamp();
 
     /**
      * Gets the username included in the token. This corresponds to the <code>wsse:UsernameToken/wsse:Usernam</code>

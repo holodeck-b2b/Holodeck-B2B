@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.interfaces.pmode;
 
+import org.holodeckb2b.interfaces.security.X509ReferenceType;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 
 /**

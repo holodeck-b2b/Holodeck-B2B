@@ -30,14 +30,22 @@ import java.util.Collection;
 public interface ISignatureProcessingResult extends ISecurityProcessingResult {
 
     /**
-     * Gets the X509 certificate that was used to create the signature of the message. This corresponds to the
-     * certificate referenced in the <code>ds:Signature/ds:KeyInfo</code> element. Note that the certificate itself does
-     * not need to be included in the message to be returned here. It can be retrieved from the public keystore based
-     * on the reference included in the message.
+     * Gets the X509 certificate used to create the signature of the message. This corresponds to the certificate
+     * referenced in the <code>ds:Signature/ds:KeyInfo</code> element. Note that the certificate itself does not need to
+     * be included in the message to be returned here, it can be retrieved from the private keys managed by the security
+     * provider based on the reference included in the message.
      *
      * @return The certificate used for signing.
      */
     X509Certificate getSigningCertificate();
+
+    /**
+     * Gets the type of security token reference used to point to the certificate that includes the public key that
+     * corresponds to the private key used to sign the message.
+     *
+     * @return The token reference type used
+     */
+    X509ReferenceType getCertificateReferenceType();
 
     /**
      * Gets algorithm that was used to create the signature of the message. The returned value is the algorithm

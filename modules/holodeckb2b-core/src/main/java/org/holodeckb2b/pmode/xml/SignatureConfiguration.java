@@ -17,7 +17,7 @@
 package org.holodeckb2b.pmode.xml;
 
 import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
-import org.holodeckb2b.interfaces.pmode.X509ReferenceType;
+import org.holodeckb2b.interfaces.security.X509ReferenceType;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 

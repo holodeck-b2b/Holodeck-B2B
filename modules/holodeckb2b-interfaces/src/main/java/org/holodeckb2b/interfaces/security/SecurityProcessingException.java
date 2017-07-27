@@ -17,10 +17,12 @@
 package org.holodeckb2b.interfaces.security;
 
 /**
- * Is used to indicate that an error occurred while processing (part of) the WS-Security header of a message. This
- * exception should be used only for <i>internal</i> errors in components of the security provider and not to report
- * problems with the WS-Security header. Such issues need to be reported using the applicable {@link
- * ISecurityProcessingResult} implementation.
+ * Is used to indicate that an error occurred in a generic function of the <i>security provider</i> or in a function
+ * related to the processing of (part of) the WS-Security header of a message.
+ * <p>NOTE: This exception is used both for reporting <i>internal</i> errors in components of the security provider and
+ * to report problems with the WS-Security headers themselves. In the first case the security provider MUST <b>throw</b>
+ * the exception,in the second case it SHOULD include it in the applicable {@link ISecurityProcessingResult}
+ * implementation.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION

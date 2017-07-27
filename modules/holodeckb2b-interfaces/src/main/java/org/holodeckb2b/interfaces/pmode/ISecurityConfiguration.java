@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.interfaces.pmode;
 
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
+
 /**
  * Describes the P-Mode parameters related to the security processing of messages.
  * <p>Security processing is described in section 7 of the ebMS V3 Core Specification and its related P-Mode parameter
@@ -33,17 +35,9 @@ package org.holodeckb2b.interfaces.pmode;
  * are needed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @aurhor Bram Bakx (bram at holodeck-b2b.org)
+ * @author Bram Bakx (bram at holodeck-b2b.org)
  */
 public interface ISecurityConfiguration {
-
-    /**
-     * Identifiers for the target of the WS-Security headers that can be included in an ebMS message.
-     */
-    public enum WSSHeaderTarget {
-        DEFAULT,
-        EBMS
-    }
 
     /**
      * Gets the configuration for the UsernameToken that is/should be included in the WSS header targeted at the
@@ -61,7 +55,7 @@ public interface ISecurityConfiguration {
      *          <code>null</code> when there should be no <code>wsse:UsernameToken</code> element in the security header
      *          with the specified target
      */
-    public IUsernameTokenConfiguration getUsernameTokenConfiguration(WSSHeaderTarget target);
+    public IUsernameTokenConfiguration getUsernameTokenConfiguration(SecurityHeaderTarget target);
 
     /**
      * Gets the configuration for adding or validating a Signature in the WS-Security header.
