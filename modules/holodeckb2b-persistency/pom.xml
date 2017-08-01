@@ -39,16 +39,16 @@
         <!-- The other Holodeck B2B libraries -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-common</artifactId>
+            <artifactId>holodeckb2b-interfaces</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-interfaces</artifactId>
+            <artifactId>holodeckb2b-common</artifactId>
         </dependency>
 
         <!--===============================================================
-            Hibernate is used to store configuration and message meta data
-            in database
+            Hibernate JAP framework is used to manage configuration and
+            message meta data in database. Actual storage is in Derby DB
         =============================================================== -->
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -60,10 +60,6 @@
             <artifactId>hibernate-entitymanager</artifactId>
             <version>${hibernate.version}</version>
         </dependency>
-
-        <!--===============================================================
-            For testing and "out of the box" operation Derby is used
-        =============================================================== -->
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
