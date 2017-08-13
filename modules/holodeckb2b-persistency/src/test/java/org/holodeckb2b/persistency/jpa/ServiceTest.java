@@ -23,6 +23,8 @@ import org.holodeckb2b.persistency.test.wrappers.WService;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -39,6 +41,19 @@ public class ServiceTest {
     private static final String T_SPECIAL_SERVICE_NAME = "http://holodeck-b2b.org/development/testing/Śêřvįċę/2";
 
     public ServiceTest() {
+    }
+
+    @After
+    public void tearDown() throws PersistenceException {
+        EntityManager em = null;
+        try {
+            em = EntityManagerUtil.getEntityManager();
+            em.getTransaction().begin();
+            em.createQuery("DELETE FROM WService").executeUpdate();
+            em.getTransaction().commit();
+        } finally {
+            if (em != null) em.close();
+        }
     }
 
     @BeforeClass

@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.jpa.MessageUnit;
 import org.holodeckb2b.persistency.jpa.MessageUnitProcessingState;
-import org.holodeckb2b.persistency.util.EntityManagerUtil;
+import org.holodeckb2b.persistency.test.EntityManagerUtil;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.Protocol;

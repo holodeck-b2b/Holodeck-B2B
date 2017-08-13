@@ -34,7 +34,7 @@ import org.holodeckb2b.persistency.jpa.Service;
 public class WService implements Serializable {
 
     @Id
-    @GeneratedValue
+    //@GeneratedValue
     public long id;
 
     @Embedded

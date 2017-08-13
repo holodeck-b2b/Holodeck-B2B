@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.events.types.IMessageUnitPurgedEvent;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.persistency.jpa.*;
-import org.holodeckb2b.persistency.util.EntityManagerUtil;
+import org.holodeckb2b.persistency.test.EntityManagerUtil;
 import org.junit.*;
 import org.junit.runners.MethodSorters;
 

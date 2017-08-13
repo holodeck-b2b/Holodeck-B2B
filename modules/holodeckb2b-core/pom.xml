@@ -157,6 +157,14 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-persistency</artifactId>
+            <version>next-201702-SNAPSHOT-4</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-common</artifactId>
             <version>next-201702-SNAPSHOT-4</version>
             <type>test-jar</type>
