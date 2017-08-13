@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.persistency.test;
 
-//import com.sun.xml.internal.ws.api.SOAPVersion;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPFactory;
@@ -28,7 +27,6 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.jpa.MessageUnit;
 import org.holodeckb2b.persistency.jpa.MessageUnitProcessingState;
-import org.holodeckb2b.persistency.util.EntityManagerUtil;
 
 import javax.persistence.EntityManager;
 import javax.xml.namespace.QName;

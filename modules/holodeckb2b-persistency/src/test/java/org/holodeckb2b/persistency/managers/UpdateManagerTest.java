@@ -43,7 +43,7 @@ import org.holodeckb2b.persistency.jpa.MessageUnit;
 import org.holodeckb2b.persistency.jpa.Receipt;
 import org.holodeckb2b.persistency.jpa.UserMessage;
 import org.holodeckb2b.persistency.test.TestData;
-import org.holodeckb2b.persistency.util.EntityManagerUtil;
+import org.holodeckb2b.persistency.test.EntityManagerUtil;
 import org.holodeckb2b.persistency.util.JPAEntityHelper;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;

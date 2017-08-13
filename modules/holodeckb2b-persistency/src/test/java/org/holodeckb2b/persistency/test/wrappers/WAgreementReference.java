@@ -17,11 +17,8 @@
 package org.holodeckb2b.persistency.test.wrappers;
 
 import java.io.Serializable;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+
 import org.holodeckb2b.persistency.jpa.AgreementReference;
 
 /**
@@ -34,7 +31,7 @@ import org.holodeckb2b.persistency.jpa.AgreementReference;
 public class WAgreementReference implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public long id;
 
     @Embedded
