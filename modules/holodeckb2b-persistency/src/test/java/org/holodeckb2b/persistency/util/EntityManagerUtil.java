@@ -1,4 +1,4 @@
-package org.holodeckb2b.persistency.test;
+package org.holodeckb2b.persistency.util;
 
 /**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
