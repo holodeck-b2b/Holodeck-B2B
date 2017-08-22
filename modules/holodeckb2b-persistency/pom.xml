@@ -30,6 +30,12 @@
     <artifactId>holodeckb2b-persistency</artifactId>
     <packaging>jar</packaging>
     <name>Holodeck B2B - Default Persistency Provider</name>
+    <inceptionYear>2017</inceptionYear>
+    <description>
+        This module contains the default Holodeck B2B persistency provider. It uses the Hibernate implementation
+        of the JPA framework to manage the persistency of the message meta-data. The actual storage is done in an
+        internal Derby database.
+    </description>
 
     <properties>
         <hibernate.version>5.0.9.Final</hibernate.version>
