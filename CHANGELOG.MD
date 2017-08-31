@@ -2,6 +2,20 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Added
+* Support for the _type_ attribute of both _Message_ and _Part Properties_. See
+  also [issue #2](https://issues.oasis-open.org/browse/EBXMLMSG-2) in the OASIS ebMS TC's issue tracker
+* Added the default temp directory to the distribution
+
+### Changed
+* Packaged the Holodeck B2B msh service as Axis2 aar file
+* Included the Holodeck B2B module meta-data in the Core jar file
+
+### Fixed
+* Reverted back to version 2.0.4 of Apache Santuario library to fix unknown method issue in case
+  an exception occurs in the XML security processing  
+
 ## 3.0.1
 ###### 2017-07-07
 ### Changed
