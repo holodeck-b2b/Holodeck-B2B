@@ -17,7 +17,6 @@
 package org.holodeckb2b.interfaces.pmode;
 
 import org.holodeckb2b.interfaces.security.X509ReferenceType;
-import org.holodeckb2b.interfaces.config.IConfiguration;
 
 /**
  * Defines the configuration of a WSS Signature contained in the security header of the ebMS message. Depending on
@@ -91,22 +90,6 @@ public interface ISigningConfiguration {
      *          <code>Boolean.FALSE</code> or <code>null</code>if only the end entity's certificate should be included.
      */
     public Boolean includeCertificatePath();
-
-    /**
-     * Indicates whether the possible revocation of a certificate must be checked. Only applies to configuration of
-     * signatures for incoming messages.
-     * <p>NOTE 1: When an error occurs during the revocation check the certificate will be treated as invalid resulting
-     * in rejection of the complete ebMS message and all message units contained in it. Therefor the revocation check
-     * should only be enabled if the PKI infrastructure works correctly.
-     * <p>NOTE 2: Whether the revocation must be checked is an optional setting in the P-Mode. If not configured in the
-     * P-Mode the global setting will be used.
-     *
-     * @return <code>Boolean.TRUE</code> if certificate should be checked for revocation,<br>
-     *         <code>Boolean.FALSE</code> if certificate should not be checked for revocation,<br>
-     *         <code>null</code> if global setting should be used.
-     * @see IConfiguration#shouldCheckCertificateRevocation()
-     */
-    public Boolean enableRevocationCheck();
 
     /**
      * Gets the algorithm that should be used to calculate the signature value. Only applies to configuration of
