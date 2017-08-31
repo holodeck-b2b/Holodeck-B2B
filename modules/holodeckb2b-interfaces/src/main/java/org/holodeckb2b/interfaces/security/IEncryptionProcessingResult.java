@@ -18,6 +18,7 @@ package org.holodeckb2b.interfaces.security;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 
 /**
  * Represents the results of processing of the encryption part of the WS-Security header. It provides information on the
@@ -48,6 +49,16 @@ public interface IEncryptionProcessingResult extends ISecurityProcessingResult {
     X509ReferenceType getCertificateReferenceType();
 
     /**
+     * Gets algorithm that was used to encrypt the message. The returned value is the algorithm identifier as defined in
+     * the <i>XML Encryption Syntax and Processing</i> specification and corresponds to the <code>
+     * xenc:EncryptedData/xenc:EncryptionMethod</code> elements. Although each encrypted part could use its own specific
+     * encryption algorithm it is assumed that one is used for all parts of the message.
+     *
+     * @return  The encryption algorithm
+     */
+    String getEncryptionAlgorithm();
+
+    /**
      * Gets the <i>key transport</i> meta-data on how the <i>symmetric key</i> is included in the message.
      *
      * @return The key transport meta-data
@@ -55,13 +66,11 @@ public interface IEncryptionProcessingResult extends ISecurityProcessingResult {
     IKeyTransportInfo   getKeyTransportInfo();
 
     /**
-     * Gets the references to the encrypted payloads. These correspond to the URIs as specified in the <code>href</code>
-     * attribute of the <code>eb:PartInfo</code> element of the payload. Because the encryption may replace the complete
-     * payload and assign new identifiers there may be no direct relation with references in the security header.
+     * Gets the encrypted payloads.
      *
-     * @return  List of references to the encrypted payloads
+     * @return  List of encrypted payloads
      */
-    Collection<String>  getEncryptedPayloadURIs();
+    Collection<IPayload>  getEncryptedPayloads();
 
     /**
      * Provides access to the meta-data on how the <i>symmetric key</i> is included in the WS-Security header. This

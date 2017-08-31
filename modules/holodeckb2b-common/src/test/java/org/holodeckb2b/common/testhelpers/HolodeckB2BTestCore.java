@@ -30,8 +30,7 @@ import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
- * Is utility class for testing the e-SENS connector
- * that simulates the Holodeck B2B Core.
+ * Is utility class for testing that simulates the Holodeck B2B Core.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */

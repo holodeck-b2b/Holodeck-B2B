@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.pmode.helpers;
 
-import org.apache.wss4j.common.principal.UsernameTokenPrincipal;
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
 
@@ -77,54 +76,5 @@ public class UsernameTokenConfig implements IUsernameTokenConfiguration {
 
     public void setIncludeCreated(final boolean includeCreated) {
         this.includeCreated = includeCreated;
-    }
-
-}
-
-class UsernameTokenPrincipalForTest implements UsernameTokenPrincipal {
-
-    @Override
-    public boolean isPasswordDigest() {
-        return false;
-    }
-
-    @Override
-    public String getPassword() {
-        return null;
-    }
-
-    @Override
-    public byte[] getNonce() {
-        return new byte[0];
-    }
-
-    @Override
-    public String getCreatedTime() {
-        return null;
-    }
-
-    @Override
-    public String getPasswordType() {
-        return null;
-    }
-
-    @Override
-    public boolean equals(Object another) {
-        return false;
-    }
-
-    @Override
-    public String toString() {
-        return null;
-    }
-
-    @Override
-    public int hashCode() {
-        return 0;
-    }
-
-    @Override
-    public String getName() {
-        return null;
     }
 }

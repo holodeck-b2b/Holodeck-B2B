@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.as4.handlers.inflow;
 
-import java.util.Collection;
+import java.util.Set;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
@@ -28,7 +28,6 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
-import org.holodeckb2b.interfaces.security.IPayloadDigest;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
@@ -77,10 +76,10 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
 
         // Message is signed, check that each payload has been included in the Signature
         if (!Utils.isNullOrEmpty(um.getPayloads())) {
-            Collection<IPayloadDigest> signedPayloads = signatureResult.getPayloadDigests();
+            Set<IPayload> signedPayloads = signatureResult.getPayloadDigests().keySet();
             if (!um.getPayloads().parallelStream().allMatch(
                             (mp) -> signedPayloads.parallelStream()
-                                                  .anyMatch((sp) -> areSamePayloadRef(mp, sp.getPayload())))) {
+                                                  .anyMatch((sp) -> areSamePayloadRef(mp, sp)))) {
                 log.warn("Not all payloads in user message [" + um.getMessageId() + "] are signed!");
                 // If not all payloads of  the message are signum.getMessageIded it does not conform to the AS4 requirements
                 // that all payloads should be signed. Therefore create the PolicyNoncompliance error

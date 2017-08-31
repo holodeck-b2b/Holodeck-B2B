@@ -18,19 +18,6 @@
 -->
 <!--
   This assembly builds the Holodeck B2B all-in-one distribution package.
-
-  The following parameters need to be defined for this assymbly to work:
-
-  ${project.version}  (p)   The version of the Holodeck B2B.
-
-  ${tomcat-home}      (d)   The directory where the Tomcat base installation
-                            can be found
-
-  ${axis-home}        (d)   The directory where the Axis 2 expanded WAR can be
-                            found
-
-  The properties marked (p) are defined in the pom.xml of the Holodeck parent
-  project and the ones marked (d) are defined in the distribution module pom.xml
 -->
 <assembly>
     <id>full</id>
@@ -79,6 +66,7 @@
                 <include>pulling_configuration.xml</include>
                 <include>workers.xml</include>
                 <include>log4j2.xml</include>
+                <include>securityprovider.xml</include>
             </includes>
         </fileSet>
         <!-- Persistency configuration -->
@@ -122,6 +110,14 @@
         <fileSet>
             <directory>../holodeckb2b-core/src/main/resources</directory>
             <outputDirectory>holodeck-b2b-${project.version}/repository</outputDirectory>
+            <includes>
+                <include>**/*.xsd</include>
+            </includes>
+        </fileSet>
+        <!-- From the default security provider module -->
+        <fileSet>
+            <directory>../holodeckb2b-security/src/main/resources</directory>
+            <outputDirectory>holodeck-b2b-${project.version}/repository/xsd</outputDirectory>
             <includes>
                 <include>**/*.xsd</include>
             </includes>

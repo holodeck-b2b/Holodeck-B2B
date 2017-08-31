@@ -118,30 +118,42 @@ public interface IConfiguration {
      * Gets the path to the keystore containing the private keys and related certificates that are used for signing
      * and decryption of messages.
      *
+     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
+     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
      * @return The path to the <i>"private"</i> keystore.
      */
+    @Deprecated
     String getPrivateKeyStorePath();
 
     /**
      * Gets the password for the keystore that holds the certificates with the private keys.
      *
+     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
+     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
      * @return  The password for accessing the keystore with the private keys
      */
+    @Deprecated
     String getPrivateKeyStorePassword();
 
     /**
      * Gets the path to the keystore containing the certificates (i.e. public keys) that are used for encrypting
      * messages and verification of a signed messages.
      *
+     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
+     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
      * @return The path to the <i>"public"</i> keystore.
      */
+    @Deprecated
     String getPublicKeyStorePath();
 
     /**
      * Gets the password for the keystore that holds the certificates with the public keys.
      *
+     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
+     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
      * @return  The password for accessing the keystore with the public keys
      */
+    @Deprecated
     String getPublicKeyStorePassword();
 
     /**
@@ -152,30 +164,24 @@ public interface IConfiguration {
      * partners certificate doesn't need to be registered in Holodeck B2B but can be included in the message itself
      * using a <code>BinarySecurityToken</code> element.
      *
+     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
+     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
      * @return The path to the <i>"trust"</i> keystore.
      * @since 2.1.0
      */
+    @Deprecated
     String getTrustKeyStorePath();
 
     /**
      * Gets the password for the keystore that holds the trusted CA certificates.
      *
+     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
+     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
      * @return  The password for accessing the keystore with the trusted certificates.
      * @since 2.1.0
      */
+    @Deprecated
     String getTrustKeyStorePassword();
-
-    /**
-     * Gets the global setting whether Holodeck B2B should check if a certificate is revoked. As an error that occurs
-     * during the revocation check will result in rejection of the complete ebMS message the default value is <i>false
-     * </i>. If required the revocation check can be enable in the P-Mode configuration.
-     * <p>To change the default setting for the revocation check change the value of the <i>CertificateRevocationCheck
-     * </i> parameter to <i>"true"</i>.
-     *
-     * @return <code>true</code> if the revocation of certificates should by default be checked,<br>
-     *         <code>false</code> otherwise
-     */
-    boolean shouldCheckCertificateRevocation();
 
     /**
      * Gets the global setting for whether Holodeck B2B should perform a strict validation of the ebMS header meta-data

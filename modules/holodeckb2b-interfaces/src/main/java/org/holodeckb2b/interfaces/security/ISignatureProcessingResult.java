@@ -17,7 +17,8 @@
 package org.holodeckb2b.interfaces.security;
 
 import java.security.cert.X509Certificate;
-import java.util.Collection;
+import java.util.Map;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 
 /**
  * Represents the results of processing of the signature part of the WS-Security header. It provides information on the
@@ -57,13 +58,24 @@ public interface ISignatureProcessingResult extends ISecurityProcessingResult {
     String getSignatureAlgorithm();
 
     /**
+     * Gets the information on the digest calculated for the ebMS SOAP header. This corresponds to the information
+     * in the <code>ds:Reference</code> element referencing the ebMS header.
+     * <p>NOTE: As the ebMS header is signed as a whole this digest covers the ebMS meta-data of all message units
+     * included in the messages.
+     *
+     * @return The information on the digest of the ebMS message header
+     */
+    ISignedPartMetadata getEbMSHeaderDigest();
+
+    /**
      * Gets the information on the digests of the payloads included in the message. This corresponds to the information
      * in the <code>ds:Reference</code> elements.
      * <p>NOTE: It is assumed that each payload contained in the message is signed separately, i.e. has its own <code>
      * ds:SignedInfo/ds:Reference</code> element, so the <code>URI</code> attribute of the <code>ds:Reference</code>
-     * element can be used to identify the payload.
+     * element can be used to identify the payload. When multiple XML payloads are included in the SOAP body it may not
+     * be possible to identify the individual payloads as the SOAP Body is signed as a whole.
      *
-     * @return The information on the digests of the payload
+     * @return The information on the digests of the payloads
      */
-    Collection<IPayloadDigest> getPayloadDigests();
+    Map<IPayload, ISignedPartMetadata> getPayloadDigests();
 }

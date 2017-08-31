@@ -397,15 +397,19 @@ public class MessageContextUtils {
     /**
      * Gets all User Message message units from the message.
      *
-     * @param mc    The message context
+     * @param mc    The current message context
      * @return      All User Message message units in the message
      * @since HB2B_NEXT_VERSION
      */
     public static Collection<IUserMessage> getUserMessagesFromMessage(final MessageContext mc) {
         Collection<IUserMessage> userMessages = new ArrayList<>();
-        getReceivedMessageUnits(mc).stream().filter((mu) -> (mu instanceof IUserMessage))
-                                                                .forEachOrdered((mu) -> {
-                                                                                userMessages.add((IUserMessage) mu); });
+        Collection<IMessageUnitEntity> allMsgUnits;
+        if (mc.getFLOW() == MessageContext.IN_FLOW || mc.getFLOW() == MessageContext.IN_FAULT_FLOW)
+            allMsgUnits = getReceivedMessageUnits(mc);
+        else
+            allMsgUnits = getSentMessageUnits(mc);
+        allMsgUnits.stream().filter(mu -> (mu instanceof IUserMessage))
+                            .forEachOrdered(mu -> userMessages.add((IUserMessage) mu));
         return userMessages;
     }
 }

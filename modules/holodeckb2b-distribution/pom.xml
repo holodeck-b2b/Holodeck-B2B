@@ -55,6 +55,11 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-persistency</artifactId>
         </dependency>
+        <!-- The default security provider implementation -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-security</artifactId>
+        </dependency>
         <!--===============================================================
             Second the runtime only dependencies, not declared in the
             modules

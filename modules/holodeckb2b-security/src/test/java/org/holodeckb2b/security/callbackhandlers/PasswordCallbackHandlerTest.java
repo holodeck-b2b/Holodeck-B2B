@@ -16,18 +16,12 @@
  */
 package org.holodeckb2b.security.callbackhandlers;
 
-import org.apache.wss4j.common.ext.WSPasswordCallback;
-import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.UnsupportedCallbackException;
-
+import org.apache.wss4j.common.ext.WSPasswordCallback;
 import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Created at 17:38 04.05.17
@@ -36,19 +30,7 @@ import static org.junit.Assert.*;
  */
 public class PasswordCallbackHandlerTest {
 
-    private static String baseDir;
-
-    private static HolodeckB2BTestCore core;
-
     private PasswordCallbackHandler handler;
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        baseDir = PasswordCallbackHandlerTest.class.getClassLoader()
-                .getResource("handlers").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
-    }
 
     @Before
     public void setUp() throws Exception {

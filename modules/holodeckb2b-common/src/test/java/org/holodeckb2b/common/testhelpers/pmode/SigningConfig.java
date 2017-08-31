@@ -28,7 +28,6 @@ public class SigningConfig implements ISigningConfiguration {
     private String              keyPassword;
     private X509ReferenceType   keyRefMethod;
     private Boolean             includeCertPath;
-    private Boolean             enableRevocation;
     private String              signAlgorithm;
     private String              hashAlgorithm;
 
@@ -66,15 +65,6 @@ public class SigningConfig implements ISigningConfiguration {
 
     public void setIncludeCertPath(final Boolean includePath) {
         this.includeCertPath = includePath;
-    }
-
-    @Override
-    public Boolean enableRevocationCheck() {
-        return enableRevocation;
-    }
-
-    public void setRevocationCheck(final Boolean enableRevocation) {
-        this.enableRevocation = enableRevocation;
     }
 
     @Override

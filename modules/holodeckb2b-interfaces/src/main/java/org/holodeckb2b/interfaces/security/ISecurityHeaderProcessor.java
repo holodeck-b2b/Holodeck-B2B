@@ -17,9 +17,10 @@
 package org.holodeckb2b.interfaces.security;
 
 import java.util.Collection;
+import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 
 /**
  * Defines the interface of the class responsible for the processing of the relevant WS-Security headers in a received
@@ -41,12 +42,14 @@ public interface ISecurityHeaderProcessor {
      * in both the <i>"default"</i> and <i>"ebms"</i> security headers. If payload data is not immediately
      * decrypted, the method must ensure that decryption will take place when payload is saved (and decryption errors
      * are handled correctly).
+     * <p>When the processor has successfully processed the WS-Security headers they MUST be marked as such by calling
+     * the {@link SOAPHeaderBlock#setProcessed()}. 
      *
      * @param msgContext    The Axis2 message context which should be used to get the SOAP Envelope and access to the
      *                      attachments
      * @param userMsgs      The collection of meta-data on the User Message message units contained in the message
-     * @param pmode         The P-Mode of the primary message unit which should be used to configure the security
-     *                      processing
+     * @param config        The security configuration to use for processing the WS-Security header as copied from the
+     *                      P-Mode of the primary message unit. May be <code>null</code> if P-Mode is not known.
      * @return              The result of the processing each part of the WS-Security header.
      * @throws SecurityProcessingException  When an error occurs in the <b>internal</b> processing of the processor,i.e.
      *                                      the error is not directly related to problems in the security headers
@@ -54,5 +57,5 @@ public interface ISecurityHeaderProcessor {
      *
      */
     Collection<ISecurityProcessingResult> processHeaders(MessageContext msgContext, Collection<IUserMessage> userMsgs,
-                                                         IPMode pmode) throws SecurityProcessingException;
+                                                      ISecurityConfiguration config) throws SecurityProcessingException;
 }

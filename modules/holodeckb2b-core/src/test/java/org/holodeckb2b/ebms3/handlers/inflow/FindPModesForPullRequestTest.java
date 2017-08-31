@@ -22,8 +22,6 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.pmode.xml.PModeWatcher;
 import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Created at 16:00 28.02.17
@@ -32,7 +30,7 @@ import org.mockito.junit.MockitoJUnitRunner;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-@RunWith(MockitoJUnitRunner.class)
+//@RunWith(MockitoJUnitRunner.class)
 public class FindPModesForPullRequestTest {
 //
 //    // Appender to control logging events
@@ -49,8 +47,8 @@ public class FindPModesForPullRequestTest {
 //
     @BeforeClass
     public static void setUpClass() throws Exception {
-        String baseDir = AuthorizeMessageTest.class.getClassLoader()
-                    .getResource(AuthorizeMessageTest.class.getName().replace('.', '/')).getPath();
+        String baseDir = FindPModesForPullRequestTest.class.getClassLoader()
+                    .getResource(FindPModesForPullRequestTest.class.getName().replace('.', '/')).getPath();
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
 
         // Read the set of test P-Modes

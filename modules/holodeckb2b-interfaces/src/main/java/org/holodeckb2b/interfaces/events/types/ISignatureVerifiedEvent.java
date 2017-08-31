@@ -16,9 +16,10 @@
  */
 package org.holodeckb2b.interfaces.events.types;
 
-import java.util.Collection;
+import java.util.Map;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.security.IPayloadDigest;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 
 /**
  * Is the <i>message processing event</i> that indicates that a signature of a received <b>User Message Unit</b> has
@@ -34,8 +35,7 @@ public interface ISignatureVerifiedEvent extends IMessageProcessingEvent {
      * Gets the information on the digests contained in the verified signature for the payloads of the User Message that
      * is the <i>subject</i> of this event.
      *
-     * @return  A <code>Collection</code> of {@link IPayloadDigest} objects with information on the digests included in
-     *          the signature.
+     * @return  A <code>Map</code> linking the digest meta-data to each payload from the user message.
      */
-    public Collection<IPayloadDigest>   getPayloadDigests();
+    public Map<IPayload, ISignedPartMetadata>   getPayloadDigests();
 }

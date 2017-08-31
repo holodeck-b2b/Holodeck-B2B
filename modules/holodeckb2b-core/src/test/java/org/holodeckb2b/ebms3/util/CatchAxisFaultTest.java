@@ -22,9 +22,7 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.engine.Handler;
-import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -130,13 +128,6 @@ public class CatchAxisFaultTest {
                 updateManager.storeIncomingMessageUnit(userMessage);
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
                 userMessageEntity);
-
-        OperationContext operationContext = mock(OperationContext.class);
-        when(operationContext
-                .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
-                .thenReturn(mc);
-
-        mc.setOperationContext(operationContext);
 
         Exception exception = new Exception("Some exception.");
         mc.setFailureReason(exception);

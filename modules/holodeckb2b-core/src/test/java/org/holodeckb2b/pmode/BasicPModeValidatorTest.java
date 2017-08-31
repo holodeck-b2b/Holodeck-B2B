@@ -22,7 +22,6 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.pmode.helpers.*;
-import org.holodeckb2b.security.util.SecurityUtils;
 import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -287,12 +286,6 @@ public class BasicPModeValidatorTest {
         assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
 
         sigConfig.setCertificatePassword("ExampleB");
-
-        assertTrue(SecurityUtils.isPrivateKeyAvailable(sigConfig.getKeystoreAlias(),
-                sigConfig.getCertificatePassword()));
-
-        assertEquals(sigConfig.getCertificatePassword(), "ExampleB");
-
         assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
     }
 }

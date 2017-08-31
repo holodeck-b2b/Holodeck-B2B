@@ -19,15 +19,25 @@ package org.holodeckb2b.interfaces.security;
 /**
  * Is used to indicate that an error occurred in a generic function of the <i>security provider</i> or in a function
  * related to the processing of (part of) the WS-Security header of a message.
- * <p>NOTE: This exception is used both for reporting <i>internal</i> errors in components of the security provider and
+ * <p>NOTE 1: This exception is used both for reporting <i>internal</i> errors in components of the security provider and
  * to report problems with the WS-Security headers themselves. In the first case the security provider MUST <b>throw</b>
- * the exception,in the second case it SHOULD include it in the applicable {@link ISecurityProcessingResult}
+ * the exception, in the second case it SHOULD include it in the applicable {@link ISecurityProcessingResult}
  * implementation.
+ * <p>NOTE 2: When processing the WS-Security headers of a message the <i>security provider</i> MAY check that the
+ * message conforms to defined security policies. If an a violation of the security policies is detected the exception
+ * that is used to report problems with the processing of the header will have its <i>isPolicyViolation</i> indicator
+ * set to <code>true</code>.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
+ * @see ISecurityProvider
  */
 public class SecurityProcessingException extends Exception {
+
+    /**
+     * Indicates whether the problem constitutes a violation of the security policies
+     */
+    private boolean isPolicyViolation = false;
 
     public SecurityProcessingException() {
         super();
@@ -37,7 +47,25 @@ public class SecurityProcessingException extends Exception {
         super(message);
     }
 
+    public SecurityProcessingException(final boolean isPolicyError, final String message) {
+        super(message);
+        this.isPolicyViolation = isPolicyError;
+    }
+
     public SecurityProcessingException(final String message, final Throwable cause) {
         super(message, cause);
+    }
+
+    /**
+     * Indicates whether this found error in processing of the WS-Security headers is caused by a violation of the
+     * security policies.
+     * <p>NOTE 1: This only applies to exceptions included in {@link ISecurityProcessingResult} objects.
+     * <p>NOTE 2: This indicator is only used when the <i>security provider</i> implements security policies.
+     *
+     * @return <code>true</code> if this error constitutes a violation of the security policies,<br>
+     *         <code>false</code> otherwise
+     */
+    public boolean isPolicyViolation() {
+        return isPolicyViolation;
     }
 }

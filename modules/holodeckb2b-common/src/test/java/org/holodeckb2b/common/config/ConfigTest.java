@@ -62,12 +62,5 @@ public class ConfigTest {
         assertNotNull(config.getHolodeckB2BHome());
         assertNotNull(config.getWorkerPoolCfgFile());
         assertNotNull(config.getTempDirectory());
-
-        assertNotNull(config.getPrivateKeyStorePath());
-        assertNotNull(config.getPrivateKeyStorePassword());
-        assertNotNull(config.getPublicKeyStorePath());
-        assertNotNull(config.getPublicKeyStorePassword());
-        assertNotNull(config.getTrustKeyStorePath());
-        assertNotNull(config.getTrustKeyStorePassword());
     }
 }

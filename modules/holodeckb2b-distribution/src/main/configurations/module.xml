@@ -30,13 +30,9 @@
             <order phase="Logging" phaseFirst="true"/>
         </handler>
 
-        <!-- Indicate the ebMS header is processed by Holodeck B2B -->
-        <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
-            <order phase="ebms3InPhase" phaseFirst="true"/>
-        </handler>
         <!-- Catch a raised Fault and translate it into an EbMS Error -->
         <handler name="CatchFaults" class="org.holodeckb2b.ebms3.util.CatchAxisFault">
-            <order phase="ebms3InPhase" after="ReportHeaderProcessed"/>
+            <order phase="ebms3InPhase" phaseFirst="true"/>
         </handler>
 
         <!--
@@ -145,6 +141,10 @@
         -->
         <handler name="ProcessGeneratedErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessGeneratedErrors">
             <order phase="ebms3InPhase" after="DeliverErrors"/>
+        </handler>
+        <!-- Indicate the ebMS header is processed by Holodeck B2B -->
+        <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
+            <order phase="ebms3InPhase" phaseLast="true"/>
         </handler>
     </InFlow>
 
@@ -157,13 +157,9 @@
             <order phase="Logging" phaseFirst="true"/>
         </handler>
 
-        <!-- Indicate the ebMS header is processed by Holodeck B2B -->
-        <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
-            <order phase="ebms3InPhase" phaseFirst="true"/>
-        </handler>
         <!-- Catch a raised Fault and translate it into an EbMS Error -->
         <handler name="CatchFaults" class="org.holodeckb2b.ebms3.util.CatchAxisFault">
-            <order phase="ebms3InPhase" after="ReportHeaderProcessed"/>
+            <order phase="ebms3InPhase" phaseFirst="true"/>
         </handler>
 
         <!--
@@ -271,6 +267,10 @@
         -->
         <handler name="ProcessGeneratedErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessGeneratedErrors">
             <order phase="ebms3InPhase" after="DeliverErrors"/>
+        </handler>
+        <!-- Indicate the ebMS header is processed by Holodeck B2B -->
+        <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
+            <order phase="ebms3InPhase" phaseLast="true"/>
         </handler>
     </InFaultFlow>
 

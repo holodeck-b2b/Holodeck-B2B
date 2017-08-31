@@ -16,28 +16,23 @@
  */
 package org.holodeckb2b.security.callbackhandlers;
 
+import java.net.URL;
+import java.util.List;
+import javax.activation.DataHandler;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import org.apache.axiom.attachments.Attachments;
 import org.apache.axis2.context.MessageContext;
 import org.apache.wss4j.common.ext.Attachment;
 import org.apache.wss4j.common.ext.AttachmentRequestCallback;
 import org.apache.wss4j.common.ext.AttachmentResultCallback;
 import org.holodeckb2b.common.messagemodel.Payload;
-import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import javax.activation.DataHandler;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import java.net.URL;
-import java.util.List;
-
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -49,17 +44,13 @@ public class AttachmentCallbackHandlerTest {
 
     private static String baseDir;
 
-    private static HolodeckB2BTestCore core;
-
     private MessageContext mc;
     private AttachmentCallbackHandler handler;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         baseDir = AttachmentCallbackHandlerTest.class.getClassLoader()
-                .getResource("handlers").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
+                .getResource(AttachmentCallbackHandlerTest.class.getName().replace('.', '/')).getPath();
     }
 
     @Before

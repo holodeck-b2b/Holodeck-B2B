@@ -215,7 +215,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         }
         log.debug("Using security provider: " + securityProvider.getName());
         try {
-             securityProvider.init();
+             securityProvider.init(instanceConfiguration.getHolodeckB2BHome());
         } catch (SecurityProcessingException initializationFailure) {
             log.fatal("Could not initialize the security provider " + securityProvider.getName()
                       + "! Unable to start Holodeck B2B. \n\tError details: " + initializationFailure.getMessage());

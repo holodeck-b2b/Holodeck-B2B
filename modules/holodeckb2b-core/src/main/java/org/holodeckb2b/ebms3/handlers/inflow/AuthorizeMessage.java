@@ -36,7 +36,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.pmode.PModeUtils;
-import org.holodeckb2b.security.util.SecurityUtils;
+import org.holodeckb2b.security.util.VerificationUtils;
 import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
 
 /**
@@ -118,7 +118,7 @@ public class AuthorizeMessage extends BaseHandler {
             IUsernameTokenProcessingResult utInMessage = (IUsernameTokenProcessingResult)
                                                                 mc.getProperty(MessageContextProperties.EBMS_UT_RESULT);
 
-            if (!SecurityUtils.verifyUsernameToken(utConfig, utInMessage)) {
+            if (!VerificationUtils.verifyUsernameToken(utConfig, utInMessage)) {
                 log.warn("Message unit [" + mu.getMessageId() + "] could not be authorized!");
                 handleAuthorizationFailure(mu, mc);
             } else {

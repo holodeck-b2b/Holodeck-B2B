@@ -14,25 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.ebms3.constants;
+package org.holodeckb2b.security;
 
 import javax.xml.namespace.QName;
-
-import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.WSSecurityEngineResult;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 
 /**
- * EbMSConstants used in the security related processing of the messages.
+ * Constants related to the identification of parts of the security header and messages.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since HB2B_NEXT_VERSION
  */
 public final class SecurityConstants {
-
-    /**
-     * Standard prefix for message context properties related to security. This is to avoid collision with other
-     * context properties
-     */
-    private static final String PREFIX = "hb2b-sec:";
 
     /**
      * The WS-Security namespace URI
@@ -47,83 +41,75 @@ public final class SecurityConstants {
                                 "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
 
     /**
+     * The QName for the <code>wsse:Security</code> element
+     */
+    public static final QName QNAME_WSS_HEADER = new QName(WSS_NAMESPACE_URI, "Security");
+
+    /**
      * The QName for the wsu:Id attribute defined in the WS-Security spec
      */
     public static final QName  QNAME_WSU_ID = new QName(WSU_NAMESPACE_URI, "Id");
 
     /**
-     * The namespace URI for XML Signatures
+     * The namespace URI for XML Signatures 1.0
      */
     public static final String DSIG_NAMESPACE_URI = "http://www.w3.org/2000/09/xmldsig#";
 
     /**
-     * Identifier for the default WSS header (without actor/role attribute). Used to indicate in which security header
-     * tokens were found
+     * The namespace URI for XML Encryption 1.0
      */
-    public static final String DEFAULT_WSS_HEADER = "wsse";
+    public static final String XENC_NAMESPACE_URI = "http://www.w3.org/2001/04/xmlenc#";
 
     /**
-     * Identifier for the WSS header targeted to "ebms" actor/role. Used to indicate in which security header tokens
-     * were found
+     * The namespace URI for XML Encryption 1.1
      */
-    public static final String EBMS_WSS_HEADER = "ebms";
+    public static final String XENC11_NAMESPACE_URI = "http://www.w3.org/2009/xmlenc11#";
 
     /**
-     * Indicator whether security headers must be added to this message.
+     * QName of the WS-Security header <code>ds:Signature</code> child element
      */
-    public static final String ADD_SECURITY_HEADERS = PREFIX + "create-headers";
+    public static final QName SIGNATURE_ELEM = new QName(DSIG_NAMESPACE_URI, "Signature");
 
     /**
-     * Key for including the {@link WSSecurityException} in the {@link WSSecurityEngineResult} when the processing of
-     * an element in the header fails.
+     * QName of the WS-Security header <code>xenc:EncryptedData</code> child element
      */
-    public static final String WSS_PROCESSING_FAILURE = PREFIX + "wss4j-exception";
+    public static final QName ENCRYPTED_DATA_ELEM = new QName(XENC_NAMESPACE_URI, "EncryptedData");
 
     /**
-     * Identifier for the MessageContext property that indicates that default WS-Sec header was invalid. The value of
-     * the property indicates what caused the problem.
+     * QName of the WS-Security header <code>xenc:CipherReference</code> child element
      */
-    public static final String INVALID_DEFAULT_HEADER = PREFIX + "invalid:" + DEFAULT_WSS_HEADER;
+    public static final QName CIPHER_REF_ELEM = new QName(XENC_NAMESPACE_URI, "CipherReference");
 
     /**
-     * Identifier for the MessageContext property that indicates that WS-Sec header targeted to the "ebms" role was
-     * invalid. The value of the property indicates what caused the problem. Note that currently the only fault cause
-     * can be the Username Token.
+     * QName of the WS-Security header <code>ds:Reference</code> element
      */
-    public static final String INVALID_EBMS_HEADER = PREFIX + "invalid:" + EBMS_WSS_HEADER;
+    public static final QName REFERENCE_ELEM = new QName(SecurityConstants.DSIG_NAMESPACE_URI, "Reference");
 
     /**
-     * Enumeration of fault causes in processing the WS-Security header.
+     * WSS4J identification of the ebMS Messaging header block
      */
-    public static enum WSS_FAILURES { DECRYPTION, SIGNATURE, UT, UNKNOWN }
+    public static final String WSS4J_PART_EBMS_HEADER = "{}{" + EbMSConstants.EBMS3_NS_URI + "}Messaging;";
 
     /**
-     * Identifier for the MessageContext property that holds all authentication information for the current message.
+     * WSS4J identification of the SOAP Body element in a SOAP 1.1 message
      */
-    public static final String MC_AUTHENTICATION_INFO = PREFIX + "authinfo";
-
+    public static final String WSS4J_PART_S11_BODY = "{}{http://schemas.xmlsoap.org/soap/envelope/}Body;";
     /**
-     * Identifier for the WSS UsernameToken included in the default WSS header.
+     * WSS4J identification of the SOAP Body element in a SOAP 1.2 message
      */
-    public static final String DEFAULT_USERNAMETOKEN = PREFIX + DEFAULT_WSS_HEADER + ":UsernameToken";
-
+    public static final String WSS4J_PART_S12_BODY = "{}{http://www.w3.org/2003/05/soap-envelope}Body;";
     /**
-     * Identifier for the WSS UsernameToken included in the WSS header targeted to the "ebms" role.
+     * WSS4J identification of the Username token security header element
      */
-    public static final String EBMS_USERNAMETOKEN = PREFIX + EBMS_WSS_HEADER + ":UsernameToken";
-
+    public static final String WSS4J_PART_UT = "{}{" + WSS_NAMESPACE_URI + "}UsernameToken;";
     /**
-     * Identifier for the WSS Signature info included in the WSS header
+     * WSS4J identification of the SOAP attachments
      */
-    public static final String SIGNATURE = PREFIX + "Signature";
-
+    public static final String WSS4J_PART_ATTACHMENTS = "{}cid:Attachments;";
     /**
-     * Identifier for the WSS encryption info included in the WSS header
+     * Name of the property in a {@link WSSecurityEngineResult} instance to indicate that processing of the WS-Security
+     * header failed
      */
-    public static final String ENCRYPTION = PREFIX + "Encryption";
-
-    /**
-     * Identifier for the indicator whether the SOAP Body should be encrypted
-     */
-    public static final String ENCRYPT_BODY = PREFIX + "encrypt-body";
+    public static final String WSS4J_FAILURE_INDICATION = "hb2b:def:sec:failure";
 }
+

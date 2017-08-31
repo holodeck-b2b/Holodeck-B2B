@@ -44,7 +44,9 @@
     <developers>
         <developer>
             <name>Sander Fieten</name>
-            <email>sander at chasquis-services.com</email>
+            <organization>Chasquis</organization>
+            <organizationUrl>http://chasquis-consulting.com/holodeck-b2b-support/</organizationUrl>
+            <email>sander at chasquis-consulting.com/</email>
             <roles>
                 <role>Lead developer</role>
             </roles>
@@ -232,7 +234,7 @@
             <dependency>
                 <groupId>org.apache.santuario</groupId>
                 <artifactId>xmlsec</artifactId>
-                <version>2.0.5</version>
+                <version>2.0.4</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.wss4j</groupId>

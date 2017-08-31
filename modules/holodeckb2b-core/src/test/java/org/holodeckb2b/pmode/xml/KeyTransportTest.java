@@ -16,13 +16,12 @@
  */
 package org.holodeckb2b.pmode.xml;
 
+import java.io.File;
+import org.holodeckb2b.interfaces.security.X509ReferenceType;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
-
-import java.io.File;
-
-import org.holodeckb2b.interfaces.security.X509ReferenceType;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -84,22 +83,11 @@ public class KeyTransportTest {
         try {
             final KeyTransport kt = createFromFile("keytransportNoChild.xml");
 
-            assertNull(kt);
-
-        } catch (final Exception e) {
-
-        }
-    }
-
-    /**
-     * Test MGF required for RSA-OAEP
-     */
-    @Test
-    public void testKTMGFRequired() {
-        try {
-            final KeyTransport kt = createFromFile("keytransportNoMGF_RSAOAEP.xml");
-
-            assertNull(kt);
+            assertNotNull(kt);
+            assertNull(kt.getAlgorithm());
+            assertNull(kt.getDigestAlgorithm());
+            assertNull(kt.getKeyReferenceMethod());
+            assertNull(kt.getMGFAlgorithm());
 
         } catch (final Exception e) {
 

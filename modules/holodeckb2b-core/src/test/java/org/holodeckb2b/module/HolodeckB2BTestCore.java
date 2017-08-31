@@ -30,12 +30,16 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.security.ICertificateManager;
+import org.holodeckb2b.interfaces.security.ISecurityProvider;
+import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.InMemoryPModeSet;
 import org.holodeckb2b.pmode.PModeManager;
+import org.holodeckb2b.security.DefaultProvider;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -57,10 +61,12 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
 
     private IMessageProcessingEventProcessor eventProcessor;
 
+    private ISecurityProvider securityProvider;
+
     public HolodeckB2BTestCore() {
         this(null, null, null);
     }
-    
+
     public HolodeckB2BTestCore(String homeDir) {
         this(homeDir, null, null);
     }
@@ -80,6 +86,12 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
         pmodeSet = new InMemoryPModeSet();
         eventProcessor = new SyncEventProcessor();
         initDAOFactory();
+        try {
+            securityProvider = new DefaultProvider();
+            securityProvider.init(homePath);
+        } catch (SecurityProcessingException spe) {
+            // Ignore, maybe the security provider isn't needed for the current tests
+        }
     }
 
     private void initDAOFactory() {
@@ -107,6 +119,16 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
     @Override
     StorageManager getStorageManager() {
         return new StorageManager(daoFactory.getUpdateManager());
+    }
+
+    @Override
+    ISecurityProvider getSecurityProvider() {
+        return securityProvider;
+    }
+
+    @Override
+    public ICertificateManager getCertificateManager() {
+        return securityProvider.getCertifcateManager();
     }
 
     @Override

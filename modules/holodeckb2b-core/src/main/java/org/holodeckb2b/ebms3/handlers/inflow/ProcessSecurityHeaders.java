@@ -25,16 +25,20 @@ import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.FailedAuthentication;
 import org.holodeckb2b.ebms3.errors.FailedDecryption;
+import org.holodeckb2b.ebms3.errors.PolicyNoncompliance;
 import org.holodeckb2b.events.DecryptionFailedEvent;
 import org.holodeckb2b.events.SignatureVerificationFailedEvent;
 import org.holodeckb2b.events.UTProcessingFailureEvent;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.IEncryptionProcessingResult;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderProcessor;
@@ -45,6 +49,8 @@ import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
+import org.holodeckb2b.pmode.PModeUtils;
+import org.holodeckb2b.security.util.SecurityConfig;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing the relevant WS-Security headers contained in the message.
@@ -79,25 +85,54 @@ public class ProcessSecurityHeaders extends BaseHandler {
 
         log.debug("Get P-Mode of primary message unit for settings");
         IMessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
-
         if (primaryMU == null) {
             log.debug("Message does not contain a message unit, nothing to do");
             return InvocationResponse.CONTINUE;
         }
         IPMode pmode = HolodeckB2BCore.getPModeSet().get(primaryMU.getPModeId());
-        if (pmode != null)
-            log.debug("PMode to use for security processing : " + pmode.getId());
-        else
+        SecurityConfig configuredSec = null;
+        // PullReq have not been assigned a P-Mode yet because information from the security headers is needed,
+        if (pmode == null && !(primaryMU instanceof IPullRequest))
             log.warn("No P-Mode available for security setting.");
+        else if (!(primaryMU instanceof IPullRequest)) {
+            log.debug("PMode to use for security processing : " + pmode.getId());
+            /* Now get the security config that apply to the message, may be used by the security provider to check on
+            /  security policies. This is taken from the other trading partner's security configuration since these
+            /  settings are specified at the TreadingPartner who SENDS the message. */
+            configuredSec = new SecurityConfig();
+            // We need to determine whether we are the initiator of the MEP or the responder to get the correct settings
+            final boolean initiator = PModeUtils.isHolodeckB2BInitiator(pmode);
 
+            // Get the security configuration related to signing the message and adding of username tokens.
+            final ITradingPartnerConfiguration tradingPartner = initiator ? pmode.getResponder() : pmode.getInitiator();
+            final ISecurityConfiguration partnerConfig = tradingPartner != null ?
+                                                                       tradingPartner.getSecurityConfiguration() : null;
+            if (partnerConfig != null) {
+                configuredSec.setSignatureConfiguration(partnerConfig.getSignatureConfiguration());
+                configuredSec.setUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT,
+                                             partnerConfig.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT));
+                configuredSec.setUsernameTokenConfiguration(SecurityHeaderTarget.EBMS,
+                                             partnerConfig.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS));
+            }
+            /* Get the security configuration for encryption of the message. This is taken from the "Holodeck B2B"
+            / trading partner's security configuration since the encryption settings are specified at the TradingPartner
+            / who RECEIVES the encrypted message. */
+            final ITradingPartnerConfiguration hb2bPartner = initiator ? pmode.getInitiator() : pmode.getResponder();
+            configuredSec.setEncryptionConfiguration(hb2bPartner != null
+                                                     && hb2bPartner.getSecurityConfiguration() != null ?
+                                                     hb2bPartner.getSecurityConfiguration().getEncryptionConfiguration()
+                                                   : null);
+            log.debug("Prepared security configuration based on P-Mode [" + pmode.getId()
+                        + "] of the primary message unit [" + primaryMU.getMessageId() + "]");
+        }
         // Get all User Message message units from the message
         Collection<IUserMessage> userMessages = MessageContextUtils.getUserMessagesFromMessage(mc);
 
-        // Process the availabel security headers using the installed security provider
+        // Process the available security headers using the installed security provider
         log.debug("Get security header processor from security provider");
         ISecurityHeaderProcessor hdrProcessor = HolodeckB2BCore.getSecurityProvider().getSecurityHeaderProcessor();
         log.debug("Process the available security headers in the message");
-        Collection<ISecurityProcessingResult> results = hdrProcessor.processHeaders(mc, userMessages, pmode);
+        Collection<ISecurityProcessingResult> results = hdrProcessor.processHeaders(mc, userMessages, configuredSec);
         log.debug("Security header processing finished, handle results");
         if (!Utils.isNullOrEmpty(results))
             for(ISecurityProcessingResult r : results)
@@ -146,11 +181,15 @@ public class ProcessSecurityHeaders extends BaseHandler {
                       ))
                     + " security header failed! Details: " + reason.getMessage());
             for (final IMessageUnitEntity mu : rcvdMsgUnits) {
-                EbmsError error =  decryptionFailure ? new FailedDecryption("Decryption of the message [unit] failed!")
-                                                   : new FailedAuthentication("Authentication of message unit failed!");
+                EbmsError error;
+                if (reason.isPolicyViolation())
+                    error = new PolicyNoncompliance(reason.getMessage());
+                else if (decryptionFailure)
+                    error = new FailedDecryption("Decryption of the message [unit] failed!");
+                else
+                    error = new FailedAuthentication("Authentication of message unit failed!");
                 error.setRefToMessageInError(mu.getMessageId());
                 MessageContextUtils.addGeneratedError(mc, error);
-
                 storageManager.setProcessingState(mu, ProcessingState.FAILURE);
 
                 IMessageProcessingEvent event;

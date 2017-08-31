@@ -16,13 +16,12 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import java.util.List;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.engine.Handler;
-import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -32,8 +31,6 @@ import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
@@ -45,21 +42,21 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.UserMessageFlow;
 import org.junit.*;
+import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import java.util.List;
-
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Created at 12:07 15.03.17
@@ -159,13 +156,6 @@ public class ProcessGeneratedErrorsTest {
         // Adding generated error
         MessageContextUtils.addGeneratedError(mc, error1);
 
-        // Mocking the Axis2 Operation Context
-        OperationContext operationContext = mock(OperationContext.class);
-        when(operationContext
-                .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
-                .thenReturn(mc);
-        mc.setOperationContext(operationContext);
-
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
@@ -217,13 +207,6 @@ public class ProcessGeneratedErrorsTest {
 
         // Adding generated error
         MessageContextUtils.addGeneratedError(mc, error1);
-
-        // Mocking the Axis2 Operation Context
-        OperationContext operationContext = mock(OperationContext.class);
-        when(operationContext
-                .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
-                .thenReturn(mc);
-        mc.setOperationContext(operationContext);
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
@@ -299,12 +282,6 @@ public class ProcessGeneratedErrorsTest {
         // Adding generated error
         MessageContextUtils.addGeneratedError(mc, error1);
 
-        // Mocking the Axis2 Operation Context
-        OperationContext operationContext = mock(OperationContext.class);
-        when(operationContext
-                .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
-                .thenReturn(mc);
-        mc.setOperationContext(operationContext);
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
@@ -442,6 +419,7 @@ public class ProcessGeneratedErrorsTest {
         // Setting input message property
         IUserMessageEntity userMessageEntity =
                 storageManager.storeIncomingMessageUnit(userMessage);
+        storageManager.setProcessingState(userMessageEntity, ProcessingState.FAILURE);
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
                 userMessageEntity);
 

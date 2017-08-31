@@ -51,9 +51,10 @@ public interface ISecurityProvider {
      * all its three components can be used, i.e. that all required configuration and data is available. Required
      * configuration parameters must be implemented by the security provider.
      *
+     * @param hb2bHome  Path to the Holodeck B2B home directory.
      * @throws SecurityProcessingException When the security provider can not be initialized correctly.
      */
-    void init() throws SecurityProcessingException;
+    void init(final String hb2bHome) throws SecurityProcessingException;
 
     /**
      * Gets the {@link ISecurityHeaderProcessor} of this security provider to process the WS-Security header in received

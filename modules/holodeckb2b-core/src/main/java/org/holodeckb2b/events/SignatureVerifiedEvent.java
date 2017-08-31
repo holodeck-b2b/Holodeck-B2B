@@ -16,10 +16,11 @@
  */
 package org.holodeckb2b.events;
 
-import java.util.Collection;
+import java.util.Map;
 import org.holodeckb2b.interfaces.events.types.ISignatureVerifiedEvent;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.security.IPayloadDigest;
+import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 
 /**
  * Is the implementation class of {@link ISignatureVerifiedEvent} to indicate that a signature for a received User
@@ -37,7 +38,7 @@ public class SignatureVerifiedEvent extends AbstractSignatureProcessedEvent impl
      * @param subject   The User Message that was signed
      * @param digests   The information about the digests for the payloads that were part of the signature
      */
-    public SignatureVerifiedEvent(final IUserMessage subject, final Collection<IPayloadDigest> digests) {
+    public SignatureVerifiedEvent(final IUserMessage subject, final Map<IPayload, ISignedPartMetadata> digests) {
         super(subject, digests);
     }
 

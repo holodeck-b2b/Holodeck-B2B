@@ -43,7 +43,7 @@ public interface ISecurityHeaderCreator {
      * @param msgContext    The Axis2 message context which should be used to get the SOAP Envelope and access to the
      *                      attachments
      * @param userMsgs      The collection of meta-data on the User Message message units contained in the message
-     * @param config        The security configuration to apply as derived from the P-Mode of the primary message unit
+     * @param config        The security configuration to apply as copied from the P-Mode of the primary message unit
      * @return              The result of the creating each part of the WS-Security header.
      * @throws SecurityProcessingException  When an error occurs in the <b>internal</b> processing of the creator,i.e.
      *                                      the error is not directly related to problems in the security headers to be

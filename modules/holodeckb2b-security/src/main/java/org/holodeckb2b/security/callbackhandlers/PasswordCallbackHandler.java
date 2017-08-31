@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
+ * Copyright (C) 2017 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,9 @@ package org.holodeckb2b.security.callbackhandlers;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
-
 import org.apache.wss4j.common.ext.WSPasswordCallback;
 
 /**
@@ -30,6 +28,7 @@ import org.apache.wss4j.common.ext.WSPasswordCallback;
  * configuration itself. Username password combinations should be set before WSS4J starts processing the message.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since HB2B_NEXT_VERSION
  */
 public class PasswordCallbackHandler implements CallbackHandler {
 
@@ -55,6 +54,7 @@ public class PasswordCallbackHandler implements CallbackHandler {
      * @param callbacks     An array of callbacks that should handled. This handler will only process the first callback
      * @throws UnsupportedCallbackException     When this handler is called incorrecty
      */
+    @Override
     public void handle(final Callback[] callbacks) throws UnsupportedCallbackException {
 
         if (!(callbacks[0] instanceof WSPasswordCallback))

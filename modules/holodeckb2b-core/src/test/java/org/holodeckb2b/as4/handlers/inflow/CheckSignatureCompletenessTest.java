@@ -18,8 +18,8 @@ package org.holodeckb2b.as4.handlers.inflow;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.messagemodel.Payload;
@@ -30,8 +30,8 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.security.IPayloadDigest;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
+import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.pmode.xml.PMode;
@@ -111,12 +111,9 @@ public class CheckSignatureCompletenessTest {
     public void testSignedCompletely() throws Exception {
 
         // Create complete set of digests
-        Collection<IPayloadDigest>  digestData = new HashSet<>();
-        for (IPayload p : payloads) {
-            IPayloadDigest digest = mock(IPayloadDigest.class);
-            when(digest.getPayload()).thenReturn(p);
-            digestData.add(digest);
-        }
+        Map<IPayload, ISignedPartMetadata>  digestData = new HashMap<>();
+        payloads.forEach((p) -> digestData.put(p, null));
+
         ISignatureProcessingResult  signatureResult = mock(ISignatureProcessingResult.class);
         when(signatureResult.getPayloadDigests()).thenReturn(digestData);
         mc.setProperty(MessageContextProperties.SIG_VERIFICATION_RESULT, signatureResult);
@@ -132,12 +129,10 @@ public class CheckSignatureCompletenessTest {
     @Test
     public void testUnsignedPayload() throws Exception {
         // Create complete set of digests
-        Collection<IPayloadDigest>  digestData = new HashSet<>();
+        Map<IPayload, ISignedPartMetadata>  digestData = new HashMap<>();
 
         for (int i = 0; i < payloads.size() - 1; i++) {
-            IPayloadDigest digest = mock(IPayloadDigest.class);
-            when(digest.getPayload()).thenReturn(payloads.get(i));
-            digestData.add(digest);
+            digestData.put(payloads.get(i), null);
         }
         ISignatureProcessingResult  signatureResult = mock(ISignatureProcessingResult.class);
         when(signatureResult.getPayloadDigests()).thenReturn(digestData);

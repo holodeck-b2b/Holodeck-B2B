@@ -16,11 +16,12 @@
  */
 package org.holodeckb2b.events;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.security.IPayloadDigest;
+import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 
 /**
  * Is an abstract implementation of a <i>message processing event</i> to indicate successful processing of a signature
@@ -34,7 +35,7 @@ import org.holodeckb2b.interfaces.security.IPayloadDigest;
  */
 abstract class AbstractSignatureProcessedEvent extends AbstractMessageProcessingEvent {
 
-    private final Collection<IPayloadDigest>  digests;
+    private final Map<IPayload, ISignedPartMetadata>  digests;
 
     /**
      * Creates a new <code>SignatureCreatedEvent</code> for the given User Message and calculated payload digests.
@@ -43,9 +44,10 @@ abstract class AbstractSignatureProcessedEvent extends AbstractMessageProcessing
      * @param digests   The information about the digests that were calculated for the payloads contained in the User
      *                  Message
      */
-    public AbstractSignatureProcessedEvent(final IUserMessage subject, final Collection<IPayloadDigest> digests) {
+    public AbstractSignatureProcessedEvent(final IUserMessage subject, final Map<IPayload, ISignedPartMetadata> digests)
+    {
         super(subject);
-        this.digests = (Collection<IPayloadDigest>) Collections.unmodifiableCollection(digests);
+        this.digests = (Map<IPayload, ISignedPartMetadata>) Collections.unmodifiableMap(digests);
     }
 
     /**
@@ -55,7 +57,7 @@ abstract class AbstractSignatureProcessedEvent extends AbstractMessageProcessing
      * @return  A <b>unmodifiable</b> <code>Collection</code> of {@link IPayloadDigest} objects with information on the
      *          calculated digests.
      */
-    public Collection<IPayloadDigest> getPayloadDigests() {
+    public Map<IPayload, ISignedPartMetadata> getPayloadDigests() {
         return digests;
     }
 

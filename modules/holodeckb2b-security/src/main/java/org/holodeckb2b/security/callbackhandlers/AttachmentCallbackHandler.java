@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
+ * Copyright (C) 2017 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
-
 import org.apache.axiom.attachments.Attachments;
 import org.apache.axis2.context.MessageContext;
 import org.apache.wss4j.common.ext.Attachment;
@@ -39,6 +37,7 @@ import org.apache.wss4j.common.ext.AttachmentResultCallback;
  * the WSS4J and Axis2 format.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since HB2B_NEXT_VERSION
  */
 public class AttachmentCallbackHandler implements CallbackHandler {
 
@@ -64,7 +63,7 @@ public class AttachmentCallbackHandler implements CallbackHandler {
                 final AttachmentResultCallback resultCallback = (AttachmentResultCallback) callback;
                 final Attachment resultAttachment = resultCallback.getAttachment();
 
-                // Wrap th stream from the WSS4J Attachment in a DataHandler that can be used by Axis2
+                // Wrap the stream from the WSS4J Attachment in a DataHandler that can be used by Axis2
                 final DataHandler dh = new DataHandler(new AttachmentDataSource(resultAttachment.getMimeType(),
                                                                           resultAttachment.getSourceStream()));
 
@@ -112,12 +111,12 @@ public class AttachmentCallbackHandler implements CallbackHandler {
      * Simple {@link DataSource} implementation to wrap the source stream from an WSS4J into DataHandler that can be
      * used by Axis2.
      */
-    public class AttachmentDataSource implements DataSource {
+    class AttachmentDataSource implements DataSource {
 
         private final String mimeType;
         private final InputStream ins;
 
-        public AttachmentDataSource(final String ctParam, final InputStream sourceStream) throws IOException {
+        AttachmentDataSource(final String ctParam, final InputStream sourceStream) throws IOException {
             this.mimeType = ctParam;
             ins = sourceStream;
         }

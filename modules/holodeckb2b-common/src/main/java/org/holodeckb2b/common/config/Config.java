@@ -113,11 +113,6 @@ public class Config implements InternalConfiguration {
     private String  trustKeyStorePassword = null;
 
     /*
-     * Default setting whether the revocation of a certificate should be checked
-     */
-    private boolean defaultRevocationCheck = false;
-
-    /*
      * The Axis2 configuration context that is used to process the messages
      */
     private ConfigurationContext    axisCfgCtx = null;
@@ -258,10 +253,6 @@ public class Config implements InternalConfiguration {
         // The password for the keystore holding the public keys
         trustKeyStorePassword = configFile.getParameter("TrustKeyStorePassword");
 
-        // Default setting for certificate revocation check
-        final String certRevocationCheck = configFile.getParameter("CertificateRevocationCheck");
-        defaultRevocationCheck = isTrue(certRevocationCheck);
-
         // The class name of the event processor
         messageProcessingEventProcessorClass = configFile.getParameter("MessageProcessingEventProcessor");
 
@@ -296,8 +287,7 @@ public class Config implements InternalConfiguration {
             hb2b_home_dir = null;
         }
 
-        return Utils.isNullOrEmpty(hb2b_home_dir) ? configContext.getRealPath("").getParent()
-                                                               : hb2b_home_dir;
+        return Utils.isNullOrEmpty(hb2b_home_dir) ? configContext.getRealPath("").getParent() : hb2b_home_dir;
     }
 
 
@@ -371,66 +361,77 @@ public class Config implements InternalConfiguration {
      *             (see {@link #useStrictHeaderValidation()}).
      */
     @Override
+    @Deprecated
     public boolean useStrictErrorRefCheck() {
         return useStrictErrorReferencesCheck;
     }
 
     /**
      * {@inheritDoc}
+     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
+     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
      */
     @Override
+    @Deprecated
     public String getPrivateKeyStorePath() {
         return privKeyStorePath;
     }
 
     /**
      * {@inheritDoc}
+     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
+     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
      */
     @Override
+    @Deprecated
     public String getPrivateKeyStorePassword() {
         return privKeyStorePassword;
     }
 
     /**
      * {@inheritDoc}
+     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
+     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
      */
     @Override
+    @Deprecated
     public String getPublicKeyStorePath() {
         return pubKeyStorePath;
     }
 
     /**
      * {@inheritDoc}
+     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
+     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
      */
     @Override
+    @Deprecated
     public String getPublicKeyStorePassword() {
         return pubKeyStorePassword;
     }
 
     /**
      * {@inheritDoc}
+     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
+     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
      * @since 2.1.0
      */
     @Override
+    @Deprecated
     public String getTrustKeyStorePath() {
         return trustKeyStorePath;
     }
 
     /**
      * {@inheritDoc}
+     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
+     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
      * @since 2.1.0
      */
     @Override
+    @Deprecated
     public String getTrustKeyStorePassword() {
         return trustKeyStorePassword;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean shouldCheckCertificateRevocation() {
-        return defaultRevocationCheck;
     }
 
     /**

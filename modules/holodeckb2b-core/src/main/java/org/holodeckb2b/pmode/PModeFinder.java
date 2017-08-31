@@ -50,7 +50,7 @@ import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
-import org.holodeckb2b.security.util.SecurityUtils;
+import org.holodeckb2b.security.util.VerificationUtils;
 
 /**
  * Is a helper class for finding the correct processing configuration for a {@see IMessageUnit}. This starts with
@@ -430,13 +430,13 @@ public class PModeFinder {
             // if not fall back to trading partner config
             expectedUT = tpSecCfg == null ? null : tpSecCfg.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS);
 
-        verified = SecurityUtils.verifyUsernameToken(expectedUT,
+        verified = VerificationUtils.verifyUsernameToken(expectedUT,
                                  (IUsernameTokenProcessingResult) authInfo.get(MessageContextProperties.EBMS_UT_RESULT));
 
         // Verify user name token in default header
         expectedUT = tpSecCfg == null ? null :
                                 tpSecCfg.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT);
-        verified &= SecurityUtils.verifyUsernameToken(expectedUT,
+        verified &= VerificationUtils.verifyUsernameToken(expectedUT,
                               (IUsernameTokenProcessingResult) authInfo.get(MessageContextProperties.DEFAULT_UT_RESULT));
 
         // Verify that the expected certificate was used for creating the signature, again start with configuration from
@@ -445,7 +445,7 @@ public class PModeFinder {
         if (expectedSig == null)
             expectedSig = tpSecCfg == null ? null : tpSecCfg.getSignatureConfiguration();
 
-        verified &= SecurityUtils.verifySigningCertificate(expectedSig,
+        verified &= VerificationUtils.verifySigningCertificate(expectedSig,
                            (ISignatureProcessingResult) authInfo.get(MessageContextProperties.SIG_VERIFICATION_RESULT));
 
         return verified;

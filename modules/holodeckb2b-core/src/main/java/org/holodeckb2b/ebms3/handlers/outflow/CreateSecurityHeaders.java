@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.ebms3.handlers.outflow;
 
-import java.util.ArrayList;
+import org.holodeckb2b.security.util.SecurityConfig;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,33 +25,31 @@ import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.events.DecryptionFailedEvent;
+import org.holodeckb2b.events.EncryptionFailedEvent;
 import org.holodeckb2b.events.SignatureCreatedEvent;
-import org.holodeckb2b.events.SignatureVerificationFailedEvent;
-import org.holodeckb2b.events.UTProcessingFailureEvent;
+import org.holodeckb2b.events.SigningFailedEvent;
+import org.holodeckb2b.events.UTCreationFailedEvent;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.events.types.ISignatureCreatedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
-import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
 import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
-import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.IEncryptionProcessingResult;
-import org.holodeckb2b.interfaces.security.IPayloadDigest;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderCreator;
 import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
 import org.holodeckb2b.interfaces.security.ISecurityProvider;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
+import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.module.HolodeckB2BCore;
@@ -159,15 +157,22 @@ public class CreateSecurityHeaders extends BaseHandler {
         log.debug("Get security header creator from security provider");
         ISecurityHeaderCreator hdrCreator = HolodeckB2BCore.getSecurityProvider().getSecurityHeaderCreator();
         log.debug("Create the security headers in the message");
-        Collection<ISecurityProcessingResult> results = hdrCreator.createHeaders(mc,
+        try {
+            Collection<ISecurityProcessingResult> results = hdrCreator.createHeaders(mc,
                                                                     MessageContextUtils.getUserMessagesFromMessage(mc),
                                                                     securityToUse);
-        log.debug("Security header creation finished, handle results");
-        if (!Utils.isNullOrEmpty(results))
-            for(ISecurityProcessingResult r : results)
-                handleResult(r, mc);
+            log.debug("Security header creation finished, handle results");
+            if (!Utils.isNullOrEmpty(results))
+                for(ISecurityProcessingResult r : results)
+                    handleResult(r, mc);
 
-        return InvocationResponse.CONTINUE;
+            return InvocationResponse.CONTINUE;
+        } catch (SecurityProcessingException spe) {
+            log.error("An error occurred in the security provider when creating the WSS header(s). Details:"
+                     + "\n\tSecurity provider: " + HolodeckB2BCore.getSecurityProvider().getName()
+                     + "\n\tError details: " + spe.getMessage());
+            throw spe;
+        }
     }
 
     /**
@@ -188,19 +193,20 @@ public class CreateSecurityHeaders extends BaseHandler {
             if (result instanceof ISignatureProcessingResult) {
                 // Raise the event for each user message. This requires collecting all relevant payload digests for
                 // each user message
-                final Collection<IPayloadDigest> digests = ((ISignatureProcessingResult) result).getPayloadDigests();
+                final Map<IPayload, ISignedPartMetadata> digests =
+                                                              ((ISignatureProcessingResult) result).getPayloadDigests();
                 rcvdMsgUnits.parallelStream().filter((mu) -> mu instanceof IUserMessage).forEach((mu) -> {
-                    final Collection<IPayloadDigest> msgDigests = new ArrayList<>();
+                    final Map<IPayload, ISignedPartMetadata> msgDigests = new HashMap<>();
                     ((IUserMessage) mu).getPayloads().forEach((pl)
-                            -> digests.stream().filter((d) -> CompareUtils.areEqual(d.getPayload(), pl))
-                                    .forEachOrdered((d) -> msgDigests.add(d)));
+                            -> digests.entrySet().stream().filter((d) -> CompareUtils.areEqual(d.getKey(), pl))
+                                    .forEachOrdered((d) -> msgDigests.put(d.getKey(), d.getValue())));
                     eventProcessor.raiseEvent(new SignatureCreatedEvent((IUserMessage) mu, msgDigests), mc);
                 });
             }
         } else {
             final SecurityProcessingException reason = result.getFailureReason();
             final StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-            final boolean decryptionFailure = (result instanceof IEncryptionProcessingResult);
+            final boolean encryptionFailure = (result instanceof IEncryptionProcessingResult);
             // Add warning to log so operator is always informed about problem
             log.warn("Creating the "
                     + (result instanceof ISignatureProcessingResult ? "signature"
@@ -214,53 +220,13 @@ public class CreateSecurityHeaders extends BaseHandler {
 
                 IMessageProcessingEvent event;
                 if (result instanceof ISignatureProcessingResult)
-                    event = new SignatureVerificationFailedEvent(mu, reason);
+                    event = new SigningFailedEvent(mu, reason);
                 else if (result instanceof IEncryptionProcessingResult)
-                    event = new DecryptionFailedEvent(mu, reason);
+                    event = new EncryptionFailedEvent(mu, reason);
                 else
-                    event = new UTProcessingFailureEvent(mu, result.getTargetedRole(), reason);
+                    event = new UTCreationFailedEvent(mu, result.getTargetedRole(), reason);
                 eventProcessor.raiseEvent(event, mc);
             }
-        }
-    }
-
-    /**
-     * Is a helper class to collect the security settings that must be applied to the outgoing message.
-     */
-    private static class SecurityConfig implements ISecurityConfiguration {
-
-        private Map<SecurityHeaderTarget, IUsernameTokenConfiguration> usernameTokenConfig = new HashMap<>(2);
-        private ISigningConfiguration       signingConfig;
-        private IEncryptionConfiguration    encryptionConfig;
-
-        private SecurityConfig() {
-        }
-
-        private void setUsernameTokenConfiguration(SecurityHeaderTarget target, IUsernameTokenConfiguration utConfig) {
-            usernameTokenConfig.put(target, utConfig);
-        }
-
-        @Override
-        public IUsernameTokenConfiguration getUsernameTokenConfiguration(SecurityHeaderTarget target) {
-            return usernameTokenConfig.get(target);
-        }
-
-        private void setSignatureConfiguration(ISigningConfiguration signConfig) {
-            signingConfig = signConfig;
-        }
-
-        @Override
-        public ISigningConfiguration getSignatureConfiguration() {
-            return signingConfig;
-        }
-
-        private void setEncryptionConfiguration(IEncryptionConfiguration encConfig) {
-            encryptionConfig = encConfig;
-        }
-
-        @Override
-        public IEncryptionConfiguration getEncryptionConfiguration() {
-            return encryptionConfig;
         }
     }
 }

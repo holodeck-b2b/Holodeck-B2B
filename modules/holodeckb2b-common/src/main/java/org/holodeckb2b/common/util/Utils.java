@@ -405,6 +405,41 @@ public final class Utils {
     }
 
     /**
+     * Creates a string for inclusion in logs containing the list of exceptions including their exception messages that
+     * caused the given exception.
+     * <p>The format of the generated string is with the exception message only included if one is provided by the
+     * exception:
+     * <pre>
+     * «Exception class name» : «exception message»
+     *      Caused by: «Exception class name» : «exception message»
+     *      Caused by: «Exception class name» : «exception message»
+     *      ...
+     * </pre>
+     *
+     * @param t The exception that occurred
+     * @return  The list of exceptions that caused this exception including their error message
+     * @since HB2B_NEXT_VERSION
+     */
+    public static String getExceptionTrace(final Throwable t) {
+        final StringBuffer r = new StringBuffer();
+
+        r.append(t.getClass().getSimpleName());
+        if (!isNullOrEmpty(t.getMessage()))
+            r.append(" : ").append(t.getMessage());
+        Throwable cause = t.getCause();
+        if (cause != null) {
+            do {
+                r.append('\n').append('\t').append("Caused by: ").append(cause.getClass().getSimpleName());
+                if (!isNullOrEmpty(cause.getMessage()))
+                    r.append(" : ").append(cause.getMessage());
+                cause = cause.getCause();
+            } while (cause != null);
+        }
+
+        return r.toString();
+    }
+
+    /**
      * Compare any 2 objects in a <code>null</code> safe manner. If both passed
      * objects are <code>null</code> they are interpreted as being equal. If only
      * one object is <code>null</code> they are different. If both objects are
