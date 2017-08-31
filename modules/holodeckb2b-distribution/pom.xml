@@ -100,6 +100,7 @@
                           </includes>
                         </fileSet>
                     </fileSets>
+                    <includeDependencies>false</includeDependencies>
                 </configuration>
                 <executions>
                     <execution>

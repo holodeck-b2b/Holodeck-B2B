@@ -39,7 +39,10 @@
         to make clear that you develop closed source custom extension for Holodeck B2B as long as you only use the
         interfaces as provided in this module.
     </description>
-    <organization><name>The Holodeck B2B Team</name><url>http://www.holodeck-b2b.org/team</url></organization>
+    <organization>
+        <name>The Holodeck B2B Team</name>
+        <url>http://www.holodeck-b2b.org/team</url>
+    </organization>
     <licenses>
         <license>
             <name>GNU Lesser General Public License v3</name>
@@ -50,7 +53,7 @@
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-kernel</artifactId>
-            <type>jar</type>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
