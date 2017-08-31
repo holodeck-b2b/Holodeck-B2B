@@ -66,9 +66,9 @@ public interface IUsernameTokenConfiguration {
      * it in the username token.
      *
      * @return  <code>true</code> if Nonce element must be included. This means that when validating an incoming
-     *          request a <code>wsse:Nonce</code> MUST be present and is used for detection of replay attacks.
+     *          request a <code>wsse:Nonce</code> MUST be present and MAY be used for detection of replay attacks.
      *          <code>false</code> otherwise. In this case there is no validation performed on the existence of the
-     *          <code>wsse:Nonce</code> element. It MAY occur in the UsernameToken and if it does it will be used to
+     *          <code>wsse:Nonce</code> element. It MAY occur in the UsernameToken and if it does it MAY be used to
      *          prevent replay attacks.
      */
     public boolean includeNonce();
@@ -80,9 +80,9 @@ public interface IUsernameTokenConfiguration {
      * and prevent replay attacks.
      *
      * @return  <code>true</code> if Created element must be included. This means that when validating an incoming
-     *          request a <code>wsu:Created</code> MUST be present and is also used for detection of replay attacks.
+     *          request a <code>wsu:Created</code> MUST be present and MAY also be used for detection of replay attacks.
      *          <code>false</code> otherwise. In this case there is no validation performed on the existence of the
-     *          <code>wsu:Created</code> element. It MAY occur in the UsernameToken and if it does it will be used to
+     *          <code>wsu:Created</code> element. It MAY occur in the UsernameToken and if it does it MAY be used to
      *          prevent replay attacks.
      */
     public boolean includeCreated();
