@@ -19,17 +19,14 @@ package org.holodeckb2b.pmode;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.pmode.helpers.*;
-import org.holodeckb2b.security.util.SecurityUtils;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
-
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * Tests the {@link BasicPModeValidator}
@@ -228,7 +225,7 @@ public class BasicPModeValidatorTest {
 
         // non null empty token with default header
         secConfig.setUsernameTokenConfiguration(
-                ISecurityConfiguration.WSSHeaderTarget.DEFAULT, tokenConfig);
+                SecurityHeaderTarget.DEFAULT, tokenConfig);
 
         assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
 
@@ -241,7 +238,7 @@ public class BasicPModeValidatorTest {
 
         // non null empty token with EBMS header
         secConfig.setUsernameTokenConfiguration(
-                ISecurityConfiguration.WSSHeaderTarget.EBMS, tokenConfig);
+                SecurityHeaderTarget.EBMS, tokenConfig);
 
         assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
     }
@@ -289,12 +286,6 @@ public class BasicPModeValidatorTest {
         assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
 
         sigConfig.setCertificatePassword("ExampleB");
-
-        assertTrue(SecurityUtils.isPrivateKeyAvailable(sigConfig.getKeystoreAlias(),
-                sigConfig.getCertificatePassword()));
-
-        assertEquals(sigConfig.getCertificatePassword(), "ExampleB");
-
         assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
     }
 }

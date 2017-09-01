@@ -28,7 +28,8 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.Receipt;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.ReceiptElement;
@@ -128,7 +129,7 @@ public class PackageReceiptSignalTest {
 
         ReceiptElement.createElement(headerBlock, receipt);
 
-        StorageManager updateManager = core.getStorageManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IReceiptEntity receiptEntity =
                 updateManager.storeIncomingMessageUnit(receipt);
         ArrayList<IReceiptEntity> receiptEntities = new ArrayList<>();

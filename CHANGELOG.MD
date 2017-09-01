@@ -5,26 +5,32 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 ### Added
 * Option to apply _strict_ validation of ebMS header meta-data. By default Holodeck B2B only validates
-that it is able to process the message. When applying _strict_ validation mode it will check that the header
-meta-data conforms to all requirements as stated in the ebMS Specifications.
-The use of the _strict_ validation mode can be configured both globally on Holodeck B2B instance level
-(`IConfiguation.useStrictHeaderValidation()`) or on a per P-Mode basis (`IPMode.useStrictHeaderValidation()`).
+  that it is able to process the message. When applying _strict_ validation mode it will check that the header
+  meta-data conforms to all requirements as stated in the ebMS Specifications.
+  The use of the _strict_ validation mode can be configured both globally on Holodeck B2B instance level
+  (`IConfiguation.useStrictHeaderValidation()`) or on a per P-Mode basis (`IPMode.useStrictHeaderValidation()`).
 * It is now possible to perform custom validations of _User Message_ message units before delivery to
-the _Consumer_. Depending on the configuration validation problems may result in rejection of the message
-unit and return an ebMS _Error Signal_ to the sender of the message. The configuration of the custom validation
-is done in the _User Message flow_ of the P-Mode, see
-`org.holodeckb2b.interfaces.pmode.IUserMessageFlow.getCustomValidationConfiguration()`
-*
+  the _Consumer_. Depending on the configuration validation problems may result in rejection of the message
+  unit and return an ebMS _Error Signal_ to the sender of the message. The configuration of the custom validation
+  is done in the _User Message flow_ of the P-Mode, see
+  `org.holodeckb2b.interfaces.pmode.IUserMessageFlow.getCustomValidationConfiguration()`
+* Interfaces for separation of Core functionality and processing of the WS-Security headers in a message by
+  introducing the _Holodeck B2B Security Provider_ concept
+* A default _security provider_ implementation. Similar to the older versions based on the WSS4J libraries
+  but now using seperate keystores for encryption and signature verification certificates.
 
 ### Changed
 * Refactored the validation of the ebMS header meta-data validation classes and handler
 * The ebMS Error returned to the sender in case the signature of a _User Message_ does not include all
 payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonCompliance_.
+* Moved classes in `org.holodeckb2b.interfaces.pmode.security` to `org.holodeckb2b.interfaces.pmode`
 
 ### Deprecated
 * The configuration parameter (`IConfiguation.useStrictErrorRefCheck()`) to apply a strict validation on the
- references in the Error signal is replaced by the generic strict header validation mode.
-*
+  references in the Error signal is replaced by the generic strict header validation mode.
+* The configuration parameters related to the keystores used in WS-Security processing. By enabling
+  _compatability mode_ in the new default security provider the functionality of the old version is still
+  supported.
 
 ### Removed
 

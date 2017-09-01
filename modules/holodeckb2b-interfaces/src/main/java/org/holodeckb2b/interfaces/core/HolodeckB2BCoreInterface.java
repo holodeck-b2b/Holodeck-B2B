@@ -23,6 +23,7 @@ import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.security.ICertificateManager;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
@@ -143,6 +144,18 @@ public class HolodeckB2BCoreInterface {
     public static IQueryManager getQueryManager() {
         assertInitialized();
         return coreImplementation.getQueryManager();
+    }
+
+    /**
+     * Gets the {@link ICertificateManager} of the active <i>security provider</i>. Using the certificate manager keys
+     * and certificates needed for the correct processing of messages can be managed.
+     *
+     * @return The active certificate manager
+     * @since HB2B_NEXT_VERSION
+     */
+    public static ICertificateManager getCertificateManager() {
+        assertInitialized();
+        return coreImplementation.getCertificateManager();
     }
 
    /**

@@ -88,4 +88,31 @@ public class PModeUtils {
     public static boolean doesHolodeckB2BTrigger(final ILeg leg) {
         return leg.getProtocol() != null && leg.getProtocol().getAddress() != null;
     }
+
+    /**
+     * Checks if the P-Mode has a leg that uses pulling to send a message from Holodeck B2B to the other MSH.
+     *
+     * @param pmode     The P-Mode to check
+     * @return          The {@link ILeg} that uses pulling to send the message, or<br>
+     *                  <code>null</code> if there is no such leg
+     * @since HB2B_NEXT_VERSION
+     */
+    public static ILeg getInPullRequestLeg(IPMode pmode) {
+        final List<? extends ILeg> legs = pmode.getLegs();
+        ILeg   inPullLeg = null;
+        final String mepBinding = pmode.getMepBinding();
+        switch (mepBinding) {
+            case EbMSConstants.ONE_WAY_PULL :
+            case EbMSConstants.TWO_WAY_PULL_PUSH :
+                inPullLeg = !doesHolodeckB2BTrigger(legs.get(0)) ? legs.get(0) : null; break;
+            case EbMSConstants.TWO_WAY_PUSH_PULL :
+                inPullLeg = !doesHolodeckB2BTrigger(legs.get(1)) ? legs.get(1) : null; break;
+            case EbMSConstants.TWO_WAY_PULL_PULL :
+                // If both legs use pulling the one that has no target URL defined is the leg where Holodeck B2B
+                // receives the Pull Request
+                for (int i = 0; i < 2 && inPullLeg == null; i++)
+                    inPullLeg = !doesHolodeckB2BTrigger(legs.get(i)) ? legs.get(i) : null;
+        }
+        return inPullLeg;
+    }
 }

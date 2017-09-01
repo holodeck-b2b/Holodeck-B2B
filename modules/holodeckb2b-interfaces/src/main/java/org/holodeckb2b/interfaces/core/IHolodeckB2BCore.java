@@ -24,6 +24,7 @@ import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.security.ICertificateManager;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
@@ -42,7 +43,7 @@ public interface IHolodeckB2BCore {
      *
      * @return  The current configuration as a {@link IConfiguration}
      */
-    public IConfiguration getConfiguration();
+    IConfiguration getConfiguration();
 
     /**
      * Gets a {@link IMessageDeliverer} object configured as specified by the {@link IDeliverySpecification} that can be
@@ -53,7 +54,7 @@ public interface IHolodeckB2BCore {
      * @throws MessageDeliveryException When no delivery specification is given or when the message deliverer can not
      *                                  be created
      */
-    public IMessageDeliverer getMessageDeliverer(IDeliverySpecification deliverySpec) throws MessageDeliveryException;
+    IMessageDeliverer getMessageDeliverer(IDeliverySpecification deliverySpec) throws MessageDeliveryException;
 
     /**
      * Gets a {@link IMessageSubmitter} object that can be used by the <i>Producer</i> business application for
@@ -61,7 +62,7 @@ public interface IHolodeckB2BCore {
      *
      * @return  A {@link IMessageSubmitter} object to use for submission of User Messages
      */
-    public IMessageSubmitter getMessageSubmitter();
+    IMessageSubmitter getMessageSubmitter();
 
     /**
      * Gets the set of currently configured P-Modes.
@@ -72,7 +73,7 @@ public interface IHolodeckB2BCore {
      * @return  The current set of P-Modes as a {@link IPModeSet}
      * @see IPMode
      */
-    public IPModeSet getPModeSet();
+    IPModeSet getPModeSet();
 
     /**
      * Gets the core component that is responsible for processing <i>"events"</i> that are raised while processing a
@@ -83,7 +84,7 @@ public interface IHolodeckB2BCore {
      * @return  The {@link IMessageProcessingEventProcessor} managing the event processing
      * @since 2.1.0
      */
-    public IMessageProcessingEventProcessor getEventProcessor();
+    IMessageProcessingEventProcessor getEventProcessor();
 
     /**
      * Sets the configuration of the <i>pull worker pool</i> which contains the <i>Workers</i> that are responsible for
@@ -99,8 +100,7 @@ public interface IHolodeckB2BCore {
      *                                      that the worker pool itself could not be started correctly.
      * @since 2.1.0
      */
-    public void setPullWorkerPoolConfiguration(IWorkerPoolConfiguration pullConfiguration)
-                                                                                    throws TaskConfigurationException;
+    void setPullWorkerPoolConfiguration(IWorkerPoolConfiguration pullConfiguration) throws TaskConfigurationException;
 
     /**
      * Gets the data access object that should be used to query the meta-data on processed message units.
@@ -109,5 +109,14 @@ public interface IHolodeckB2BCore {
      * @return  The {@link IQueryManager} that should use to query the meta-data of message units
      * @since  3.0.0
      */
-    public IQueryManager getQueryManager();
+    IQueryManager getQueryManager();
+
+    /**
+     * Gets the {@link ICertificateManager} of the active <i>security provider</i>. Using the certificate manager keys
+     * and certificates needed for the correct processing of messages can be managed.
+     *
+     * @return The active certificate manager
+     * @since HB2B_NEXT_VERSION
+     */
+    ICertificateManager getCertificateManager();
 }

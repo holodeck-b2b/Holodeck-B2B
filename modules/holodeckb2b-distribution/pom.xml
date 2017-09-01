@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>next-201702-SNAPSHOT-5</version>
+        <version>next-201702-SNAPSHOT-6</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -56,15 +56,15 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
         </dependency>
+        <!-- The default security provider implementation -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-security</artifactId>
+        </dependency>
         <!--===============================================================
             Second the runtime only dependencies, not declared in the
             modules
         =============================================================== -->
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <scope>runtime</scope>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>

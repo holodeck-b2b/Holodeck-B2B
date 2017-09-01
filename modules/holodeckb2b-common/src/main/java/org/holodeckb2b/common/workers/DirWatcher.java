@@ -17,9 +17,7 @@
 package org.holodeckb2b.common.workers;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.Map;
-
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
@@ -91,12 +89,9 @@ public abstract class DirWatcher extends PathWatcher {
         }
 
         final String ext = extensionFilter;
-        final File[] fileList = dir.listFiles(new FileFilter() {
-                                        @Override
-                                        public boolean accept(final File file) {
-                                            return file.isFile() && (ext != null ? file.getName().toLowerCase().endsWith("." + ext) : true);
-                                        }
-                                    });
+        final File[] fileList = dir.listFiles((final File file)
+                                            -> file.isFile()
+                                            && (ext != null ? file.getName().toLowerCase().endsWith("." + ext) : true));
 
         // Sort the retrieved file list
         Utils.sortFiles(fileList);

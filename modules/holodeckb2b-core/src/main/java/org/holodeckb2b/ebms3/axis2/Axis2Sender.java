@@ -27,7 +27,6 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.logging.Log;
-import org.holodeckb2b.axis2.Axis2Utils;
 import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;

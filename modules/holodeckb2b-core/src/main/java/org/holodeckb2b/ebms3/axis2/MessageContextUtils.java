@@ -23,6 +23,7 @@ import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
@@ -201,7 +202,8 @@ public class MessageContextUtils {
 
         try {
             final OperationContext opContext = currentMsgCtx.getOperationContext();
-            final MessageContext targetMsgContext = opContext.getMessageContext(flow == MessageContext.IN_FLOW ?
+            final MessageContext targetMsgContext = currentMsgCtx.getFLOW() == flow ? currentMsgCtx :
+                                                    opContext.getMessageContext(flow == MessageContext.IN_FLOW ?
                                                                                 WSDLConstants.MESSAGE_LABEL_IN_VALUE :
                                                                                 WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
 
@@ -390,5 +392,24 @@ public class MessageContextUtils {
             return primaryMsgUnit;
         else // no message unit in this context
             return null;
+    }
+
+    /**
+     * Gets all User Message message units from the message.
+     *
+     * @param mc    The current message context
+     * @return      All User Message message units in the message
+     * @since HB2B_NEXT_VERSION
+     */
+    public static Collection<IUserMessage> getUserMessagesFromMessage(final MessageContext mc) {
+        Collection<IUserMessage> userMessages = new ArrayList<>();
+        Collection<IMessageUnitEntity> allMsgUnits;
+        if (mc.getFLOW() == MessageContext.IN_FLOW || mc.getFLOW() == MessageContext.IN_FAULT_FLOW)
+            allMsgUnits = getReceivedMessageUnits(mc);
+        else
+            allMsgUnits = getSentMessageUnits(mc);
+        allMsgUnits.stream().filter(mu -> (mu instanceof IUserMessage))
+                            .forEachOrdered(mu -> userMessages.add((IUserMessage) mu));
+        return userMessages;
     }
 }

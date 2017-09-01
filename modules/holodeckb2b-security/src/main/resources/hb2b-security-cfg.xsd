@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<!--
+Copyright (C) 2017 The Holodeck B2B Team, Sander Fieten
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    targetNamespace="http://holodeck-b2b.org/schemas/2017/07/config/security"
+    version="HB2B_NEXT_VERSION" xmlns="http://holodeck-b2b.org/schemas/2017/07/config/security">
+    <xs:annotation>
+        <xs:documentation>This XML schema defines the structure of the configuration file of the default <i>Security
+            Provider</i> of Holodeck B2B</xs:documentation>
+    </xs:annotation>
+    <xs:element name="ProviderConfiguration" type="ProviderConfigurationType"/>
+    <xs:complexType name="ProviderConfigurationType">
+        <xs:sequence>
+            <xs:element name="CompatibilityMode" type="xs:boolean" minOccurs="0" default="false"/>
+            <xs:element name="Keystores" type="KeystoresType">
+                <xs:annotation>
+                    <xs:documentation>This element contains the information needed to access the three keystores used by Holodeck B2B's default Security Provider. </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="KeystoresType">
+        <xs:sequence>
+            <xs:element name="PrivateKeys" type="KeystoreAccessType">
+                <xs:annotation>
+                    <xs:documentation>This keystore holds the private keys and related certificates that are used for signing and decrypting of messsages.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="PublicEncryptionKeys" type="KeystoreAccessType">
+                <xs:annotation>
+                    <xs:documentation>This keystore holds the certificates with the public keys used for encryption of messsages.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="TrustedCerts" type="KeystoreAccessType">
+                <xs:annotation>
+                    <xs:documentation>This keystore holds the certificates with the public keys used for the verification of messsage signatures. This includes both the certificates used to sign the messages and the CA certficates used to validate the signing certificate.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="KeystoreAccessType">
+        <xs:sequence>
+            <xs:element name="Path" type="non-empty-string">
+                <xs:annotation>
+                    <xs:documentation>The path of the Java keystore. A relative path is will start at the Holodeck B2B home directory (see org.holodeckb2b.interfaces.config.IConfiguration.getHolodeckB2BHome())</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" name="Password" type="non-empty-string">
+                <xs:annotation>
+                    <xs:documentation>The password to access the keystore.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="non-empty-string">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+            <xs:whiteSpace value="collapse"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

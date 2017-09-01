@@ -23,7 +23,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
-import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
+import org.holodeckb2b.interfaces.security.X509ReferenceType;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;

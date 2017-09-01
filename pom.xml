@@ -23,7 +23,7 @@
     <groupId>org.holodeckb2b</groupId>
     <artifactId>holodeckb2b</artifactId>
     <packaging>pom</packaging>
-    <version>next-201702-SNAPSHOT-5</version>
+    <version>next-201702-SNAPSHOT-6</version>
     <name>Holodeck B2B</name>
     <url>http://www.holodeck-b2b.org/</url>
     <inceptionYear>2015</inceptionYear>
@@ -44,7 +44,9 @@
     <developers>
         <developer>
             <name>Sander Fieten</name>
-            <email>sander at chasquis-services.com</email>
+            <organization>Chasquis</organization>
+            <organizationUrl>http://chasquis-consulting.com/holodeck-b2b-support/</organizationUrl>
+            <email>sander at chasquis-consulting.com/</email>
             <roles>
                 <role>Lead developer</role>
             </roles>
@@ -70,13 +72,12 @@
 
     <properties>
         <!-- This version of Holodeck B2B requires at least JDK 1.7 -->
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
 
         <axis2-version>1.6.3</axis2-version>
         <axiom-version>1.2.14</axiom-version>
         <netbeans.hint.license>gpl30</netbeans.hint.license>
-        <wss4j.version>2.0.4</wss4j.version>
         <log4j.version>2.6.2</log4j.version>
     </properties>
 
@@ -84,6 +85,7 @@
         <module>modules/holodeckb2b-interfaces</module>
         <module>modules/holodeckb2b-common</module>
         <module>modules/holodeckb2b-persistency</module>
+        <module>modules/holodeckb2b-security</module>
         <module>modules/holodeckb2b-core</module>
         <module>modules/holodeckb2b-distribution</module>
         <module>modules/holodeckb2b-it</module>
@@ -98,7 +100,7 @@
 
     <dependencyManagement>
         <dependencies>
-            
+
             <!--===============================================================
                 First the modules of Holodeck B2B itself
             =============================================================== -->
@@ -115,6 +117,11 @@
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
                 <artifactId>holodeckb2b-persistency</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.holodeckb2b</groupId>
+                <artifactId>holodeckb2b-security</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -205,33 +212,6 @@
             </dependency>
 
             <!--===============================================================
-                Security libraries used to implement signing and encryption
-                of the messages.
-                The WSS4J framework is used to implement WS-Security and
-                BouncyCastle is included as security provider
-            =============================================================== -->
-            <dependency>
-                <groupId>org.apache.santuario</groupId>
-                <artifactId>xmlsec</artifactId>
-                <version>2.0.4</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.wss4j</groupId>
-                <artifactId>wss4j-ws-security-common</artifactId>
-                <version>${wss4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.wss4j</groupId>
-                <artifactId>wss4j-ws-security-dom</artifactId>
-                <version>${wss4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
-                <version>1.54</version>
-            </dependency>
-
-            <!--===============================================================
                 Log4j is used for logging in Holodeck B2B
             =============================================================== -->
             <dependency>
@@ -244,7 +224,7 @@
                 <artifactId>log4j-core</artifactId>
                 <version>${log4j.version}</version>
             </dependency>
-            
+
             <!-- Axis2 and currently also Holodeck B2B use Commons logging, so add log4j binding -->
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>

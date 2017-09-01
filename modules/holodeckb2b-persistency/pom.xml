@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>next-201702-SNAPSHOT-5</version>
+        <version>next-201702-SNAPSHOT-6</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -53,7 +53,7 @@
         </dependency>
 
         <!--===============================================================
-            Hibernate JAP framework is used to manage configuration and
+            Hibernate JPA framework is used to manage configuration and
             message meta data in database. Actual storage is in Derby DB
         =============================================================== -->
         <dependency>

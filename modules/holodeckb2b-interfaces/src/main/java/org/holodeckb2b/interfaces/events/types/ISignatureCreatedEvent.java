@@ -16,10 +16,11 @@
  */
 package org.holodeckb2b.interfaces.events.types;
 
-import java.util.Collection;
 
+import java.util.Map;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.security.IPayloadDigest;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 
 /**
  * Is the <i>message processing event</i> that indicates that a signature is created for a <b>User Message Unit</b> that
@@ -36,7 +37,7 @@ public interface ISignatureCreatedEvent extends IMessageProcessingEvent {
      * Gets the information on the digests that were calculated for the payloads in the User Message that is the <i>
      * subject</i> of this event.
      *
-     * @return  A <code>Collection</code> of {@link IPayloadDigest} objects with information on the calculated digests.
+     * @return  A <code>Map</code> linking the digest meta-data to each payload from the user message
      */
-    public Collection<IPayloadDigest>   getPayloadDigests();
+    public Map<IPayload, ISignedPartMetadata>   getPayloadDigests();
 }

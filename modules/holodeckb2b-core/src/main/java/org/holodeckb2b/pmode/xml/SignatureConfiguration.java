@@ -16,8 +16,8 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
+import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
+import org.holodeckb2b.interfaces.security.X509ReferenceType;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
@@ -34,6 +34,7 @@ public class SignatureConfiguration implements ISigningConfiguration {
     @Element(name = "KeystoreAlias")
     private KeystoreAlias keyStoreRef;
 
+    // This element is not supported anymore, but to prevent old P-Mode files from breaking it is still read
     @Element(name = "enableRevocationCheck", required = false)
     private Boolean enableRevocation = null;
 
@@ -67,11 +68,6 @@ public class SignatureConfiguration implements ISigningConfiguration {
     @Override
     public Boolean includeCertificatePath() {
         return includeCertPath;
-    }
-
-    @Override
-    public Boolean enableRevocationCheck() {
-        return enableRevocation;
     }
 
     @Override

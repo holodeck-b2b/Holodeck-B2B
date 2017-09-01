@@ -16,17 +16,16 @@
  */
 package org.holodeckb2b.pmode.xml;
 
+import java.io.File;
+import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
+import org.holodeckb2b.interfaces.security.UTPasswordType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
-
-import java.io.File;
-
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -64,11 +63,11 @@ public class PullSecurityConfigurationTest {
 
             // Check the ebms UT
             final IUsernameTokenConfiguration ebmsUT =
-                                sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS);
+                                sc.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS);
             assertNotNull(ebmsUT);
             assertEquals("DmTnJLxXFgEsuQX", ebmsUT.getUsername());
             assertEquals("ymjl8hCo0BdTvcRf", ebmsUT.getPassword());
-            assertEquals(IUsernameTokenConfiguration.PasswordType.TEXT, ebmsUT.getPasswordType());
+            assertEquals(UTPasswordType.TEXT, ebmsUT.getPasswordType());
             assertFalse(ebmsUT.includeNonce());
             assertFalse(ebmsUT.includeCreated());
 
@@ -103,11 +102,11 @@ public class PullSecurityConfigurationTest {
 
             // Check the ebms UT
             final IUsernameTokenConfiguration ebmsUT =
-                                sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS);
+                                sc.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS);
             assertNotNull(ebmsUT);
             assertEquals("DmTnJLxXFgEsuQX", ebmsUT.getUsername());
             assertEquals("ymjl8hCo0BdTvcRf", ebmsUT.getPassword());
-            assertEquals(IUsernameTokenConfiguration.PasswordType.TEXT, ebmsUT.getPasswordType());
+            assertEquals(UTPasswordType.TEXT, ebmsUT.getPasswordType());
             assertFalse(ebmsUT.includeNonce());
             assertFalse(ebmsUT.includeCreated());
 
@@ -127,8 +126,8 @@ public class PullSecurityConfigurationTest {
             assertNotNull(sc);
 
             // Check that there are no UT
-            assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS));
-            assertNull(sc.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.DEFAULT));
+            assertNull(sc.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS));
+            assertNull(sc.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT));
 
             // Check the Signature config
             final ISigningConfiguration signatureCfg = sc.getSignatureConfiguration();

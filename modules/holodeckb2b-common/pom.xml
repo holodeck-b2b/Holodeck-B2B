@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>next-201702-SNAPSHOT-5</version>
+        <version>next-201702-SNAPSHOT-6</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -51,12 +51,6 @@
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
-        </dependency>
-
-        <!-- Santuario is used to convert between Axiom and DOM XML -->
-        <dependency>
-            <groupId>org.apache.santuario</groupId>
-            <artifactId>xmlsec</artifactId>
         </dependency>
 
         <!-- Dependencies specific for testing -->

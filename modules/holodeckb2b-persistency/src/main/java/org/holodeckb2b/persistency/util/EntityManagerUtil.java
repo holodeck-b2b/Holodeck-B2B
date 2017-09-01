@@ -182,4 +182,18 @@ public class EntityManagerUtil {
            throw new PersistenceException("Error while creating the EntityManager", e);
        }
     }
+
+    /**
+     * Checks whether the EntityManager can be successfully intialized.
+     *
+     * @throws PersistenceException If there is an issue intializing the EntityManager
+     */
+    public static void check() throws PersistenceException {
+        try {
+            SingletonHolder.instance.isOpen();
+        } catch (final Throwable t) {
+            // Seems something went wrong in opening the database connnection
+            throw new PersistenceException("The database cannot be initialized successfully!", t);
+        }
+    }
 }

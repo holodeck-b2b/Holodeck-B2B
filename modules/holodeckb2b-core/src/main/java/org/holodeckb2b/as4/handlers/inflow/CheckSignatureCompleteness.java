@@ -16,26 +16,20 @@
  */
 package org.holodeckb2b.as4.handlers.inflow;
 
-import java.util.Collection;
-import java.util.Iterator;
-import javax.xml.namespace.QName;
-import org.apache.axiom.om.OMAttribute;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPBody;
+import java.util.Set;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.SecurityConstants;
+import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.PolicyNoncompliance;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.security.util.SecurityUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler that checks whether all payloads in the user message are signed. That all payloads
@@ -73,99 +67,42 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
             return InvocationResponse.CONTINUE;
         }
 
-        // Check for signed message by retrieving the ds:References from the signature
-        final Collection<OMElement> references = SecurityUtils.getSignatureReferences(mc);
-        if (Utils.isNullOrEmpty(references))
+        // Check if received message was signed
+        final ISignatureProcessingResult signatureResult =
+                          (ISignatureProcessingResult) mc.getProperty(MessageContextProperties.SIG_VERIFICATION_RESULT);
+        if (signatureResult == null)
             // No Signature, nothing to check
             return InvocationResponse.CONTINUE;
 
-        // Message is signed, check that each payload has a ds:Reference in the Signature
-        boolean allRefd = true;
+        // Message is signed, check that each payload has been included in the Signature
         if (!Utils.isNullOrEmpty(um.getPayloads())) {
-            for(final IPayload payload : um.getPayloads()) {
-                String plRef = payload.getPayloadURI();
-                // If the payload has no reference the SOAP Body is implicitly referenced. So set the reference to the id
-                // from de Body element
-                if (plRef == null || plRef.isEmpty())
-                    plRef = getSOAPBodyIdRef(mc);
-                else {
-                    // Add prefix to the reference
-                    switch (payload.getContainment()) {
-                        case BODY :
-                            plRef = "#" + plRef; break;
-                        case ATTACHMENT :
-                            plRef = "cid:" + plRef;
-                    }
-                }
-                boolean found = false;
-                for(final Iterator<OMElement> it = references.iterator(); it.hasNext() && !found ; ) {
-                    final OMElement ref = it.next();
-                    found = plRef.equals(ref.getAttributeValue(new QName("URI")));
-                }
-                allRefd &= found;
-                if (!found) {
-                    log.warn("Payload with reference [" + plRef + "] is not signed in user message ["
-                                + um.getMessageId() + "]");
-                    // If no ds:Reference is found for this payload the message does not conform to the AS4 requirements
-                    // that all payloads should be signed. Therefore create the PolicyNoncompliance error
-                    createPolicyNoncomplianceError(mc, um.getMessageId(), payload.getPayloadURI());
-                }
+            Set<IPayload> signedPayloads = signatureResult.getPayloadDigests().keySet();
+            if (!um.getPayloads().parallelStream().allMatch(
+                            (mp) -> signedPayloads.parallelStream()
+                                                  .anyMatch((sp) -> areSamePayloadRef(mp, sp)))) {
+                log.warn("Not all payloads in user message [" + um.getMessageId() + "] are signed!");
+                // If not all payloads of  the message are signum.getMessageIded it does not conform to the AS4 requirements
+                // that all payloads should be signed. Therefore create the PolicyNoncompliance error
+                final PolicyNoncompliance   error = new PolicyNoncompliance("Not all payloads are signed");
+                error.setRefToMessageInError(um.getMessageId());
+                MessageContextUtils.addGeneratedError(mc, error);
+                HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.FAILURE);
             }
         }
-        // If not all payloads are referenced the UserMessage should not be processed further, so change it processing
-        // state to failed
-        if (!allRefd)
-            HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.FAILURE);
 
         return InvocationResponse.CONTINUE;
     }
 
     /**
-     * Helper method to retrieve the value of the id of the SOAP <code>Body</code> element.
-     * <a>As described in the WS-Security spec valid id attributes are:<ul>
-     * <li>Local ID attributes on XML Signature elements</li>
-     * <li>Local ID attributes on XML Encryption elements</li>
-     * <li>Global wsu:Id attributes (described below) on elements</li>
-     * <li>Profile specific defined identifiers</li>
-     * <li>Global xml:id attributes on elements</li>
-     * </ul>
-     * So for the SOAP <code>Body</code> element the possible id attributes are <code>wsu:Id</code> and
-     * <code>xml:id</code>.
+     * Helper method to check whether two payload references point to the same payload in the message.
      *
-     * @param mc    The current message context
-     * @return      The id reference for the SOAP Body element if it has an id attribute, or<br>
-     *              <code>null</code> if no id attribute is found on the SOAP Body element
+     * @param plRef1    The first reference
+     * @param plRef2    The second reference
+     * @return          <code>true</code> if both reference have same URI and containment type,<br>
+     *                  <code>false</code> otherwise.
      */
-    private String getSOAPBodyIdRef(final MessageContext mc) {
-        String  bodyId = null;
-
-        final SOAPBody body = mc.getEnvelope().getBody();
-        for(final Iterator<OMAttribute> attributes = body.getAllAttributes(); attributes.hasNext() && bodyId == null;) {
-            final OMAttribute attr = attributes.next();
-
-            if (SecurityConstants.QNAME_WSU_ID.equals(attr.getQName()))
-                bodyId = attr.getAttributeValue();
-            else if (EbMSConstants.QNAME_XMLID.equals(attr.getQName()))
-                bodyId = attr.getAttributeValue();
-        }
-
-        // As we need to return the reference the id must be prefixed with a '#'
-        return bodyId != null ? "#" + bodyId : null;
+    private boolean areSamePayloadRef(IPayload plRef1, IPayload plRef2) {
+        return Utils.nullSafeEqual(plRef1.getContainment(), plRef2.getContainment()) &&
+               Utils.nullSafeEqual(plRef1.getPayloadURI(), plRef2.getPayloadURI());
     }
-
-    /**
-     * Helper method to create a <i>PolicyNoncompliance</i> error to indicate that a payload is not signed.
-     *
-     * @param mc        The current message context
-     * @param msgId     The message id of the user message for which the signature is not complete
-     * @param plRef     The reference for which no ds:Reference was found in the signature
-     */
-    private void createPolicyNoncomplianceError(final MessageContext mc, final String msgId, final String plRef) {
-        final PolicyNoncompliance   error = new PolicyNoncompliance();
-        error.setRefToMessageInError(msgId);
-        error.setErrorDetail("Payload with href=" + plRef + " is not included in Signature");
-
-        MessageContextUtils.addGeneratedError(mc, error);
-    }
-
 }

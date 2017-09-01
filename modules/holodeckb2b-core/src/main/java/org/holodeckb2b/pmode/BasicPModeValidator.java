@@ -23,18 +23,21 @@ import java.util.List;
 import java.util.Set;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
+import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
 import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
-import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
 import org.holodeckb2b.interfaces.pmode.validation.PModeValidationError;
-import org.holodeckb2b.security.util.SecurityUtils;
+import org.holodeckb2b.interfaces.security.ICertificateManager.CertificateUsage;
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
+import org.holodeckb2b.interfaces.security.SecurityProcessingException;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is the default implementation of {@link IPModeValidator} that will check if a P-Mode is correct. Since Holodeck B2B
@@ -48,7 +51,6 @@ import org.holodeckb2b.security.util.SecurityUtils;
 public class BasicPModeValidator implements IPModeValidator {
 
     private static final Set<String> VALID_MEPS, VALID_MEP_BINDINGS;
-
     static {
         VALID_MEPS = new HashSet<>();
         VALID_MEPS.add(EbMSConstants.ONE_WAY_MEP);
@@ -113,7 +115,7 @@ public class BasicPModeValidator implements IPModeValidator {
         ITradingPartnerConfiguration tpCfg = pmode.getInitiator();
         ISecurityConfiguration secCfg = tpCfg != null ? tpCfg.getSecurityConfiguration() : null;
         errors.addAll(checkUsernameTokenParameters(secCfg, "PMode.Initiator"));
-        errors.addAll(checkX509Parameters(secCfg, "PMode.Initiator", hb2bIsInitiator));
+            errors.addAll(checkX509Parameters(secCfg, "PMode.Initiator", hb2bIsInitiator));
 
         // Responder
         tpCfg = pmode.getResponder();
@@ -145,7 +147,7 @@ public class BasicPModeValidator implements IPModeValidator {
         Collection<PModeValidationError>    errors = new ArrayList<>();
         if (parentSecurityCfg != null) {
             IUsernameTokenConfiguration utConfig =
-                        parentSecurityCfg.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.DEFAULT);
+                        parentSecurityCfg.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT);
             if (utConfig != null) {
                 if (Utils.isNullOrEmpty(utConfig.getUsername()))
                     errors.add(new PModeValidationError(parentParameterName + ".UsernameToken[default].username",
@@ -154,7 +156,7 @@ public class BasicPModeValidator implements IPModeValidator {
                     errors.add(new PModeValidationError(parentParameterName + ".UsernameToken[default].password",
                                                     "The configuration of a Username token must contain a password"));
             }
-            utConfig = parentSecurityCfg.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS);
+            utConfig = parentSecurityCfg.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS);
             if (utConfig != null) {
                 if (Utils.isNullOrEmpty(utConfig.getUsername()))
                     errors.add(new PModeValidationError(parentParameterName + ".UsernameToken[ebms].username",
@@ -173,37 +175,35 @@ public class BasicPModeValidator implements IPModeValidator {
         Collection<PModeValidationError>    errors = new ArrayList<>();
         if (parentSecurityCfg != null) {
             ISigningConfiguration sigConfig = parentSecurityCfg.getSignatureConfiguration();
-            if (sigConfig != null) {
-                if (privateKey && Utils.isNullOrEmpty(sigConfig.getKeystoreAlias()))
+            if (sigConfig != null && privateKey) {
+                if (Utils.isNullOrEmpty(sigConfig.getKeystoreAlias()))
                     errors.add(new PModeValidationError(parentParameterName + ".Signature.KeyAlias",
                                                                 "A reference to the private key must be specified"));
-                else if (privateKey && Utils.isNullOrEmpty(sigConfig.getCertificatePassword()))
+                else if (Utils.isNullOrEmpty(sigConfig.getCertificatePassword()))
                     errors.add(new PModeValidationError(parentParameterName + ".Signature.KeyPassword",
                                                                 "A password for the private key must be specified"));
-                else if (privateKey && !SecurityUtils.isPrivateKeyAvailable(sigConfig.getKeystoreAlias(),
-                                                                            sigConfig.getCertificatePassword()))
+                else if (!isPrivateKeyAvailable(sigConfig.getKeystoreAlias(),
+                                                              sigConfig.getCertificatePassword()))
                     errors.add(new PModeValidationError(parentParameterName + ".Signature",
                                                              "The private key specified for signing is not available"));
-                else if (!privateKey && !Utils.isNullOrEmpty(sigConfig.getKeystoreAlias())
-                                     && !SecurityUtils.isCertificateAvailable(sigConfig.getKeystoreAlias(), true))
-                    errors.add(new PModeValidationError(parentParameterName + ".Signature",
-                                                             "The specified certificate for signing is not available"));
             }
 
             IEncryptionConfiguration encConfig = parentSecurityCfg.getEncryptionConfiguration();
             if (encConfig != null) {
-                if (privateKey && Utils.isNullOrEmpty(encConfig.getKeystoreAlias()))
+                if (Utils.isNullOrEmpty(encConfig.getKeystoreAlias()))
                     errors.add(new PModeValidationError(parentParameterName + ".Encryption.KeyAlias",
-                                                                "A reference to the private key must be specified"));
+                                                        "A reference to the " + (privateKey ? "private key" :
+                                                                                             "certificate")
+                                                        + " must be specified"));
                 else if (privateKey && Utils.isNullOrEmpty(encConfig.getCertificatePassword()))
                     errors.add(new PModeValidationError(parentParameterName + ".Encryption.KeyPassword",
                                                                 "A password for the private key must be specified"));
-                else if (privateKey && !SecurityUtils.isPrivateKeyAvailable(encConfig.getKeystoreAlias(),
-                                                                            encConfig.getCertificatePassword()))
+                else if (privateKey && !isPrivateKeyAvailable(encConfig.getKeystoreAlias(),
+                                                              encConfig.getCertificatePassword()))
                     errors.add(new PModeValidationError(parentParameterName + ".Encryption",
                                                           "The private key specified for decryption is not available"));
-                else if (!privateKey && !Utils.isNullOrEmpty(encConfig.getKeystoreAlias())
-                                     && !SecurityUtils.isCertificateAvailable(encConfig.getKeystoreAlias(), false))
+                else if (!privateKey && !isCertificateAvailable(encConfig.getKeystoreAlias(),
+                                                                CertificateUsage.Encryption))
                     errors.add(new PModeValidationError(parentParameterName + ".Encryption",
                                                           "The specified certificate for encryption is not available"));
             }
@@ -251,4 +251,35 @@ public class BasicPModeValidator implements IPModeValidator {
         return errors;
     }
 
+    /**
+     * Checks whether a key pair is available in the installed <i>Certificate Manager</i>.
+     *
+     * @param keystoreAlias         The alias the key pair should be registered under
+     * @param certificatePassword   The password to get access to the keypair
+     * @return  <code>true</code> if a keypair exists and is accessible for the given alias and password,<br>
+     *          <code>false</code> otherwise
+     */
+    private boolean isPrivateKeyAvailable(String keystoreAlias, String certificatePassword) {
+        try {
+            return HolodeckB2BCore.getCertificateManager().getKeyPair(keystoreAlias, certificatePassword) != null;
+        } catch (SecurityProcessingException ex) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether a certificate is available for the given usage in the installed <i>Certificate Manager</i>.
+     *
+     * @param keystoreAlias         The alias the certificate should be registered under
+     * @param certificateUsage      The intended use of the certificate
+     * @return  <code>true</code> if a certificate for the given usage and with the given alias exists,<br>
+     *          <code>false</code> otherwise
+     */
+    private boolean isCertificateAvailable(String keystoreAlias, CertificateUsage certificateUsage) {
+        try {
+            return HolodeckB2BCore.getCertificateManager().getCertificate(certificateUsage, keystoreAlias) != null;
+        } catch (SecurityProcessingException ex) {
+            return false;
+        }
+    }
 }

@@ -16,15 +16,12 @@
  */
 package org.holodeckb2b.pmode.xml;
 
+import java.io.File;
+import org.holodeckb2b.interfaces.security.X509ReferenceType;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.io.File;
-
-import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -61,7 +58,6 @@ public class SignatureConfigurationTest {
         try {
             final SignatureConfiguration sigCfg = createFromFile("completeCfg1.xml");
             assertEquals("KeystoreAlias0", sigCfg.getKeystoreAlias());
-            assertFalse(sigCfg.enableRevocationCheck());
         } catch (final Exception e) {
             fail();
         }
@@ -75,7 +71,6 @@ public class SignatureConfigurationTest {
         try {
             final SignatureConfiguration sigCfg = createFromFile("minimalCfg1.xml");
             assertEquals("KeystoreAlias1", sigCfg.getKeystoreAlias());
-            assertNull(sigCfg.enableRevocationCheck());
         } catch (final Exception e) {
             fail();
         }
@@ -90,8 +85,6 @@ public class SignatureConfigurationTest {
             final SignatureConfiguration sigCfg = createFromFile("completeCfg2.xml");
             assertEquals("KeystoreAlias2", sigCfg.getKeystoreAlias());
             assertEquals("keypwd2$%'s;:@#$:!", sigCfg.getCertificatePassword());
-
-            assertNull(sigCfg.enableRevocationCheck());
 
             assertEquals(X509ReferenceType.BSTReference, sigCfg.getKeyReferenceMethod());
             assertTrue(sigCfg.includeCertificatePath());
@@ -113,7 +106,6 @@ public class SignatureConfigurationTest {
             assertEquals("KeystoreAlias3", sigCfg.getKeystoreAlias());
             assertEquals("727dhjkvdjk%%#^&%dgg", sigCfg.getCertificatePassword());
 
-            assertNull(sigCfg.enableRevocationCheck());
             assertNull(sigCfg.getKeyReferenceMethod());
             assertNull(sigCfg.includeCertificatePath());
             assertNull(sigCfg.getSignatureAlgorithm());

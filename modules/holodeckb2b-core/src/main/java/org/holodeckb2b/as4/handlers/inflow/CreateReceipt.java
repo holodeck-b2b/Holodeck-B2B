@@ -17,8 +17,8 @@
 package org.holodeckb2b.as4.handlers.inflow;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -26,7 +26,6 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.constants.SecurityConstants;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
@@ -41,8 +40,6 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.security.tokens.IAuthenticationInfo;
-import org.holodeckb2b.security.util.SecurityUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for creating a <i>Receipt</i> signal for the received user message.
@@ -57,6 +54,15 @@ import org.holodeckb2b.security.util.SecurityUtils;
  */
 public class CreateReceipt extends AbstractUserMessageHandler {
 
+    /**
+     * The WS-Security namespace URI
+     */
+    private static final String WSS_NAMESPACE_URI =
+                                "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
+    /**
+     * The namespace URI for XML Signatures
+     */
+    public static final String DSIG_NAMESPACE_URI = "http://www.w3.org/2000/09/xmldsig#";
     /**
      * The namespace of the XML schema that defines the elements that must be inserted into a NRR receipt
      */
@@ -117,10 +123,8 @@ public class CreateReceipt extends AbstractUserMessageHandler {
             rcptData.setPModeId(um.getPModeId());
 
             log.debug("Determine type of Receipt that should be sent");
-            // Check if message was signed, done by checking if Signature info was available in default WS-Sec header
-            final Map<String, IAuthenticationInfo> authInfo = (Map<String, IAuthenticationInfo>)
-                                                            mc.getProperty(SecurityConstants.MC_AUTHENTICATION_INFO);
-            if (authInfo != null && authInfo.containsKey(SecurityConstants.SIGNATURE)) {
+            // Check if message was signed,
+            if (mc.getProperties().containsKey(MessageContextProperties.SIG_VERIFICATION_RESULT)) {
                 log.debug("Received message was signed, created NRR receipt");
                 rcptData.setContent(createNRRContent(mc));
             } else {
@@ -198,7 +202,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
         ebbpNRIElement.declareNamespace(EBBP_NS, EBBP_NS_PREFIX);
 
         // Add a ebbp:MessagePartNRInformation for each reference found in Signature element of the received message
-        for (final OMElement ref : SecurityUtils.getSignatureReferences(mc)) {
+        for (final OMElement ref : getSignatureReferences(mc)) {
             final OMElement ebbpMsgPart = elemFactory.createOMElement(QNAME_MSG_PART_ELEM);
             ebbpMsgPart.addChild(ref.cloneOMElement());
             ebbpNRIElement.addChild(ebbpMsgPart);
@@ -208,4 +212,49 @@ public class CreateReceipt extends AbstractUserMessageHandler {
         return rcptContent.iterator();
     }
 
+    /**
+     * Gets all <code>ds:Reference</code> descendant elements from the signature in the default WS-Security header.
+     * <p>In an ebMS there may only be one <code>ds:Signature</code> element, so we can take the<code>
+     * ds:SignedInfo</code> of the first one to get access to the <code>ds:Reference</code> elements.
+     *
+     * @param mc    The {@link MessageContext} of the message to get the reference from
+     * @return      The {@link Collection} of <code>ds:Reference</code> elements contained in the signature,<br>
+     *              <code>null</code> or an empty collection if there is no signature in the default security header.
+     */
+    private Collection<OMElement> getSignatureReferences(final MessageContext mc) {
+       // Get all WS-Security headers
+        final ArrayList<SOAPHeaderBlock> secHeaders = mc.getEnvelope().getHeader()
+                                                        .getHeaderBlocksWithNSURI(WSS_NAMESPACE_URI);
+        if (secHeaders == null || secHeaders.isEmpty())
+            return null; // No security headers in message
+
+        // There can be more than one security header, get the default header
+        SOAPHeaderBlock defHeader = null;
+        for(final SOAPHeaderBlock h : secHeaders) {
+            if (h.getRole() == null)
+                defHeader = h;
+        }
+        if (defHeader == null)
+            return null; // No default security header
+
+        // Get the ds:SignedInfo descendant in the default header.
+        final Iterator<OMElement> signatureElems = defHeader.getChildrenWithName(
+                                                          new QName(DSIG_NAMESPACE_URI, "Signature"));
+        if (signatureElems == null || !signatureElems.hasNext())
+            return null; // No Signature in default header
+
+        // The ds:SignedInfo element is the first child of ds:Signature
+        final OMElement signedInfoElement = signatureElems.next().getFirstElement();
+        // Collect all ds:Reference contained in it
+        Collection<OMElement> references = null;
+        if (signedInfoElement != null) {
+            references = new ArrayList<>();
+            for (final Iterator<OMElement> it =
+                    signedInfoElement.getChildrenWithName(new QName(DSIG_NAMESPACE_URI, "Reference"))
+                ; it.hasNext() ;)
+                references.add(it.next());
+        }
+
+        return references;
+    }
 }

@@ -32,7 +32,7 @@ public class PersistenceException extends Exception {
         super(message);
     }
 
-    public PersistenceException(final String message, final Exception cause) {
+    public PersistenceException(final String message, final Throwable cause) {
         super(message, cause);
     }
 }

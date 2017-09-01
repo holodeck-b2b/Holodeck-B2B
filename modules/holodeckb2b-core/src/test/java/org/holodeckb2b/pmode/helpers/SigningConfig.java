@@ -16,8 +16,8 @@
  */
 package org.holodeckb2b.pmode.helpers;
 
-import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.X509ReferenceType;
+import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
+import org.holodeckb2b.interfaces.security.X509ReferenceType;
 
 /**
  * @author Sander Fieten (sander at holodeck-b2b.org)
@@ -28,7 +28,6 @@ public class SigningConfig implements ISigningConfiguration {
     private String              keyPassword;
     private X509ReferenceType   keyRefMethod;
     private Boolean             includeCertPath;
-    private Boolean             enableRevocation;
     private String              signAlgorithm;
     private String              hashAlgorithm;
 
@@ -66,15 +65,6 @@ public class SigningConfig implements ISigningConfiguration {
 
     public void setIncludeCertPath(final Boolean includePath) {
         this.includeCertPath = includePath;
-    }
-
-    @Override
-    public Boolean enableRevocationCheck() {
-        return enableRevocation;
-    }
-
-    public void setRevocationCheck(final Boolean enableRevocation) {
-        this.enableRevocation = enableRevocation;
     }
 
     @Override

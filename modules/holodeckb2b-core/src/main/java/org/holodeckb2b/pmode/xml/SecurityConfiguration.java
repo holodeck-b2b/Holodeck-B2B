@@ -17,12 +17,12 @@
 package org.holodeckb2b.pmode.xml;
 
 import java.util.ArrayList;
-
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.pmode.security.IEncryptionConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.ISigningConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
+import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
@@ -75,13 +75,13 @@ public class SecurityConfiguration implements ISecurityConfiguration {
     }
 
     @Override
-    public IUsernameTokenConfiguration getUsernameTokenConfiguration(final WSSHeaderTarget target) {
+    public IUsernameTokenConfiguration getUsernameTokenConfiguration(final SecurityHeaderTarget target) {
         if (usernameTokens == null)
             return null;
 
         for (final UsernameToken ut : usernameTokens) {
             if (target.name().equalsIgnoreCase(ut.target)
-            || (target == WSSHeaderTarget.DEFAULT && (ut.target == null || ut.target.isEmpty())))
+            || (target == SecurityHeaderTarget.DEFAULT && (ut.target == null || ut.target.isEmpty())))
                 return ut;
         }
         // The correct UsernameToken must be found before the for is exited, so the requested UT is not specified

@@ -24,6 +24,7 @@ import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
 import org.holodeckb2b.persistency.managers.QueryManager;
 import org.holodeckb2b.persistency.managers.UpdateManager;
+import org.holodeckb2b.persistency.util.EntityManagerUtil;
 
 /**
  *
@@ -42,6 +43,7 @@ public class DefaultProvider implements IPersistencyProvider {
 
     @Override
     public void init() throws PersistenceException {
+        EntityManagerUtil.check();
     }
 
     /**

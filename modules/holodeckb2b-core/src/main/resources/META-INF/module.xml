@@ -30,13 +30,9 @@
             <order phase="Logging" phaseFirst="true"/>
         </handler>
 
-        <!-- Indicate the ebMS header is processed by Holodeck B2B -->
-        <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
-            <order phase="ebms3InPhase" phaseFirst="true"/>
-        </handler>
         <!-- Catch a raised Fault and translate it into an EbMS Error -->
         <handler name="CatchFaults" class="org.holodeckb2b.ebms3.util.CatchAxisFault">
-            <order phase="ebms3InPhase" after="ReportHeaderProcessed"/>
+            <order phase="ebms3InPhase" phaseFirst="true"/>
         </handler>
 
         <!--
@@ -77,20 +73,13 @@
         <!--
             Process and validate the WS-Security
         -->
-        <!-- Security handler responsible for processing the WSS headers -->
-        <handler name="SetupWSSProcessing" class="org.holodeckb2b.security.handlers.SetupWSSProcessing">
+        <handler name="ProcessSecurityHeaders" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessSecurityHeaders">
             <order phase="ebms3InPhase" after="FindPModes"/>
-        </handler>
-        <handler name="ProcessSecurityHeaders" class="org.holodeckb2b.security.handlers.ProcessWSSHeaders">
-            <order phase="ebms3InPhase" after="SetupWSSProcessing"/>
-        </handler>
-        <handler name="CheckWSSProcessing" class="org.holodeckb2b.security.handlers.ProcessSecurityFault">
-            <order phase="ebms3InPhase" after="ProcessSecurityHeaders"/>
         </handler>
 
         <!-- Authorize the message base on UsernameToken -->
         <handler name="AuthorizeMessage" class="org.holodeckb2b.ebms3.handlers.inflow.AuthorizeMessage">
-            <order phase="ebms3InPhase" after="CheckWSSProcessing"/>
+            <order phase="ebms3InPhase" after="ProcessSecurityHeaders"/>
         </handler>
 
         <!--
@@ -152,6 +141,10 @@
         -->
         <handler name="ProcessGeneratedErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessGeneratedErrors">
             <order phase="ebms3InPhase" after="DeliverErrors"/>
+        </handler>
+        <!-- Indicate the ebMS header is processed by Holodeck B2B -->
+        <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
+            <order phase="ebms3InPhase" phaseLast="true"/>
         </handler>
     </InFlow>
 
@@ -164,13 +157,9 @@
             <order phase="Logging" phaseFirst="true"/>
         </handler>
 
-        <!-- Indicate the ebMS header is processed by Holodeck B2B -->
-        <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
-            <order phase="ebms3InPhase" phaseFirst="true"/>
-        </handler>
         <!-- Catch a raised Fault and translate it into an EbMS Error -->
         <handler name="CatchFaults" class="org.holodeckb2b.ebms3.util.CatchAxisFault">
-            <order phase="ebms3InPhase" after="ReportHeaderProcessed"/>
+            <order phase="ebms3InPhase" phaseFirst="true"/>
         </handler>
 
         <!--
@@ -210,20 +199,13 @@
         <!--
             Process and validate the WS-Security
         -->
-        <!-- Security handler responsible for processing the WSS headers -->
-        <handler name="SetupWSSProcessing" class="org.holodeckb2b.security.handlers.SetupWSSProcessing">
+        <handler name="ProcessSecurityHeaders" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessSecurityHeaders">
             <order phase="ebms3InPhase" after="FindPModes"/>
-        </handler>
-        <handler name="ProcessSecurityHeaders" class="org.holodeckb2b.security.handlers.ProcessWSSHeaders">
-            <order phase="ebms3InPhase" after="SetupWSSProcessing"/>
-        </handler>
-        <handler name="CheckWSSProcessing" class="org.holodeckb2b.security.handlers.ProcessSecurityFault">
-            <order phase="ebms3InPhase" after="ProcessSecurityHeaders"/>
         </handler>
 
         <!-- Authorize the message base on UsernameToken -->
         <handler name="AuthorizeMessage" class="org.holodeckb2b.ebms3.handlers.inflow.AuthorizeMessage">
-            <order phase="ebms3InPhase" after="CheckWSSProcessing"/>
+            <order phase="ebms3InPhase" after="ProcessSecurityHeaders"/>
         </handler>
 
         <!--
@@ -285,6 +267,10 @@
         -->
         <handler name="ProcessGeneratedErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessGeneratedErrors">
             <order phase="ebms3InPhase" after="DeliverErrors"/>
+        </handler>
+        <!-- Indicate the ebMS header is processed by Holodeck B2B -->
+        <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
+            <order phase="ebms3InPhase" phaseLast="true"/>
         </handler>
     </InFaultFlow>
 
@@ -339,15 +325,9 @@
             <order phase="ebms3OutPhase" after="PackagePullRequest"/>
         </handler>
 
-        <!-- Security handlers responsible for adding the WSS headers -->
-        <handler name="GetSecuritySettings" class="org.holodeckb2b.security.handlers.GetSecurityConfiguration">
-            <order phase="Security" phaseFirst="true"/>
-        </handler>
-        <handler name="CreateSecurityHeaders" class="org.holodeckb2b.security.handlers.CreateWSSHeaders">
-            <order phase="Security" after="GetSecuritySettings"/>
-        </handler>
-        <handler name="RaiseSignatureEvent" class="org.holodeckb2b.security.handlers.RaiseSignatureCreatedEvent">
-            <order phase="Security" after="CreateSecurityHeaders"/>
+        <!-- Security handler responsible for adding the WSS headers -->
+        <handler name="CreateSecurityHeaders" class="org.holodeckb2b.ebms3.handlers.outflow.CreateSecurityHeaders">
+            <order phase="Security"/>
         </handler>
 
         <!-- Handlers responsible for configuration and checking of message transport -->
@@ -420,12 +400,9 @@
             <order phase="ebms3OutPhase" after="PackagePullRequest"/>
         </handler>
 
-        <!-- Security handlers responsible for adding the WSS headers -->
-        <handler name="GetSecuritySettings" class="org.holodeckb2b.security.handlers.GetSecurityConfiguration">
-            <order phase="Security" phaseFirst="true"/>
-        </handler>
-        <handler name="CreateSecurityHeaders" class="org.holodeckb2b.security.handlers.CreateWSSHeaders">
-            <order phase="Security" after="GetSecuritySettings"/>
+        <!-- Security handler responsible for adding the WSS headers -->
+        <handler name="CreateSecurityHeaders" class="org.holodeckb2b.ebms3.handlers.outflow.CreateSecurityHeaders">
+            <order phase="Security"/>
         </handler>
 
         <!-- Handlers responsible for configuration and checking of message transport -->

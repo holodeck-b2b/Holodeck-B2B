@@ -16,7 +16,8 @@
  */
 package org.holodeckb2b.common.testhelpers.pmode;
 
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.security.UTPasswordType;
 
 /**
  * @author Sander Fieten (sander at holodeck-b2b.org)
@@ -25,7 +26,7 @@ public class UsernameTokenConfig implements IUsernameTokenConfiguration {
 
     private String          username;
     private String          password;
-    private PasswordType    pwdType;
+    private UTPasswordType  pwdType;
     private boolean         includeNonce;
     private boolean         includeCreated;
 
@@ -48,11 +49,11 @@ public class UsernameTokenConfig implements IUsernameTokenConfiguration {
     }
 
     @Override
-    public PasswordType getPasswordType() {
+    public UTPasswordType getPasswordType() {
         return pwdType;
     }
 
-    public void setPasswordType(final PasswordType pwdType) {
+    public void setPasswordType(final UTPasswordType pwdType) {
         this.pwdType = pwdType;
     }
 

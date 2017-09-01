@@ -16,6 +16,12 @@
  */
 package org.holodeckb2b.as4.receptionawareness;
 
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import javax.persistence.EntityManager;
 import org.apache.axis2.context.MessageContext;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Level;
@@ -23,13 +29,13 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.Interval;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.jpa.MessageUnit;
 import org.holodeckb2b.persistency.jpa.MessageUnitProcessingState;
 import org.holodeckb2b.persistency.util.EntityManagerUtil;
@@ -38,6 +44,7 @@ import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.Protocol;
 import org.holodeckb2b.pmode.helpers.ReceptionAwarenessConfig;
 import org.junit.After;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,18 +52,9 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import javax.persistence.EntityManager;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Created at 17:54 30.04.17
@@ -71,7 +69,6 @@ public class RetransmissionWorkerTest {
     @Captor
     private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
 
-    private static String baseDir;
 
     private static HolodeckB2BTestCore core;
 
@@ -79,9 +76,7 @@ public class RetransmissionWorkerTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = RetransmissionWorkerTest.class.getClassLoader()
-                .getResource("security").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
+        core = new HolodeckB2BTestCore(null);
         HolodeckB2BCoreInterface.setImplementation(core);
     }
 

@@ -32,7 +32,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -265,11 +264,7 @@ public final class Utils {
      */
     public static void sortFiles(final File array[]) {
         if (array != null && array.length > 1)
-            Arrays.sort (array, new Comparator <File>(){
-                public int compare (File aO1, File aO2) {
-                    return aO1.getName ().compareTo (aO2.getName ());
-                }
-            });
+            Arrays.sort (array, (File aO1, File aO2) -> aO1.getName ().compareTo (aO2.getName ()));
     }
 
     /**
@@ -407,6 +402,41 @@ public final class Utils {
         }
 
         return exceptionStack;
+    }
+
+    /**
+     * Creates a string for inclusion in logs containing the list of exceptions including their exception messages that
+     * caused the given exception.
+     * <p>The format of the generated string is with the exception message only included if one is provided by the
+     * exception:
+     * <pre>
+     * «Exception class name» : «exception message»
+     *      Caused by: «Exception class name» : «exception message»
+     *      Caused by: «Exception class name» : «exception message»
+     *      ...
+     * </pre>
+     *
+     * @param t The exception that occurred
+     * @return  The list of exceptions that caused this exception including their error message
+     * @since HB2B_NEXT_VERSION
+     */
+    public static String getExceptionTrace(final Throwable t) {
+        final StringBuffer r = new StringBuffer();
+
+        r.append(t.getClass().getSimpleName());
+        if (!isNullOrEmpty(t.getMessage()))
+            r.append(" : ").append(t.getMessage());
+        Throwable cause = t.getCause();
+        if (cause != null) {
+            do {
+                r.append('\n').append('\t').append("Caused by: ").append(cause.getClass().getSimpleName());
+                if (!isNullOrEmpty(cause.getMessage()))
+                    r.append(" : ").append(cause.getMessage());
+                cause = cause.getCause();
+            } while (cause != null);
+        }
+
+        return r.toString();
     }
 
     /**

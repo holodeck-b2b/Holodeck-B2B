@@ -17,26 +17,27 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
-import java.util.Map;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.SecurityConstants;
+import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.FailedAuthentication;
-import org.holodeckb2b.ebms3.packaging.PullRequestElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.ISecurityConfiguration;
-import org.holodeckb2b.interfaces.pmode.security.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.security.tokens.IAuthenticationInfo;
-import org.holodeckb2b.security.tokens.UsernameToken;
-import org.holodeckb2b.security.util.SecurityUtils;
+import org.holodeckb2b.pmode.PModeUtils;
+import org.holodeckb2b.security.util.VerificationUtils;
+import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for authorizing the processing of a received message (and by that, the
@@ -45,10 +46,11 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * WS-Security UsernameToken element in a WSS header targeted to the "ebms" role/actor. The configuration is done using
  * P-Mode parameters in the <code>PMode.Initiator|Responder.Authorization</code> group depending on the role Holodeck
  * B2B acts in. In the Holodeck B2B P-Mode interface this is <code>IPMode.getInitiator().getSecurityConfiguration().
- * getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS)</code>.<br>
+ * getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS)</code>.<br>
  * If the P-Mode does not include a configuration setting for username tokens there is no authorization performed. This
  * also implies that a message containing an unexpected username token is not rejected.
- * <p>The P-Mode of the <i>primary</i> message unit is used to determine whether the message must be authorized.
+ * <p>As the authorization of the Pull Request signal is performed when searching the applicable P-Mode this handler
+ * will only process the other type of message units.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
@@ -67,84 +69,79 @@ public class AuthorizeMessage extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) throws Exception {
 
-        log.debug("Get the primary message unit");
-        final IMessageUnitEntity mu = MessageContextUtils.getPrimaryMessageUnit(mc);
-
-        if (mu == null || mu instanceof PullRequestElement) {
-            // Primary message unit is PullRequest => authorization checked separately
+        Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
+        if (Utils.isNullOrEmpty(msgUnits)) {
+            // No message units in message, nothing to do
+            log.debug("Message does not contain a message unit, nothing to do");
             return InvocationResponse.CONTINUE;
         }
 
-        log.debug("Get the P-Mode for the primary message unit and check if authorization is used");
-        final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(mu.getPModeId());
+        final IPModeSet pmodes = HolodeckB2BCoreInterface.getPModeSet();
+        // Check authorization for each message unit
+        for (IMessageUnitEntity mu : msgUnits) {
+            if (mu instanceof IPullRequest)
+                // Authorization of Pull Request is handled separately
+                continue;
 
-        if (pmode == null) {
-            // This can happen for general Error signals that do not have a RefToMessageId and can not be linked to
-            // a sent message unit
-            log.warn("No P-Mode found for primary message unit, nothing to check!");
-            return InvocationResponse.CONTINUE;
-        }
+            log.debug("Get the P-Mode for the message unit and check if authorization is used");
+            final IPMode pmode = pmodes.get(mu.getPModeId());
 
-        /* To determine whether the message must be authorized we need to know if Holodeck B2B acts as the
-        Initiator or Responder in this MEP. As we only have One-Way MEPs this equivalent to the HTTP role Holodeck B2B
-        plays.
-        The security configuration that defines the authorization however is that of the other role as we authorize the
-        other party and not ourselves!
-        */
-        log.debug("Check security configuration for received message");
-        final ITradingPartnerConfiguration tradingPartner = isInFlow(INITIATOR) ? pmode.getResponder() : pmode.getInitiator();
-        final ISecurityConfiguration tpSecConfig = tradingPartner != null ? tradingPartner.getSecurityConfiguration() : null;
+            if (pmode == null) {
+                // This can happen for general Error signals that do not have a RefToMessageId and can not be linked to
+                // a sent message unit
+                log.warn("No P-Mode found for message unit [" + mu.getMessageId() + "], nothing to check!");
+                continue;
+            }
 
-        /* Authorization of user messages is only based on a user name token that should be included in the WSS header
-        targeted to "ebms". If there is no UT configuration for the "ebms" entity we do not authorize the message. An
-        UT included in the message will be ignored.
-        */
-        final IUsernameTokenConfiguration utConfig = tpSecConfig == null ? null :
-                            tpSecConfig.getUsernameTokenConfiguration(ISecurityConfiguration.WSSHeaderTarget.EBMS);
-        if (utConfig == null) {
-            log.debug("No authorization of the message required");
-            return InvocationResponse.CONTINUE;
-        }
+            /* To determine whether the message must be authorized we need to know if Holodeck B2B acts as the
+            Initiator or Responder in this MEP. The security configuration that defines the authorization however
+            is that of the other role as we authorize the other party and not ourselves!
+            */
+            log.debug("Check security configuration for received message");
+            final ITradingPartnerConfiguration tradingPartner = PModeUtils.isHolodeckB2BInitiator(pmode) ?
+                                                                            pmode.getResponder() : pmode.getInitiator();
+            final ISecurityConfiguration tpSecConfig = tradingPartner == null ? null :
+                                                                              tradingPartner.getSecurityConfiguration();
 
-        log.debug("Message must be authorized, get authentication info from message");
-        final Map<String, IAuthenticationInfo> authInfo = (Map<String, IAuthenticationInfo>)
-                                                            mc.getProperty(SecurityConstants.MC_AUTHENTICATION_INFO);
-        final UsernameToken   ebmsUT = authInfo != null ? (UsernameToken) authInfo.get(SecurityConstants.EBMS_USERNAMETOKEN)
-                                                  : null;
+            /* Authorization of user messages is only based on a user name token that should be included in the WSS
+            header targeted to "ebms". If there is no UT configuration for the "ebms" entity we do not authorize the
+            message. An UT included in the message will be ignored.
+            */
+            final IUsernameTokenConfiguration utConfig = tpSecConfig == null ? null :
+                                                   tpSecConfig.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS);
+            if (utConfig == null) {
+                log.debug("No authorization of message unit [" + mu.getMessageId() + "] required");
+                continue;
+            }
 
-        if (!SecurityUtils.verifyUsernameToken(utConfig, ebmsUT)) {
-            log.warn("Message [Primary msg msgId=" + mu.getMessageId() + "] could not be authorized!");
-            // Generate error and set all message units (except PullRequest) to failed
-            failMsgUnits(mc);
-        } else {
-            log.info("Message [Primary msg msgId=" + mu.getMessageId() + "] successfully authorized");
+            log.debug("Message must be authorized, get authentication info from message");
+            IUsernameTokenProcessingResult utInMessage = (IUsernameTokenProcessingResult)
+                                                                mc.getProperty(MessageContextProperties.EBMS_UT_RESULT);
+
+            if (!VerificationUtils.verifyUsernameToken(utConfig, utInMessage)) {
+                log.warn("Message unit [" + mu.getMessageId() + "] could not be authorized!");
+                handleAuthorizationFailure(mu, mc);
+            } else {
+                log.info("Message unit [" + mu.getMessageId() + "] successfully authorized");
+            }
         }
 
         return InvocationResponse.CONTINUE;
     }
 
     /**
-     * Generates a <i>FailedAuthentication</i> Error signal for all message units, except the PullRequest, contained in
-     * the received message. Also set the processing state to FAILED to prevent further processing of the message units.
+     * Handles an authorization failure for a message unit by generating a <i>FailedAuthentication</i> ebMS Error and
+     * setting the processing state of the message unit to <i>FAILURE</i> so it is not processed further.
      *
-     * @param mc The message context of the message that failed
+     * @param mu    The message unit
+     * @param mc    The message context of the message that failed
+     * @throws PersistenceException When there is a problem in updating the processing state
      */
-    protected void failMsgUnits(final MessageContext mc) throws PersistenceException {
-
-        log.debug("Get all message units contained in message");
-        final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
-
-        for (final IMessageUnitEntity mu : rcvdMsgUnits) {
-            // PullRequest are authenticated seperately, so process only other message unit types
-            if (! (mu instanceof PullRequestElement)) {
-                log.debug("Authentication of " + MessageUnitUtils.getMessageUnitName(mu)
-                                               + "[msgId=" + mu.getMessageId() + "] failed!");
-                final FailedAuthentication authError = new FailedAuthentication();
-                authError.setRefToMessageInError(mu.getMessageId());
-                authError.setErrorDetail("Authentication of message unit failed!");
-                MessageContextUtils.addGeneratedError(mc, authError);
-                HolodeckB2BCore.getStorageManager().setProcessingState(mu, ProcessingState.FAILURE);
-            }
-        }
+    protected void handleAuthorizationFailure(final IMessageUnitEntity mu, final MessageContext mc)
+                                                                                        throws PersistenceException {
+        final FailedAuthentication authError = new FailedAuthentication("Authentication of message unit failed!");
+        authError.setRefToMessageInError(mu.getMessageId());
+        MessageContextUtils.addGeneratedError(mc, authError);
+        HolodeckB2BCore.getStorageManager().setProcessingState(mu, ProcessingState.FAILURE);
     }
 }

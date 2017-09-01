@@ -36,7 +36,8 @@ import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.common.testhelpers.Config;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.*;
@@ -133,7 +134,7 @@ public class PrepareResponseMessageTest {
 
         // Setting input message property
         IUserMessageEntity userMessageEntity =
-                core.getStorageManager().storeIncomingMessageUnit(userMessage);
+                HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
         mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
                 userMessageEntity);
 
@@ -179,7 +180,7 @@ public class PrepareResponseMessageTest {
 
         ReceiptElement.createElement(headerBlock, receipt);
 
-        StorageManager updateManager = core.getStorageManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IReceiptEntity receiptEntity =
                 updateManager.storeIncomingMessageUnit(receipt);
         mc.setProperty(MessageContextProperties.RESPONSE_RECEIPT, receiptEntity);
@@ -233,7 +234,7 @@ public class PrepareResponseMessageTest {
 
         ErrorSignalElement.createElement(headerBlock, errorMessage);
 
-        StorageManager updateManager = core.getStorageManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IErrorMessageEntity errorMessageEntity =
                 updateManager.storeIncomingMessageUnit(errorMessage);
 
@@ -281,7 +282,7 @@ public class PrepareResponseMessageTest {
             fail(axisFault.getMessage());
         }
 
-        StorageManager updateManager = core.getStorageManager();
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
 
         ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
 

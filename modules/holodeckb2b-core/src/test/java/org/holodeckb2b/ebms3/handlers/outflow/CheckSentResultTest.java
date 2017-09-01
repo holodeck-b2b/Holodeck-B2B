@@ -26,7 +26,8 @@ import org.apache.axis2.engine.Handler;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -119,7 +120,7 @@ public class CheckSentResultTest {
         pmode.setId(pmodeId);
         core.getPModeSet().add(pmode);
 
-        StorageManager storageManager = core.getStorageManager();
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
         // Setting input message property
         IUserMessageEntity userMessageEntity =
                 storageManager.storeIncomingMessageUnit(userMessage);

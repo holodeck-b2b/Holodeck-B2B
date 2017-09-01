@@ -17,10 +17,11 @@
 package org.holodeckb2b.module;
 
 import org.holodeckb2b.common.config.InternalConfiguration;
+import org.holodeckb2b.customvalidation.ICustomValidationExecutor;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.security.ISecurityProvider;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.customvalidation.ICustomValidationExecutor;
 
 /**
  * Provides access to the Holodeck B2B Core of a running instance to the Holodeck B2B Core classes. It is an extension
@@ -63,5 +64,16 @@ public class HolodeckB2BCore extends HolodeckB2BCoreInterface {
      */
     public static ICustomValidationExecutor getValidationExecutor() {
         return ((HolodeckB2BCoreImpl) coreImplementation).getValidationExecutor();
+    }
+
+    /**
+     * Gets the active <i>security provider</i> of this Holodeck B2B instance.
+     *
+     * @return The active security provider
+     * @since HB2B_NEXT_VERSION
+     * @see ISecurityProvider
+     */
+    public static ISecurityProvider getSecurityProvider() {
+        return ((HolodeckB2BCoreImpl) coreImplementation).getSecurityProvider();
     }
 }

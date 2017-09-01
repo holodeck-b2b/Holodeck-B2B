@@ -59,11 +59,13 @@ public class Config implements InternalConfiguration {
     }
 
     @Override
+    @Deprecated
     public String getPublicKeyStorePath() {
         return getHolodeckB2BHome() + "/publickeys.jks";
     }
 
     @Override
+    @Deprecated
     public String getPublicKeyStorePassword() {
         return "nosecrets";
     }
@@ -109,26 +111,25 @@ public class Config implements InternalConfiguration {
     }
 
     @Override
+    @Deprecated
     public String getPrivateKeyStorePath() {
         return getHolodeckB2BHome() + "/privatekeys.jks";
     }
 
     @Override
+    @Deprecated
     public String getPrivateKeyStorePassword() {
         return "secrets";
     }
 
     @Override
-    public boolean shouldCheckCertificateRevocation() {
-        return true;
-    }
-
-    @Override
+    @Deprecated
     public String getTrustKeyStorePath() {
         return getHolodeckB2BHome() + "/trustedcerts.jks";
     }
 
     @Override
+    @Deprecated
     public String getTrustKeyStorePassword() {
         return "trusted";
     }
@@ -156,5 +157,10 @@ public class Config implements InternalConfiguration {
     @Override
     public boolean useStrictHeaderValidation() {
         return useStrictHeaderValidation;
+    }
+
+    @Override
+    public String getSecurityProviderClass() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
