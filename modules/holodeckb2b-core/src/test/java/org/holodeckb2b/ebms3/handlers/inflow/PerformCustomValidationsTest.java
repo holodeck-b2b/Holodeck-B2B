@@ -16,32 +16,19 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.engine.Handler;
 import org.apache.log4j.Appender;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.util.MessageIdGenerator;
 import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.customvalidation.CustomValidationFailedEvent;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.customvalidation.IMessageValidatorConfiguration;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
-import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.pmode.helpers.*;
-import org.junit.After;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.pmode.xml.PMode;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -51,8 +38,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
 
 import static org.junit.Assert.*;
 
@@ -70,129 +56,72 @@ public class PerformCustomValidationsTest {
     @Captor
     private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
 
-    private static String baseDir;
-
     private static HolodeckB2BTestCore core;
 
-    private PerformCustomValidations handler;
+    private static PMode rejectOnFailurePmode;
+    private static PMode rejectOnWarnPmode;
+
+    private MessageContext  mc;
+
+    private IUserMessageEntity umEntity;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = PerformCustomValidationsTest.class.getClassLoader()
-                .getResource("customvalidation").getPath();
+        String baseDir = PerformCustomValidationsTest.class.getClassLoader()
+                .getResource(PerformCustomValidationsTest.class.getName().replace('.', '/')).getPath();
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
+
+        rejectOnFailurePmode = PMode.createFromFile(new File(baseDir + "/reject-on-failure-pmode.xml"));
+        rejectOnWarnPmode = PMode.createFromFile(new File(baseDir + "/reject-on-warn-pmode.xml"));
+
+        core.getPModeSet().add(rejectOnFailurePmode);
+        core.getPModeSet().add(rejectOnWarnPmode);
     }
 
     @Before
     public void setUp() throws Exception {
-        handler = new PerformCustomValidations();
+        mc = new MessageContext();
+        mc.setFLOW(MessageContext.IN_FLOW);
+
         LogManager.getRootLogger().addAppender(mockAppender);
     }
 
-    @After
-    public void tearDown() throws Exception {
-        LogManager.getRootLogger().removeAppender(mockAppender);
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+//        LogManager.getRootLogger().removeAppender(mockAppender);
         core.getPModeSet().removeAll();
     }
 
     @Test
      public void testDoProcessing() throws Exception {
-        String stopValidationOn = "warn";
-        String rejectMessageOn = "warn";
-        ProcessingState expPS = ProcessingState.RECEIVED;
-        performCustomValidations(stopValidationOn, rejectMessageOn, expPS);
+        UserMessage userMessage = new UserMessage();
+        userMessage.setPModeId(rejectOnWarnPmode.getId());
+        userMessage.setMessageId(MessageIdGenerator.createMessageId());
+        umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
+        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umEntity);
+
+        try {
+            new PerformCustomValidations().invoke(mc);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+        assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
     }
 
     @Test
     public void testDoProcessingRejectOnFailure() throws Exception {
-        String stopValidationOn = "warn";
-        String rejectMessageOn = "failure";
-        ProcessingState expPS = ProcessingState.FAILURE;
-        performCustomValidations(stopValidationOn, rejectMessageOn, expPS);
-    }
-
-    /**
-     * Performing common custom validation testing logic
-     * @param stopValidationOn
-     * @param rejectMessageOn
-     * @param expPS expected ProcessingState
-     * @throws Exception
-     */
-    private void performCustomValidations(String stopValidationOn, String rejectMessageOn,
-                                          ProcessingState expPS) throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("customvalidation/full_mmd.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-
-        MessageContext mc = new MessageContext();
-        mc.setFLOW(MessageContext.IN_FLOW);
-
-        String pmodeId = "some_pmode_id";
-        PMode pmode = new PMode();
-        pmode.setId(pmodeId);
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-
-        UserMessage userMessage
-                = UserMessageElement.readElement(umElement);
-
-        // We need to set the PMode id value separately because
-        // the agreement pmode & userMessage pmode are different
-        // Currently we just set the same value
-        userMessage.setPModeId(pmodeId);
-
-        // Setting input message property
-        StorageManager updateManager = core.getStorageManager();
-        IUserMessageEntity userMessageEntity =
-                updateManager.storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                userMessageEntity);
-
-        Leg leg = new Leg();
-
-        EventHandlerConfig eventHandlerConfig = new EventHandlerConfig();
-        eventHandlerConfig.setFactoryClass(
-                "org.holodeckb2b.common.testhelpers.events.TestEventHandlerFactory");
-
-        ArrayList<Class<? extends IMessageProcessingEvent>> eventsList = new ArrayList<>();
-        eventsList.add(CustomValidationFailedEvent.class);
-        eventHandlerConfig.setHandledEvents(eventsList);
-
-        leg.addMessageProcessingEventConfiguration(eventHandlerConfig);
-
-        UserMessageFlow flow = new UserMessageFlow();
-        CustomValidationSpec validationSpec =
-                new CustomValidationSpec(stopValidationOn, rejectMessageOn);
-        List<IMessageValidatorConfiguration> validators = new ArrayList<>();
-        ValidatorConfig vc = new ValidatorConfig();
-        vc.setId("some_validator_id");
-        vc.setFactory("org.holodeckb2b.customvalidation.helpers.CustomValidator$Factory");
-        validators.add(vc);
-        validationSpec.setValidators(validators);
-        flow.setCustomValidationConfiguration(validationSpec);
-
-        leg.setUserMessageFlow(flow);
-
-        pmode.addLeg(leg);
-
-        core.getPModeSet().add(pmode);
+        UserMessage userMessage = new UserMessage();
+        userMessage.setPModeId(rejectOnFailurePmode.getId());
+        userMessage.setMessageId(MessageIdGenerator.createMessageId());
+        umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
+        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umEntity);
 
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertNotNull(invokeResp);
+            new PerformCustomValidations().invoke(mc);
         } catch (Exception e) {
             fail(e.getMessage());
         }
-
-        assertEquals(expPS, userMessageEntity.getCurrentProcessingState().getState());
-        // When validation is successful there should be no error in the message context
-        if(!expPS.equals(ProcessingState.FAILURE)) {
-            assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
-        }
+        assertNotNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
     }
 }
