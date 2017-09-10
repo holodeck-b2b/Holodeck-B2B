@@ -70,7 +70,7 @@ public class BasicPModeValidatorTest {
         validPMode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
         validPMode.addLeg(new Leg());
 
-        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(validPMode)));
+        assertTrue(Utils.isNullOrEmpty(validator.validatePMode(validPMode)));
     }
 
     /**
@@ -123,7 +123,7 @@ public class BasicPModeValidatorTest {
         leg.addPullRequestFlow(prFlow);
         validPMode.addLeg(leg);
 
-        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(validPMode)));
+        assertTrue(Utils.isNullOrEmpty(validator.validatePMode(validPMode)));
     }
 
     /**
@@ -147,7 +147,7 @@ public class BasicPModeValidatorTest {
         leg.addPullRequestFlow(prFlow);
         validPMode.addLeg(leg);
 
-        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(validPMode)));
+        assertTrue(Utils.isNullOrEmpty(validator.validatePMode(validPMode)));
 
         validPMode = new PMode();
         validPMode.setMep(EbMSConstants.ONE_WAY_MEP);
@@ -170,7 +170,7 @@ public class BasicPModeValidatorTest {
         leg.addPullRequestFlow(prFlow);
         validPMode.addLeg(leg);
 
-        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(validPMode)));
+        assertTrue(Utils.isNullOrEmpty(validator.validatePMode(validPMode)));
     }
 
     @Test
@@ -179,25 +179,25 @@ public class BasicPModeValidatorTest {
         invalidPMode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
         invalidPMode.addLeg(new Leg());
 
-        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertFalse(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
         invalidPMode.setMep(EbMSConstants.ONE_WAY_MEP);
-        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertTrue(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
 
         invalidPMode.setMepBinding(EbMSConstants.ONE_WAY_PUSH + "/smth"); // wrong mep binding
 
-        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertFalse(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
         invalidPMode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertTrue(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
 
         invalidPMode.addLeg(new Leg()); // adding second leg
 
-        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertFalse(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
 
         invalidPMode.removeLegs();
         invalidPMode.setMep(EbMSConstants.TWO_WAY_MEP);
         invalidPMode.addLeg(new Leg()); // adding only one leg into two way mep
 
-        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertFalse(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
     }
 
     @Test
@@ -206,7 +206,7 @@ public class BasicPModeValidatorTest {
         invalidPMode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
         invalidPMode.addLeg(new Leg());
 
-        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertTrue(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
 
         PartnerConfig initiator = new PartnerConfig();
         SecurityConfig secConfig = new SecurityConfig();
@@ -227,12 +227,12 @@ public class BasicPModeValidatorTest {
         secConfig.setUsernameTokenConfiguration(
                 SecurityHeaderTarget.DEFAULT, tokenConfig);
 
-        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertFalse(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
 
         tokenConfig.setUsername("username");
         tokenConfig.setPassword("secret");
 
-        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertTrue(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
 
         tokenConfig = new UsernameTokenConfig();
 
@@ -240,7 +240,7 @@ public class BasicPModeValidatorTest {
         secConfig.setUsernameTokenConfiguration(
                 SecurityHeaderTarget.EBMS, tokenConfig);
 
-        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertFalse(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
     }
 
     @Test
@@ -253,7 +253,7 @@ public class BasicPModeValidatorTest {
         leg.setProtocol(protocolConfig);
         invalidPMode.addLeg(leg);
 
-        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertTrue(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
 
         PartnerConfig initiator = new PartnerConfig();
         SecurityConfig secConfig = new SecurityConfig();
@@ -269,23 +269,23 @@ public class BasicPModeValidatorTest {
         assertTrue(PModeUtils.isHolodeckB2BInitiator(invalidPMode));
         assertTrue(Utils.isNullOrEmpty(sigConfig.getKeystoreAlias()));
 
-        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertFalse(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
 
         encConfig.setKeystoreAlias("partya");
 
-        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertFalse(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
 
         encConfig.setCertificatePassword("ExampleA");
 
-        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertFalse(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
 
         sigConfig.setKeystoreAlias("partyb");
 
         assertNotNull(sigConfig.getKeystoreAlias());
 
-        assertFalse(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertFalse(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
 
         sigConfig.setCertificatePassword("ExampleB");
-        assertTrue(Utils.isNullOrEmpty(validator.isPModeValid(invalidPMode)));
+        assertTrue(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
     }
 }

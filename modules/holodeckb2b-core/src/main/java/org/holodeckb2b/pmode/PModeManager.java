@@ -136,7 +136,7 @@ public class PModeManager implements IPModeSet {
         log.trace("Request to add P-Mode");
 
         // Validate the new P-Mode
-        Collection<PModeValidationError> validationErrors = validator.isPModeValid(pmode);
+        Collection<PModeValidationError> validationErrors = validator.validatePMode(pmode);
         if (Utils.isNullOrEmpty(validationErrors)) {
             log.debug("No errors found in new P-Mode, adding to deployed set of P-Modes");
             try {
@@ -159,7 +159,7 @@ public class PModeManager implements IPModeSet {
         log.trace("Request to replace P-Mode [{}]", pmode.getId());
 
         // Validate the new P-Mode
-        Collection<PModeValidationError> validationErrors = validator.isPModeValid(pmode);
+        Collection<PModeValidationError> validationErrors = validator.validatePMode(pmode);
         if (Utils.isNullOrEmpty(validationErrors)) {
             log.debug("No errors found in new version of P-Mode, replacing it in the deployed set of P-Modes");
             try {

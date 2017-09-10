@@ -66,7 +66,7 @@ public class BasicPModeValidator implements IPModeValidator {
     }
 
     @Override
-    public Collection<PModeValidationError> isPModeValid(final IPMode pmode) {
+    public Collection<PModeValidationError> validatePMode(final IPMode pmode) {
         Collection<PModeValidationError>    errors = new ArrayList<>();
 
         errors.addAll(checkGeneralParameters(pmode));

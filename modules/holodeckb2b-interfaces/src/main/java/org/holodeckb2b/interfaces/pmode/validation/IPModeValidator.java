@@ -44,5 +44,5 @@ public interface IPModeValidator {
      *                  or a <code>Collection</code> of {@link PModeValidationError}s the describe the validation errors
      *                  found. It is RECOMMENDED that implementations check all rules and return all validation errors.
      */
-    public Collection<PModeValidationError> isPModeValid(final IPMode pmode);
+    public Collection<PModeValidationError> validatePMode(final IPMode pmode);
 }
