@@ -27,7 +27,7 @@ import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.events.MessageUnitPurgedEvent;
-import org.holodeckb2b.interfaces.events.types.IMessageUnitPurgedEvent;
+import org.holodeckb2b.interfaces.events.IMessageUnitPurgedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;

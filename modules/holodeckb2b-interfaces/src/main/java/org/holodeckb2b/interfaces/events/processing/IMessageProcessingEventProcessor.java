@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.events;
+package org.holodeckb2b.interfaces.events.processing;
 
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 
 /**
  * Defines the interface of the Holodeck B2B Core component that is responsible for the processing of {@link

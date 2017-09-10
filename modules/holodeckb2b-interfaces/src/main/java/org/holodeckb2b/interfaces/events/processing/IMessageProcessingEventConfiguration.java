@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.events;
+package org.holodeckb2b.interfaces.events.processing;
 
 import java.util.List;
 import java.util.Map;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.pmode.IPMode;

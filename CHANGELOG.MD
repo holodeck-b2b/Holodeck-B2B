@@ -22,8 +22,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Refactored the validation of the ebMS header meta-data validation classes and handler
 * The ebMS Error returned to the sender in case the signature of a _User Message_ does not include all
-payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonCompliance_.
+  payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonCompliance_.
 * Moved classes in `org.holodeckb2b.interfaces.pmode.security` to `org.holodeckb2b.interfaces.pmode`
+* Refactored package structure of event interfaces: interfaces related to processing of events moved to
+  `org.holodeckb2b.interfaces.events.processing` and event definitions in `org.holodeckb2b.interfaces.events`,
+  `org.holodeckb2b.interfaces.events.security` and `org.holodeckb2b.interfaces.events.receptionawareness`
 
 ### Deprecated
 * The configuration parameter (`IConfiguation.useStrictErrorRefCheck()`) to apply a strict validation on the
@@ -50,7 +53,7 @@ payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonC
 
 ### Fixed
 * Reverted back to version 2.0.4 of Apache Santuario library to fix unknown method issue in case
-  an exception occurs in the XML security processing  
+  an exception occurs in the XML security processing
 
 ## 3.0.1
 ###### 2017-07-07

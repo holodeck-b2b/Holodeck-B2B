@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.events;
 
-import org.holodeckb2b.interfaces.events.types.IEncryptionFailedEvent;
+import org.holodeckb2b.interfaces.events.security.IEncryptionFailedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 

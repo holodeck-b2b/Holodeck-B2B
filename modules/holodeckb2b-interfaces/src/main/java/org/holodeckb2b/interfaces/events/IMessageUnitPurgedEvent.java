@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.holodeckb2b.interfaces.events.types;
+package org.holodeckb2b.interfaces.events;
 
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.workerpool.IWorkerTask;

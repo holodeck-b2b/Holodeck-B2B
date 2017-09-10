@@ -30,7 +30,7 @@ import org.holodeckb2b.events.DecryptionFailedEvent;
 import org.holodeckb2b.events.SignatureVerificationFailedEvent;
 import org.holodeckb2b.events.UTProcessingFailureEvent;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.events.processing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;

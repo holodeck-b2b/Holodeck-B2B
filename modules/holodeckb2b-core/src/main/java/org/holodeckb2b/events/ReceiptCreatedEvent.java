@@ -17,7 +17,7 @@
 package org.holodeckb2b.events;
 
 import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.types.IReceiptCreatedEvent;
+import org.holodeckb2b.interfaces.events.receptionawareness.IReceiptCreatedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 

@@ -17,7 +17,7 @@
 package org.holodeckb2b.common.testhelpers.pmode;
 
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventConfiguration;
+import org.holodeckb2b.interfaces.events.processing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 
 import java.util.ArrayList;

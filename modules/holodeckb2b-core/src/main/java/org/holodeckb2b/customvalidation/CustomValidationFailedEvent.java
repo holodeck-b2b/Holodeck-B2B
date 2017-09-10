@@ -21,7 +21,7 @@ import java.util.Map;
 import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
-import org.holodeckb2b.interfaces.events.types.ICustomValidationFailedEvent;
+import org.holodeckb2b.interfaces.events.ICustomValidationFailedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**

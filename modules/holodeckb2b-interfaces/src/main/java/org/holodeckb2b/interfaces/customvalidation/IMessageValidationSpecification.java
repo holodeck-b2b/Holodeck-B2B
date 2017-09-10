@@ -17,7 +17,7 @@
 package org.holodeckb2b.interfaces.customvalidation;
 
 import java.util.List;
-import org.holodeckb2b.interfaces.events.types.ICustomValidationFailedEvent;
+import org.holodeckb2b.interfaces.events.ICustomValidationFailedEvent;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 
 /**

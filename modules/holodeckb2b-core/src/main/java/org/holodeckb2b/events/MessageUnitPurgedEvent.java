@@ -17,7 +17,7 @@
 package org.holodeckb2b.events;
 
 import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.types.IMessageUnitPurgedEvent;
+import org.holodeckb2b.interfaces.events.IMessageUnitPurgedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
