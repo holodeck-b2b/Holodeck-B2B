@@ -76,6 +76,7 @@ public interface IConfiguration {
      *
      * @return Indication whether bundling of signals in a response is allowed
      */
+    @Deprecated
     boolean allowSignalBundling();
 
     /**

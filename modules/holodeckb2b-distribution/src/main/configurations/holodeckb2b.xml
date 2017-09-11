@@ -60,19 +60,6 @@
     <!-- <parameter name="MessageProcessingEventProcessor"/>-->
 
     <!-- ====================================================================
-    - This parameter enables bundling of multiple signal message units in of
-    - the same type in a response message. When enabled Holodeck B2B can add
-    - multiple signal message units generated during the processing of the
-    - request message to the response preventing loss of information.
-    - NOTE: This will create ebMS messages that DO NOT conform to the ebMS
-    - v3 Core Spec and AS4 profile!
-    - The default setting is not to allow this bundling to ensure Core Spec
-    - and AS4 compliant ebMS messages. To enable the feature set the value
-    - of this parameter to "on" or "true".
-    ===================================================================== -->
-    <parameter name="AllowSignalBundling">off</parameter>
-
-    <!-- ====================================================================
     - This parameter conatains the default setting whether Errors on Errors
     - should be reported to the sender of the faulty error. This setting can
     - be overriden in the P-Mode configuration. However the problem that

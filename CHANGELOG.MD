@@ -31,10 +31,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   `org.holodeckb2b.interfaces.events.security` and `org.holodeckb2b.interfaces.events.receptionawareness`
 
 ### Deprecated
+* The configuration parameter (`IConfiguation.allowSignalBundling()`) which was used to indicate that it was allowed to
+  bundle multiple Signal message units of the same type in one message. This goes beyond the ebMS V3 Core and AS4
+  Specifications and this options will therefore be removed.
 * The configuration parameter (`IConfiguation.useStrictErrorRefCheck()`) to apply a strict validation on the
   references in the Error signal is replaced by the generic strict header validation mode.
-* The configuration parameters related to the keystores used in WS-Security processing. By enabling
-  _compatability mode_ in the new default security provider the functionality of the old version is still
+* The configuration parameters (as defined in `IConfiguration`) related to the keystores used in WS-Security processing.
+  By enabling _compatability mode_ in the new default security provider the functionality of the old version is still
   supported.
 
 ### Removed

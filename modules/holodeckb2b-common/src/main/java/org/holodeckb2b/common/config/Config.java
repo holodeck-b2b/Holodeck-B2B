@@ -335,6 +335,7 @@ public class Config implements InternalConfiguration {
      * {@inheritDoc}
      */
     @Override
+    @Deprecated
     public boolean allowSignalBundling() {
         return allowSignalBundling;
     }
