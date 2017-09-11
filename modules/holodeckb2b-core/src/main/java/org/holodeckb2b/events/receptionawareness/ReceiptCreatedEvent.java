@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.events;
+package org.holodeckb2b.events.receptionawareness;
 
 import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
 import org.holodeckb2b.interfaces.events.receptionawareness.IReceiptCreatedEvent;

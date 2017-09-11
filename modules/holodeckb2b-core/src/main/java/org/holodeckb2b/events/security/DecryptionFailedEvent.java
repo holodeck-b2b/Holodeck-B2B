@@ -14,28 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.events;
+package org.holodeckb2b.events.security;
 
-import org.holodeckb2b.interfaces.events.security.IEncryptionFailedEvent;
+import org.holodeckb2b.events.security.AbstractSecurityProcessingFailureEvent;
+import org.holodeckb2b.interfaces.events.security.IDecryptionFailedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 
 /**
- * Is the implementation of {@link IEncryptionFailedEvent} to indicate that the encryption of a submitted message unit
+ * Is the implementation of {@link IDecryptionFailedEvent} to indicate that the decryption of a received message unit
  * failed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
-public class EncryptionFailedEvent extends AbstractSecurityProcessingFailureEvent implements IEncryptionFailedEvent {
+public class DecryptionFailedEvent extends AbstractSecurityProcessingFailureEvent implements IDecryptionFailedEvent {
 
     /**
-     * Creates a new <code>EncryptionFailedEvent</code> for the given message unit and failure reason.
+     * Creates a new <code>DecryptionFailedEvent</code> for the given message unit and failure reason.
      *
      * @param subject   The message unit
-     * @param reason    The reason why the encryption failed
+     * @param reason    The reason why the decryption failed
      */
-    public EncryptionFailedEvent(IMessageUnit subject, SecurityProcessingException reason) {
+    public DecryptionFailedEvent(IMessageUnit subject, SecurityProcessingException reason) {
         super(subject, reason);
     }
 }
