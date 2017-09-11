@@ -1,7 +1,7 @@
 package org.holodeckb2b.common.testhelpers.events;
 
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandler;
+import org.holodeckb2b.interfaces.events.processing.IMessageProcessingEventHandler;
 
 /**
  * Created at 16:37 15.07.17

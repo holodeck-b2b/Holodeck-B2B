@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
+import org.holodeckb2b.events.receptionawareness.DuplicateReceivedEvent;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -110,9 +111,10 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
 
                 log.debug("Update processing state to duplicate");
                 HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.DUPLICATE);
-
                 // To prevent repeated delivery but still send a receipt set message as delivered
                 mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);
+                // Raise message processing event to inform other components of the duplicate message
+                HolodeckB2BCore.getEventProcessor().raiseEvent(new DuplicateReceivedEvent(um), null);
             }
 
             return InvocationResponse.CONTINUE;

@@ -18,7 +18,7 @@ package org.holodeckb2b.customvalidation;
 
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
-import org.holodeckb2b.interfaces.events.types.ICustomValidationFailedEvent;
+import org.holodeckb2b.interfaces.events.ICustomValidationFailedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**

@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
+import org.holodeckb2b.events.receptionawareness.MessageResentEvent;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -139,6 +140,8 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                                 storageManager.setProcessingState(um, ProcessingState.AWAITING_PULL);
                             }
                             log.debug("Message unit is ready for retransmission");
+                            // Raise message processing event to inform other components that message is resent
+                            HolodeckB2BCore.getEventProcessor().raiseEvent(new MessageResentEvent(um), null);
                         }
                     } else {
                             // Time to wait for receipt has not expired yet, wait longer

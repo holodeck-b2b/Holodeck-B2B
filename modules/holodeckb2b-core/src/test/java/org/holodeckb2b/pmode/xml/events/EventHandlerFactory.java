@@ -18,7 +18,7 @@ package org.holodeckb2b.pmode.xml.events;
 
 import java.util.Map;
 
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandlerFactory;
+import org.holodeckb2b.interfaces.events.processing.IMessageProcessingEventHandlerFactory;
 
 /**
  * An implementation of {@link IMessageProcessingEventHandlerFactory} for testing the event handler configuration

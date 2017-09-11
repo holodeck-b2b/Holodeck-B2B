@@ -18,9 +18,9 @@ package org.holodeckb2b.common.events;
 
 import org.holodeckb2b.common.testhelpers.pmode.EventHandlerConfig;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandler;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandlerFactory;
-import org.holodeckb2b.interfaces.events.MessageProccesingEventHandlingException;
+import org.holodeckb2b.interfaces.events.processing.IMessageProcessingEventHandler;
+import org.holodeckb2b.interfaces.events.processing.IMessageProcessingEventHandlerFactory;
+import org.holodeckb2b.interfaces.events.processing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.junit.Test;
 

@@ -24,7 +24,7 @@ import java.util.Map;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventConfiguration;
+import org.holodeckb2b.interfaces.events.processing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.pmode.IProtocol;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
