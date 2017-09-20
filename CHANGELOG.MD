@@ -14,7 +14,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 * Reverted back to version 2.0.4 of Apache Santuario library to fix unknown method issue in case
-  an exception occurs in the XML security processing  
+  an exception occurs in the XML security processing
+* StringIndexOutOfBoundsException when eb:Timestamp does not contain 'Z' indicator [#78](https://github.com/holodeck-b2b/Holodeck-B2B/issues/78) 
 
 ## 3.0.1
 ###### 2017-07-07
