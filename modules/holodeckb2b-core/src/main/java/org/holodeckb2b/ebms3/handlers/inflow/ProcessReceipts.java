@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -23,20 +24,15 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
-import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
-import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received receipt signals.
@@ -164,17 +160,22 @@ public class ProcessReceipts extends BaseHandler {
      * ProcessingState#AWAITING_PULL} and the previous state was {@link ProcessingState#AWAITING_RECEIPT}</li></ol>
      * <p>The check must always include the current state as we do not want to change a processing state that is final.
      *
-     * @param mu    The {@link IMessageUnit} to check
+     * @param mu    The {@link IMessageUnitEntity} to check
      * @return      <code>true</code> if the message unit is waiting for a receipt, <code>false</code> otherwise
+     * @throws org.holodeckb2b.interfaces.persistency.PersistenceException When the given message unit entity can not
+     *                                                                     be loaded from storage
      */
-    protected boolean isWaitingForReceipt(final IMessageUnit mu) {
-        // Check the previous state (there should be, but not guaranteed if receipt is in error)
-        List<IMessageUnitProcessingState>   states = mu.getProcessingStates();
-        ProcessingState prevState = null, curState = mu.getCurrentProcessingState().getState();
-        if (mu.getProcessingStates().size() > 1)
-            prevState = states.get(states.size() - 2).getState();
-        return curState == ProcessingState.AWAITING_RECEIPT
-               || (( curState == ProcessingState.AWAITING_PULL || curState == ProcessingState.READY_TO_PUSH )
-                    && prevState == ProcessingState.AWAITING_RECEIPT );
+    protected boolean isWaitingForReceipt(final IMessageUnitEntity mu) throws PersistenceException {
+        ProcessingState currentState = mu.getCurrentProcessingState().getState();
+        if (currentState == ProcessingState.AWAITING_RECEIPT)
+            return true;
+        else if (currentState == ProcessingState.AWAITING_PULL || currentState == ProcessingState.READY_TO_PUSH) {
+            // Check if the previous state was AWAITING_RECEIPT and we are now wiating for resend
+            if (!mu.isLoadedCompletely())
+                HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(mu);
+            return mu.getProcessingStates().get(mu.getProcessingStates().size() - 2).getState()
+                                                                                    == ProcessingState.AWAITING_RECEIPT;
+        } else
+            return false;
     }
 }

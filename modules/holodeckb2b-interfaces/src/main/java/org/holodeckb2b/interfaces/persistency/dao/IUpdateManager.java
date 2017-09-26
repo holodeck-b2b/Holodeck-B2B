@@ -63,13 +63,14 @@ public interface IUpdateManager {
 
     /**
      * Updates the processing state of the given message unit to the specified state.
-     * <p>Before changing the processing state this method checks that the message unit is in a specific state. The
-     * check and change need to be executed in one transaction to ensure that no other thread can make changes to the
-     * message unit's processing state.<br>
-     * The new processing state's  start time will be set to the current time.
+     * <p>If a current processing state is provided this method checks that the message unit is currently in this state
+     * before changing to the new state. The check and change need to be executed in one transaction to ensure that no
+     * other thread can make changes to the message unit's processing state.<br>
+     * The new processing state's start time will be set to the current time.
      *
      * @param msgUnit           The entity object representing the message unit
-     * @param currentProcState  The required current processing state of the message unit
+     * @param currentProcState  The required current processing state of the message unit or<br>
+     *                          <code>null</code> if the state should always be changed regardless of current state
      * @param newProcState      The new processing state
      * @return                  <code>true</code> if the processing state was changed,<br>
      *                          <code>false</code> if not because the current processing state has already changed
