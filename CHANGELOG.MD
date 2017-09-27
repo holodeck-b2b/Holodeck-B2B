@@ -46,11 +46,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Security
 
-## Unreleased (3.0.x)
+## Unreleased (3.1.x)
 ### Added
 * Support for the _type_ attribute of both _Message_ and _Part Properties_. See
   also [issue #2](https://issues.oasis-open.org/browse/EBXMLMSG-2) in the OASIS ebMS TC's issue tracker
 * Added the default temp directory to the distribution
+* Support for continuously running workers.
 
 ### Changed
 * Packaged the Holodeck B2B msh service as Axis2 aar file
@@ -59,6 +60,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 * Reverted back to version 2.0.4 of Apache Santuario library to fix unknown method issue in case
   an exception occurs in the XML security processing
+* StringIndexOutOfBoundsException when eb:Timestamp does not contain 'Z' indicator [#78](https://github.com/holodeck-b2b/Holodeck-B2B/issues/78)
+* Issue in Receipt processing when the referenced message was not completely loaded from storage
+  but previous processing states need to be evaluated
 
 ## 3.0.1
 ###### 2017-07-07
@@ -71,7 +75,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Body payload(s) not encrypted when message also contains other payloads [#70](https://github.com/holodeck-b2b/Holodeck-B2B/issues/70)
 
 ## 3.0.0
-###### 2017-04-18
+###### 2017-06-13
 ### Added
 * P-Mode validation feature which separates the validation of P-Modes from both their internal and external storage
 * The direction and processing states of a message unit are now available through the interfaces

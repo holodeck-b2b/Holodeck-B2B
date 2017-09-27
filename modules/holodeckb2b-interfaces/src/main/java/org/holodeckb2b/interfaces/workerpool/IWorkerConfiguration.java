@@ -17,7 +17,6 @@
 package org.holodeckb2b.interfaces.workerpool;
 
 import java.util.Map;
-
 import org.holodeckb2b.interfaces.general.Interval;
 
 /**
@@ -75,8 +74,8 @@ public interface IWorkerConfiguration {
     public int getConcurrentExecutions();
 
     /**
-     * Gets the time interval between repeated executions of the worker
-     * <p>When the task only needs to run once (or runs continuously from start) no interval should be specified.
+     * Gets the time interval between repeated executions of the worker. When the task only needs to run once no
+     * interval should be specified. If the task needs to run continuously the interval should be set to 0.
      *
      * @return  The interval between repeated executions or <code>null</code> when the worker should only be executed
      *          once.

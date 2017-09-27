@@ -109,11 +109,13 @@ public final class Utils {
             // Limit the number of digits to extract to 3 but use less if no more available
             final int S = Math.min(z-i-1, 3);
             s = s.substring(0, i + S + 1) + s.substring(z);
-            // Remove ':' from timezone
+            // Remove ':' from timezone (if there is a timezone)
             i = s.indexOf(":", i + S + 1);
-            s = s.substring(0, i) + s.substring(i+1);
-            // Set format
-            f = "yyyy-MM-dd'T'HH:mm:ss." + "SSS".substring(0, S)  +"Z";
+            f = "yyyy-MM-dd'T'HH:mm:ss." + "SSS".substring(0, S);
+            if (i > 0) {
+                s = s.substring(0, i) + s.substring(i + 1);
+                f = f + "Z";
+            }
         } else {
             // No fractional seconds, just remove the ':' from the timezone indication (when it is there)
             if (s.length() > 22 ) {

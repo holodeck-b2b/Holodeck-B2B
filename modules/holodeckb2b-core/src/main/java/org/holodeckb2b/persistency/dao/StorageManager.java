@@ -123,8 +123,8 @@ public class StorageManager {
     }
 
     /**
-     * Updates the processing state of the given message unit to the specified state.<br>
-     * The new processing state's  start time will be set to the current time.
+     * Updates the processing state of the given message unit to the specified state without checking the current state.
+     * <br>The start time of the new processing state will be set to the current time.
      *
      * @param msgUnit           The entity object representing the message unit
      * @param newProcState      The new processing state
@@ -132,7 +132,7 @@ public class StorageManager {
      */
     public void setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState newProcState)
                                                                                         throws PersistenceException {
-        this.setProcessingState(msgUnit, msgUnit.getCurrentProcessingState().getState(), newProcState);
+        this.setProcessingState(msgUnit, null, newProcState);
     }
 
     /**
@@ -140,7 +140,7 @@ public class StorageManager {
      * <p>Before changing the processing state this method checks that the message unit is in a specific state. The
      * check and change need to be executed in one transaction to ensure that no other thread can make changes to the
      * message unit's processing state.<br>
-     * The new processing state's  start time will be set to the current time.
+     * The new processing state's start time will be set to the current time.
      *
      * @param msgUnit           The entity object representing the message unit
      * @param currentProcState  The required current processing state of the message unit

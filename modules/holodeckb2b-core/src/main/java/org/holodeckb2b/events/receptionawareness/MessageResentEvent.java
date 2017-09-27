@@ -25,6 +25,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * been received and processed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @@since HB2B_NEXT_VERSION
  */
 public class MessageResentEvent extends AbstractMessageProcessingEvent implements IMessageResentEvent {
 
