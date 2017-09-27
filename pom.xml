@@ -28,7 +28,8 @@
     <url>http://www.holodeck-b2b.org/</url>
     <inceptionYear>2015</inceptionYear>
     <description>
-        A standard open source implementation of the AS4 profile of ebMS V3.
+        An open source B2B messaging solution that implements the OASIS specifications for ebXML Messaging version 3 and AS4 profile. 
+        It is designed with extensibility in mind providing an interface layer (API) which you can find in the Interfaces module and lots of documentation inside the code.
     </description>
 
     <scm>
@@ -48,15 +49,21 @@
             <organizationUrl>http://chasquis-consulting.com/holodeck-b2b-support/</organizationUrl>
             <email>sander at chasquis-consulting.com/</email>
             <roles>
+                <role>Architect</role>
                 <role>Lead developer</role>
             </roles>
+            <timezone>Europe/Amsterdam</timezone>
         </developer>
         <developer>
             <name>Renate Slebe</name>
+            <organization>Chasquis</organization>
+            <organizationUrl>http://chasquis-consulting.com/holodeck-b2b-support/</organizationUrl>
             <email>renate at chasquis-consulting.com</email>
             <roles>
-                <role>QA and Documentation</role>
+                <role>Product manager</role>
+                <role>QA and documentation</role>
             </roles>
+            <timezone>Europe/Amsterdam</timezone>
         </developer>
     </developers>
     <contributors>
@@ -191,9 +198,9 @@
                 <scope>runtime</scope>
             </dependency>
 
-            <!--===============================================================
-                Apache Tika is used in Common project to determine MIME Type
-            =============================================================== -->
+            <!--==================================================================
+                Apache Tika is used in the Common project to determine MIME Type
+            ================================================================== -->
             <dependency>
                 <groupId>org.apache.tika</groupId>
                 <artifactId>tika-core</artifactId>
