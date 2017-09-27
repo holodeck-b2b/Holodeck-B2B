@@ -21,7 +21,8 @@ import org.holodeckb2b.interfaces.events.IMessageUnitPurgedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
- * Is the implementation class of {@link IMessageUnitPurgedEvent} to indicate that
+ * Is the implementation class of {@link IMessageUnitPurgedEvent} to indicate that a message unit is to deleted from the
+ * Holodeck B2B Core message database because the period for maintaining it's meta-data has expired.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  2.1.0

@@ -17,8 +17,11 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.holodeckb2b.ebms3.errors.OtherContentError;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
+import org.holodeckb2b.events.MessageDeliveryEvent;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
@@ -57,6 +60,7 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
         if(updateManager.setProcessingState(um, ProcessingState.READY_FOR_DELIVERY, ProcessingState.OUT_FOR_DELIVERY)) {
             // Message can be delivered to business application
             log.debug("Start delivery of user message");
+            MessageDeliveryException failure = null;
             try {
                 // Get the delivery specification from the P-Mode
                 final IPMode pmode = HolodeckB2BCore.getPModeSet().get(um.getPModeId());
@@ -82,12 +86,17 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
                 log.debug("Set the processing state to delivered");
                 updateManager.setProcessingState(um, ProcessingState.DELIVERED);
             } catch (final MessageDeliveryException ex) {
+                failure = ex;
                 log.error("Could not deliver the user message [msgId=" + um.getMessageId()
-                            + "] using specified delivery method!"
-                            + "\n\tError details: " + ex.getMessage());
+                            + "] using specified delivery method!" + "\n\tError details: " + ex.getMessage());
                 // Indicate failure in processing state
                 updateManager.setProcessingState(um, ProcessingState.DELIVERY_FAILED);
+                // If the problem that occurred is indicated as permanent, we can return an Error to the sender
+                MessageContextUtils.addGeneratedError(mc, new OtherContentError("Message delivery impossible!",
+                                                                                um.getMessageId()));
             }
+            // Raise delivery event to inform external components
+            HolodeckB2BCore.getEventProcessor().raiseEvent(new MessageDeliveryEvent(um, failure == null, failure), mc);
         } else {
             // This message is not ready for delivery now which is caused by it already been delivered by another
             // thread. This however should not occur normaly.

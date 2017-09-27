@@ -18,6 +18,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   introducing the _Holodeck B2B Security Provider_ concept
 * A default _security provider_ implementation. Similar to the older versions based on the WSS4J libraries
   but now using seperate keystores for encryption and signature verification certificates.
+* Message processing events for delivery attempts of message units and security processing, e.g. signature creation and
+  validation, en-/decryption, etc. See package `org.holodeckb2b.interfaces.events` and its descendants.
+* Option to indicate that a problem in delivery of the message is permanent and an ebMS Error can be returned to the
+  sender of the message.
 
 ### Changed
 * Refactored the validation of the ebMS header meta-data validation classes and handler
