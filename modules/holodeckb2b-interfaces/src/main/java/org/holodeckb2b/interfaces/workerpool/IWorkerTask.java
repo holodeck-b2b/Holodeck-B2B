@@ -21,13 +21,14 @@ import java.util.Map;
 /**
  * Is an interface defining a task to be executed by a worker in a WorkerPool.
  * <p>Tasks implement the functionality that should be executed by a worker. They do not need to manage the execution
- * itself. This is done by the WorkerPool. By separating thread management and task functionality the worker
- * task only needs to focus on the task on hand.
+ * itself. This is done by the WorkerPool. By separating thread management and task functionality the worker tasks only
+ * needs to focus on the task on hand.
  * <p><b>NOTES:</b><ul>
- * <li>Implementations MUST handle interrupts correctly and SHOULD stop processing as soon as possible when an interrupt is received.</li>
+ * <li>Implementations MUST handle interrupts correctly and SHOULD stop processing as soon as possible when an interrupt
+ *     is received.</li>
  * <li>Implementations SHOULD be thread safe as the task can be run in parallel!</li>
  * <li>When the task should executed more than once implementations SHOULD prevent unhandled exceptions to occur in the
- * {@link #run()} method as these will stop the thread and prevent repeated executing!</li>
+ *     {@link #run()} method as these will stop the thread and prevent repeated executing!</li>
  * </ul>
  *
  * @author Sander Fieten <sander@holodeck-b2b.org>

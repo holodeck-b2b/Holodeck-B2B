@@ -22,7 +22,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.interfaces.general.Interval;
@@ -288,18 +287,20 @@ public class WorkerPool {
                 rWorker.task.setParameters(workerCfg.getTaskParameters());
 
                 final Interval    interval = workerCfg.getInterval();
-                if (interval != null)
+                if (interval != null && interval.getLength() > 0)
                     // Because the initial delay must be in same timeunit as interval it needs to be converted
                     rWorker.runningWorker = pool.scheduleWithFixedDelay(rWorker.task,
                                                                interval.getUnit().convert(delay, TimeUnit.MILLISECONDS),
                                                                interval.getLength(), interval.getUnit());
-                else if (delay > 0)
-                    rWorker.runningWorker = pool.schedule(rWorker.task, delay, TimeUnit.MILLISECONDS);
-                else
-                    rWorker.runningWorker = pool.submit(rWorker.task);
-
-                workers.add(rWorker);
-                log.debug("Added new worker instance [" + workerCfg.getName() + "] to the pool");
+                else {
+                    // If the interval is set to 0, this task should run continuously, therefore wrap it
+                    if (interval != null && interval.getLength() == 0)
+                        rWorker.task = new ContinuousWorkerRunner(rWorker.task);
+                    if (delay > 0)
+                        rWorker.runningWorker = pool.schedule(rWorker.task, delay, TimeUnit.MILLISECONDS);
+                    else
+                        rWorker.runningWorker = pool.submit(rWorker.task);
+                }
             }
         } catch (final ClassNotFoundException cnfe) {
             log.error("Unable to add worker " + workerCfg.getName() + " because task class [" + workerCfg.getWorkerTask() + "] could not be found");

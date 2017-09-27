@@ -29,17 +29,19 @@ import org.simpleframework.xml.Root;
  *
  * <p>The XML element containing the configuration is shown here:
  * <pre>
- *      &lt;worker
- *          name=<i>String : Name of this worker</i>
- *          activate=<i>boolean : Should this worker be active?</i>
- *          delay=<i>integer : The delay in seconds before starting the worker. Optional parameter, default = 0 (start immediately)</li></i>
- *          workerClass=<i>string : Name of the class that implements the workers functionality</i>
- *          concurrent=<i>integer : The number of concurrent executions. Optional parameter, default = 1</i>
- *          interval=<i>integer : If the worker should run repeatedly, the delay between executions in seconds</i>
- *      &gt;
- *          &lt;-- <i>The worker may need some configuration settings. These can be supplied by adding one or more param child elements</i>--&gt;
- *          &lt;parameter name=<i>string : Name of the parameter</i>&gt;Value of the parameter&lt;/parameter&gt;
- *      &lt;/worker&gt;<br>
+ *  &lt;worker
+ *      name=<i>String : Name of this worker</i>
+ *      activate=<i>boolean : Should this worker be active?</i>
+ *      delay=<i>integer : The delay in seconds before starting the worker. Optional parameter, default = 0 (start immediately)</li></i>
+ *      workerClass=<i>string : Name of the class that implements the workers functionality</i>
+ *      concurrent=<i>integer : The number of concurrent executions. Optional parameter, default = 1</i>
+ *      interval=<i>integer : If the worker should run repeatedly, the delay between executions in seconds.
+ *                         Optional, when not included the worker will be executed just once. If set to 0 it will
+ *                         run continuously.</i>
+ *  &gt;
+ *      &lt;-- <i>The worker may need some configuration settings. These can be supplied by adding one or more param child elements</i>--&gt;
+ *      &lt;parameter name=<i>string : Name of the parameter</i>&gt;Value of the parameter&lt;/parameter&gt;
+ *  &lt;/worker&gt;<br>
  * </pre>
  *
  * @author Sander Fieten <sander@holodeck-b2b.org>
@@ -63,7 +65,7 @@ public class XMLWorkerConfig implements IWorkerConfiguration {
     private int concurrent;
 
     @Attribute(name="interval", required=false)
-    private int xmlInterval;
+    private int xmlInterval = -1;
 
     private Interval    interval;
 
@@ -103,7 +105,7 @@ public class XMLWorkerConfig implements IWorkerConfiguration {
 
     @Override
     public Interval getInterval() {
-        if (xmlInterval > 0 && interval == null)
+        if (xmlInterval >= 0 && interval == null)
             interval = new Interval(xmlInterval, TimeUnit.SECONDS);
 
         return interval;
