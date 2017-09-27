@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>next-201702-SNAPSHOT-8</version>
+        <version>next-201702-SNAPSHOT-9</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>holodeckb2b-security</artifactId>
