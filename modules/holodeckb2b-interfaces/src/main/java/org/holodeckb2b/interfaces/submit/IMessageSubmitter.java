@@ -42,29 +42,6 @@ public interface IMessageSubmitter {
      * <p>It is NOT REQUIRED that the meta data contains a reference to the P-Mode that should be used to handle the
      * message. The first action of a <i>MessageSubmitter</i> is to find the correct P-Mode for the user message. It is
      * however RECOMMENDED to include the P-Mode id to prevent mismatches.
-     * <p><b>NOTE:<b> This method is <b>DEPRECATED</b> and should not be used anymore for new developments! Use the new
-     * method where you can specify handling of the payloads, i.e. whether they should be deleted from their current
-     * location or not.
-     *
-     * @param um    The meta data on the user message to be sent to the other trading partner.
-     * @return      The ebMS message-id assigned to the user message.
-     * @throws MessageSubmitException   When the user message can not be submitted successfully. Reasons for failure can
-     *                                  be that no P-Mode can be found to handle the message or the given P-Mode
-     *                                  conflicts with supplied meta-data.
-     */
-    @Deprecated
-    public String submitMessage(IUserMessage um) throws MessageSubmitException;
-
-    /**
-     * Submits the specified <b>User Message</b> to Holodeck B2B for sending.
-     * <p>Whether the message will be sent immediately depends on the P-Mode that applies and the MEP being specified
-     * therein. If the MEP is Push the Holodeck B2B will try to send the message immediately. When the MEP is Pull the
-     * message is stored for retrieval by the receiving MSH.
-     * <p><b>NOTE:</b> This method MAY return before the message is actually sent to the receiver. Successful return
-     * ONLY GUARANTEES that the message CAN be sent to the receiver and that Holodeck B2B will try to do so.
-     * <p>It is NOT REQUIRED that the meta data contains a reference to the P-Mode that should be used to handle the
-     * message. The first action of a <i>MessageSubmitter</i> is to find the correct P-Mode for the user message. It is
-     * however RECOMMENDED to include the P-Mode id to prevent mismatches.
      *
      * @param um                    The meta data on the user message to be sent to the other trading partner.
      * @param deletePayloadFiles    Indicator whether the files containing the payload data must be deleted or not

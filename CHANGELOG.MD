@@ -45,6 +45,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   supported.
 
 ### Removed
+* Deprecated method `IMessageSubmitter.submitMessage(IUserMessage)` and corresponding implementation
 
 ### Fixed
 

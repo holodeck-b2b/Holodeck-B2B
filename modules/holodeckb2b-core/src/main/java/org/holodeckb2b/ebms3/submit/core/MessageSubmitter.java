@@ -54,12 +54,6 @@ public class MessageSubmitter implements IMessageSubmitter {
 
     private static final Log log = LogFactory.getLog(MessageSubmitter.class.getName());
 
-    @Override
-    @Deprecated
-    public String submitMessage(final IUserMessage um) throws MessageSubmitException {
-        return submitMessage(um, false);
-    }
-
     /**
      * Submits the specified <b>User Message</b> to Holodeck B2B for sending.
      * <p>Whether the message will be sent immediately depends on the P-Mode that applies and the MEP being specified
