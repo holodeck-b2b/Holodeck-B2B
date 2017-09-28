@@ -61,6 +61,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Packaged the Holodeck B2B msh service as Axis2 aar file
 * Included the Holodeck B2B module meta-data in the Core jar file
+* Sending of Pull Requests is now done by the `SenderWorker` instead of `PullWorker`
 
 ### Fixed
 * Reverted back to version 2.0.4 of Apache Santuario library to fix unknown method issue in case
@@ -68,6 +69,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * StringIndexOutOfBoundsException when eb:Timestamp does not contain 'Z' indicator [#78](https://github.com/holodeck-b2b/Holodeck-B2B/issues/78)
 * Issue in Receipt processing when the referenced message was not completely loaded from storage
   but previous processing states need to be evaluated
+* Pull Requests directly submitted to the Core are never send
 
 ## 3.0.1
 ###### 2017-07-07

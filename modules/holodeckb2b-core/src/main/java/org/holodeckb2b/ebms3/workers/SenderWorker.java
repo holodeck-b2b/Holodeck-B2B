@@ -16,8 +16,6 @@
  */
 package org.holodeckb2b.ebms3.workers;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
@@ -26,12 +24,8 @@ import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.ebms3.axis2.Axis2Sender;
-import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.messagemodel.IReceipt;
-import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
@@ -59,28 +53,14 @@ public class SenderWorker extends AbstractWorkerTask {
     public void doProcessing() {
         try {
             log.debug("Getting list of message units to send");
-            final List<IMessageUnitEntity> newMsgs = new ArrayList<>();
-            final IQueryManager queryManager = HolodeckB2BCore.getQueryManager();
-            // Add all User Messages waiting to be sent
-            Collection<? extends IMessageUnitEntity> msgUnits = queryManager.getMessageUnitsInState(IUserMessage.class,
+            List<IMessageUnitEntity> msgUnitsToSend = HolodeckB2BCore.getQueryManager()
+                                                               .getMessageUnitsInState(IMessageUnit.class,
                                                                 IMessageUnit.Direction.OUT,
                                                                 new ProcessingState[] {ProcessingState.READY_TO_PUSH});
-            if (!Utils.isNullOrEmpty(msgUnits))
-                newMsgs.addAll(msgUnits);
-            // Add all Receipts waiting to be sent
-            msgUnits = queryManager.getMessageUnitsInState(IReceipt.class, IMessageUnit.Direction.OUT,
-                                                                new ProcessingState[] {ProcessingState.READY_TO_PUSH});
-            if (!Utils.isNullOrEmpty(msgUnits))
-                newMsgs.addAll(msgUnits);
-            // Add all Errors waiting to be sent
-            msgUnits = queryManager.getMessageUnitsInState(IErrorMessage.class, IMessageUnit.Direction.OUT,
-                                                                new ProcessingState[] {ProcessingState.READY_TO_PUSH});
-            if (!Utils.isNullOrEmpty(msgUnits))
-                newMsgs.addAll(msgUnits);
 
-            if (!Utils.isNullOrEmpty(newMsgs)) {
-                log.info("Found " + newMsgs.size() + " message units to send");
-                for (final IMessageUnitEntity msgUnit : newMsgs) {
+            if (!Utils.isNullOrEmpty(msgUnitsToSend)) {
+                log.info("Found " + msgUnitsToSend.size() + " message units to send");
+                for (final IMessageUnitEntity msgUnit : msgUnitsToSend) {
                     // Only message units associated with a P-Mode can be send
                     if (Utils.isNullOrEmpty(msgUnit.getPModeId())) {
                         log.error("Can not sent message [" + msgUnit.getMessageId()
