@@ -22,11 +22,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.messagemodel.PullRequest;
-import org.holodeckb2b.ebms3.axis2.Axis2Sender;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
@@ -183,17 +180,12 @@ public class PullWorker implements IWorkerTask {
             log.debug("Using [" + mpc + "] as MPC for pull request");
 
             try {
-                log.debug("Create the PullRequest signal for P-Mode [" + p.getId() + "] and MPC=" + mpc);
+                // Submit the PullRequest to the Core, actual sending will be done by SenderWorker
                 final String messageId = HolodeckB2BCore.getMessageSubmitter()
                                                         .submitMessage(new PullRequest(p.getId(), mpc));
-                final IPullRequestEntity pullRequest = (IPullRequestEntity) HolodeckB2BCore.getQueryManager()
-                                                                    .getMessageUnitsWithId(messageId).iterator().next();
-                log.info("Start send process for PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
-                Axis2Sender.sendMessage(pullRequest, log);
+                log.info("Submitted the PullRequest signal for P-Mode [" + p.getId() + "] and MPC=" + mpc);
             } catch (final MessageSubmitException ex) {
                     log.error("Could not submit PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
-            } catch (PersistenceException ex) {
-                    log.error("Could not retrieve the created PullRequest from the database");
             }
         }
     }

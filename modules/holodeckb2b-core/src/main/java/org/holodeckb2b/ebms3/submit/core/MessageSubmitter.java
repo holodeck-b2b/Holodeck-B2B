@@ -35,6 +35,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -152,8 +153,10 @@ public class MessageSubmitter implements IMessageSubmitter {
         try {
             log.debug("Create and add PullRequest to database");
             PullRequest submission = new PullRequest(pullRequest);
-            submission.setProcessingState(ProcessingState.SUBMITTED);
-            prMessageId = HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(submission).getMessageId();
+            IPullRequestEntity submittedPR = HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(submission);
+            prMessageId = submittedPR.getMessageId();
+            // Indicate that the PR can be directly pushed to other MSH
+            HolodeckB2BCore.getStorageManager().setProcessingState(submittedPR, ProcessingState.READY_TO_PUSH);
             log.info("Submitted PullRequest, assigned messageId=" + prMessageId);
         } catch (final PersistenceException ex) {
             log.error("Could not create the PullRequest because a error occurred in the database! Details: "
