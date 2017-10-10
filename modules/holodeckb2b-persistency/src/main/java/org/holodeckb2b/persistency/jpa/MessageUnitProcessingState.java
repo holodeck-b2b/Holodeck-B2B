@@ -56,6 +56,15 @@ public class MessageUnitProcessingState implements IMessageUnitProcessingState, 
         return  START;
     }
 
+    public void setDescription(final String descr) {
+        this.DESCRIPTION = descr;
+    }
+
+    @Override
+    public String getDescription() {
+        return DESCRIPTION;
+    }
+
     public void setSeqNumber(final int n) {
         this.PROC_STATE_NUM = n;
     }
@@ -81,6 +90,7 @@ public class MessageUnitProcessingState implements IMessageUnitProcessingState, 
     public MessageUnitProcessingState(final IMessageUnitProcessingState state) {
         this.STATE = state.getState();
         this.START = state.getStartTime();
+        this.DESCRIPTION = state.getDescription();
     }
 
     /*
@@ -113,4 +123,6 @@ public class MessageUnitProcessingState implements IMessageUnitProcessingState, 
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date        START;
+
+    private String      DESCRIPTION;
 }

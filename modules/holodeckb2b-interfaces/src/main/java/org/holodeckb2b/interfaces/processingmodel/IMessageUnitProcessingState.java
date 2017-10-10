@@ -44,4 +44,14 @@ public interface IMessageUnitProcessingState {
      * @return The {@link Date} the message unit entered this processing state
      */
     Date    getStartTime();
+
+    /**
+     * Gets an additional description regarding the details of the processing state.
+     * <p>This optional attribute can for example be used to provide additional information on the method used for
+     * delivery or reasons why the message processing failed.
+     *
+     * @return The details on this processing state, may be <code>null</code>
+     * @since HB2B_NEXT_VERSION
+     */
+    String getDescription();
 }

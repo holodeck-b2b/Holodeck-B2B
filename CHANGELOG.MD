@@ -22,6 +22,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   validation, en-/decryption, etc. See package `org.holodeckb2b.interfaces.events` and its descendants.
 * Option to indicate that a problem in delivery of the message is permanent and an ebMS Error can be returned to the
   sender of the message.
+* Added 'IMessageProcessingState.getDescription()' method so an additional description on the processing state of a
+  message unit can be stored.
 
 ### Changed
 * Refactored the validation of the ebMS header meta-data validation classes and handler

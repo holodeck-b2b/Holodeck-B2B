@@ -31,6 +31,7 @@ public class MessageProcessingState implements IMessageUnitProcessingState {
 
         private ProcessingState state;
         private Date            startTime;
+        private String          description;
 
         /**
          * Creates a new <code>MessageProcessingState</code> object with the given state and the current time as start
@@ -38,6 +39,7 @@ public class MessageProcessingState implements IMessageUnitProcessingState {
         public MessageProcessingState(final ProcessingState state) {
             this.state = state;
             this.startTime = new Date();
+            this.description = null;
         }
 
         /**
@@ -49,6 +51,7 @@ public class MessageProcessingState implements IMessageUnitProcessingState {
             if (sourceState != null) {
                 this.state = sourceState.getState();
                 this.startTime = sourceState.getStartTime();
+                this.description = sourceState.getDescription();
             }
         }
 
@@ -60,5 +63,10 @@ public class MessageProcessingState implements IMessageUnitProcessingState {
         @Override
         public Date getStartTime() {
             return startTime;
+        }
+
+        @Override
+        public String getDescription() {
+            return description;
         }
     }
