@@ -19,9 +19,8 @@ package org.holodeckb2b.interfaces.events;
 import org.holodeckb2b.interfaces.delivery.*;
 
 /**
- * Is the <i>message processing event</i> that indicates that an attempt to deliver a message unit to the business
- * application was executed. This event is triggered for all types of message units when a <i>delivery method</i> is
- * specified for it in the P-Mode governing its processing.
+ * Is the <i>message processing event</i> that indicates that an attempt to deliver a <i>User Message</i> message unit
+ * to the business application was executed.
  * <p>When the delivery attempt failed, i.e. a {@link MessageDeliveryException} was thrown in the delivery process, the
  * cause of failure is included in the event.
  *

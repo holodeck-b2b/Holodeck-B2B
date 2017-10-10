@@ -21,11 +21,11 @@ import java.util.Map;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidatorConfiguration;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 
 /**
- * Is the <i>message processing event</i> that indicates that the custom validation of a message unit has failed. This
- * event is to inform the back-end business application (or Connector) about possible issues with the message unit.
+ * Is the <i>message processing event</i> that indicates that the custom validation of a m<i>User Message</i> message
+ * unit has failed. This event is to inform the back-end business application (or Connector) about possible issues with
+ * the message unit.
  * <p>NOTE: This event is always raised in case a validation error occurs, regardless whether message processing
  * continues or not.
  *
