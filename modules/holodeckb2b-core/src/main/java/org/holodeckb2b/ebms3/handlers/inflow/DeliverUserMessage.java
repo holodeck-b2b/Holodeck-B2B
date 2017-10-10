@@ -91,9 +91,13 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
                             + "] using specified delivery method!" + "\n\tError details: " + ex.getMessage());
                 // Indicate failure in processing state
                 updateManager.setProcessingState(um, ProcessingState.DELIVERY_FAILED);
-                // If the problem that occurred is indicated as permanent, we can return an Error to the sender
-                MessageContextUtils.addGeneratedError(mc, new OtherContentError("Message delivery impossible!",
+                // If the problem that occurred is indicated as permanent, we can set the state to FAILURE and return
+                //  an ebMS Error to the sender
+                if (ex.isPermanent()) {
+                    updateManager.setProcessingState(um, ProcessingState.FAILURE);
+                    MessageContextUtils.addGeneratedError(mc, new OtherContentError("Message delivery impossible!",
                                                                                 um.getMessageId()));
+                }
             }
             // Raise delivery event to inform external components
             HolodeckB2BCore.getEventProcessor().raiseEvent(new MessageDeliveryEvent(um, failure == null, failure), mc);
