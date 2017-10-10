@@ -14,22 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.ebms3.headervalidation.validators;
+package org.holodeckb2b.core.validation.header;
 
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 
 /**
- * Provides the validation of the ebMS header information specific for <i>Pull Request</i> message units.
+ * Provides the validation of the ebMS header information specific for <i>Receipt</i> message units.
  *
  * @author Sander Fieten <sander at chasquis-services.com>
  * @since  HB2B_NEXT_VERSION
  */
-public class PullRequestValidator extends GeneralMessageUnitValidator  {
+class ReceiptValidator extends GeneralMessageUnitValidator {
 
     /**
-     * Performs the basic validation of the ebMS header meta-data specific for a Pull Request signal message unit.
-     * <p>The basic validation only ensures that there is no <i>refToMessageId</i> in the header.
+     * Performs the basic validation of the ebMS header meta-data specific for a Receipt signal message unit.
+     * <p>In addition to the general checks on the header this includes a check that a reference to another message unit
+     * is provided. As for processing by Holodeck B2B the Receipt content in not required the check on Receipt content
+     * is moved to the strict validation.
      *
      * @param messageUnit           The message unit which header must be validated
      * @param validationErrors      The string that is being build containing a description of all validation errors
@@ -40,14 +43,14 @@ public class PullRequestValidator extends GeneralMessageUnitValidator  {
         // First do genereal validation
         super.doBasicValidation(messageUnit, validationErrors);
 
-        // Check that no RefToMessageId is included
-        if (!Utils.isNullOrEmpty(messageUnit.getRefToMessageId()))
-            validationErrors.append("There must be no RefToMessageId\n");
+        // Check that a RefToMessageId is included
+        if (Utils.isNullOrEmpty(messageUnit.getRefToMessageId()))
+            validationErrors.append("RefToMessageId is missing\n");
     }
 
     /**
-     * Performs the strict validation of the ebMS header meta-data specific for a Pull Request signal message unit
-     * <p>
+     * Performs the strict validation of the ebMS header meta-data specific for a Receipt signal message unit
+     * <p>Checks that the <code>Receipt</code> element does contain at least one child element.
      *
      * @param messageUnit           The message unit which header must be validated
      * @param validationErrors      The string that is being build containing a description of all validation errors
@@ -58,7 +61,7 @@ public class PullRequestValidator extends GeneralMessageUnitValidator  {
         // First do genereal validation
         super.doStrictValidation(messageUnit, validationErrors);
 
-
+        if (((IReceipt) messageUnit).getContent().isEmpty())
+            validationErrors.append("Receipt content is missing\n");
     }
-
 }

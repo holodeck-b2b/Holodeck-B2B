@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.ebms3.headervalidation.validators;
+package org.holodeckb2b.core.validation.header;
 
 import java.util.Iterator;
 import org.holodeckb2b.common.util.Utils;
@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * @author Sander Fieten <sander at chasquis-services.com>
  * @since  HB2B_NEXT_VERSION
  */
-public class ErrorSignalValidator extends GeneralMessageUnitValidator {
+class ErrorSignalValidator extends GeneralMessageUnitValidator {
 
     /**
      * Checks the meta-data on a Error signal to contain at least the required information for further processing.

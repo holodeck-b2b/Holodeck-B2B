@@ -14,15 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.ebms3.headervalidation;
+package org.holodeckb2b.core.validation.header;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
-import org.holodeckb2b.ebms3.headervalidation.validators.ErrorSignalValidator;
-import org.holodeckb2b.ebms3.headervalidation.validators.PullRequestValidator;
-import org.holodeckb2b.ebms3.headervalidation.validators.ReceiptValidator;
-import org.holodeckb2b.ebms3.headervalidation.validators.UserMessageValidator;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.ebms3.headervalidation;
+package org.holodeckb2b.core.validation.header;
 
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 

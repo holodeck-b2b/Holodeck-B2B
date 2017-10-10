@@ -17,7 +17,7 @@
 package org.holodeckb2b.module;
 
 import org.holodeckb2b.common.config.InternalConfiguration;
-import org.holodeckb2b.customvalidation.ICustomValidationExecutor;
+import org.holodeckb2b.core.validation.custom.ICustomValidationExecutor;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.security.ISecurityProvider;

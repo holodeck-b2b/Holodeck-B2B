@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.ebms3.headervalidation.validators;
+package org.holodeckb2b.core.validation.header;
 
 import java.util.Collection;
 import org.holodeckb2b.common.util.Utils;
@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * @author Sander Fieten <sander at chasquis-services.com>
  * @since  HB2B_NEXT_VERSION
  */
-public class UserMessageValidator extends GeneralMessageUnitValidator {
+class UserMessageValidator extends GeneralMessageUnitValidator {
 
     /**
      * Performs the basic validation of the ebMS header meta-data specific for a Receipt signal message unit.
@@ -78,7 +78,7 @@ public class UserMessageValidator extends GeneralMessageUnitValidator {
 
     /**
      * Performs the strict validation of the ebMS header meta-data specific for a User Message message unit
-     * <p>Checks that 
+     * <p>Checks that
      *
      * @param messageUnit           The message unit which header must be validated
      * @param validationErrors      The string that is being build containing a description of all validation errors

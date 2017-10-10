@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.customvalidation;
+package org.holodeckb2b.core.validation.custom;
 
 import java.util.Collection;
 import java.util.HashMap;
