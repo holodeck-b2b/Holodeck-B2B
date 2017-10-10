@@ -230,7 +230,7 @@ public class QueryManager implements IQueryManager {
     }
 
     @Override
-    public boolean isAlreadyDelivered(String messageId) throws PersistenceException {
+    public boolean isAlreadyProcessed(String messageId) throws PersistenceException {
         boolean result = false;
         final EntityManager em = EntityManagerUtil.getEntityManager();
 
@@ -238,14 +238,17 @@ public class QueryManager implements IQueryManager {
                            + "FROM UserMessage um JOIN um.states s1 "
                            + "WHERE um.DIRECTION = :direction AND um.MESSAGE_ID = :msgId "
                            + "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM um.states s2) "
-                           + "AND s1.STATE = :state";
+                           + "AND s1.STATE IN :states";
         try {
             em.getTransaction().begin();
             result = "true".equals(em.createQuery(query)
                                      .setParameter("direction", IMessageUnit.Direction.IN)
                                      .setParameter("msgId", messageId)
-                                     .setParameter("state", ProcessingState.DELIVERED)
-                                     .getSingleResult());
+                                     .setParameter("states", Arrays.asList(new ProcessingState[]
+                                                                                    { ProcessingState.DELIVERED,
+                                                                                      ProcessingState.FAILURE }))
+                                     .getSingleResult()
+                                  );
         } catch (final NoResultException nothingFound) {
             result = false;
         } catch (final Exception e) {

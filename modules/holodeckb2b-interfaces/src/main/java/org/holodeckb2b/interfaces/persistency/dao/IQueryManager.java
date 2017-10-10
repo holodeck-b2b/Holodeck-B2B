@@ -134,16 +134,18 @@ public interface IQueryManager {
     int getNumberOfTransmissions(final IUserMessageEntity userMessage) throws PersistenceException;
 
     /**
-     * Checks whether there exists a <b>received</b> <i>Message Unit</i> with the given <code>MessageId</code> that has
-     * already been delivered, i.e. its <i>current</i> processing state is {@link ProcessingState#DELIVERED}.
+     * Checks whether there exists a <b>received</b> <i>User Message</i> message unit with the given <code>MessageId
+     * </code> that has already been processed completely, i.e. its <i>current</i> processing state is either {@link
+     * ProcessingState#DELIVERED} or {@link ProcessingState#FAILURE}.
      *
      * @param messageId   The <code>MessageId</code> to check delivery for
      * @return            <code>true</code> if there exists a User Message entity with {@link
      *                    IUserMessage#getMessageId()} == <code>messageId</code> and {@link IUserMessage#getDirection()}
-     *                    == <code>OUT</code> and {@link IUserMessage#getCurrentProcessingState()} == {@link
-     *                    ProcessingStates#DELIVERED},
+     *                    == <code>IN</code> and {@link IUserMessage#getCurrentProcessingState()} ==
+     *                    {@link ProcessingStates.DELIVERED} | {@link ProcessingStates.FAILURE},
      *                    <br><code>false</code> otherwise.
      * @throws PersistenceException If an error occurs when executing this query
+     * @since HB2B_NEXT_VERSION
      */
-    boolean isAlreadyDelivered(final String messageId) throws PersistenceException;
+    boolean isAlreadyProcessed(final String messageId) throws PersistenceException;
 }

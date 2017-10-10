@@ -33,6 +33,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Refactored package structure of event interfaces: interfaces related to processing of events moved to
   `org.holodeckb2b.interfaces.events.processing` and event definitions in `org.holodeckb2b.interfaces.events`,
   `org.holodeckb2b.interfaces.events.security` and `org.holodeckb2b.interfaces.events.receptionawareness`
+* Refactored `IQueryManager.isAlreadyDelivered()` to `IQueryManager.isAlreadyProcessed()` to take also failed message
+  units into account when determining if user message is already processed and should be considered a duplicate.
 
 ### Deprecated
 * The configuration parameter (`IConfiguation.allowSignalBundling()`) which was used to indicate that it was allowed to

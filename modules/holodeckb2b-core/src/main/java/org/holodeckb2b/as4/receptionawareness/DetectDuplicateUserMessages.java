@@ -102,12 +102,12 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
                         + "] has already been delivered");
 
             boolean isDuplicate = false;
-            isDuplicate = HolodeckB2BCore.getQueryManager().isAlreadyDelivered(msgId);
+            isDuplicate = HolodeckB2BCore.getQueryManager().isAlreadyProcessed(msgId);
             if (isDuplicate) {
-                log.debug("UserMessage [msgId=" + msgId + "] has already been delivered");
+                log.debug("UserMessage [msgId=" + msgId + "] has already been processed");
                 // Also log in special duplicate log
                 duplicateLog.info("UserMessage [msgId=" + msgId
-                                            + "] is a duplicate of an already delivered message");
+                                            + "] is a duplicate of an already processed message");
 
                 log.debug("Update processing state to duplicate");
                 HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.DUPLICATE);

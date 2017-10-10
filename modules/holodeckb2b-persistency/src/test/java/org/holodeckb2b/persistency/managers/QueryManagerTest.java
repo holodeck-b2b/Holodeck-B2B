@@ -109,15 +109,12 @@ public class QueryManagerTest {
     }
 
     @Test
-    public void isAlreadyDelivered() throws PersistenceException {
-        // First one with message Id which is not a User Message
-        assertFalse(queryManager.isAlreadyDelivered(TestData.error4.getMessageId()));
-
+    public void isAlreadyProcessed() throws PersistenceException {
         // Then a delivered User Message
-        assertTrue(queryManager.isAlreadyDelivered(TestData.userMsg5.getMessageId()));
+        assertTrue(queryManager.isAlreadyProcessed(TestData.userMsg5.getMessageId()));
 
         // And one that is not yet delivered
-        assertFalse(queryManager.isAlreadyDelivered(TestData.userMsg3.getMessageId()));
+        assertFalse(queryManager.isAlreadyProcessed(TestData.userMsg3.getMessageId()));
     }
 
     @Test
