@@ -426,8 +426,9 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                 }
                 // As WSS4J does not report the key transport detail, we need to collect them directly from the
                 // EncryptedKey element
-                final Element encryptionMethod = wss4jDocInfo.getTokenElement(
-                                                                 (String) decResult.get(WSSecurityEngineResult.TAG_ID));
+                final Element encryptionMethod = (Element) wss4jDocInfo.getTokenElement(
+                                                                 (String) decResult.get(WSSecurityEngineResult.TAG_ID))
+                                                                       .getFirstChild();
                 for(int i = 0; i < encryptionMethod.getChildNodes().getLength() ; i++) {
                     Node child = encryptionMethod.getChildNodes().item(i);
                     switch (child.getLocalName()) {
