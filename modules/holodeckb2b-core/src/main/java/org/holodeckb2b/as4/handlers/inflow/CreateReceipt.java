@@ -124,7 +124,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
 
             log.debug("Determine type of Receipt that should be sent");
             // Check if message was signed,
-            if (mc.getProperties().containsKey(MessageContextProperties.SIG_VERIFICATION_RESULT)) {
+            if (mc.getProperty(MessageContextProperties.SIG_VERIFICATION_RESULT) != null) {
                 log.debug("Received message was signed, created NRR receipt");
                 rcptData.setContent(createNRRContent(mc));
             } else {
