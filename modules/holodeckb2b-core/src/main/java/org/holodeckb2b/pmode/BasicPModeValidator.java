@@ -115,7 +115,7 @@ public class BasicPModeValidator implements IPModeValidator {
         ITradingPartnerConfiguration tpCfg = pmode.getInitiator();
         ISecurityConfiguration secCfg = tpCfg != null ? tpCfg.getSecurityConfiguration() : null;
         errors.addAll(checkUsernameTokenParameters(secCfg, "PMode.Initiator"));
-            errors.addAll(checkX509Parameters(secCfg, "PMode.Initiator", hb2bIsInitiator));
+        errors.addAll(checkX509Parameters(secCfg, "PMode.Initiator", hb2bIsInitiator));
 
         // Responder
         tpCfg = pmode.getResponder();
@@ -223,7 +223,7 @@ public class BasicPModeValidator implements IPModeValidator {
                 ILeg leg = legs.get(i);
                 IUserMessageFlow userMsgFlow = leg.getUserMessageFlow();
                 String userMsgMpc = userMsgFlow != null && userMsgFlow.getBusinessInfo() != null ?
-                                        userMsgFlow.getBusinessInfo().getMpc() : null;
+                                        userMsgFlow.getBusinessInfo().getMpc() : EbMSConstants.DEFAULT_MPC;
 
                 Collection<IPullRequestFlow> pullCfgs = leg.getPullRequestFlows();
                 if (!Utils.isNullOrEmpty(pullCfgs) && pullCfgs.size() > 1) {
@@ -236,7 +236,7 @@ public class BasicPModeValidator implements IPModeValidator {
                                                                 "Each PullRequestFlow must define a (sub-)MPC value"));
                         else {
                             parentParameterName += ".Subchannel(" + pullMPC + ")";
-                            if (!Utils.isNullOrEmpty(userMsgMpc) && !pullMPC.startsWith(userMsgMpc))
+                            if (!pullMPC.startsWith(userMsgMpc))
                                 errors.add(new PModeValidationError(parentParameterName,
                                         "The MPC in the PullRequestFlow must be sub-channel of the user message MPC"));
                             if (!pullMPCs.add(pullMPC))

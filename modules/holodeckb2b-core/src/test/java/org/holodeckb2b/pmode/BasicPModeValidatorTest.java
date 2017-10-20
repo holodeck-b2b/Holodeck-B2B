@@ -137,13 +137,13 @@ public class BasicPModeValidatorTest {
 
         Leg leg = new Leg();
         PullRequestFlow prFlow = new PullRequestFlow();
-        prFlow.setMPC("sub-MPC-1");
+        prFlow.setMPC(EbMSConstants.DEFAULT_MPC + "/sub-MPC-1");
         leg.addPullRequestFlow(prFlow);
         prFlow = new PullRequestFlow();
-        prFlow.setMPC("sub-MPC-2");
+        prFlow.setMPC(EbMSConstants.DEFAULT_MPC + "/sub-MPC-2");
         leg.addPullRequestFlow(prFlow);
         prFlow = new PullRequestFlow();
-        prFlow.setMPC("sub-MPC-3");
+        prFlow.setMPC(EbMSConstants.DEFAULT_MPC + "/sub-MPC-3");
         leg.addPullRequestFlow(prFlow);
         validPMode.addLeg(leg);
 
@@ -158,7 +158,8 @@ public class BasicPModeValidatorTest {
         BusinessInfo busInfo = new BusinessInfo();
         busInfo.setMpc("MPC");
         umFlow.setBusinnessInfo(busInfo);
-
+        leg.setUserMessageFlow(umFlow);
+        
         prFlow = new PullRequestFlow();
         prFlow.setMPC("MPC-1");
         leg.addPullRequestFlow(prFlow);
