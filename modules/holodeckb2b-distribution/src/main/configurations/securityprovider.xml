@@ -12,9 +12,9 @@ and certificates needed in specific actions:
  * The certificates with public keys used for the verification of a
    message's signature.
 ===================================================================================== -->
-<ProviderConfiguration xmlns="http://holodeck-b2b.org/schemas/2017/07/config/security"
+<ProviderConfiguration xmlns="http://holodeck-b2b.org/schemas/2017/10/config/security"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://holodeck-b2b.org/schemas/2017/07/config/security ../repository/xsd/hb2b-security-cfg.xsd">
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2017/10/config/security ../repository/xsd/hb2b-security-cfg.xsd">
     <Keystores>
         <PrivateKeys>
             <Path>repository/certs/privatekeys.jks</Path>
