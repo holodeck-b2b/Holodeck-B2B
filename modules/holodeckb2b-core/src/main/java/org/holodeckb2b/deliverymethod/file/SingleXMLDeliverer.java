@@ -38,7 +38,6 @@ import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
@@ -114,7 +113,7 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
      * @throws MessageDeliveryException When an error occurs while delivering the user message to the business
      *                                  application
      */
-    protected void deliverUserMessage(final IMessageUnit usrMsgUnit) throws MessageDeliveryException {
+    protected void deliverUserMessage(final IUserMessage usrMsgUnit) throws MessageDeliveryException {
         log.debug("Delivering user message with msgId=" + usrMsgUnit.getMessageId());
 
         // We first convert the user message into a MMD document

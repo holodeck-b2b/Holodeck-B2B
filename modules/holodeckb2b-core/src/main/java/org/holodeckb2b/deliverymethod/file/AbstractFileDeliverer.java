@@ -55,7 +55,7 @@ public abstract class AbstractFileDeliverer implements IMessageDeliverer {
     /**
      * Logger
      */
-    protected Log   log = LogFactory.getLog(AbstractFileDeliverer.class);
+    protected Log   log = LogFactory.getLog(this.getClass());
 
     /**
      * Constructs a new deliverer which will write the files to the given directory.
