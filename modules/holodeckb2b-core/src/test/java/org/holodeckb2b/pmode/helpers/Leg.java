@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
-import org.holodeckb2b.interfaces.events.processing.IMessageProcessingEventConfiguration;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 

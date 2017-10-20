@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.processing.IMessageProcessingEventConfiguration;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventConfiguration;
 
 /**
  * Represents the P-Mode parameters of one leg, i.e. the exchange of a user message, in a message exchange.

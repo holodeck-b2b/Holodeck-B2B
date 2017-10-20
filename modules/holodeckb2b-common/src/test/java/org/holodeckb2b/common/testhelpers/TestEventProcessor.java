@@ -18,7 +18,7 @@ package org.holodeckb2b.common.testhelpers;
 
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.processing.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 
 import java.util.ArrayList;
 

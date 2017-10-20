@@ -17,8 +17,8 @@
 package org.holodeckb2b.events.security;
 
 import java.util.Map;
-import org.holodeckb2b.interfaces.events.security.ISignatureCreatedEvent;
-import org.holodeckb2b.interfaces.events.security.ISignatureVerifiedEvent;
+import org.holodeckb2b.interfaces.security.ISignatureCreatedEvent;
+import org.holodeckb2b.interfaces.security.ISignatureVerifiedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;

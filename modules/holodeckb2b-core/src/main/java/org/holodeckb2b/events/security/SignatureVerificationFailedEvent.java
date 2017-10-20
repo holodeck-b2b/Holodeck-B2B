@@ -17,7 +17,7 @@
 package org.holodeckb2b.events.security;
 
 import org.holodeckb2b.events.security.AbstractSecurityProcessingFailureEvent;
-import org.holodeckb2b.interfaces.events.security.ISignatureVerificationFailedEvent;
+import org.holodeckb2b.interfaces.security.ISignatureVerificationFailedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 

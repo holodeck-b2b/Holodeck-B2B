@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ProviderConfiguration xmlns="http://holodeck-b2b.org/schemas/2017/07/config/security"
+<ProviderConfiguration xmlns="http://holodeck-b2b.org/schemas/2017/10/config/security"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://holodeck-b2b.org/schemas/2017/07/config/security file:/Users/safi/Development/hb2b-cur-dev/modules/holodeckb2b-security/src/main/resources/hb2b-security-cfg.xsd">
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2017/10/config/security file:/Users/safi/Development/hb2b-cur-dev/modules/holodeckb2b-security/src/main/resources/hb2b-security-cfg.xsd">
     <Keystores>
         <PrivateKeys>
             <Path>privatekeys.jks</Path>

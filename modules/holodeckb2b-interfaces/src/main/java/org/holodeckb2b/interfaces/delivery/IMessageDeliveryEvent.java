@@ -14,9 +14,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.events;
+package org.holodeckb2b.interfaces.delivery;
 
 import org.holodeckb2b.interfaces.delivery.*;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 
 /**
  * Is the <i>message processing event</i> that indicates that an attempt to deliver a <i>User Message</i> message unit
@@ -35,11 +36,11 @@ public interface IMessageDeliveryEvent extends IMessageProcessingEvent {
      *
      * @return  <code>true</code> if the delivery attempt was successful, or<br><code>false</code> otherwise
      */
-    boolean isDeliverySuccessfull();
+    boolean isDeliverySuccessful();
 
     /**
      * Gets the {@link MessageDeliveryException} that was thrown during the message delivery attempt.
-     * <p>NOTE: This method should only be called when the {@link #isDeliverySuccessfull()} return <code>false</code>.
+     * <p>NOTE: This method should only be called when the {@link #isDeliverySuccessful()} return <code>false</code>.
      *
      * @return  The exception that caused the message delivery failure
      */

@@ -31,7 +31,7 @@ import org.holodeckb2b.ebms3.handlers.inflow.DeliverUserMessage;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
-import org.holodeckb2b.events.receptionawareness.ReceiptCreatedEvent;
+import org.holodeckb2b.as4.receptionawareness.ReceiptCreatedEvent;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;

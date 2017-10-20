@@ -21,7 +21,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
-import org.holodeckb2b.events.receptionawareness.DuplicateReceivedEvent;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;

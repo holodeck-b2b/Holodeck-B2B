@@ -18,7 +18,7 @@ package org.holodeckb2b.common.config;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.events.processing.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;

@@ -20,7 +20,7 @@ import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
-import org.holodeckb2b.interfaces.events.processing.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.ICertificateManager;

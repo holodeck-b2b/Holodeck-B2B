@@ -19,11 +19,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * A default _security provider_ implementation. Similar to the older versions based on the WSS4J libraries
   but now using seperate keystores for encryption and signature verification certificates.
 * Message processing events for delivery attempts of message units and security processing, e.g. signature creation and
-  validation, en-/decryption, etc. See package `org.holodeckb2b.interfaces.events` and its descendants.
+  validation, en-/decryption, etc.
 * Option to indicate that a problem in delivery of the message is permanent and an ebMS Error can be returned to the
   sender of the message.
 * Added 'IMessageProcessingState.getDescription()' method so an additional description on the processing state of a
-  message unit can be stored.
+  message unit can be stored. NOTE: This description is introduced for future use, the Holodeck B2B Core does not
+  yet use it!
 
 ### Changed
 * Refactored the validation of the ebMS header meta-data validation classes and handler
@@ -32,9 +33,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * The ebMS Error returned to the sender in case the signature of a _User Message_ does not include all
   payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonCompliance_.
 * Moved classes in `org.holodeckb2b.interfaces.pmode.security` to `org.holodeckb2b.interfaces.pmode`
-* Refactored package structure of event interfaces: interfaces related to processing of events moved to
-  `org.holodeckb2b.interfaces.events.processing` and event definitions in `org.holodeckb2b.interfaces.events`,
-  `org.holodeckb2b.interfaces.events.security` and `org.holodeckb2b.interfaces.events.receptionawareness`
+* Refactored package structure of event interfaces: events directly related to a specific function are now
+  included in the same package as the other interface of that function. Interfaces related to processing of
+  events and generic event are in `org.holodeckb2b.interfaces.events.processing`
 * Refactored `IQueryManager.isAlreadyDelivered()` to `IQueryManager.isAlreadyProcessed()` to take also failed message
   units into account when determining if user message is already processed and should be considered a duplicate.
 

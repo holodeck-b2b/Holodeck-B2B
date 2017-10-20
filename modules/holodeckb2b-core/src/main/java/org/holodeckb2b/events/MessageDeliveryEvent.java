@@ -18,7 +18,7 @@ package org.holodeckb2b.events;
 
 import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
-import org.holodeckb2b.interfaces.events.IMessageDeliveryEvent;
+import org.holodeckb2b.interfaces.delivery.IMessageDeliveryEvent;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
@@ -48,7 +48,7 @@ public class MessageDeliveryEvent extends AbstractMessageProcessingEvent impleme
     }
 
     @Override
-    public boolean isDeliverySuccessfull() {
+    public boolean isDeliverySuccessful() {
         return successFulDelivery;
     }
 

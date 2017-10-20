@@ -23,6 +23,8 @@ import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.events.MessageTransferEvent;
+import org.holodeckb2b.interfaces.events.IMessageTransferEvent;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -103,8 +105,10 @@ public class CheckSentResult extends BaseHandler {
             final StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             for (final IMessageUnitEntity mu : msgUnits) {
                 try {
+                    IMessageTransferEvent transferEvent;
                     if (!success) {
                         updateManager.setProcessingState(mu, ProcessingState.TRANSPORT_FAILURE);
+                        transferEvent = new MessageTransferEvent(mu, mc.getFailureReason());
                     } else {
                         // State to set depends on type of message unit
                         if (mu instanceof ISignalMessage) {
@@ -119,9 +123,12 @@ public class CheckSentResult extends BaseHandler {
                             else
                                 updateManager.setProcessingState(mu, ProcessingState.DELIVERED);
                         }
+                        transferEvent = new MessageTransferEvent(mu);
                     }
                     log.debug("Processing state for message unit [" + mu.getMessageId() + "] changed to"
                                 + mu.getCurrentProcessingState().getState());
+                    // Raise a message processing event about the transfer
+                    HolodeckB2BCore.getEventProcessor().raiseEvent(transferEvent, mc);
                 } catch (final PersistenceException databaseException) {
                     // Ai, something went wrong updating the processing state of the message unit. As the message unit
                     // is already processed there is nothing we can other than logging the error

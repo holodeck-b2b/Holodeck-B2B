@@ -25,7 +25,7 @@ import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.processing.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.events.IMessageUnitPurgedEvent;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.persistency.jpa.*;

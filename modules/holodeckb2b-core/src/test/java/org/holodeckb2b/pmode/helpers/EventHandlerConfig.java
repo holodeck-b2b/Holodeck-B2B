@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.processing.IMessageProcessingEventConfiguration;
+import org.holodeckb2b.interfaces.events.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
