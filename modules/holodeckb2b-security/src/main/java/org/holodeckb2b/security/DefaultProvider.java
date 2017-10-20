@@ -43,10 +43,11 @@ import org.holodeckb2b.security.config.ProviderConfigurationType;
  * <p>Note that the use of the three keystores is similar to earlier versions of Holodeck B2B but their use slightly
  * different since the provider differentiates between certificates used for encryption and signature verification and
  * stores them in separate keystores whereas in the former versions of Holodeck B2B the certificates stored in the
- * "public keys" keystore were used for both encryption and signature verification. For migration purposes the current
- * version of the provider offers a <i>"compatibility mode"</i> in which the certificates registered in the "encryption"
- * keystore are also used in signature verification. It must be noted that this mode will be offered only temporarily
- * and will be removed in a furture version of the provider!
+ * "public keys" keystore were used for both encryption and signature verification.
+ * <p>For migration purposes the current version of the provider offers a <i>"compatibility mode"</i> in which it will
+ * use the "old" configuration and also use the certificates registered in the <i>public</i> keystore are for signature
+ * verification. This mode is automatically used when the provider's normal configuration file is not found. It must be
+ * noted that this mode will be offered only temporarily and will be removed in a furture version of the provider!
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
@@ -105,8 +106,7 @@ public class DefaultProvider implements ISecurityProvider {
                 trustStorePath = ensureAbsolutePath(providerConfig.getKeystores().getTrustedCerts().getPath(),
                                                     hb2bHome);
                 trustStorePwd = providerConfig.getKeystores().getTrustedCerts().getPassword();
-                inCompatibilityMode = providerConfig.isCompatibilityMode() != null ?
-                                        providerConfig.isCompatibilityMode() : false;
+                inCompatibilityMode = false;
             } else {
                 log.warn("No configuration file found!");
                 fallback = true;
