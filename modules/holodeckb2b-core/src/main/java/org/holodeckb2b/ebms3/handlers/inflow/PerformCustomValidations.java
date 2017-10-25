@@ -20,8 +20,8 @@ import java.util.Collection;
 import java.util.Map;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.core.validation.custom.CustomValidationFailedEvent;
-import org.holodeckb2b.core.validation.custom.ValidationResult;
+import org.holodeckb2b.core.validation.CustomValidationFailedEvent;
+import org.holodeckb2b.core.validation.ValidationResult;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.errors.OtherContentError;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
@@ -29,6 +29,7 @@ import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecificati
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
@@ -54,19 +55,42 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
         // For the execution of the validation a separate component is used. This component will also raise the event
         log.debug("Validate user message if specified");
         try {
-            ValidationResult validationResult = HolodeckB2BCore.getValidationExecutor().validate(userMessage);
+            // Get custom validation specifcation from P-Mode
+            IMessageValidationSpecification validationSpec = null;
+            try {
+                validationSpec = HolodeckB2BCore.getPModeSet().get(userMessage.getPModeId())
+                                                              .getLeg(ILeg.Label.REQUEST)
+                                                              .getUserMessageFlow().getCustomValidationConfiguration();
+            } catch (NullPointerException npe) {
+                // Some element in the path to the validation spec is not available, so there is nothing to do
+                log.error("The was a problem retrieving the validation specifcation from P-Mode ["
+                           + userMessage.getPModeId() + "]!");
+            }
+
+            if (validationSpec == null) {
+                log.debug("No custom validation specified for user message");
+                return InvocationResponse.CONTINUE;
+            }
+
+            ValidationResult validationResult = HolodeckB2BCore.getValidationExecutor().validate(userMessage,
+                                                                                                 validationSpec);
 
             if (validationResult == null || Utils.isNullOrEmpty(validationResult.getValidationErrors()))
-                log.debug("User message is valid or no custom validation specified");
-            else if (!validationResult.shouldRejectMessage())
-                log.warn("User message contains validation errors, but can be processed");
+                log.debug("User message is valid");
             else {
-                log.warn("User message is not valid and must be rejected, generate Other error.");
-                OtherContentError otherError = new OtherContentError(
-                                                        buildErrorDetailText(validationResult.getValidationErrors()),
-                                                        userMessage.getMessageId());
-                MessageContextUtils.addGeneratedError(mc, otherError);
-                HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, ProcessingState.FAILURE);
+                if (!validationResult.shouldRejectMessage())
+                    log.warn("User message contains validation errors, but can be processed");
+                else {
+                    log.warn("User message is not valid and must be rejected, generate Other error.");
+                    OtherContentError otherError = new OtherContentError(
+                                                            buildErrorDetailText(validationResult.getValidationErrors()),
+                                                            userMessage.getMessageId());
+                    MessageContextUtils.addGeneratedError(mc, otherError);
+                    HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, ProcessingState.FAILURE);
+                }
+                // Raise message processing event to inform other components of the validation issue
+                HolodeckB2BCore.getEventProcessor().raiseEvent(new CustomValidationFailedEvent(userMessage,
+                                                                                               validationResult), mc);
             }
         } catch (MessageValidationException ve) {
             log.error("An error occurred when performing the validation of User Message [" + userMessage.getMessageId()

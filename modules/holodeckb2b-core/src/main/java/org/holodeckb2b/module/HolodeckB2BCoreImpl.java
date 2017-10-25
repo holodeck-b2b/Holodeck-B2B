@@ -32,8 +32,7 @@ import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.WorkerPool;
 import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
-import org.holodeckb2b.core.validation.custom.DefaultValidationExecutor;
-import org.holodeckb2b.core.validation.custom.ICustomValidationExecutor;
+import org.holodeckb2b.core.validation.DefaultValidationExecutor;
 import org.holodeckb2b.ebms3.pulling.PullConfiguration;
 import org.holodeckb2b.ebms3.pulling.PullConfigurationWatcher;
 import org.holodeckb2b.ebms3.pulling.PullWorker;
@@ -58,6 +57,7 @@ import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeManager;
+import org.holodeckb2b.core.validation.IValidationExecutor;
 
 /**
  * Axis2 module class for the Holodeck B2B Core module.
@@ -418,7 +418,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     }
 
     /**
-     * Gets the {@link ICustomValidationExecutor} implementation that should be used for the execution of the custom
+     * Gets the {@link IValidationExecutor} implementation that should be used for the execution of the custom
      * message validations.<br>
      * Currently the executor is not configurable and a simple, i.e. non-optimized, executor is used, see {@link
      * DefaultValidationExecutor}
@@ -426,7 +426,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * @return  The component responsible for execution of the custom validations.
      * @since HB2B_NEXT_VERSION
      */
-    ICustomValidationExecutor getValidationExecutor() {
+    IValidationExecutor getValidationExecutor() {
         return new DefaultValidationExecutor();
     }
 

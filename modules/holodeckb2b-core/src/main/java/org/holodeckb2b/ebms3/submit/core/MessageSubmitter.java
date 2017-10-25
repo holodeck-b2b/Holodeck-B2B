@@ -30,7 +30,8 @@ import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.core.validation.custom.ValidationResult;
+import org.holodeckb2b.core.validation.ValidationResult;
+import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -39,6 +40,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -96,20 +98,7 @@ public class MessageSubmitter implements IMessageSubmitter {
             checkPayloads(completedMetadata, pmode); // Throws MessageSubmitException if there is a problem with a specified submissionPayloadInfo
 
             log.debug("Validate submitted message if specified");
-            try {
-                ValidationResult validationResult = HolodeckB2BCore.getValidationExecutor().validate(completedMetadata);
-                if (validationResult == null || Utils.isNullOrEmpty(validationResult.getValidationErrors()))
-                    log.debug("Submitted message is valid or no custom validation specified");
-                else if (!validationResult.shouldRejectMessage())
-                    log.warn("Submitted message contains validation errors, but can be processed");
-                else {
-                    log.warn("Submitted message is not valid and must be rejected!");
-                    throw new MessageSubmitException("Message rejected due to fatal validation errors!");
-                }
-            } catch (MessageValidationException ex) {
-                log.error("Could not execute the validation of the submitted message!\n\tDetails: " + ex.getMessage());
-                throw new MessageSubmitException("Could not execute the validation of the submitted message!", ex);
-            }
+            validateMessage(completedMetadata, pmode);
 
             log.debug("Add message to database");
             final IUserMessageEntity newUserMessage = (IUserMessageEntity)
@@ -262,15 +251,16 @@ public class MessageSubmitter implements IMessageSubmitter {
     }
 
     /**
-     * Helper method to copy or move the submissionPayloadInfo to an internal directory so they will be kept available during the
- processing of the message (which may include resending).
+     * Helper method to copy or move the submissionPayloadInfo to an internal directory so they will be kept available
+     * during the processing of the message (which may include resending).
      *
      * @param um     The meta data on the submitted user message
      * @param pmode  The P-Mode that governs the processing this user message
      * @throws IOException  When the payload could not be moved/copied to the internal payload storage
      * @throws PersistenceException When the new payload locations couldn't be saved to the database
      */
-    private void moveOrCopyPayloads(final IUserMessageEntity um, final boolean move) throws IOException, PersistenceException {
+    private void moveOrCopyPayloads(final IUserMessageEntity um, final boolean move) throws IOException,
+                                                                                            PersistenceException {
         // Path to the "temp" dir where to store submissionPayloadInfo during processing
         final String internalPayloadDir = HolodeckB2BCore.getConfiguration().getTempDirectory() + "plcout";
         // Create the directory if needed
@@ -318,4 +308,43 @@ public class MessageSubmitter implements IMessageSubmitter {
         }
     }
 
+    /**
+     * Helper method that validates the submitted if custom validation has been specified in the P-Mode.
+     *
+     * @param submittedMsg  The meta-data of the submitted message
+     * @param pmode         The P-Mode of the submitted message
+     */
+    private void validateMessage(IUserMessage submittedMsg, IPMode pmode) throws MessageSubmitException {
+        // Get custom validation specifcation from P-Mode
+        IMessageValidationSpecification validationSpec = null;
+        try {
+            validationSpec = HolodeckB2BCore.getPModeSet().get(submittedMsg.getPModeId())
+                    .getLeg(ILeg.Label.REQUEST)
+                    .getUserMessageFlow().getCustomValidationConfiguration();
+        } catch (NullPointerException npe) {
+            // Some element in the path to the validation spec is not available, so there is nothing to do
+            log.error("The was a problem retrieving the validation specifcation from P-Mode ["
+                    + submittedMsg.getPModeId() + "]!");
+        }
+
+        if (validationSpec == null)
+            log.debug("No custom validation specified for submitted message");
+        else {
+            try {
+                ValidationResult validationResult = HolodeckB2BCore.getValidationExecutor().validate(submittedMsg,
+                                                                                                     validationSpec);
+                if (validationResult == null || Utils.isNullOrEmpty(validationResult.getValidationErrors())) {
+                    log.debug("Submitted message is valid");
+                } else if (!validationResult.shouldRejectMessage()) {
+                    log.warn("Submitted message contains validation errors, but can be processed");
+                } else {
+                    log.warn("Submitted message is not valid and must be rejected!");
+                    throw new MessageSubmitException("Message rejected due to fatal validation errors!");
+                }
+            } catch (MessageValidationException ex) {
+                log.error("Could not execute the validation of the submitted message!\n\tDetails: " + ex.getMessage());
+                throw new MessageSubmitException("Could not execute the validation of the submitted message!", ex);
+            }
+        }
+    }
 }

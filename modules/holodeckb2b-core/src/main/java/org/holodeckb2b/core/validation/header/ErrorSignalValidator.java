@@ -42,8 +42,8 @@ class ErrorSignalValidator extends GeneralMessageUnitValidator {
      * the <code>eb:Error</code> element(s) MUST NOT be related to a particular ebMS message."</i>
      * <p>Holodeck B2B by default however allows a bit more flexibility by not checking on the second condition, i.e. it
      * allows an empty or absent <code>eb:SignalMessage/eb:RefToMessageId</code> together with <code>eb:Error</code>
-     * element(s) that refer to a message unit. It does however require that all <code>eb:Error</code> elements refer the
-     * same message unit, i.e. contain the same value for the <code>refToMessageInError</code> attribute.
+     * element(s) that refer to a message unit. It does however require that all <code>eb:Error</code> elements refer
+     * the same message unit, i.e. contain the same value for the <code>refToMessageInError</code> attribute.
      * <br>The more strict check as defined in the ebMS Specification is only used in the strict validation mode.
      *
      * @param messageUnit           The message unit which header must be validated

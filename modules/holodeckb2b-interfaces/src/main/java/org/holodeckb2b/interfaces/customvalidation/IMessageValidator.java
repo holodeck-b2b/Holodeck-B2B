@@ -18,12 +18,13 @@ package org.holodeckb2b.interfaces.customvalidation;
 
 import java.util.Collection;
 import java.util.Map;
-import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 
 /**
- * Defines both the interface of a validator that can be used to perform custom validation on a <i>User Message</i>
- * message unit and in an inner interface its associated factory.
+ * Defines both the interface of a validator that can be used to perform validations on a message unit and in an inner
+ * interface its associated factory. This interface is used for both the built-in validation of the ebMS header as well
+ * as <i>custom validation</i> of User Message message units.
  * <p>Custom validations are intended to check specific business domain requirements on the message meta-data. As the
  * validators however have access to the payloads of the User Message they can also validate the business meta-data.
  * <p>Whether User Messages should be validated is configured in the <i>User Message flow</i> of the P-Mode, see {@link
@@ -34,19 +35,20 @@ import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
  * of the message processing. Custom validation overhead should therefore be minimized.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @param <M>   Indicates the type of message units the implementation can validate
  * @since HB2B_NEXT_VERSION
  */
-public interface IMessageValidator {
+public interface IMessageValidator<M extends IMessageUnit> {
 
     /**
      * Validates the given <i>User Message</i> message unit.
      *
-     * @param userMessage   The User Message that must be validated.
+     * @param messageUnit   The message unit that must be validated.
      * @return              A Collection of {@link MessageValidationError}s when there are validation errors.<br>
      *                      When no problems were detected an empty Collection or <code>null</code>
      * @throws MessageValidationException   When the validator can not complete the validation of the message unit
      */
-    Collection<MessageValidationError> validate(final IUserMessage userMessage) throws MessageValidationException;
+    Collection<MessageValidationError> validate(final M messageUnit) throws MessageValidationException;
 
     /**
      * Defines the interface for factory object that is responsible for creating the validator objects.
