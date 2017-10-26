@@ -16,17 +16,24 @@
  */
 package org.holodeckb2b.core.validation.header;
 
+import java.util.Collection;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
+import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 
 /**
  * Provides the validation of the ebMS header information specific for <i>Receipt</i> message units.
  *
- * @author Sander Fieten <sander at chasquis-services.com>
+ * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since  HB2B_NEXT_VERSION
  */
-class ReceiptValidator extends GeneralMessageUnitValidator {
+class ReceiptValidator extends GeneralMessageUnitValidator<IReceipt>
+                       implements IMessageValidator<IReceipt> {
+
+    public ReceiptValidator(boolean useStrictValidation) {
+        super(useStrictValidation);
+    }
 
     /**
      * Performs the basic validation of the ebMS header meta-data specific for a Receipt signal message unit.
@@ -34,34 +41,34 @@ class ReceiptValidator extends GeneralMessageUnitValidator {
      * is provided. As for processing by Holodeck B2B the Receipt content in not required the check on Receipt content
      * is moved to the strict validation.
      *
-     * @param messageUnit           The message unit which header must be validated
-     * @param validationErrors      The string that is being build containing a description of all validation errors
-     *                              found for the header in the message header
+     * @param messageUnit       The Receipt signal message unit which header must be validated
+     * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
      */
     @Override
-    protected void doBasicValidation(final IMessageUnit messageUnit, final StringBuilder validationErrors) {
+    protected void doBasicValidation(final IReceipt messageUnit,
+                                     Collection<MessageValidationError> validationErrors) {
         // First do genereal validation
         super.doBasicValidation(messageUnit, validationErrors);
 
         // Check that a RefToMessageId is included
         if (Utils.isNullOrEmpty(messageUnit.getRefToMessageId()))
-            validationErrors.append("RefToMessageId is missing\n");
+            validationErrors.add(new MessageValidationError("RefToMessageId is missing"));
     }
 
     /**
      * Performs the strict validation of the ebMS header meta-data specific for a Receipt signal message unit
      * <p>Checks that the <code>Receipt</code> element does contain at least one child element.
      *
-     * @param messageUnit           The message unit which header must be validated
-     * @param validationErrors      The string that is being build containing a description of all validation errors
-     *                              found for the header in the message header
+     * @param messageUnit       The Receipt signal message unit which header must be validated
+     * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
      */
     @Override
-    protected void doStrictValidation(final IMessageUnit messageUnit, final StringBuilder validationErrors) {
+    protected void doStrictValidation(final IReceipt messageUnit,
+                                      Collection<MessageValidationError> validationErrors) {
         // First do genereal validation
         super.doStrictValidation(messageUnit, validationErrors);
 
         if (((IReceipt) messageUnit).getContent().isEmpty())
-            validationErrors.append("Receipt content is missing\n");
+            validationErrors.add(new MessageValidationError("Receipt content is missing"));
     }
 }

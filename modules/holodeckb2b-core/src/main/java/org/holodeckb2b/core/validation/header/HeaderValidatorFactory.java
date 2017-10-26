@@ -18,7 +18,8 @@ package org.holodeckb2b.core.validation.header;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
+import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
+import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
@@ -32,33 +33,51 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since HB2B_NEXT_VERSION
  */
-public class HeaderValidatorFactory {
+public class HeaderValidatorFactory implements IMessageValidator.Factory {
+    /**
+     * Name of the parameter that indicates whether lax or strict validation should occur
+     */
+    public static final String P_VALIDATION_MODE = "hdr-valid-strict";
+    /**
+     * Name of the parameter that contains the interface class indicating the message unit type to be validated
+     */
+    public static final String P_MSGUNIT_TYPE = "hdr-valid-type";
 
     /**
-     * Storage of header validators structured per message unit type and validation mode
+     * Maps holding the singletons of both the lax and strict header validators structured per message unit type
      */
-    private static final Map<Class<? extends IMessageUnit>, IHeaderValidator>   headerValidators;
-
+    private static final Map<Class<? extends IMessageUnit>, IMessageValidator>   laxValidators;
+    private static final Map<Class<? extends IMessageUnit>, IMessageValidator>   strictValidators;
     static {
         // Create the validator instances
         //
-        headerValidators = new HashMap<>();
+        laxValidators = new HashMap<>();
+        laxValidators.put(IUserMessage.class, new UserMessageValidator(false));
+        laxValidators.put(IPullRequest.class, new PullRequestValidator(false));
+        laxValidators.put(IReceipt.class, new ReceiptValidator(false));
+        laxValidators.put(IErrorMessage.class, new ErrorSignalValidator(false));
+        strictValidators = new HashMap<>();
+        strictValidators.put(IUserMessage.class, new UserMessageValidator(true));
+        strictValidators.put(IPullRequest.class, new PullRequestValidator(true));
+        strictValidators.put(IReceipt.class, new ReceiptValidator(true));
+        strictValidators.put(IErrorMessage.class, new ErrorSignalValidator(true));
+    }
+    /**
+     * The validator requested by this instance of the factory
+     */
+    private IMessageValidator   validator;
 
-        headerValidators.put(IUserMessage.class, new UserMessageValidator());
-        headerValidators.put(IPullRequest.class, new PullRequestValidator());
-        headerValidators.put(IReceipt.class, new ReceiptValidator());
-        headerValidators.put(IErrorMessage.class, new ErrorSignalValidator());
+    @Override
+    public void init(Map<String, ?> parameters) throws MessageValidationException {
+        // Get the correct validator depending on the preferred validation mode and message type
+        if (Boolean.TRUE.equals(parameters.get(P_VALIDATION_MODE)))
+            validator = strictValidators.get((Class<? extends IMessageUnit>) parameters.get(P_MSGUNIT_TYPE));
+        else
+            validator = laxValidators.get((Class<? extends IMessageUnit>) parameters.get(P_MSGUNIT_TYPE));
     }
 
-    /**
-     * Gets the validator for the given message unit depending on whether a basic or strict validation should be
-     * executed.
-     *
-     * @param messageUnit   The message unit to validate
-     * @return              The validator that can check the given message in the requested mode.
-     */
-    public static IHeaderValidator getValidator(final IMessageUnit messageUnit) {
-        // Get the validator for the specified mode
-        return headerValidators.get(MessageUnitUtils.getMessageUnitType(messageUnit));
+    @Override
+    public IMessageValidator createMessageValidator() throws MessageValidationException {
+        return validator;
     }
 }

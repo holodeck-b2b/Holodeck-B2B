@@ -16,20 +16,28 @@
  */
 package org.holodeckb2b.core.validation.header;
 
+import java.util.Collection;
 import java.util.Iterator;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
+import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
+import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
-import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
- * Provides the validation of the ebMS header information specific for <i>Error</i> message units.
+ * Provides the validation of the ebMS header information specific for <i>Error Signal</i> message units.
  *
- * @author Sander Fieten <sander at chasquis-services.com>
+ * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since  HB2B_NEXT_VERSION
  */
-class ErrorSignalValidator extends GeneralMessageUnitValidator {
+class ErrorSignalValidator extends GeneralMessageUnitValidator<IErrorMessage>
+                           implements IMessageValidator<IErrorMessage> {
+
+    public ErrorSignalValidator(boolean useStrictValidation) {
+        super(useStrictValidation);
+    }
 
     /**
      * Checks the meta-data on a Error signal to contain at least the required information for further processing.
@@ -46,26 +54,25 @@ class ErrorSignalValidator extends GeneralMessageUnitValidator {
      * the same message unit, i.e. contain the same value for the <code>refToMessageInError</code> attribute.
      * <br>The more strict check as defined in the ebMS Specification is only used in the strict validation mode.
      *
-     * @param messageUnit           The message unit which header must be validated
-     * @param useStrictValidation   Indicates whether a strict validation should be performed or just a basic one
-     * @return                      A string containing a description of the validation errors found, or an empty string
-     *                              if no problems where found.
+     * @param messageUnit   The Error Signal message unit which header must be validated
+     * @return              A Collection of {@link MessageValidationError}s when there are validation errors.<br>
+     *                      When no problems were detected an empty Collection.
+     * @throws MessageValidationException   When the validator can not complete the validation of the message unit
      */
     @Override
-    public String validate(final IMessageUnit messageUnit, final boolean useStrictValidation) {
-        StringBuilder    validationErrors = new StringBuilder();
-
+    public Collection<MessageValidationError> validate(final IErrorMessage messageUnit)
+                                                                                    throws MessageValidationException {
         // First do generic validations
-        validationErrors.append(super.validate(messageUnit, useStrictValidation));
+        Collection<MessageValidationError> validationErrors = super.validate(messageUnit);
 
         // Then check that the signal reference at most one other message unit
         // @todo: Remove use of specific config parameter on reference check
-        if (!checkReferences((IErrorMessage) messageUnit, useStrictValidation
+        if (!checkReferences(messageUnit, useStrictValidation
                                           || HolodeckB2BCoreInterface.getConfiguration().useStrictErrorRefCheck()))
-            validationErrors.append("Error Signal contains inconsistent references\n");
+            validationErrors.add(new MessageValidationError("Error Signal contains inconsistent references"));
 
         // Return validation results
-        return validationErrors.toString().trim();
+        return validationErrors;
     }
 
     /**

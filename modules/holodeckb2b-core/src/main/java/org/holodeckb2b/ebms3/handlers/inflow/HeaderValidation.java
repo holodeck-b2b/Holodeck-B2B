@@ -17,16 +17,18 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
+import java.util.Map;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.validation.ValidationResult;
+import org.holodeckb2b.core.validation.header.HeaderValidationSpecification;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
-import org.holodeckb2b.core.validation.header.HeaderValidatorFactory;
-import org.holodeckb2b.core.validation.header.IHeaderValidator;
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -46,7 +48,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * These validation can also include checks on payloads included in the User Message and are separately configured in
  * the P-Mode.
  *
- * @author Sander Fieten <sander at chasquis-services.com>
+ * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since HB2B_NEXT_VERSION
  */
 public class HeaderValidation extends BaseHandler {
@@ -65,22 +67,24 @@ public class HeaderValidation extends BaseHandler {
         if (!Utils.isNullOrEmpty(msgUnits)) {
             for (IMessageUnitEntity m : msgUnits) {
                 // Determine the validation to use
-                boolean useStrictValidation;
-                useStrictValidation = shouldUseStrictMode(m);
+                boolean useStrictValidation = shouldUseStrictMode(m);
 
                 log.debug("Validate " + MessageUnitUtils.getMessageUnitName(m) + " header meta-data using "
                          + (useStrictValidation ? "strict" : "basic") + " validation");
-                IHeaderValidator validator = HeaderValidatorFactory.getValidator(m);
-                String validationResult = validator.validate(m, useStrictValidation);
-                if (!Utils.isNullOrEmpty(validationResult)) {
-                    log.warn("Header of " + MessageUnitUtils.getMessageUnitName(m) + " [" + m.getMessageId()
-                            + "] is invalid!\n\tDetails: " + validationResult);
-                    InvalidHeader invalidHeaderError = new InvalidHeader(validationResult, m.getMessageId());
-                    MessageContextUtils.addGeneratedError(mc, invalidHeaderError);
-                    HolodeckB2BCore.getStorageManager().setProcessingState(m, ProcessingState.FAILURE);
-                } else
+
+                ValidationResult validationResult = HolodeckB2BCore.getValidationExecutor().validate(m,
+                                               HeaderValidationSpecification.getValidationSpec(m, useStrictValidation));
+
+                if (validationResult == null || Utils.isNullOrEmpty(validationResult.getValidationErrors()))
                     log.debug("Header of " + MessageUnitUtils.getMessageUnitName(m) + " [" + m.getMessageId()
                             + "] successfully validated");
+                else {
+                    log.warn("Header of " + MessageUnitUtils.getMessageUnitName(m) + " [" + m.getMessageId()
+                            + "] is invalid!\n\tDetails: " + validationResult);
+                    MessageContextUtils.addGeneratedError(mc, buildError(m.getMessageId(),
+                                                                         validationResult.getValidationErrors()));
+                    HolodeckB2BCore.getStorageManager().setProcessingState(m, ProcessingState.FAILURE);
+                }
             }
         }
 
@@ -88,24 +92,36 @@ public class HeaderValidation extends BaseHandler {
     }
 
     /**
-     * Saves a <i>InvalidHeader</i> error that was result of validation of the given message unit to the message context
-     * and sets the processing state of the message unit to <i>FAILURE</i>.
+     * Creates the text to include in the <i>error detail</i> field of the ebMS error.
      *
-     * @param invalidHeaderError    The error that was generated during validation
-     * @param messageUnit           The message unit that was validated
-     * @param mc                    The current message context
-     * @throws PersistenceException    When there is a problem changing the processing state of the invalid message unit
+     * @param validationErrors  The validation errors found in the message (grouped by validator)
+     * @return  The text to include in the ebMS error
      */
-    private void saveError(InvalidHeader invalidHeaderError, IMessageUnitEntity messageUnit, MessageContext mc)
-                                                                                          throws PersistenceException {
-        log.warn("Received " + MessageUnitUtils.getMessageUnitName(messageUnit) + " [" + messageUnit.getMessageId()
-                 + "] is not valid");
-        log.debug("Save the error to message context");
-        MessageContextUtils.addGeneratedError(mc, invalidHeaderError);
-        log.debug("Set processing state for invalid message to failure");
-        HolodeckB2BCore.getStorageManager().setProcessingState(messageUnit, ProcessingState.FAILURE);
-        log.debug("Processed InvalidHeader error");
+    private InvalidHeader buildError(final String messageId,
+                              final Map<String, Collection<MessageValidationError>> validationErrors) {
+
+        StringBuilder   errorText = new StringBuilder();
+        // Add a line describing each error, count number of errors and check the maximum severity level
+        int totalErrors = 0;
+        MessageValidationError.Severity maxSeverity = MessageValidationError.Severity.Warning;
+        for(MessageValidationError error : validationErrors.values().iterator().next()) {
+            errorText.append(error.getDescription()).append('\n');
+            if (error.getSeverityLevel().compareTo(maxSeverity) > 0)
+                maxSeverity = error.getSeverityLevel();
+            totalErrors++;
+        }
+        // Add intro, including number of errors found.
+        errorText.insert(0, String.valueOf(totalErrors)).append(" validation errors were found in the message:\n");
+        errorText.insert(0, "The message was found to be invalid!\n\n");
+
+        // Create the error
+        InvalidHeader error = new InvalidHeader(errorText.toString(), messageId);
+        error.setSeverity(maxSeverity == MessageValidationError.Severity.Failure ? IEbmsError.Severity.FAILURE
+                                                                                 : IEbmsError.Severity.WARNING);
+
+        return error;
     }
+
 
     /**
      * Helper method to determine which validation mode should be used for the given message unit.

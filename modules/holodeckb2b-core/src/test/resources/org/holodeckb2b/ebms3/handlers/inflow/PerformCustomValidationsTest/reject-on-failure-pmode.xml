@@ -43,7 +43,7 @@
         <EventHandlers>
             <EventHandler>
                 <HandlerFactoryClass>org.holodeckb2b.common.testhelpers.events.TestEventHandlerFactory</HandlerFactoryClass>
-                <HandledEvent>org.holodeckb2b.core.validation.custom.CustomValidationFailedEvent</HandledEvent>
+                <HandledEvent>org.holodeckb2b.interfaces.customvalidation.ICustomValidationFailedEvent</HandledEvent>
             </EventHandler>
         </EventHandlers>
     </Leg>

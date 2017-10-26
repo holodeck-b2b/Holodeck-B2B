@@ -83,8 +83,8 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
                 else {
                     log.warn("User message is not valid and must be rejected, generate Other error.");
                     OtherContentError otherError = new OtherContentError(
-                                                            buildErrorDetailText(validationResult.getValidationErrors()),
-                                                            userMessage.getMessageId());
+                                                           buildErrorDetailText(validationResult.getValidationErrors()),
+                                                           userMessage.getMessageId());
                     MessageContextUtils.addGeneratedError(mc, otherError);
                     HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, ProcessingState.FAILURE);
                 }

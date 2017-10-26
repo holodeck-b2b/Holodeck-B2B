@@ -16,49 +16,54 @@
  */
 package org.holodeckb2b.core.validation.header;
 
+import java.util.Collection;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
+import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 
 /**
  * Provides the validation of the ebMS header information specific for <i>Pull Request</i> message units.
  *
- * @author Sander Fieten <sander at chasquis-services.com>
+ * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since  HB2B_NEXT_VERSION
  */
-class PullRequestValidator extends GeneralMessageUnitValidator  {
+class PullRequestValidator extends GeneralMessageUnitValidator<IPullRequest>
+                           implements IMessageValidator<IPullRequest> {
+
+    PullRequestValidator(boolean useStrictValidation) {
+        super(useStrictValidation);
+    }
 
     /**
      * Performs the basic validation of the ebMS header meta-data specific for a Pull Request signal message unit.
      * <p>The basic validation only ensures that there is no <i>refToMessageId</i> in the header.
      *
-     * @param messageUnit           The message unit which header must be validated
-     * @param validationErrors      The string that is being build containing a description of all validation errors
-     *                              found for the header in the message header
+     * @param messageUnit       The Pull Request message unit which header must be validated
+     * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
      */
     @Override
-    protected void doBasicValidation(final IMessageUnit messageUnit, final StringBuilder validationErrors) {
+    protected void doBasicValidation(final IPullRequest messageUnit,
+                                     Collection<MessageValidationError> validationErrors) {
         // First do genereal validation
         super.doBasicValidation(messageUnit, validationErrors);
 
         // Check that no RefToMessageId is included
         if (!Utils.isNullOrEmpty(messageUnit.getRefToMessageId()))
-            validationErrors.append("There must be no RefToMessageId\n");
+            validationErrors.add(new MessageValidationError("There must be no RefToMessageId"));
     }
 
     /**
      * Performs the strict validation of the ebMS header meta-data specific for a Pull Request signal message unit
      * <p>
      *
-     * @param messageUnit           The message unit which header must be validated
-     * @param validationErrors      The string that is being build containing a description of all validation errors
-     *                              found for the header in the message header
+     * @param messageUnit       The Pull Request message unit which header must be validated
+     * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
      */
     @Override
-    protected void doStrictValidation(final IMessageUnit messageUnit, final StringBuilder validationErrors) {
-        // First do genereal validation
+    protected void doStrictValidation(final IPullRequest messageUnit,
+                                      Collection<MessageValidationError> validationErrors) {
+        // First do general validation
         super.doStrictValidation(messageUnit, validationErrors);
-
-
     }
-
 }

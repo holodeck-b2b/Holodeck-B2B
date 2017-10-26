@@ -16,28 +16,46 @@
  */
 package org.holodeckb2b.core.validation.header;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
+import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
+import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
  * Provides validation of the ebMS header information that should be available in all message units.
  *
- * @author Sander Fieten <sander at chasquis-services.com>
+ * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since  HB2B_NEXT_VERSION
  */
-abstract class GeneralMessageUnitValidator implements IHeaderValidator {
+abstract class GeneralMessageUnitValidator<M extends IMessageUnit> implements IMessageValidator<M> {
+    /**
+     * Indicator whether lax or strict validation should be applied
+     */
+    protected boolean useStrictValidation;
 
+    /**
+     * Create a new validator with the specified validation mode
+     *
+     * @param useStrictValidation   Indicates whether strict validation should be applied
+     */
+    GeneralMessageUnitValidator(final boolean useStrictValidation) {
+        this.useStrictValidation = useStrictValidation;
+    }
+    
     /**
      * Performs the requested validation of the generic ebMS header meta-data.
      *
-     * @param messageUnit           The message unit which header must be validated
-     * @param useStrictValidation   Indicates whether a strict validation should be performed or just a basic one
-     * @return                      A string containing a description of the validation errors found, or an empty string
-     *                              if no problems where found.
+     * @param messageUnit   The message unit which header must be validated
+     * @return              A Collection of {@link MessageValidationError}s when there are validation errors.<br>
+     *                      When no problems were detected an empty Collection.
+     * @throws MessageValidationException   When the validator can not complete the validation of the message unit
      */
-    @Override
-    public String validate(final IMessageUnit messageUnit, final boolean useStrictValidation) {
-        StringBuilder    validationErrors = new StringBuilder();
+    public Collection<MessageValidationError> validate(final M messageUnit) throws MessageValidationException {
+
+        Collection<MessageValidationError>    validationErrors = new ArrayList<>();
 
         // Always perform the basic validation
         doBasicValidation(messageUnit, validationErrors);
@@ -45,34 +63,31 @@ abstract class GeneralMessageUnitValidator implements IHeaderValidator {
         if (useStrictValidation)
             doStrictValidation(messageUnit, validationErrors);
 
-        // Return trimmed string so it is empty when nothing is reported
-        return  validationErrors.toString().trim();
+        return  validationErrors;
     }
 
     /**
      * Performs the basic validation of the generic ebMS header meta-data.
      * <p>Checks a MessageId and timestamp are available in the given message unit.
      *
-     * @param messageUnit           The message unit which header must be validated
-     * @param validationErrors      The string that is being build containing a description of all validation errors
-     *                              found for the header in the message header
+     * @param messageUnit       The message unit which header must be validated
+     * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
      */
-    protected void doBasicValidation(final IMessageUnit messageUnit, final StringBuilder validationErrors) {
+    protected void doBasicValidation(final M messageUnit, Collection<MessageValidationError> validationErrors) {
 
         if (Utils.isNullOrEmpty(messageUnit.getMessageId()))
-            validationErrors.append("MessageId is missing\n");
+            validationErrors.add(new MessageValidationError("MessageId is missing"));
         if (messageUnit.getTimestamp() == null)
-            validationErrors.append("Timestamp is missing\n");
+            validationErrors.add(new MessageValidationError("Timestamp is missing"));
     }
 
     /**
-     * Performs the strict validation of the generic ebMS header meta-data.
-     * <p>
+     * Performs the strict validation of the ebMS header meta-data.
      *
-     * @param messageUnit           The message unit which header must be validated
-     * @param validationErrors      The string that is being build containing a description of all validation errors
-     *                              found for the header in the message header
+     * @param messageUnit       The message unit which header must be validated
+     * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
      */
-    protected void doStrictValidation(final IMessageUnit messageUnit, final StringBuilder validationErrors) {
+    protected void doStrictValidation(final M messageUnit,  Collection<MessageValidationError> validationErrors) {
+
     }
 }
