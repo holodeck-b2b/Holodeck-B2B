@@ -51,7 +51,7 @@ import static org.junit.Assert.*;
 
 /**
  * todo [] refactor the test
- * @author Sander Fieten (sander at chasquis-services.com)
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class PurgeOldMessagesWorkerTest {

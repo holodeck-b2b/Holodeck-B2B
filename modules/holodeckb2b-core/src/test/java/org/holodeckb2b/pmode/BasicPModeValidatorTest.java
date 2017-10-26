@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Tests the {@link BasicPModeValidator}
  *
- * @author Sander Fieten (sander at chasquis-services.com)
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class BasicPModeValidatorTest {
 
