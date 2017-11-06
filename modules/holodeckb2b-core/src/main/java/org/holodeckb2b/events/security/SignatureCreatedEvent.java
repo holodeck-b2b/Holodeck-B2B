@@ -17,10 +17,10 @@
 package org.holodeckb2b.events.security;
 
 import java.util.Map;
-import org.holodeckb2b.interfaces.security.ISignatureCreatedEvent;
-import org.holodeckb2b.interfaces.security.ISignatureVerifiedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.security.ISignatureCreatedEvent;
+import org.holodeckb2b.interfaces.security.ISignatureVerifiedEvent;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 
 /**
@@ -40,7 +40,7 @@ public class SignatureCreatedEvent extends AbstractSignatureProcessedEvent imple
      * @param digests   The information about the digests for the payloads that were part of the signature
      */
     public SignatureCreatedEvent(final IUserMessage subject, final Map<IPayload, ISignedPartMetadata> digests) {
-        super(subject, digests);
+        super(subject, null, digests);
     }
 
 }

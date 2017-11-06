@@ -28,11 +28,13 @@ import org.holodeckb2b.ebms3.errors.FailedDecryption;
 import org.holodeckb2b.ebms3.errors.PolicyNoncompliance;
 import org.holodeckb2b.events.security.DecryptionFailedEvent;
 import org.holodeckb2b.events.security.SignatureVerificationFailedEvent;
+import org.holodeckb2b.events.security.SignatureVerifiedEvent;
 import org.holodeckb2b.events.security.UTProcessingFailureEvent;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
+import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -45,6 +47,7 @@ import org.holodeckb2b.interfaces.security.ISecurityHeaderProcessor;
 import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
 import org.holodeckb2b.interfaces.security.ISecurityProvider;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
+import org.holodeckb2b.interfaces.security.ISignatureVerifiedEvent;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.module.HolodeckB2BCore;
@@ -146,22 +149,35 @@ public class ProcessSecurityHeaders extends BaseHandler {
     /**
      * Handles the result of the processing a part of the WS-Security header.
      * <p>When the the part is successfully processed, the processing result is added to the message context so the next
-     * handlers can use it for policy conformance, authentication or authorization.
+     * handlers can use it for policy conformance, authentication or authorization. In case the result applies to the
+     * verification of the signature also a {@link SignatureVerifiedEvent} is raised.
      * <p>If the processing failed, an ebMS Error will be generated for all the received message units, their processing
      * state is set to <i>FAILURE</i> and a message processing event will be raised. The ebMS Error generated depends on
-     * the part which failed to process, for signature and username tokens this will be the <i>FailedAuthentication</i>
-     * Error and for decryption problems a <i>FailedDecryption</i>.
+     * the reason of failure and the part which failed to process; if the error indicate a security policy violation a
+     * <i>PolicyNoncompliance</i> Error is genereated, otherwise for signature and username tokens a <i>
+     * FailedAuthentication</i> Error and for decryption problems a <i>FailedDecryption</i>.
      *
      * @param result    The result of processing a part of the security header
      * @param mc        The current message context
      */
     private void handleProcessingResult(final ISecurityProcessingResult result, final MessageContext mc)
                                                                                         throws PersistenceException {
+        final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
         final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
         if (result.isSuccessful()) {
-            if (result instanceof ISignatureProcessingResult)
+            if (result instanceof ISignatureProcessingResult) {
                 mc.setProperty(MessageContextProperties.SIG_VERIFICATION_RESULT, result);
-            else if (result instanceof IEncryptionProcessingResult)
+                ISignatureProcessingResult sigResult = (ISignatureProcessingResult) result;
+                for (final IMessageUnitEntity mu : rcvdMsgUnits) {
+                    ISignatureVerifiedEvent event;
+                    if (mu instanceof IUserMessage)
+                        event = new SignatureVerifiedEvent((IUserMessage) mu, sigResult.getEbMSHeaderDigest(),
+                                                           sigResult.getPayloadDigests());
+                    else
+                        event = new SignatureVerifiedEvent((ISignalMessage) mu, sigResult.getEbMSHeaderDigest());
+                    eventProcessor.raiseEvent(event, mc);
+                }
+            } else if (result instanceof IEncryptionProcessingResult)
                 mc.setProperty(MessageContextProperties.DECRYPTION_RESULT, result);
             else if (result.getTargetedRole() == SecurityHeaderTarget.DEFAULT)
                 mc.setProperty(MessageContextProperties.DEFAULT_UT_RESULT, result);
@@ -170,7 +186,6 @@ public class ProcessSecurityHeaders extends BaseHandler {
         } else {
             final SecurityProcessingException reason = result.getFailureReason();
             final StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-            final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
             final boolean decryptionFailure = (result instanceof IEncryptionProcessingResult);
             // Add warning to log so operator is always informed about problem
             log.warn("The processing of the "

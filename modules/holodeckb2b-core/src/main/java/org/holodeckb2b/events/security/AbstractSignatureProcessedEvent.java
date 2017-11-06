@@ -20,45 +20,76 @@ import java.util.Collections;
 import java.util.Map;
 import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 
 /**
  * Is an abstract implementation of a <i>message processing event</i> to indicate successful processing of a signature
- * in a message containing the User Message message unit which the subject of this event. This can either be the
- * creation or verification of the signature security header.
- * <p>Beside the standard event meta-data the event includes information about the digests of the User Message's
- * payloads included in the signature. These can only be set when the event is created and not be modified afterwards.
+ * in a message containing the message unit which the subject of this event. This can either be the creation or
+ * verification of the signature security header.
+ * <p>Beside the standard event meta-data the event includes information about the digests of the ebMS Header and in
+ * case of a User Message its payloads included in the signature. These can only be set when the event is created and
+ * not be modified afterwards.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
 abstract class AbstractSignatureProcessedEvent extends AbstractMessageProcessingEvent {
 
-    private final Map<IPayload, ISignedPartMetadata>  digests;
+    private final ISignedPartMetadata   headerDigest;
+    private final Map<IPayload, ISignedPartMetadata>  payloadDigests;
 
     /**
-     * Creates a new <code>SignatureCreatedEvent</code> for the given User Message and calculated payload digests.
+     * Creates a new <code>SignatureCreatedEvent</code> for the given Signal Message message unit and digest of its ebMS
+     * header.
      *
-     * @param subject   The User Message that was signed
-     * @param digests   The information about the digests that were calculated for the payloads contained in the User
-     *                  Message
+     * @param subject         The message unit that was signed
+     * @param headerDigest    The digest of the ebMS header
      */
-    public AbstractSignatureProcessedEvent(final IUserMessage subject, final Map<IPayload, ISignedPartMetadata> digests)
+    public AbstractSignatureProcessedEvent(final ISignalMessage subject, final ISignedPartMetadata headerDigest) {
+        super(subject);
+        this.headerDigest = headerDigest;
+        this.payloadDigests = null;
+    }
+
+    /**
+     * Creates a new <code>SignatureCreatedEvent</code> for the given User Message and calculated header and payload
+     * digests.
+     *
+     * @param subject         The User Message that was signed
+     * @param headerDigest    The digest of the ebMS header
+     * @param payloadDigests  The information about the digests that were calculated for the payloads contained
+     *                        in the User Message
+     */
+    public AbstractSignatureProcessedEvent(final IUserMessage subject, final ISignedPartMetadata headerDigest,
+                                           final Map<IPayload, ISignedPartMetadata> payloadDigests)
     {
         super(subject);
-        this.digests = (Map<IPayload, ISignedPartMetadata>) Collections.unmodifiableMap(digests);
+        this.headerDigest = headerDigest;
+        this.payloadDigests = (Map<IPayload, ISignedPartMetadata>) Collections.unmodifiableMap(payloadDigests);
+    }
+
+    /**
+     * Gets the information on the digest contained in the processed signature for the ebMS header of the message unit
+     * that is the <i>subject</i> of this event.
+     *
+     * @return  A {@link ISignedPartMetadata} object with information on the calculated digest of the ebMS header.
+     */
+    public ISignedPartMetadata getHeaderDigest() {
+        return headerDigest;
     }
 
     /**
      * Gets the information on the digests contained in the processed signature for the payloads of the User Message
      * that is the <i>subject</i> of this event.
+     * <p>NOTE: This method should only be used when the subject of the event is a User Message.
      *
-     * @return  A <b>unmodifiable</b> <code>Collection</code> of {@link IPayloadDigest} objects with information on the
-     *          calculated digests.
+     * @return  A <b>unmodifiable</b> <code>Collection</code> of {@link ISignedPartMetadata} objects with information on
+     *          the calculated payload digests.
      */
     public Map<IPayload, ISignedPartMetadata> getPayloadDigests() {
-        return digests;
+        return payloadDigests;
     }
 
 }

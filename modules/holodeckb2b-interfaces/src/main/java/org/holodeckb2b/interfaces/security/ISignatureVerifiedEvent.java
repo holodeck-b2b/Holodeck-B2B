@@ -19,12 +19,11 @@ package org.holodeckb2b.interfaces.security;
 import java.util.Map;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 
 /**
- * Is the <i>message processing event</i> that indicates that a signature of a received <b>User Message Unit</b> has
- * been verified successfully. This event is to inform the business application (or extensions) about the digests part
- * of the message level signature which for example can be used to create evidences.
+ * Is the <i>message processing event</i> that indicates that the signature of a received message unit has been verified
+ * successfully. This event is to inform the business application (or extensions) about the parts of the message that
+ * were included in the signature. These can be for example be used to create specific evidences.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
@@ -32,10 +31,19 @@ import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 public interface ISignatureVerifiedEvent extends IMessageProcessingEvent {
 
     /**
+     * Gets the information on the digest contained in the verified signature for the ebMS header of the message unit
+     * that is the <i>subject</i> of this event.
+     *
+     * @return  A {@link ISignedPartMetadata} object with information on the calculated digest of the ebMS header.
+     */
+    ISignedPartMetadata getHeaderDigest();
+
+    /**
      * Gets the information on the digests contained in the verified signature for the payloads of the User Message that
      * is the <i>subject</i> of this event.
+     * <p>NOTE: This method should only be used when the subject of the event is a User Message.
      *
      * @return  A <code>Map</code> linking the digest meta-data to each payload from the user message.
      */
-    public Map<IPayload, ISignedPartMetadata>   getPayloadDigests();
+    Map<IPayload, ISignedPartMetadata>   getPayloadDigests();
 }

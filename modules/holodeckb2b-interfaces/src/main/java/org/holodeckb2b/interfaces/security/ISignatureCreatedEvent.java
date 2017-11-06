@@ -20,13 +20,12 @@ package org.holodeckb2b.interfaces.security;
 import java.util.Map;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 
 /**
- * Is the <i>message processing event</i> that indicates that a signature is created for a <b>User Message Unit</b> that
- * is being sent. This event is to inform the business application (or extensions) about the digests that have been
- * created as part of the message level signature so it can check data integrity both for the sent message but also of
- * a resulting <i>NRR</i>.
+ * Is the <i>message processing event</i> that indicates that a signature is created for a <b>User Message</b> message
+ * unit that is being sent. This event is to inform the business application (or extensions) about the digests that have
+ * been created as part of the message level signature so it can check data integrity both for the sent message but also
+ * of a resulting <i>NRR</i>.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
