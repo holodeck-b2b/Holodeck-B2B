@@ -21,6 +21,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Issue in Receipt processing when the referenced message was not completely loaded from storage
   but previous processing states need to be evaluated
 * Pull Requests directly submitted to the Core are never send
+* Non closed output streams and incorrect flushing of data in file delivery methods
 
 ## 3.0.1
 ###### 2017-07-07
