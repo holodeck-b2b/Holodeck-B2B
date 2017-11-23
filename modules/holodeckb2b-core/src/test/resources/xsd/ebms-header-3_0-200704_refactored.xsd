@@ -1,22 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-
-    Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
--->
 <xsd:schema xmlns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/"
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 	xmlns:S11="http://schemas.xmlsoap.org/soap/envelope/"
@@ -209,7 +191,7 @@
 		<xsd:attribute name="id" type="xsd:ID" use="optional"/>
 		<xsd:attribute ref="S11:mustUnderstand" use="optional">
 			<xsd:annotation>
-				<xsd:documentation>If SOAP 1.1 is being used, this attribute is required, 
+				<xsd:documentation>If SOAP 1.1 is being used, this attribute is required,
 					other SOAP 1.1 attributes are allowed and SOAP 1.2 attributes are prohibited.
 				</xsd:documentation>
 			</xsd:annotation>
@@ -218,7 +200,7 @@
 		<xsd:attribute ref="S11:actor"/>
 		<xsd:attribute ref="S12:mustUnderstand" use="optional">
 			<xsd:annotation>
-				<xsd:documentation>If SOAP 1.2 is being used, this attribute is required, 
+				<xsd:documentation>If SOAP 1.2 is being used, this attribute is required,
 					other SOAP 1.2 attributes are allowed and SOAP 1.1 attributes are prohibited.
 				</xsd:documentation>
 			</xsd:annotation>

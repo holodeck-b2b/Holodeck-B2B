@@ -16,30 +16,25 @@
  */
 package org.holodeckb2b.ebms3.packaging;
 
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.TestUtils;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
@@ -51,14 +46,17 @@ import org.xml.sax.SAXException;
  */
 public class PackagingTest {
 
-    private final String    ebMSschemaFile;
-    private final String    SOAP11schemaFile;
-    private final String    SOAP12schemaFile;
+    private final File    ebMSschemaFile;
+    private final File    SOAP11schemaFile;
+    private final File    SOAP12schemaFile;
+    private final File    xmlSchemaFile;
 
     public PackagingTest() {
-        ebMSschemaFile = this.getClass().getClassLoader().getResource("xsd/ebms-header-3_0-200704_refactored.xsd").getPath();
-        SOAP11schemaFile = this.getClass().getClassLoader().getResource("xsd/soap11-envelope.xsd").getPath();
-        SOAP12schemaFile = this.getClass().getClassLoader().getResource("xsd/soap12-envelope.xsd").getPath();
+        ebMSschemaFile = new File(this.getClass().getClassLoader()
+                                                 .getResource("xsd/ebms-header-3_0-200704_refactored.xsd").getPath());
+        SOAP11schemaFile = new File(this.getClass().getClassLoader().getResource("xsd/soap11-envelope.xsd").getPath());
+        SOAP12schemaFile = new File(this.getClass().getClassLoader().getResource("xsd/soap12-envelope.xsd").getPath());
+        xmlSchemaFile = new File(this.getClass().getClassLoader().getResource("xsd/xml.xsd").getPath());
     }
 
     /**
@@ -101,10 +99,11 @@ public class PackagingTest {
             final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware( true );
             dbf.setValidating(true);
-            dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema");
+            dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage",
+                                "http://www.w3.org/2001/XMLSchema");
             dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaSource",
-                                new String[] {ebMSschemaFile, SOAP11schemaFile, SOAP12schemaFile});
-            final Document xml = dbf.newDocumentBuilder().parse( new InputSource( new FileReader(xmlFile) ) );
+                                new File[] {ebMSschemaFile, SOAP11schemaFile, SOAP12schemaFile, xmlSchemaFile});
+            final Document xml = dbf.newDocumentBuilder().parse( new File( xmlFile)  );
         } catch (final SAXException ex) {
             Logger.getLogger(PackagingTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
