@@ -22,42 +22,11 @@
     <!-- <parameter name="WorkerConfig"/>-->
 
     <!-- ====================================================================
-    - This parameter defines which persistency provider Holodeck B2B should
-    - use for storing the meta-data on processed messages. If not specified
-    - a default implementation using an internal database is used.
-    ===================================================================== -->
-    <!-- <parameter name="PersistencyProvider"/> -->
-
-    <!-- ====================================================================
     - This parameter sets the directory that should be used for temporarily
     - storing data. If it is not set here a "temp" directory is created
     - in the "repository" directory of the Holodeck B2B install
     ===================================================================== -->
     <!-- <parameter name="TempDir"/> -->
-
-    <!-- ====================================================================
-    - This parameter specifies the custom P-Mode storage implementation that
-    - Holodeck B2B should use. By default the P-Modes are stored in-memory,
-    - but in certain environments it may be necessary to have a permanent
-    - storage.
-    ===================================================================== -->
-    <!-- <parameter name="PModeStorageImplementation"/> -->
-
-    <!-- ====================================================================
-    - Before P-Modes are deployed to the Holodeck B2B Core they are validated
-    - to make sure they can be used for message processing. The default basic
-    - checks are normally fine, but in some deployments you may want to use
-    - domain specific validation of certain P-Mode parameters. Using a custom
-    - P-Mode validator these checks can be performed. This parameter is used
-    - to specify which non-default P-Mode validator should be used.
-    ===================================================================== -->
-    <!-- <parameter name="PModeValidator"/>-->
-
-    <!-- ====================================================================
-    - This parameter specifies the custom processor of message processing
-    - events. If not specified the default implementation will be used.
-    ===================================================================== -->
-    <!-- <parameter name="MessageProcessingEventProcessor"/>-->
 
     <!-- ====================================================================
     - This parameter conatains the default setting whether Errors on Errors
@@ -75,6 +44,47 @@
     - can be overriden in the P-Mode configuration.
     ===================================================================== -->
     <parameter name="ReportErrorOnReceipt">false</parameter>
+
+    <!-- ====================================================================
+    - Before P-Modes are deployed to the Holodeck B2B Core they are validated
+    - to make sure they can be used for message processing. The default basic
+    - checks are normally fine, but in some deployments you may want to use
+    - domain specific validation of certain P-Mode parameters. Using a custom
+    - P-Mode validator these checks can be performed. This parameter is used
+    - to specify which non-default P-Mode validator should be used.
+    ===================================================================== -->
+    <!-- <parameter name="PModeValidator"/>-->
+
+    <!-- ====================================================================
+    - This parameter defines which persistency provider Holodeck B2B should
+    - use for storing the meta-data on processed messages. If not specified
+    - a default implementation using an internal database is used.
+    ===================================================================== -->
+    <!-- <parameter name="PersistencyProvider"/> -->
+
+    <!-- ====================================================================
+    - This parameter specifies the custom P-Mode storage implementation that
+    - Holodeck B2B should use. By default the P-Modes are stored in-memory,
+    - but in certain environments it may be necessary to have a permanent
+    - storage.
+    - NOTE: When changing to another implementation you may also need to
+    -       change the management of the P-Modes, i.e. replace the default
+    -       worker that watches for P-Mode XML files.
+    ===================================================================== -->
+    <!-- <parameter name="PModeStorageImplementation"/> -->
+
+    <!-- ====================================================================
+    - This parameter specifies the processor of message processing events.
+    - If not specified the default implementation will be used.
+    ===================================================================== -->
+    <!-- <parameter name="MessageProcessingEventProcessor"/>-->
+
+    <!-- ====================================================================
+    - This parameter defines which security provider Holodeck B2B should
+    - use for procesisng of the WS-Security header in the messages. If not
+    - specified a default implementation is used.
+    ===================================================================== -->
+    <!-- <parameter name="SecurityProvider"/> -->
 
     <!-- ====================================================================
 
