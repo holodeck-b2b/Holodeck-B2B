@@ -63,7 +63,7 @@ public class DefaultValidationExecutor implements IValidationExecutor {
             log.debug("Validating the message using validator {}", validatorCfg.getId());
             Collection<MessageValidationError>  errors = validator.validate(userMessage);
             if (Utils.isNullOrEmpty(errors))
-                log.debug("Messagge successfully validated by []", validatorCfg.getId());
+                log.debug("Messagge successfully validated by [{}]", validatorCfg.getId());
             else {
                 log.debug("Validator [{}] found {} errors in message", validatorCfg.getId(), errors.size());
                 // Store the errors in result map
