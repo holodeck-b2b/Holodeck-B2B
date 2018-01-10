@@ -176,6 +176,19 @@
     </dependencies>
 
     <build>
+        <plugins>
+            <plugin>
+              <artifactId>maven-clean-plugin</artifactId>
+              <configuration>
+                <filesets>
+                  <fileset>
+                    <directory>db</directory>
+                    <followSymlinks>false</followSymlinks>
+                  </fileset>
+                </filesets>
+              </configuration>
+            </plugin>
+        </plugins>
         <resources>
           <resource>
             <directory>src/main/resources</directory>
