@@ -2,7 +2,8 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 3.1.0
+###### 2018-01-10
 ### Added
 * Support for the _type_ attribute of both _Message_ and _Part Properties_. See
   also [issue #2](https://issues.oasis-open.org/browse/EBXMLMSG-2) in the OASIS ebMS TC's issue tracker
