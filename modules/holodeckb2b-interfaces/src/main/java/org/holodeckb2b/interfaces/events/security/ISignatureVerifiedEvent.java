@@ -14,11 +14,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.security;
+package org.holodeckb2b.interfaces.events.security;
 
 import java.util.Map;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 
 /**
  * Is the <i>message processing event</i> that indicates that the signature of a received message unit has been verified

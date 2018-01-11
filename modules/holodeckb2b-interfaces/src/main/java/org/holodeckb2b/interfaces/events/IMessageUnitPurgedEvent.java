@@ -17,6 +17,7 @@
 
 package org.holodeckb2b.interfaces.events;
 
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
 
 /**

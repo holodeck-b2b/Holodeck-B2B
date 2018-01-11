@@ -17,8 +17,8 @@
 package org.holodeckb2b.common.testhelpers.pmode;
 
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventConfiguration;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 import java.util.ArrayList;

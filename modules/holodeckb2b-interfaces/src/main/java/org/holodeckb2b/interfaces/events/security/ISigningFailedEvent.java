@@ -14,24 +14,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.security;
+package org.holodeckb2b.interfaces.events.security;
 
-import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
+import org.holodeckb2b.interfaces.events.security.ISecurityHeaderCreationFailureEvent;
 
 /**
- * Is the <i>message processing event</i> that indicates that a username token could not be added to the message to be
- * sent containing the message unit failed. This event is to inform the business application (or extensions) that a
- * submitted message unit could not be sent because it a required username token could not be added to the message.
+ * Is the <i>message processing event</i> that indicates that the signing of a message to be sent containing the
+ * message unit failed. This event is to inform the business application (or extensions) that a submitted message unit
+ * could not be sent because it could not be signed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
-public interface IUTCreationFailedEvent extends ISecurityHeaderCreationFailureEvent {
+public interface ISigningFailedEvent extends ISecurityHeaderCreationFailureEvent {
 
-    /**
-     * Gets the target of Username token WS-Security header which could not be added to the message.
-     *
-     * @return The target of the Username token header
-     */
-    SecurityHeaderTarget getTargetedRole();
 }

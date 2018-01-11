@@ -21,10 +21,10 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventConfiguration;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandler;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandlerFactory;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandler;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandlerFactory;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**

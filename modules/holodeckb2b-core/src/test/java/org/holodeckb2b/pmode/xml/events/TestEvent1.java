@@ -19,7 +19,7 @@ package org.holodeckb2b.pmode.xml.events;
 import java.util.Date;
 import java.util.UUID;
 
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**

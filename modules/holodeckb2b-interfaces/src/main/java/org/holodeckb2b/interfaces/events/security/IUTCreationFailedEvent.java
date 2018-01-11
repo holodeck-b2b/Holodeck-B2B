@@ -14,22 +14,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.security;
+package org.holodeckb2b.interfaces.events.security;
 
+import org.holodeckb2b.interfaces.events.security.ISecurityHeaderCreationFailureEvent;
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 
 /**
- * Is the <i>message processing event</i> that indicates that the processing of a user name token in a received message
- * failed. This event is to inform the business application (or extensions) that a message unit was received but
- * can not be delivered due to the invalid user name token. Based on the event the problem might be handled out of band.
+ * Is the <i>message processing event</i> that indicates that a username token could not be added to the message to be
+ * sent containing the message unit failed. This event is to inform the business application (or extensions) that a
+ * submitted message unit could not be sent because it a required username token could not be added to the message.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
-public interface IUTProcessingFailureEvent extends ISecurityProcessingFailureEvent {
+public interface IUTCreationFailedEvent extends ISecurityHeaderCreationFailureEvent {
 
     /**
-     * Gets the target of Username token WS-Security header in which processing failed.
+     * Gets the target of Username token WS-Security header which could not be added to the message.
      *
      * @return The target of the Username token header
      */

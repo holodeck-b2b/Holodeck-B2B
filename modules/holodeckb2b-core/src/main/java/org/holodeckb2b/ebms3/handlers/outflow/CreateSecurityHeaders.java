@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.ebms3.handlers.outflow;
 
-import org.holodeckb2b.security.util.SecurityConfig;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,9 +28,8 @@ import org.holodeckb2b.events.security.EncryptionFailedEvent;
 import org.holodeckb2b.events.security.SignatureCreatedEvent;
 import org.holodeckb2b.events.security.SigningFailedEvent;
 import org.holodeckb2b.events.security.UTCreationFailedEvent;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
-import org.holodeckb2b.interfaces.security.ISignatureCreatedEvent;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -48,6 +46,7 @@ import org.holodeckb2b.interfaces.security.IEncryptionProcessingResult;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderCreator;
 import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
 import org.holodeckb2b.interfaces.security.ISecurityProvider;
+import org.holodeckb2b.interfaces.events.security.ISignatureCreatedEvent;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
@@ -55,6 +54,7 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeUtils;
+import org.holodeckb2b.security.util.SecurityConfig;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the required WS-Security headers in the message. As described
@@ -159,7 +159,7 @@ public class CreateSecurityHeaders extends BaseHandler {
         log.debug("Create the security headers in the message");
         try {
             Collection<ISecurityProcessingResult> results = hdrCreator.createHeaders(mc,
-                                                                    MessageContextUtils.getUserMessagesFromMessage(mc),
+                                                                    MessageContextUtils.getSentMessageUnits(mc),
                                                                     securityToUse);
             log.debug("Security header creation finished, handle results");
             if (!Utils.isNullOrEmpty(results))

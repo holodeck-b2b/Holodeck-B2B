@@ -18,8 +18,8 @@ package org.holodeckb2b.pmode.xml.events;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandler;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandler;
 
 /**
  *

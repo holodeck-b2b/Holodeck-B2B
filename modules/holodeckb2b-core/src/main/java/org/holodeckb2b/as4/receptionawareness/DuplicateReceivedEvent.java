@@ -17,7 +17,7 @@
 package org.holodeckb2b.as4.receptionawareness;
 
 import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.receptionawareness.IDuplicateReceivedEvent;
+import org.holodeckb2b.interfaces.events.IDuplicateReceivedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**

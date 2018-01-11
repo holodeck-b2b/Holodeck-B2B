@@ -17,10 +17,10 @@
 package org.holodeckb2b.common.events;
 
 import org.holodeckb2b.common.testhelpers.pmode.EventHandlerConfig;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandler;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandlerFactory;
-import org.holodeckb2b.interfaces.events.MessageProccesingEventHandlingException;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandler;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandlerFactory;
+import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.junit.Test;
 

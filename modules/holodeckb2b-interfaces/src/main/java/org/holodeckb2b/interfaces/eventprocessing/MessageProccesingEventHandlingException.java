@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.events;
+package org.holodeckb2b.interfaces.eventprocessing;
 
 /**
  * Indicates a problem that occurred in the processing of a {@link IMessageProcessingEvent}.

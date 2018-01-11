@@ -14,27 +14,29 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.security;
+package org.holodeckb2b.interfaces.events.security;
 
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 
 /**
- * Is a generic <i>message processing event</i> that indicates that there was a problem in the creation of the
- * WS-Security header(s) of a message containing the message unit. Descendent interfaces are defined to indicate in
- * which header part the problem occurred.
+ * Is a generic <i>message processing event</i> that indicates that there was a problem in the processing of the
+ * WS-Security header of a received message unit. Descendent interfaces are defined to indicate in which header the
+ * problem occurred.
  * <p>The descendent classes are used by the Holodeck B2B Core to inform the business application (or extensions) that a
- * submitted message unit could not be sent due to the problem in applying the security.<br>
+ * message unit was received but can not be delivered due to the problem in the security. Based on the event the problem
+ * might be handled out of band.<br>
  * Although the Core will always raise specific events this interface can be used when configuring the event handlers in
  * the P-Mode to define one handler for all events related to WS-Security problems.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
-public interface ISecurityHeaderCreationFailureEvent extends IMessageProcessingEvent {
+public interface ISecurityProcessingFailureEvent extends IMessageProcessingEvent {
 
     /**
-     * Gets the description as given by the <i>Security Provider</i> of what caused the creation of the WS-Security
+     * Gets the description as given by the <i>Security Provider</i> of what caused the processing of the WS-Security
      * header to fail.
      *
      * @return  The {@link SecurityProcessingException} that caused the failure.

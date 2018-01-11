@@ -14,16 +14,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.security;
+package org.holodeckb2b.interfaces.events.security;
 
 /**
- * Is the <i>message processing event</i> that indicates that the signing of a message to be sent containing the
+ * Is the <i>message processing event</i> that indicates that the encryption of a message to be sent containing the
  * message unit failed. This event is to inform the business application (or extensions) that a submitted message unit
- * could not be sent because it could not be signed.
+ * could not be sent because it could not be encrypted.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
-public interface ISigningFailedEvent extends ISecurityHeaderCreationFailureEvent {
+public interface IEncryptionFailedEvent extends ISecurityHeaderCreationFailureEvent {
 
 }

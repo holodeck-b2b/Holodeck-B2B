@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.pmode.xml.events;
 
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 
 /**
  * An extension of the {@link IMessageProcessingEvent} interface for testing the event handler configuration

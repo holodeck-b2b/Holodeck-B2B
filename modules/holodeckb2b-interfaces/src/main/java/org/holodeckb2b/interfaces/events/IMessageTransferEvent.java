@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.interfaces.events;
 
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
+
 /**
  * Is the <i>message processing event</i> that indicates that there was an attempt to transfer a message unit to the
  * other MSH, either by sending it as a request or including it as a response. The event is raised for all message units

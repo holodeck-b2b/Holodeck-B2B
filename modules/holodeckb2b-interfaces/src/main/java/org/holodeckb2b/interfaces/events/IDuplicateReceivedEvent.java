@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.events.receptionawareness;
+package org.holodeckb2b.interfaces.events;
 
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
-import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 
 /**
  * Is the <i>message processing event</i> that indicates that Holodeck B2B determined that the received <i>User Message

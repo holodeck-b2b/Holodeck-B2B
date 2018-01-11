@@ -1,7 +1,7 @@
 package org.holodeckb2b.common.testhelpers.events;
 
-import org.holodeckb2b.interfaces.events.IMessageProcessingEventHandlerFactory;
-import org.holodeckb2b.interfaces.events.MessageProccesingEventHandlingException;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandlerFactory;
+import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 
 import java.util.Map;
 
