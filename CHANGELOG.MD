@@ -33,9 +33,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * The ebMS Error returned to the sender in case the signature of a _User Message_ does not include all
   payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonCompliance_.
 * Moved classes in `org.holodeckb2b.interfaces.pmode.security` to `org.holodeckb2b.interfaces.pmode`
-* Refactored package structure of event interfaces: events directly related to a specific function are now
-  included in the same package as the other interface of that function. Interfaces related to processing of
-  events and generic event are in `org.holodeckb2b.interfaces.events.processing`
+* Refactored package structure of _message processing events_ related interfaces: The definition of all events is done
+  using interfaces in the `org.holodeckb2b.interfaces.events` and subpackages. Interfaces related to the processing
+  of events are in `org.holodeckb2b.interfaces.eventprocessing`
 * Refactored `IQueryManager.isAlreadyDelivered()` to `IQueryManager.isAlreadyProcessed()` to take also failed message
   units into account when determining if user message is already processed and should be considered a duplicate.
 
@@ -56,7 +56,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Security
 
-## Unreleased (3.1.x)
+## 3.1.0
+###### 2018-01-10
 ### Added
 * Support for the _type_ attribute of both _Message_ and _Part Properties_. See
   also [issue #2](https://issues.oasis-open.org/browse/EBXMLMSG-2) in the OASIS ebMS TC's issue tracker
