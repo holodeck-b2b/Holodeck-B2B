@@ -26,6 +26,7 @@ import org.apache.wss4j.dom.str.STRParser;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
@@ -92,12 +93,12 @@ public final class SecurityUtils {
      * ds:Reference</code> elements included in the default WS-Security header.
      *
      * @param domEnvelope   The DOM representation of the SOAP envelope
-     * @param userMessages  The collection of user message included in the message
+     * @param messageUnits  The collection of message units included in the message
      * @return The digest information related to the ebMS header and payloads
      * @throws SecurityProcessingException  When the SOAP envelope does not contain an ebMS header
      */
     public static SignedMessagePartsInfo getSignedPartsInfo(final Document domEnvelope,
-                                                          final Collection<IUserMessage> userMessages)
+                                                            final Collection<? extends IMessageUnit> messageUnits)
                                                                                     throws SecurityProcessingException {
         // Get the ds:Reference elements from the header
         Collection<Element> sigRefs = getSignatureReferences(domEnvelope);
@@ -115,7 +116,8 @@ public final class SecurityUtils {
 
         // For each payload try to get the applicable reference element and create the SignedPartMetadata instance
         Map<IPayload, ISignedPartMetadata> payloadDigests = new HashMap<>();
-        userMessages.stream().map(userMsg -> userMsg.getPayloads())
+        messageUnits.stream().filter(msgUnit -> msgUnit instanceof IUserMessage)
+                             .map(userMsg -> ((IUserMessage) userMsg).getPayloads())
                              .filter(umPayloads -> !Utils.isNullOrEmpty(umPayloads))
                              .forEachOrdered(umPayloads ->
                                 umPayloads.forEach((p) ->
@@ -198,7 +200,7 @@ public final class SecurityUtils {
     /**
      * Checks whether the given reference applies to the given payload.
      *
-     * @param payload       The payload to check
+     * @param pl            The payload to check
      * @param refURI        The reference to check
      * @param domEnvelope   The DOM representation of the SOAP envelope
      * @return              <code>true</code> if this reference applies to a payload of the message,<br>

@@ -42,6 +42,7 @@ import org.apache.wss4j.dom.handler.WSHandler;
 import org.apache.wss4j.dom.message.WSSecHeader;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
@@ -100,9 +101,9 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
     private MessageContext       msgContext;
 
     /**
-     * Collection of all User Message units in the processed message
+     * Collection of all Message Units in the processed message
      */
-    private Collection<IUserMessage> userMsgs;
+    private Collection<? extends IMessageUnit> msgUnits;
 
     /**
      * DOM version of the SOAP envelope as this is needed for WSS4J processing
@@ -123,12 +124,12 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
      */
     @Override
     public Collection<ISecurityProcessingResult> createHeaders(MessageContext mc,
-                                                               Collection<IUserMessage> userMsgs,
+                                                               Collection<? extends IMessageUnit> msgUnits,
                                                                ISecurityConfiguration config)
                                                                                     throws SecurityProcessingException {
         // Copy reference to message context
         this.msgContext = mc;
-        this.userMsgs = userMsgs;
+        this.msgUnits = msgUnits;
 
         // Convert the SOAP Envelope to standard DOM representation as this is required by the security processing
         // libraries
@@ -203,7 +204,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
             log.debug("The message must be encrypted, set up encryption configuration");
             // Add encryption action
             actions.add(new HandlerAction(WSConstants.ENCR));
-            setupEncryption(userMsgs, encryptionCfg);
+            setupEncryption(encryptionCfg);
         }
         if (Utils.isNullOrEmpty(actions))
             log.debug("No default WSS header needed");
@@ -256,14 +257,15 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
     }
 
     /**
-     * Sets the processing parameters for signing the message
+     * Sets the processing parameters for encryption of the message
      *
-     * @param signatureConfig  The P-Mode settings for signing
+     * @param encryptionCfg  The P-Mode settings for encryption
      */
-    private void setupEncryption(Collection<IUserMessage> userMsgs, final IEncryptionConfiguration encryptionCfg) {
+    private void setupEncryption(final IEncryptionConfiguration encryptionCfg) {
         // AS4 requires that only the payloads are encrypted, so we encrypt the Body only when it contains a payload
-        if (!Utils.isNullOrEmpty(userMsgs)
-           && userMsgs.stream().map(userMsg -> userMsg.getPayloads())
+        if (!Utils.isNullOrEmpty(msgUnits)
+           && msgUnits.stream().filter(msgUnit -> msgUnit instanceof IUserMessage)
+                               .map(userMsg -> ((IUserMessage) userMsg).getPayloads())
                                .filter(umPayloads -> !Utils.isNullOrEmpty(umPayloads))
                                .anyMatch(umPayloads -> umPayloads.stream()
                                                   .anyMatch(p -> p.getContainment() == IPayload.Containment.BODY)));
@@ -480,7 +482,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
     private SignatureProcessingResult getSignatureResults(final ISigningConfiguration signConfig)
                                                                                    throws SecurityProcessingException {
         // Get the digest information from the SOAP envelope
-        final SignedMessagePartsInfo signedPartsData = SecurityUtils.getSignedPartsInfo(domEnvelope, userMsgs);
+        final SignedMessagePartsInfo signedPartsData = SecurityUtils.getSignedPartsInfo(domEnvelope, msgUnits);
         if (signedPartsData == null) {
             // Although a signing action was executed, nothing was signed?!
             log.error("Signing operation did not sign any part of the message!");
@@ -510,7 +512,8 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
                                                                                    throws SecurityProcessingException {
         // Get all payloads included in the message, i.e. in attachment or body
         Collection<IPayload> encryptedPayloads = new HashSet<>();
-        userMsgs.stream().map(userMsg -> userMsg.getPayloads())
+        msgUnits.stream().filter(msgUnit -> msgUnit instanceof IUserMessage)
+                         .map(userMsg -> ((IUserMessage) userMsg).getPayloads())
                          .filter(umPayloads -> !Utils.isNullOrEmpty(umPayloads))
                          .forEachOrdered((umPayloads) ->
                                 umPayloads.stream().filter(p -> p.getContainment() != IPayload.Containment.EXTERNAL)

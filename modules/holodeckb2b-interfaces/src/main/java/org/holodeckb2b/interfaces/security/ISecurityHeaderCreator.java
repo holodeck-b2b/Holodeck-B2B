@@ -18,7 +18,7 @@ package org.holodeckb2b.interfaces.security;
 
 import java.util.Collection;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 
 /**
@@ -42,7 +42,7 @@ public interface ISecurityHeaderCreator {
      *
      * @param msgContext    The Axis2 message context which should be used to get the SOAP Envelope and access to the
      *                      attachments
-     * @param userMsgs      The collection of meta-data on the User Message message units contained in the message
+     * @param msgUnits      The collection of meta-data on the message units contained in the message
      * @param config        The security configuration to apply as copied from the P-Mode of the primary message unit
      * @return              The result of the creating each part of the WS-Security header.
      * @throws SecurityProcessingException  When an error occurs in the <b>internal</b> processing of the creator,i.e.
@@ -50,7 +50,8 @@ public interface ISecurityHeaderCreator {
      *                                      created in the message.
      *
      */
-    Collection<ISecurityProcessingResult> createHeaders(MessageContext msgContext, Collection<IUserMessage> userMsgs,
+    Collection<ISecurityProcessingResult> createHeaders(MessageContext msgContext,
+                                                        Collection<? extends IMessageUnit> msgUnits,
                                                         ISecurityConfiguration config)
                                                                                      throws SecurityProcessingException;
 }
