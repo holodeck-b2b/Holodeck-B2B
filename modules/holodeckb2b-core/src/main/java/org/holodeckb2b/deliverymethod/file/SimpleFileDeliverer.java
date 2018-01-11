@@ -219,12 +219,11 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
                                                                     + msgId.replaceAll("[^a-zA-Z0-9.-]", "_")
                                                                     + ".xml");
 
-        try {
-            final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(
-                                                                                new FileWriter(msgFilePath.toString()));
+        try (final FileWriter fw = new FileWriter(msgFilePath.toString())) {
+            final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(fw);
             xml.serialize(writer);
+            writer.flush();
             writer.close();
-
             return msgFilePath.toString();
         } catch (final Exception ex) {
             // Can not write the message info XML to file -> delivery not possible

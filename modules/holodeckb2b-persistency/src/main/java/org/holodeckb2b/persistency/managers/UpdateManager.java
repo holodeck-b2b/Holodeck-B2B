@@ -20,6 +20,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.LockModeType;
 import javax.persistence.OptimisticLockException;
 import javax.persistence.RollbackException;
@@ -55,6 +56,7 @@ public class UpdateManager implements IUpdateManager {
                                                                                         throws PersistenceException {
         EntityManager em = null;
         MessageUnit jpaMsgUnit = null;
+        EntityTransaction tx = null;
         try {
             // Determine which JPA class should be created to store the meta-data
             Class jpaEntityClass = JPAEntityHelper.determineJPAClass(messageUnit);
@@ -63,11 +65,16 @@ public class UpdateManager implements IUpdateManager {
             jpaMsgUnit = (MessageUnit) cons.newInstance(messageUnit);
 
             em = EntityManagerUtil.getEntityManager();
-            em.getTransaction().begin();
+            tx = em.getTransaction();
+            tx.begin();
             em.persist(jpaMsgUnit);
-            em.getTransaction().commit();
+            tx.commit();
         } catch (NoSuchMethodException | SecurityException | InstantiationException
                 | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+        	
+        		if (tx!=null && tx.isActive()) {
+        			tx.rollback();
+        		}
             // Could not create a JPA entity object for the given message unit
             throw new PersistenceException("An error occurred while saving the message unit's meta-data!", ex);
         } finally {
@@ -81,9 +88,12 @@ public class UpdateManager implements IUpdateManager {
     @Override
     public boolean setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState currentProcState,
                                       final ProcessingState newProcState) throws PersistenceException {
-        EntityManager em = EntityManagerUtil.getEntityManager();
+    		EntityManager em = null;
+        EntityTransaction tx = null;
         try {
-            em.getTransaction().begin();
+        		em = EntityManagerUtil.getEntityManager();
+        	 	tx = em.getTransaction();
+            tx.begin();
             // Reload the entity object from the database so we've actual data and a managed JPA object ready for change
             MessageUnit jpaMsgUnit = em.find(MessageUnit.class, ((MessageUnitEntity) msgUnit).getOID(),
                                              LockModeType.OPTIMISTIC_FORCE_INCREMENT);
@@ -102,15 +112,16 @@ public class UpdateManager implements IUpdateManager {
             // Ensure that the object stays completely loaded if it was already so previously
             if (msgUnit.isLoadedCompletely())
                 QueryManager.loadCompletely(jpaMsgUnit);
-            em.getTransaction().commit();
+            tx.commit();
             // Update the entity object
             ((MessageUnitEntity) msgUnit).updateJPAObject(jpaMsgUnit);
             return true;
         } catch (final OptimisticLockException | RollbackException alreadyChanged) {
             // During transaction the message unit was already updated, so state can not be changed.
             // Rollback and return false
-            if (em.getTransaction().isActive())
-                em.getTransaction().rollback();
+	        	if (tx!=null && tx.isActive()) {
+	    			tx.rollback();
+	    		}
             return false;
         } catch (final Exception e) {
             // Another error occured when updating the processing state. Rollback and rethrow as DatabaseException
@@ -123,17 +134,21 @@ public class UpdateManager implements IUpdateManager {
 
     @Override
     public void deleteMessageUnit(final IMessageUnitEntity messageUnit) throws PersistenceException {
-        EntityManager em = EntityManagerUtil.getEntityManager();
+    		EntityManager em = null;
+        EntityTransaction tx = null;
         try {
-            em.getTransaction().begin();
+        		em = EntityManagerUtil.getEntityManager();
+        		tx = em.getTransaction();
+            tx.begin();
             // Reload the entity object from the database so we've actual data and a managed JPA object ready for change
             MessageUnit jpaMsgUnit = em.find(MessageUnit.class, ((MessageUnitEntity) messageUnit).getOID());
             em.remove(jpaMsgUnit);
-            em.getTransaction().commit();
+            tx.commit();
         } catch (final Exception e) {
             // Something went wrong while executing the update, rollback the transaction (if active) and throw exception
-            if (em.getTransaction().isActive())
-                em.getTransaction().rollback();
+	        	if (tx!=null && tx.isActive()) {
+	    			tx.rollback();
+	    		}
             throw new PersistenceException("An error occurred in the update of the message unit meta-data!", e);
         }finally {
             em.close();
@@ -142,21 +157,25 @@ public class UpdateManager implements IUpdateManager {
 
     private void performUpdate(final MessageUnitEntity msgUnitEntity, final UpdateCallback update)
                                                                                           throws PersistenceException {
-        EntityManager em = EntityManagerUtil.getEntityManager();
+        EntityManager em = null;
+        EntityTransaction tx = null;
         try {
-            em.getTransaction().begin();
+        		em = EntityManagerUtil.getEntityManager();
+        		tx = em.getTransaction();
+            tx.begin();
             // Reload the entity object from the database so we've actual data and a managed JPA object ready for change
             MessageUnit jpaMsgUnit = em.find(MessageUnit.class, msgUnitEntity.getOID());
             update.perform(jpaMsgUnit);
             // Ensure that the object stays completely loaded if it was already so previously
             if (msgUnitEntity.isLoadedCompletely())
                 QueryManager.loadCompletely(jpaMsgUnit);
-            em.getTransaction().commit();
+            tx.commit();
             msgUnitEntity.updateJPAObject(jpaMsgUnit);
         } catch (final Exception e) {
             // Something went wrong while executing the update, rollback the transaction (if active) and throw exception
-            if (em.getTransaction().isActive())
-                em.getTransaction().rollback();
+	        	if (tx!=null && tx.isActive()) {
+	    			tx.rollback();
+	    		}
             throw new PersistenceException("An error occurred in the update of the message unit meta-data!", e);
         }finally {
             em.close();

@@ -113,6 +113,7 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
      * @throws MessageDeliveryException When an error occurs while delivering the user message to the business
      *                                  application
      */
+    @Override
     protected void deliverUserMessage(final IUserMessage usrMsgUnit) throws MessageDeliveryException {
         log.debug("Delivering user message with msgId=" + usrMsgUnit.getMessageId());
 
@@ -141,17 +142,19 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
         }
 
         String msgFilePath = null;
+        FileWriter fw = null;
         try {
             msgFilePath = Utils.createFileWithUniqueName(directory + "message-"
-                                                        + mmd.getMessageId().replaceAll("[^a-zA-Z0-9.-]", "_")
-                                                        + ".xml").toString();
+                                                            + mmd.getMessageId().replaceAll("[^a-zA-Z0-9.-]", "_")
+                                                            + ".xml").toString();
             log.debug("Message meta data complete, start writing this to file " + msgFilePath);
-            final FileWriter fw = new FileWriter(msgFilePath);
+            fw = new FileWriter(msgFilePath);
             final XMLStreamWriter xmlWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(fw);
             log.debug("Write the meta data to file");
             xmlWriter.writeStartElement(XML_ROOT_NAME.getLocalPart());
             usrMsgElement.serialize(xmlWriter);
             xmlWriter.flush();
+            xmlWriter.close();
             log.debug("Meta data writen to file");
             if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
                 log.debug("Write payload contents");
@@ -175,6 +178,7 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
             // Remove the delivery file (if it was already created)
             if (!Utils.isNullOrEmpty(msgFilePath))
                 try {
+                    if (fw != null) fw.close();
                     Files.deleteIfExists(Paths.get(msgFilePath));
                 } catch (IOException io) {
                     log.error("Could not remove temp file [" + msgFilePath.toString() + "]! Remove manually.");
@@ -193,17 +197,17 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
      * @throws IOException      When reading from the source or writing to the output fails
      */
     protected void writeEncodedPayload(final String sourceFile, final Writer output) throws IOException {
-        final FileInputStream fis = new FileInputStream(sourceFile);
-        final Base64EncodingWriterOutputStream b64os = new Base64EncodingWriterOutputStream(output);
-
-        final byte[] buffer = new byte[4096];
-
-        int r = fis.read(buffer);
-        while (r > 0) {
-            b64os.write(buffer, 0, r);
-            r = fis.read(buffer);
+        final Base64EncodingWriterOutputStream b64os;
+        try (FileInputStream fis = new FileInputStream(sourceFile)) {
+            b64os = new Base64EncodingWriterOutputStream(output);
+            final byte[] buffer = new byte[4096];
+            int r = fis.read(buffer);
+            while (r > 0) {
+                b64os.write(buffer, 0, r);
+                r = fis.read(buffer);
+            }
         }
-        fis.close();
+        b64os.complete();
         b64os.flush();
     }
 

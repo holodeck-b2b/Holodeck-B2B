@@ -1,21 +1,3 @@
-<!--
-
-    Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
--->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.w3.org/2003/05/soap-envelope" targetNamespace="http://www.w3.org/2003/05/soap-envelope" elementFormDefault="qualified">
 
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd"/>
@@ -42,7 +24,7 @@
     </xs:sequence>
     <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
-  
+
   <xs:element name="Body" type="tns:Body"/>
   <xs:complexType name="Body">
     <xs:sequence>
@@ -94,7 +76,7 @@
 	  </xs:extension>
 	</xs:simpleContent>
   </xs:complexType>
-  
+
   <xs:complexType name="faultcode">
     <xs:sequence>
       <xs:element name="Value" type="tns:faultcodeEnum"/>
@@ -123,7 +105,7 @@
     <xs:sequence>
       <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
-    <xs:anyAttribute namespace="##other" processContents="lax"/> 
+    <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
 
   <!-- Global element declaration and complex type definition for header entry returned due to a mustUnderstand fault -->
