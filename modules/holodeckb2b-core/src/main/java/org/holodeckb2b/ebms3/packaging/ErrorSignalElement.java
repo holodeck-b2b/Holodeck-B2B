@@ -16,6 +16,9 @@
  */
 package org.holodeckb2b.ebms3.packaging;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -26,10 +29,6 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
-
-import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * Is a helper class for handling the ebMS Error Signal message units in the ebMS SOAP header. The Error Signal message
@@ -205,9 +204,12 @@ public class ErrorSignalElement {
         error.setMessage(errorElement.getAttributeValue(new QName(SHORT_DESCR_ATTR)));
         error.setRefToMessageInError(errorElement.getAttributeValue(new QName(REF_TO_ATTR)));
         // Convert text of attribute to enum value of entity object
-        error.setSeverity( IEbmsError.Severity.FAILURE.toString()
-                                .equalsIgnoreCase(errorElement.getAttributeValue(new QName(SEVRITY_ATTR)))
-                           ? IEbmsError.Severity.FAILURE : IEbmsError.Severity.WARNING);
+        final String severity = errorElement.getAttributeValue(new QName(SEVRITY_ATTR));
+        if (!Utils.isNullOrEmpty(severity))
+            switch (severity.toLowerCase()) {
+                case "failure" : error.setSeverity(IEbmsError.Severity.FAILURE); break;
+                case "warning" : error.setSeverity(IEbmsError.Severity.WARNING);
+            }
 
         // Read the ErrorDetail child element (if it exists)
         final OMElement errDetailElement = errorElement.getFirstChildWithName(Q_ERROR_DETAIL);
