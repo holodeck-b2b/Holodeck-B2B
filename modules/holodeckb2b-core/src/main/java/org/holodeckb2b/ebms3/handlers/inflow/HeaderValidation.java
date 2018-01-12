@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import org.apache.axis2.context.MessageContext;
@@ -26,6 +27,7 @@ import org.holodeckb2b.core.validation.ValidationResult;
 import org.holodeckb2b.core.validation.header.HeaderValidationSpecification;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
+import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
@@ -52,6 +54,11 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * @since HB2B_NEXT_VERSION
  */
 public class HeaderValidation extends BaseHandler {
+    /**
+     * Value to set as {@link MessageValidationError#details} to indicate the resulting invalidHdr for this validation issue
+ should be <i>ValueInconsistent</i> instead of <i>InvalidHeader</i>
+     */
+    public static final String VALUE_INCONSISTENT_REQ = "ValueInconsistent";
 
     @Override
     protected byte inFlows() {
@@ -81,8 +88,8 @@ public class HeaderValidation extends BaseHandler {
                 else {
                     log.warn("Header of " + MessageUnitUtils.getMessageUnitName(m) + " [" + m.getMessageId()
                             + "] is invalid!\n\tDetails: " + validationResult);
-                    MessageContextUtils.addGeneratedError(mc, buildError(m.getMessageId(),
-                                                                         validationResult.getValidationErrors()));
+                    for(IEbmsError e : createEbMSErrors(m.getMessageId(), validationResult.getValidationErrors()))
+                        MessageContextUtils.addGeneratedError(mc, e);
                     HolodeckB2BCore.getStorageManager().setProcessingState(m, ProcessingState.FAILURE);
                 }
             }
@@ -92,36 +99,49 @@ public class HeaderValidation extends BaseHandler {
     }
 
     /**
-     * Creates the text to include in the <i>error detail</i> field of the ebMS error.
+     * Creates the required ebMS errors based on the found validation issues. As specified in the ebMS V3 Core
+     * Specification some issues with the meta-data from header should be reported using the <i>ValueInconsistent<i>
+     * instead of the <i>InvalidHeader</i> validationError. The header validators indicate this by setting the {@link
+     * MessageValidationError#details} field to <i>"ValueInconsistent"<i>.
      *
      * @param validationErrors  The validation errors found in the message (grouped by validator)
-     * @return  The text to include in the ebMS error
+     * @return  One or more <code>IEbMSError<code>s to signal the issues found during validation.
      */
-    private InvalidHeader buildError(final String messageId,
+    private Collection<IEbmsError> createEbMSErrors(final String messageId,
                               final Map<String, Collection<MessageValidationError>> validationErrors) {
+        Collection<IEbmsError>  ebmsErrors = new ArrayList<>();
 
-        StringBuilder   errorText = new StringBuilder();
-        // Add a line describing each error, count number of errors and check the maximum severity level
+        // For all validation errors that don't need to be translated into a ValueInconsitent validationError we create one
+        // InvalidHeader validationError which in the errorDetail contains a description of all issues found
+        StringBuilder   invalidHeaderErrorDetails = new StringBuilder();
+        // Add a line describing each validationError, count number of errors and check the maximum severity level
         int totalErrors = 0;
         MessageValidationError.Severity maxSeverity = MessageValidationError.Severity.Warning;
-        for(MessageValidationError error : validationErrors.values().iterator().next()) {
-            errorText.append(error.getDescription()).append('\n');
-            if (error.getSeverityLevel().compareTo(maxSeverity) > 0)
-                maxSeverity = error.getSeverityLevel();
-            totalErrors++;
+        for(MessageValidationError validationError : validationErrors.values().iterator().next()) {
+            if (VALUE_INCONSISTENT_REQ.equals(validationError.getDetails()))
+                ebmsErrors.add(new ValueInconsistent(validationError.getDescription()));
+            else {
+                // Error does not require special treatment, just add to description for the InvalidHeader invalidHdr
+                invalidHeaderErrorDetails.append(validationError.getDescription()).append('\n');
+                if (validationError.getSeverityLevel().compareTo(maxSeverity) > 0)
+                    maxSeverity = validationError.getSeverityLevel();
+                totalErrors++;
+            }
         }
-        // Add intro, including number of errors found.
-        errorText.insert(0, String.valueOf(totalErrors)).append(" validation errors were found in the message:\n");
-        errorText.insert(0, "The message was found to be invalid!\n\n");
+        if (totalErrors > 0) {
+            // Add intro, including number of errors found.
+            invalidHeaderErrorDetails.insert(0, " validation error(s) found in the message:\n")
+                                     .insert(0, String.valueOf(totalErrors))
+                                     .insert(0, "The message was found to be invalid!\n\n");
+            // Create the validationError
+            InvalidHeader invalidHdr = new InvalidHeader(invalidHeaderErrorDetails.toString(), messageId);
+            invalidHdr.setSeverity(maxSeverity == MessageValidationError.Severity.Failure ? IEbmsError.Severity.FAILURE
+                                                                                         : IEbmsError.Severity.WARNING);
+            ebmsErrors.add(invalidHdr);
+        }
 
-        // Create the error
-        InvalidHeader error = new InvalidHeader(errorText.toString(), messageId);
-        error.setSeverity(maxSeverity == MessageValidationError.Severity.Failure ? IEbmsError.Severity.FAILURE
-                                                                                 : IEbmsError.Severity.WARNING);
-
-        return error;
+        return ebmsErrors;
     }
-
 
     /**
      * Helper method to determine which validation mode should be used for the given message unit.

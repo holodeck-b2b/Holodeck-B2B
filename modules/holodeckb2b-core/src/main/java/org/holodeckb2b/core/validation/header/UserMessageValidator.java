@@ -118,7 +118,9 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
             IService service = userMessageInfo.getCollaborationInfo().getService();
             if (service != null && Utils.isNullOrEmpty(service.getType()) && !Utils.isValidURI(service.getName()))
                validationErrors.add(new MessageValidationError("Untype Service value [" + service.getName()
-                                                                                                    + "] is not URI"));
+                                                                                                    + "] is not URI",
+                                                               MessageValidationError.Severity.Warning,
+                                                               HeaderValidation.VALUE_INCONSISTENT_REQ));
         }
         // Check that all properties have a value
         // Check MessageProperties (if provided)
@@ -176,7 +178,7 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
                     validationErrors.add(new MessageValidationError(partnerName + " partyId [" + pid.getId()
                                                                            + " does not have a type and is not an URI",
                                                                     MessageValidationError.Severity.Failure,
-                                                                    "ValueInconsistent"));
+                                                                    HeaderValidation.VALUE_INCONSISTENT_REQ));
         }
         if (multipleSameType)
             validationErrors.add(new MessageValidationError(partnerName + " has multiple partyIds of the same type"));
