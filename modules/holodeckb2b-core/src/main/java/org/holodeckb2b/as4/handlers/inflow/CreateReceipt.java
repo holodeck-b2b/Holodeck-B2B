@@ -24,12 +24,12 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.as4.receptionawareness.ReceiptCreatedEvent;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
-import org.holodeckb2b.as4.receptionawareness.ReceiptCreatedEvent;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -77,7 +77,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
      * The fully qualified name of the <code>ebbp:NonRepudiationInformation</code> element that is the main element
      * for the NRR Receipt
      */
-    private static final QName QNAME_NRI_ELEM = new QName(EBBP_NS, "NonRepudiationInformation", EBBP_NS_PREFIX);
+    public static final QName QNAME_NRI_ELEM = new QName(EBBP_NS, "NonRepudiationInformation", EBBP_NS_PREFIX);
     /**
      * The fully qualified name of the <code>ebbp:MessagePartNRInformation</code> element that contains a
      * <code>ds:Reference</code> element from the original message
