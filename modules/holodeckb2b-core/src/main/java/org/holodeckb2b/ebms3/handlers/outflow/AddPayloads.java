@@ -30,7 +30,7 @@ import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.messagemodel.Payload;
-import org.holodeckb2b.common.util.MessageIdGenerator;
+import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -92,7 +92,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
                 // First ensure that the payload is assigned a MIME Content-Id when it added as an attachment
                 if (pl.getContainment() == ATTACHMENT && Utils.isNullOrEmpty(pl.getPayloadURI())) {
                     // No MIME Content-Id assigned on submission, assign now
-                    final String cid = MessageIdGenerator.createContentId(um.getMessageId());
+                    final String cid = MessageIdUtils.createContentId(um.getMessageId());
                     log.debug("Generated a new Content-id [" + cid + "] for payload [" + pl.getContentLocation() + "]");
                     p.setPayloadURI(cid);
                     cidGenerated = true;

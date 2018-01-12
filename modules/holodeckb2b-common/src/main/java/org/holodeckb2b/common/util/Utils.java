@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -476,5 +478,24 @@ public final class Utils {
      */
     public static boolean nullSafeEqualIgnoreCase (final String s1, final String s2) {
         return s1 == null ? s2 == null : s1.equalsIgnoreCase (s2);
+    }
+
+    /**
+     * Checks whether the given string is a valid URI as defined in <a href=
+     * "https://tools.ietf.org/html/rfc3986#section-3">section 3 of RFC3986</a>.
+     *
+     * @param uri   The URI value to check
+     * @return      <code>true</code> if the given string is a valid URI, <code>false</code> otherwise.
+     * @since HB2B_NEXT_VERSION
+     */
+    public static boolean isValidURI(final String uri) {
+        boolean isValid;
+        try {
+            new URI(uri);
+            isValid = true;
+        } catch (URISyntaxException ex) {
+            isValid = false;
+        }
+        return isValid;
     }
 }

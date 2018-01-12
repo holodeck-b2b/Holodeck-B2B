@@ -23,7 +23,7 @@ import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
-import org.holodeckb2b.common.util.MessageIdGenerator;
+import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.OtherContentError;
@@ -129,7 +129,7 @@ public class CatchAxisFault extends BaseHandler {
             // (Still) a problem with the database, create the Error signal message without storing it
             log.fatal("Could not store error signal message in database! Details: " + dbe.getMessage());
             log.debug("Set the non-persisted ErrorMessage in message context");
-            errorMessage.setMessageId(MessageIdGenerator.createMessageId());
+            errorMessage.setMessageId(MessageIdUtils.createMessageId());
             mc.setProperty(MessageContextProperties.OUT_ERRORS, Collections.singletonList(errorMessage));
         }
         // Remove the error condition from the context as we handled the error here

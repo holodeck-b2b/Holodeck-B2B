@@ -48,7 +48,7 @@ public class MessageIdGeneratorTest {
 
     @Test
     public void testCreateMessageId() throws Exception {
-        String id = MessageIdGenerator.createMessageId();
+        String id = MessageIdUtils.createMessageId();
         assertNotNull(id);
         String[] parts = id.split("@");
         assertTrue(parts.length == 2);
@@ -58,9 +58,9 @@ public class MessageIdGeneratorTest {
 
     @Test
     public void testCreateContentId() throws Exception {
-        String id = MessageIdGenerator.createMessageId();
+        String id = MessageIdUtils.createMessageId();
         String[] idParts = id.split("@");
-        String contentId = MessageIdGenerator.createContentId(id);
+        String contentId = MessageIdUtils.createContentId(id);
         assertNotNull(contentId);
         String[] contentIdParts = contentId.split("@");
         assertTrue(contentIdParts.length == 2);

@@ -22,7 +22,7 @@ import org.apache.log4j.Appender;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.util.MessageIdGenerator;
+import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
@@ -95,7 +95,7 @@ public class PerformCustomValidationsTest {
      public void testDoProcessing() throws Exception {
         UserMessage userMessage = new UserMessage();
         userMessage.setPModeId(rejectOnWarnPmode.getId());
-        userMessage.setMessageId(MessageIdGenerator.createMessageId());
+        userMessage.setMessageId(MessageIdUtils.createMessageId());
         umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umEntity);
 
@@ -111,7 +111,7 @@ public class PerformCustomValidationsTest {
     public void testDoProcessingRejectOnFailure() throws Exception {
         UserMessage userMessage = new UserMessage();
         userMessage.setPModeId(rejectOnFailurePmode.getId());
-        userMessage.setMessageId(MessageIdGenerator.createMessageId());
+        userMessage.setMessageId(MessageIdUtils.createMessageId());
         umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umEntity);
 

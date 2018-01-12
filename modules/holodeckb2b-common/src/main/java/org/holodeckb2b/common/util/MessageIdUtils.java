@@ -18,15 +18,16 @@ package org.holodeckb2b.common.util;
 
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
- * Generates unique identifiers for use in message processing.
+ * Is a utility class to generate and the message and MIME content-id identifiers that are use in the message
+ * processing.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since HB2B_NEXT_VERSION     Replaces the old <code>org.holodeckb2b.common.util.MessageIdGenerator</code> class
  */
-public class MessageIdGenerator {
+public class MessageIdUtils {
 
     /**
      * Generates an unique message id as specified in the ebMS V3 Core Specification.
@@ -77,5 +78,49 @@ public class MessageIdGenerator {
             // And return with rightPart added again
             return leftPart + rightPart;
         }
+    }
+
+    /**
+     * Contains the regular expression to use for checking on conformance to RFC2822. The regular expression is based
+     * on the ABNF definition of messageId given in the RFC.
+     */
+    private static final String   RFC2822_MESSAGE_ID;
+    static {
+        String  ALPHA = "[a-zA-Z]";
+        String  DIGIT = "\\d";
+        String  atext = "[" + ALPHA + DIGIT + "\\Q" +
+                            "!" + "#" +
+                            "$" + "%" +
+                            "&" + "'" +
+                            "*" + "+" +
+                            "-" + "/" +
+                            "=" + "?" +
+                            "^" + "_" +
+                            "`" + "{" +
+                            "|" + "}" +
+                            "~" + "\\E" + "]";
+
+        String   dot_atom_text   =   atext + "+" +  "(\\." + atext + "+)*";
+
+        String   id_left         =   dot_atom_text;
+        String   id_right        =   dot_atom_text;
+
+        RFC2822_MESSAGE_ID = id_left + "@" + id_right;
+    }
+
+    /**
+     * Checks whether the given messageId is correctly formatted as specified in <a href=
+     * "https://tools.ietf.org/html/rfc2822">RFC2822</a>.
+     *
+     * @param messageId     The message id to check for correct syntax
+     * @return              <code>true</code> if the given messageId is in correct format,<br>
+     *                      <code>false></code> otherwise
+     * @since HB2B_NEXT_VERSION
+     */
+    public static boolean isCorrectFormat(final String messageId) {
+        if (Utils.isNullOrEmpty(messageId))
+            return false;
+        else
+            return messageId.matches(RFC2822_MESSAGE_ID);
     }
 }

@@ -23,7 +23,7 @@ import org.holodeckb2b.common.messagemodel.MessageUnit;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.util.MessageIdGenerator;
+import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
@@ -101,7 +101,7 @@ public class StorageManager {
             tempObject.setProcessingState(ProcessingState.CREATED);
 
         if (Utils.isNullOrEmpty(tempObject.getMessageId()))
-            tempObject.setMessageId(MessageIdGenerator.createMessageId());
+            tempObject.setMessageId(MessageIdUtils.createMessageId());
         if (tempObject.getTimestamp() == null)
             tempObject.setTimestamp(new Date());
 

@@ -19,7 +19,7 @@ package org.holodeckb2b.common.messagemodel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import org.holodeckb2b.common.util.MessageIdGenerator;
+import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
@@ -62,7 +62,7 @@ public class ErrorMessage extends MessageUnit implements IErrorMessage {
      */
     public ErrorMessage(final IEbmsError error) {
         this();
-        setMessageId(MessageIdGenerator.createMessageId());
+        setMessageId(MessageIdUtils.createMessageId());
         setTimestamp(new Date());
         addError(error);
     }
@@ -74,7 +74,7 @@ public class ErrorMessage extends MessageUnit implements IErrorMessage {
      */
     public ErrorMessage(final Collection<IEbmsError> errors) {
         this();
-        setMessageId(MessageIdGenerator.createMessageId());
+        setMessageId(MessageIdUtils.createMessageId());
         setTimestamp(new Date());
         setErrors(errors);
     }

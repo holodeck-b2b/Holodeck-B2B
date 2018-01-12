@@ -24,7 +24,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.util.MessageIdGenerator;
+import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -88,7 +88,7 @@ public class CheckSignatureCompletenessTest {
 
     @Before
     public void setupMessageContext() throws PersistenceException {
-        userMessage.setMessageId(MessageIdGenerator.createMessageId());
+        userMessage.setMessageId(MessageIdUtils.createMessageId());
         IUserMessage umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
 
         mc = new MessageContext();

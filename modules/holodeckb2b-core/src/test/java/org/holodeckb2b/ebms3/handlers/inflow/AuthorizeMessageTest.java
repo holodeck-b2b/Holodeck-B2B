@@ -23,7 +23,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.util.MessageIdGenerator;
+import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
@@ -82,13 +82,13 @@ public class AuthorizeMessageTest {
 
         UserMessage userMessage = new UserMessage();
         userMessage.setPModeId(pmodeAuth.getId());
-        userMessage.setMessageId(MessageIdGenerator.createMessageId());
+        userMessage.setMessageId(MessageIdUtils.createMessageId());
         umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umEntity);
 
         Receipt receipt = new Receipt();
         receipt.setPModeId(pmodeNoAuth.getId());
-        receipt.setMessageId(MessageIdGenerator.createMessageId());
+        receipt.setMessageId(MessageIdUtils.createMessageId());
         IReceiptEntity  rcptEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(receipt);
         mc.setProperty(MessageContextProperties.IN_RECEIPTS, Arrays.asList(new IReceiptEntity[] {rcptEntity}));
     }
