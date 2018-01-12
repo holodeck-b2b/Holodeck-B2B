@@ -18,6 +18,7 @@ package org.holodeckb2b.core.validation.header;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
@@ -44,7 +45,7 @@ abstract class GeneralMessageUnitValidator<M extends IMessageUnit> implements IM
     GeneralMessageUnitValidator(final boolean useStrictValidation) {
         this.useStrictValidation = useStrictValidation;
     }
-    
+
     /**
      * Performs the requested validation of the generic ebMS header meta-data.
      *
@@ -68,7 +69,9 @@ abstract class GeneralMessageUnitValidator<M extends IMessageUnit> implements IM
 
     /**
      * Performs the basic validation of the generic ebMS header meta-data.
-     * <p>Checks a MessageId and timestamp are available in the given message unit.
+     * <p>Checks that <i>MessageId</i> and <i>Timestamp</i> are included in the given message unit. Note that although
+     * the timestamp is missing from the <code>MessageUnit</code> object it may have been included in the message but
+     * not in the correct format causing a parsing error when reading the header.
      *
      * @param messageUnit       The message unit which header must be validated
      * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
@@ -78,16 +81,24 @@ abstract class GeneralMessageUnitValidator<M extends IMessageUnit> implements IM
         if (Utils.isNullOrEmpty(messageUnit.getMessageId()))
             validationErrors.add(new MessageValidationError("MessageId is missing"));
         if (messageUnit.getTimestamp() == null)
-            validationErrors.add(new MessageValidationError("Timestamp is missing"));
+            validationErrors.add(new MessageValidationError("Timestamp is missing or invalid"));
     }
 
     /**
      * Performs the strict validation of the ebMS header meta-data.
+     * <p>Adds a check that values of the <i>MessageId</i> and <i>RefToMessageId</i> fields are according to the
+     * message-id format as specified in RFC2822.
      *
      * @param messageUnit       The message unit which header must be validated
      * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
      */
     protected void doStrictValidation(final M messageUnit,  Collection<MessageValidationError> validationErrors) {
-
+        if (!MessageIdUtils.isCorrectFormat(messageUnit.getMessageId()))
+            validationErrors.add(new MessageValidationError("MessageId value [" + messageUnit.getMessageId() +
+                                                            "] does not conform to RCFC2822"));
+        if (!Utils.isNullOrEmpty(messageUnit.getRefToMessageId())
+           && !MessageIdUtils.isCorrectFormat(messageUnit.getRefToMessageId()))
+            validationErrors.add(new MessageValidationError("RefToMessageId value [" + messageUnit.getRefToMessageId() +
+                                                            "] does not conform to RCFC2822"));
     }
 }

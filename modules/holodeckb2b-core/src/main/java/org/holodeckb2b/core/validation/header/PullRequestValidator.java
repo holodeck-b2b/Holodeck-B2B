@@ -24,6 +24,8 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 
 /**
  * Provides the validation of the ebMS header information specific for <i>Pull Request</i> message units.
+ * <p>As there are no specific requirements on <i>Pull Request</i>s to process them, there is no override for the {@link
+ * GeneralMessageUnitValidator#doBasicValidation(IMessageUnit, Collection)} method.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since  HB2B_NEXT_VERSION
@@ -36,26 +38,9 @@ class PullRequestValidator extends GeneralMessageUnitValidator<IPullRequest>
     }
 
     /**
-     * Performs the basic validation of the ebMS header meta-data specific for a Pull Request signal message unit.
-     * <p>The basic validation only ensures that there is no <i>refToMessageId</i> in the header.
-     *
-     * @param messageUnit       The Pull Request message unit which header must be validated
-     * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
-     */
-    @Override
-    protected void doBasicValidation(final IPullRequest messageUnit,
-                                     Collection<MessageValidationError> validationErrors) {
-        // First do genereal validation
-        super.doBasicValidation(messageUnit, validationErrors);
-
-        // Check that no RefToMessageId is included
-        if (!Utils.isNullOrEmpty(messageUnit.getRefToMessageId()))
-            validationErrors.add(new MessageValidationError("There must be no RefToMessageId"));
-    }
-
-    /**
      * Performs the strict validation of the ebMS header meta-data specific for a Pull Request signal message unit
-     * <p>
+     * <p>In addition to the general checks for a message unit it ensures that there is no <i>refToMessageId</i> in the
+     * header and also checks that the given MPC is a valid URI.
      *
      * @param messageUnit       The Pull Request message unit which header must be validated
      * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
@@ -65,5 +50,12 @@ class PullRequestValidator extends GeneralMessageUnitValidator<IPullRequest>
                                       Collection<MessageValidationError> validationErrors) {
         // First do general validation
         super.doStrictValidation(messageUnit, validationErrors);
+
+        // Check that no RefToMessageId is included
+        if (!Utils.isNullOrEmpty(messageUnit.getRefToMessageId()))
+            validationErrors.add(new MessageValidationError("There must be no RefToMessageId"));
+        if (!Utils.isValidURI(messageUnit.getMPC()))
+            validationErrors.add(new MessageValidationError("Specified MPC [" + messageUnit.getMPC()
+                                                            + "] is not a valid URI"));        
     }
 }

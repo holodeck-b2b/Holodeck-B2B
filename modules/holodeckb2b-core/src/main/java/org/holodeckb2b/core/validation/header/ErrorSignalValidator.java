@@ -65,6 +65,11 @@ class ErrorSignalValidator extends GeneralMessageUnitValidator<IErrorMessage>
         // First do generic validations
         Collection<MessageValidationError> validationErrors = super.validate(messageUnit);
 
+        // Check that the error code and severity are available
+        if (!messageUnit.getErrors().stream()
+                                    .allMatch(e -> !Utils.isNullOrEmpty(e.getErrorCode()) && e.getSeverity() != null))
+            validationErrors.add(new MessageValidationError("Error code or severity not set for all Errors!"));
+
         // Then check that the signal reference at most one other message unit
         // @todo: Remove use of specific config parameter on reference check
         if (!checkReferences(messageUnit, useStrictValidation

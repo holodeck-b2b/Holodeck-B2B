@@ -17,11 +17,14 @@
 package org.holodeckb2b.core.validation.header;
 
 import java.util.Collection;
+import java.util.HashSet;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.ebms3.handlers.inflow.HeaderValidation;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
 import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -73,18 +76,26 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
                 validationErrors.add(new MessageValidationError("Service information is missing"));
         }
         // Check MessageProperties (if provided)
-        checkProperties(userMessageInfo.getMessageProperties(), "Message", validationErrors);
+        checkPropertiesNames(userMessageInfo.getMessageProperties(), "Message", validationErrors);
 
         // Check PayloadInfo, in this validator only the part properties are checked
         final Collection<IPayload> payloadInfo = (Collection<IPayload>) userMessageInfo.getPayloads();
         if (!Utils.isNullOrEmpty(payloadInfo))
             for (IPayload p : payloadInfo)
-                checkProperties(p.getProperties(), "Part", validationErrors);
+                checkPropertiesNames(p.getProperties(), "Part", validationErrors);
     }
 
     /**
      * Performs the strict validation of the ebMS header meta-data specific for a User Message message unit
-     * <p>Checks that
+     * <p>In addition to the basic validations it is checked that:<ul>
+     * <li>the PartyIds are URI when they don't have a type and if there are multiple PartyIds for partner that have a
+     * type, these types are unique.</li>
+     * <li>the Service is an URI when no type is specfied.</i>
+     * <li>All properties, both message and part, have a value.</li></ul>
+     * As the <i>ebMS V3 Core Specification<i> specifies that a violation of the first two rules should result in a
+     * <i>ValueInconsistent</i> error (instead of <i>InvalidHeader<i>) the {@link MessageValidationError#details} field
+     * is used to indicate this by setting its value to "<i>ValueInconsistent</i>". The {@link HeaderValidation} handler
+     * can then create the correct error.
      *
      * @param messageUnit       The User Message message unit which header must be validated
      * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
@@ -92,8 +103,32 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
     @Override
     protected void doStrictValidation(final IUserMessage messageUnit,
                                       Collection<MessageValidationError> validationErrors) {
-        // First do genereal validation
+        // First do general validation
         super.doStrictValidation(messageUnit, validationErrors);
+
+        // Cast to IUserMessage
+        IUserMessage userMessageInfo = (IUserMessage) messageUnit;
+
+        // Check the PartyIds of the sender and receiver
+        doStrictPartyIdValidation(userMessageInfo.getSender().getPartyIds(), "Sender", validationErrors);
+        doStrictPartyIdValidation(userMessageInfo.getReceiver().getPartyIds(), "Receiver", validationErrors);
+
+        // Check that the Service value is an URI if it's untyped
+        if (userMessageInfo.getCollaborationInfo() != null) {
+            IService service = userMessageInfo.getCollaborationInfo().getService();
+            if (service != null && Utils.isNullOrEmpty(service.getType()) && !Utils.isValidURI(service.getName()))
+               validationErrors.add(new MessageValidationError("Untype Service value [" + service.getName()
+                                                                                                    + "] is not URI"));
+        }
+        // Check that all properties have a value
+        // Check MessageProperties (if provided)
+        checkPropertiesValues(userMessageInfo.getMessageProperties(), "Message", validationErrors);
+
+        // Check PayloadInfo, in this validator only the part properties are checked
+        final Collection<IPayload> payloadInfo = (Collection<IPayload>) userMessageInfo.getPayloads();
+        if (!Utils.isNullOrEmpty(payloadInfo))
+            for (IPayload p : payloadInfo)
+                checkPropertiesValues(p.getProperties(), "Part", validationErrors);
     }
 
     /**
@@ -112,33 +147,67 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
                 validationErrors.add(new MessageValidationError("Role of " + partnerName + " is missing"));
             if (Utils.isNullOrEmpty(partnerInfo.getPartyIds()))
                 validationErrors.add(new MessageValidationError("Identification of " + partnerName + " is missing"));
-            else {
-                for (IPartyId pid : partnerInfo.getPartyIds()) {
-                    if (Utils.isNullOrEmpty(pid.getId()))
-                        validationErrors.add(new MessageValidationError("Empty PartyId for " + partnerName
-                                                                        + " is not allowed"));
-                }
-            }
+            else if (partnerInfo.getPartyIds().stream().anyMatch(pid -> Utils.isNullOrEmpty(pid.getId())))
+                validationErrors.add(new MessageValidationError("Empty PartyId for " + partnerName + " is not allowed"));
         }
     }
 
     /**
-     * Checks whether all properties in a set of properties have a name and value.
+     * Perform a check on the <i>PartyId</i>s of the sender or receiver contained in the User Message.
+     *
+     * @param partyIds          The partyIds of the sender or receiver
+     * @parem partnerName       The text to identify this partner in error message, i.e. "Sender" or "Receiver"
+     * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
+     */
+    private void doStrictPartyIdValidation(final Collection<IPartyId> partyIds, final String partnerName,
+                                           Collection<MessageValidationError> validationErrors) {
+        if (Utils.isNullOrEmpty(partyIds))
+            return;
+
+        Collection<String>  types = new HashSet<>(partyIds.size());
+        boolean multipleSameType = false;
+        for (IPartyId pid : partyIds) {
+            if (!Utils.isNullOrEmpty(pid.getType()))
+                // Check that the type of this id isn't used earlier by making sure the set did grow
+                multipleSameType = !types.add(pid.getType());
+            else
+                // No type for this partyId, ensure it is an URI
+                if (!Utils.isValidURI(pid.getId()))
+                    validationErrors.add(new MessageValidationError(partnerName + " partyId [" + pid.getId()
+                                                                           + " does not have a type and is not an URI",
+                                                                    MessageValidationError.Severity.Failure,
+                                                                    "ValueInconsistent"));
+        }
+        if (multipleSameType)
+            validationErrors.add(new MessageValidationError(partnerName + " has multiple partyIds of the same type"));
+    }
+
+    /**
+     * Checks whether all properties in a set of properties have a name.
      *
      * @param properties        The set of properties to check
      * @param propSetName       The name of the set, i.e. "Message" or "Part"
      * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
      */
-    private void checkProperties(final Collection<IProperty> properties, final String propSetName,
+    private void checkPropertiesNames(final Collection<IProperty> properties, final String propSetName,
+                                          Collection<MessageValidationError> validationErrors) {
+        if (!Utils.isNullOrEmpty(properties) && properties.stream().anyMatch(p -> Utils.isNullOrEmpty(p.getName())))
+            validationErrors.add(new MessageValidationError("Unnamed " + propSetName + " property is not allowed"));
+    }
+
+    /**
+     * Checks whether all properties in a set of properties have a value.
+     *
+     * @param properties        The set of properties to check
+     * @param propSetName       The name of the set, i.e. "Message" or "Part"
+     * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
+     */
+    private void checkPropertiesValues(final Collection<IProperty> properties, final String propSetName,
                                           Collection<MessageValidationError> validationErrors) {
         if (!Utils.isNullOrEmpty(properties))
-            for(IProperty p : properties) {
-                if (Utils.isNullOrEmpty(p.getName()))
-                    validationErrors.add(
-                                     new MessageValidationError("Unnamed " + propSetName + " property is not allowed"));
-                if (Utils.isNullOrEmpty(p.getValue()))
-                    validationErrors.add(new MessageValidationError(propSetName + " property \"" + p.getName()
-                                                                                                  + "\" has no value"));
-            }
+            properties.stream().filter(p -> Utils.isNullOrEmpty(p.getValue()))
+                               .forEachOrdered(p ->
+                                       validationErrors.add(new MessageValidationError(propSetName + " property " +
+                                                                   p.getName() + " must have a non-empty value!")));
     }
 }
