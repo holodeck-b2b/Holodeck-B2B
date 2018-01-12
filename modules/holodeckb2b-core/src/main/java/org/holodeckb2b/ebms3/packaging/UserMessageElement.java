@@ -39,12 +39,12 @@ public class UserMessageElement {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "UserMessage");
+    public static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "UserMessage");
 
     /**
      * The local name of the mpc attribute
      */
-    private static final String MPC_ATTR = "mpc";
+    public static final String LN_MPC_ATTR = "mpc";
 
     /**
      * Creates a <code>UserMessage</code> element and adds it to the given <code>Messaging</code> element.
@@ -64,7 +64,7 @@ public class UserMessageElement {
         // MPC attribute only set when not default
         final String mpc = data.getMPC();
         if (mpc != null && !mpc.equals(EbMSConstants.DEFAULT_MPC))
-            usermessage.addAttribute(MPC_ATTR, mpc, null);
+            usermessage.addAttribute(LN_MPC_ATTR, mpc, null);
 
         // Create the MessageInfo element
         MessageInfoElement.createElement(usermessage, data);
@@ -107,7 +107,7 @@ public class UserMessageElement {
         final UserMessage umData = new UserMessage();
 
         // Read the [optional] mpc attribute
-        final String  mpc = umElement.getAttributeValue(new QName(MPC_ATTR));
+        final String  mpc = umElement.getAttributeValue(new QName(LN_MPC_ATTR));
         // If there was no mpc attribute or it was empty (which formally is illegal because the mpc should be a valid
         // URI) it is set to the default MPC
         umData.setMPC(Utils.isNullOrEmpty(mpc) ? EbMSConstants.DEFAULT_MPC : mpc);

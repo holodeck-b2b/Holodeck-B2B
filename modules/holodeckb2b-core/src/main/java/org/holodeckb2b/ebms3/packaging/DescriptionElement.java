@@ -38,10 +38,10 @@ public class DescriptionElement {
     /**
      * The fully qualified name of the element as an {@see QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Description");
+    public static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Description");
 
     // The local name of the lang attribute
-    private static final String LN_ATTR_LANG = "lang";
+    public static final String LN_ATTR_LANG = "lang";
 
     // The lang attribute is defined in the standard XML namespace
     private static final String NS_PREFIX_ATTR_LANG = "xml";

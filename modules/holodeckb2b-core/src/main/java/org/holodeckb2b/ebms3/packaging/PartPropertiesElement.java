@@ -37,7 +37,7 @@ public class PartPropertiesElement {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "PartProperties");
+    public static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "PartProperties");
 
     /**
      * Creates a <code>PartProperties</code> element and adds it to the given <code>PartInfo</code> element.

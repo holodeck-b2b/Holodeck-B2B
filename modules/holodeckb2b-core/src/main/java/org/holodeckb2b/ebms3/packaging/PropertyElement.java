@@ -44,13 +44,13 @@ public class PropertyElement {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Property");
+    public static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Property");
 
     // The local name of the name attribute
-    private static final String LN_ATTR_NAME = "name";
+    public static final String LN_ATTR_NAME = "name";
 
     // The local name of the type attribute
-    private static final String LN_ATTR_TYPE = "type";
+    public static final String LN_ATTR_TYPE = "type";
 
     /**
      * Creates a <code>Property</code> element and adds it to the given element.

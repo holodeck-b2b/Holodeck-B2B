@@ -39,7 +39,7 @@ public class PartyInfoElement {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "PartyInfo");
+    public static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "PartyInfo");
 
     /**
      * Creates an ebMS 3 <code>PartyInfo</code> element and adds it to <code>UserMessage</code> element. The created
@@ -121,7 +121,7 @@ public class PartyInfoElement {
         private static final QName  Q_PARTYID = new QName(EbMSConstants.EBMS3_NS_URI, "PartyId");
 
         // The local name for the PartyId type attribute
-        private static final String LN_PARTYID_TYPE = "type";
+        public static final String LN_PARTYID_TYPE = "type";
 
         /**
          * The fully qualified name of the Role element as an {@link QName}

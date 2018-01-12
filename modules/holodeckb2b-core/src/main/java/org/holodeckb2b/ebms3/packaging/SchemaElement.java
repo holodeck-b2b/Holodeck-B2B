@@ -34,16 +34,16 @@ public class SchemaElement {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Schema");
+    public static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Schema");
 
     // The local name of the location attribute
-    private static final String LN_ATTR_LOCATION = "location";
+    public static final String LN_ATTR_LOCATION = "location";
 
     // The local name of the version attribute
-    private static final String LN_ATTR_VERSION = "version";
+    public static final String LN_ATTR_VERSION = "version";
 
     // The local name of the namespace attribute
-    private static final String LN_ATTR_NAMESPACE = "namespace";
+    public static final String LN_ATTR_NAMESPACE = "namespace";
 
     /**
      * Creates a <code>Schema</code> element and adds it to the given <code>PartInfo</code> element.

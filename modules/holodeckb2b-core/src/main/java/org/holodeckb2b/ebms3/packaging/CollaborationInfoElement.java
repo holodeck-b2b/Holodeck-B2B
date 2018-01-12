@@ -33,7 +33,7 @@ public class CollaborationInfoElement {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "CollaborationInfo");
+    public static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "CollaborationInfo");
 
     /**
      * The fully qualified name of the Action element as an {@link QName}

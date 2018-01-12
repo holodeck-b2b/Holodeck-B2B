@@ -33,10 +33,10 @@ public class ServiceElement {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Service");
+    public static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Service");
 
     // The local name of the type attribute
-    private static final String LN_ATTR_TYPE = "type";
+    public static final String LN_ATTR_TYPE = "type";
 
     /**
      * Creates a <code>Service</code> element and adds it to the given <code>CollaborationInfo</code> element.

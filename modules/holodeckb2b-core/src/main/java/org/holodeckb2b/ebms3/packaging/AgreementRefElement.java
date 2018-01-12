@@ -34,13 +34,13 @@ public class AgreementRefElement {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "AgreementRef");
+    public static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "AgreementRef");
 
     // The local name of the type attribute
-    private static final String LN_ATTR_TYPE = "type";
+    public static final String LN_ATTR_TYPE = "type";
 
     // The local name of the pmode attribute
-    private static final String LN_ATTR_PMODE = "pmode";
+    public static final String LN_ATTR_PMODE = "pmode";
 
     /**
      * Creates a <code>AgreementRef</code> element and adds it to the given <code>CollaborationInfo</code> element.

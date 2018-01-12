@@ -46,7 +46,7 @@ public class ErrorSignalElement {
     /**
      * The fully qualified name of the element as an {@link QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Error");
+    public static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Error");
 
     /**
      * The fully qualified name of the ErrorDetail element as an {@link QName}

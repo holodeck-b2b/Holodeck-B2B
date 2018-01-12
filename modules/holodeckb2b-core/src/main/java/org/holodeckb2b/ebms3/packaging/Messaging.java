@@ -30,10 +30,10 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
  */
 public class Messaging {
 
-    /*
-     * The local name of the Messaging element
+    /**
+     * The fully qualified name of the element as an {@link QName}
      */
-    static final String LOCAL_NAME = "Messaging";
+    public static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Messaging");
 
     /**
      * Creates an <code>Messaging</code> element representing the ebMS SOAP header and adds it to given SOAP envelope
@@ -49,7 +49,7 @@ public class Messaging {
 
         if( messaging == null) {
             // No existing messaging element, so create a new one
-            messaging = env.getHeader().addHeaderBlock(LOCAL_NAME, SOAPEnv.getEbms3Namespace(env));
+            messaging = env.getHeader().addHeaderBlock(Q_ELEMENT_NAME.getLocalPart(), SOAPEnv.getEbms3Namespace(env));
 
             // The messaging header must be understood by the MSH (see 5.2.1 core spec)
             messaging.setMustUnderstand(true);
@@ -71,8 +71,7 @@ public class Messaging {
 
         try {
             // there should only be one messaging element so we can just get the first one
-            messaging = (SOAPHeaderBlock) env.getHeader().getFirstChildWithName(
-                                                            new QName(EbMSConstants.EBMS3_NS_URI, LOCAL_NAME));
+            messaging = (SOAPHeaderBlock) env.getHeader().getFirstChildWithName(Q_ELEMENT_NAME);
         } catch (final Exception ex) {
             // Returned element not a header block or no header available
             //      => can not be the messaging element, leave null

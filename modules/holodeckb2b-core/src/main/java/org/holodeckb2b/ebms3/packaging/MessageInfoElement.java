@@ -37,7 +37,7 @@ public class MessageInfoElement {
     /**
      * The fully qualified name of the element as an {@see QName}
      */
-    static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "MessageInfo");
+    public static final QName  Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "MessageInfo");
 
     /**
      * The fully qualified name of the Timestamp element as an {@see QName}
