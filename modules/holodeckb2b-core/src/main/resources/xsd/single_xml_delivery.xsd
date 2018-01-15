@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2018 The Holodeck B2B Team, Sander Fieten
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<xsd:schema xmlns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://holodeck-b2b.org/schemas/2018/01/delivery/single_xml"
+	targetNamespace="http://holodeck-b2b.org/schemas/2018/01/delivery/single_xml"
+	elementFormDefault="qualified" attributeFormDefault="unqualified"
+	xmlns:rcpt="http://holodeck-b2b.org/schemas/2015/08/delivery/ebms/receiptchild">
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en">This schema defines the format of the <i>single_xml</i> format of the default file based delivery method.
+			Files in this format include both the meta data and payload data in one XML document. For the meta-data a copy of the ebMS header is
+			used, with exception of the <i>Receipt</i> Signal which content is replaced by a single element. As this is also done in the "ebms"
+			format the definition of these specific elements is done in a separate XML schema.</xsd:documentation>
+	</xsd:annotation>
+	<xsd:import namespace="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/"
+		schemaLocation="ebms-header-3_0-200704_refactored.xsd"/>
+	<xsd:import namespace="http://holodeck-b2b.org/schemas/2015/08/delivery/ebms/receiptchild"
+		schemaLocation="delivery_rcpt_child.xsd"/>
+
+	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+	<xsd:element name="ebMSMessage" type="tns:ebMSMessageType"/>
+	<xsd:complexType name="ebMSMessageType">
+		<xsd:annotation>
+			<xsd:documentation>Defines the content of the delivery document which is either a single <code>SignalMessage</code> element or a <code>UserMessage</code> element followed by the <i>base64</i> encoded payloads in the <code>Payloads</code> element.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:choice>
+			<xsd:element name="SignalMessage" type="tns:SignalMessageDeliveryType"/>
+			<xsd:sequence>
+				<xsd:element name="UserMessage" type="UserMessage">
+					<xsd:annotation>
+						<xsd:documentation>This element is just a copy of the <code>UserMessage</code> element from the ebMS header.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element minOccurs="0" name="Payloads" type="tns:PayloadsType"/>
+			</xsd:sequence>
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="SignalMessageDeliveryType">
+		<xsd:annotation>
+			<xsd:documentation>Defines the content of the SignalMessage element specifically for this delivery method. It is a restricted copy of the SignalMessage element in the ebMS header but can only contain either a single <i>Receipt</i> or one ore more <i>Error</i> elements as <i>PullRequest</i> are not notified to the back-end.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element ref="MessageInfo"/>
+			<xsd:choice>
+				<xsd:element name="Receipt" type="tns:DeliveryReceiptContent"/>
+				<xsd:element maxOccurs="unbounded" name="Error" type="Error"/>
+			</xsd:choice>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="DeliveryReceiptContent">
+		<xsd:annotation>
+			<xsd:documentation>Defines the content of the Receipt element specifically for this delivery method where it includes just one <code>ReceiptChild</code> child element to indicate the type of Receipt that was received. Because this child element is used also in the <i>"ebms"</i> format it is defined in a separate schema.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element ref="rcpt:ReceiptChild"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="PayloadsType">
+		<xsd:annotation>
+			<xsd:documentation>Each payload contained in the <i>User Message</i> is base64 and added in a <code>Payload</code> element. The payload is referenced from the <code>UserMessage/PayloadInfo/PartInfo</code> element by adding a <i>Part Property</i> named "org:holodeckb2b:ref" that includes the <code>xml:id</code> value of the <code>Payload</code> element.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element maxOccurs="unbounded" minOccurs="1" name="Payload">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:base64Binary">
+							<xsd:attribute ref="xml:id" use="required"/>
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

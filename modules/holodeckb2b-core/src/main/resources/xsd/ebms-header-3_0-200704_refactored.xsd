@@ -1,69 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-
-    Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
--->
 <xsd:schema xmlns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/"
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 	xmlns:S11="http://schemas.xmlsoap.org/soap/envelope/"
 	xmlns:S12="http://www.w3.org/2003/05/soap-envelope"
 	xmlns:tns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/"
 	targetNamespace="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/"
-	elementFormDefault="qualified" attributeFormDefault="unqualified"
-	xmlns:rcpt="http://holodeck-b2b.org/schemas/2015/08/delivery/ebms/receiptchild">
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
 	<xsd:annotation>
-		<xsd:documentation xml:lang="en">This schema is a modified version of the standard schema that defines the XML Infoset of ebMS-3 headers.
-			This schema defines how the standard schema is used by the FileDelivery method when using the "ebms" file format. 
-			NOTE this schema is provided for convenience only for developers that need to process the delivery files.</xsd:documentation>
+		<xsd:appinfo>Schema for ebMS-3 XML Infoset</xsd:appinfo>
+		<xsd:documentation xml:lang="en"> This schema defines the XML Infoset of ebMS-3 headers.
+			These headers are placed within the SOAP Header element of either a SOAP 1.1 or SOAP 1.2
+			message. </xsd:documentation>
 	</xsd:annotation>
+	<xsd:import namespace="http://schemas.xmlsoap.org/soap/envelope/"
+		schemaLocation="http://schemas.xmlsoap.org/soap/envelope/"/>
+	<xsd:import namespace="http://www.w3.org/2003/05/soap-envelope"
+		schemaLocation="http://www.w3.org/2003/05/soap-envelope"/>
 	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"
 		schemaLocation="http://www.w3.org/2001/03/xml.xsd"/>
-	<xsd:import namespace="http://holodeck-b2b.org/schemas/2015/08/delivery/ebms/receiptchild"
-		schemaLocation="delivery_rcpt_child.xsd"/>
+
 	<xsd:element name="Messaging" type="Messaging"/>
 	<xsd:complexType name="Messaging">
 		<xsd:annotation>
-			<xsd:documentation xml:lang="en">Because the xml document used for delivery will always apply to one message unit the sequence is replaced by a choice.</xsd:documentation>
+			<xsd:documentation xml:lang="en"> The eb:Messaging element is the top element of ebMS-3
+				headers, and it is placed within the SOAP Header element (either SOAP 1.1 or SOAP
+				1.2). The eb:Messaging element may contain several instances of eb:SignalMessage and
+				eb:UserMessage elements. However in the core part of the ebMS-3 specification, only
+				one instance of either eb:UserMessage or eb:SignalMessage must be present. The
+				second part of ebMS-3 specification may need to include multiple instances of either
+				eb:SignalMessage, eb:UserMessage or both. Therefore, this schema is allowing
+				multiple instances of eb:SignalMessage and eb:UserMessage elements for part 2 of the
+				ebMS-3 specification. Note that the eb:Messaging element cannot be empty (at least
+				one of eb:SignalMessage or eb:UserMessage element must present).
+			</xsd:documentation>
 		</xsd:annotation>
-		<xsd:choice>
-			<xsd:element name="SignalMessage" type="SignalMessage" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="UserMessage" type="UserMessage" minOccurs="1" maxOccurs="1"/>
-		</xsd:choice>
+		<xsd:sequence>
+			<xsd:element name="SignalMessage" type="SignalMessage" minOccurs="0"
+				maxOccurs="unbounded"/>
+			<xsd:element name="UserMessage" type="UserMessage" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attributeGroup ref="tns:headerExtension"/>
 	</xsd:complexType>
 	<xsd:complexType name="SignalMessage">
 		<xsd:annotation>
-			<xsd:documentation xml:lang="en">As PullRequest will never be delivered to the business application the PullRequest element is removed as an option for the child of SignalMessage. Also a choice is introduced to reflect that a SignalMessage is always of one type.
-
-Furthermore the Receipt child is now explicitly defined as the ReceiptChild element which is used by the FileDelivery method.</xsd:documentation>
+			<xsd:documentation xml:lang="en"> In the core part of ebMS-3 specification, an eb:Signal
+				Message is allowed to contain eb:MessageInfo and at most one Receipt Signal, at most
+				one eb:PullRequest element, and/or a series of eb:Error elements. In part 2 of the
+				ebMS-3 specification, new signals may be introduced, and for this reason, an
+				extensibility point is added here to the eb:SignalMessage element to allow it to
+				contain any elements. </xsd:documentation>
 		</xsd:annotation>
 		<xsd:sequence>
 			<xsd:element ref="MessageInfo"/>
-			<xsd:choice>
-				<xsd:element name="Receipt" minOccurs="0">
-					<xsd:complexType>
-						<xsd:sequence>
-							<xsd:element ref="rcpt:ReceiptChild"/>
-						</xsd:sequence>
-					</xsd:complexType>
-				</xsd:element>
-				<xsd:element name="Error" type="Error" minOccurs="0" maxOccurs="unbounded"/>
-				<xsd:any maxOccurs="unbounded" minOccurs="0" namespace="##other"
-					processContents="lax"/>
-			</xsd:choice>
+			<xsd:element name="PullRequest" type="PullRequest" minOccurs="0"/>
+			<xsd:element name="Receipt" type="Receipt" minOccurs="0"/>
+			<xsd:element name="Error" type="Error" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
 		</xsd:sequence>
 	</xsd:complexType>
 	<xsd:complexType name="Error">
@@ -78,9 +71,15 @@ Furthermore the Receipt child is now explicitly defined as the ReceiptChild elem
 		<xsd:attribute name="severity" type="xsd:token" use="required"/>
 		<xsd:attribute name="shortDescription" type="xsd:token" use="optional"/>
 	</xsd:complexType>
+	<xsd:complexType name="PullRequest">
+		<xsd:sequence>
+			<xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attributeGroup ref="pullAttributes"/>
+	</xsd:complexType>
 	<xsd:complexType name="Receipt">
 		<xsd:sequence>
-			<xsd:any namespace="##other" processContents="lax" maxOccurs="unbounded"/>
+			<xsd:any namespace="##any" processContents="lax" maxOccurs="unbounded"/>
 		</xsd:sequence>
 	</xsd:complexType>
 	<xsd:complexType name="UserMessage">
@@ -188,6 +187,33 @@ Furthermore the Receipt child is now explicitly defined as the ReceiptChild elem
 			<xsd:element name="Property" type="Property" maxOccurs="unbounded"/>
 		</xsd:sequence>
 	</xsd:complexType>
+	<xsd:attributeGroup name="headerExtension">
+		<xsd:attribute name="id" type="xsd:ID" use="optional"/>
+		<xsd:attribute ref="S11:mustUnderstand" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>If SOAP 1.1 is being used, this attribute is required, 
+					other SOAP 1.1 attributes are allowed and SOAP 1.2 attributes are prohibited.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute ref="S11:encodingStyle"/>
+		<xsd:attribute ref="S11:actor"/>
+		<xsd:attribute ref="S12:mustUnderstand" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>If SOAP 1.2 is being used, this attribute is required, 
+					other SOAP 1.2 attributes are allowed and SOAP 1.1 attributes are prohibited.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute ref="S12:encodingStyle"/>
+		<xsd:attribute ref="S12:relay"/>
+		<xsd:attribute ref="S12:role"/>
+		<xsd:anyAttribute namespace="##other" processContents="lax"/>
+	</xsd:attributeGroup>
+	<xsd:attributeGroup name="pullAttributes">
+		<xsd:attribute name="mpc" type="xsd:anyURI" use="optional"/>
+		<xsd:anyAttribute namespace="##other" processContents="lax"/>
+	</xsd:attributeGroup>
 	<xsd:complexType name="Description">
 		<xsd:simpleContent>
 			<xsd:extension base="tns:non-empty-string">
