@@ -52,9 +52,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 * Deprecated method `IMessageSubmitter.submitMessage(IUserMessage)` and corresponding implementation
 
+## 3.1.1
+###### 2018-01-15
 ### Fixed
-
-### Security
+* Notification includes original Receipt content [#82](https://github.com/holodeck-b2b/Holodeck-B2B/issues/82)
+* Incorrect root element in single XML file delivery [#83](https://github.com/holodeck-b2b/Holodeck-B2B/issues/83)
+* No XML schema provided for single XML delivery [#84](https://github.com/holodeck-b2b/Holodeck-B2B/issues/84)
 
 ## 3.1.0
 ###### 2018-01-10

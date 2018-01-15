@@ -21,36 +21,38 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 
 /**
- * Is an {@link IMessageDelivererFactory} implementation that creates {@link IMessageDeliverer} implementations that
- * deliver the message unit by writing the message units info to one or more file. Depending on the requested format
- * an implementation is created. Currently there are three formats that can be chosen:<dl>
- *      <dt><i>1 - "mmd"</i></dt>
- *                  <dd>writes the message meta as included in the ebMS header and payloads into separate files. For
- *                      the message meta the MMD format described by schema
- *                      <code>http://holodeck-b2b.org/schemas/2014/06/mmd</code> is used.<br>
- *             <b>NOTE that this format can only deliver user message message units!</b></dd>
- *      <dt><i>2 - "ebms"</i></dt>
- *                  <dd>also writes the message meta data and payloads to separate files but uses a copy of
- *                      ebMS header element as format for the meta data file;</dd>
- *      <dt><i>2 - "single_xml"</i></dt>
- *                  <dd>writes the complete message unit, including the payloads, to one XML file. Because the payloads
- *                      can be binary data they will be included <i>base64</i> encoded.</dd>
+ * Is the {@link IMessageDelivererFactory} implementation for the default file based delivery method. This delivery
+ * method writes the meta-data and business document (for <i>User Messages</i>) to one or more files. Three formats are
+ * included in this implementation, each implemented by a separate {@link IMessageDeliverer} implementation:<dl>
+ *   <dt><i>1 - "mmd"</i></dt><dd>writes the message meta as included in the ebMS header and payloads into separate
+ *                  files. The same MMD format as used by the default file based submission is used (specified by the
+ *                  XML schema definition with the namespace <code>http://holodeck-b2b.org/schemas/2014/06/mmd</code>.
+ *              <br><b>NOTE :</b> This format can only deliver <i>User Message</i> message units!</dd>
+ *  <dt><i>2 - "ebms"</i></dt><dd>also writes the message meta data and payloads to separate files but uses the same
+ *                  format as the ebMS header for the meta data file. To reference the payload file location a specific
+ *                  <i>Part Property</i> is included in the meta-data of each payload.</dd>
+ *  <dt><i>3 - "single_xml"</i></dt><dd>writes all data of a message unit, including the payloads of a <i>User Message
+ *                  </i> message unit to one XML file. Because the payloads can be binary data they will be included
+ *                  <i>base64</i> encoded. This format is defined by the XML schema definition with namespace <code>
+ *                  http://holodeck-b2b.org/schemas/2018/01/delivery/single_xml</code></dd>
  * </dl>
- * <p>Which format is requested must be specified when creating the factory using the "<i>format</i>" setting. If not
+ * <p>NOTE: In both the <i>ebms</i> and <i>single_xml</i> format the meta-data on the <i>Receipt</i> content does not
+ * include its content as included in the ebMS header but only an indication of what element was included. See the XML
+ * schema with namespace <code>http://holodeck-b2b.org/schemas/2015/08/delivery/ebms/receiptchild</code> for the
+ * definition of the element that is included as Receipt content.
+ * <p>Which format is requested must be specified when creating the factory using the "<i>format</i>" parameter. If not
  * specified the <i>"ebms"</i> format will be used as default.<br>
  * Furthermore the directory where to write the files MUST be specified using the "<i>deliveryDirectoy</i>" setting.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see MMDDeliverer
- * @see SimpleFileDeliverer
+ * @see EbmsFileDeliverer
  * @see SingleXMLDeliverer
- *
  */
 public class FileDeliveryFactory implements IMessageDelivererFactory {
 
@@ -134,7 +136,7 @@ public class FileDeliveryFactory implements IMessageDelivererFactory {
                 case MMD :
                     return new MMDDeliverer(deliveryDir);
                 default:
-                    return new SimpleFileDeliverer(deliveryDir);
+                    return new EbmsFileDeliverer(deliveryDir);
             }
         else
             // Directory is not valid anymore

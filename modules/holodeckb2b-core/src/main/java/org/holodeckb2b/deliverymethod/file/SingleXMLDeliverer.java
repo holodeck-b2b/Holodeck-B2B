@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import javax.xml.namespace.QName;
+import javax.xml.XMLConstants;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -42,60 +42,84 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
- * Is an {@link IMessageDeliverer} implementation that delivers the message unit to the business application by writing
- * all information of the message unit info, <b>including</b> the payload data to one XML file.
- * <p>The format of the file uses the ebMS messaging header followed by a <code>Payloads</code> element that includes
- * all payloads of the message as <code>Payload</code> elements. Because the payload can contain binary data their
- * content is included <i>base64</i> encoded. The payloads are referenced using the <code>xml:id</code> attribute of a
- * <code>Payload</code> element which is included as a "part property" in <code>eb:PartProperties/eb:Property</code>
- * named "<i>org:holodeckb2b:ref</i>"
- * <p>Example: For a received user message unit containing one payload the message info file is like this:
+ * Is the {@link IMessageDeliverer} that implements the <i>"ebms"</i> format of the default file delivery method.
+ * <p>It delivers the message unit to the business application by writing all information of the message unit info,
+ * <b>including</b> the payload data of a <i>User Message</i> message unit to one XML file. The format of the XML
+ * document is defined by the XML schema <code>http://holodeck-b2b.org/schemas/2018/01/delivery/single_xml</code>.
+ * <p>It includes the ebMS messaging header followed by a <code>Payloads</code> element that includes all payloads of
+ * the  message as <code>Payload</code> elements. Because the payload can contain binary data their content is included
+ * <i>base64</i> encoded. The payloads are referenced using the <code>xml:id</code> attribute of a <code>Payload</code>
+ * element which is included as a <i>"Part Property"</i> with name "<i>org:holodeckb2b:ref</i>".
+ * <p><b>Examples</b>
+ * <p><u>User message</u>
+ * <p>For a received user message unit containing one payload the message info file is like this:
 <pre>
 {@code
-<ebmsMessage>
-    <eb:UserMessage xmlns:eb="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
-        <eb:MessageInfo>
-            <eb:Timestamp>2014-08-14T17:50:00.000+02:00</eb:Timestamp>
-            <eb:MessageId>d6a19bec-4ffa-4e9c-862b-6dc127b00077@mountain-lion.fritz.box</eb:MessageId>
-        </eb:MessageInfo>
-        <eb:PartyInfo>
-            <eb:From>
-                <eb:PartyId type="org:holodeckb2b:test">Party_1</eb:PartyId>
-                <eb:Role>Sender</eb:Role>
-            </eb:From>
-            <eb:To>
-                <eb:PartyId type="org:holodeckb2b:test">Party_2</eb:PartyId>
-                <eb:Role>Receiver</eb:Role>
-            </eb:To>
-        </eb:PartyInfo>
-        <eb:CollaborationInfo>
-            <eb:Service type="org:holodeckb2b:test">single_xml</eb:Service>
-            <eb:Action>Test</eb:Action>
-            <eb:ConversationId>org:holodeckb2b:test:conversation</eb:ConversationId>
-        </eb:CollaborationInfo>
-        <eb:PayloadInfo>
-            <eb:Payload>
-                <eb:PartProperties>
-                    <eb:Property name="org:holodeckb2b:ref">pl-1</eb:Property>
-                </eb:PartProperties>
-            </eb:Payload>
-        </eb:PayloadInfo>
-    </eb:UserMessage>
+<ebmsMessage xmlns="http://holodeck-b2b.org/schemas/2018/01/delivery/single_xml">
+    <eb3:UserMessage xmlns:eb="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
+        <eb3:MessageInfo>
+            <eb3:Timestamp>2014-08-14T17:50:00.000+02:00</eb3:Timestamp>
+            <eb3:MessageId>d6a19bec-4ffa-4e9c-862b-6dc127b00077@mountain-lion.fritz.box</eb3:MessageId>
+        </eb3:MessageInfo>
+        <eb3:PartyInfo>
+            <eb3:From>
+                <eb3:PartyId type="org:holodeckb2b:test">Party_1</eb3:PartyId>
+                <eb3:Role>Sender</eb3:Role>
+            </eb3:From>
+            <eb3:To>
+                <eb3:PartyId type="org:holodeckb2b:test">Party_2</eb3:PartyId>
+                <eb3:Role>Receiver</eb3:Role>
+            </eb3:To>
+        </eb3:PartyInfo>
+        <eb3:CollaborationInfo>
+            <eb3:Service type="org:holodeckb2b:test">single_xml</eb3:Service>
+            <eb3:Action>Test</eb3:Action>
+            <eb3:ConversationId>org:holodeckb2b:test:conversation</eb3:ConversationId>
+        </eb3:CollaborationInfo>
+        <eb3:PayloadInfo>
+            <eb3:Payload>
+                <eb3:PartProperties>
+                    <eb3:Property name="org:holodeckb2b:ref">pl-1</eb3:Property>
+                </eb3:PartProperties>
+            </eb3:Payload>
+        </eb3:PayloadInfo>
+    </eb3:UserMessage>
     <Payloads>
         <Payload xml:id="pl-1">«base64 encoded data»</Payload>
     </Payloads>
+</ebmsMessage>
+}</pre>
+ * <p><u>Receipt</u>
+ * <p>For a received Receipt message unit containing a reception awareness receipt the message info file is like this:
+<pre>
+{@code
+<ebmsMessage xmlns="http://holodeck-b2b.org/schemas/2018/01/delivery/single_xml">
+    <eb3:SignalMessage xmlns:eb="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
+        <eb3:MessageInfo>
+            <eb3:Timestamp>2014-08-14T17:50:00.000+02:00</eb3:Timestamp>
+            <eb3:MessageId>d6a19bec-4ffa-4e9c-862b-6dc127b00077@mountain-lion.fritz.box</eb3:MessageId>
+        </eb3:MessageInfo>
+        <eb3:Receipt>
+            <ReceiptChild xmlns="http://holodeck-b2b.org/schemas/2015/08/delivery/ebms/receiptchild"
+            >eb3:UserMessage</ReceiptChild>
+        </eb3:Receipt>
+    </eb3:SignalMessage>
 </ebmsMessage>
 }</pre>
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see FileDeliveryFactory
  */
-public class SingleXMLDeliverer extends SimpleFileDeliverer {
+public class SingleXMLDeliverer extends EbmsFileDeliverer {
 
     /**
-     * The element name of the container element that contains the message info
+     * The namespace URI of the XML schema that defines the structure of the delivery file
      */
-    protected static QName XML_ROOT_NAME = new QName("ebmsMessage");
+    private static final String DELIVERY_NS_URI = "http://holodeck-b2b.org/schemas/2018/01/delivery/single_xml";
+    /**
+     * The QName of the container element that contains the message info
+     */
+    private static final String XML_ROOT_NAME = "ebmsMessage";
 
     /**
      * Constructs a new deliverer which will write the files to the given directory.
@@ -104,6 +128,21 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
      */
     SingleXMLDeliverer(final String dir) {
         super(dir);
+    }
+
+    /**
+     * Create the root element of the meta-data document.
+     *
+     * @return  The root element of the delivery document.
+     */
+    protected OMElement createContainerElementName() {
+        final OMFactory   f = OMAbstractFactory.getOMFactory();
+        final OMElement rootElement = f.createOMElement(XML_ROOT_NAME, DELIVERY_NS_URI, XMLConstants.DEFAULT_NS_PREFIX);
+        // Declare the namespaces
+        rootElement.declareDefaultNamespace(DELIVERY_NS_URI);
+        rootElement.declareNamespace(EbMSConstants.EBMS3_NS_URI, EbMSConstants.EBMS3_NS_PREFIX);
+
+        return rootElement;
     }
 
     /**
@@ -120,9 +159,7 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
         // We first convert the user message into a MMD document
         final MessageMetaData mmd = new MessageMetaData((IUserMessage) usrMsgUnit);
 
-        final OMFactory   f = OMAbstractFactory.getOMFactory();
-        final OMElement    container = f.createOMElement(XML_ROOT_NAME);
-        container.declareNamespace(EbMSConstants.EBMS3_NS_URI, "eb");
+        final OMElement    container = createContainerElementName();
 
         log.debug("Add general message info to XML container");
         // Add the information on the user message to the container
@@ -151,7 +188,7 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
             fw = new FileWriter(msgFilePath);
             final XMLStreamWriter xmlWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(fw);
             log.debug("Write the meta data to file");
-            xmlWriter.writeStartElement(XML_ROOT_NAME.getLocalPart());
+            xmlWriter.writeStartElement(XML_ROOT_NAME);
             usrMsgElement.serialize(xmlWriter);
             xmlWriter.flush();
             xmlWriter.close();
@@ -169,7 +206,7 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
                 log.debug("Close the <Payloads> element");
                 fw.write("</Payloads>\n");
             }
-            fw.write("</" + XML_ROOT_NAME.getLocalPart() + ">");
+            fw.write("</" + XML_ROOT_NAME + ">");
             fw.close();
             log.info("User message with msgID=" + mmd.getMessageId() + " successfully delivered");
         } catch (IOException | XMLStreamException ex) {
@@ -196,7 +233,7 @@ public class SingleXMLDeliverer extends SimpleFileDeliverer {
      * @param output            The output writer
      * @throws IOException      When reading from the source or writing to the output fails
      */
-    protected void writeEncodedPayload(final String sourceFile, final Writer output) throws IOException {
+    private void writeEncodedPayload(final String sourceFile, final Writer output) throws IOException {
         final Base64EncodingWriterOutputStream b64os;
         try (FileInputStream fis = new FileInputStream(sourceFile)) {
             b64os = new Base64EncodingWriterOutputStream(output);

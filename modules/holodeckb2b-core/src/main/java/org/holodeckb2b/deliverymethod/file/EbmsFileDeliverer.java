@@ -20,7 +20,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.Arrays;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
@@ -43,87 +43,86 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 
 /**
- * Is an {@link IMessageDeliverer} implementation that delivers the message unit to the business application by writing
- * the message unit info to a file using the same format as in the ebMS messaging header as defined in the xml schema
- * definition <code>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/</code>. Because a file is generated
- * per message unit the <code>eb:Messaging</code> element contains only one child element.
+ * Is the {@link IMessageDeliverer} that implements the <i>"ebms"</i> format of the default file delivery method.
+ * <p>It delivers the message unit to the business application by writing the message unit info to a file using the same
+ * format as in the ebMS messaging header as defined in the xml schema definition
+ * <code>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/</code>.
  * <p>As only Receipt and Error signals are delivered (notified in ebMS terminology) to the business application the
  * <code>eb:SignalMessage</code> element can only have the <code>eb:Receipt</code> and <code>eb:Error</code> child
  * elements (in addition to the required <code>eb:MessageInfo</code> element).
- * <p>For receipts the <code>eb:Receipt</code> element must contain at least one child element. Because the content
- * as included in the actual ebMS message is not for delivery it is replaced with a single child element
- * <code>ReceiptChild</code> that contains the name (including namespace prefix if available) of the first element
- * contained in the actuals AS4 message. The <code>ReceiptChild</code> element itself is defined in xml schema
- * definition <code>http://holodeck-b2b.org/schemas/2015/08/delivery/ebms/receiptchild</code>.
+ * <p>For Receipts the actual content of the <code>eb:Receipt</code> element as included in the ebMS message is replaced
+ * with a single child element <code>ReceiptChild</code> that contains a identifier of the type of Receipt. See the XML
+ * schema definition <code>http://holodeck-b2b.org/schemas/2015/08/delivery/ebms/receiptchild</code>.
  * <p>For user messages the payloads are copied to the same directory and referred to through a <i>additional</i> part
  * property named "<i>org:holodeckb2b:location</i>" in <code>eb:PartProperties/eb:Property</code>.
  * <p><b>Examples</b>
  * <p><u>User message</u>
- * <p>For a received user message unit containing two payloads there will be one XML file containing the
- * message info and two files containing the payload content. The message info file is like this:
+ * <p>For a received user message unit containing two payloads there will be one XML file containing the message info
+ * and two files containing the payload content. The message info file is like this:
 <pre>
 {@code
-<eb:Messaging xmlns:eb="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
-    <eb:UserMessage>
-        <eb:MessageInfo>
-            <eb:Timestamp>2014-08-14T17:50:00.000+02:00</eb:Timestamp>
-            <eb:MessageId>d6a19bec-4ffa-4e9c-862b-6dc127b00077@mountain-lion.fritz.box</eb:MessageId>
-        </eb:MessageInfo>
-        <eb:PartyInfo>
-            <eb:From>
-                <eb:PartyId type="org:holodeckb2b:test">Party_1</eb:PartyId>
-                <eb:Role>Sender</eb:Role>
-            </eb:From>
-            <eb:To>
-                <eb:PartyId type="org:holodeckb2b:test">Party_2</eb:PartyId>
-                <eb:Role>Receiver</eb:Role>
-            </eb:To>
-        </eb:PartyInfo>
-        <eb:CollaborationInfo>
-            <eb:Service type="org:holodeckb2b:test">service</eb:Service>
-            <eb:Action>Test</eb:Action>
-            <eb:ConversationId>org:holodeckb2b:test:conversation</eb:ConversationId>
-        </eb:CollaborationInfo>
-        <eb:PayloadInfo>
-            <eb:Payload>
-                <eb:PartProperties>
-                    <eb:Property name="originalFileName">simpletest.xml</eb:Property>
-                    <eb:Property name="org:holodeckb2b:location">
+<eb3:Messaging xmlns:eb="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
+    <eb3:UserMessage>
+        <eb3:MessageInfo>
+            <eb3:Timestamp>2014-08-14T17:50:00.000+02:00</eb3:Timestamp>
+            <eb3:MessageId>d6a19bec-4ffa-4e9c-862b-6dc127b00077@mountain-lion.fritz.box</eb3:MessageId>
+        </eb3:MessageInfo>
+        <eb3:PartyInfo>
+            <eb3:From>
+                <eb3:PartyId type="org:holodeckb2b:test">Party_1</eb3:PartyId>
+                <eb3:Role>Sender</eb3:Role>
+            </eb3:From>
+            <eb3:To>
+                <eb3:PartyId type="org:holodeckb2b:test">Party_2</eb3:PartyId>
+                <eb3:Role>Receiver</eb3:Role>
+            </eb3:To>
+        </eb3:PartyInfo>
+        <eb3:CollaborationInfo>
+            <eb3:Service type="org:holodeckb2b:test">service</eb3:Service>
+            <eb3:Action>Test</eb3:Action>
+            <eb3:ConversationId>org:holodeckb2b:test:conversation</eb3:ConversationId>
+        </eb3:CollaborationInfo>
+        <eb3:PayloadInfo>
+            <eb3:Payload>
+                <eb3:PartProperties>
+                    <eb3:Property name="originalFileName">simpletest.xml</eb3:Property>
+                    <eb3:Property name="org:holodeckb2b:location">
                         /Users/safi/holodeck-test/pl-d6a19bec-4ffa-4e9c-862b-6dc127b00077_mountain-lion.fritz.box-body-16.xml
-                    </eb:Property>
-                </eb:PartProperties>
-            </eb:Payload>
-        </eb:PayloadInfo>
-    </eb:UserMessage>
-</eb:Messaging>
+                    </eb3:Property>
+                </eb3:PartProperties>
+            </eb3:Payload>
+        </eb3:PayloadInfo>
+    </eb3:UserMessage>
+</eb3:Messaging>
 }</pre>
  * <p><u>Receipt</u>
  * <p>For a received Receipt message unit containing a non repudiation receipt the message info file is like this:
 <pre>
 {@code
-<eb:Messaging xmlns:eb="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
-    <eb:SignalMessage>
-        <eb:MessageInfo>
-            <eb:Timestamp>2014-08-14T17:50:00.000+02:00</eb:Timestamp>
-            <eb:MessageId>d6a19bec-4ffa-4e9c-862b-6dc127b00077@mountain-lion.fritz.box</eb:MessageId>
-        </eb:MessageInfo>
-        <eb:Receipt>
+<eb3:Messaging xmlns:eb="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
+    <eb3:SignalMessage>
+        <eb3:MessageInfo>
+            <eb3:Timestamp>2014-08-14T17:50:00.000+02:00</eb3:Timestamp>
+            <eb3:MessageId>d6a19bec-4ffa-4e9c-862b-6dc127b00077@mountain-lion.fritz.box</eb3:MessageId>
+        </eb3:MessageInfo>
+        <eb3:Receipt>
             <ReceiptChild xmlns="http://holodeck-b2b.org/schemas/2015/08/delivery/ebms/receiptchild"
             >ebbp:NonRepudiationInformation</ReceiptChild>
-        </eb:Receipt>
-    </eb:SignalMessage>
-</eb:Messaging>
+        </eb3:Receipt>
+    </eb3:SignalMessage>
+</eb3:Messaging>
 }</pre>
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see FileDeliveryFactory
  */
-public class SimpleFileDeliverer extends AbstractFileDeliverer {
+public class EbmsFileDeliverer extends AbstractFileDeliverer {
 
     /**
      * The QName of the container element that contains the message info, i.e. the <code>eb:Messaging</code> element
      */
-    protected static final QName XML_ROOT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Messaging", "eb");
+    protected static final QName ROOT_QNAME = new QName(EbMSConstants.EBMS3_NS_URI, "Messaging",
+                                                           EbMSConstants.EBMS3_NS_PREFIX);
 
     protected static final String RECEIPT_CHILD_NS_URI =
                                                 "http://holodeck-b2b.org/schemas/2015/08/delivery/ebms/receiptchild";
@@ -133,7 +132,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
      *
      * @param dir   The directory where file should be written to.
      */
-    public SimpleFileDeliverer(final String dir) {
+    public EbmsFileDeliverer(final String dir) {
         super(dir);
     }
 
@@ -146,7 +145,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
     @Override
     protected void writeUserMessageInfoToFile(final MessageMetaData mmd) throws IOException {
         final OMFactory   f = OMAbstractFactory.getOMFactory();
-        final OMElement    container = f.createOMElement(XML_ROOT_NAME);
+        final OMElement    container = f.createOMElement(ROOT_QNAME);
         container.declareNamespace(EbMSConstants.EBMS3_NS_URI, "eb");
 
         if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
@@ -178,9 +177,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
      */
     @Override
     protected void deliverSignalMessage(final ISignalMessage sigMsgUnit) throws MessageDeliveryException {
-        final OMFactory   f = OMAbstractFactory.getOMFactory();
-        final OMElement    container = f.createOMElement(XML_ROOT_NAME);
-        container.declareNamespace(EbMSConstants.EBMS3_NS_URI, "eb");
+        final OMElement   container = createContainerElementName();
 
         if (sigMsgUnit instanceof IReceipt) {
             log.debug("Create a new Receipt to prevent content from inclusion in XML");
@@ -206,6 +203,19 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
     }
 
     /**
+     * Create the root element of the meta-data document.
+     *
+     * @return  The root element of the delivery document.
+     */
+    protected OMElement createContainerElementName() {
+        final OMFactory   f = OMAbstractFactory.getOMFactory();
+        final OMElement rootElement = f.createOMElement(ROOT_QNAME);
+        rootElement.declareNamespace(EbMSConstants.EBMS3_NS_URI, EbMSConstants.EBMS3_NS_PREFIX);
+
+        return rootElement;
+    }
+
+    /**
      * Helper to write the XML to file. Serializes the given XML element to file named
      * "<code>mi-«<i>message id</i>».xml</code>".
      *
@@ -214,7 +224,7 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
      * @return          The path to the new file containing the XML document
      * @throws IOException When the XML can not be written to disk
      */
-    protected String writeXMLDocument(final OMElement xml, final String msgId) throws IOException {
+    private String writeXMLDocument(final OMElement xml, final String msgId) throws IOException {
         final Path msgFilePath = Utils.createFileWithUniqueName(directory + "mi-"
                                                                     + msgId.replaceAll("[^a-zA-Z0-9.-]", "_")
                                                                     + ".xml");
@@ -252,20 +262,20 @@ public class SimpleFileDeliverer extends AbstractFileDeliverer {
         rcptChild.declareDefaultNamespace(RECEIPT_CHILD_NS_URI);
 
         // If there was actual content (and we could get access to it) use the name of first element
-        final List<OMElement>  actual = originalReceipt.getContent();
-        String firstChildName = null;
-        if (!Utils.isNullOrEmpty(actual)) {
-            final OMElement firstChild = actual.get(0);
-            firstChildName = Utils.getValue(firstChild.getPrefix(), "");
-            firstChildName += (firstChildName.isEmpty() ? "" : ":") + firstChild.getLocalName();
-        } else
-            // If we can not access the actual content use a descriptive text
-            firstChildName = "Receipt content unknown";
-        rcptChild.setText(firstChildName);
+        final String firstReceiptChildName = originalReceipt.getContent().get(0).getLocalName();
+        String mmdRcptName;
+        switch (firstReceiptChildName) {
+            case "NonRepudiationInformation" :
+                mmdRcptName = "ebbp:NonRepudiationInformation"; break;
+            case "UserMessage" :
+                mmdRcptName = "eb:UserMessage"; break;
+            default :
+                mmdRcptName = "unspecified";
+         }
+        rcptChild.setText(mmdRcptName);
 
-        deliveryReceipt.addElementToContent(rcptChild);
+        deliveryReceipt.setContent(Arrays.asList(new OMElement[] { rcptChild }));
 
         return deliveryReceipt;
     }
-
 }
