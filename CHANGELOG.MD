@@ -8,14 +8,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   that it is able to process the message. When applying _strict_ validation mode it will check that the header
   meta-data conforms to all requirements as stated in the ebMS Specifications.
   The use of the _strict_ validation mode can be configured both globally on Holodeck B2B instance level
-  (`IConfiguation.useStrictHeaderValidation()`) or on a per P-Mode basis (`IPMode.useStrictHeaderValidation()`).
+  (`IConfiguation.useStrictHeaderValidation()`) or on a per P-Mode basis (`IPMode.useStrictHeaderValidation()`)
 * It is now possible to perform custom validations of _User Message_ message units before delivery to
   the _Consumer_. Depending on the configuration validation problems may result in rejection of the message
   unit and return an ebMS _Error Signal_ to the sender of the message. The configuration of the custom validation
   is done in the _User Message flow_ of the P-Mode, see
   `org.holodeckb2b.interfaces.pmode.IUserMessageFlow.getCustomValidationConfiguration()`
 * Interfaces for separation of Core functionality and processing of the WS-Security headers in a message by
-  introducing the _Holodeck B2B Security Provider_ concept
+  introducing the _Holodeck B2B Security Provider_ concept.
 * A default _security provider_ implementation. Similar to the older versions based on the WSS4J libraries
   but now using seperate keystores for encryption and signature verification certificates.
 * Message processing events for delivery attempts of message units and security processing, e.g. signature creation and
@@ -27,22 +27,22 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   yet use it!
 
 ### Changed
-* Refactored the validation of the ebMS header meta-data validation classes and handler
+* Refactored the validation of the ebMS header meta-data validation classes and handler.
 * Renamed method `org.holodeckb2b.interfaces.pmode.validation.IPModeValidator.isPModeValid()` to
   `org.holodeckb2b.interfaces.pmode.validation.IPModeValidator.validatePMode()`
 * The ebMS Error returned to the sender in case the signature of a _User Message_ does not include all
-  payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonCompliance_.
+  payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonCompliance_
 * Moved classes in `org.holodeckb2b.interfaces.pmode.security` to `org.holodeckb2b.interfaces.pmode`
 * Refactored package structure of _message processing events_ related interfaces: The definition of all events is done
   using interfaces in the `org.holodeckb2b.interfaces.events` and subpackages. Interfaces related to the processing
   of events are in `org.holodeckb2b.interfaces.eventprocessing`
-* Refactored `IQueryManager.isAlreadyDelivered()` to `IQueryManager.isAlreadyProcessed()` to take also failed message
-  units into account when determining if user message is already processed and should be considered a duplicate.
+* Refactored `IQueryManager.isAlreadyDelivered()` to `IQueryManager.isAlreadyProcessed()` to also take failed message
+  units into account when determining if a user message is already processed and should be considered a duplicate.
 
 ### Deprecated
 * The configuration parameter (`IConfiguation.allowSignalBundling()`) which was used to indicate that it was allowed to
   bundle multiple Signal message units of the same type in one message. This goes beyond the ebMS V3 Core and AS4
-  Specifications and this options will therefore be removed.
+  Specifications and this option is therefore removed.
 * The configuration parameter (`IConfiguation.useStrictErrorRefCheck()`) to apply a strict validation on the
   references in the Error signal is replaced by the generic strict header validation mode.
 * The configuration parameters (as defined in `IConfiguration`) related to the keystores used in WS-Security processing.
@@ -50,7 +50,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   supported.
 
 ### Removed
-* Deprecated method `IMessageSubmitter.submitMessage(IUserMessage)` and corresponding implementation
+* Deprecated method `IMessageSubmitter.submitMessage(IUserMessage)` and corresponding implementation.
 
 ## 3.1.1
 ###### 2018-01-15
@@ -65,7 +65,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Support for the _type_ attribute of both _Message_ and _Part Properties_. See
   also [issue #2](https://issues.oasis-open.org/browse/EBXMLMSG-2) in the OASIS ebMS TC's issue tracker
 * Added the default temp directory to the distribution
-* Support for continuously running workers.
+* Support for continuously running workers
 
 ### Changed
 * Packaged the Holodeck B2B msh service as Axis2 aar file
@@ -78,7 +78,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * StringIndexOutOfBoundsException when eb:Timestamp does not contain 'Z' indicator [#78](https://github.com/holodeck-b2b/Holodeck-B2B/issues/78)
 * Issue in Receipt processing when the referenced message was not completely loaded from storage
   but previous processing states need to be evaluated
-* Pull Requests directly submitted to the Core are never send
+* Pull Requests directly submitted to the Core are never sent
 * Non closed output streams and incorrect flushing of data in file delivery methods
 
 ## 3.0.1
