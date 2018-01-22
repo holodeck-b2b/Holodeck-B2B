@@ -65,12 +65,12 @@ import org.holodeckb2b.security.util.VerificationUtils;
 public class PModeFinder {
 
     /**
-     *
+     * Identifiers for the meta-data that is being used in the matching
      */
     protected static enum PARAMETERS {ID, FROM, FROM_ROLE, TO, TO_ROLE, SERVICE, ACTION, MPC, AGREEMENT}
 
     /**
-     *
+     * The weight for each of the parameters
      */
     protected static Map<PARAMETERS, Integer> MATCH_WEIGHTS; // {37, 7, 2, 7, 2, 5, 5, 1};
     static {
@@ -110,15 +110,18 @@ public class PModeFinder {
      * <tr><td>MPC</td><td>1</td></tr>
      * </table> </p>
      * <p>If there is a mismatch for one of the elements the P-Mode is considered as a mismatch.</p>
+     * <p>This method will only find one matching P-Mode. This means that when multiple P-Modes with the highest match
+     * score are found none is returned.
      *
      * @param mu        The user message message unit to find the P-Mode for
-     * @return          The P-Mode for the message unit if the message unit can be matched to a P-Mode,
+     * @return          The P-Mode for the message unit if the message unit can be matched to a <b>single</b> P-Mode,
      *                  <code>null</code> if no P-Mode could be found for the user message message unit.
      */
     public static IPMode forReceivedUserMessage(final IUserMessage mu) {
         final IPModeSet pmodes = HolodeckB2BCoreInterface.getPModeSet();
         IPMode    hPMode = null;
         int       hValue = 0;
+        boolean   multiple = false;
 
         if (pmodes == null)
             return null;
@@ -274,10 +277,14 @@ public class PModeFinder {
                 // Yes, it does, set it as new best match
                 hValue = cValue;
                 hPMode = p;
-            }
+                multiple = false;
+            } else if (cValue == hValue)
+                // It has the same match as the current highest scoring one
+                multiple = true;
         }
 
-        return hPMode;
+        // Only return a single P-Mode
+        return !multiple ? hPMode : null;
     }
 
     /**

@@ -27,6 +27,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   yet use it!
 
 ### Changed
+* When multiple P-Modes match to a received message this is now considered as "no match found" and no result is
+  returned instead of the first matching P-Mode.
 * Refactored the validation of the ebMS header meta-data validation classes and handler.
 * Renamed method `org.holodeckb2b.interfaces.pmode.validation.IPModeValidator.isPModeValid()` to
   `org.holodeckb2b.interfaces.pmode.validation.IPModeValidator.validatePMode()`
