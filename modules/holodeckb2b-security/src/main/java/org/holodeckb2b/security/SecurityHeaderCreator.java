@@ -268,7 +268,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
                                .map(userMsg -> ((IUserMessage) userMsg).getPayloads())
                                .filter(umPayloads -> !Utils.isNullOrEmpty(umPayloads))
                                .anyMatch(umPayloads -> umPayloads.stream()
-                                                  .anyMatch(p -> p.getContainment() == IPayload.Containment.BODY)));
+                                                  .anyMatch(p -> p.getContainment() == IPayload.Containment.BODY)))
             processingParams.put(ConfigurationConstants.ENCRYPTION_PARTS, (msgContext.isSOAP11() ?
                     SecurityConstants.WSS4J_PART_S11_BODY :
                     SecurityConstants.WSS4J_PART_S12_BODY));

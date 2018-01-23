@@ -179,10 +179,10 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
             log.error("A problem occurred in the {} action when processing the default WS-Security header!" +
                       "\n\tDetails: {}", hpf.getFailedAction().name(), hpf.getMessage());
             switch (hpf.getFailedAction()) {
-                case SIGN :
+                case VERIFY :
                     results.add(new SignatureProcessingResult(hpf));
                     break;
-                case ENCRYPT :
+                case DECRYPT :
                     results.add(new EncryptionProcessingResult(hpf));
                     break;
                 case USERNAME_TOKEN :
