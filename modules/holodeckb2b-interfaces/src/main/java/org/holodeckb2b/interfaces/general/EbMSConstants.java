@@ -84,6 +84,14 @@ public final class EbMSConstants {
      * URI identifying a Two-Way MEP using Pull on both legs (very uncommon)
      */
     public static final String TWO_WAY_PULL_PULL = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pullAndPull";
+    /**
+     * URI identifying the test service as defined in the ebMS V3 Core Spec (sections 4.3 and 5.2.2.9)
+     */
+    public static final String TEST_SERVICE_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service";
+    /**
+     * URI identifying the test action as defined in the ebMS V3 Core Spec (sections 4.3 and 5.2.2.9)
+     */
+    public static final String TEST_ACTION_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test";
 
     /*
      * This class is just a place holder for constants and should not be

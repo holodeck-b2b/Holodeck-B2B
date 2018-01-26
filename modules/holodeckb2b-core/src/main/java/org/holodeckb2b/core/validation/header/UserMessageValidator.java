@@ -22,6 +22,7 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.handlers.inflow.HeaderValidation;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.IService;
@@ -117,10 +118,15 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
         if (userMessageInfo.getCollaborationInfo() != null) {
             IService service = userMessageInfo.getCollaborationInfo().getService();
             if (service != null && Utils.isNullOrEmpty(service.getType()) && !Utils.isValidURI(service.getName()))
-               validationErrors.add(new MessageValidationError("Untype Service value [" + service.getName()
+                validationErrors.add(new MessageValidationError("Untype Service value [" + service.getName()
                                                                                                     + "] is not URI",
-                                                               MessageValidationError.Severity.Warning,
+                                                               MessageValidationError.Severity.Failure,
                                                                HeaderValidation.VALUE_INCONSISTENT_REQ));
+            if (EbMSConstants.TEST_ACTION_URI.equals(userMessageInfo.getCollaborationInfo().getAction())
+                && !EbMSConstants.TEST_SERVICE_URI.equals(service.getName()))
+                validationErrors.add(new MessageValidationError("Service must be " + EbMSConstants.TEST_SERVICE_URI +
+                                                               "if Action is set to " + EbMSConstants.TEST_ACTION_URI));
+
         }
         // Check that all properties have a value
         // Check MessageProperties (if provided)
