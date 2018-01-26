@@ -16,12 +16,13 @@
  */
 package org.holodeckb2b.pmode.xml;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
 import java.io.File;
-
+import java.util.concurrent.TimeUnit;
+import org.holodeckb2b.interfaces.general.Interval;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -40,35 +41,30 @@ public class ReceptionAwarenessTest {
      * @param fName The filename for the ReceptionAwareness
      * @return ReceptionAwareness or NULL in case of an error
      */
-    public ReceptionAwareness createFromFile(final String fName) {
+    public ReceptionAwareness createFromFile(final String fName) throws Exception {
+        // retrieve the resource from the pmodetest directory.
+        final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/receptionawareness/" + fName).getPath());
 
-        try {
-            // retrieve the resource from the pmodetest directory.
-            final File f = new File(this.getClass().getClassLoader().getResource("pmodetest/receptionawareness/" + fName).getPath());
-
-            final Serializer  serializer = new Persister();
-            return serializer.read(ReceptionAwareness.class, f);
-        }
-        catch (final Exception ex) {
-            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-            return null;
-        }
+        final Serializer  serializer = new Persister();
+        return serializer.read(ReceptionAwareness.class, f);
     }
 
     /**
-     * Test minimal ReceptionAwareness.
+     * Test pre HB2B_NEXT_VERSION configuration with fixed intervals
      */
     @Test
-    public void testReceptionAwarenessMinimal() {
+    public void testFixedIntervals() {
 
         try {
             ReceptionAwareness ra;
-            ra = createFromFile("receptionawarenessMinimal.xml");
+            ra = createFromFile("fixed.xml");
 
             // Check ReceptionAwareness object
             assertNotNull(ra);
-            assertEquals(2, ra.getMaxRetries());
-            assertEquals(60L, ra.getRetryInterval().getLength());
+            assertTrue(ra.shouldRetry());
+            assertArrayEquals(new Interval[] { new Interval(60, TimeUnit.SECONDS),
+                                               new Interval(60, TimeUnit.SECONDS)
+                                             }, ra.getWaitIntervals());
 
         } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
@@ -78,25 +74,80 @@ public class ReceptionAwarenessTest {
     }
 
     /**
-     * Test for full ReceptionAwareness.
+     * Test post HB2B_NEXT_VERSION configuration with flexible intervals
      */
     @Test
-    public void testReceptionAwarenessFull() {
-
+    public void testFlexibleIntervals() {
         try {
             ReceptionAwareness ra;
-            ra = createFromFile("receptionawarenessFull.xml");
-
+            ra = createFromFile("flexible_1.xml");
             // Check ReceptionAwareness object
-            assertNotNull(ra);
-            assertEquals(3, ra.getMaxRetries());
-            assertEquals(30L, ra.getRetryInterval().getLength());
+            assertTrue(ra.shouldRetry());
+            assertArrayEquals(new Interval[] { new Interval(5, TimeUnit.SECONDS),
+                                               new Interval(10, TimeUnit.SECONDS),
+                                               new Interval(15, TimeUnit.SECONDS)
+                                             }, ra.getWaitIntervals());
 
         } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
             fail();
         }
-
+        try {
+            ReceptionAwareness ra;
+            ra = createFromFile("flexible_2.xml");
+            // Check ReceptionAwareness object
+            assertTrue(ra.shouldRetry());
+            assertArrayEquals(new Interval[] { new Interval(5, TimeUnit.SECONDS),
+                                               new Interval(10, TimeUnit.SECONDS),
+                                               new Interval(15, TimeUnit.SECONDS),
+                                               new Interval(20, TimeUnit.SECONDS)
+                                             }, ra.getWaitIntervals());
+        } catch (final Exception ex) {
+            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
+            fail();
+        }
     }
 
+    @Test
+    public void testEmptyInterval() {
+        try {
+            createFromFile("flexible_empty_1.xml");
+            fail("Empty interval should be rejected");
+        } catch (final Exception invalid) {
+        }
+        try {
+            createFromFile("flexible_empty_2.xml");
+            fail("Empty interval should be rejected");
+        } catch (final Exception invalid) {
+        }
+        try {
+            createFromFile("flexible_empty_3.xml");
+            fail("Empty interval should be rejected");
+        } catch (final Exception invalid) {
+        }
+    }
+
+    @Test
+    public void testNegativeIntervals() {
+        try {
+            createFromFile("fixed_negative.xml");
+            fail("Negative interval should be rejected");
+        } catch (final Exception invalid) {
+        }
+        try {
+            createFromFile("flexible_negative_1.xml");
+            fail("Negative interval should be rejected");
+        } catch (final Exception invalid) {
+        }
+        try {
+            createFromFile("flexible_negative_2.xml");
+            fail("Negative interval should be rejected");
+        } catch (final Exception invalid) {
+        }
+        try {
+            createFromFile("flexible_negative_3.xml");
+            fail("Negative interval should be rejected");
+        } catch (final Exception invalid) {
+        }
+    }
 }

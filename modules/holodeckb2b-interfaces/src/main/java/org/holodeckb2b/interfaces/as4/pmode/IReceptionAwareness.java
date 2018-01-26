@@ -17,24 +17,36 @@
 package org.holodeckb2b.interfaces.as4.pmode;
 
 import org.holodeckb2b.interfaces.general.Interval;
+import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
 
 
 /**
  * Represents P-Mode parameters related to the <i>AS4 Reception Awareness feature</i>. This feature is a (simple)
  * reliability protocol that uses ebMS Receipt signals for acknowledgments. See section 3.2 of the AS4 profile for more
  * information.
- * <p>The AS4 profile defines five additional P-Mode parameters for the reception awareness feature. Holodeck B2B uses
- * only three parameters as some of the P-Mode parameters from the spec are combined:<ol>
- * <li><b>Maximum number of retries</b> : Indicates how many times a message should be resende if no Receipt is
- * received. Setting this value to zero disables the retry functionality;</li>
- * <li><b>Interval before resend</b> : The time to wait for a Receipt and before a message is resend;</li>
+ * <p>The <i>AS4 Reception Awareness feature</i> feature is a (simple) reliability protocol that uses ebMS Receipt
+ * signals for acknowledgments. See section 3.2 of the AS4 profile for more information. Although the AS4 profile
+ * defines five P-Mode parameters for this feature, this interface defines only three methods. This is due to the fact
+ * that the other parameters are derived. The explicitly mapped parameters are:<ol>
+ * <li><b>PMode[1].ReceptionAwareness</b> -> {@link #shouldRetry()} : Indicates whether Holodeck B2B should resend
+ * User Messages if no Receipt is received.</li>
+ * <li><b>PMode[1].ReceptionAwareness.Retry.Parameters</b> -> {@link #getWaitIntervals()} : Indicates the intervals to wait
+ * for a Receipt and after which the User Message should be resend. When using asynchronous Receipts there should be at
+ * least one interval to specify the period to wait for the Receipt after the initial send.</li>
  * <li><b>Use duplicate elimination</b> : Indication whether a message that is received twice should be delivered to the
  * business application or not. If enabled Holodeck B2B will search all received messages in database to check if the
- * message was received (and delivered) before. There is no further parameterization.</li>
- * </ol>
- * Enabling the Reception Awareness feature itself is done by including an object of this type on the leg, i.e. when
- * {@link IAS4Leg#getReceptionAwareness()} returns a non-null value. Note that we use a special type of leg ({@link
- * IAS4Leg}) to indicate that the leg includes AS4 specific features.
+ * message was received (and delivered) before. There is no further parameterization. This corresponds to the <b>
+ * PMode[1].ReceptionAwareness.DuplicateDetection</b> and <b>DuplicateDetection.Parameters</b> P-Mode parameters from
+ * the AS4 profiile.</li></ol>
+ * NOTE: Either the {@link #shouldRetry()} and {@link #getWaitIntervals()} or the {@link #useDuplicateDetection()} should
+ * be used in a specific instance on a Leg as these settings apply to sent or received User Messages.
+ * <p>Enabling the Reception Awareness feature itself (<b>PMode[1].ReceptionAwareness</b>) is done by including an object
+ * of this type on the leg, i.e. when {@link IAS4Leg#getReceptionAwareness()} returns a non-null value. Note that we use
+ * a special type of leg ({@link IAS4Leg}) to indicate that the leg includes AS4 specific features. *
+ * <b>NOTE:</b> In version HB2B_NEXT_VERSION the interface changed to allow a more flexible configuration of the
+ * intervals between retries. To allow an easy migration path all methods related to the retry configuration have a
+ * default implementation. New implementations of this interface SHOULD implement <b>only</b> {@link #shouldRetry()},
+ * {@link #getWaitIntervals()} and {@link #useDuplicateDetection()}.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
@@ -46,15 +58,56 @@ public interface IReceptionAwareness {
      * generated directly after the first "retry" interval has elapsed.
      *
      * @return  The maximum number of retries to executed. 0 if a message should not be retransmitted.
+     * @deprecated Only included for back-ward compatibility, the Core only uses the {@link #getRetries()} method.
+     *             New implementations SHOULD NOT implement this method.
      */
-    public int getMaxRetries();
+    @Deprecated
+    public default int getMaxRetries() {
+        return getWaitIntervals().length;
+    }
 
     /**
      * Gets the period to wait for a receipt signal before a message should be retransmitted (if there are retries left)
      *
      * @return The period to wait for a receipt signal expressed as an {@link Interval}
+     * @deprecated Only included for back-ward compatibility, the Core only uses the {@link #getRetries()} method.
+     *             New implementations SHOULD NOT implement this method.
      */
-    public Interval getRetryInterval();
+    @Deprecated
+    public default Interval getRetryInterval() {
+        return getWaitIntervals()[0];
+    }
+
+    /**
+     * Indicates whether Holodeck B2B should resend User Message if no Receipt has been received.
+     * <p>If set to <i>false</i> Holodeck B2B will wait at least the first specified interval for a Receipt. If none is
+     * received a <i>MissingReceiptError</i> will be generated. If no intervals are specified Holodeck B2B can
+     * immediately after sending and processing the response generate the error. Whether this error is reported to the
+     * back-end depends on the setting {@link IReceiptConfiguration#shouldNotifyReceiptToBusinessApplication()}.
+     *
+     * @return  <i>true</i> if Holodeck B2B should resend a User Message if no Receipt is received within the specified
+     *          intervals, <br><i>false</i> if User Message should not be resend.
+     * @since HB2B_NEXT_VERSION     <b>New implementation MUST override this method</b>
+     */
+    public default boolean shouldRetry() {
+       return getMaxRetries() > 0;
+    }
+
+    /**
+     * Gets an array of intervals to wait for a <i>Receipt</i> Signal before a <i>User Message</i> should be
+     * retransmitted.
+     * <p>Note that the last interval only indicates the time to wait for the Receipt and no resending will take place.
+     * Therefore the number of retries is one less then the number of intervals specified!.
+     *
+     * @return The periods to wait for a <i>Receipt</i> Signal expressed as an array of {@link Interval}
+     * @since HB2B_NEXT_VERSION     <b>New implementation MUST override this method</b>
+     */
+    public default Interval[] getWaitIntervals() {
+        Interval[] intervals = new Interval[getMaxRetries()];
+        for(int i = 0; i < intervals.length; i++)
+            intervals[i] = getRetryInterval();
+        return intervals;
+    }
 
     /**
      * Indicates whether duplicate detection and elimination should be used.

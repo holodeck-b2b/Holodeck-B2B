@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 ### Added
+* More flexible retry configuration of the AS4 Reception Feature where it is now possible to specify each interval
+  separately. See refactored `org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness`.
 * Option to apply _strict_ validation of ebMS header meta-data. By default Holodeck B2B only validates
   that it is able to process the message. When applying _strict_ validation mode it will check that the header
   meta-data conforms to all requirements as stated in the ebMS Specifications.
@@ -50,6 +52,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * The configuration parameters (as defined in `IConfiguration`) related to the keystores used in WS-Security processing.
   By enabling _compatability mode_ in the new default security provider the functionality of the old version is still
   supported.
+* The methods `getMaxRetries()` and `getRetryInterval()` in `org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness`
+  as they are superseded by the new `shouldRetry()` and `getWaitIntervals()` methods which allow both fixed and flexible
+  retry configuration. Using _default_ older implementations of this interface can still be used in this version.
 
 ### Removed
 * Deprecated method `IMessageSubmitter.submitMessage(IUserMessage)` and corresponding implementation.

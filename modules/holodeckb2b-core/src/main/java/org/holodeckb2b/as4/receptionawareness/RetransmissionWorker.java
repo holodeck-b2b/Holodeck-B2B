@@ -31,6 +31,7 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.general.Interval;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -109,18 +110,19 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         continue; // with next message
                     }
 
-                    // Check if retransmit interval has passed
-                    // Convert configured retry interval to milliseconds
-                    final long retransmitInterval = TimeUnit.MILLISECONDS.convert(raConfig.getRetryInterval().getLength(),
-                                                                            raConfig.getRetryInterval().getUnit());
+                    // Check if retransmit interval has passed, because these are flexible first get the number of
+                    // send attempts already executed
+                    final int attempts = HolodeckB2BCore.getQueryManager().getNumberOfTransmissions(um);
+                    // Convert configured interval to milliseconds
+                    final Interval currentInterval = raConfig.getWaitIntervals()[attempts - 1];
+                    final long intervalInMillis = TimeUnit.MILLISECONDS.convert(currentInterval.getLength(),
+                                                                                currentInterval.getUnit());
+                    // Check if the interval has expired
                     if (((new Date()).getTime() - um.getCurrentProcessingState().getStartTime().getTime())
-                         >= retransmitInterval) {
-                        // The retransmit interval expired, check if message can be resend or a MissingReceipt error
+                         >= intervalInMillis) {
+                        // The interval expired, check if message can be resend or if a MissingReceipt error
                         // has to be generated
-
-                        // Initial transmission does not count for max retries
-                        final int numOfRetransmits = HolodeckB2BCore.getQueryManager().getNumberOfTransmissions(um) - 1;
-                        if (numOfRetransmits >= raConfig.getMaxRetries()) {
+                        if (attempts >= raConfig.getWaitIntervals().length) {
                             // No retries left, generate MissingReceipt error
                             missingReceiptsLog.error("No Receipt received for UserMessage with messageId="
                                                         + um.getMessageId());
