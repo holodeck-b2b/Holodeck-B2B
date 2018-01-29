@@ -264,6 +264,12 @@ final class MMDCompleter {
             case 2 :
                 sci.setAction(pa);
         }
+        // Check that correct Service is specified when test Action URI is used
+        if (sci.getAction().equals(EbMSConstants.TEST_ACTION_URI)
+            && !sci.getService().getName().equals(EbMSConstants.TEST_SERVICE_URI))
+            throw new MessageSubmitException("Service must be " + EbMSConstants.TEST_SERVICE_URI
+                                             + "if Action is set to " + EbMSConstants.TEST_ACTION_URI);
+
         // This set will copy information into merged info set, therefor set after info is made complete
         submission.setCollaborationInfo(sci);
 

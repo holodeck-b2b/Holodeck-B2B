@@ -16,6 +16,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   unit and return an ebMS _Error Signal_ to the sender of the message. The configuration of the custom validation
   is done in the _User Message flow_ of the P-Mode, see
   `org.holodeckb2b.interfaces.pmode.IUserMessageFlow.getCustomValidationConfiguration()`
+* Check on the correct combination of _Service_ and _Action_ meta-data values when when triggering a _"ping test"_ as
+  defined in the ebMS V3 Core Specification.
 * Interfaces for separation of Core functionality and processing of the WS-Security headers in a message by
   introducing the _Holodeck B2B Security Provider_ concept.
 * A default _security provider_ implementation. Similar to the older versions based on the WSS4J libraries
