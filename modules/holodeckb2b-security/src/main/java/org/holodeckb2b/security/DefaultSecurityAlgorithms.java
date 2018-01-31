@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.security;
+package org.holodeckb2b.security;
+
+import org.holodeckb2b.interfaces.security.X509ReferenceType;
 
 /**
- * Defines constants representing the default security algorithms that the Holodeck B2B Core will use when no explicit
- * settings are configured in the P-Mode.
- * <p>This class is mainly provided for information only and for use by the Core to correctly setup the processing of
- * the WS-Security headers.
+ * Defines constants representing the default security algorithms that the <i>default security provider</i> will use
+ * when no explicit settings are configured in the P-Mode.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION

@@ -125,7 +125,8 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
     @Override
     public Collection<ISecurityProcessingResult> createHeaders(MessageContext mc,
                                                                Collection<? extends IMessageUnit> msgUnits,
-                                                               ISecurityConfiguration config)
+                                                               ISecurityConfiguration senderConfig,
+                                                               ISecurityConfiguration receiverConfig)
                                                                                     throws SecurityProcessingException {
         // Copy reference to message context
         this.msgContext = mc;
@@ -149,7 +150,9 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
         // First create the ebms targeted header as it should be included in signature of default header (if signed)
         //
         // The header targeted to ebms role can only contain a username token
-        IUsernameTokenConfiguration  utConfig = config.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS);
+        IUsernameTokenConfiguration  utConfig = senderConfig != null ?
+                                                   senderConfig.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS)
+                                                 : null;
         if (utConfig != null) {
             log.debug("A UsernameToken element must be added to the security header targeted to ebms role");
             // Set processing parameters for creating the username token
@@ -183,7 +186,8 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
         actions.clear();
 
         // Check if a UsernameToken element should be added
-        utConfig = config.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT);
+        utConfig = senderConfig != null ? senderConfig.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT)
+                                        : null;
         if (utConfig != null) {
             log.debug("A UsernameToken element must be added to the default security header");
             // Add UT action
@@ -191,7 +195,8 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
             setupUsernameToken(utConfig);
         }
         // Check if message must be signed
-        final ISigningConfiguration signatureCfg = config.getSignatureConfiguration();
+        final ISigningConfiguration signatureCfg = senderConfig != null ? senderConfig.getSignatureConfiguration()
+                                                                        : null;
         if (signatureCfg != null) {
             log.debug("The message must be signed, set up signature configuration");
             // Add Signature action
@@ -199,7 +204,9 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
             setupSigning(signatureCfg);
         }
         // Check if message must also be encrypted
-        final IEncryptionConfiguration encryptionCfg = config.getEncryptionConfiguration();
+        final IEncryptionConfiguration encryptionCfg = receiverConfig != null ?
+                                                                            receiverConfig.getEncryptionConfiguration()
+                                                                          : null;
         if (encryptionCfg != null) {
             log.debug("The message must be encrypted, set up encryption configuration");
             // Add encryption action
@@ -274,25 +281,32 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
                     SecurityConstants.WSS4J_PART_S12_BODY));
         // And if there are attachments also the attachments must be encrypted.
         processingParams.put(ConfigurationConstants.OPTIONAL_ENCRYPTION_PARTS,
-                SecurityConstants.WSS4J_PART_ATTACHMENTS);
+                             SecurityConstants.WSS4J_PART_ATTACHMENTS);
         // Symmetric encryption algorithms to use
-        processingParams.put(ConfigurationConstants.ENC_SYM_ALGO, encryptionCfg.getAlgorithm());
+        processingParams.put(ConfigurationConstants.ENC_SYM_ALGO, encryptionCfg.getAlgorithm() != null ?
+                                                                  encryptionCfg.getAlgorithm() :
+                                                                  DefaultSecurityAlgorithms.ENCRYPTION  );
         // The alias of the certificate to use for encryption
         processingParams.put(ConfigurationConstants.ENCRYPTION_USER, encryptionCfg.getKeystoreAlias());
 
         // KeyTransport configuration defines settings for constructing the xenc:EncryptedKey
         final IKeyTransport   ktConfig = encryptionCfg.getKeyTransport();
         // Key encryption algorithm
-        final String ktAlgorithm = ktConfig.getAlgorithm();
+        final String ktAlgorithm = (ktConfig != null && ktConfig.getAlgorithm() != null) ? ktConfig.getAlgorithm()
+                                                                            : DefaultSecurityAlgorithms.KEY_TRANSPORT;
         processingParams.put(ConfigurationConstants.ENC_KEY_TRANSPORT, ktAlgorithm);
         // If key transport algorithm is RSA-OAEP also the MGF must be set
         if (WSConstants.KEYTRANSPORT_RSAOEP_XENC11.equalsIgnoreCase(ktAlgorithm))
             processingParams.put(ConfigurationConstants.ENC_MGF_ALGO, ktConfig.getMGFAlgorithm());
         // Message digest
-        processingParams.put(ConfigurationConstants.ENC_DIGEST_ALGO, ktConfig.getDigestAlgorithm());
+        processingParams.put(ConfigurationConstants.ENC_DIGEST_ALGO,
+                             (ktConfig != null && ktConfig.getDigestAlgorithm() != null) ? ktConfig.getDigestAlgorithm()
+                                                                            : DefaultSecurityAlgorithms.MESSAGE_DIGEST);
         // Key refence method
         processingParams.put(ConfigurationConstants.ENC_KEY_ID,
-                SecurityUtils.getWSS4JX509KeyId(ktConfig.getKeyReferenceMethod()));
+                                SecurityUtils.getWSS4JX509KeyId(ktConfig.getKeyReferenceMethod() != null ?
+                                                                            ktConfig.getKeyReferenceMethod()
+                                                                            : DefaultSecurityAlgorithms.KEY_REFERENCE));
     }
 
     /**
@@ -319,7 +333,9 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
 
         // How should certificate be referenced in header? We need to map the P-Mode value to the WSS4J value
         processingParams.put(ConfigurationConstants.SIG_KEY_ID,
-                SecurityUtils.getWSS4JX509KeyId(signatureCfg.getKeyReferenceMethod()));
+                SecurityUtils.getWSS4JX509KeyId(signatureCfg.getKeyReferenceMethod() != null ?
+                                                                            signatureCfg.getKeyReferenceMethod()
+                                                                            : DefaultSecurityAlgorithms.KEY_REFERENCE));
         // If BST is included, should complete cert path be included?
         if (signatureCfg.getKeyReferenceMethod() == X509ReferenceType.BSTReference
                 && (signatureCfg.includeCertificatePath() != null ? signatureCfg.includeCertificatePath() : false))
@@ -328,8 +344,12 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
             processingParams.put(ConfigurationConstants.USE_SINGLE_CERTIFICATE, "true");
 
         // Algorithms to use
-        processingParams.put(ConfigurationConstants.SIG_DIGEST_ALGO, signatureCfg.getHashFunction());
-        processingParams.put(ConfigurationConstants.SIG_ALGO, signatureCfg.getSignatureAlgorithm());
+        processingParams.put(ConfigurationConstants.SIG_DIGEST_ALGO,
+                                signatureCfg.getHashFunction() != null ? signatureCfg.getHashFunction()
+                                                                       : DefaultSecurityAlgorithms.MESSAGE_DIGEST);
+        processingParams.put(ConfigurationConstants.SIG_ALGO,
+                                signatureCfg.getSignatureAlgorithm() != null ? signatureCfg.getSignatureAlgorithm()
+                                                                             : DefaultSecurityAlgorithms.SIGNATURE);
     }
 
     /**

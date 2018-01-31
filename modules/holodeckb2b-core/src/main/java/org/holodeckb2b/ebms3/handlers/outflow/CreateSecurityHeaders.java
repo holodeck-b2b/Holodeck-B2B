@@ -54,7 +54,6 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeUtils;
-import org.holodeckb2b.security.util.SecurityConfig;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the required WS-Security headers in the message. As described
@@ -110,45 +109,25 @@ public class CreateSecurityHeaders extends BaseHandler {
         //
         // Now get the security config to apply to the message.
         //
-        SecurityConfig securityToUse = new SecurityConfig();
-        // We need to determine whether we are the initiator of the MEP or the responder to get the correct settings
+        ISecurityConfiguration  senderConfig = null, receiverConfig = null;
+        // We need to determine if we are the initiator or responder to get the correct settings
         final boolean initiator = PModeUtils.isHolodeckB2BInitiator(pmode);
 
         // Get the security configuration for signing the message and adding of username tokens. If the primary message
         // is a Pull Request it can have a specific security configuration for this
-        final ITradingPartnerConfiguration hb2bPartner = initiator ? pmode.getInitiator() : pmode.getResponder();
-        final ISecurityConfiguration partnerConfig = hb2bPartner != null ? hb2bPartner.getSecurityConfiguration() :null;
-        if (partnerConfig != null) {
-            securityToUse.setSignatureConfiguration(partnerConfig.getSignatureConfiguration());
-            securityToUse.setUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT,
-                                             partnerConfig.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT));
-            securityToUse.setUsernameTokenConfiguration(SecurityHeaderTarget.EBMS,
-                                             partnerConfig.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS));
-        }
         if (primaryMU instanceof IPullRequest) {
             final IPullRequestFlow pullReqFlow = PModeUtils.getOutPullRequestFlow(pmode);
-            final ISecurityConfiguration pullRequestConfig = pullReqFlow != null ?
-                                                                         pullReqFlow.getSecurityConfiguration() : null;
-            if (pullRequestConfig != null) {
-                if (pullRequestConfig.getSignatureConfiguration() != null)
-                    securityToUse.setSignatureConfiguration(pullRequestConfig.getSignatureConfiguration());
-                if (pullRequestConfig.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT) != null)
-                    securityToUse.setUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT,
-                                         pullRequestConfig.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT));
-                if (pullRequestConfig.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS) != null)
-                    securityToUse.setUsernameTokenConfiguration(SecurityHeaderTarget.EBMS,
-                                         pullRequestConfig.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS));
+            if (pullReqFlow != null) {
+                log.debug("Using PullRequest specific settings for Sender's configuration");
+                senderConfig = pullReqFlow.getSecurityConfiguration();
             }
+        } else {
+            final ITradingPartnerConfiguration hb2bPartner = initiator ? pmode.getInitiator() : pmode.getResponder();
+            senderConfig = hb2bPartner != null ? hb2bPartner.getSecurityConfiguration() : null;
         }
-
-        // Get the security configuration for encryption of the message. This is taken from the other trading partner's
-        // security configuration since the encryption settings are specified at the TreadingPartner who RECIEVES the
-        // encrypted message.
+        // Get the security configuration for the receiver of the message
         final ITradingPartnerConfiguration tradingPartner = initiator ? pmode.getResponder() : pmode.getInitiator();
-        securityToUse.setEncryptionConfiguration(tradingPartner != null
-                                                 && tradingPartner.getSecurityConfiguration() != null
-                                                ? tradingPartner.getSecurityConfiguration().getEncryptionConfiguration()
-                                                : null);
+        receiverConfig = tradingPartner != null ? tradingPartner.getSecurityConfiguration() : null;
 
         log.debug("Prepared security configuration based on P-Mode [" + pmode.getId()
                     + "] of the primary message unit [" + primaryMU.getMessageId() + "]");
@@ -160,7 +139,7 @@ public class CreateSecurityHeaders extends BaseHandler {
         try {
             Collection<ISecurityProcessingResult> results = hdrCreator.createHeaders(mc,
                                                                     MessageContextUtils.getSentMessageUnits(mc),
-                                                                    securityToUse);
+                                                                    senderConfig, receiverConfig);
             log.debug("Security header creation finished, handle results");
             if (!Utils.isNullOrEmpty(results))
                 for(ISecurityProcessingResult r : results)

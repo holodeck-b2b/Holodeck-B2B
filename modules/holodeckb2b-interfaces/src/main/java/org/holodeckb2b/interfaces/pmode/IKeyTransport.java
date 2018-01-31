@@ -34,9 +34,9 @@ public interface IKeyTransport {
 
     /**
      * Gets the key transport algorithm.
-     * <p>If <i>RSA-OAEP</i> is used as key transport algorithm then also a MGF algorithm must be specified, i.e.
+     * <p>If <i>RSA-OAEP</i> is used as key transport algorithm then also a MGF algorithm MUST be specified, i.e.
      * {@link #getMGFAlgorithm()} MUST NOT return <code>null</code>.
-     * <p>The default value is <i>RSA-OAEP (including MGF1 with SHA1)</i>.
+     * <p>If not specified the default algorithm of the installed <i>security provider</i> is used.
      *
      * @return  String containing the id of the key transport algorithm to be used as defined in XMLENC-core1, or<br>
      *          <code>null</code> if not specified
@@ -54,7 +54,7 @@ public interface IKeyTransport {
 
     /**
      * Gets the message digest algorithm for key transport.
-     * <p>The default value is <i>SHA256</i>.
+     * <p>If not specified the default algorithm of the installed <i>security provider</i> is used.
      *
      * @return  String containing the id the digest algorithm to be used as defined in XMLENC-core1, or<br>
      *          <code>null</code> if not specified
@@ -68,9 +68,8 @@ public interface IKeyTransport {
      * <p>NOTE 1: This setting only applies when encrypting the message, i.e. for outgoing messages. When the incoming
      * message is decrypted the reference included in the message will be used to look up the certificate regardless
      * of the used reference method.
-     * <p>NOTE 2: When not specified in the P-Mode Holodeck B2B will reference the certificate using its issuer and
-     * serial number (as specified in section 3.2.3 of WS-Sec X.509 CTP).
-     *
+     * <p>NOTE 2: When not specified the default algorithm of the installed <i>security provider</i> is used.
+
      * @return  The method to be used for referencing the certificate, or<br>
      *          <code>null</code> if no method is specified
      */

@@ -53,7 +53,6 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeUtils;
-import org.holodeckb2b.security.util.SecurityConfig;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing the relevant WS-Security headers contained in the message.
@@ -93,38 +92,24 @@ public class ProcessSecurityHeaders extends BaseHandler {
             return InvocationResponse.CONTINUE;
         }
         IPMode pmode = HolodeckB2BCore.getPModeSet().get(primaryMU.getPModeId());
-        SecurityConfig configuredSec = null;
+        ISecurityConfiguration  senderConfig = null, receiverConfig = null;
         // PullReq have not been assigned a P-Mode yet because information from the security headers is needed,
         if (pmode == null && !(primaryMU instanceof IPullRequest))
             log.warn("No P-Mode available for security setting.");
         else if (!(primaryMU instanceof IPullRequest)) {
             log.debug("PMode to use for security processing : " + pmode.getId());
-            /* Now get the security config that apply to the message, may be used by the security provider to check on
-            /  security policies. This is taken from the other trading partner's security configuration since these
-            /  settings are specified at the TreadingPartner who SENDS the message. */
-            configuredSec = new SecurityConfig();
-            // We need to determine whether we are the initiator of the MEP or the responder to get the correct settings
+            /* Now get the security configs that apply to the message, may be used by the security provider to check on
+            /  security policies. To get correct settings we need to determine whether HB2B is the initiator of the MEP
+            /  or the responder to get the correct settings */
             final boolean initiator = PModeUtils.isHolodeckB2BInitiator(pmode);
 
-            // Get the security configuration related to signing the message and adding of username tokens.
+            // Get the security configuration related to the sender of the message
             final ITradingPartnerConfiguration tradingPartner = initiator ? pmode.getResponder() : pmode.getInitiator();
-            final ISecurityConfiguration partnerConfig = tradingPartner != null ?
-                                                                       tradingPartner.getSecurityConfiguration() : null;
-            if (partnerConfig != null) {
-                configuredSec.setSignatureConfiguration(partnerConfig.getSignatureConfiguration());
-                configuredSec.setUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT,
-                                             partnerConfig.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT));
-                configuredSec.setUsernameTokenConfiguration(SecurityHeaderTarget.EBMS,
-                                             partnerConfig.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS));
-            }
-            /* Get the security configuration for encryption of the message. This is taken from the "Holodeck B2B"
-            / trading partner's security configuration since the encryption settings are specified at the TradingPartner
-            / who RECEIVES the encrypted message. */
+            senderConfig = tradingPartner != null ? tradingPartner.getSecurityConfiguration() : null;
+
+            // Get the security configuration for encryption of the message
             final ITradingPartnerConfiguration hb2bPartner = initiator ? pmode.getInitiator() : pmode.getResponder();
-            configuredSec.setEncryptionConfiguration(hb2bPartner != null
-                                                     && hb2bPartner.getSecurityConfiguration() != null ?
-                                                     hb2bPartner.getSecurityConfiguration().getEncryptionConfiguration()
-                                                   : null);
+            receiverConfig = hb2bPartner != null ? hb2bPartner.getSecurityConfiguration() : null;
             log.debug("Prepared security configuration based on P-Mode [" + pmode.getId()
                         + "] of the primary message unit [" + primaryMU.getMessageId() + "]");
         }
@@ -135,7 +120,8 @@ public class ProcessSecurityHeaders extends BaseHandler {
         log.debug("Get security header processor from security provider");
         ISecurityHeaderProcessor hdrProcessor = HolodeckB2BCore.getSecurityProvider().getSecurityHeaderProcessor();
         log.debug("Process the available security headers in the message");
-        Collection<ISecurityProcessingResult> results = hdrProcessor.processHeaders(mc, userMessages, configuredSec);
+        Collection<ISecurityProcessingResult> results = hdrProcessor.processHeaders(mc, userMessages,
+                                                                                    senderConfig, receiverConfig);
         log.debug("Security header processing finished, handle results");
         if (!Utils.isNullOrEmpty(results))
             for(ISecurityProcessingResult r : results)

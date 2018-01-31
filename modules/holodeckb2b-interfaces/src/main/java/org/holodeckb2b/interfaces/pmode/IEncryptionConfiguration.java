@@ -68,11 +68,8 @@ public interface IEncryptionConfiguration {
      * Gets the key transport settings that determine how the <code>xenc:EncryptedKey</code> element in the WS-Security
      * header of the message must be created. These settings therefore apply only to the sending side of a message
      * exchange.
-     * <p>Specification of these parameters is optional. Holodeck B2B will use the following defaults if not specified:
-     * <ul><li>Key Transport Algorithm = RSA-OAEP (including MGF1 with SHA1)</li>
-     * <li>Message Digest Algorithm = SHA256</li>
-     * <li>Key Reference Method  = Issuer and Serial number</li>
-     * </ul>
+     * <p>Specification of these parameters is optional. In case not specified the installed <i>security provider</i>
+     * will use default settings. 
      *
      * @return  An {@link IKeyTransport} object containing the key transport parameters, or<br>
      *          <code>null</code> if not specified

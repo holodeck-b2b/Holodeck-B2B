@@ -144,7 +144,8 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
      */
     @Override
     public Collection<ISecurityProcessingResult> processHeaders(MessageContext mc, Collection<IUserMessage> userMsgs,
-                                                                ISecurityConfiguration config)
+                                                                ISecurityConfiguration senderConfig,
+                                                                ISecurityConfiguration receiverConfig)
                                                                                     throws SecurityProcessingException {
         // Copy reference to message context
         this.msgContext = mc;
@@ -167,7 +168,8 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         // First process the default header
         //
         // Configure access to the private key for decryption
-        IEncryptionConfiguration encConfig = config != null ? config.getEncryptionConfiguration() : null;
+        final IEncryptionConfiguration encConfig = receiverConfig != null ? receiverConfig.getEncryptionConfiguration()
+                                                                          : null;
         if (encConfig != null)
             ((PasswordCallbackHandler) reqData.getCallbackHandler()).addUser(encConfig.getKeystoreAlias(),
                                                                              encConfig.getCertificatePassword());

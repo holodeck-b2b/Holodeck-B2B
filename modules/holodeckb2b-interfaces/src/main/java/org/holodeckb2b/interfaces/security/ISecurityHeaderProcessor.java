@@ -43,19 +43,27 @@ public interface ISecurityHeaderProcessor {
      * decrypted, the method must ensure that decryption will take place when payload is saved (and decryption errors
      * are handled correctly).
      * <p>When the processor has successfully processed the WS-Security headers they MUST be marked as such by calling
-     * the {@link SOAPHeaderBlock#setProcessed()}. 
+     * the {@link SOAPHeaderBlock#setProcessed()}.
      *
-     * @param msgContext    The Axis2 message context which should be used to get the SOAP Envelope and access to the
-     *                      attachments
-     * @param userMsgs      The collection of meta-data on the User Message message units contained in the message
-     * @param config        The security configuration to use for processing the WS-Security header as copied from the
-     *                      P-Mode of the primary message unit. May be <code>null</code> if P-Mode is not known.
-     * @return              The result of the processing each part of the WS-Security header.
+     * @param msgContext        The Axis2 message context which should be used to get the SOAP Envelope and access to the
+     *                          attachments
+     * @param userMsgs          The collection of meta-data on the User Message message units contained in the message
+     * @param senderConfig      The security configuration for the <i>Sender</i> of the message as copied from the
+     *                          P-Mode of the primary message unit. Contains the settings for signing and username
+     *                          tokens. May be <code>null</code> if no security features related to the sender are
+     *                          defined.
+     * @param receiverConfig    The security configuration for the <i>Receiver</i> of the message as copied from the
+     *                          P-Mode of the primary message unit. Contains the settings for encryption. May be <code>
+     *                          null</code> if no security features related to the receiver are defined.
+     * @return                  The results of the processing each part of the WS-Security header.
      * @throws SecurityProcessingException  When an error occurs in the <b>internal</b> processing of the processor,i.e.
      *                                      the error is not directly related to problems in the security headers
      *                                      contained in the message.
      *
      */
-    Collection<ISecurityProcessingResult> processHeaders(MessageContext msgContext, Collection<IUserMessage> userMsgs,
-                                                      ISecurityConfiguration config) throws SecurityProcessingException;
+    Collection<ISecurityProcessingResult> processHeaders(MessageContext msgContext,
+                                                         Collection<IUserMessage> userMsgs,
+                                                         ISecurityConfiguration senderConfig,
+                                                         ISecurityConfiguration receiverConfig)
+                                                                                    throws SecurityProcessingException;
 }

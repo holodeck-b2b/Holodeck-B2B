@@ -40,18 +40,24 @@ public interface ISecurityHeaderCreator {
      * <i>"default"</i> and <i>"ebms"</i> security headers. If payload data is not immediately encrypted, the method
      * must ensure that encryption will take place when the message is sent.
      *
-     * @param msgContext    The Axis2 message context which should be used to get the SOAP Envelope and access to the
-     *                      attachments
-     * @param msgUnits      The collection of meta-data on the message units contained in the message
-     * @param config        The security configuration to apply as copied from the P-Mode of the primary message unit
-     * @return              The result of the creating each part of the WS-Security header.
+     * @param msgContext        The Axis2 message context which should be used to get the SOAP Envelope and access to the
+     *                          attachments
+     * @param msgUnits          The collection of meta-data on the message units contained in the message
+     * @param senderConfig      The security configuration for the <i>Sender</i> of the message as copied from the
+     *                          P-Mode of the primary message unit. Contains the settings for signing and username
+     *                          tokens. May be <code>null</code> if no security features related to the sender are
+     *                          defined.
+     * @param receiverConfig    The security configuration for the <i>Receiver</i> of the message as copied from the
+     *                          P-Mode of the primary message unit. Contains the settings for encryption. May be <code>
+     *                          null</code> if no security features related to the receiver are defined.
+     * @return                  The results of the creating each part of the WS-Security header.
      * @throws SecurityProcessingException  When an error occurs in the <b>internal</b> processing of the creator,i.e.
      *                                      the error is not directly related to problems in the security headers to be
      *                                      created in the message.
-     *
      */
     Collection<ISecurityProcessingResult> createHeaders(MessageContext msgContext,
                                                         Collection<? extends IMessageUnit> msgUnits,
-                                                        ISecurityConfiguration config)
+                                                        ISecurityConfiguration senderConfig,
+                                                        ISecurityConfiguration receiverConfig)
                                                                                      throws SecurityProcessingException;
 }
