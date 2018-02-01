@@ -55,8 +55,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   By enabling _compatability mode_ in the new default security provider the functionality of the old version is still
   supported.
 * The methods `getMaxRetries()` and `getRetryInterval()` in `org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness`
-  as they are superseded by the new `shouldRetry()` and `getWaitIntervals()` methods which allow both fixed and flexible
-  retry configuration. Using _default_ older implementations of this interface can still be used in this version.
+  as they are superseded by the new `getWaitIntervals()` method which allows both fixed and flexible retry
+  configuration. Older implementations of this interface can still be used in this version as it provides _default_
+  implementations to convert to the new interface.
 
 ### Removed
 * Deprecated method `IMessageSubmitter.submitMessage(IUserMessage)` and corresponding implementation.
