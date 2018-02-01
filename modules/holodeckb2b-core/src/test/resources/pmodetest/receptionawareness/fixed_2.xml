@@ -20,5 +20,6 @@
 <tns:ReceptionAwarenes xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 >
-    <WaitIntervals>,10,15</WaitIntervals>
+    <MaxRetries>0</MaxRetries>
+    <RetryInterval>5</RetryInterval>
 </tns:ReceptionAwarenes>

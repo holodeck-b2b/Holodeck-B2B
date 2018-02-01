@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import org.holodeckb2b.interfaces.general.Interval;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
@@ -57,14 +56,19 @@ public class ReceptionAwarenessTest {
 
         try {
             ReceptionAwareness ra;
-            ra = createFromFile("fixed.xml");
+            ra = createFromFile("fixed_1.xml");
 
             // Check ReceptionAwareness object
             assertNotNull(ra);
-            assertTrue(ra.shouldRetry());
             assertArrayEquals(new Interval[] { new Interval(60, TimeUnit.SECONDS),
+                                               new Interval(60, TimeUnit.SECONDS),
                                                new Interval(60, TimeUnit.SECONDS)
                                              }, ra.getWaitIntervals());
+
+            ra = createFromFile("fixed_2.xml");
+            // Check ReceptionAwareness object
+            assertNotNull(ra);
+            assertArrayEquals(new Interval[] { new Interval(5, TimeUnit.SECONDS) }, ra.getWaitIntervals());
 
         } catch (final Exception ex) {
             System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
@@ -82,7 +86,6 @@ public class ReceptionAwarenessTest {
             ReceptionAwareness ra;
             ra = createFromFile("flexible_1.xml");
             // Check ReceptionAwareness object
-            assertTrue(ra.shouldRetry());
             assertArrayEquals(new Interval[] { new Interval(5, TimeUnit.SECONDS),
                                                new Interval(10, TimeUnit.SECONDS),
                                                new Interval(15, TimeUnit.SECONDS)
@@ -96,7 +99,6 @@ public class ReceptionAwarenessTest {
             ReceptionAwareness ra;
             ra = createFromFile("flexible_2.xml");
             // Check ReceptionAwareness object
-            assertTrue(ra.shouldRetry());
             assertArrayEquals(new Interval[] { new Interval(5, TimeUnit.SECONDS),
                                                new Interval(10, TimeUnit.SECONDS),
                                                new Interval(15, TimeUnit.SECONDS),

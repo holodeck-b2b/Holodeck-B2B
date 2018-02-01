@@ -20,6 +20,5 @@
 <tns:ReceptionAwarenes xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 >
-    <UseRetries>true</UseRetries>
     <WaitIntervals>5, 10,</WaitIntervals>
 </tns:ReceptionAwarenes>

@@ -100,10 +100,11 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         log.error("Message [" + um.getMessageId() + "] can not be resent due to missing P-Mode ["
                                     + um.getPModeId() + "]");
                     }
-                    if (raConfig == null) {
-                        // Not an ILegAS4 instance or no RA config available, can't determine if and how to resend.
+                    if (raConfig == null || raConfig.getWaitIntervals() == null
+                        || raConfig.getWaitIntervals().length == 0) {
+                        // Not an ILegAS4 instance or no retry config available, can't determine if and how to resend.
                         log.error("Message [" + um.getMessageId() + "] can not be resent due to missing Reception"
-                                    + " Awareness configuration in P-Mode [" + um.getPModeId() + "]");
+                                    + " Awareness retry configuration in P-Mode [" + um.getPModeId() + "]");
                         // Because we don't know how to process this message further the only thing we can do is set
                         // the processing to failed
                         storageManager.setProcessingState(um, ProcessingState.FAILURE);

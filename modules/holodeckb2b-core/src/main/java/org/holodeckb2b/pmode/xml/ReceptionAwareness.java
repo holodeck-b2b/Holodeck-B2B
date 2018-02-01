@@ -38,9 +38,6 @@ import org.simpleframework.xml.core.ValueRequiredException;
  */
 public class ReceptionAwareness implements IReceptionAwareness {
 
-    @Element(name = "UseRetries", required = false)
-    private boolean useRetries = true;
-
     @Element(name = "MaxRetries", required = false)
     private int maxRetries = -1;
 
@@ -94,18 +91,12 @@ public class ReceptionAwareness implements IReceptionAwareness {
             } catch (NumberFormatException nan) {
                 throw new TextException("WaitIntervals does not contain valid list of intervals!");
             }
-        } else if (maxRetries > -1) {
-            // Configuration with fixed intervals, convert to new structure
-            useRetries = true;
-            waitIntervals = new Interval[maxRetries];
-            for(int i = 0; i < maxRetries; i++)
+        } else if (maxRetries >= 0) {
+            // Configuration with fixed intervals, convert to new structure so add an extra wait interval
+            waitIntervals = new Interval[maxRetries + 1];
+            for(int i = 0; i < maxRetries + 1; i++)
                 waitIntervals[i] = new Interval(fixedInterval, TimeUnit.SECONDS);
-        } else {
-            // Old configuration with no retries => read the intial time to wait for Receipt
-            useRetries = false;
-            waitIntervals = new Interval[] { new Interval(fixedInterval, TimeUnit.SECONDS) };
-        }
-
+        } 
     }
 
 
@@ -114,15 +105,10 @@ public class ReceptionAwareness implements IReceptionAwareness {
         return useDupElimination;
     }
 
-    @Override
-    public boolean shouldRetry() {
-        return useRetries;
-    }
-
     /**
      * Gets an array of nIntervals to wait for a <i>Receipt</i> Signal before a <i>User Message</i> should be
      * retransmitted.
-     * <p>If the "old" fixed nIntervals are used in the XML it is converted to the new method.
+     * <p>If the fixed intervals are used in the XML it is converted to the new method.
      *
      * @return The periods to wait for a <i>Receipt</i> Signal expressed as an array of {@link Interval}
      * @since HB2B_NEXT_VERSION
