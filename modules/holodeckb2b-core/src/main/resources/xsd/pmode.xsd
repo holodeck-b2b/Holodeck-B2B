@@ -540,45 +540,36 @@ Although the specification allows implementations not to compress payloads using
     </xs:simpleType>
     <xs:complexType name="ReceptionAwareness">
         <xs:choice>
-            <xs:sequence>
-                <xs:element default="true" minOccurs="0" name="UseRetries" type="xs:boolean">
-                    <xs:annotation>
-                        <xs:documentation><p>This OPTIONAL element indicates whether Holodeck B2B should resend <i>User Messages</i> if no <i>Receipt</i> is received within the specified intervals. Default value is <i>true</i>.</p>
-<p>If this element has value <i>true</i> either the sibling elements <code>MaxRetries</code> and <code>RetryInterval</code> or the <code>WaitIntervals</code> sibling should be included.</p></xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-                <xs:choice>
-                    <xs:sequence>
-                        <xs:element name="MaxRetries" type="xs:int">
-                            <xs:annotation>
-                                <xs:documentation><p>This element sets the maximum of times a message should be resend if no Receipt is received using the fixed interval time specified in <code>RetryInterval</code>.</p>
-<p>NOTE: For back-ward compatibility reasons the value for this element can be set to "0" in which cases no retries will be send even if <code>UseRetries</code> is set to <i>true</i>.</p></xs:documentation>
-                            </xs:annotation>
-                        </xs:element>
-                        <xs:element name="RetryInterval" type="xs:long">
-                            <xs:annotation>
-                                <xs:documentation><p>This element contains the fixed time interval, in seconds, to wait for a <i>Receipt</i> and before resending a <i>User Message</i>.</p>
+            <xs:choice>
+                <xs:sequence>
+                    <xs:element name="MaxRetries" type="xs:int">
+                        <xs:annotation>
+                            <xs:documentation><p>This element sets the maximum of times a message should be resend if no Receipt is received using the fixed interval time specified in <code>RetryInterval</code>. If this element is set to "0" no retries will be send and Holodeck B2B will wait the specified interval for the <i>Receipt</i> to arrive before generating a <i>MissingReceipt</i> error.</p></xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="RetryInterval" type="xs:long">
+                        <xs:annotation>
+                            <xs:documentation><p>This element contains the fixed time interval, in seconds, to wait for a <i>Receipt</i> and before resending a <i>User Message</i>.</p>
 <p>NOTE: For back-ward compatibility this element is still named <code>RetryInterval</code>.</p></xs:documentation>
-                            </xs:annotation>
-                        </xs:element>
-                    </xs:sequence>
-                    <xs:sequence>
-                        <xs:element name="WaitIntervals" minOccurs="0">
-                            <xs:annotation>
-                                <xs:documentation><p>This element contains the intervals Holodeck B2B has to wait for a <i>Receipt</i> to arrive before resending the <i>User Message</i> or in case no re-sending should take place just the time to wait for a <i>Receipt</i> before generating a <i>MissingReceiptError</i>.</p>
-<p>This element MUST be included in case Holodeck B2B should resend User Message, i.e. element <code>UseRetries</code> has value <i>true</i>. The element is OPTIONAL when resending is not needed in which case Holodeck B2B may generate the <i>MissingReceiptError</i> immmediately after sending the User Message (and processing the response).</p>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+                <xs:sequence>
+                    <xs:element name="WaitIntervals" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation><p>This element contains the intervals Holodeck B2B has to wait for a <i>Receipt</i> to arrive before resending the <i>User Message</i> or in case no re-sending should take place just the time to wait for a <i>Receipt</i> before generating a <i>MissingReceiptError</i>.</p>
+<p>This element MUST be included in case Holodeck B2B should resend User Message and include at least two values. The element is OPTIONAL when resending is not needed in which case Holodeck B2B may generate the <i>MissingReceiptError</i> immmediately after sending the User Message (and processing the response).</p>
 <p>The value of this element must be a comma separated list of positive integers. Each integer defines the time in seconds to wait for a <i>Receipt</i> and before a new attempt will be executed to send the message. Note that the total number of send attempt is equal to the number of intervals specified, so the number of retries is one less then the number of intervals.</p>
 </xs:documentation>
-                            </xs:annotation>
-                            <xs:simpleType>
-                                <xs:restriction base="xs:string">
-                                    <xs:pattern value="[1-9]([0-9])*(,[1-9]([0-9])*)*"/>
-                                </xs:restriction>
-                            </xs:simpleType>
-                        </xs:element>
-                    </xs:sequence>
-                </xs:choice>
-            </xs:sequence>
+                        </xs:annotation>
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:pattern value="[1-9]([0-9])*(,[1-9]([0-9])*)*"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                </xs:sequence>
+            </xs:choice>
             <xs:element default="true" minOccurs="1" name="UseDuplicateElimination"
                 type="xs:boolean">
                 <xs:annotation>
