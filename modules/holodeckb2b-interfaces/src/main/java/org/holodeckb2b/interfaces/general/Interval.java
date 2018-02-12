@@ -38,7 +38,7 @@ public class Interval {
     private long  length;
 
     /**
-     * Create an Interval with specified length
+     * Create a new <code>Interval</code> interval with specified length
      *
      * @param length the length to set
      * @param unit the unit to set
@@ -46,6 +46,17 @@ public class Interval {
     public Interval(final long length, final TimeUnit unit) {
         this.length = length;
         this.unit = unit;
+    }
+
+    /**
+     * Creates a new <code>Interval</code> instance that is a copy of the given instance.
+     *
+     * @param source    The <code>Interval</code> instance to copy
+     * @since HB2B_NEXT_VERSION
+     */
+    public Interval(final Interval source) {
+        this.length = source.length;
+        this.unit = source.unit;
     }
 
     /**
@@ -86,11 +97,9 @@ public class Interval {
 
     /**
      * Determines if two <code>Interval</code> objects are equal, i.e. last the same amount of time.
-     * <p>NOTE: Currently both the length of the interval and time unit must be equal. The intervals
-     * are not recalculated to a common unit of time!
      *
      * @param   o   The object to compare with, should be an instance of {@link Interval}
-     * @return      <code>true</code> if <code>this.length == i.length && this.unit == i.unit</code>,<br>
+     * @return      <code>true</code> if the intervals last the same amount of time
      *              <code>false</code> otherwise
      */
     @Override
@@ -99,16 +108,16 @@ public class Interval {
           return true;
         if (o == null || !getClass ().equals (o.getClass ()))
           return false;
-        final Interval rhs = (Interval) o;
-        return this.length == rhs.length && this.unit == rhs.unit;
-    }
 
-    @Override
-    public int hashCode () {
-      int ret = 17;
-      ret = ret * 31 + (int) (this.length >>> 32);
-      ret = ret * 31 + (int) (this.length & 0xffffffffL);
-      ret = ret * 31 + this.unit.hashCode ();
-      return ret;
-    }
+        final Interval rhs = (Interval) o;
+        if (this.unit ==  rhs.unit)
+            // Unit of time equal, so directly compare lengths
+            return this.length == rhs.length;
+        else
+            // Units not equal, convert to smallest unit of time
+            if (this.unit.ordinal() < rhs.unit.ordinal())
+                return this.length == this.unit.convert(rhs.length, rhs.unit);
+            else
+                return rhs.unit.convert(this.length, this.unit) == rhs.length;
+   }
 }

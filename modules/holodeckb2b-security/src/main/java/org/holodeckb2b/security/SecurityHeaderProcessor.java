@@ -323,12 +323,12 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                 } catch (WSSecurityException ex) {
                     p = null;
                 }
-                if (p == null && action != null) {
+                if (action != null && p == null) {
                     log.error("No processor available to execute the {} action in the {} WS-Security header!"
                               , action, target);
                     throw new SecurityProcessingException("No processor available to execute the " + action
                                                          + " action in the " + target + " WS-Security header!");
-                } else if (p != null) {
+                } else if (action != null && p != null) {
                     try {
                         log.debug("Performing {} action in {} WS-Security header", action, target);
                         List<WSSecurityEngineResult> actionResults = p.handleToken((Element) node, requestData,
@@ -342,7 +342,8 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                         // Decorate the exception with the action before throwing it again
                         throw new HeaderProcessingFailure(getAction(el), ex);
                     }
-                }
+                } else
+                    log.debug("Ignored {} element in the WS-Security header", el.getLocalPart());
             }
             // If the next sibling is null and the stored next sibling is not null, then we have
             // encountered an EncryptedData element which was decrypted, and so the next sibling
