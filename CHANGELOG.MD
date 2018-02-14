@@ -36,7 +36,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   recommended!
 * When multiple P-Modes match to a received message this is now considered as "no match found" and no result is
   returned instead of the first matching P-Mode.
-* Refactored the validation of the ebMS header meta-data validation classes and handler.
+* Refactored the validation of the ebMS header meta-data validation classes and handler to align with custom validation
+  classes.
+* Added the Holodeck B2B _home directory_ as parameter to the 
+  `org.holodeckb2b.interfaces.persistency.IPersistencyProvider.init()` method
 * Renamed method `org.holodeckb2b.interfaces.pmode.validation.IPModeValidator.isPModeValid()` to
   `org.holodeckb2b.interfaces.pmode.validation.IPModeValidator.validatePMode()`
 * The ebMS Error returned to the sender in case the signature of a _User Message_ does not include all

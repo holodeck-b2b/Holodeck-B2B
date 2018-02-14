@@ -29,7 +29,7 @@ import org.holodeckb2b.persistency.util.EntityManagerUtil;
 /**
  * Is the default implementation of a Holodeck B2B <i>Persistency Provider</i>. This provider uses an integrated Derby
  * database for storing all the data. It is suitable for smaller gateway deployments. For larger gateways that have
- * additional requirements on performance and high availability a different provider should be used. 
+ * additional requirements on performance and high availability a different provider should be used.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
@@ -44,7 +44,7 @@ public class DefaultProvider implements IPersistencyProvider {
 
 
     @Override
-    public void init() throws PersistenceException {
+    public void init(final String hb2bHomeDir) throws PersistenceException {
         EntityManagerUtil.check();
     }
 

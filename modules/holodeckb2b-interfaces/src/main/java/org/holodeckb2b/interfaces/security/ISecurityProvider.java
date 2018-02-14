@@ -29,7 +29,8 @@ package org.holodeckb2b.interfaces.security;
  * </ol>
  * <p>The security provider to use is configured per Holodeck B2B instance, so all messages processed by the instance
  * will use the same security provider. The security will be initialized on startup of the instance. Implementations
- * that want to support dynamic reconfiguration should handle this internally.
+ * that want to support dynamic reconfiguration should handle this internally. To allow the Holodeck B2B Core to create
+ * an instance of the provider a default non-argument constructor must be provided by the implementation.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION

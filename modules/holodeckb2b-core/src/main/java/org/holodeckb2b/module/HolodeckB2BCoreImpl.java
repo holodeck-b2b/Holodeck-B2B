@@ -33,6 +33,7 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.WorkerPool;
 import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
 import org.holodeckb2b.core.validation.DefaultValidationExecutor;
+import org.holodeckb2b.core.validation.IValidationExecutor;
 import org.holodeckb2b.ebms3.pulling.PullConfiguration;
 import org.holodeckb2b.ebms3.pulling.PullConfigurationWatcher;
 import org.holodeckb2b.ebms3.pulling.PullWorker;
@@ -57,7 +58,6 @@ import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeManager;
-import org.holodeckb2b.core.validation.IValidationExecutor;
 
 /**
  * Axis2 module class for the Holodeck B2B Core module.
@@ -194,7 +194,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         }
         log.debug("Using " + persistencyProvider.getName() + " as persistency provider");
         try {
-             persistencyProvider.init();
+             persistencyProvider.init(instanceConfiguration.getHolodeckB2BHome());
              daoFactory = persistencyProvider.getDAOFactory();
         } catch (PersistenceException initializationFailure) {
             log.fatal("Could not initialize the persistency provider " + persistencyProvider.getName()
