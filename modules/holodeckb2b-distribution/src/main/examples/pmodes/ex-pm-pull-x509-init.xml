@@ -29,7 +29,7 @@ environment based on the "Getting Started" page from the web site you should ins
     </Initiator>
     <Leg>
         <Protocol>
-            <Address>http://localhost:9090/msh/</Address>
+            <Address>http://localhost:9090/holodeckb2b/as4</Address>
         </Protocol>
         <Receipt>
             <ReplyPattern>CALLBACK</ReplyPattern>            

@@ -31,7 +31,7 @@ install this P-Mode on instance A.
     <Leg>
         <Protocol>
             <!-- Change the URL below to reflect the location where the receiving MSH is listening for messages -->
-            <Address>http://localhost:9090/msh</Address>
+            <Address>http://localhost:9090/holodeckb2b/as4</Address>
         </Protocol>
         <Receipt>
             <NotifyReceiptToBusinessApplication>true</NotifyReceiptToBusinessApplication>

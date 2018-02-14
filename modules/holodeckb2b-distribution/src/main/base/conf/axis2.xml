@@ -55,7 +55,7 @@
     <parameter name="password">axis2</parameter>
 
     <parameter name="contextRoot"/> <!-- axis2</parameter>-->
-    <parameter name="servicePath">services</parameter>
+    <parameter name="servicePath">holodeckb2b</parameter>
 
     <!-- Following parameter will completely disable REST handling in Axis2-->
     <parameter name="disableREST" locked="false">true</parameter>

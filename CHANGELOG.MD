@@ -31,6 +31,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   yet use it!
 
 ### Changed
+* The default URL path where Holodeck B2B receives AS4 messages and which needs to be used by the _Sending MSH_ has been
+  changed to _/holodeckb2b2/as4_. For backward compatibility the old path _msh_ can still be used, its use however isn't
+  recommended!
 * When multiple P-Modes match to a received message this is now considered as "no match found" and no result is
   returned instead of the first matching P-Mode.
 * Refactored the validation of the ebMS header meta-data validation classes and handler.
@@ -58,6 +61,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   as they are superseded by the new `getWaitIntervals()` method which allows both fixed and flexible retry
   configuration. Older implementations of this interface can still be used in this version as it provides _default_
   implementations to convert to the new interface.
+* The _msh_ URL path for receiving messages. The new _/holodeckb2b/as4_ path should be used.
 
 ### Removed
 * Deprecated method `IMessageSubmitter.submitMessage(IUserMessage)` and corresponding implementation.

@@ -43,8 +43,10 @@ public class HolodeckB2BDispatcher extends AbstractDispatcher
     AxisService axisService = msgCtx.getAxisService();
     if (axisService != null)
         return axisService;
+    else if (msgCtx.getTo().getAddress().endsWith("msh"))
+        return msgCtx.getConfigurationContext().getAxisConfiguration().getService("as4");
     else
-        return msgCtx.getConfigurationContext().getAxisConfiguration().getService("msh");
+        return null;
   }
 
   @Override
