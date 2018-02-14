@@ -97,7 +97,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
     private void initDAOFactory() {
         IPersistencyProvider persistencyProvider = new org.holodeckb2b.persistency.DefaultProvider();
         try {
-            persistencyProvider.init();
+            persistencyProvider.init(config.getHolodeckB2BHome());
             daoFactory = persistencyProvider.getDAOFactory();
         } catch (PersistenceException initializationFailure) {
             //throw new AxisFault("Holodeck B2B could not be initialized!");
