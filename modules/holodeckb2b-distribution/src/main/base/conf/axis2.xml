@@ -60,6 +60,9 @@
     <!-- Following parameter will completely disable REST handling in Axis2-->
     <parameter name="disableREST" locked="false">true</parameter>
 
+    <!--Service deployer , this will alow users to deploy AAR or exploded AAR as axis2 services-->
+    <deployer extension=".aar" directory="services" class="org.apache.axis2.deployment.ServiceDeployer"/>
+
     <threadContextMigrators>
         <threadContextMigrator listId="JAXWS-ThreadContextMigrator-List"
                                class="org.apache.axis2.jaxws.addressing.migrator.EndpointContextMapMigrator"/>

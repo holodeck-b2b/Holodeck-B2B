@@ -38,7 +38,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   returned instead of the first matching P-Mode.
 * Refactored the validation of the ebMS header meta-data validation classes and handler to align with custom validation
   classes.
-* Added the Holodeck B2B _home directory_ as parameter to the 
+* Added the Holodeck B2B _home directory_ as parameter to the
   `org.holodeckb2b.interfaces.persistency.IPersistencyProvider.init()` method
 * Renamed method `org.holodeckb2b.interfaces.pmode.validation.IPModeValidator.isPModeValid()` to
   `org.holodeckb2b.interfaces.pmode.validation.IPModeValidator.validatePMode()`
@@ -50,6 +50,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   of events are in `org.holodeckb2b.interfaces.eventprocessing`
 * Refactored `IQueryManager.isAlreadyDelivered()` to `IQueryManager.isAlreadyProcessed()` to also take failed message
   units into account when determining if a user message is already processed and should be considered a duplicate.
+* Updated to Axis2 version 1.7.7
 
 ### Deprecated
 * The configuration parameter (`IConfiguation.allowSignalBundling()`) which was used to indicate that it was allowed to

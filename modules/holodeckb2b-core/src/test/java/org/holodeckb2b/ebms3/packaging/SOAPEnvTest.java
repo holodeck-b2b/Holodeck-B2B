@@ -16,15 +16,13 @@
  */
 package org.holodeckb2b.ebms3.packaging;
 
-import org.apache.axiom.om.impl.llom.OMNamespaceImpl;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.junit.Test;
-
 import java.util.HashSet;
 import java.util.Iterator;
-
+import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.soap.SOAPEnvelope;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 /**
  * Created at 13:09 15.10.16
@@ -39,12 +37,12 @@ public class SOAPEnvTest {
     public void testCreateEnvelope() throws Exception {
         SOAPEnvelope env =
                 SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        Iterator<OMNamespaceImpl> it = env.getNamespacesInScope();
+        Iterator<OMNamespace> it = env.getNamespacesInScope();
 
         HashSet<String> prefixSet = new HashSet<>();
 
         while (it.hasNext()) {
-            OMNamespaceImpl omNamespace = it.next();
+            OMNamespace omNamespace = it.next();
             String prefix = omNamespace.getPrefix();
             prefixSet.add(prefix);
             String uri = omNamespace.getNamespaceURI();

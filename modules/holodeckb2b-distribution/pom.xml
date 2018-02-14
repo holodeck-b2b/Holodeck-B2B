@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>4.0.0-SNAPSHOT-9</version>
+        <version>4.0.0-SNAPSHOT-10</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -90,16 +90,8 @@
                 <artifactId>axis2-aar-maven-plugin</artifactId>
                 <version>${axis2-version}</version>
                 <configuration>
+                    <servicesXmlFile>src/main/service/services.xml</servicesXmlFile>
                     <aarName>hb2b-as4-msh</aarName>
-                    <fileSets>
-                        <fileSet>
-                          <directory>src/main/service/</directory>
-                          <outputDirectory>META-INF</outputDirectory>
-                          <includes>
-                            <include>**</include>
-                          </includes>
-                        </fileSet>
-                    </fileSets>
                     <includeDependencies>false</includeDependencies>
                 </configuration>
                 <executions>
