@@ -30,6 +30,7 @@ import org.holodeckb2b.events.security.SigningFailedEvent;
 import org.holodeckb2b.events.security.UTCreationFailedEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.events.security.ISignatureCreatedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -46,7 +47,6 @@ import org.holodeckb2b.interfaces.security.IEncryptionProcessingResult;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderCreator;
 import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
 import org.holodeckb2b.interfaces.security.ISecurityProvider;
-import org.holodeckb2b.interfaces.events.security.ISignatureCreatedEvent;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
@@ -121,7 +121,9 @@ public class CreateSecurityHeaders extends BaseHandler {
                 log.debug("Using PullRequest specific settings for Sender's configuration");
                 senderConfig = pullReqFlow.getSecurityConfiguration();
             }
-        } else {
+        }
+        // if not configured specifically for the PullRequest, use the configuration at trading partner level
+        if (senderConfig == null) {
             final ITradingPartnerConfiguration hb2bPartner = initiator ? pmode.getInitiator() : pmode.getResponder();
             senderConfig = hb2bPartner != null ? hb2bPartner.getSecurityConfiguration() : null;
         }
