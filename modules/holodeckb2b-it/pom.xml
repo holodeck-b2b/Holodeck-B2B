@@ -119,17 +119,24 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>2.19.1</version>
-                    <configuration>
-                        <includes>
-                          <include>**/*.java</include>
-                        </includes>
-                        <groups>org.holodeckb2b.test.integration.IntegrationTest</groups>
-                    </configuration>
                     <executions>
                         <execution>
                             <id>integration-test</id>
                             <goals>
                                 <goal>integration-test</goal>
+                            </goals>
+                            <configuration>
+                                <includes>
+                                  <include>**/*.java</include>
+                                </includes>
+                                <groups>org.holodeckb2b.test.integration.IntegrationTest</groups>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>verify</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>verify</goal>
                             </goals>
                         </execution>
                     </executions>
