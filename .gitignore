@@ -7,6 +7,7 @@
 *.o
 *.so
 target/
+bin/
 
 # Packages #
 ############
@@ -28,9 +29,15 @@ target/
 *.sqlite
 db/
 
-# Config files       #
+# IDE Config files   #
 ######################
 nb-configuration.xml
+.project
+.settings/
+nbproject/
+*.iml
+.idea
+.classpath
 
 # OS generated files #
 ######################
@@ -41,11 +48,3 @@ nb-configuration.xml
 .Trashes
 ehthumbs.db
 Thumbs.db
-
-/.project
-/.settings/
-
-*.iml
-/.idea
-/modules/holodeckb2b-core/nbproject/
-/modules/holodeckb2b-persistency/nbproject/
