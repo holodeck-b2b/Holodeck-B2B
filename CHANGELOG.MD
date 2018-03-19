@@ -51,6 +51,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Refactored `IQueryManager.isAlreadyDelivered()` to `IQueryManager.isAlreadyProcessed()` to also take failed message
   units into account when determining if a user message is already processed and should be considered a duplicate.
 * Updated to Axis2 version 1.7.7
+* The log name for message processing now includes indication of the message protocol being processed.
 
 ### Deprecated
 * The configuration parameter (`IConfiguation.allowSignalBundling()`) which was used to indicate that it was allowed to
@@ -68,7 +69,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * The _msh_ URL path for receiving messages. The new _/holodeckb2b/as4_ path should be used.
 
 ### Removed
-* Deprecated method `IMessageSubmitter.submitMessage(IUserMessage)` and corresponding implementation.
+* Method `IMessageSubmitter.submitMessage(IUserMessage)` and corresponding implementation.
 
 ## 3.1.1
 ###### 2018-01-15
@@ -120,6 +121,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * A default implementation of the message model interface (in Common module)
 * Interfaces for separation of Core functionality and storage of message unit meta-data
 * Default _persistency provider_ implementation
+* Extended `IMessageSubmitter.submitMessage(IUserMessage)` method with parameter to indicate whether to delete the
+  original payload files on message submission  
 
 ### Changed
 * Refactored the validation of received message units into separate validation classes and handler
@@ -127,6 +130,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Moved XML message meta-data implementation and ProductId classes to Common module
 * It is now possible to not only configure whether _Error Signals_ should be logged but also if all signals
   should be logged or only the ones that contain an Error with severity _failure_ (see `log4j2.xml` for more info)
+
+### Deprecated
+* The single parameter version of the `IMessageSubmitter.submitMessage(IUserMessage)` method has been deprecated. The 
+  new version with the additional parameter to indicate whether payload files should be deleted should be used.
 
 ### Removed
 * Exceptions `org.holodeckb2b.common.exceptions.DatabaseException` and `org.holodeckb2b.common.exceptions.DuplicateMessageIdError`

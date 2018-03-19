@@ -17,6 +17,9 @@
 
 -->
 <module name="holodeckb2b-core" class="org.holodeckb2b.module.HolodeckB2BCoreImpl">
+	<Description>This module contains the configuration of the Axis2 handlers for processing AS4 messages</Description>
+	<parameter name="HandledMessagingProtocol" locked="true">AS4</parameter>
+	
     <!--                                                                 -->
     <!--                   Holodeck B2B Handlers                         -->
     <!--                                                                 -->

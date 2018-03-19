@@ -18,6 +18,7 @@ package org.holodeckb2b.common.handler;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -69,7 +70,11 @@ public abstract class BaseHandler extends AbstractHandler {
      * running in.
      */
     protected Log log = null;
-
+    /**
+     * The name of the messaging protocol that this handler is processing, taken from the parent module
+     */
+    protected String handledMsgProtocol = null;
+    
     /**
      * The current flow as a byte
      */
@@ -79,6 +84,22 @@ public abstract class BaseHandler extends AbstractHandler {
      */
     private String currentFlowName = null;
 
+    /**
+     * Initializes the handler by checking it is contained in a Holodeck B2B module that is dealing with a specific
+     * messaging protocol, e.g. ebMS V3 or AS2. The protocol handled by the module must be specified in the <i>
+     * HandledMessagingProtocol</i> parameter of the module.    
+     *
+     */
+    public void init(HandlerDescription handlerdesc) {    		
+        super.init(handlerdesc);
+        try { 
+        		handledMsgProtocol = (String) handlerdesc.getParent().getParameter("HandledMessagingProtocol").getValue();
+        } catch (Exception e) {
+        		LogFactory.getLog(this.getClass().getName())
+        				  					.warn("Not running inside a Holodeck B2B module for message processing");        		
+        }
+    }
+    
     /**
      * Checks that the handler runs in the given flow.
      *
@@ -142,8 +163,9 @@ public abstract class BaseHandler extends AbstractHandler {
         }
 
         // Running in correct flow, create a logger
-        log = LogFactory.getLog("org.holodeckb2b.msgproc." + currentFlowName + "." + this.getClass().getSimpleName());
-
+        log = LogFactory.getLog("org.holodeckb2b.msgproc." + handledMsgProtocol 
+        												+ "." + currentFlowName + "." + this.getClass().getSimpleName());
+        
         // Do actual processing in implementation
         try {
             log.trace("Start processing");
