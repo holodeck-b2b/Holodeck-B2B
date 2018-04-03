@@ -301,6 +301,8 @@ public class WorkerPool {
                     else
                         rWorker.runningWorker = pool.submit(rWorker.task);
                 }
+                workers.add(rWorker);
+                log.debug("Added new worker instance [" + workerCfg.getName() + "] to the pool");                
             }
         } catch (final ClassNotFoundException cnfe) {
             log.error("Unable to add worker " + workerCfg.getName() + " because task class [" + workerCfg.getWorkerTask() + "] could not be found");

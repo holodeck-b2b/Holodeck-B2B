@@ -17,7 +17,10 @@
 package org.holodeckb2b.common.messagemodel.util;
 
 import java.util.Collection;
+import java.util.Optional;
+
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
@@ -129,5 +132,28 @@ public class MessageUnitUtils {
             }
         }
         return errorMsg.toString();
+    }
+    
+    /**
+     * Gets the <i>message property</i> with the specified name from the given <i>User Message</i>.
+     * 
+     * @param userMessage	The User Message
+     * @param property		The property's name 
+     * @return				The property if it exists in the collection of message properties for the given message,
+     * 						<br>or <code>null</code> if no such property exists.
+     * @since HB2B_NEXT_VERSION 
+     */
+    public static IProperty getMessageProperty(final IUserMessage userMessage, final String property) {
+    		if (Utils.isNullOrEmpty(property) || userMessage == null)
+    			throw new IllegalArgumentException("Both User Message and property name must be specified");
+    		
+    		Collection<IProperty> properties = userMessage.getMessageProperties();
+    		IProperty result = null;
+    		if (properties != null) {
+    			Optional<IProperty> prop = properties.parallelStream()
+    												.filter(p -> p.getName().equals(property)).findFirst();
+    			result = prop.isPresent() ? prop.get() : null;
+    		}
+    		return result;
     }
 }

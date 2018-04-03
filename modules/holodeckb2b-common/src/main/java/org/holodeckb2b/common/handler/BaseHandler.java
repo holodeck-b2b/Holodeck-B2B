@@ -164,7 +164,7 @@ public abstract class BaseHandler extends AbstractHandler {
 
         // Running in correct flow, create a logger
         log = LogFactory.getLog("org.holodeckb2b.msgproc." + handledMsgProtocol 
-        												+ "." + currentFlowName + "." + this.getClass().getSimpleName());
+        												+ "." + currentFlowName + "." + getHandlerDesc().getName());
         
         // Do actual processing in implementation
         try {
