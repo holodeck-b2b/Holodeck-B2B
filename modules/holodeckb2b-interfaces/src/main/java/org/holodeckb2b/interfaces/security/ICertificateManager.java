@@ -18,6 +18,7 @@ package org.holodeckb2b.interfaces.security;
 
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 
 /**
  * Defines the interface of the component of the <i>security provider</i> responsible for storing the keys used in the
@@ -34,7 +35,9 @@ public interface ICertificateManager {
      */
     public enum CertificateUsage {
         /**
-         * Indicates the certificate can be used in the validation of the message signature
+         * Indicates the certificate can be used in the validation of the message signature, i.e. is trusted. This
+         * can be certificates of other MSHs to create a <i>direct</i> trust relation or of certificate authorities to
+         * enable validation using a PKI. 
          */
         Validation,
         /**
@@ -101,6 +104,14 @@ public interface ICertificateManager {
      */
     X509Certificate getCertificate(final CertificateUsage use, final String alias) throws SecurityProcessingException;
 
+    /**
+     * Gets all certificates that are registered for the validation of signatures, i.e. all trusted certificates. 
+     * 
+     * @return	The collection of trusted certificates
+     * @throws SecurityProcessingException	When there is a problem in retrieving the certificates.	
+     */
+    Collection<X509Certificate> getValidationCertificates() throws SecurityProcessingException;
+    
     /**
      * Searches for the given certificate in the set of certificates registered by the certificate manager for the
      * specified usage and returns the alias if found.

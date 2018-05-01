@@ -21,6 +21,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -224,6 +227,23 @@ class CertificateManager implements ICertificateManager {
         }
     }
 
+    @Override
+    public Collection<X509Certificate> getValidationCertificates() throws SecurityProcessingException {
+    	// Load keystore and retrieve the certificates from it
+        final KeyStore ks = KeystoreUtils.load(trustKeystorePath, trustKeystorePwd);
+        try {
+	        final Collection<X509Certificate> result = new ArrayList<>(ks.size());
+	        Enumeration<String> aliases = ks.aliases();
+	        while (aliases.hasMoreElements()) 
+	        	 result.add((X509Certificate) ks.getCertificate(aliases.nextElement()));       
+	        return result;
+        } catch (KeyStoreException ex) {
+            log.error("Problem retrieving the trusted certificates from keystore!\n\tError details: {}", 
+            			ex.getMessage());
+            throw new SecurityProcessingException("Error retrieving the certificates", ex);       	
+        }
+    }
+    
     @Override
     public String getCertificateAlias(final CertificateUsage use, final X509Certificate cert)
                                                                                    throws SecurityProcessingException {
