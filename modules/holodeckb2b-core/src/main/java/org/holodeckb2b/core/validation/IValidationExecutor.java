@@ -40,7 +40,7 @@ public interface IValidationExecutor {
      * specification.
      *
      * @param messageUnit       The message unit to be validated
-     * @param validationSpec  The validation configuration specifying which validators should be executed
+     * @param validationSpec  	The validation configuration specifying which validators should be executed
      * @return                  The validation result, or <code>null</code> when no validation was needed
      * @throws MessageValidationException   When a problem occurs during the validation of the User Message
      */

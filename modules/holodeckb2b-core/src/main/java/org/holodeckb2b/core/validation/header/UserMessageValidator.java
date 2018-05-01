@@ -66,7 +66,7 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
         doBasicPartyInfoValidation(userMessageInfo.getSender(), "Sender", validationErrors);
         doBasicPartyInfoValidation(userMessageInfo.getReceiver(), "Receiver", validationErrors);
 
-        // Check collaboration information, i.e. Service, Action and ConversationId
+        // Check collaboration information, i.e. Service, Action
         final ICollaborationInfo collabInfo = userMessageInfo.getCollaborationInfo();
         if (collabInfo == null)
             validationErrors.add(new MessageValidationError("Collaboration information is missing"));
@@ -89,9 +89,10 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
     /**
      * Performs the strict validation of the ebMS header meta-data specific for a User Message message unit
      * <p>In addition to the basic validations it is checked that:<ul>
+     * <li>a non-empty value is provided for ConversationId</li>
      * <li>the PartyIds are URI when they don't have a type and if there are multiple PartyIds for partner that have a
      * type, these types are unique.</li>
-     * <li>the Service is an URI when no type is specfied.</i>
+     * <li>the Service is an URI when no type is specfied.</li>
      * <li>All properties, both message and part, have a value.</li></ul>
      * As the <i>ebMS V3 Core Specification<i> specifies that a violation of the first two rules should result in a
      * <i>ValueInconsistent</i> error (instead of <i>InvalidHeader<i>) the {@link MessageValidationError#details} field
@@ -115,14 +116,17 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
         doStrictPartyIdValidation(userMessageInfo.getReceiver().getPartyIds(), "Receiver", validationErrors);
 
         // Check that the Service value is an URI if it's untyped
-        if (userMessageInfo.getCollaborationInfo() != null) {
-            IService service = userMessageInfo.getCollaborationInfo().getService();
+        final ICollaborationInfo collabInfo = userMessageInfo.getCollaborationInfo();
+        if (collabInfo != null) {
+        	if (Utils.isNullOrEmpty(collabInfo.getConversationId()))
+                validationErrors.add(new MessageValidationError("ConversationId must have a non-empty value"));                        
+            IService service = collabInfo.getService();
             if (service != null && Utils.isNullOrEmpty(service.getType()) && !Utils.isValidURI(service.getName()))
                 validationErrors.add(new MessageValidationError("Untype Service value [" + service.getName()
                                                                                                     + "] is not URI",
                                                                MessageValidationError.Severity.Failure,
                                                                HeaderValidation.VALUE_INCONSISTENT_REQ));
-            if (EbMSConstants.TEST_ACTION_URI.equals(userMessageInfo.getCollaborationInfo().getAction())
+            if (EbMSConstants.TEST_ACTION_URI.equals(collabInfo.getAction())
                 && !EbMSConstants.TEST_SERVICE_URI.equals(service.getName()))
                 validationErrors.add(new MessageValidationError("Service must be " + EbMSConstants.TEST_SERVICE_URI +
                                                                "if Action is set to " + EbMSConstants.TEST_ACTION_URI));
