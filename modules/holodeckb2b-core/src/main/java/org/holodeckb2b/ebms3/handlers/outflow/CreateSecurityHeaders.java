@@ -168,7 +168,7 @@ public class CreateSecurityHeaders extends BaseHandler {
      */
     private void handleResult(final ISecurityProcessingResult result, final MessageContext mc)
                                                                                         throws PersistenceException {
-        final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
+        final Collection<IMessageUnitEntity> sentMsgUnits = MessageContextUtils.getSentMessageUnits(mc);
         final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
         if (result.isSuccessful()) {
             if (result instanceof ISignatureProcessingResult) {
@@ -176,7 +176,7 @@ public class CreateSecurityHeaders extends BaseHandler {
                 // each user message
                 final Map<IPayload, ISignedPartMetadata> digests =
                                                               ((ISignatureProcessingResult) result).getPayloadDigests();
-                rcvdMsgUnits.parallelStream().filter((mu) -> mu instanceof IUserMessage).forEach((mu) -> {
+                sentMsgUnits.parallelStream().filter((mu) -> mu instanceof IUserMessage).forEach((mu) -> {
                     final Map<IPayload, ISignedPartMetadata> msgDigests = new HashMap<>();
                     ((IUserMessage) mu).getPayloads().forEach((pl)
                             -> digests.entrySet().stream().filter((d) -> CompareUtils.areEqual(d.getKey(), pl))
@@ -196,7 +196,7 @@ public class CreateSecurityHeaders extends BaseHandler {
                                                                                                            : "ebms")
                       ))
                     + " security header failed! Details: " + reason.getMessage());
-            for (final IMessageUnitEntity mu : rcvdMsgUnits) {
+            for (final IMessageUnitEntity mu : sentMsgUnits) {
                 storageManager.setProcessingState(mu, ProcessingState.FAILURE);
 
                 IMessageProcessingEvent event;
