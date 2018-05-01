@@ -27,6 +27,7 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
@@ -140,8 +141,7 @@ public class DeliverReceipts extends BaseHandler {
     protected IDeliverySpecification getReceiptDelivery(final IReceiptEntity receipt) {
         IDeliverySpecification deliverySpec = null;
 
-        final ILeg leg = HolodeckB2BCore.getPModeSet().get(receipt.getPModeId())
-                                                      .getLeg(receipt.getLeg());
+        final ILeg leg = HolodeckB2BCore.getPModeSet().get(receipt.getPModeId()).getLeg(Label.REQUEST);
         final IReceiptConfiguration rcptConfig = leg.getReceiptConfiguration();
 
         if (rcptConfig != null && rcptConfig.shouldNotifyReceiptToBusinessApplication()) {

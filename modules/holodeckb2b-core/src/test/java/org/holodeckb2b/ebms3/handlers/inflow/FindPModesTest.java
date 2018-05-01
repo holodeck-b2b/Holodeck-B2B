@@ -37,6 +37,7 @@ import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
@@ -195,31 +196,12 @@ public class FindPModesTest {
     @Test
     public void testDoProcessingOfErrorSignal() throws Exception {
         MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-
-        UserMessage userMessage = UserMessageElement.readElement(umElement);
-
-        String msgId = userMessage.getMessageId();
-
-        MessageContext mc = new MessageContext();
-        mc.setFLOW(MessageContext.IN_FLOW);
-
+  
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-
         // Setting input message property
-        IUserMessageEntity userMessageEntity =
-                storageManager.storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                userMessageEntity);
+        IUserMessageEntity userMessageEntity = storageManager.storeOutGoingMessageUnit(mmd);
 
-        AgreementReference agreementReference =
-                userMessage.getCollaborationInfo().getAgreement();
-        String pmodeId = agreementReference.getPModeId();
+        String pmodeId = userMessageEntity.getPModeId();
 
         PMode pmode = new PMode();
         pmode.setMep(EbMSConstants.ONE_WAY_MEP);
@@ -237,7 +219,7 @@ public class FindPModesTest {
         error.setTimestamp(new Date());
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
-        ebmsError.setRefToMessageInError(msgId);
+        ebmsError.setRefToMessageInError(userMessageEntity.getMessageId());
         errors.add(ebmsError);
         error.setErrors(errors);
 
@@ -247,12 +229,9 @@ public class FindPModesTest {
         System.out.println("errors: " + errorMessageEntity.getErrors());
         ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
         errorMessageEntities.add(errorMessageEntity);
-        mc.setProperty(MessageContextProperties.IN_ERRORS,
-                errorMessageEntities);
-
-        // Mocking the Axis2 Operation Context
-//        OperationContext operationContext = mock(OperationContext.class);
-//        mc.setOperationContext(operationContext);
+        MessageContext mc = new MessageContext();
+        mc.setFLOW(MessageContext.IN_FLOW);
+        mc.setProperty(MessageContextProperties.IN_ERRORS, errorMessageEntities);
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
@@ -261,13 +240,8 @@ public class FindPModesTest {
             fail(e.getMessage());
         }
 
-        // Checking log messages to make sure handler found pmode
-        verify(mockAppender, atLeastOnce())
-                .doAppend(captorLoggingEvent.capture());
-        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String msg = "Found P-Mode [" + pmode.getId()
-                + "] for Error Signal [" + errMsgId + "]";
-        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
+        // Checking log handler found pmode
+        assertEquals(pmodeId, errorMessageEntity.getPModeId());
     }
 
     @Test

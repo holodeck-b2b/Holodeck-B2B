@@ -24,6 +24,7 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -96,7 +97,7 @@ public class ProcessReceipts extends BaseHandler {
         log.debug("Start processing Receipt [msgId=" + receipt.getMessageId()
                     + "] for referenced message with msgId=" + refToMsgId);
         Collection<IMessageUnitEntity> refdMsgs = HolodeckB2BCore.getQueryManager()
-                                                                 .getMessageUnitsWithId(refToMsgId);
+                                                                 .getMessageUnitsWithId(refToMsgId, Direction.OUT);
         if (Utils.isNullOrEmpty(refdMsgs)) {
             // This error SHOULD NOT occur because the reference is already checked when finding the P-Mode
             log.error("Receipt [msgId=" + receipt.getMessageId() + "] contains unknown refToMessageId ["

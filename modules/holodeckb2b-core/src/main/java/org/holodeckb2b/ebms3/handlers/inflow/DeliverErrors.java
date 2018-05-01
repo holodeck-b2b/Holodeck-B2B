@@ -27,6 +27,7 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -128,7 +129,8 @@ public class DeliverErrors extends BaseHandler {
             // Get the referenced message unit. There may be more than one MU with the given id, we assume they
             // all use the same P-Mode
             final Collection<IMessageUnitEntity> refdMsgUnits = HolodeckB2BCore.getQueryManager()
-                                                                               .getMessageUnitsWithId(refToMsgId);
+                                                                               .getMessageUnitsWithId(refToMsgId,
+                                                                            		   	 			  Direction.OUT);
 
             if (!Utils.isNullOrEmpty(refdMsgUnits))
                 // Found referenced message unit (should be one), use its P-Mode to determine if and how to deliver

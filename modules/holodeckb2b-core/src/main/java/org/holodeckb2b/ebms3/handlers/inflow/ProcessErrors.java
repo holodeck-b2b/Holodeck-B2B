@@ -30,6 +30,7 @@ import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit.Direction;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -116,7 +117,7 @@ public class ProcessErrors extends BaseHandler {
         if (!Utils.isNullOrEmpty(refToMessageId)) {
             log.debug("Error Signal [" + errSignal.getMessageId() + "] references messageId: "
                         + refToMessageId);
-            refdMessages = HolodeckB2BCore.getQueryManager().getMessageUnitsWithId(refToMessageId);
+            refdMessages = HolodeckB2BCore.getQueryManager().getMessageUnitsWithId(refToMessageId, Direction.OUT);
         } else if (isInFlow(INITIATOR)) {
             log.warn("Error Signal [" + errSignal.getMessageId() + "] does not contain reference."
                     + "Assuming it refers to sent messages");

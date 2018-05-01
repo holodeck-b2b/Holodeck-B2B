@@ -147,6 +147,11 @@ public class QueryManagerTest {
         result = queryManager.getMessageUnitsWithId(TestData.receipt2.getMessageId());
         assertFalse(Utils.isNullOrEmpty(result));
         assertEquals(3 , result.size());
+        
+        // Test with optional direction indicator 
+        result = queryManager.getMessageUnitsWithId(TestData.receipt2.getMessageId(), IMessageUnit.Direction.OUT);
+        assertFalse(Utils.isNullOrEmpty(result));
+        assertEquals(1 , result.size());
 
         // Test with multiple results of different type
         result = queryManager.getMessageUnitsWithId(TestData.error4.getMessageId());

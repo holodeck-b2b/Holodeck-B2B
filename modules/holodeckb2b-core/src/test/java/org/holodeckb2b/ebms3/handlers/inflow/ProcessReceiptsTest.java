@@ -149,7 +149,7 @@ public class ProcessReceiptsTest {
 
         // Setting input message property
         IUserMessageEntity userMessageEntity =
-                storageManager.storeIncomingMessageUnit(userMessage);
+                storageManager.storeOutGoingMessageUnit(userMessage);
         mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
                 userMessageEntity);
 

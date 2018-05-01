@@ -66,11 +66,13 @@ public interface IQueryManager {
      * unit is going to be processed it must be checked if it is loaded completely.
      *
      * @param messageId     The messageId of the message units to retrieve
-     * @return              The list of received {@link MessageUnit}s with the given message id or,<br>
-     *                      <code>null</code> if no received message units with this message if where found
+     * @param direction		The direction in which the message units to retrieve should be.  
+     * @return              The list of received {@link MessageUnit}s with the given message id
      * @throws PersistenceException If an error occurs when saving the object to the database
      */
-    Collection<IMessageUnitEntity> getMessageUnitsWithId(final String messageId) throws PersistenceException;
+    Collection<IMessageUnitEntity> getMessageUnitsWithId(final String messageId, 
+    													 final IMessageUnit.Direction... direction) 
+    															 						throws PersistenceException;
 
     /**
      * Retrieves all message units of which the last change in processing state occurred before the given date and time.

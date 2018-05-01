@@ -257,7 +257,7 @@ public class TestData {
         receipt6.setMessageId(T_MSG_ID_4);
         receipt6.setTimestamp(new Date());
         receipt6.setPModeId(T_PMODEID_1);
-        receipt6.setDirection(IMessageUnit.Direction.IN);
+        receipt6.setDirection(IMessageUnit.Direction.OUT);
         receipt6.setRefToMessageId(T_MSG_ID_11);
         receipt6.setProcessingState(ProcessingState.DELIVERY_FAILED);
         // Adding content data

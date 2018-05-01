@@ -23,6 +23,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TemporalType;
+import javax.persistence.TypedQuery;
+
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
@@ -79,19 +81,28 @@ public class QueryManager implements IQueryManager {
     }
 
     @Override
-    public Collection<IMessageUnitEntity> getMessageUnitsWithId(String messageId) throws PersistenceException {
+    public Collection<IMessageUnitEntity> getMessageUnitsWithId(String messageId, 
+    															IMessageUnit.Direction... direction) 
+    																					throws PersistenceException {
         List<MessageUnit> jpaResult = null;
         final EntityManager em = EntityManagerUtil.getEntityManager();
-
-        final String queryString = "SELECT mu "
-                                 + "FROM MessageUnit mu "
-                                 + "WHERE mu.MESSAGE_ID = :msgId "
-                                 + "ORDER BY mu.MU_TIMESTAMP";
+        
+        StringBuilder queryString = new StringBuilder();
+        queryString.append("SELECT mu ")
+        		   .append("FROM MessageUnit mu ")
+        		   .append("WHERE mu.MESSAGE_ID = :msgId ");
+        if (direction.length == 1)
+        	queryString.append("AND mu.DIRECTION = :direction ");
+        	
+        queryString.append("ORDER BY mu.MU_TIMESTAMP");
         try {
             em.getTransaction().begin();
-            jpaResult = em.createQuery(queryString, MessageUnit.class)
-                                        .setParameter("msgId", messageId)
-                                        .getResultList();
+            final TypedQuery<MessageUnit> query = em.createQuery(queryString.toString(), MessageUnit.class)
+                                        						.setParameter("msgId", messageId);
+            if (direction.length == 1)
+            	query.setParameter("direction", direction[0]);
+            
+            jpaResult = query.getResultList();
         } catch (final Exception e) {
             // Something went wrong during query execution
             throw new PersistenceException("Could not execute query \"getMessageUnitsWithId\"", e);

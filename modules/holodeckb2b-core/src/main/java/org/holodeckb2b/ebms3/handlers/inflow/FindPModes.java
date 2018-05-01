@@ -25,6 +25,7 @@ import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.ProcessingModeMismatch;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit.Direction;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -179,7 +180,8 @@ public class FindPModes extends BaseHandler {
         IPMode pmode = null;
         if (!Utils.isNullOrEmpty(refToMsgId)) {
             Collection<IMessageUnitEntity> refdMsgUnits = HolodeckB2BCore.getQueryManager()
-                                                                         .getMessageUnitsWithId(refToMsgId);
+                                                                         .getMessageUnitsWithId(refToMsgId,
+                                                                        		 				Direction.OUT);
             if (!Utils.isNullOrEmpty(refdMsgUnits) && refdMsgUnits.size() == 1)
                 pmode = HolodeckB2BCoreInterface.getPModeSet().get(refdMsgUnits.iterator().next().getPModeId());
         }

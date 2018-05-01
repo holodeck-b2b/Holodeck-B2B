@@ -68,7 +68,9 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
             }
 
             if (validationSpec == null) {
-                log.debug("No custom validation specified for user message");
+                log.debug("No custom validation specified for user message, ready for delivery");
+                HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, 
+                													   ProcessingState.READY_FOR_DELIVERY);                
                 return InvocationResponse.CONTINUE;
             }
 
@@ -78,9 +80,11 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
             if (validationResult == null || Utils.isNullOrEmpty(validationResult.getValidationErrors()))
                 log.debug("User message is valid");
             else {
-                if (!validationResult.shouldRejectMessage())
+                if (!validationResult.shouldRejectMessage()) {
                     log.warn("User message contains validation errors, but can be processed");
-                else {
+                	HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, 
+                														   ProcessingState.READY_FOR_DELIVERY);                
+                } else {
                     log.warn("User message is not valid and must be rejected, generate Other error.");
                     OtherContentError otherError = new OtherContentError(
                                                            buildErrorDetailText(validationResult.getValidationErrors()),

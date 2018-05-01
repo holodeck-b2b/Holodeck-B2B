@@ -27,6 +27,7 @@ import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
@@ -137,7 +138,8 @@ public class ConfigureMultihop extends BaseHandler {
         } else {
             // Not sent as response, so get the information from the database
             Collection<IMessageUnitEntity> refdMessages = HolodeckB2BCore.getQueryManager()
-                                                                         .getMessageUnitsWithId(refToMsgId);
+                                                                         .getMessageUnitsWithId(refToMsgId, 
+                                                                        		 				Direction.OUT);
             if (!Utils.isNullOrEmpty(refdMessages)) {
                 IMessageUnitEntity sentMsgUnit = refdMessages.iterator().next();
                 return (sentMsgUnit instanceof IUserMessageEntity) ? (IUserMessageEntity) sentMsgUnit : null;
