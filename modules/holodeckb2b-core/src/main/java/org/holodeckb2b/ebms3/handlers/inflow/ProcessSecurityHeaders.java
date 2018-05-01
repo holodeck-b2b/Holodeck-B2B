@@ -157,10 +157,10 @@ public class ProcessSecurityHeaders extends BaseHandler {
                 for (final IMessageUnitEntity mu : rcvdMsgUnits) {
                     ISignatureVerifiedEvent event;
                     if (mu instanceof IUserMessage)
-                        event = new SignatureVerifiedEvent((IUserMessage) mu, sigResult.getEbMSHeaderDigest(),
+                        event = new SignatureVerifiedEvent((IUserMessage) mu, sigResult.getHeaderDigest(),
                                                            sigResult.getPayloadDigests());
                     else
-                        event = new SignatureVerifiedEvent((ISignalMessage) mu, sigResult.getEbMSHeaderDigest());
+                        event = new SignatureVerifiedEvent((ISignalMessage) mu, sigResult.getHeaderDigest());
                     eventProcessor.raiseEvent(event, mc);
                 }
             } else if (result instanceof IEncryptionProcessingResult)

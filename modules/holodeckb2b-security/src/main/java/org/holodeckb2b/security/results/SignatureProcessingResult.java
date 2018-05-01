@@ -19,6 +19,7 @@ package org.holodeckb2b.security.results;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Map;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.security.*;
 
@@ -70,7 +71,7 @@ public class SignatureProcessingResult extends AbstractSecurityProcessingResult 
         this.refMethod = certReferenceMethod;
         this.algorithm = algorithm;
         this.headerDigest = headerDigest;
-        this.payloadDigests = Collections.unmodifiableMap(payloadDigests);
+        this.payloadDigests = !Utils.isNullOrEmpty(payloadDigests) ? Collections.unmodifiableMap(payloadDigests) : null;
     }
 
 
@@ -102,7 +103,7 @@ public class SignatureProcessingResult extends AbstractSecurityProcessingResult 
      * {@inheritDoc}
      */
     @Override
-    public ISignedPartMetadata getEbMSHeaderDigest() {
+    public ISignedPartMetadata getHeaderDigest() {
         return headerDigest;
     }
 

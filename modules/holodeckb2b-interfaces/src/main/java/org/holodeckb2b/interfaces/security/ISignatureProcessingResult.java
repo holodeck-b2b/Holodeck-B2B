@@ -65,7 +65,7 @@ public interface ISignatureProcessingResult extends ISecurityProcessingResult {
      *
      * @return The information on the digest of the ebMS message header
      */
-    ISignedPartMetadata getEbMSHeaderDigest();
+    ISignedPartMetadata getHeaderDigest();
 
     /**
      * Gets the information on the digests of the payloads included in the message. This corresponds to the information

@@ -19,6 +19,7 @@ package org.holodeckb2b.security.results;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Collections;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.security.IEncryptionProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
@@ -76,7 +77,7 @@ public class EncryptionProcessingResult extends AbstractSecurityProcessingResult
         this.refMethod = certReferenceMethod;
         this.keyInfo = new KeyTransportInfo(ktAlgorithm, ktDigest, ktMGF);
         this.algorithm = algorithm;
-        this.payloads = Collections.unmodifiableCollection(payloads);
+        this.payloads = !Utils.isNullOrEmpty(payloads) ? Collections.unmodifiableCollection(payloads) : null;
     }
 
     @Override
