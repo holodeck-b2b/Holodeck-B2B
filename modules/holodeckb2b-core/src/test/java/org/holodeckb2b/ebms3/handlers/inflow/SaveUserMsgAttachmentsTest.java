@@ -43,10 +43,15 @@ import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.google.common.io.Files;
+
 import javax.activation.DataHandler;
+
+import java.io.File;
 import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -147,7 +152,7 @@ public class SaveUserMsgAttachmentsTest {
             fail(e.getMessage());
         }
 
-        assertEquals(ProcessingState.READY_FOR_DELIVERY,
-                userMessageEntity.getCurrentProcessingState().getState());
+        File tempFile = new File(userMessageEntity.getPayloads().iterator().next().getContentLocation());
+        assertTrue(tempFile.exists());        
     }
 }

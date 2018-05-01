@@ -77,9 +77,11 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
             ValidationResult validationResult = HolodeckB2BCore.getValidationExecutor().validate(userMessage,
                                                                                                  validationSpec);
 
-            if (validationResult == null || Utils.isNullOrEmpty(validationResult.getValidationErrors()))
+            if (validationResult == null || Utils.isNullOrEmpty(validationResult.getValidationErrors())) {
                 log.debug("User message is valid");
-            else {
+            	HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, 
+            														   ProcessingState.READY_FOR_DELIVERY);                
+            } else {
                 if (!validationResult.shouldRejectMessage()) {
                     log.warn("User message contains validation errors, but can be processed");
                 	HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, 

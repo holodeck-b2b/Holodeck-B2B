@@ -87,7 +87,6 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
         // If there are no payloads in the UserMessage directly continue processing
         if (Utils.isNullOrEmpty(payloads)) {
             log.debug("UserMessage contains no payloads.");
-            updateManager.setProcessingState(um, ProcessingState.READY_FOR_DELIVERY);
             return InvocationResponse.CONTINUE;
         }
 
@@ -195,10 +194,8 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
             }
 
             log.debug("All payloads saved to temp file");
-            // Update the message meta data in data base and change the processing state of the
-            // message to indicate it is now ready for delivery to the business application
+            // Update the message meta data in database 
             updateManager.setPayloadInformation(um, newPayloadData);
-            updateManager.setProcessingState(um, ProcessingState.READY_FOR_DELIVERY);
         } catch (IOException | XMLStreamException ex) {
             log.fatal("Payload(s) could not be saved to temporary file! Details:" + ex.getMessage());
             updateManager.setProcessingState(um, ProcessingState.FAILURE);
