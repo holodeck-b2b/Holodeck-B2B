@@ -93,9 +93,9 @@ public abstract class BaseHandler extends AbstractHandler {
     public void init(HandlerDescription handlerdesc) {    		
         super.init(handlerdesc);
         try { 
-        		handledMsgProtocol = (String) handlerdesc.getParent().getParameter("HandledMessagingProtocol").getValue();
+    		handledMsgProtocol = (String) handlerdesc.getParent().getParameter("HandledMessagingProtocol").getValue();
         } catch (Exception e) {
-        		LogFactory.getLog(this.getClass().getName())
+    		LogFactory.getLog(this.getClass().getName())
         				  					.warn("Not running inside a Holodeck B2B module for message processing");        		
         }
     }

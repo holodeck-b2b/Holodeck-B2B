@@ -62,7 +62,7 @@ public class MessageMetaData implements IUserMessage {
     @Element(name = "PartyInfo", required = false)
     private PartyInfo           partyInfo;
 
-    @Element(name = "CollaborationInfo", required = true)
+    @Element(name = "CollaborationInfo", required = false)
     private CollaborationInfo   collabInfo;
 
     @ElementList(name = "MessageProperties", entry = "Property", type = Property.class, required = false)

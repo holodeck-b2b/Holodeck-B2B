@@ -29,6 +29,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Added 'IMessageProcessingState.getDescription()' method so an additional description on the processing state of a
   message unit can be stored. NOTE: This description is introduced for future use, the Holodeck B2B Core does not
   yet use it!
+* Added optional parameter to `IQueryManager.getMessageUnitsWithId()` to indicate that only message units flowing in
+  a specific direction should be returned 
 
 ### Changed
 * The default URL path where Holodeck B2B receives AS4 messages and which needs to be used by the _Sending MSH_ has been
@@ -50,6 +52,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   of events are in `org.holodeckb2b.interfaces.eventprocessing`
 * Refactored `IQueryManager.isAlreadyDelivered()` to `IQueryManager.isAlreadyProcessed()` to also take failed message
   units into account when determining if a user message is already processed and should be considered a duplicate.
+* Changed the API specification of the query methods in `IQueryManager` to return **empty** collections instead of
+  `null` when no matching message units have been found  
 * Updated to Axis2 version 1.7.7
 * The log name for message processing now includes indication of the message protocol being processed.
 
@@ -70,6 +74,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Removed
 * Method `IMessageSubmitter.submitMessage(IUserMessage)` and corresponding implementation.
+* Method `IPModeSet.listPModeIds()` and corresponding implementation.
 
 ## 3.1.1
 ###### 2018-01-15
