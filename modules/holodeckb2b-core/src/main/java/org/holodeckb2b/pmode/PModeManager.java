@@ -111,12 +111,6 @@ public class PModeManager implements IPModeSet {
     }
 
     @Override
-    @Deprecated
-    public String[] listPModeIds() {
-        return deployedPModes.listPModeIds();
-    }
-
-    @Override
     public IPMode get(String id) {
         return deployedPModes.get(id);
     }

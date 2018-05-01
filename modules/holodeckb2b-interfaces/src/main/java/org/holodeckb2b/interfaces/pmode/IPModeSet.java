@@ -32,16 +32,6 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 public interface IPModeSet {
 
     /**
-     * Gets a list of the <b>PMode.id</b>s of all P-Modes in the set.
-     *
-     * @return A <code>String[]</code> containing the P-Mode id's
-     * @deprecated Use {@link #containsId(java.lang.String)} to check if a id exists in the set or {@link #getAll()} to
-     *              get all P-Modes for the set.
-     */
-    @Deprecated
-    public String[] listPModeIds();
-
-    /**
      * Gets the P-Mode with the given <b>PMode.id</b>
      * <p>NOTE: The returned {@link IPMode} instance represents the P-Mode as it is configured <b>at the moment</b> this
      * method is called. Changes that are made to this P-Mode after this call may not be reflected in the retrieved

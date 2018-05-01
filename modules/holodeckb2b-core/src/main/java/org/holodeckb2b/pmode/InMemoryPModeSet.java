@@ -39,19 +39,6 @@ public class InMemoryPModeSet implements IPModeSet {
     private HashMap<String, IPMode>     pmodeSet = new HashMap<>();
 
     @Override
-    @Deprecated
-    public String[] listPModeIds() {
-        final String[]    pmodeIds = new String[pmodeSet.size()];
-
-        // Copy all ids to an array
-        int i = 0;
-        for (final String id : pmodeSet.keySet())
-            pmodeIds[i++] = id;
-
-        return pmodeIds;
-    }
-
-    @Override
     public IPMode get(final String id) {
         if (this.containsId(id))
             return pmodeSet.get(id);
