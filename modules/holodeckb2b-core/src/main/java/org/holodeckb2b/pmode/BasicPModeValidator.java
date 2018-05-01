@@ -50,13 +50,13 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  */
 public class BasicPModeValidator implements IPModeValidator {
 
-    private static final Set<String> VALID_MEPS, VALID_MEP_BINDINGS;
+    protected static Set<String> VALID_MEPS, VALID_MEP_BINDINGS;
     static {
         VALID_MEPS = new HashSet<>();
         VALID_MEPS.add(EbMSConstants.ONE_WAY_MEP);
         VALID_MEPS.add(EbMSConstants.TWO_WAY_MEP);
 
-        VALID_MEP_BINDINGS = new HashSet();
+        VALID_MEP_BINDINGS = new HashSet<>();
         VALID_MEP_BINDINGS.add(EbMSConstants.ONE_WAY_PULL);
         VALID_MEP_BINDINGS.add(EbMSConstants.ONE_WAY_PUSH);
         VALID_MEP_BINDINGS.add(EbMSConstants.TWO_WAY_PUSH_PUSH);
@@ -76,7 +76,7 @@ public class BasicPModeValidator implements IPModeValidator {
         return errors;
     }
 
-    private Collection<PModeValidationError> checkGeneralParameters(final IPMode pmode) {
+    protected Collection<PModeValidationError> checkGeneralParameters(final IPMode pmode) {
         Collection<PModeValidationError>    errors = new ArrayList<>();
 
         // PMode.MEP must contain a valid MEP url
@@ -102,7 +102,7 @@ public class BasicPModeValidator implements IPModeValidator {
         return errors;
     }
 
-    private Collection<PModeValidationError> checkSecurityParameters(IPMode pmode) {
+    protected Collection<PModeValidationError> checkSecurityParameters(IPMode pmode) {
         Collection<PModeValidationError>    errors = new ArrayList<>();
 
         // For checking the key references we need to know whether Holodeck acts as intiator or responder
@@ -142,7 +142,7 @@ public class BasicPModeValidator implements IPModeValidator {
         return errors;
     }
 
-    private Collection<PModeValidationError> checkUsernameTokenParameters(final ISecurityConfiguration parentSecurityCfg
+    protected Collection<PModeValidationError> checkUsernameTokenParameters(final ISecurityConfiguration parentSecurityCfg
                                                                          ,final String parentParameterName) {
         Collection<PModeValidationError>    errors = new ArrayList<>();
         if (parentSecurityCfg != null) {
@@ -169,7 +169,7 @@ public class BasicPModeValidator implements IPModeValidator {
         return errors;
     }
 
-    private Collection<PModeValidationError> checkX509Parameters(final ISecurityConfiguration parentSecurityCfg,
+    protected Collection<PModeValidationError> checkX509Parameters(final ISecurityConfiguration parentSecurityCfg,
                                                                  final String parentParameterName,
                                                                  final boolean privateKey) {
         Collection<PModeValidationError>    errors = new ArrayList<>();
@@ -211,7 +211,7 @@ public class BasicPModeValidator implements IPModeValidator {
         return errors;
     }
 
-    private Collection<PModeValidationError> checkPullingMPCs(IPMode pmode) {
+    protected Collection<PModeValidationError> checkPullingMPCs(IPMode pmode) {
         Collection<PModeValidationError>    errors = new ArrayList<>();
 
         // If a leg contains more than one PullRequestFlow, each one must define a MPC which must be a sub-channel of
@@ -259,7 +259,7 @@ public class BasicPModeValidator implements IPModeValidator {
      * @return  <code>true</code> if a keypair exists and is accessible for the given alias and password,<br>
      *          <code>false</code> otherwise
      */
-    private boolean isPrivateKeyAvailable(String keystoreAlias, String certificatePassword) {
+    protected boolean isPrivateKeyAvailable(String keystoreAlias, String certificatePassword) {
         try {
             return HolodeckB2BCore.getCertificateManager().getKeyPair(keystoreAlias, certificatePassword) != null;
         } catch (SecurityProcessingException ex) {
@@ -275,7 +275,7 @@ public class BasicPModeValidator implements IPModeValidator {
      * @return  <code>true</code> if a certificate for the given usage and with the given alias exists,<br>
      *          <code>false</code> otherwise
      */
-    private boolean isCertificateAvailable(String keystoreAlias, CertificateUsage certificateUsage) {
+    protected boolean isCertificateAvailable(String keystoreAlias, CertificateUsage certificateUsage) {
         try {
             return HolodeckB2BCore.getCertificateManager().getCertificate(certificateUsage, keystoreAlias) != null;
         } catch (SecurityProcessingException ex) {
