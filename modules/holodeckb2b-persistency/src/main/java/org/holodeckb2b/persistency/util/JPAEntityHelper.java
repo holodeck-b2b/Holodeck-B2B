@@ -83,12 +83,10 @@ public class JPAEntityHelper {
      * @return              List with all JPA entity objects from the given list wrapped in the correct entity object.
      */
     public static <T extends IMessageUnit, V extends IMessageUnitEntity> List<V> wrapInEntity(List<T> jpaObjects) {
-        if (Utils.isNullOrEmpty(jpaObjects))
-            return null;
-
-        List<V> result = new ArrayList(jpaObjects.size());
-        for(T jpaObject : jpaObjects)
-            result.add((V) wrapInEntity((MessageUnit) jpaObject, false));
+        List<V> result = new ArrayList(!Utils.isNullOrEmpty(jpaObjects) ? jpaObjects.size() : 0);
+        if (jpaObjects != null)
+	        for(T jpaObject : jpaObjects)
+	            result.add((V) wrapInEntity((MessageUnit) jpaObject, false));
 
         return result;
     }

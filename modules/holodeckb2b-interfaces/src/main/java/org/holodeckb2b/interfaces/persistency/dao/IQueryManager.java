@@ -38,9 +38,9 @@ public interface IQueryManager {
 
     /**
      * Retrieves all message units of the specified type and that are in one of the given states and are flowing in the
-     * specified direction. If message units are found they are sorted on their timestamp starting with the oldest
-     * message units.
-     * <br><b>NOTE:</b> The entity objects in the resulting collection may not be completely loaded! Before a message
+     * specified direction. The found message units are sorted on their time stamp starting with the oldest message 
+     * units.
+     * <p><b>NOTE:</b> The entity objects in the resulting collection may not be completely loaded! Before a message
      * unit is going to be processed it must be checked if it is loaded completely.
      *
      * @param <T>       Limits the <code>type</code> parameter to only message unit classes
@@ -48,8 +48,8 @@ public interface IQueryManager {
      * @param type      The type of message units to retrieve specified by the interface they implement
      * @param direction The direction of the message units to retrieve
      * @param states    Array of processing states that the message units to retrieve should be in
-     * @return          A collection of entity objects representing the message units of the specified type that are in
-     *                  one of the given states,<br>or <code>null</code> when no such message units are found.
+     * @return          List with entity objects representing the message units of the specified type that are 
+     * 					in one of the given states, in descending order on time stamp 
      * @throws PersistenceException When a problem occurs during the retrieval of the message units
      */
     <T extends IMessageUnit, V extends IMessageUnitEntity> List<V>
@@ -59,7 +59,8 @@ public interface IQueryManager {
                                                                                         throws PersistenceException;
 
     /**
-     * Retrieves all message units with the given <code>MessageId</code>.
+     * Retrieves all message units with the given <code>MessageId</code>. Optionally the direction in which the 
+     * searched messages units flow can also be specified.
      * <p>Although messageIds should be unique there can exist multiple <code>MessageUnits</code> with the same
      * messageId due to resending (and because other MSH or business applications may not conform to this constraint).
      * <br><b>NOTE:</b> The entity objects in the resulting collection may not be completely loaded! Before a message
@@ -102,8 +103,7 @@ public interface IQueryManager {
      * @param state     The processing state the message units to retrieve should be in
      * @return          The ordered list of entity objects representing the message unit objects of the specified
      *                  type and which are in the specified processing state and have their processing defined by a
-     *                  P-Mode with one of the specified ids,
-     *                  or<br> <code>null</code> if no such message units where found
+     *                  P-Mode with one of the specified ids
      * @throws PersistenceException When an error occurs while executing the query
      */
     <T extends IMessageUnit, V extends IMessageUnitEntity> List<V> getMessageUnitsForPModesInState(
