@@ -2,7 +2,8 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 2.1.4-SNAPSHOT-3 (Unreleased)
+## 2.1.4
+###### 2018-05-28
 ### Fixed
 * Resolved build issue on Windows platform
 * Server starts with error message if Holodeck B2B directory name includes space [#54](https://github.com/holodeck-b2b/Holodeck-B2B/issues/54)
