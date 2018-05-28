@@ -2,15 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 3.1.2 (Unreleased)
-##### tbd
-
+## 3.1.2
+##### 2018-05-28
 ### Changed
 * Test for `org.holodeckb2b.ebms3.workers.SubmitFromFile` worker has been changed due to refactoring
 
 ### Fixed
 * Skipped MMD files ignored until gateway restart [#86](https://github.com/holodeck-b2b/Holodeck-B2B/issues/86)
-
 
 ## 3.1.1
 ###### 2018-01-15
