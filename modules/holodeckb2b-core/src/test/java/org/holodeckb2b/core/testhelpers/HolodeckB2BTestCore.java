@@ -36,7 +36,6 @@ import org.holodeckb2b.module.HolodeckB2BCoreImpl;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.InMemoryPModeSet;
 import org.holodeckb2b.pmode.PModeManager;
-
 import static org.mockito.Mockito.mock;
 
 /**
@@ -46,9 +45,7 @@ import static org.mockito.Mockito.mock;
  */
 public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
 
-    private static final class SubmitterSingletonHolder {
-        static final IMessageSubmitter instance = new MessageSubmitter();
-    }
+    private static IMessageSubmitter submitter = new MessageSubmitter();
 
     private IDAOFactory daoFactory;
 
@@ -59,7 +56,11 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
     private IMessageProcessingEventProcessor eventProcessor;
 
     public HolodeckB2BTestCore(final String homeDir) {
-        this(homeDir, null, null);
+        this(homeDir, null, null, null);
+    }
+
+    public HolodeckB2BTestCore(final String homeDir, final IMessageSubmitter testSubmitter) {
+        this(homeDir, null, null, testSubmitter);
     }
 
     public HolodeckB2BTestCore(final String homeDir,
@@ -70,9 +71,17 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
     public HolodeckB2BTestCore(final String homeDir,
                                final String pmodeValidatorClass,
                                final String pmodeStorageClass) {
+        this(homeDir, pmodeValidatorClass, pmodeStorageClass, null);
+    }
+
+    public HolodeckB2BTestCore(final String homeDir,
+                               final String pmodeValidatorClass,
+                               final String pmodeStorageClass,
+                               final IMessageSubmitter testSubmitter) {
         config = new Config(homeDir, pmodeValidatorClass, pmodeStorageClass);
         pmodeSet = new InMemoryPModeSet();
         eventProcessor = new SyncEventProcessor();
+        submitter = testSubmitter;
         initDAOFactory();
     }
 
@@ -118,7 +127,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
 
     @Override
     public IMessageSubmitter getMessageSubmitter() {
-        return SubmitterSingletonHolder.instance;
+        return submitter;
     }
 
     @Override

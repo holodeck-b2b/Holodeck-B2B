@@ -17,6 +17,7 @@
 package org.holodeckb2b.ebms3.workers;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -27,89 +28,108 @@ import java.util.Map;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.common.mmd.xml.PartInfo;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.common.workers.DirWatcher;
+import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
- * This worker reads all MMD documents from the specified directory and submits the corresponding user message to the
- * Holodeck B2B core to trigger the send process.
- * <p>The files to process must have extension <b>mmd</b>. After processing the file, i.e. after the user message has
- * been submitted, the extension will be changed to <b>accepted</b>. When an error occurs on submit the extension will
- * be changed to <b>rejected</b> and information on the error will be written to a file with the same name but
- * with extension <b>err</b>.
+ * This worker reads all MMD documents from the specified directory and submits the corresponding <i>User Message<s/i>
+ * to the Holodeck B2B Core to trigger the send process.
+ * <p>The directory to look for the MMD files must be specified by the "watchPath" worker parameter. The files to
+ * process must have extension <b>mmd</b>. After processing the file, i.e. after the user message has been submitted,
+ * the extension will be changed to <b>accepted</b>. When an error occurs on submit the extension will be changed to
+ * <b>rejected</b> and information on the error will be written to a file with the same name but with extension
+ * <b>err</b>.
  *
- * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @author Sander Fieten <sander at holodeck-b2b.org>
  */
-public class SubmitFromFile extends DirWatcher {
+public class SubmitFromFile extends AbstractWorkerTask {
+    /**
+     * The path to the directory to watch for MMD files
+     */
+    private String watchPath;
 
     /**
-     * Initializes the worker. Overrides parent method to ensure that the watched
-     * extension is set fixed to "mmd".
-     * <p>Also gets the {@see IMessageSubmitterFactory} from the Holodeck B2B core
-     * to create {@see IMessageSubmitter}s for the submission of the user messages
-     * to Holodeck B2B.
+     * Initializes the worker by setting the
      *
      * @param parameters
      * @throws TaskConfigurationException
      */
     @Override
     public void setParameters(final Map<String, ?> parameters) throws TaskConfigurationException {
-        // Set parameters using super class method
-        super.setParameters(parameters);
+        // Check the watchPath parameter is provided and points to a directory
+        final String pathParameter = (String) parameters.get("watchPath");
+        if (Utils.isNullOrEmpty(pathParameter)) {
+            log.error("Unable to configure task: Missing required parameter \"watchPath\"");
+            throw new TaskConfigurationException("Missing required parameter \"watchPath\"");
+        } else if (!Paths.get(pathParameter).isAbsolute())
+            watchPath = Paths.get(HolodeckB2BCoreInterface.getConfiguration().getHolodeckB2BHome(), pathParameter).toString();
+        else
+            watchPath = pathParameter;
 
-        // Override externsion parameter to set it to fixed "mmd" value
-        setExtension("mmd");
+        final File dir = new File(watchPath);
+        if (!dir.exists() || !dir.isDirectory() || !dir.canRead()) {
+            log.error("The specified directory to watch for submission [" + watchPath + "] is not accessible to HB2B");
+            throw new TaskConfigurationException("Invalid path specified!");
+        }
     }
 
     @Override
-    protected void onChange(final File f, final Event event) {
-        if (event != Event.ADDED) {
-            // Only proces new mmd files, ignore other events
-            log.debug(event.toString().toLowerCase() + " " + f.getName() + " ignored");
+    public void doProcessing() {
+        log.debug("Get list of available MMD files from watched directory: " + watchPath);
+        final File   dir = new File(watchPath);
+        final File[] mmdFiles = dir.listFiles(new FileFilter() {
+                                        @Override
+                                        public boolean accept(final File file) {
+                                            return file.isFile() && file.getName().toLowerCase().endsWith(".mmd");
+                                        }
+                                    });
+        // A null value indicates the directory could not be read => signal as error
+        if (mmdFiles == null) {
+            log.error("The specified directory [" + watchPath + "]could not be searched for MMD files!");
             return;
         }
 
-        final String  cFileName = f.getAbsolutePath();
-        String  bFileName = null;
-        final int     i = cFileName.toLowerCase().indexOf(".mmd"); // start of extension part
-        bFileName = cFileName.substring(0, i);
-        final String tFileName = bFileName + ".processing";
+        for(File f : mmdFiles) {
+            // Get file name without the extension
+            final String  cFileName = f.getAbsolutePath();
+            final String  baseFileName = cFileName.substring(0, cFileName.toLowerCase().indexOf(".mmd"));
 
-        try {
-            // Directly rename file to prevent processing by another worker
-            if( !f.renameTo(new File(tFileName)))
-                // Renaming failed, so file already processed by another worker or externally
-                // changed
-                log.info(f.getName() + " is not processed because it could not be renamed");
-            else {
-                // The file can be processed
-                log.debug("Read message meta data from " + f.getName());
-                final MessageMetaData mmd = MessageMetaData.createFromFile(new File(tFileName));
-                log.debug("Succesfully read message meta data from " + f.getName());
-                // Convert relative paths in payload references to absolute ones to prevent file not found errors
-                convertPayloadPaths(mmd, f);
-                final IMessageSubmitter   submitter = HolodeckB2BCoreInterface.getMessageSubmitter();
-                submitter.submitMessage(mmd, mmd.shouldDeleteFilesAfterSubmit());
-                log.info("User message from " + f.getName() + " succesfully submitted to Holodeck B2B");
-                // Change extension to reflect success
-                Files.move(Paths.get(tFileName), Utils.createFileWithUniqueName(bFileName + ".accepted")
-                           , StandardCopyOption.REPLACE_EXISTING);
-            }
-        } catch (final Exception e) {
-            // Something went wrong on reading the message meta data
-            log.error("An error occured when reading message meta data from " + f.getName()
-                        + ". Details: " + e.getMessage());
-            // Change extension to reflect error and write error information
+            final String tFileName = baseFileName + ".processing";
             try {
-                final Path rejectFilePath = Utils.createFileWithUniqueName(bFileName + ".rejected");
-                Files.move(Paths.get(tFileName), rejectFilePath, StandardCopyOption.REPLACE_EXISTING);
-                writeErrorFile(rejectFilePath, e);
-            } catch (IOException ex) {
-                // The directory where the file was originally found has gone. Nothing we can do about it, so ignore
-                log.error("An error occured while renaming the mmd file or writing the error info to file!");
+                // Directly rename file to prevent processing by another worker
+                if( !f.renameTo(new File(tFileName)))
+                    // Renaming failed, so file already processed by another worker or externally changed
+                    log.debug(f.getName() + " is ignored because it could not be renamed");
+                else {
+                    // The file can be processed
+                    log.debug("Read message meta data from " + f.getName());
+                    final MessageMetaData mmd = MessageMetaData.createFromFile(new File(tFileName));
+                    log.debug("Succesfully read message meta data from " + f.getName());
+                    // Convert relative paths in payload references to absolute ones to prevent file not found errors
+                    convertPayloadPaths(mmd, f);
+                    final IMessageSubmitter   submitter = HolodeckB2BCoreInterface.getMessageSubmitter();
+                    submitter.submitMessage(mmd, mmd.shouldDeleteFilesAfterSubmit());
+                    log.info("User message from " + f.getName() + " succesfully submitted to Holodeck B2B");
+                    // Change extension to reflect success
+                    Files.move(Paths.get(tFileName), Utils.createFileWithUniqueName(baseFileName + ".accepted")
+                               , StandardCopyOption.REPLACE_EXISTING);
+                }
+            } catch (final Exception e) {
+                // Something went wrong on reading the message meta data
+                log.error("An error occured when reading message meta data from " + f.getName()
+                            + ". Details: " + e.getMessage());
+                // Change extension to reflect error and write error information
+                try {
+                    final Path rejectFilePath = Utils.createFileWithUniqueName(baseFileName + ".rejected");
+                    Files.move(Paths.get(tFileName), rejectFilePath, StandardCopyOption.REPLACE_EXISTING);
+                    writeErrorFile(rejectFilePath, e);
+                } catch (IOException ex) {
+                    // The directory where the file was originally found has gone. Nothing we can do about it, so ignore
+                    log.error("An error occured while renaming the mmd file or writing the error info to file!");
+                }
             }
         }
     }
@@ -124,8 +144,9 @@ public class SubmitFromFile extends DirWatcher {
         final String basePath = mmdFile.getParent();
         if (!Utils.isNullOrEmpty(mmd.getPayloads()))
             for (final IPayload p : mmd.getPayloads()) {
-                if (!(Paths.get(p.getContentLocation()).isAbsolute()))
-                    ((PartInfo) p).setContentLocation(Paths.get(basePath, p.getContentLocation()).normalize().toString());
+                final PartInfo pi = (PartInfo) p;
+                if (!(Paths.get(pi.getContentLocation()).isAbsolute()))
+                    pi.setContentLocation(Paths.get(basePath, pi.getContentLocation()).normalize().toString());
             }
     }
 
