@@ -24,7 +24,8 @@ We are using the simplified Github workflow to accept modifications which means 
 * write your code 
 * commit incrementally with readable and detailed commit messages
 * run integration tests to check everything works on runtime
-* submit a pull-request against the master branch of this repository
+* Update the changelog with a short description of the changes including a reference to the issues fixed
+* submit a pull request against the master branch of this repository
 
 If your contribution is more than a patch, please contact us beforehand to discuss which branch you can best submit the pull request to.
 
