@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+* Checking of references in Error Signal has been corrected so Error with the reference contained
+  only in the Errors is not rejected.
+
 ## 3.1.2
 ##### 2018-05-28
 ### Changed
