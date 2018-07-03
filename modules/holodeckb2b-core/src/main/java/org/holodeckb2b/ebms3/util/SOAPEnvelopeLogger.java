@@ -44,7 +44,11 @@ public class SOAPEnvelopeLogger extends BaseHandler {
 
         // Only do something when logging is enabled
         if (soapEnvLog.isInfoEnabled()) {
-            soapEnvLog.info(mc.getEnvelope().cloneOMElement().toStringWithConsume() + "\n");
+            try {
+                soapEnvLog.info(mc.getEnvelope().cloneOMElement().toStringWithConsume() + "\n");
+            } catch (Exception invalidSOAPEnv) {
+                log.error("Message with non parseable SOAP content");
+            }
         }
 
         return InvocationResponse.CONTINUE;

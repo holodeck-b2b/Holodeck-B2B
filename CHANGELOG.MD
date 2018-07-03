@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 * Checking of references in Error Signal has been corrected so Error with the reference contained
   only in the Errors is not rejected.
+* Exception when processing an invalid SOAP message [#15](https://github.com/holodeck-b2b/Holodeck-B2B/issues/15) 
 
 ## 3.1.2
 ##### 2018-05-28
