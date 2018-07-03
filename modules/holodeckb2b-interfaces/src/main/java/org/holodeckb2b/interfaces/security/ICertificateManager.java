@@ -74,12 +74,13 @@ public interface ICertificateManager {
      * certificates with the same usage.
      *
      * @param cert      The certificate to register
-     * @param use       The function(s) for which the certificate can be used
      * @param alias     The alias to register the certificate under
+     * @param use       The function(s) for which the certificate can be used, if no specific usage is specified the
+     * 					certificate is registered for both encryption and validation
      * @throws SecurityProcessingException When there is a problem in registration of the key pair. This can be caused
      *                                     by a duplicate alias.
      */
-    void registerCertificate(final X509Certificate cert, final CertificateUsage[] use, final String alias)
+    void registerCertificate(final X509Certificate cert, final String alias, final CertificateUsage... use)
                                                                                    throws SecurityProcessingException;
 
     /**
@@ -144,9 +145,10 @@ public interface ICertificateManager {
      * certificate being removed is not in use before removing it.
      *
      * @param alias The alias of the certificate to remove
-     * @param use   The function(s) for which the certificate should not be used anymore
+     * @param use   The function(s) for which the certificate should not be used anymore. If no specific usage is 
+     * 				specified the certificate is removed for all functions.
      * @throws SecurityProcessingException When there is a problem in retrieving the certificate. This can be caused by
      *                                     an unknown alias or the key pair still being used by a P-Mode.
      */
-    void removeCertificate(final String alias, final CertificateUsage[] use) throws SecurityProcessingException;
+    void removeCertificate(final String alias, final CertificateUsage... use) throws SecurityProcessingException;
 }

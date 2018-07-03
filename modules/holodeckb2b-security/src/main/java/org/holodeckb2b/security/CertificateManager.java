@@ -35,6 +35,7 @@ import org.apache.wss4j.common.ext.WSSecurityException;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.security.ICertificateManager;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
+import org.holodeckb2b.interfaces.security.ICertificateManager.CertificateUsage;
 import org.holodeckb2b.security.util.KeystoreUtils;
 import org.holodeckb2b.security.util.SecurityUtils;
 
@@ -146,13 +147,21 @@ class CertificateManager implements ICertificateManager {
     }
 
     @Override
-    public synchronized void registerCertificate(final X509Certificate cert, final CertificateUsage[] use,
-                                                 final String alias) throws SecurityProcessingException {
-        Map<CertificateUsage, KeyStore> modifiedKeystores = new HashMap<>(2);
+    public synchronized void registerCertificate(final X509Certificate cert, final String alias,
+                                                 final CertificateUsage... use) throws SecurityProcessingException {
+        // If no usage is specified the Certificate will be registered for both uses
+    	CertificateUsage[] forUsage;
+    	if (use.length == 0)
+    		forUsage = new CertificateUsage[] { CertificateUsage.Validation, CertificateUsage.Encryption };
+    	else
+    		forUsage = use;
+    	
+    	Map<CertificateUsage, KeyStore> modifiedKeystores = new HashMap<>(2);
         CertificateUsage usage = null;
         try {
-            for (int i = 0; i < use.length; i++) {
-                usage = use[i];
+        	// We use the "classic" for loop here so we know the usage also in case an exception occurs
+            for (int i = 0; i < forUsage.length; i++) {
+                usage = forUsage[i];
                 // Load the keystore and add the entry
                 KeyStore ks;
                 if (usage == CertificateUsage.Encryption)
@@ -284,19 +293,25 @@ class CertificateManager implements ICertificateManager {
     }
 
     /**
-     * Removes the certificate registered for the specified usages and under the given alias.
+     * Removes the certificate registered under the given alias for the specified usages (or all if none specified).
      * <p>The certificate manager does not check whether the certificate can be safely removed, i.e. if there is no
      * active P-Mode referencing it. It is the responsibility of the caller to make sure it is safe to remove the
      * certificate.
      */
     @Override
-    public synchronized void removeCertificate(String alias, CertificateUsage[] use)
+    public synchronized void removeCertificate(String alias, CertificateUsage... use)
                                                                                    throws SecurityProcessingException {
+        // If no usage is specified the Certificate will be removed for all uses
+    	CertificateUsage[] forUsage;
+    	if (use.length == 0)
+    		forUsage = new CertificateUsage[] { CertificateUsage.Validation, CertificateUsage.Encryption };
+    	else
+    		forUsage = use;
         Map<CertificateUsage, KeyStore> modifiedKeystores = new HashMap<>(2);
         CertificateUsage usage = null;
         try {
-            for (int i = 0; i < use.length; i++) {
-                usage = use[i];
+            for (int i = 0; i < forUsage.length; i++) {
+                usage = forUsage[i];
                 // Load the keystore and add the entry
                 KeyStore ks;
                 if (usage == CertificateUsage.Encryption)
