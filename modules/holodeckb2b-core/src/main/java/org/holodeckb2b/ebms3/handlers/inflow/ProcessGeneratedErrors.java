@@ -19,12 +19,14 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
@@ -61,7 +63,7 @@ public class ProcessGeneratedErrors extends BaseHandler {
      * configuration users can decide if this logging should be enabled and
      * how errors should be logged.
      */
-    private final Log     errorLog = LogFactory.getLog("org.holodeckb2b.msgproc.errors.generated.IN_FLOW");
+    private final Log     errorLog = LogFactory.getLog("org.holodeckb2b.msgproc.errors.generated.AS4");
 
     @Override
     protected byte inFlows() {
@@ -89,6 +91,11 @@ public class ProcessGeneratedErrors extends BaseHandler {
                 ErrorMessage tErrorMessage = new ErrorMessage(segmentedErrors.get(refToMsgId));
                 tErrorMessage.setRefToMessageId(refToMsgId.equals("null") ? null : refToMsgId);
                 final IErrorMessageEntity errorMessage = storageManager.storeOutGoingMessageUnit(tErrorMessage);
+                // Log to the error log
+                if (MessageUnitUtils.isWarning(errorMessage))
+                	errorLog.warn(MessageUnitUtils.errorSignalToString(errorMessage));
+            	else
+            		errorLog.error(MessageUnitUtils.errorSignalToString(errorMessage));
                 if (refToMsgId.equals("null")) {
                     // This collection of errors does not reference a specific message unit, should therefor be sent
                     // as a response.
