@@ -22,6 +22,7 @@ import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.holodeckb2b.common.util.Utils;
 
 /**
  * Is an <i>abstract</i> implementation of an Axis2 handler that acts as the base class for the Holodeck B2B handlers.
@@ -74,7 +75,7 @@ public abstract class BaseHandler extends AbstractHandler {
      * The name of the messaging protocol that this handler is processing, taken from the parent module
      */
     protected String handledMsgProtocol = null;
-    
+
     /**
      * The current flow as a byte
      */
@@ -87,19 +88,19 @@ public abstract class BaseHandler extends AbstractHandler {
     /**
      * Initializes the handler by checking it is contained in a Holodeck B2B module that is dealing with a specific
      * messaging protocol, e.g. ebMS V3 or AS2. The protocol handled by the module must be specified in the <i>
-     * HandledMessagingProtocol</i> parameter of the module.    
+     * HandledMessagingProtocol</i> parameter of the module.
      *
      */
-    public void init(HandlerDescription handlerdesc) {    		
+    public void init(HandlerDescription handlerdesc) {
         super.init(handlerdesc);
-        try { 
+        try {
     		handledMsgProtocol = (String) handlerdesc.getParent().getParameter("HandledMessagingProtocol").getValue();
         } catch (Exception e) {
     		LogFactory.getLog(this.getClass().getName())
-        				  					.warn("Not running inside a Holodeck B2B module for message processing");        		
+        				  					.warn("Not running inside a Holodeck B2B module for message processing");
         }
     }
-    
+
     /**
      * Checks that the handler runs in the given flow.
      *
@@ -163,9 +164,10 @@ public abstract class BaseHandler extends AbstractHandler {
         }
 
         // Running in correct flow, create a logger
-        log = LogFactory.getLog("org.holodeckb2b.msgproc." + handledMsgProtocol 
-        												+ "." + currentFlowName + "." + getHandlerDesc().getName());
-        
+        log = LogFactory.getLog("org.holodeckb2b.msgproc." + (!Utils.isNullOrEmpty(handledMsgProtocol) ?
+                                                                handledMsgProtocol + "." : "")
+                                                           + currentFlowName + "." + getHandlerDesc().getName());
+
         // Do actual processing in implementation
         try {
             log.trace("Start processing");
