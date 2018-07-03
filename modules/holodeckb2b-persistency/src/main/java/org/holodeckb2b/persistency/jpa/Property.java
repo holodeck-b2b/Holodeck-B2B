@@ -17,9 +17,11 @@
 package org.holodeckb2b.persistency.jpa;
 
 import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Lob;
+
 import org.holodeckb2b.interfaces.general.IProperty;
 
 /**
@@ -115,7 +117,7 @@ public class Property implements IProperty, Serializable {
     private String  NAME;
 
     @Lob
-    @Column(length = 1024)
+    @Column(length = 3092)
     private String  VALUE;
 
     @Lob
