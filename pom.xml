@@ -37,7 +37,10 @@
         <connection>scm:git:https://github.com/holodeck-b2b/Holodeck-B2B.git</connection>
         <developerConnection>scm:git:git@github.com:holodeck-b2b/Holodeck-B2B.git</developerConnection>
     </scm>
-
+    <issueManagement>
+    	<url>https://github.com/holodeck-b2b/Holodeck-B2B/issues</url>
+    </issueManagement>
+    
     <organization>
         <name>The Holodeck B2B Team</name>
         <url>http://www.holodeck-b2b.org/team</url>
@@ -47,7 +50,7 @@
             <name>Sander Fieten</name>
             <organization>Chasquis</organization>
             <organizationUrl>http://chasquis-consulting.com/holodeck-b2b-support/</organizationUrl>
-            <email>sander at chasquis-consulting.com/</email>
+            <email>sander at chasquis-consulting.com</email>            
             <roles>
                 <role>Architect</role>
                 <role>Lead developer</role>
@@ -285,5 +288,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
