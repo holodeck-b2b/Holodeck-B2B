@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+### Changed
+* Use 'exec' to start the Java program, instead of forking the process to simplify management of
+  the Java process.
+
 ### Fixed
 * Checking of references in Error Signal has been corrected so Error with the reference contained
   only in the Errors is not rejected.
