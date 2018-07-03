@@ -37,7 +37,7 @@ public class CheckForResponse extends AbstractMessageReceiver {
     /**
      * Log facility.
      */
-    protected   Log     log = LogFactory.getLog("org.holodeckb2b.msgproc." + this.getClass().getSimpleName());
+    protected   Log     log = LogFactory.getLog("org.holodeckb2b.msgproc.AS4.CheckForResponse");
 
     /**
      * Checks whether a HTTP response has to be sent back and if so, triggers it.

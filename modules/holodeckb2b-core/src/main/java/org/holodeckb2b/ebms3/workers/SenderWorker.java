@@ -24,6 +24,7 @@ import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.ebms3.axis2.Axis2Sender;
+import org.holodeckb2b.ebms3.axis2.ebMS3SendService;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -77,7 +78,7 @@ public class SenderWorker extends AbstractWorkerTask {
                                     + "[" + msgUnit.getMessageId() + "]");
                         // Ensure all data is available for processing
                         HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(msgUnit);
-                        Axis2Sender.sendMessage(msgUnit, log);
+                        Axis2Sender.sendMessage(msgUnit, new ebMS3SendService(), log);
                     } else
                         // Message probably already in process
                         log.debug("Could not start processing message [" + msgUnit.getMessageId()

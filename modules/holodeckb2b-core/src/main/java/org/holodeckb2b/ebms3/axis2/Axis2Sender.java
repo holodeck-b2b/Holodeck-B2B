@@ -24,6 +24,7 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisService;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.logging.Log;
@@ -39,7 +40,6 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
-import org.holodeckb2b.module.HolodeckB2BCoreImpl;
 
 /**
  * Is a helper class that handles the sending of a message unit using the Axis2 framework.
@@ -54,7 +54,7 @@ public class Axis2Sender {
      * @param messageUnit   The message unit to send
      * @param log           The log to use for writing log information
      */
-    public static void sendMessage(final IMessageUnitEntity messageUnit, final Log log) {
+    public static void sendMessage(final IMessageUnitEntity messageUnit, final AxisService svcConfig, final Log log) {
         ServiceClient sc;
         OperationClient oc;
         final MessageContext msgCtx = new MessageContext();
@@ -64,8 +64,10 @@ public class Axis2Sender {
                         + " with msgId: " + messageUnit.getMessageId());
             sc = new ServiceClient(((InternalConfiguration) HolodeckB2BCoreInterface.getConfiguration())
                                                                                     .getAxisConfigurationContext(),
-                                   Axis2Utils.createAnonymousService());
-            sc.engageModule(HolodeckB2BCoreImpl.HOLODECKB2B_CORE_MODULE);
+                                   svcConfig);
+            // Engage all modules required by the service
+            for(String module : svcConfig.getModules())
+                sc.engageModule(module);
             oc = sc.createClient(ANON_OUT_IN_OP);
 
             log.debug("Create an empty MessageContext for message with current configuration");

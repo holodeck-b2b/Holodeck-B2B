@@ -23,7 +23,6 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -33,12 +32,11 @@ import org.holodeckb2b.interfaces.pmode.IProtocol;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
- * Is the <i>OUT_FLOW</i> handler that configures the actual message transport over the HTTP protocol. The parameters
- * for the transfer are defined by the P-Mode parameters represented by the {@link IProtocol} interface and currently
- * consist of <i>HTTP gzip compression</i> and <i>HTTP chunking</i>.
- * <p>The actual configuration is done by setting specific {@link Options} in the message context. Not all options (see
- * <a href="http://wso2.com/library/230/#HTTPConstants">http://wso2.com/library/230/#HTTPConstants</a> for an overview
- * of all options), are relevant for Holodeck B2B. The options set by this handler are:<ul>
+ * Is the <i>OUT_FLOW</i> handler that configures the actual message transport over the HTTP protocol. When this 
+ * message is sent as a HTTP request this handler will find the determine the destination URL based on the P-Mode of
+ * the primary message unit. It will also enable <i>HTTP gzip compression</i> and <i>HTTP chunking</i> based on the 
+ * P-Mode settings (in <b>PMode[1].Protocol</b>). The actual configuration is done by setting specific {@link Options} 
+ * which define the:<ul>
  * <li>Transfer-encoding : When sending messages with large payloads included in the SOAP Body it is useful to compress
  *      the messages during transport. This is done by the standard compression feature of HTTP/1.1 by using the
  *      <i>gzip</i> Transfer-Encoding.<br>
@@ -49,14 +47,9 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  *      is the initiator or responder in the current message transfer.<br>
  *      That both the chunked and gzip encodings are enabled is a requirement from HTTP
  *      (see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6">http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6</a>).</li>
- * <li>EndpointReference : The EndpointReference is used to determine the MSH where the message must be delivered.
- *      This only relevant when Holodeck B2B is initiator of the message transfer, if Holodeck B2B is responding to a
- *      request received from another MSH, the message is just added in the response.<br>
- *      In a point to point situation this only consists of an URL, but in a multi-hop context there must be more
- *      information to determine the ultimate receiver of the message. As Holodeck B2B currently only support point to
- *      point exchanges we directly set the URL.<br>
- *      It is possible that the processed message contains multiple message units. In that case the P-Mode of the
- *      <i>primary</i> message unit will be used to set the URL.</li>
+ * <li>EndpointReference : Defines where the message must be delivered. Only relevant when Holodeck B2B is initiator 
+ * 		of the message transfer, if Holodeck B2B is responding to a request received from another MSH, the message is 
+ * 		just added in the response.</li>
  * </ul>
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
@@ -73,17 +66,7 @@ public class ConfigureHTTPTransportHandler extends BaseHandler {
 
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) {
-        // First check if this is an ebMS message, i.e. contains ebMS messaging header
-        if (Messaging.getElement(mc.getEnvelope()) == null)
-            return InvocationResponse.CONTINUE;
-
-        // Get current set of options
-        final Options options = mc.getOptions();
-
-        // Get the primary message unit that is processed
-        log.debug("Get the primary MessageUnit from MessageContext");
         final IMessageUnitEntity primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
-
         // Only when message contains a message unit there is something to do
         if (primaryMU != null) {
             log.debug("Get P-Mode configuration for primary MU");
@@ -93,7 +76,8 @@ public class ConfigureHTTPTransportHandler extends BaseHandler {
                 log.debug("No P-Mode given for primary message unit, using default HTTP configuration");
                 return InvocationResponse.CONTINUE;
             }
-
+            // Get current set of options
+            final Options options = mc.getOptions();
             // Currently only One-Way MEPs are supported, so always on first leg
             final ILeg leg = pmode.getLeg(primaryMU.getLeg());
             final IProtocol protocolCfg = leg.getProtocol();
@@ -109,7 +93,7 @@ public class ConfigureHTTPTransportHandler extends BaseHandler {
                             destURL = leg.getReceiptConfiguration().getTo();
                         else if (primaryMU instanceof IErrorMessage)
                             destURL = leg.getUserMessageFlow().getErrorHandlingConfiguration().getReceiverErrorsTo();
-                    } finally {}
+                    } catch (NullPointerException npe) {}
 
                     // If not we use the URL defined on the leg level which is also the one to use for UserMessage and
                     // PullRequest

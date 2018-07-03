@@ -17,12 +17,12 @@
 package org.holodeckb2b.ebms3.handlers.outflow;
 
 import java.util.Collection;
-import org.apache.axiom.soap.SOAPHeaderBlock;
+
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.events.MessageTransferEvent;
 import org.holodeckb2b.interfaces.events.IMessageTransferEvent;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
@@ -92,16 +92,15 @@ public class CheckSentResult extends BaseHandler {
      */
     @Override
     public void doFlowComplete(final MessageContext mc) {
-        // First get the ebMS header block, that is the eb:Messaging element
-        final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
+        // First check if there were messaging units sent
+        final Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
 
-        if (messaging != null) {
+        if (!Utils.isNullOrEmpty(msgUnits)) {
             log.debug("Check result of sent operation");
-            final boolean   success = (mc.getFailureReason() == null);
+            final boolean   success = isSuccessful(mc);
             log.debug("The sent operation was " + (success ? "" : "not ") + "successful");
 
             //Change processing state of all message units in the message accordingly
-            final Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
             final StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             for (final IMessageUnitEntity mu : msgUnits) {
                 try {
@@ -137,5 +136,17 @@ public class CheckSentResult extends BaseHandler {
                 }
             }
         }
+    }
+    
+    /**
+     * Checks whether the message exchange was successful, which in case of AS4 is when there were no exceptions 
+     * raised.
+     *  
+     * @param msgContext	The message context of the sent message
+     * @return	<code>true</code> if no exceptions were raised during the message exchange,<br>
+     * 			<code>false</code> if there was an exception during the message processing.
+     */
+    protected boolean isSuccessful(final MessageContext msgContext) {
+    	return msgContext.getFailureReason() == null;
     }
 }

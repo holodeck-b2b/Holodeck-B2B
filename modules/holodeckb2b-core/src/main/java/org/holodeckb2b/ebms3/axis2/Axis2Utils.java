@@ -16,12 +16,9 @@
  */
 package org.holodeckb2b.ebms3.axis2;
 
-import java.util.UUID;
 import org.apache.axis2.AxisFault;
-import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
-import org.apache.axis2.description.AxisService;
 import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.axis2.wsdl.WSDLConstants;
 
@@ -31,11 +28,6 @@ import org.apache.axis2.wsdl.WSDLConstants;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public final class Axis2Utils {
-
-    /**
-     * Name for the anonymous AxisService that uses correct Axis2 operation
-     */
-    private static final String HB2B_ANON_SVC = "hb2b:axis2utils:anon_svc";
 
     /**
      * Creates the {@link MessageContext} for the response to message currently being processed.
@@ -65,19 +57,5 @@ public final class Axis2Utils {
             // Somewhere the construction of the new MessageContext failed
             return null;
         }
-    }
-
-    /**
-     * Create an axisService with one (anonymous) operation for OutIn MEP but that does accept an empty responses.
-     *
-     * @return The configured anonymous service
-     */
-    public static AxisService createAnonymousService() {
-        final AxisService axisService = new AxisService(HB2B_ANON_SVC + ":" + UUID.randomUUID());
-
-        final OutOptInAxisOperation outInOperation = new OutOptInAxisOperation(ANON_OUT_IN_OP);
-        axisService.addOperation(outInOperation);
-
-        return axisService;
     }
 }
