@@ -62,7 +62,7 @@ done
 
 cd "$AXIS2_HOME"
 
-java $JAVA_OPTS -classpath "$AXIS2_CLASSPATH" \
+exec java $JAVA_OPTS -classpath "$AXIS2_CLASSPATH" \
     -Djava.endorsed.dirs="$AXIS2_HOME/lib/endorsed":"$JAVA_HOME/jre/lib/endorsed":"$JAVA_HOME/lib/endorsed" \
     -Dderby.stream.error.file="$AXIS2_HOME/logs/derby.log" \
     org.apache.axis2.transport.SimpleAxis2Server \
