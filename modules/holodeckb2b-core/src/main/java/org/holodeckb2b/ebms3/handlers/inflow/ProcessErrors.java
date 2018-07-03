@@ -18,7 +18,7 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
+
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,8 +28,6 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
-import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
-import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit.Direction;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -104,7 +102,7 @@ public class ProcessErrors extends BaseHandler {
         }
 
         // Always log the error signal, even if its processing may fail later
-        if (isWarning(errSignal))
+        if (MessageUnitUtils.isWarning(errSignal))
             errorLog.warn(MessageUnitUtils.errorSignalToString(errSignal));
         else
             errorLog.error(MessageUnitUtils.errorSignalToString(errSignal));
@@ -137,12 +135,12 @@ public class ProcessErrors extends BaseHandler {
         } else {
             // Change the processing state of the found message unit(s)
             for (final IMessageUnitEntity mu : refdMessages) {
-                if (isWarning(errSignal)) {
+                if (MessageUnitUtils.isWarning(errSignal)) {
                     log.debug("Error level is warning, set processing state of referenced message ["
                               + mu.getMessageId() + "] to warning");
                     storageManager.setProcessingState(mu, ProcessingState.WARNING);
                 } else {
-                    log.debug("Error level is warning, set processing state of referenced message ["
+                    log.debug("Error level is failure, set processing state of referenced message ["
                               + mu.getMessageId() + "] to failure");
                     storageManager.setProcessingState(mu, ProcessingState.FAILURE);
                 }
@@ -151,25 +149,5 @@ public class ProcessErrors extends BaseHandler {
             // Errors may need to be delivered to bussiness app which can be done now
             storageManager.setProcessingState(errSignal, ProcessingState.READY_FOR_DELIVERY);
         }
-    }
-
-
-
-    /**
-     * Determines if this Error signal only contains errors with severity <i>warning</i>.
-     *
-     * @param errorSignal   The Error signal to check
-     * @return              <code>true</code> if all errors in the signal have severity <i>warning</i>,<br>
-     *                      <code>false</code> otherwise
-     */
-    private boolean isWarning(final IErrorMessage errorSignal) {
-        boolean isWarning = true;
-
-        final Iterator<IEbmsError>  errs = errorSignal.getErrors().iterator();
-        while (errs.hasNext() && isWarning) {
-            isWarning = (errs.next().getSeverity() == IEbmsError.Severity.WARNING);
-        }
-
-        return isWarning;
     }
 }
