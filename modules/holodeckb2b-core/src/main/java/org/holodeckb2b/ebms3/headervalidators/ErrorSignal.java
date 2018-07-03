@@ -68,12 +68,19 @@ public class ErrorSignal {
         String refToMessageId = errorInfo.getRefToMessageId();
         final Iterator<IEbmsError> it = errorInfo.getErrors().iterator();
         boolean consistent = true;
-        if (refToMessageId == null && !HolodeckB2BCoreInterface.getConfiguration().useStrictErrorRefCheck())
+        boolean allowNull = false;
+        if (Utils.isNullOrEmpty(refToMessageId)
+                && !HolodeckB2BCoreInterface.getConfiguration().useStrictErrorRefCheck()) {
             // Signal level ref == null => all individual refs should be same, take first as leading
             refToMessageId = it.next().getRefToMessageInError();
+        } else
+            allowNull = true;
 
-        while (it.hasNext() && consistent)
-            consistent = Utils.nullSafeEqual(refToMessageId, it.next().getRefToMessageInError());
+        while (it.hasNext() && consistent) {
+            final String errorRefTo = it.next().getRefToMessageInError();
+            consistent = (allowNull && Utils.isNullOrEmpty(errorRefTo))
+                                                                    || Utils.nullSafeEqual(refToMessageId, errorRefTo);
+        }
 
         if (!consistent)
             errDetails.append("Error Signal contains inconsistent references\n");
