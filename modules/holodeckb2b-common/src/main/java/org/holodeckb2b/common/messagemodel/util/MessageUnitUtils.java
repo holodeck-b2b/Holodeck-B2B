@@ -17,6 +17,7 @@
 package org.holodeckb2b.common.messagemodel.util;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Optional;
 
 import org.holodeckb2b.common.util.Utils;
@@ -92,7 +93,7 @@ public class MessageUnitUtils {
         if (Utils.isNullOrEmpty(refToMessageId) && msgUnit instanceof IErrorMessage) {
             // For errors the reference can also be included in the Error elements, but they all need to be the same,
             // so take the first one
-            final Collection<IEbmsError> errors = (Collection<IEbmsError>) ((IErrorMessage) msgUnit).getErrors();
+            final Collection<IEbmsError> errors = ((IErrorMessage) msgUnit).getErrors();
             refToMessageId = errors.isEmpty() ? null : errors.iterator().next().getRefToMessageInError();
         }
         return refToMessageId;
@@ -156,4 +157,23 @@ public class MessageUnitUtils {
     		}
     		return result;
     }
+    
+    /**
+     * Determines if this Error signal only contains errors with severity <i>warning</i>.
+     *
+     * @param errorSignal   The Error signal to check
+     * @return              <code>true</code> if all errors in the signal have severity <i>warning</i>,<br>
+     *                      <code>false</code> otherwise
+     * @since HB2B_NEXT_VERSION 
+     */
+    public static boolean isWarning(final IErrorMessage errorSignal) {
+        boolean isWarning = true;
+
+        final Iterator<IEbmsError>  errs = errorSignal.getErrors().iterator();
+        while (errs.hasNext() && isWarning) {
+            isWarning = (errs.next().getSeverity() == IEbmsError.Severity.WARNING);
+        }
+
+        return isWarning;
+    }    
 }
