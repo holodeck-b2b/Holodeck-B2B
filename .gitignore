@@ -42,10 +42,11 @@ nb-configuration.xml
 ehthumbs.db
 Thumbs.db
 
-/.project
-/.settings/
+.project
+.settings/
+.classpath
 
 *.iml
-/.idea
+.idea
 /modules/holodeckb2b-core/nbproject/
 /modules/holodeckb2b-persistency/nbproject/
