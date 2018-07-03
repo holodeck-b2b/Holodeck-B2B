@@ -18,6 +18,7 @@ package org.holodeckb2b.common.util;
 
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
@@ -122,5 +123,24 @@ public class MessageIdUtils {
             return false;
         else
             return messageId.matches(RFC2822_MESSAGE_ID);
+    }
+    
+    /**
+     * Strips the brackets (&lt; and &gt;) from the given MessageId string. 
+     * 
+     * @param messageId	The MessageId string
+     * @return	The messageId value without brackets
+     * @since HB2B_NEXT_VERSION
+     */
+    public static String stripBrackets(final String messageId) {
+    	if (messageId == null)
+    		return null;
+    	
+    	String msgIdOnly = messageId;
+        if (msgIdOnly.startsWith("<"))
+        	msgIdOnly = msgIdOnly.substring(1);
+        if (msgIdOnly.endsWith(">"))
+        	msgIdOnly = msgIdOnly.substring(0, msgIdOnly.length() - 1);
+        return msgIdOnly;
     }
 }
