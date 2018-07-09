@@ -17,59 +17,71 @@
 1. Contents of this directory
 =============================
 
-This directory is used by default to store the Java keystore files that 
-hold the certificates that are used for signing and encrypting messages.
+This directory is used by the default security provider to store the Java
+keystore files that hold the certificates that are used for processing signed
+and/or encrypted messages.
 
-It contains two keystores:
+It contains three keystores:
 
-1) "publickeys.jks" holding the public keys. These are used to validate
-   the signature of a received message and to encrypt sent messages.
+1) "publickeys.jks" holding the public keys of trading partners. These are used
+   to validate the signature of a received message and/or to encrypt messages
+   sent to the partner.
 
 2) "privatekeys.jks" holding the private keys. These are used to sign
    sent messages and decrypt received messages.
 
+3) "trustedcerts.jks" holding certificates of trusted certificate authorities.
+   These are used to the validate the trust in certificates used for signing
+   of received messages.
+
 The distribution package by default includes empty keystores, with simple
-passwords: "secret" for the private one and "nosecrets" for the public
-one. It is HIGHLY RECOMMENDED to change these passwords to safer
-ones, see below how to configure Holodeck B2B for the new passwords.
+passwords: "secret" for the private one, "nosecrets" for the public
+one and "trusted" for the one with CA certificates. It is HIGHLY RECOMMENDED to
+change these passwords to safer ones, see below how to configure Holodeck B2B
+for the new passwords.
 
 2. Configuring Holodeck B2B
 ===========================
 
-To give Holodeck B2B access to the keystores you need to configure the 
-keystore passwords in the Holodeck B2B configuration file which is found 
+To give Holodeck B2B access to the keystores you need to configure the
+keystore passwords in the Holodeck B2B configuration file which is found
 in «Holodeck B2B base dir»/conf/holodeckb2b.xml
-Set "PrivateKeyStorePassword" and "PublicKeyStorePassword" parameters to
-the passwords of the respective keystores. 
+Set "PrivateKeyStorePassword", "PublicKeyStorePassword" and "TrustKeyStorePassword"
+parameters to the passwords of the respective keystores.
 
-NOTE: If you want the change the passwords for the default keystores you
-must also change the password on the keystore files by executing the
-following command: 
+NOTE: If you want the change the passwords for the default keystores you must
+also change the password on the keystore files by executing the following
+command:
     keytool -storepasswd -keystore «path to keystore»
 
-Also the location where Holodeck B2B should look for the keystores can be 
-specified by setting the "PrivateKeyStorePath" and "PublicKeyStorePath"
-parameters. 
+Also the location where Holodeck B2B should look for the keystores can be
+specified by setting the "PrivateKeyStorePath", "PublicKeyStorePath" and
+"TrustKeyStorePath" parameters.
 
 3. Adding certificates and private keys
 =======================================
 
-Each certificate or private key that is added to a keystore is assigned an
-id, called the alias. This alias is used in the P-Mode to identify the 
-certificate / key that must be used for processing the message. It is 
-RECOMMENDED to use descriptive aliases for easy identification.
+Each certificate of a trading partner (added to "publickeys.jks") or private key
+that is added to a keystore is assigned an identifier, called the alias. This
+alias is used in the P-Mode to identify the certificate / key that must be used
+for processing the message. It is RECOMMENDED to use descriptive aliases for
+easy identification.
+Although the aliases of trusted certificate authorities' certificates (in
+"trustedcerts.jks") are not used in the P-Modes it is still RECOMMENDED to use
+meaningful aliases for these too.
 
 To add a X.509v3 certificate holding the public key of a trading
-partner to the public keystore use the following command:
+partner or trusted CA to the public or trusted keystore use the following
+command:
 
 keytool -importcert \
-        -keystore «Holodeck B2B base dir»/repository/certs/publickeys.jks \
+        -keystore «location of the keystore» \
         -storepass «your keystore password» \
         -alias «alias for the cert in keystore» \
-        -file «path to certificate file» 
+        -file «path to certificate file»
 
-To add a PKCS#12 formatted certificate holding the private of a 
-trading partner to the private keystore use the following command:
+To add a PKCS#12 formatted certificate holding the private of a trading partner
+to the private keystore use the following command:
 
 keytool -importkeystore -srcstoretype PKCS12 \
         -srckeystore «path to certificate file» \
@@ -77,10 +89,10 @@ keytool -importkeystore -srcstoretype PKCS12 \
         -srcstorepass «the password to access the PKCS#12 file» \
         -destkeystore «Holodeck B2B base dir»/repository/certs/privatekeys.jks \
         -deststorepass «your keystore password» \
-        -destalias «alias for cert in keystore» \ 
+        -destalias «alias for cert in keystore» \
         -destkeypass «the password to set on the new entry in the keystore»
 
-NOTE: Use the following command to list the certificates in the PKCS#12 
+NOTE: Use the following command to list the certificates in the PKCS#12
 file and show their names / aliases:
 keytool -list -v -storetype pkcs12 -keystore «path to certificate file»
 
@@ -88,12 +100,10 @@ keytool -list -v -storetype pkcs12 -keystore «path to certificate file»
 ===========
 
 The examples/certs directory contains two sample keystores which contain
-the certificates that are used in the example P-Modes (contained in 
+the certificates that are used in the example P-Modes (contained in
 examples/pmodes). Their passwords are the same as the default keystores.
 You can therefore just overwrite the default keystores with the example
 keystores.
 
-When using the private key in a P-Mode the password is 
+When using the private key in a P-Mode the password is
 "Example" + 'A' | 'B' | 'C' | 'D'
-
-
