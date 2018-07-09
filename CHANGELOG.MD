@@ -6,11 +6,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Use 'exec' to start the Java program, instead of forking the process to simplify management of
   the Java process.
+* Updated the example certificates and key stores to extend validity of certificates
 
 ### Fixed
 * Checking of references in Error Signal has been corrected so Error with the reference contained
   only in the Errors is not rejected.
-* Exception when processing an invalid SOAP message [#15](https://github.com/holodeck-b2b/Holodeck-B2B/issues/15) 
+* Exception when processing an invalid SOAP message [#15](https://github.com/holodeck-b2b/Holodeck-B2B/issues/15)
+* Updated README regarding certificate management in `repository/certs` folder to include also
+  the keystore with the certificates of trusted certificate authorities.
 
 ## 3.1.2
 ##### 2018-05-28
