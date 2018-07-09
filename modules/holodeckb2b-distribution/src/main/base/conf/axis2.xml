@@ -189,10 +189,10 @@
                 class="org.apache.axis2.jaxws.dispatchers.MustUnderstandValidationDispatcher"/>
             <handler name="HB2BDispatcher" class="org.holodeckb2b.ebms3.handlers.inflow.HolodeckB2BDispatcher"/>
         </phase>
-        <phase name="ebms3InPhase"/>
+        <phase name="protocolInPhase"/>
     </phaseOrder>
     <phaseOrder type="OutFlow">
-        <phase name="ebms3OutPhase"/>
+        <phase name="protocolOutPhase"/>
         <phase name="Security"/>
         <phase name="MessageOut">
             <handler name="HB2BIdentifier" class="org.holodeckb2b.ebms3.handlers.outflow.HTTPProductIdentifier"/>
@@ -208,10 +208,10 @@
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
             <handler name="HB2BDispatcher" class="org.holodeckb2b.ebms3.handlers.inflow.HolodeckB2BDispatcher"/>
         </phase>
-        <phase name="ebms3InPhase"/>
+        <phase name="protocolInPhase"/>
     </phaseOrder>
     <phaseOrder type="OutFaultFlow">
-        <phase name="ebms3OutPhase"/>
+        <phase name="protocolOutPhase"/>
         <phase name="Security"/>
         <phase name="MessageOut">
             <handler name="HB2BIdentifier" class="org.holodeckb2b.ebms3.handlers.outflow.HTTPProductIdentifier"/>
