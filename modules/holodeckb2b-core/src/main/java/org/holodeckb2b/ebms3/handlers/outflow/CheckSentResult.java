@@ -124,7 +124,7 @@ public class CheckSentResult extends BaseHandler {
                         }
                         transferEvent = new MessageTransferEvent(mu);
                     }
-                    log.debug("Processing state for message unit [" + mu.getMessageId() + "] changed to"
+                    log.debug("Processing state for message unit [" + mu.getMessageId() + "] changed to "
                                 + mu.getCurrentProcessingState().getState());
                     // Raise a message processing event about the transfer
                     HolodeckB2BCore.getEventProcessor().raiseEvent(transferEvent, mc);
