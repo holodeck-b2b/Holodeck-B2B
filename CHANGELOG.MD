@@ -30,7 +30,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   message unit can be stored. NOTE: This description is introduced for future use, the Holodeck B2B Core does not
   yet use it!
 * Added optional parameter to `IQueryManager.getMessageUnitsWithId()` to indicate that only message units flowing in
-  a specific direction should be returned 
+  a specific direction should be returned
 
 ### Changed
 * The default URL path where Holodeck B2B receives AS4 messages and which needs to be used by the _Sending MSH_ has been
@@ -54,8 +54,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   units into account when determining if a user message is already processed and should be considered a duplicate.
 * Changed the API specification of the query methods in `IQueryManager` to return **empty** collections instead of
   `null` when no matching message units have been found  
-* Updated to Axis2 version 1.7.7
-* The log name for message processing now includes indication of the message protocol being processed.
+* Updated to Axis2 version 1.7.7 and Bouncy Castle version 1.59
+* The log name for message processing now includes indication of the message protocol being processed. The message
+  protocol is retrieved from the _HandledMessagingProtocol_ parameter of the engaged Holodeck B2B module.
+* Renamed the Axis2 phases that include the handlers for processing the messages to more generic _protocolInPhase_
+  and _protocolOutPhase_ making easier to install extensions for other messaging protocols.
 
 ### Deprecated
 * The configuration parameter (`IConfiguation.allowSignalBundling()`) which was used to indicate that it was allowed to
@@ -137,7 +140,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   should be logged or only the ones that contain an Error with severity _failure_ (see `log4j2.xml` for more info)
 
 ### Deprecated
-* The single parameter version of the `IMessageSubmitter.submitMessage(IUserMessage)` method has been deprecated. The 
+* The single parameter version of the `IMessageSubmitter.submitMessage(IUserMessage)` method has been deprecated. The
   new version with the additional parameter to indicate whether payload files should be deleted should be used.
 
 ### Removed

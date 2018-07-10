@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>4.0.0-SNAPSHOT-13</version>
+        <version>4.0.0-SNAPSHOT-14</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>holodeckb2b-security</artifactId>
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.54</version>
+            <version>1.59</version>
         </dependency>
 
         <!-- Logging -->
