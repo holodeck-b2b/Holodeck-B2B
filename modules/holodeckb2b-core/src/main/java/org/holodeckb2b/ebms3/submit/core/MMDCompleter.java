@@ -18,6 +18,7 @@ package org.holodeckb2b.ebms3.submit.core;
 
 import java.util.Collection;
 import java.util.Iterator;
+
 import org.holodeckb2b.common.messagemodel.AgreementReference;
 import org.holodeckb2b.common.messagemodel.CollaborationInfo;
 import org.holodeckb2b.common.messagemodel.Service;
@@ -131,7 +132,7 @@ final class MMDCompleter {
         Collection<IPartyId> sPartyIds = null;
         String  sRole = null;
         if (submissionSender != null) {
-            sPartyIds = (Collection<IPartyId>) submissionSender.getPartyIds();
+            sPartyIds = submissionSender.getPartyIds();
             sRole = submissionSender.getRole();
         }
 
@@ -143,7 +144,7 @@ final class MMDCompleter {
         Collection<IPartyId> pmPartyIds = null;
         String  pmRole = null;
         if (pmodeSender != null) {
-            pmPartyIds = (Collection<IPartyId>) pmodeSender.getPartyIds();
+            pmPartyIds = pmodeSender.getPartyIds();
             pmRole = pmodeSender.getRole();
         }
 
@@ -190,7 +191,7 @@ final class MMDCompleter {
         Collection<IPartyId> sPartyIds = null;
         String  sRole = null;
         if (mr != null) {
-            sPartyIds = (Collection<IPartyId>) mr.getPartyIds();
+            sPartyIds = mr.getPartyIds();
             sRole = mr.getRole();
         }
         // Get receiver info from P-Mode
@@ -200,7 +201,7 @@ final class MMDCompleter {
         Collection<IPartyId> pmPartyIds = null;
         String  pmRole = null;
         if (pr != null) {
-            pmPartyIds = (Collection<IPartyId>) pr.getPartyIds();
+            pmPartyIds = pr.getPartyIds();
             pmRole = pr.getRole();
         }
 
@@ -259,17 +260,15 @@ final class MMDCompleter {
             case 2 :
                 sci.setAction(pa);
         }
+
+        completeService();
+        completeAgreement();
+
         // Check that correct Service is specified when test Action URI is used
         if (sci.getAction().equals(EbMSConstants.TEST_ACTION_URI)
             && !sci.getService().getName().equals(EbMSConstants.TEST_SERVICE_URI))
             throw new MessageSubmitException("Service must be " + EbMSConstants.TEST_SERVICE_URI
                                              + "if Action is set to " + EbMSConstants.TEST_ACTION_URI);
-
-        // This set will copy information into merged info set, therefor set after info is made complete
-        submission.setCollaborationInfo(sci);
-
-        completeService();
-        completeAgreement();
     }
 
     /**
@@ -292,7 +291,7 @@ final class MMDCompleter {
             throw new MessageSubmitException("Missing required information on the receiver of the message");
         else if (ssi == null)
             // Take P-Mode info
-            ((CollaborationInfo) submission.getCollaborationInfo()).setService(psi);
+            submission.getCollaborationInfo().setService(psi);
         else if (psi != null) {
             // Both P-Mode and submitted MMD contain service info, ensure they are equal
             if (!CompareUtils.areEqual(ssi, psi))
