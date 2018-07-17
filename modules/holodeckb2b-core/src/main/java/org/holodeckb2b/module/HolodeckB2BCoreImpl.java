@@ -18,6 +18,7 @@ package org.holodeckb2b.module;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisDescription;
@@ -163,8 +164,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         }
 
         log.debug("Initialize the P-Mode manager");
-        pmodeManager = new PModeManager(instanceConfiguration.getPModeValidatorImplClass(),
-                                        instanceConfiguration.getPModeStorageImplClass());
+        pmodeManager = new PModeManager(instanceConfiguration);
 
         log.debug("Create the processor for message processing events");
         final String eventProcessorClassname = instanceConfiguration.getMessageProcessingEventProcessor();

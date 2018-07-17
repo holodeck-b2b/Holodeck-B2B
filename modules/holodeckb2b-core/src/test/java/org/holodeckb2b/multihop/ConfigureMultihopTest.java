@@ -16,6 +16,10 @@
  */
 package org.holodeckb2b.multihop;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -28,7 +32,11 @@ import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.*;
+import org.holodeckb2b.ebms3.packaging.AgreementRefElement;
+import org.holodeckb2b.ebms3.packaging.CollaborationInfoElement;
+import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.ebms3.packaging.SOAPEnv;
+import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
@@ -40,7 +48,6 @@ import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.Protocol;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -68,8 +75,7 @@ public class ConfigureMultihopTest {
         HolodeckB2BCoreInterface.setImplementation(core);
         InternalConfiguration initialConf =
                 (InternalConfiguration)HolodeckB2BCoreInterface.getConfiguration();
-        manager = new PModeManager(initialConf.getPModeValidatorImplClass(),
-                initialConf.getPModeStorageImplClass());
+        manager = new PModeManager(initialConf);
     }
 
     @Before

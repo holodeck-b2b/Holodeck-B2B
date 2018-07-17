@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.module;
 
+import static org.mockito.Mockito.mock;
+
 import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.common.testhelpers.Config;
 import org.holodeckb2b.common.util.Utils;
@@ -40,7 +42,6 @@ import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.InMemoryPModeSet;
 import org.holodeckb2b.pmode.PModeManager;
 import org.holodeckb2b.security.DefaultProvider;
-import static org.mockito.Mockito.mock;
 
 /**
  * Is utility class for testing the e-SENS connector that simulates the Holodeck B2B Core.
@@ -142,8 +143,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
     @Override
     public IPModeSet getPModeSet() {
         if (pmodeSet == null)
-            pmodeSet = new PModeManager(config.getPModeValidatorImplClass(),
-                    config.getPModeStorageImplClass());
+            pmodeSet = new PModeManager(config);
 
         return pmodeSet;
     }

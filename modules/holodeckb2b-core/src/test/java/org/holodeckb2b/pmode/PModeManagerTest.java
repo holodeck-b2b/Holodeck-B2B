@@ -16,20 +16,21 @@
  */
 package org.holodeckb2b.pmode;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
-import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 17:28 09.09.16
@@ -50,8 +51,7 @@ public class PModeManagerTest {
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
         InternalConfiguration initialConf =
                 (InternalConfiguration)HolodeckB2BCoreInterface.getConfiguration();
-        manager = new PModeManager(initialConf.getPModeValidatorImplClass(),
-                initialConf.getPModeStorageImplClass());
+        manager = new PModeManager(initialConf);
     }
 
     @Before

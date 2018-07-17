@@ -31,6 +31,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   yet use it!
 * Added optional parameter to `IQueryManager.getMessageUnitsWithId()` to indicate that only message units flowing in
   a specific direction should be returned
+* Added default initialization method to `IPModeSet` to pass the Holodeck B2B _home directory_ as parameter 
+  on creation of the P-Mode storage implementation.
 
 ### Changed
 * The default URL path where Holodeck B2B receives AS4 messages and which needs to be used by the _Sending MSH_ has been

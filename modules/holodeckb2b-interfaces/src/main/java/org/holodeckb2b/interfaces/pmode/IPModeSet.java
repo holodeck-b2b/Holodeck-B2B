@@ -18,6 +18,7 @@ package org.holodeckb2b.interfaces.pmode;
 
 
 import java.util.Collection;
+
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
@@ -30,6 +31,15 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IPModeSet {
+	
+	/**
+	 * Initializes the P-Mode set. A default, <i>NOP</i>, implementation is provided for backward compatibility and
+	 * easy implementation.   
+	 * 
+	 * @param hb2bHomeDir	Path of the Holodeck B2B home directory.
+	 * @since HB2B_NEXT_VERSION
+	 */
+	default void init(final String hb2bHomeDir) {};
 
     /**
      * Gets the P-Mode with the given <b>PMode.id</b>
@@ -41,7 +51,7 @@ public interface IPModeSet {
      * @return      The {@link IPMode} with the given id if it exists in the set, or<br>
      *              <code>null</code> when there is no P-Mode in the set with the given id.
      */
-    public IPMode get(String id);
+    IPMode get(String id);
 
     /**
      * Gets all P-Modes currently in the set.
@@ -50,7 +60,7 @@ public interface IPModeSet {
      *
      * @return      The complete {@link Collection} of {@link IPMode}s
      */
-    public Collection<IPMode> getAll();
+    Collection<IPMode> getAll();
 
     /**
      * Determines whether the set contains a P-Mode with the given id.
@@ -59,7 +69,7 @@ public interface IPModeSet {
      * @return      <code>true</code> when the set contains a P-Mode with the given id,<br>
      *              <code>false</code> otherwise.
      */
-    public boolean containsId(String id);
+    boolean containsId(String id);
 
     /**
      * Adds a P-Mode to the set.
@@ -72,7 +82,7 @@ public interface IPModeSet {
      * @throws PModeSetException When the P-Mode can not be added to the set, for example because the set already
      *          contains a P-Mode with the same id.
      */
-    public String add(IPMode pmode) throws PModeSetException;
+    String add(IPMode pmode) throws PModeSetException;
 
     /**
      * Replaces the configuration of a P-Mode in the set.
@@ -81,7 +91,7 @@ public interface IPModeSet {
      * @throws PModeSetException When the P-Mode can not be replaced by the given P-Mode. If this exception occurs it is
      *          not guaranteed that either the old or new configuration is loaded.
      */
-    public void replace(IPMode pmode) throws PModeSetException;
+    void replace(IPMode pmode) throws PModeSetException;
 
     /**
      * Removes the P-Mode with the given id from the set.
@@ -92,7 +102,7 @@ public interface IPModeSet {
      * @throws PModeSetException When an error occurs while removing the P-Mode from the set. If this exception occurs
      *          it is not guaranteed that the P-Mode is removed.
      */
-    public void remove(String id) throws PModeSetException;
+    void remove(String id) throws PModeSetException;
 
     /**
      * Removes all P-Modes from the set.
@@ -100,5 +110,5 @@ public interface IPModeSet {
      *
      * @throws PModeSetException When an error occurs while removing all P-Modes from the set.
      */
-    public void removeAll() throws PModeSetException;
+    void removeAll() throws PModeSetException;
 }
