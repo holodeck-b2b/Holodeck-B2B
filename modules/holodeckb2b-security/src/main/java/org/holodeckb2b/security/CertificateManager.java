@@ -27,6 +27,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.crypto.Crypto;
@@ -35,7 +36,6 @@ import org.apache.wss4j.common.ext.WSSecurityException;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.security.ICertificateManager;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
-import org.holodeckb2b.interfaces.security.ICertificateManager.CertificateUsage;
 import org.holodeckb2b.security.util.KeystoreUtils;
 import org.holodeckb2b.security.util.SecurityUtils;
 
@@ -98,6 +98,7 @@ class CertificateManager implements ICertificateManager {
      * @param encryptionKeystorePwd     Password of the encryption keystore
      * @param trustKeystorePath         Path to keystore holding the certificates used for signature verification
      * @param trustKeystorePwd          Password of the trust keystore
+     * @param inCompatibilityMode		Indicates whether the secruity provider runs in compatibility mode
      * @throws SecurityProcessingException When the keystores can not be accessed given the provided configuration.
      */
     CertificateManager(final String privateKeystorePath, final String privateKeystorePwd,
