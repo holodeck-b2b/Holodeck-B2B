@@ -564,7 +564,7 @@ Although the specification allows implementations not to compress payloads using
                         </xs:annotation>
                         <xs:simpleType>
                             <xs:restriction base="xs:string">
-                                <xs:pattern value="[1-9]([0-9])*(,[1-9]([0-9])*)*"/>
+                                <xs:pattern value="[1-9]([0-9])*(,[0-9]+)*"/>
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:element>
