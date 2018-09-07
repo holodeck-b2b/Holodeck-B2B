@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandler
  * An implementation of {@link IMessageProcessingEventHandlerFactory} for testing the event handler configuration
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class EventHandlerFactory implements IMessageProcessingEventHandlerFactory<EventHandler>{
+public class EventHandlerFactory implements IMessageProcessingEventHandlerFactory {
 
     @Override
     public void init(final Map<String, ?> settings) {

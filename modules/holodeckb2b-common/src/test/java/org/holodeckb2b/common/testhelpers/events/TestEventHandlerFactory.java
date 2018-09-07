@@ -1,9 +1,9 @@
 package org.holodeckb2b.common.testhelpers.events;
 
+import java.util.Map;
+
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandlerFactory;
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
-
-import java.util.Map;
 
 /**
  * Created at 16:36 15.07.17
@@ -11,7 +11,7 @@ import java.util.Map;
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class TestEventHandlerFactory
-        implements IMessageProcessingEventHandlerFactory<TestEventHandler> {
+        implements IMessageProcessingEventHandlerFactory {
     @Override
     public void init(Map settings)
             throws MessageProccesingEventHandlingException {

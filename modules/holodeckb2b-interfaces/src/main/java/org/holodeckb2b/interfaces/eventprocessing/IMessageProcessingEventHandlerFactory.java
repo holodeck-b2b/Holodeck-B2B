@@ -23,10 +23,9 @@ import java.util.Map;
  * IMessageProcessingEventHandler}s.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @param <T>   The type of event handler the implementing factory class can create
  * @since 2.1.0
  */
-public interface IMessageProcessingEventHandlerFactory<T extends IMessageProcessingEventHandler> {
+public interface IMessageProcessingEventHandlerFactory {
 
     /**
      * Initializes the factory with the settings provided by the {@link IMessageProcessingEventConfiguration}. The
@@ -43,8 +42,8 @@ public interface IMessageProcessingEventHandlerFactory<T extends IMessageProcess
      * Gets a {@link IMessageProcessingEventHandler} object for handling an event. It is up to the factory
      * implementation to decide whether a new object must be created or that an existing handler object can be reused.
      *
-     * @return A instance of class <code>T</code> ready for handling an event.
+     * @return A event handler ready for handling an event.
      * @throws MessageProccesingEventHandlingException When the factory is unable to to create event handlers.
      */
-    public T createHandler() throws MessageProccesingEventHandlingException;
+    public IMessageProcessingEventHandler createHandler() throws MessageProccesingEventHandlingException;
 }

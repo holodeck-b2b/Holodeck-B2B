@@ -16,6 +16,14 @@
  */
 package org.holodeckb2b.common.events;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.holodeckb2b.common.testhelpers.pmode.EventHandlerConfig;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandler;
@@ -23,12 +31,6 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandler
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 14:58 14.01.17
@@ -88,7 +90,7 @@ public class EventUtilsTest {
         }
     }
 
-    class EventHandlerFactory implements IMessageProcessingEventHandlerFactory<EventForTestHandler> {
+    class EventHandlerFactory implements IMessageProcessingEventHandlerFactory {
 
         @Override
         public void init(Map settings) throws MessageProccesingEventHandlingException {
