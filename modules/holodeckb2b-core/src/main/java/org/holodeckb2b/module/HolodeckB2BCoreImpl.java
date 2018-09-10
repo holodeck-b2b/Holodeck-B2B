@@ -223,6 +223,9 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         }
         log.info("Succesfully loaded " + securityProvider.getName() + " as security provider");
 
+        log.debug("Create list of available message delivery methods");
+        msgDeliveryFactories = new HashMap<>();
+
         // From this point on other components can be started which need access to the Core
         log.debug("Make Core available to outside world");
         HolodeckB2BCore.setImplementation(this);
@@ -246,9 +249,6 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         //  worker pool
         pullWorkers = new WorkerPool(PullConfiguration.PULL_WORKER_POOL_NAME);
         log.debug("Pull worker pool created");
-
-        log.debug("Create list of available message delivery methods");
-        msgDeliveryFactories = new HashMap<>();
 
         log.info("Holodeck B2B Core module STARTED.");
     }
