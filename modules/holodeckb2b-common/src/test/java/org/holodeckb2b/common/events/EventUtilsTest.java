@@ -16,19 +16,15 @@
  */
 package org.holodeckb2b.common.events;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.holodeckb2b.common.testhelpers.pmode.EventHandlerConfig;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandler;
-import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandlerFactory;
-import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.junit.Test;
 
@@ -53,21 +49,6 @@ public class EventUtilsTest {
         assertFalse(EventUtils.shouldHandleEvent(config, unhandledEvent));
     }
 
-    @Test
-    public void testGetConfiguredHandler() throws Exception {
-        EventForTest event = new EventForTest(null);
-
-        EventHandlerConfig config = new EventHandlerConfig();
-        List<Class<? extends  IMessageProcessingEvent>> list = new ArrayList<>();
-        list.add(event.getClass());
-        config.setHandledEvents(list);
-        config.setFactoryClass(EventHandlerFactory.class.getName());
-
-        assertEquals(
-                (new EventHandlerFactory()).createHandler().getClass(),
-                EventUtils.getConfiguredHandler(config));
-    }
-
     class EventForTest extends AbstractMessageProcessingEvent {
 
         public EventForTest(IMessageUnit subject) {
@@ -90,16 +71,4 @@ public class EventUtilsTest {
         }
     }
 
-    class EventHandlerFactory implements IMessageProcessingEventHandlerFactory {
-
-        @Override
-        public void init(Map settings) throws MessageProccesingEventHandlingException {
-
-        }
-
-        @Override
-        public EventForTestHandler createHandler() throws MessageProccesingEventHandlingException {
-            return new EventForTestHandler();
-        }
-    }
 }

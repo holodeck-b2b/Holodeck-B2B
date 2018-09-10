@@ -16,15 +16,11 @@
  */
 package org.holodeckb2b.common.events;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.List;
 
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
-import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandler;
-import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandlerFactory;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
@@ -67,39 +63,5 @@ public final class EventUtils {
         } // else no restriction specified on message type, so automatically applies to this handler
 
         return shouldHandle;
-    }
-
-    /**
-     * Gets the handler implementation class that is configured in the given handler configuration.
-     * <p>This class is retrieved by checking the <i>actual type</i> used in the implementation of the factory class for
-     * the generic {@link IMessageProcessingEventHandlerFactory} interface.
-     *
-     * @param handlerCfg    The event handler configuration to check
-     * @return  A {@link Class} object that represent the {@link IMessageProcessingEventHandler} implementation that
-     *          will handle events configured by the given configuration,<br>
-     *          or <code>null</code> if the handler class could not be determined.
-     */
-    public static Class<? extends IMessageProcessingEventHandler> getConfiguredHandler(
-                                                                    final IMessageProcessingEventConfiguration handlerCfg) {
-        final String handlerClassname = handlerCfg.getFactoryClass();
-        try {
-            final Class<?> factoryClass = Class.forName(handlerClassname);
-            // Check that it indeed is handler factory
-            if (IMessageProcessingEventHandlerFactory.class.isAssignableFrom(factoryClass)) {
-                // Get all the generic interface implemented by the factory class
-                final Type[]  interfaces = factoryClass.getGenericInterfaces();
-                for (final Type intf : interfaces) {
-                    if (intf instanceof ParameterizedType
-                      && ((ParameterizedType) intf).getRawType().equals(IMessageProcessingEventHandlerFactory.class)) {
-                        // This the IMessageProcessingEventHandlerFactory interface, check the actual handler type
-                        return (Class<? extends IMessageProcessingEventHandler>)
-                                                                ((ParameterizedType) intf).getActualTypeArguments()[0];
-                    }
-                }
-            }
-        } catch (final ClassNotFoundException noSuchClass) {
-        }
-
-        return null;
     }
 }

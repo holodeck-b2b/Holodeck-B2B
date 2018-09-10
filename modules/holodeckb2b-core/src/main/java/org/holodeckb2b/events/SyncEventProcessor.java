@@ -17,6 +17,7 @@
 package org.holodeckb2b.events;
 
 import java.util.List;
+
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -106,7 +107,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
             // Check each configured if it needs to handle this event
             for (final IMessageProcessingEventConfiguration c : eventHandlers) {
                 final boolean shouldHandle = EventUtils.shouldHandleEvent(c, event);
-                final String handlerClassname = EventUtils.getConfiguredHandler(c).getSimpleName();
+                final String handlerClassname = c.getFactoryClass();
                 log.debug(handlerClassname + (shouldHandle ? " should" : " does not") + " handle " + eventType + " for "
                           + msgUnitType + " with msgId=[" + messageId + "]");
                 if (shouldHandle) {
@@ -114,7 +115,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
                     IMessageProcessingEventHandlerFactory factory = null;
                     try {
                         factory = (IMessageProcessingEventHandlerFactory)
-                                                                    Class.forName(c.getFactoryClass()).newInstance();
+                                                                    	Class.forName(handlerClassname).newInstance();
                     }   catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
                         log.error("Could not create factory instance (specified class name=" + c.getFactoryClass()
                                   + ") due to a " + ex.getClass().getSimpleName());
