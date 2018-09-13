@@ -47,7 +47,7 @@ public class SecurityProcessingException extends Exception {
         super(message);
     }
 
-    public SecurityProcessingException(final boolean isPolicyError, final String message) {
+    public SecurityProcessingException(final String message, final boolean isPolicyError) {
         super(message);
         this.isPolicyViolation = isPolicyError;
     }
@@ -56,6 +56,11 @@ public class SecurityProcessingException extends Exception {
         super(message, cause);
     }
 
+    public SecurityProcessingException(final String message, final Throwable cause, final boolean isPolicyError) {
+    	super(message, cause);
+    	this.isPolicyViolation = isPolicyError;
+    }
+    
     /**
      * Indicates whether this found error in processing of the WS-Security headers is caused by a violation of the
      * security policies.
