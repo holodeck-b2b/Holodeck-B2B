@@ -46,6 +46,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   `org.holodeckb2b.interfaces.persistency.IPersistencyProvider.init()` method
 * Renamed method `org.holodeckb2b.interfaces.pmode.validation.IPModeValidator.isPModeValid()` to
   `org.holodeckb2b.interfaces.pmode.validation.IPModeValidator.validatePMode()`
+* Extracted `Direction` enumeration from `IMessageUnit` into stand alone
 * The ebMS Error returned to the sender in case the signature of a _User Message_ does not include all
   payloads of the message has been changed from _ValueInconsistent_ to _PolicyNonCompliance_
 * Moved classes in `org.holodeckb2b.interfaces.pmode.security` to `org.holodeckb2b.interfaces.pmode`
@@ -55,7 +56,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Refactored `IQueryManager.isAlreadyDelivered()` to `IQueryManager.isAlreadyProcessed()` to also take failed message
   units into account when determining if a user message is already processed and should be considered a duplicate.
 * Changed the API specification of the query methods in `IQueryManager` to return **empty** collections instead of
-  `null` when no matching message units have been found  
+  `null` when no matching message units have been found 
+* Changed argument of the `IQueryManager.isAlreadyProcessed()` to full _message unit_ instead of just the
+  messageId 
 * Updated to Axis2 version 1.7.7 and Bouncy Castle version 1.59
 * The log name for message processing now includes indication of the message protocol being processed. The message
   protocol is retrieved from the _HandledMessagingProtocol_ parameter of the engaged Holodeck B2B module.
