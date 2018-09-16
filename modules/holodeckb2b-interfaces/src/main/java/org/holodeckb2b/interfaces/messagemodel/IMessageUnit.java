@@ -44,13 +44,6 @@ import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 public interface IMessageUnit {
 
     /**
-     * Enumeration to define the direction in which the message unit flows.
-     *
-     * @since  3.0.0
-     */
-    enum Direction { IN, OUT };
-
-    /**
      * Gets the direction in which this message unit is sent, i.e. received or sent by Holodeck B2B.
      *
      * @return The direction in which this message unit flows

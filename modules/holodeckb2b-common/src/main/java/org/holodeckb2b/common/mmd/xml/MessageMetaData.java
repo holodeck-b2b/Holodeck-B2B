@@ -25,6 +25,7 @@ import java.util.List;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;

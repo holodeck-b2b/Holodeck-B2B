@@ -19,6 +19,8 @@ package org.holodeckb2b.interfaces.persistency.dao;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -54,7 +56,7 @@ public interface IQueryManager {
      */
     <T extends IMessageUnit, V extends IMessageUnitEntity> List<V>
                                                  getMessageUnitsInState(final Class<T> type,
-                                                                        final IMessageUnit.Direction direction,
+                                                                        final Direction direction,
                                                                         final ProcessingState[] states)
                                                                                         throws PersistenceException;
 
@@ -72,7 +74,7 @@ public interface IQueryManager {
      * @throws PersistenceException If an error occurs when saving the object to the database
      */
     Collection<IMessageUnitEntity> getMessageUnitsWithId(final String messageId, 
-    													 final IMessageUnit.Direction... direction) 
+    													 final Direction... direction) 
     															 						throws PersistenceException;
 
     /**

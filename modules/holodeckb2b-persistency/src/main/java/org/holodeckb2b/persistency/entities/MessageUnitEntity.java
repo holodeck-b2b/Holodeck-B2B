@@ -18,6 +18,8 @@ package org.holodeckb2b.persistency.entities;
 
 import java.util.Date;
 import java.util.List;
+
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;

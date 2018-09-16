@@ -18,6 +18,8 @@ package org.holodeckb2b.ebms3.workers;
 
 import java.util.List;
 import java.util.Map;
+
+import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -25,6 +27,7 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.ebms3.axis2.Axis2Sender;
 import org.holodeckb2b.ebms3.axis2.ebMS3SendService;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -56,7 +59,7 @@ public class SenderWorker extends AbstractWorkerTask {
             log.debug("Getting list of message units to send");
             List<IMessageUnitEntity> msgUnitsToSend = HolodeckB2BCore.getQueryManager()
                                                                .getMessageUnitsInState(IMessageUnit.class,
-                                                                IMessageUnit.Direction.OUT,
+                                                                Direction.OUT,
                                                                 new ProcessingState[] {ProcessingState.READY_TO_PUSH});
 
             if (!Utils.isNullOrEmpty(msgUnitsToSend)) {
@@ -89,11 +92,9 @@ public class SenderWorker extends AbstractWorkerTask {
         } catch (final PersistenceException dbError) {
             log.error("Could not process message because a database error occurred. Details:"
                         + dbError.toString() + "\n");
-        }
-        catch (final Throwable t) {
-            log.error ("Internal error in SenderWorker", t);
-            return;
-        }
+        } catch (AxisFault sendFailure) {
+            log.error("An unhandled error occurred when sending a message. Details:" + sendFailure.getMessage());
+		}
     }
 
     /**

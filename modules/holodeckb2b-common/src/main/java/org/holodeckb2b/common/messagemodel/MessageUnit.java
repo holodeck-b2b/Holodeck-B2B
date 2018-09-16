@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
@@ -34,7 +35,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  */
 public abstract class MessageUnit implements IMessageUnit {
 
-    private IMessageUnit.Direction  direction;
+    private Direction  direction;
     private String  messageId;
     private Date    timestamp;
     private String  refToMessageId;

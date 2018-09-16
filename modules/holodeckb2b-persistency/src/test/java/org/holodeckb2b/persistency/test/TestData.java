@@ -22,7 +22,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPFactory;
 import org.holodeckb2b.common.messagemodel.*;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -134,7 +134,7 @@ public class TestData {
         userMsg1.setMessageId(T_MSG_ID_1);
         userMsg1.setTimestamp(new Date());
         userMsg1.setPModeId(T_PMODEID_1);
-        userMsg1.setDirection(IMessageUnit.Direction.OUT);
+        userMsg1.setDirection(Direction.OUT);
         userMsg1.setProcessingState(ProcessingState.SUBMITTED);
         TradingPartner sender = new TradingPartner();
         sender.addPartyId(new PartyId(T_SENDER_1_PID, null));
@@ -157,7 +157,7 @@ public class TestData {
         receipt1.setMessageId(T_MSG_ID_2);
         receipt1.setTimestamp(new Date());
         receipt1.setPModeId(T_PMODEID_1);
-        receipt1.setDirection(IMessageUnit.Direction.IN);
+        receipt1.setDirection(Direction.IN);
         receipt1.setRefToMessageId(T_MSG_ID_1);
         receipt1.setProcessingState(ProcessingState.PROCESSING);
         try { Thread.sleep(200); } catch (InterruptedException ex) {}
@@ -166,7 +166,7 @@ public class TestData {
         userMsg2.setMessageId(T_MSG_ID_3);
         userMsg2.setTimestamp(new Date());
         userMsg2.setPModeId(T_PMODEID_1);
-        userMsg2.setDirection(IMessageUnit.Direction.OUT);
+        userMsg2.setDirection(Direction.OUT);
         userMsg2.setProcessingState(ProcessingState.SUBMITTED);
         userMsg2.setProcessingState(ProcessingState.PROCESSING);
         userMsg2.setProcessingState(ProcessingState.SENDING);
@@ -180,7 +180,7 @@ public class TestData {
         receipt2.setMessageId(T_MSG_ID_4);
         receipt2.setTimestamp(new Date());
         receipt2.setPModeId(T_PMODEID_1);
-        receipt2.setDirection(IMessageUnit.Direction.IN);
+        receipt2.setDirection(Direction.IN);
         receipt2.setRefToMessageId(T_MSG_ID_2);
         receipt2.setProcessingState(ProcessingState.DONE);
         try { Thread.sleep(200); } catch (InterruptedException ex) {}
@@ -189,7 +189,7 @@ public class TestData {
         userMsg3.setMessageId(T_MSG_ID_5);
         userMsg3.setTimestamp(new Date());
         userMsg3.setPModeId(T_PMODEID_2);
-        userMsg3.setDirection(IMessageUnit.Direction.IN);
+        userMsg3.setDirection(Direction.IN);
         userMsg3.setRefToMessageId(T_MSG_ID_1);
         userMsg3.setProcessingState(ProcessingState.RECEIVED);
         try { Thread.sleep(200); } catch (InterruptedException ex) {}
@@ -198,7 +198,7 @@ public class TestData {
         error3.setMessageId(T_MSG_ID_6);
         error3.setTimestamp(new Date());
         error3.setPModeId(T_PMODEID_2);
-        error3.setDirection(IMessageUnit.Direction.OUT);
+        error3.setDirection(Direction.OUT);
         error3.setRefToMessageId(T_MSG_ID_5);
         error3.setProcessingState(ProcessingState.CREATED);
         EbmsError error = new EbmsError();
@@ -211,7 +211,7 @@ public class TestData {
         pull4.setMessageId(T_MSG_ID_7);
         pull4.setTimestamp(new Date());
         pull4.setPModeId(T_PMODEID_3);
-        pull4.setDirection(IMessageUnit.Direction.OUT);
+        pull4.setDirection(Direction.OUT);
         pull4.setMPC(EbMSConstants.DEFAULT_MPC);
         pull4.setProcessingState(ProcessingState.DELIVERED);
         try { Thread.sleep(200); } catch (InterruptedException ex) {}
@@ -220,7 +220,7 @@ public class TestData {
         error4.setMessageId(T_MSG_ID_5);
         error4.setTimestamp(new Date());
         error4.setPModeId(T_PMODEID_3);
-        error4.setDirection(IMessageUnit.Direction.IN);
+        error4.setDirection(Direction.IN);
         error4.setRefToMessageId(T_MSG_ID_7);
         error4.setProcessingState(ProcessingState.DONE);
         try { Thread.sleep(200); } catch (InterruptedException ex) {}
@@ -229,7 +229,7 @@ public class TestData {
         pull5.setMessageId(T_MSG_ID_9);
         pull5.setTimestamp(new Date());
         pull5.setPModeId(T_PMODEID_3);
-        pull5.setDirection(IMessageUnit.Direction.OUT);
+        pull5.setDirection(Direction.OUT);
         pull5.setMPC(EbMSConstants.DEFAULT_MPC);
         pull5.setProcessingState(ProcessingState.DELIVERED);
         try { Thread.sleep(200); } catch (InterruptedException ex) {}
@@ -238,7 +238,7 @@ public class TestData {
         userMsg5.setMessageId(T_MSG_ID_10);
         userMsg5.setTimestamp(new Date());
         userMsg5.setPModeId(T_PMODEID_3);
-        userMsg5.setDirection(IMessageUnit.Direction.IN);
+        userMsg5.setDirection(Direction.IN);
         userMsg5.setProcessingState(ProcessingState.DELIVERED);
         try { Thread.sleep(200); } catch (InterruptedException ex) {}
 
@@ -246,7 +246,7 @@ public class TestData {
         userMsg6.setMessageId(T_MSG_ID_11);
         userMsg6.setTimestamp(new Date());
         userMsg6.setPModeId(T_PMODEID_1);
-        userMsg6.setDirection(IMessageUnit.Direction.OUT);
+        userMsg6.setDirection(Direction.OUT);
         userMsg6.setProcessingState(ProcessingState.SUBMITTED);
         userMsg6.setProcessingState(ProcessingState.PROCESSING);
         userMsg6.setProcessingState(ProcessingState.SENDING);
@@ -257,7 +257,7 @@ public class TestData {
         receipt6.setMessageId(T_MSG_ID_4);
         receipt6.setTimestamp(new Date());
         receipt6.setPModeId(T_PMODEID_1);
-        receipt6.setDirection(IMessageUnit.Direction.OUT);
+        receipt6.setDirection(Direction.OUT);
         receipt6.setRefToMessageId(T_MSG_ID_11);
         receipt6.setProcessingState(ProcessingState.DELIVERY_FAILED);
         // Adding content data

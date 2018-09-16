@@ -25,6 +25,7 @@ import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -75,7 +76,7 @@ public class StorageManager {
                                                                                            throws PersistenceException {
         MessageUnit tempObject = createTempObject(messageUnit);
         // Set correct direction
-        tempObject.setDirection(IMessageUnit.Direction.IN);
+        tempObject.setDirection(Direction.IN);
         tempObject.setProcessingState(ProcessingState.RECEIVED);
         return parent.storeMessageUnit(tempObject);
     }
@@ -94,7 +95,7 @@ public class StorageManager {
                                                                                         throws PersistenceException {
         MessageUnit tempObject = createTempObject(messageUnit);
         // Set correct direction
-        tempObject.setDirection(IMessageUnit.Direction.OUT);
+        tempObject.setDirection(Direction.OUT);
         if (messageUnit instanceof IUserMessage || messageUnit instanceof IPullRequest)
             tempObject.setProcessingState(ProcessingState.SUBMITTED);
         else

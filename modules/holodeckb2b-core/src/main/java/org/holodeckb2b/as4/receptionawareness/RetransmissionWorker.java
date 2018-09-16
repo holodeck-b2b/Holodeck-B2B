@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.general.Interval;
-import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -69,7 +69,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
         Collection<IUserMessageEntity> waitingForRcpt = null;
         try {
             waitingForRcpt = HolodeckB2BCore.getQueryManager()
-                                                .getMessageUnitsInState(IUserMessage.class, IMessageUnit.Direction.OUT,
+                                                .getMessageUnitsInState(IUserMessage.class, Direction.OUT,
                                                         new ProcessingState[] { ProcessingState.AWAITING_RECEIPT,
                                                                                 ProcessingState.TRANSPORT_FAILURE,
                                                                                 ProcessingState.WARNING

@@ -21,6 +21,7 @@ import java.util.Iterator;
 
 import org.holodeckb2b.common.messagemodel.AgreementReference;
 import org.holodeckb2b.common.messagemodel.CollaborationInfo;
+import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.Service;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
@@ -31,6 +32,7 @@ import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
+import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IBusinessInfo;
 import org.holodeckb2b.interfaces.pmode.ILeg;
@@ -114,7 +116,10 @@ final class MMDCompleter {
         completeReceiver();
         completeCollaborationInfo();
         completeProperties();
-
+        // Set the containment of payloads if not already specified
+        submission.getPayloads().parallelStream().filter(p -> p.getContainment() == null)
+        										 .forEach(p -> ((Payload) p).setContainment(Containment.ATTACHMENT));
+        
         return submission;
     }
 
