@@ -19,13 +19,18 @@ package org.holodeckb2b.persistency.managers;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.LockModeType;
 import javax.persistence.OptimisticLockException;
 import javax.persistence.RollbackException;
+
 import org.holodeckb2b.common.messagemodel.MessageProcessingState;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
+import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -54,9 +59,16 @@ public class UpdateManager implements IUpdateManager {
     @Override
     public <T extends IMessageUnit, V extends IMessageUnitEntity> V storeMessageUnit(final T messageUnit)
                                                                                         throws PersistenceException {
-        EntityManager em = null;
+        // If this is an outgoing message check its messageId is unique
+    	if (messageUnit.getDirection() == Direction.OUT 
+    		&& !Utils.isNullOrEmpty(HolodeckB2BCoreInterface.getQueryManager()
+    											.getMessageUnitsWithId(messageUnit.getMessageId(), Direction.OUT)))
+    		throw new PersistenceException("The messageId of the message unit (" + messageUnit.getMessageId() 
+    										+ ") already exists!");
+    	
+    	EntityManager em = null;
         MessageUnit jpaMsgUnit = null;
-        EntityTransaction tx = null;
+        EntityTransaction tx = null;                
         try {
             // Determine which JPA class should be created to store the meta-data
             Class jpaEntityClass = JPAEntityHelper.determineJPAClass(messageUnit);

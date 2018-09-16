@@ -16,19 +16,31 @@
  */
 package org.holodeckb2b.persistency.managers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
+
 import org.hibernate.LazyInitializationException;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.Property;
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
+import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
@@ -46,13 +58,6 @@ import org.holodeckb2b.persistency.test.TestData;
 import org.holodeckb2b.persistency.util.EntityManagerUtil;
 import org.holodeckb2b.persistency.util.JPAEntityHelper;
 import org.junit.After;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -86,6 +91,10 @@ public class UpdateManagerTest {
     public static void setUpClass() throws PersistenceException {
         em = EntityManagerUtil.getEntityManager();
         updManager = new UpdateManager();
+        
+        HolodeckB2BTestCore testCore = new HolodeckB2BTestCore(null);
+        testCore.setQueryManager(new QueryManager());
+        HolodeckB2BCoreInterface.setImplementation(testCore);
     }
 
     @Before

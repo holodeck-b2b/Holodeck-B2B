@@ -17,6 +17,7 @@
 package org.holodeckb2b.interfaces.persistency.dao;
 
 import java.util.Collection;
+
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -47,7 +48,8 @@ public interface IUpdateManager {
      * @param <V>           Only entity objects will be returned, V and T will be of the same message type
      * @param messageUnit   The meta-data on message unit that should be stored in the new persistent object
      * @return              The created persistency object.
-     * @throws PersistenceException        If an error occurs when saving the new message unit to the database.
+     * @throws PersistenceException   If an error occurs when saving the new message unit to the database or when the
+     * 								  messageId of the <b>outgoing</b> message unit already exists.  
      */
     <T extends IMessageUnit, V extends IMessageUnitEntity> V storeMessageUnit(final T messageUnit)
                                                                                             throws PersistenceException;
