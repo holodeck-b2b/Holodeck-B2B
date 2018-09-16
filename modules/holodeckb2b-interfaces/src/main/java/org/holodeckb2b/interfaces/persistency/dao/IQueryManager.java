@@ -142,7 +142,7 @@ public interface IQueryManager {
      * </code> that has already been processed completely, i.e. its <i>current</i> processing state is either {@link
      * ProcessingState#DELIVERED} or {@link ProcessingState#FAILURE}.
      *
-     * @param messageId   The <code>MessageId</code> to check delivery for
+     * @param userMessage The <code>User Message</code> to check for if it's already processed
      * @return            <code>true</code> if there exists a User Message entity with {@link
      *                    IUserMessage#getMessageId()} == <code>messageId</code> and {@link IUserMessage#getDirection()}
      *                    == <code>IN</code> and {@link IUserMessage#getCurrentProcessingState()} ==
@@ -151,5 +151,5 @@ public interface IQueryManager {
      * @throws PersistenceException If an error occurs when executing this query
      * @since HB2B_NEXT_VERSION
      */
-    boolean isAlreadyProcessed(final String messageId) throws PersistenceException;
+    boolean isAlreadyProcessed(final IUserMessage userMessage) throws PersistenceException;
 }

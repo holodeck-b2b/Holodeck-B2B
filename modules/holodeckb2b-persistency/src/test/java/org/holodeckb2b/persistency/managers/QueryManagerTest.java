@@ -16,14 +16,22 @@
  */
 package org.holodeckb2b.persistency.managers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -38,11 +46,6 @@ import org.holodeckb2b.persistency.entities.ReceiptEntity;
 import org.holodeckb2b.persistency.entities.UserMessageEntity;
 import org.holodeckb2b.persistency.jpa.UserMessage;
 import org.holodeckb2b.persistency.test.TestData;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -76,7 +79,7 @@ public class QueryManagerTest {
     public void getMessageUnitsInState() throws PersistenceException {
         // First test query on one state and one result
         List<IUserMessageEntity> usrMsgOnlyResult = queryManager.getMessageUnitsInState(IUserMessage.class,
-                                                                IMessageUnit.Direction.OUT,
+                                                                Direction.OUT,
                                                                 new ProcessingState[] { ProcessingState.SUBMITTED });
         assertFalse(Utils.isNullOrEmpty(usrMsgOnlyResult));
         assertEquals(1 , usrMsgOnlyResult.size());
@@ -84,7 +87,7 @@ public class QueryManagerTest {
 
         // Test on one state with multiple results
         List<IMessageUnitEntity>   result =  queryManager.getMessageUnitsInState(IMessageUnit.class,
-                                                                IMessageUnit.Direction.OUT,
+                                                                Direction.OUT,
                                                                 new ProcessingState[] { ProcessingState.DELIVERED });
         assertFalse(Utils.isNullOrEmpty(result));
         assertEquals(3 , result.size());
@@ -92,13 +95,13 @@ public class QueryManagerTest {
 
         // Test no result
         result = queryManager.getMessageUnitsInState(IMessageUnit.class,
-                                                     IMessageUnit.Direction.IN,
+                                                     Direction.IN,
                                                      new ProcessingState[] { ProcessingState.FAILURE });
         assertTrue(Utils.isNullOrEmpty(result));
 
         // Test with multiple states
         result = queryManager.getMessageUnitsInState(IMessageUnit.class,
-                                                     IMessageUnit.Direction.IN,
+                                                     Direction.IN,
                                                      new ProcessingState[] { ProcessingState.FAILURE,
                                                                              ProcessingState.RECEIVED,
                                                                              ProcessingState.DONE
@@ -111,10 +114,10 @@ public class QueryManagerTest {
     @Test
     public void isAlreadyProcessed() throws PersistenceException {
         // Then a delivered User Message
-        assertTrue(queryManager.isAlreadyProcessed(TestData.userMsg5.getMessageId()));
+        assertTrue(queryManager.isAlreadyProcessed(TestData.userMsg5));
 
         // And one that is not yet delivered
-        assertFalse(queryManager.isAlreadyProcessed(TestData.userMsg3.getMessageId()));
+        assertFalse(queryManager.isAlreadyProcessed(TestData.userMsg3));
     }
 
     @Test
@@ -149,7 +152,7 @@ public class QueryManagerTest {
         assertEquals(3 , result.size());
         
         // Test with optional direction indicator 
-        result = queryManager.getMessageUnitsWithId(TestData.receipt2.getMessageId(), IMessageUnit.Direction.OUT);
+        result = queryManager.getMessageUnitsWithId(TestData.receipt2.getMessageId(), Direction.OUT);
         assertFalse(Utils.isNullOrEmpty(result));
         assertEquals(1 , result.size());
 

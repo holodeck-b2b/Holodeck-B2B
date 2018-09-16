@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TemporalType;
@@ -27,6 +28,7 @@ import javax.persistence.TypedQuery;
 
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
@@ -52,7 +54,7 @@ public class QueryManager implements IQueryManager {
 
     @Override
     public <T extends IMessageUnit, V extends IMessageUnitEntity> List<V> getMessageUnitsInState(
-               Class<T> type, IMessageUnit.Direction direction, ProcessingState[] states) throws PersistenceException {
+               Class<T> type, Direction direction, ProcessingState[] states) throws PersistenceException {
         List<T> jpaResult = null;
         final EntityManager em = EntityManagerUtil.getEntityManager();
 
@@ -82,7 +84,7 @@ public class QueryManager implements IQueryManager {
 
     @Override
     public Collection<IMessageUnitEntity> getMessageUnitsWithId(String messageId, 
-    															IMessageUnit.Direction... direction) 
+    															Direction... direction) 
     																					throws PersistenceException {
         List<MessageUnit> jpaResult = null;
         final EntityManager em = EntityManagerUtil.getEntityManager();
@@ -241,25 +243,22 @@ public class QueryManager implements IQueryManager {
     }
 
     @Override
-    public boolean isAlreadyProcessed(String messageId) throws PersistenceException {
+    public boolean isAlreadyProcessed(final IUserMessage userMessage) throws PersistenceException {
         boolean result = false;
         final EntityManager em = EntityManagerUtil.getEntityManager();
 
-        final String query = "SELECT 'true' "
+        final String query = "SELECT COUNT(um) "
                            + "FROM UserMessage um JOIN um.states s1 "
-                           + "WHERE um.DIRECTION = :direction AND um.MESSAGE_ID = :msgId "
+                           + "WHERE um.DIRECTION = org.holodeckb2b.interfaces.messagemodel.Direction.IN "
+                           + "AND um.MESSAGE_ID = :msgId "
                            + "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM um.states s2) "
-                           + "AND s1.STATE IN :states";
+                           + "AND s1.STATE IN ( org.holodeckb2b.interfaces.processingmodel.ProcessingState.DELIVERED, "
+                           + 				 "org.holodeckb2b.interfaces.processingmodel.ProcessingState.FAILURE)";
         try {
             em.getTransaction().begin();
-            result = "true".equals(em.createQuery(query)
-                                     .setParameter("direction", IMessageUnit.Direction.IN)
-                                     .setParameter("msgId", messageId)
-                                     .setParameter("states", Arrays.asList(new ProcessingState[]
-                                                                                    { ProcessingState.DELIVERED,
-                                                                                      ProcessingState.FAILURE }))
-                                     .getSingleResult()
-                                  );
+            result = em.createQuery(query, Long.class)
+                                     .setParameter("msgId", userMessage.getMessageId())
+                                     .getSingleResult() > 0;
         } catch (final NoResultException nothingFound) {
             result = false;
         } catch (final Exception e) {
