@@ -42,6 +42,8 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
 
     private IMessageProcessingEventProcessor eventProcessor;
 
+	private IQueryManager queryManager;
+
     public HolodeckB2BTestCore(final String homeDir) {
         this(homeDir, null, null);
     }
@@ -98,9 +100,13 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
 
     @Override
     public IQueryManager getQueryManager() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return queryManager;
     }
 
+    public void setQueryManager(final IQueryManager qManager) {
+    	queryManager = qManager;
+    }
+    
     @Override
     public ICertificateManager getCertificateManager() {
         throw new UnsupportedOperationException("Not supported yet.");
