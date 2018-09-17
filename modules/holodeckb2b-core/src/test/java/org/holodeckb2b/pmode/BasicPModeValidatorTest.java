@@ -16,14 +16,28 @@
  */
 package org.holodeckb2b.pmode;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.holodeckb2b.pmode.helpers.*;
+import org.holodeckb2b.pmode.helpers.BusinessInfo;
+import org.holodeckb2b.pmode.helpers.EncryptionConfig;
+import org.holodeckb2b.pmode.helpers.Leg;
+import org.holodeckb2b.pmode.helpers.PMode;
+import org.holodeckb2b.pmode.helpers.PartnerConfig;
+import org.holodeckb2b.pmode.helpers.Protocol;
+import org.holodeckb2b.pmode.helpers.PullRequestFlow;
+import org.holodeckb2b.pmode.helpers.SecurityConfig;
+import org.holodeckb2b.pmode.helpers.SigningConfig;
+import org.holodeckb2b.pmode.helpers.UserMessageFlow;
+import org.holodeckb2b.pmode.helpers.UsernameTokenConfig;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,7 +59,7 @@ public class BasicPModeValidatorTest {
     }
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass() throws Exception {
         baseDir = BasicPModeValidatorTest.class.getClassLoader().getResource("pmode_validation").getPath();
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
     }

@@ -23,7 +23,7 @@ import org.holodeckb2b.common.config.InternalConfiguration;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class Config implements InternalConfiguration {
+public class TestConfig implements InternalConfiguration {
 
     private String hb2b_home;
     private String pmodeValidatorClass = null;
@@ -32,23 +32,23 @@ public class Config implements InternalConfiguration {
 
     private boolean allowSignalBundling = false;
 
-    public Config(final String homeDir) {
+    public TestConfig(final String homeDir) {
         hb2b_home = homeDir;
     }
 
-    public Config(final String homeDir, final String pmodeValidatorClass) {
+    public TestConfig(final String homeDir, final String pmodeValidatorClass) {
         hb2b_home = homeDir;
         this.pmodeValidatorClass = pmodeValidatorClass;
     }
 
-    public Config(final String homeDir, final String pmodeValidatorClass,
+    public TestConfig(final String homeDir, final String pmodeValidatorClass,
            final String pmodeStorageClass) {
         hb2b_home = homeDir;
         this.pmodeValidatorClass = pmodeValidatorClass;
         this.pmodeStorageClass = pmodeStorageClass;
     }
 
-    public Config(final String homeDir, final boolean useStrictValidation) {
+    public TestConfig(final String homeDir, final boolean useStrictValidation) {
         hb2b_home = homeDir;
         useStrictHeaderValidation = useStrictValidation;
     }

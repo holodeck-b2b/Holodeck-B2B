@@ -20,11 +20,13 @@ import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.ICertificateManager;
+import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
@@ -36,79 +38,122 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  */
 public class HolodeckB2BTestCore implements IHolodeckB2BCore {
 
-    private final Config  config;
+	private IConfiguration		configuration;
+	private IMessageSubmitter	messageSubmitter;
+	private IPModeSet			pmodes;
+	private IMessageProcessingEventProcessor eventProcessor;
+	private ICertificateManager certManager;
+	private IQueryManager		queryManager;
+	
+	
+	public HolodeckB2BTestCore() {
+	}
 
-    private IPModeSet pmodeSet;
+	public HolodeckB2BTestCore(final String homeDir) {
+		this.configuration = new TestConfig(homeDir);
+	}
+	
+	public HolodeckB2BTestCore(final IConfiguration config) {
+		this.configuration = config;
+	}	
+	
+	/* (non-Javadoc)
+	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getConfiguration()
+	 */
+	@Override
+	public IConfiguration getConfiguration() {
+		return configuration;
+	}
 
-    private IMessageProcessingEventProcessor eventProcessor;
+	/* (non-Javadoc)
+	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getMessageDeliverer(org.holodeckb2b.interfaces.delivery.IDeliverySpecification)
+	 */
+	@Override
+	public IMessageDeliverer getMessageDeliverer(IDeliverySpecification deliverySpec) throws MessageDeliveryException {
+		IMessageDelivererFactory mdf;
+        try {
+            final String factoryClassName = deliverySpec.getFactory();
+            mdf = (IMessageDelivererFactory) Class.forName(factoryClassName).newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
+            // Somehow the factory class failed to load
+            throw new MessageDeliveryException("Factory class not available!", ex);
+        }
+        // Initialize the new factory with the settings from the delivery spec
+        mdf.init(deliverySpec.getSettings());
+        return mdf.createMessageDeliverer();
+	}
+	
+	public void setMessageSubmitter(final IMessageSubmitter submitter) {
+		this.messageSubmitter = submitter;
+	}
 
-	private IQueryManager queryManager;
+	/* (non-Javadoc)
+	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getMessageSubmitter()
+	 */
+	@Override
+	public IMessageSubmitter getMessageSubmitter() {
+		if (messageSubmitter == null)
+			messageSubmitter = new Submitter();
+		return messageSubmitter;
+	}
 
-    public HolodeckB2BTestCore(final String homeDir) {
-        this(homeDir, null, null);
-    }
+	public void setPModeSet(final IPModeSet pmodeSet) {
+		this.pmodes = pmodeSet;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getPModeSet()
+	 */
+	@Override
+	public IPModeSet getPModeSet() {
+		if (pmodes == null)
+			pmodes = new SimplePModeSet();
+		return pmodes;
+	}
 
-    public HolodeckB2BTestCore(final String homeDir,
-                               final String pmodeValidatorClass) {
-        this(homeDir, pmodeValidatorClass, null);
-    }
+	public void setMessageProcessingEventProcessor(final IMessageProcessingEventProcessor processor) {
+		this.eventProcessor = processor;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getEventProcessor()
+	 */
+	@Override
+	public IMessageProcessingEventProcessor getEventProcessor() {
+		if (eventProcessor == null)
+			eventProcessor = new TestEventProcessor();
+		return eventProcessor;
+	}
 
-    public HolodeckB2BTestCore(final String homeDir,
-                               final String pmodeValidatorClass,
-                               final String pmodeStorageClass) {
-        config = new Config(homeDir, pmodeValidatorClass, pmodeStorageClass);
-    }
+	/* (non-Javadoc)
+	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#setPullWorkerPoolConfiguration(org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration)
+	 */
+	@Override
+	public void setPullWorkerPoolConfiguration(IWorkerPoolConfiguration pullConfiguration) throws TaskConfigurationException {
+	}
 
-    @Override
-    public IConfiguration getConfiguration() {
-        return config;
-    }
+	public void setQueryManager(final IQueryManager queryManager) {
+		this.queryManager = queryManager;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getQueryManager()
+	 */
+	@Override
+	public IQueryManager getQueryManager() {
+		return queryManager;
+	}
 
-    @Override
-    public IMessageDeliverer getMessageDeliverer(
-            final IDeliverySpecification deliverySpec)
-            throws MessageDeliveryException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public IMessageSubmitter getMessageSubmitter() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public IPModeSet getPModeSet() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setEventProcessor(
-            final IMessageProcessingEventProcessor processor) {
-        eventProcessor = processor;
-    }
-
-    @Override
-    public IMessageProcessingEventProcessor getEventProcessor() {
-        return eventProcessor;
-    }
-
-    @Override
-    public void setPullWorkerPoolConfiguration(
-            final IWorkerPoolConfiguration pullConfiguration)
-            throws TaskConfigurationException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public IQueryManager getQueryManager() {
-        return queryManager;
-    }
-
-    public void setQueryManager(final IQueryManager qManager) {
-    	queryManager = qManager;
-    }
-    
-    @Override
-    public ICertificateManager getCertificateManager() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	/* (non-Javadoc)
+	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getCertificateManager()
+	 */
+	@Override
+	public ICertificateManager getCertificateManager() {
+		if (certManager == null)
+			try {
+				certManager = new InMemoryCertificateManager();
+			} catch (SecurityProcessingException e) {				
+			}
+		return certManager;
+	}
 }

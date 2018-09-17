@@ -39,6 +39,7 @@ import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
@@ -68,7 +69,7 @@ public class ConfigureMultihopTest {
     private static PModeManager manager;
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass() throws Exception {
         baseDir = CheckFromICloudTest.class
                 .getClassLoader().getResource("multihop").getPath();
         core = new HolodeckB2BTestCore(baseDir);

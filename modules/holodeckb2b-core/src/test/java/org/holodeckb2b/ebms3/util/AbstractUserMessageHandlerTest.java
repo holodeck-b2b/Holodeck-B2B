@@ -27,6 +27,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -35,7 +36,6 @@ import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -53,7 +53,7 @@ public class AbstractUserMessageHandlerTest {
 
     private static String baseDir;
 
-    private static HolodeckB2BTestCore core;
+    private static org.holodeckb2b.module.HolodeckB2BTestCore core;
 
     private AbstractUserMessageHandler handler;
 

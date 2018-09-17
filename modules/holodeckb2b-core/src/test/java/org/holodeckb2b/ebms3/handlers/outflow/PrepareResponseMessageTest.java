@@ -40,13 +40,14 @@ import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.common.testhelpers.Config;
+import org.holodeckb2b.common.testhelpers.TestConfig;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
@@ -77,7 +78,7 @@ public class PrepareResponseMessageTest {
     private PrepareResponseMessage handler;
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass() throws Exception {
         baseDir = PrepareResponseMessageTest.class.getClassLoader()
                 .getResource("handlers").getPath();
         core = new HolodeckB2BTestCore(baseDir);
@@ -253,7 +254,7 @@ public class PrepareResponseMessageTest {
         outMsgCtx.setOperationContext(operationContext);
 
         InternalConfiguration config = core.getConfiguration();
-        Field f = Config.class.getDeclaredField("allowSignalBundling");
+        Field f = TestConfig.class.getDeclaredField("allowSignalBundling");
         f.setAccessible(true);
         f.setBoolean(config, true);
 

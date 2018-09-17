@@ -16,14 +16,20 @@
  */
 package org.holodeckb2b.as4.handlers.inflow;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.as4.receptionawareness.ReceiptCreatedEvent;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.testhelpers.NullDeliveryMethod;
 import org.holodeckb2b.common.testhelpers.TestEventProcessor;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
@@ -31,7 +37,6 @@ import org.holodeckb2b.ebms3.handlers.inflow.DeliverUserMessage;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
-import org.holodeckb2b.as4.receptionawareness.ReceiptCreatedEvent;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -42,7 +47,6 @@ import org.holodeckb2b.pmode.helpers.DeliverySpecification;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.ReceiptConfiguration;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -106,6 +110,7 @@ public class CreateReceiptTest {
 
         Leg leg = new Leg();
         DeliverySpecification deliverySpec = new DeliverySpecification();
+        deliverySpec.setFactory(NullDeliveryMethod.class.getName());
         deliverySpec.setId("some_delivery_spec_01");
         leg.setDefaultDelivery(deliverySpec);
 
@@ -144,7 +149,7 @@ public class CreateReceiptTest {
         // Adding event processor to make sure the ReceiptCreatedEvent
         // is actually raised.
         final TestEventProcessor eventProcessor = new TestEventProcessor();
-        core.setEventProcessor(eventProcessor);
+        core.setMessageProcessingEventProcessor(eventProcessor);
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);

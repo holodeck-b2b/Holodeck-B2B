@@ -16,6 +16,15 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
+
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -24,7 +33,6 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
@@ -37,11 +45,6 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import javax.xml.namespace.QName;
-import java.util.ArrayList;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 23:21 29.01.17

@@ -78,5 +78,5 @@ public interface ISecurityProvider {
      *
      * @return The certificate manager of this security provider
      */
-    ICertificateManager         getCertifcateManager();
+    ICertificateManager         getCertificateManager();
 }

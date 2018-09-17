@@ -16,6 +16,10 @@
  */
 package org.holodeckb2b.multihop;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -35,7 +39,6 @@ import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -52,7 +55,7 @@ public class CheckFromICloudTest {
     private CheckFromICloud handler;
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass() throws Exception {
         baseDir = CheckFromICloudTest.class
                 .getClassLoader().getResource("multihop").getPath();
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));

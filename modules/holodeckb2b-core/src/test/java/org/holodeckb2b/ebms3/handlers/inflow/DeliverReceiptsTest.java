@@ -16,6 +16,14 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
+
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -25,8 +33,7 @@ import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
+import org.holodeckb2b.common.testhelpers.NullDeliveryMethod;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -38,6 +45,8 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.helpers.DeliverySpecification;
 import org.holodeckb2b.pmode.helpers.Leg;
@@ -47,11 +56,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import javax.xml.namespace.QName;
-import java.util.ArrayList;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 12:05 15.03.17
@@ -129,6 +133,7 @@ public class DeliverReceiptsTest {
         ReceiptConfiguration receiptConfig = new ReceiptConfiguration();
         receiptConfig.setNotifyReceiptToBusinessApplication(true);
         DeliverySpecification deliverySpec = new DeliverySpecification();
+        deliverySpec.setFactory(NullDeliveryMethod.class.getName());
         deliverySpec.setId("some_delivery_spec_01");
         receiptConfig.setReceiptDelivery(deliverySpec);
         leg.setReceiptConfiguration(receiptConfig);

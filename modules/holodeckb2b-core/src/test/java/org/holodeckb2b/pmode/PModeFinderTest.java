@@ -16,10 +16,17 @@
  */
 package org.holodeckb2b.pmode;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -30,15 +37,15 @@ import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
 import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.holodeckb2b.pmode.helpers.*;
+import org.holodeckb2b.pmode.helpers.EncryptionConfig;
+import org.holodeckb2b.pmode.helpers.PMode;
+import org.holodeckb2b.pmode.helpers.PartnerConfig;
+import org.holodeckb2b.pmode.helpers.PullRequestFlow;
+import org.holodeckb2b.pmode.helpers.SecurityConfig;
+import org.holodeckb2b.pmode.helpers.UsernameTokenConfig;
 import org.holodeckb2b.pmode.xml.PModeWatcher;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Created at 16:56 02.02.17

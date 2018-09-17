@@ -16,18 +16,17 @@
  */
 package org.holodeckb2b.ebms3.workers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.util.HashMap;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+
+import org.holodeckb2b.common.testhelpers.Submitter;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
-import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
-import org.holodeckb2b.interfaces.submit.MessageSubmitException;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
-import org.holodeckb2b.core.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,11 +39,10 @@ public class SubmitFromFileTest {
 
     private String basePath = TestUtils.getPath(SubmitFromFileTest.class, "submitfromfiletest");
 
-    private TestSubmitter submitter = new TestSubmitter();
-
     @Before
     public void setUp() throws Exception {
-        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(basePath, submitter));
+    	HolodeckB2BTestCore core = new HolodeckB2BTestCore(basePath);
+        HolodeckB2BCoreInterface.setImplementation(core);
     }
 
     @After
@@ -63,30 +61,9 @@ public class SubmitFromFileTest {
         } catch (TaskConfigurationException e) {
             fail(e.getMessage());
         }
-        submitter.c = 0;
+        
         worker.run();
 
-        assertEquals(1, submitter.c);
-    }
-
-    class TestSubmitter implements IMessageSubmitter {
-        public int c = 0;
-
-        @Override
-        public String submitMessage(IUserMessage um) throws MessageSubmitException {
-            throw new UnsupportedOperationException("This method signature is deprecated");
-        }
-
-        @Override
-        public String submitMessage(IUserMessage um, boolean deletePayloadFiles) throws MessageSubmitException {
-            c++;
-            return "new-msg-" + c;
-        }
-
-        @Override
-        public String submitMessage(IPullRequest pr) throws MessageSubmitException {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
+        assertEquals(1, ((Submitter) HolodeckB2BCoreInterface.getMessageSubmitter()).getAllSubmitted().size());
     }
 }

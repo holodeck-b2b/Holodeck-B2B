@@ -18,8 +18,9 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+
 import org.holodeckb2b.module.HolodeckB2BTestCore;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.pmode.xml.PModeWatcher;
 import org.junit.BeforeClass;
 

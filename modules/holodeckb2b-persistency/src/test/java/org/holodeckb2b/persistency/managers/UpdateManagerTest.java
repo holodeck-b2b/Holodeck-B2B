@@ -92,7 +92,7 @@ public class UpdateManagerTest {
         em = EntityManagerUtil.getEntityManager();
         updManager = new UpdateManager();
         
-        HolodeckB2BTestCore testCore = new HolodeckB2BTestCore(null);
+        HolodeckB2BTestCore testCore = new HolodeckB2BTestCore();
         testCore.setQueryManager(new QueryManager());
         HolodeckB2BCoreInterface.setImplementation(testCore);
     }

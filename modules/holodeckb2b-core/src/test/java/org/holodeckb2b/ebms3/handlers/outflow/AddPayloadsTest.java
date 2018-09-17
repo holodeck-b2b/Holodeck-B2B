@@ -53,14 +53,14 @@ import org.junit.Test;
  */
 public class AddPayloadsTest {
 
-    private static HolodeckB2BTestCore core;
+    private static org.holodeckb2b.module.HolodeckB2BTestCore core;
 
     private static String baseDir;
 
     private AddPayloads handler;
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass() throws Exception {
         baseDir = AddPayloadsTest.class.getClassLoader()
                 .getResource("handlers").getPath();
         core = new HolodeckB2BTestCore(baseDir);

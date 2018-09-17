@@ -16,37 +16,45 @@
  */
 package org.holodeckb2b.ebms3.workers;
 
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
-import org.holodeckb2b.interfaces.events.IMessageUnitPurgedEvent;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.persistency.jpa.*;
-import org.holodeckb2b.persistency.util.EntityManagerUtil;
-import org.junit.*;
-import org.junit.runners.MethodSorters;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import javax.persistence.EntityManager;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.*;
+import javax.persistence.EntityManager;
+
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
+import org.holodeckb2b.common.testhelpers.TestEventProcessor;
+import org.holodeckb2b.core.testhelpers.TestUtils;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.events.IMessageUnitPurgedEvent;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
+import org.holodeckb2b.persistency.jpa.ErrorMessage;
+import org.holodeckb2b.persistency.jpa.MessageUnit;
+import org.holodeckb2b.persistency.jpa.MessageUnitProcessingState;
+import org.holodeckb2b.persistency.jpa.Payload;
+import org.holodeckb2b.persistency.jpa.Receipt;
+import org.holodeckb2b.persistency.jpa.UserMessage;
+import org.holodeckb2b.persistency.util.EntityManagerUtil;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 
 /**
@@ -75,7 +83,7 @@ public class PurgeOldMessagesWorkerTest {
             .getClassLoader().getResource("purgetest/").getPath();
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass() throws Exception {
         core = new HolodeckB2BTestCore(basePath);
         HolodeckB2BCoreInterface.setImplementation(core);
 
@@ -248,16 +256,16 @@ public class PurgeOldMessagesWorkerTest {
 
         try {
             // Enable event processing
-            final HolodeckB2BTestCore hb2bTestCore = new HolodeckB2BTestCore("");
+            final HolodeckB2BTestCore hb2bTestCore = new HolodeckB2BTestCore();
             final TestEventProcessor eventProcessor = new TestEventProcessor();
-            hb2bTestCore.setEventProcessor(eventProcessor);
+            hb2bTestCore.setMessageProcessingEventProcessor(eventProcessor);
             HolodeckB2BCoreInterface.setImplementation(hb2bTestCore);
 
             worker.doProcessing();
 
-            assertTrue(eventProcessor.allPurgeEvents);
-            assertEquals(1, eventProcessor.msgIdsPurged.size());
-            assertEquals(MSGID_1, eventProcessor.msgIdsPurged.get(0));
+            assertTrue(eventProcessor.events.stream().allMatch(e -> e instanceof IMessageUnitPurgedEvent));
+            assertEquals(1, eventProcessor.events.size());
+            assertEquals(MSGID_1, eventProcessor.events.get(0).getSubject().getMessageId());
         } catch (final Exception ex) {
             Logger.getLogger(PurgeOldMessagesWorkerTest.class.getName()).log(Level.SEVERE, null, ex);
             fail("Exception during processing");
@@ -289,14 +297,14 @@ public class PurgeOldMessagesWorkerTest {
             // Enable event processing
             final HolodeckB2BTestCore hb2bTestCore = new HolodeckB2BTestCore("");
             final TestEventProcessor eventProcessor = new TestEventProcessor();
-            hb2bTestCore.setEventProcessor(eventProcessor);
+            hb2bTestCore.setMessageProcessingEventProcessor(eventProcessor);
             HolodeckB2BCoreInterface.setImplementation(hb2bTestCore);
 
             worker.doProcessing();
 
-            assertTrue(eventProcessor.allPurgeEvents);
-            assertEquals(1, eventProcessor.msgIdsPurged.size());
-            assertEquals(MSGID_2, eventProcessor.msgIdsPurged.get(0));
+            assertTrue(eventProcessor.events.stream().allMatch(e -> e instanceof IMessageUnitPurgedEvent));
+            assertEquals(1, eventProcessor.events.size());
+            assertEquals(MSGID_2, eventProcessor.events.get(0).getSubject().getMessageId());
         } catch (final Exception ex) {
             Logger.getLogger(PurgeOldMessagesWorkerTest.class.getName()).log(Level.SEVERE, null, ex);
             fail("Exception during processing");
@@ -326,14 +334,14 @@ public class PurgeOldMessagesWorkerTest {
             // Enable event processing
             final HolodeckB2BTestCore hb2bTestCore = new HolodeckB2BTestCore("");
             final TestEventProcessor eventProcessor = new TestEventProcessor();
-            hb2bTestCore.setEventProcessor(eventProcessor);
+            hb2bTestCore.setMessageProcessingEventProcessor(eventProcessor);
             HolodeckB2BCoreInterface.setImplementation(hb2bTestCore);
 
             worker.doProcessing();
 
-            assertTrue(eventProcessor.allPurgeEvents);
-            assertEquals(1, eventProcessor.msgIdsPurged.size());
-            assertEquals(MSGID_3, eventProcessor.msgIdsPurged.get(0));
+            assertTrue(eventProcessor.events.stream().allMatch(e -> e instanceof IMessageUnitPurgedEvent));
+            assertEquals(1, eventProcessor.events.size());
+            assertEquals(MSGID_3, eventProcessor.events.get(0).getSubject().getMessageId());
         } catch (final Exception ex) {
             Logger.getLogger(PurgeOldMessagesWorkerTest.class.getName()).log(Level.SEVERE, null, ex);
             fail("Exception during processing");
@@ -354,20 +362,5 @@ public class PurgeOldMessagesWorkerTest {
         assertTrue(m4Deleted);
 
         assertFalse(Paths.get(basePath, "tmp", "3-" + PAYLOAD_1_FILE).toFile().exists());
-    }
-
-    class TestEventProcessor implements IMessageProcessingEventProcessor {
-
-        boolean allPurgeEvents = false;
-        ArrayList<String> msgIdsPurged = new ArrayList<>();
-
-        @Override
-        public void raiseEvent(final IMessageProcessingEvent event, final MessageContext msgContext) {
-            allPurgeEvents = event instanceof IMessageUnitPurgedEvent;
-            if (allPurgeEvents) {
-                assertNotNull(event.getSubject());
-                msgIdsPurged.add(event.getSubject().getMessageId());
-            }
-        }
     }
 }

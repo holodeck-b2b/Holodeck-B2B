@@ -435,7 +435,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      */
     @Override
     public ICertificateManager getCertificateManager() {
-        return securityProvider.getCertifcateManager();
+        return securityProvider.getCertificateManager();
     }
 
     /**

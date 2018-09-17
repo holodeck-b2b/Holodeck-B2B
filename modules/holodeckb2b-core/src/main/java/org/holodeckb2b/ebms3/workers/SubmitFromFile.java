@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
+
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.common.mmd.xml.PartInfo;
 import org.holodeckb2b.common.util.Utils;
@@ -99,41 +100,42 @@ public class SubmitFromFile extends AbstractWorkerTask {
             // Get file name without the extension
             final String  cFileName = f.getAbsolutePath();
             final String  baseFileName = cFileName.substring(0, cFileName.toLowerCase().indexOf(".mmd"));
-	final String tFileName = bFileName + ".processing";
+            final String tFileName = baseFileName + ".processing";
 
-        try {
-            // Directly rename file to prevent processing by another worker
-            if( !f.renameTo(new File(tFileName)))
-                // Renaming failed, so file already processed by another worker or externally
-                // changed
-                log.debug(f.getName() + " is not processed because it could not be renamed");
-            else {
-                // The file can be processed
-                log.trace("Read message meta data from " + f.getName());
-                final MessageMetaData mmd = MessageMetaData.createFromFile(new File(tFileName));
-                log.trace("Succesfully read message meta data from " + f.getName());
-                // Convert relative paths in payload references to absolute ones to prevent file not found errors
-                convertPayloadPaths(mmd, f);
-                final IMessageSubmitter   submitter = HolodeckB2BCoreInterface.getMessageSubmitter();
-                submitter.submitMessage(mmd, mmd.shouldDeleteFilesAfterSubmit());
-                log.info("User message from " + f.getName() + " succesfully submitted to Holodeck B2B");
-                // Change extension to reflect success
-                Files.move(Paths.get(tFileName), Utils.createFileWithUniqueName(baseFileName + ".accepted")
-                           , StandardCopyOption.REPLACE_EXISTING);
-            }
-        } catch (final Exception e) {
-            // Something went wrong on reading the message meta data
-            log.error("An error occured when reading message meta data from " + f.getName()
-                        + ". Details: " + e.getMessage());
-            // Change extension to reflect error and write error information
-            try {
-                final Path rejectFilePath = Utils.createFileWithUniqueName(baseFileName + ".rejected");
-                Files.move(Paths.get(tFileName), rejectFilePath, StandardCopyOption.REPLACE_EXISTING);
-                writeErrorFile(rejectFilePath, e);
-            } catch (IOException ex) {
-                // The directory where the file was originally found has gone. Nothing we can do about it, so ignore
-                log.error("An error occured while renaming the mmd file or writing the error info to file!");
-            }
+	        try {
+	            // Directly rename file to prevent processing by another worker
+	            if( !f.renameTo(new File(tFileName)))
+	                // Renaming failed, so file already processed by another worker or externally
+	                // changed
+	                log.debug(f.getName() + " is not processed because it could not be renamed");
+	            else {
+	                // The file can be processed
+	                log.trace("Read message meta data from " + f.getName());
+	                final MessageMetaData mmd = MessageMetaData.createFromFile(new File(tFileName));
+	                log.trace("Succesfully read message meta data from " + f.getName());
+	                // Convert relative paths in payload references to absolute ones to prevent file not found errors
+	                convertPayloadPaths(mmd, f);
+	                final IMessageSubmitter   submitter = HolodeckB2BCoreInterface.getMessageSubmitter();
+	                submitter.submitMessage(mmd, mmd.shouldDeleteFilesAfterSubmit());
+	                log.info("User message from " + f.getName() + " succesfully submitted to Holodeck B2B");
+	                // Change extension to reflect success
+	                Files.move(Paths.get(tFileName), Utils.createFileWithUniqueName(baseFileName + ".accepted")
+	                           , StandardCopyOption.REPLACE_EXISTING);
+	            }
+	        } catch (final Exception e) {
+	            // Something went wrong on reading the message meta data
+	            log.error("An error occured when reading message meta data from " + f.getName()
+	                        + ". Details: " + e.getMessage());
+	            // Change extension to reflect error and write error information
+	            try {
+	                final Path rejectFilePath = Utils.createFileWithUniqueName(baseFileName + ".rejected");
+	                Files.move(Paths.get(tFileName), rejectFilePath, StandardCopyOption.REPLACE_EXISTING);
+	                writeErrorFile(rejectFilePath, e);
+	            } catch (IOException ex) {
+	                // The directory where the file was originally found has gone. Nothing we can do about it, so ignore
+	                log.error("An error occured while renaming the mmd file or writing the error info to file!");
+	            }
+	        }
         }
     }
 

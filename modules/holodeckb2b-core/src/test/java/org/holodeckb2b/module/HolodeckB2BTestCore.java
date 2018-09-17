@@ -16,19 +16,13 @@
  */
 package org.holodeckb2b.module;
 
-import static org.mockito.Mockito.mock;
-
 import org.holodeckb2b.common.config.InternalConfiguration;
-import org.holodeckb2b.common.testhelpers.Config;
-import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.submit.core.MessageSubmitter;
-import org.holodeckb2b.events.SyncEventProcessor;
+import org.holodeckb2b.common.testhelpers.TestConfig;
+import org.holodeckb2b.common.testhelpers.TestEventProcessor;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
-import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
@@ -38,10 +32,8 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
+import org.holodeckb2b.persistency.DefaultProvider;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.pmode.InMemoryPModeSet;
-import org.holodeckb2b.pmode.PModeManager;
-import org.holodeckb2b.security.DefaultProvider;
 
 /**
  * Is utility class for testing the e-SENS connector that simulates the Holodeck B2B Core.
@@ -50,121 +42,97 @@ import org.holodeckb2b.security.DefaultProvider;
  */
 public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
 
-    private static IMessageSubmitter submitter = new MessageSubmitter();
+    protected org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore     coreImplementation;
 
     private IDAOFactory daoFactory;
-
-    private final Config  config;
-
-    private IPModeSet pmodeSet;
-
-    private IMessageProcessingEventProcessor eventProcessor;
-
-    private ISecurityProvider securityProvider;
-
-    public HolodeckB2BTestCore() {
+    
+    private ISecurityProvider secProvider;
+    
+    public HolodeckB2BTestCore() throws Exception {
         this(null, null, null);
     }
 
-    public HolodeckB2BTestCore(String homeDir) {
+    public HolodeckB2BTestCore(String homeDir) throws Exception {
         this(homeDir, null, null);
     }
 
     public HolodeckB2BTestCore(final String homeDir,
-                               final String pmodeValidatorClass) {
+                               final String pmodeValidatorClass) throws Exception {
         this(homeDir, pmodeValidatorClass, null);
     }
 
     public HolodeckB2BTestCore(final String homeDir,
                                final String pmodeValidatorClass,
-                               final String pmodeStorageClass) {
-        String homePath = homeDir;
-        if (Utils.isNullOrEmpty(homePath))
-            homePath = HolodeckB2BTestCore.class.getClassLoader().getResource("").getPath();
-        config = new Config(homePath, pmodeValidatorClass, pmodeStorageClass);
-        pmodeSet = new InMemoryPModeSet();
-        eventProcessor = new SyncEventProcessor();
-        submitter = testSubmitter;
-        initDAOFactory();
-        try {
-            securityProvider = new DefaultProvider();
-            securityProvider.init(homePath);
-        } catch (SecurityProcessingException spe) {
-            // Ignore, maybe the security provider isn't needed for the current tests
-        }
-    }
-
-    private void initDAOFactory() {
-        IPersistencyProvider persistencyProvider = new org.holodeckb2b.persistency.DefaultProvider();
-        try {
-            persistencyProvider.init(config.getHolodeckB2BHome());
-            daoFactory = persistencyProvider.getDAOFactory();
-        } catch (PersistenceException initializationFailure) {
-            //throw new AxisFault("Holodeck B2B could not be initialized!");
-            System.err.println("Could not initialize the persistency provider " + persistencyProvider.getName()
-                    + "! Unable to start Holodeck B2B. \n\tError details: " + initializationFailure.getMessage());
-        }
+                               final String pmodeStorageClass) throws Exception {
+    	TestConfig tstCfg = new TestConfig(homeDir, pmodeValidatorClass, pmodeStorageClass);
+    	coreImplementation = new org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore(tstCfg);
+    	
+    	DefaultProvider dbProvider = new DefaultProvider();
+    	dbProvider.init(homeDir);
+    	daoFactory = dbProvider.getDAOFactory();
     }
 
     @Override
-    StorageManager getStorageManager() {
-        return new StorageManager(daoFactory.getUpdateManager());
+	public InternalConfiguration getConfiguration() {
+        return (InternalConfiguration) coreImplementation.getConfiguration();
     }
 
     @Override
-    ISecurityProvider getSecurityProvider() {
-        return securityProvider;
+	public IMessageDeliverer getMessageDeliverer(final IDeliverySpecification deliverySpec)
+                                                        throws MessageDeliveryException {
+        return coreImplementation.getMessageDeliverer(deliverySpec);
     }
 
     @Override
-    public ICertificateManager getCertificateManager() {
-        return securityProvider.getCertifcateManager();
+	public IMessageSubmitter getMessageSubmitter() {
+        return coreImplementation.getMessageSubmitter();
     }
 
     @Override
-    public InternalConfiguration getConfiguration() {
-        return config;
+	public IPModeSet getPModeSet() {
+        return coreImplementation.getPModeSet();
     }
 
     @Override
-    public IMessageDeliverer getMessageDeliverer(
-            final IDeliverySpecification deliverySpec)
-            throws MessageDeliveryException {
-        IMessageDeliverer messageDeliverer = mock(IMessageDeliverer.class);
-        return messageDeliverer;
+	public IMessageProcessingEventProcessor getEventProcessor() {
+        return coreImplementation.getEventProcessor();
     }
 
     @Override
-    public IMessageSubmitter getMessageSubmitter() {
-        return submitter;
+	public void setPullWorkerPoolConfiguration(final IWorkerPoolConfiguration pullConfiguration)
+                                                                                    throws TaskConfigurationException {
+        coreImplementation.setPullWorkerPoolConfiguration(pullConfiguration);
     }
 
     @Override
-    public IPModeSet getPModeSet() {
-        if (pmodeSet == null)
-            pmodeSet = new PModeManager(config);
-
-        return pmodeSet;
-    }
-
-    public void setEventProcessor(final IMessageProcessingEventProcessor processor) {
-        eventProcessor = processor;
-    }
-
-    @Override
-    public IMessageProcessingEventProcessor getEventProcessor() {
-        return eventProcessor;
-    }
-
-    @Override
-    public void setPullWorkerPoolConfiguration(
-            final IWorkerPoolConfiguration pullConfiguration)
-            throws TaskConfigurationException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public IQueryManager getQueryManager() {
+	public IQueryManager getQueryManager() {
         return daoFactory.getQueryManager();
     }
+    
+    @Override
+	public StorageManager getStorageManager() {
+    	return new StorageManager(daoFactory.getUpdateManager());
+    }
+    
+    @Override
+	public ICertificateManager getCertificateManager() {
+        return getSecurityProvider().getCertificateManager();
+    }
+    
+    @Override
+	public ISecurityProvider getSecurityProvider() {
+    	if (secProvider == null) {
+        	secProvider = new org.holodeckb2b.security.DefaultProvider();
+        	try {
+				secProvider.init(getConfiguration().getHolodeckB2BHome());
+			} catch (SecurityProcessingException e) {
+				e.printStackTrace();
+			}    	
+    	}
+    	return secProvider;
+    }
+    
+	public void setMessageProcessingEventProcessor(TestEventProcessor eventProcessor) {
+		coreImplementation.setMessageProcessingEventProcessor(eventProcessor);
+	}    
 }

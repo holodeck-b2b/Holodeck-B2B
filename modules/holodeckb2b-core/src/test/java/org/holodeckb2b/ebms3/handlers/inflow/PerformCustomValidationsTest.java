@@ -24,12 +24,12 @@ import java.io.File;
 
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.pmode.xml.PMode;
 import org.junit.AfterClass;
 import org.junit.Before;

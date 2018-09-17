@@ -3,6 +3,7 @@ package org.holodeckb2b.customvalidation;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.core.validation.DefaultValidationExecutor;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.pmode.helpers.CustomValidationSpec;
 import org.holodeckb2b.pmode.helpers.Leg;
@@ -27,12 +28,12 @@ public class DefaultValidationExecutorTest {
 
     private static String baseDir;
 
-    private static HolodeckB2BTestCore core;
+    private static org.holodeckb2b.module.HolodeckB2BTestCore core;
 
     private DefaultValidationExecutor validationExecutor;
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass() throws Exception {
         baseDir = DefaultValidationExecutorTest.class.getClassLoader()
                 .getResource("customvalidation").getPath();
         core = new HolodeckB2BTestCore(baseDir);

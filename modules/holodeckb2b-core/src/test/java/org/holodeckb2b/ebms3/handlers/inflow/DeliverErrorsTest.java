@@ -31,6 +31,7 @@ import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.testhelpers.NullDeliveryMethod;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
@@ -123,6 +124,7 @@ public class DeliverErrorsTest {
         ErrorHandlingConfig errorHandlingConfig = new ErrorHandlingConfig();
         errorHandlingConfig.setNotifyErrorToBusinessApplication(true);
         DeliverySpecification deliverySpecification = new DeliverySpecification();
+        deliverySpecification.setFactory(NullDeliveryMethod.class.getName());
         deliverySpecification.setId("delivery_spec_id");
         errorHandlingConfig.setErrorDelivery(deliverySpecification);
         umFlow.setErrorHandlingConfiguration(errorHandlingConfig);
@@ -157,31 +159,14 @@ public class DeliverErrorsTest {
         errorMessage.setMessageId("error_id");
 
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-
-        // Setting input message property
-        IUserMessageEntity userMessageEntity =
-                storageManager.storeOutGoingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                userMessageEntity);
-
         // Setting input errors property
         ErrorSignalElement.createElement(headerBlock, errorMessage);
-        IErrorMessageEntity errorMessageEntity =
-                storageManager.storeIncomingMessageUnit(errorMessage);
+        IErrorMessageEntity errorMessageEntity = storageManager.storeIncomingMessageUnit(errorMessage);
+        storageManager.setProcessingState(errorMessageEntity, ProcessingState.READY_FOR_DELIVERY);
         ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
         errorMessageEntities.add(errorMessageEntity);
         mc.setProperty(MessageContextProperties.IN_ERRORS,
                 errorMessageEntities);
-
-        try {
-            Handler.InvocationResponse invokeResp = processErrorsHandler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-
-        assertEquals(ProcessingState.READY_FOR_DELIVERY,
-                errorMessageEntity.getCurrentProcessingState().getState());
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);

@@ -171,7 +171,7 @@ public class DefaultProvider implements ISecurityProvider {
      * {@inheritDoc}
      */
     @Override
-    public ICertificateManager getCertifcateManager() {
+    public ICertificateManager getCertificateManager() {
         return certManager;
     }
 

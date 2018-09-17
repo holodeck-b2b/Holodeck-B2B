@@ -16,23 +16,23 @@
  */
 package org.holodeckb2b.ebms3.handlers.outflow;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.server.AxisHttpResponse;
 import org.holodeckb2b.common.constants.ProductId;
-import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 /**
  * Created at 15:47 27.02.17
@@ -53,7 +53,7 @@ public class HTTPProductIdentifierTest {
     private HTTPProductIdentifier handler;
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass() throws Exception {
         baseDir = HTTPProductIdentifierTest.class.getClassLoader()
                 .getResource("handlers").getPath();
         core = new HolodeckB2BTestCore(baseDir);

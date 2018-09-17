@@ -67,9 +67,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Refactored the logging to have clear separation of details logged at the different levels. Using _INFO_
   level provides enough information to see all messages which are processed. Going to _DEBUG_ add information
   of process steps and _TRACE_ provides most detailed logging.    
-
-### Fixed
-* Exception when processing an invalid SOAP message [#15](https://github.com/holodeck-b2b/Holodeck-B2B/issues/15)
+* In case of exception when logging an invalid SOAP message, a error message is written to SOAP log
 
 ### Deprecated
 * The configuration parameter (`IConfiguation.allowSignalBundling()`) which was used to indicate that it was allowed to
