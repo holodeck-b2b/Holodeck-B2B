@@ -18,6 +18,7 @@ package org.holodeckb2b.ebms3.util;
 
 import java.util.Collection;
 import java.util.Collections;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
@@ -92,7 +93,7 @@ public class CatchAxisFault extends BaseHandler {
                 }
             }
 
-            log.debug("Remove existing outgoing message units from context");
+            log.trace("Remove existing outgoing message units from context");
             mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, null);
             mc.setProperty(MessageContextProperties.OUT_RECEIPTS, null);
             mc.setProperty(MessageContextProperties.OUT_ERRORS, null);
@@ -119,16 +120,16 @@ public class CatchAxisFault extends BaseHandler {
         ErrorMessage errorMessage = new ErrorMessage();
         errorMessage.addError(otherError);
         try {
-            log.debug("Create the Error signal message");
+            log.trace("Create the Error signal message");
             IErrorMessageEntity storedError = (IErrorMessageEntity) HolodeckB2BCore.getStorageManager()
                                                                                 .storeOutGoingMessageUnit(errorMessage);
-            log.debug("Created a new Error signal message");
+            log.trace("Created a new Error signal message");
             mc.setProperty(MessageContextProperties.OUT_ERRORS, Collections.singletonList(storedError));
-            log.debug("Set the Error signal as the only ebMS message to return");
+            log.trace("Set the Error signal as the only ebMS message to return");
         } catch (final PersistenceException dbe) {
             // (Still) a problem with the database, create the Error signal message without storing it
             log.fatal("Could not store error signal message in database! Details: " + dbe.getMessage());
-            log.debug("Set the non-persisted ErrorMessage in message context");
+            log.trace("Set the non-persisted ErrorMessage in message context");
             errorMessage.setMessageId(MessageIdUtils.createMessageId());
             mc.setProperty(MessageContextProperties.OUT_ERRORS, Collections.singletonList(errorMessage));
         }

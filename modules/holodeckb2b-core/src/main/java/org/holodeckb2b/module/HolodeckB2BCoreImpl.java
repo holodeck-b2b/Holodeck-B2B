@@ -163,12 +163,12 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
             throw new AxisFault("Could not initialize Holodeck B2B module!", ex);
         }
 
-        log.debug("Initialize the P-Mode manager");
+        log.trace("Initialize the P-Mode manager");
         pmodeManager = new PModeManager(instanceConfiguration);
 
-        log.debug("Create the processor for message processing events");
         final String eventProcessorClassname = instanceConfiguration.getMessageProcessingEventProcessor();
         if (!Utils.isNullOrEmpty(eventProcessorClassname)) {
+        	log.debug("Using " + eventProcessorClassname + " as persistency provider");
             try {
                eventProcessor = (IMessageProcessingEventProcessor) Class.forName(eventProcessorClassname).newInstance();
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
@@ -178,7 +178,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
             }
         } else
             eventProcessor = new SyncEventProcessor();
-        log.debug("Created " + eventProcessor.getClass().getSimpleName() + " event processor");
+        log.info("Created " + eventProcessor.getClass().getSimpleName() + " event processor");
 
         log.debug("Load the persistency provider for storing meta-data on message units");
         String persistencyProviderClassname = instanceConfiguration.getPersistencyProviderClass();
@@ -192,7 +192,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
            log.fatal("Could not load the persistency provider: " + persistencyProviderClassname);
            throw new AxisFault("Unable to load required persistency provider!");
         }
-        log.debug("Using " + persistencyProvider.getName() + " as persistency provider");
+        log.info("Using " + persistencyProvider.getName() + " as persistency provider");
         try {
              persistencyProvider.init(instanceConfiguration.getHolodeckB2BHome());
              daoFactory = persistencyProvider.getDAOFactory();
@@ -203,7 +203,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         }
         log.info("Succesfully loaded " + persistencyProvider.getName() + " as persistency provider");
 
-        log.debug("Load the security provider for storing meta-data on message units");
+        log.trace("Load the security provider for storing meta-data on message units");
         String securityProviderClassname = instanceConfiguration.getSecurityProviderClass();
         if (Utils.isNullOrEmpty(securityProviderClassname))
             securityProviderClassname = "org.holodeckb2b.security.DefaultProvider";
@@ -223,14 +223,14 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         }
         log.info("Succesfully loaded " + securityProvider.getName() + " as security provider");
 
-        log.debug("Create list of available message delivery methods");
+        log.trace("Create list of available message delivery methods");
         msgDeliveryFactories = new HashMap<>();
 
         // From this point on other components can be started which need access to the Core
         log.debug("Make Core available to outside world");
         HolodeckB2BCore.setImplementation(this);
 
-        log.debug("Initialize worker pool");
+        log.trace("Initialize worker pool");
         final IWorkerPoolConfiguration poolCfg =
                                         XMLWorkerPoolConfig.loadFromFile(instanceConfiguration.getWorkerPoolCfgFile());
         if (poolCfg != null) {
@@ -244,7 +244,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
                                 + instanceConfiguration.getWorkerPoolCfgFile());
         }
 
-        log.debug("Create the pull worker pool");
+        log.trace("Create the pull worker pool");
         // The pull worker pool is only created here, initialization is done by the worker part of the normal
         //  worker pool
         pullWorkers = new WorkerPool(PullConfiguration.PULL_WORKER_POOL_NAME);
@@ -272,13 +272,12 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         log.info("Shutting down Holodeck B2B Core module...");
 
         // Stop all the workers by shutting down the normal and pull worker pool
-        log.debug("Stopping worker pool");
+        log.trace("Stopping worker pool");
         workers.stop(10);
         log.debug("Worker pool stopped");
-        log.debug("Stopping pull worker pool");
+        log.trace("Stopping pull worker pool");
         pullWorkers.stop(10);
         log.debug("Pull worker pool stopped");
-
 
         log.info("Holodeck B2B Core module STOPPED.");
     }
@@ -316,11 +315,11 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
 
         IMessageDeliverer   deliverer = null;
 
-        log.debug("Check if there is a factory available for this specification [" + deliverySpec.getId() +"]");
+        log.trace("Check if there is a factory available for this specification [" + deliverySpec.getId() +"]");
         IMessageDelivererFactory mdf = msgDeliveryFactories.get(deliverySpec.getId());
 
         if (mdf != null) {
-            log.debug("Factory available, get message deliverer");
+            log.trace("Factory available, get message deliverer");
             try {
                 deliverer = mdf.createMessageDeliverer();
             } catch (final MessageDeliveryException mde) {
@@ -331,7 +330,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
             }
         } else {
             try {
-                log.debug("No factory available yet for this specification [" + deliverySpec.getId() + "]");
+                log.trace("No factory available yet for this specification [" + deliverySpec.getId() + "]");
                 final String factoryClassName = deliverySpec.getFactory();
                 log.debug("Create a factory [" + factoryClassName + "] for delivery specification ["
                         + deliverySpec.getId() + "]");
@@ -353,10 +352,10 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
                 if (msgDeliveryFactories.get(deliverySpec.getId()) == null)
                     msgDeliveryFactories.put(deliverySpec.getId(), mdf);
             }
-            log.debug("Added new factory to list of available delivery methods");
+            log.trace("Added new factory to list of available delivery methods");
         }
 
-        log.debug("Get and return deliverer from the factory");
+        log.trace("Get and return deliverer from the factory");
         return mdf.createMessageDeliverer();
     }
 
@@ -384,13 +383,13 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     @Override
     public void setPullWorkerPoolConfiguration(final IWorkerPoolConfiguration pullConfiguration)
                                                                                     throws TaskConfigurationException {
-        log.debug("New pull worker configuration provided, reconfiguring Pull Worker Pool");
+        log.trace("New pull worker configuration provided, reconfiguring Pull Worker Pool");
         if (pullConfiguration == null) {
-            log.debug("Configuration is removed, stop worker pool");
+            log.trace("Configuration is removed, stop worker pool");
             pullWorkers.stop(0);
             log.warn("Pull Worker Pool stopped due to removal of configuration!");
         } else {
-            log.debug("New configuration provided, reconfigure the worker pool");
+            log.trace("New configuration provided, reconfigure the worker pool");
             pullWorkers.setConfiguration(pullConfiguration);
             log.info("Pull configuration succesfully changed");
         }

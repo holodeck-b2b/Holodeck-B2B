@@ -17,6 +17,7 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
+
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.EbmsError;
@@ -32,6 +33,7 @@ import org.holodeckb2b.events.security.SignatureVerifiedEvent;
 import org.holodeckb2b.events.security.UTProcessingFailureEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.events.security.ISignatureVerifiedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
@@ -47,7 +49,6 @@ import org.holodeckb2b.interfaces.security.ISecurityHeaderProcessor;
 import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
 import org.holodeckb2b.interfaces.security.ISecurityProvider;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
-import org.holodeckb2b.interfaces.events.security.ISignatureVerifiedEvent;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.module.HolodeckB2BCore;
@@ -85,19 +86,18 @@ public class ProcessSecurityHeaders extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
 
-        log.debug("Get P-Mode of primary message unit for settings");
         IMessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
-        if (primaryMU == null) {
-            log.debug("Message does not contain a message unit, nothing to do");
+        if (primaryMU == null)
             return InvocationResponse.CONTINUE;
-        }
+        
+        log.trace("Get P-Mode of primary message unit for settings");
         IPMode pmode = HolodeckB2BCore.getPModeSet().get(primaryMU.getPModeId());
         ISecurityConfiguration  senderConfig = null, receiverConfig = null;
         // PullReq have not been assigned a P-Mode yet because information from the security headers is needed,
         if (pmode == null && !(primaryMU instanceof IPullRequest))
             log.warn("No P-Mode available for security setting.");
         else if (!(primaryMU instanceof IPullRequest)) {
-            log.debug("PMode to use for security processing : " + pmode.getId());
+            log.trace("PMode to use for security processing : " + pmode.getId());
             /* Now get the security configs that apply to the message, may be used by the security provider to check on
             /  security policies. To get correct settings we need to determine whether HB2B is the initiator of the MEP
             /  or the responder to get the correct settings */
@@ -117,16 +117,17 @@ public class ProcessSecurityHeaders extends BaseHandler {
         Collection<IUserMessage> userMessages = MessageContextUtils.getUserMessagesFromMessage(mc);
 
         // Process the available security headers using the installed security provider
-        log.debug("Get security header processor from security provider");
+        log.trace("Get security header processor from security provider");
         ISecurityHeaderProcessor hdrProcessor = HolodeckB2BCore.getSecurityProvider().getSecurityHeaderProcessor();
-        log.debug("Process the available security headers in the message");
+        log.trace("Process the available security headers in the message");
         Collection<ISecurityProcessingResult> results = hdrProcessor.processHeaders(mc, userMessages,
                                                                                     senderConfig, receiverConfig);
-        log.debug("Security header processing finished, handle results");
-        if (!Utils.isNullOrEmpty(results))
+        if (!Utils.isNullOrEmpty(results)) {
+        	log.trace("Security header processing finished, handle results");
             for(ISecurityProcessingResult r : results)
                 handleProcessingResult(r, mc);
-        else
+            log.debug("Processing of the security headers completed");
+        } else
             log.debug("Message did not contain security headers");
 
         return InvocationResponse.CONTINUE;

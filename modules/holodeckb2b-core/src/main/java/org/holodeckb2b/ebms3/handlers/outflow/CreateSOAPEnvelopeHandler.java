@@ -17,7 +17,6 @@
 package org.holodeckb2b.ebms3.handlers.outflow;
 
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
@@ -53,10 +52,10 @@ public class CreateSOAPEnvelopeHandler extends BaseHandler {
         //  or when response does not yet contain one
         if ((isInFlow(RESPONDER) && (env = mc.getEnvelope()) == null) || isInFlow(INITIATOR)) {
             // For request use P-Mode, for response use SOAP version from request
-            log.debug("Check for SOAP version");
+            log.trace("Check for SOAP version");
             SOAPEnv.SOAPVersion version;
             if (isInFlow(INITIATOR)) {
-                log.debug("Use P-Mode of primary message unit to get SOAP version");
+                log.trace("Use P-Mode of primary message unit to get SOAP version");
                 final IMessageUnitEntity primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
                 if (primaryMU == null) {
                     log.debug("No message unit in this response, no envelope needed");
@@ -68,7 +67,7 @@ public class CreateSOAPEnvelopeHandler extends BaseHandler {
                 version = leg.getProtocol() != null && "1.1".equals(leg.getProtocol().getSOAPVersion()) ?
                                     SOAPEnv.SOAPVersion.SOAP_11 : SOAPEnv.SOAPVersion.SOAP_12;
             } else {
-                log.debug("Get version from request context");
+                log.trace("Get version from request context");
                 final OperationContext opContext = mc.getOperationContext();
                 final MessageContext reqMsgContext = opContext.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
                 version = (reqMsgContext.isSOAP11() ? SOAPEnv.SOAPVersion.SOAP_11 : SOAPEnv.SOAPVersion.SOAP_12);
@@ -84,14 +83,14 @@ public class CreateSOAPEnvelopeHandler extends BaseHandler {
                 log.fatal("Could not add the SOAP envelope to the message!");
                 throw new AxisFault("Could not add the SOAP envelope to the message!");
             }
-            log.debug("Added SOAP envelope to message context");
+            log.trace("Added SOAP envelope to message context");
         } else {
-            log.debug("Check that ebMS namespace is declared on the SOAP envelope");
+            log.trace("Check that ebMS namespace is declared on the SOAP envelope");
             SOAPEnv.declareNamespaces(env);
         }
 
-        log.debug("Add empty eb3:Messaging element");
-        final SOAPHeaderBlock messaging = Messaging.createElement(env);
+        log.trace("Add empty eb3:Messaging element");
+        Messaging.createElement(env);
 
         return InvocationResponse.CONTINUE;
     }

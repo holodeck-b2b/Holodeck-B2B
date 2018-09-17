@@ -22,10 +22,12 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -135,7 +137,8 @@ public class SingleXMLDeliverer extends EbmsFileDeliverer {
      *
      * @return  The root element of the delivery document.
      */
-    protected OMElement createContainerElementName() {
+    @Override
+	protected OMElement createContainerElementName() {
         final OMFactory   f = OMAbstractFactory.getOMFactory();
         final OMElement rootElement = f.createOMElement(XML_ROOT_NAME, DELIVERY_NS_URI, XMLConstants.DEFAULT_NS_PREFIX);
         // Declare the namespaces
@@ -157,7 +160,7 @@ public class SingleXMLDeliverer extends EbmsFileDeliverer {
         log.debug("Delivering user message with msgId=" + usrMsgUnit.getMessageId());
 
         // We first convert the user message into a MMD document
-        final MessageMetaData mmd = new MessageMetaData((IUserMessage) usrMsgUnit);
+        final MessageMetaData mmd = new MessageMetaData(usrMsgUnit);
 
         final OMElement    container = createContainerElementName();
 
@@ -166,7 +169,7 @@ public class SingleXMLDeliverer extends EbmsFileDeliverer {
         final OMElement  usrMsgElement = UserMessageElement.createElement(container, mmd);
 
         if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
-            log.debug("Add payload meta info to XML container");
+            log.trace("Add payload meta info to XML container");
             // Generate a element id and set this a reference in payload property
             int i = 1;
             for (final IPayload p : mmd.getPayloads()) {
@@ -184,31 +187,31 @@ public class SingleXMLDeliverer extends EbmsFileDeliverer {
             msgFilePath = Utils.createFileWithUniqueName(directory + "message-"
                                                             + mmd.getMessageId().replaceAll("[^a-zA-Z0-9.-]", "_")
                                                             + ".xml").toString();
-            log.debug("Message meta data complete, start writing this to file " + msgFilePath);
+            log.trace("Message meta data complete, start writing this to file " + msgFilePath);
             fw = new FileWriter(msgFilePath);
             final XMLStreamWriter xmlWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(fw);
-            log.debug("Write the meta data to file");
+            log.trace("Write the meta data to file");
             xmlWriter.writeStartElement(XML_ROOT_NAME);
             usrMsgElement.serialize(xmlWriter);
             xmlWriter.flush();
             xmlWriter.close();
-            log.debug("Meta data writen to file");
+            log.trace("Meta data writen to file");
             if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
                 log.debug("Write payload contents");
                 fw.write("<Payloads>");
                 int i = 1;
                 for(final IPayload p : mmd.getPayloads()) {
-                    log.debug("Create <Payload> element");
+                    log.trace("Create <Payload> element");
                     fw.write("<Payload xml:id=\"pl-" + i++ + "\">");
                     writeEncodedPayload(p.getContentLocation(), fw);
                     fw.write("</Payload>\n");
                 }
-                log.debug("Close the <Payloads> element");
+                log.trace("Close the <Payloads> element");
                 fw.write("</Payloads>\n");
             }
             fw.write("</" + XML_ROOT_NAME + ">");
             fw.close();
-            log.info("User message with msgID=" + mmd.getMessageId() + " successfully delivered");
+            log.debug("User message with msgID=" + mmd.getMessageId() + " successfully delivered");
         } catch (IOException | XMLStreamException ex) {
             log.error("An error occurred while delivering the user message [" + mmd.getMessageId()
                                                                     + "]\n\tError details: " + ex.getMessage());

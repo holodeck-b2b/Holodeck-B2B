@@ -16,12 +16,16 @@
  */
 package org.holodeckb2b.ebms3.handlers.outflow;
 
+import static org.holodeckb2b.interfaces.messagemodel.IPayload.Containment.ATTACHMENT;
+
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collection;
+
 import javax.activation.FileDataSource;
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.attachments.ConfigurableDataHandler;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -35,7 +39,6 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import static org.holodeckb2b.interfaces.messagemodel.IPayload.Containment.ATTACHMENT;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
@@ -67,13 +70,13 @@ public class AddPayloads extends AbstractUserMessageHandler {
     protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
                                                                                           throws PersistenceException {
 
-        log.debug("Check that all meta-data of the User Message is available for processing");
+        log.trace("Check that all meta-data of the User Message is available for processing");
         if (!um.isLoadedCompletely()) {
-            log.debug("Not all info loaded, load now");
+            log.trace("Not all info loaded, load now");
             HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(um);
         }
 
-        log.debug("All meta-data of User Message available, check for payloads to include");
+        log.trace("All meta-data of User Message available, check for payloads to include");
         final Collection<IPayload> payloads = um.getPayloads();
 
         if (Utils.isNullOrEmpty(payloads)) {
@@ -81,7 +84,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
             log.debug("User message has no payloads");
         } else {
             // Add each payload to the message as described by the containment attribute
-            log.debug("User message contains " + payloads.size() + " payload(s)");
+            log.trace("User message contains " + payloads.size() + " payload(s)");
             // If a MIME Content-Id is generated it should be saved to database as well, therefor we need to construct
             // new set of payload meta-data
             ArrayList<IPayload>  newPayloadInfo = new ArrayList<>(payloads.size());
@@ -93,7 +96,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
                 if (pl.getContainment() == ATTACHMENT && Utils.isNullOrEmpty(pl.getPayloadURI())) {
                     // No MIME Content-Id assigned on submission, assign now
                     final String cid = MessageIdUtils.createContentId(um.getMessageId());
-                    log.debug("Generated a new Content-id [" + cid + "] for payload [" + pl.getContentLocation() + "]");
+                    log.trace("Generated a new Content-id [" + cid + "] for payload [" + pl.getContentLocation() + "]");
                     p.setPayloadURI(cid);
                     cidGenerated = true;
                 }
@@ -112,7 +115,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
                 HolodeckB2BCore.getStorageManager().setPayloadInformation(um, newPayloadInfo);
                 log.debug("Generated MIME Content-Id(s) saved to database");
             }
-            log.debug("Payloads successfully added to message");
+            log.debug("Payloads successfully added to User Message [msgId=" + um.getMessageId() + "]");
         }
         return InvocationResponse.CONTINUE;
     }
@@ -145,39 +148,31 @@ public class AddPayloads extends AbstractUserMessageHandler {
 
         switch (p.getContainment()) {
             case ATTACHMENT :
-                log.debug("Adding payload as attachment. Content located at " + p.getContentLocation());
+                log.trace("Adding payload as attachment. Content located at " + p.getContentLocation());
                 f = new File(p.getContentLocation());
 
                 // Use specified MIME type or detect it when none is specified
                 String mimeType = p.getMimeType();
                 if (mimeType == null || mimeType.isEmpty()) {
-                    log.debug("Detecting MIME type of payload");
+                    log.trace("Detecting MIME type of payload");
                     mimeType = Utils.detectMimeType(f);
                 }
 
-                log.debug("Payload mime type is " + mimeType);
+                log.trace("Payload mime type is " + mimeType);
                 // Use Axiom ConfigurableDataHandler to enable setting of mime type
                 final ConfigurableDataHandler dh = new ConfigurableDataHandler(new FileDataSource(f));
                 dh.setContentType(mimeType);
-
-                // Check if a Content-id is specified, if not generate one now
                 final String cid = p.getPayloadURI();
-                if (cid == null || cid.isEmpty()) {
-                    log.warn("Content-id missing for payload.");
-                    throw new Exception("Content-id missing for payload");
-                }
-
-                log.debug("Add payload to message as attachment with Content-id: " + cid);
+                log.trace("Add payload to message as attachment with Content-id: " + cid);
                 mc.addAttachment(cid, dh);
-                log.info("Payload content located at '" + p.getContentLocation() + "' added to message");
-
+                log.debug("Payload content located at '" + p.getContentLocation() + "' added to message");
                 return;
             case BODY :
-                log.debug("Adding payload to SOAP body. Content located at " + p.getContentLocation());
+                log.trace("Adding payload to SOAP body. Content located at " + p.getContentLocation());
                 f = new File(p.getContentLocation());
 
                 try {
-                    log.debug("Parse the XML from file so it can be added to SOAP body");
+                    log.trace("Parse the XML from file so it can be added to SOAP body");
                     final OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new FileReader(f));
                     final OMElement documentElement = builder.getDocumentElement();
 
@@ -185,7 +180,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
                     final String href = p.getPayloadURI();
                     final String xmlId = documentElement.getAttributeValue(new QName("id"));
                     if( href != null && xmlId != null && !href.equals(xmlId)) {
-                        log.error("Payload reference [" + href + "] and id of payload element [" + xmlId +
+                        log.warn("Payload reference [" + href + "] and id of payload element [" + xmlId +
                                     "] are not equal! Can not create consistent message.");
                         throw new Exception("Payload reference [" + href + "] and id of payload element [" + xmlId +
                                     "] are not equal! Can not create consistent message.");
@@ -196,12 +191,12 @@ public class AddPayloads extends AbstractUserMessageHandler {
                         documentElement.addAttribute(EbMSConstants.QNAME_XMLID.getLocalPart(), href, xmlIdNS);
                     }
 
-                    log.debug("Add payload XML to SOAP Body");
+                    log.trace("Add payload XML to SOAP Body");
                     mc.getEnvelope().getBody().addChild(documentElement);
-                    log.info("Payload content located at '" + p.getContentLocation() + "' added to message");
+                    log.debug("Payload content located at '" + p.getContentLocation() + "' added to message");
                 } catch (final OMException parseError) {
                     // The given document could not be parsed, probably not an XML document. Reject it as body payload
-                    log.error("Failed to parse payload located at " + p.getContentLocation() + "!");
+                    log.warn("Failed to parse payload located at " + p.getContentLocation() + "!");
                     throw new Exception("Failed to parse payload located at " + p.getContentLocation() + "!",
                                         parseError);
                 }

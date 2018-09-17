@@ -18,6 +18,7 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
 import java.util.Map;
+
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.validation.CustomValidationFailedEvent;
@@ -53,7 +54,7 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
     @Override
     protected InvocationResponse doProcessing(MessageContext mc, IUserMessageEntity userMessage) throws Exception {
         // For the execution of the validation a separate component is used. This component will also raise the event
-        log.debug("Validate user message if specified");
+        log.trace("Validate user message if specified");
         try {
             // Get custom validation specifcation from P-Mode
             IMessageValidationSpecification validationSpec = null;
@@ -63,8 +64,6 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
                                                               .getUserMessageFlow().getCustomValidationConfiguration();
             } catch (NullPointerException npe) {
                 // Some element in the path to the validation spec is not available, so there is nothing to do
-                log.error("The was a problem retrieving the validation specifcation from P-Mode ["
-                           + userMessage.getPModeId() + "]!");
             }
 
             if (validationSpec == null) {
@@ -83,11 +82,13 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
             														   ProcessingState.READY_FOR_DELIVERY);                
             } else {
                 if (!validationResult.shouldRejectMessage()) {
-                    log.warn("User message contains validation errors, but can be processed");
+                    log.info("User message [" + userMessage.getMessageId() 
+                    										+ "] contains validation errors, but can be processed");
                 	HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, 
                 														   ProcessingState.READY_FOR_DELIVERY);                
                 } else {
-                    log.warn("User message is not valid and must be rejected, generate Other error.");
+                    log.info("User message [" + userMessage.getMessageId() 
+                    								+ "] is not valid and must be rejected, generate Other error.");
                     OtherContentError otherError = new OtherContentError(
                                                            buildErrorDetailText(validationResult.getValidationErrors()),
                                                            userMessage.getMessageId());

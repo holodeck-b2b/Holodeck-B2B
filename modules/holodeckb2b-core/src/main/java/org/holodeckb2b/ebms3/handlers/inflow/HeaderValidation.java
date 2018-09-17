@@ -19,6 +19,7 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -86,7 +87,7 @@ public class HeaderValidation extends BaseHandler {
                     log.debug("Header of " + MessageUnitUtils.getMessageUnitName(m) + " [" + m.getMessageId()
                             + "] successfully validated");
                 else {
-                    log.warn("Header of " + MessageUnitUtils.getMessageUnitName(m) + " [" + m.getMessageId()
+                    log.info("Header of " + MessageUnitUtils.getMessageUnitName(m) + " [" + m.getMessageId()
                             + "] is invalid!\n\tDetails: " + validationResult);
                     for(IEbmsError e : createEbMSErrors(m.getMessageId(), validationResult.getValidationErrors()))
                         MessageContextUtils.addGeneratedError(mc, e);

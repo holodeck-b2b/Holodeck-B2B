@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import java.util.Iterator;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
@@ -27,8 +29,6 @@ import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-
-import java.util.Iterator;
 
 /**
  * Is the handler in the <i>IN_FLOW</i> responsible for reading the meta data on an user message message unit from the
@@ -60,21 +60,21 @@ public class ReadUserMessage extends BaseHandler {
 
         if (messaging != null) {
             // Check if there is a user message unit
-            log.debug("Check for UserMessage element");
+            log.trace("Check for UserMessage element");
             final Iterator<?> it = UserMessageElement.getElements(messaging);
             if (it.hasNext()) {
                 log.debug("UserMessage found, read information from message");
                 final OMElement umElement = (OMElement) it.next();
                 // Read information into UserMessage entity object
                 UserMessage userMessage = UserMessageElement.readElement(umElement);
-                log.info("Succesfully read user message meta data from header. Msg-id="
-                        + userMessage.getMessageId());
+                log.debug("Succesfully read user message meta data from header. Msg-id="
+                        	+ userMessage.getMessageId());
 
                 // Store it in both database and message context for further processing
-                log.debug("Saving user message meta data to database and message context");
+                log.trace("Saving user message meta data to database and message context");
                 mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
                                HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
-                log.debug("User message with msgId " + userMessage.getMessageId() + " succesfully read");
+                log.info("User message with msgId " + userMessage.getMessageId() + " succesfully read");
             }
         }
 

@@ -16,6 +16,9 @@
  */
 package org.holodeckb2b.core.testhelpers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -23,11 +26,10 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.List;
+
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
-import org.apache.log4j.Level;
-import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
@@ -35,8 +37,6 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * Created at 15:22 19.02.17
@@ -111,26 +111,6 @@ public class TestUtils {
         assertEquals(name, p.getName());
         assertEquals(value, p.getValue());
         assertEquals(type, p.getType());
-    }
-
-    /**
-     *
-     * @param events
-     * @param logLevel
-     * @param msg
-     * @return
-     */
-    public static boolean eventContainsMsg(List<LoggingEvent> events,
-                                           Level logLevel, String msg) {
-        boolean flag = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(logLevel)) {
-                if(e.getRenderedMessage().trim().equals(msg)) {
-                    flag = true;
-                }
-            }
-        }
-        return flag;
     }
 
     /**

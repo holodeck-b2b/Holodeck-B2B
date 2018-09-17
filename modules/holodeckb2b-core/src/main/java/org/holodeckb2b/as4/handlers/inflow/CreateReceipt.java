@@ -19,7 +19,9 @@ package org.holodeckb2b.as4.handlers.inflow;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -96,7 +98,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
         final Boolean delivered = (Boolean) mc.getProperty(MessageContextProperties.DELIVERED_USER_MSG);
 
         if (delivered != null && delivered) {
-            log.debug("User message was succesfully delivered, check if Receipt is needed");
+            log.trace("User message was succesfully delivered, check if Receipt is needed");
 
             final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
             if (pmode == null) {
@@ -116,13 +118,13 @@ public class CreateReceipt extends AbstractUserMessageHandler {
                 return InvocationResponse.CONTINUE;
             }
 
-            log.debug("Receipt requested for this message exchange, create new Receipt signal");
+            log.trace("Receipt requested for this message exchange, create new Receipt signal");
             final Receipt rcptData = new Receipt();
             // Copy some meta-data to receipt
             rcptData.setRefToMessageId(um.getMessageId());
             rcptData.setPModeId(um.getPModeId());
 
-            log.debug("Determine type of Receipt that should be sent");
+            log.trace("Determine type of Receipt that should be sent");
             // Check if message was signed,
             if (mc.getProperty(MessageContextProperties.SIG_VERIFICATION_RESULT) != null) {
                 log.debug("Received message was signed, created NRR receipt");
@@ -134,16 +136,16 @@ public class CreateReceipt extends AbstractUserMessageHandler {
 
             // Check reply patten to see if receipt should be sent as response
             final boolean asResponse = rcptConfig.getPattern() == ReplyPattern.RESPONSE;
-            log.debug("Store the receipt signal in database");
+            log.trace("Store the receipt signal in database");
             try {
                 IReceiptEntity receipt = (IReceiptEntity) HolodeckB2BCore.getStorageManager()
                                                                                 .storeOutGoingMessageUnit(rcptData);
                 if (asResponse) {
-                    log.debug("Store the receipt in the MessageContext");
+                    log.trace("Store the receipt in the MessageContext");
                     mc.setProperty(MessageContextProperties.RESPONSE_RECEIPT, receipt);
                     mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
                 } else {
-                    log.debug("The Receipt should be sent separately");
+                    log.trace("The Receipt should be sent separately");
                     HolodeckB2BCore.getStorageManager().setProcessingState(receipt, ProcessingState.READY_TO_PUSH);
                 }
                 log.debug("Receipt for message [msgId=" + um.getMessageId() + "] created successfully");
@@ -156,7 +158,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
                 // Storing the new Receipt signal failed! This is a severe problem, but it does not
                 // need to stop processing because the user message is already delivered. The receipt
                 // can be regenerated when a retry is received.
-                log.error("Creating the Receipt signal in repsonse to user message [msgId="
+                log.error("Saving the Receipt signal in repsonse to user message [msgId="
                             + um.getMessageId() + "] failed! Details: " + ex.getMessage());
             }
         } else {

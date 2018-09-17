@@ -55,10 +55,10 @@ public class PullConfigurationWatcher extends FileWatcher {
                 log.error("An error occurred when stopping the Pull Worker Pool. Details: " + ex.getMessage());
             }
         } else {
-            log.debug("Configuration file changed, read new configuration from file");
+            log.trace("Configuration file changed, read new configuration from file");
             final PullConfiguration poolCfg = PullConfiguration.loadFromFile(f.getAbsolutePath());
             if (poolCfg != null) {
-                log.debug("Read new configuration, reconfigure the worker pool");
+                log.trace("Read new configuration, reconfigure the worker pool");
                 try {
                     HolodeckB2BCoreInterface.setPullWorkerPoolConfiguration(poolCfg);
                     log.info("Pull configuration succesfully changed");

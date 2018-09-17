@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Map;
+
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -70,27 +71,27 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
         final String expDateString = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:SS.sss").format(expirationDate.getTime());
 
         try {
-            log.debug("Get all message units that changed state before " + expDateString);
+            log.trace("Get all message units that changed state before " + expDateString);
              experidMsgUnits = queryManager.getMessageUnitsWithLastStateChangedBefore(expirationDate.getTime());
         } catch (final PersistenceException dbe) {
             log.error("Could not get the list of expired message units from database! Error details: "
                      + dbe.getMessage());
         }
         if (Utils.isNullOrEmpty(experidMsgUnits)) {
-            log.debug("No expired message unist found, nothing to do");
+            log.trace("No expired message unist found, nothing to do");
             return;
         }
 
         log.debug("Removing " + experidMsgUnits.size() + " expired message units.");
         for(final IMessageUnitEntity msgUnit : experidMsgUnits) {
-            log.debug("Removing " + MessageUnitUtils.getMessageUnitName(msgUnit)
-                      + " with msgId: " + msgUnit.getMessageId());
+            log.trace("Removing " + MessageUnitUtils.getMessageUnitName(msgUnit) + " with msgId: " 
+            			+ msgUnit.getMessageId());
             try {
                 // If the message unit to delete is a User Message we need to have a temp object so we can change the
                 // payload location info as we may need to trigger purge event.
                 UserMessage tmpUserMessage = null;
                 if (msgUnit instanceof IUserMessage) {
-                    log.debug("Delete the payload data of the User Message");
+                    log.trace("Delete the payload data of the User Message");
                     // Complete loading is needed as it is not done when querying
                     queryManager.ensureCompletelyLoaded(msgUnit);
                     tmpUserMessage = new UserMessage((IUserMessage) msgUnit);
@@ -98,11 +99,11 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
                     if (!Utils.isNullOrEmpty(payloads)) {
                         for (final IPayload pl : payloads) {
                             if (Utils.isNullOrEmpty(pl.getContentLocation()))
-                                log.debug("No payload location provided for payload [" + pl.getPayloadURI() + "]");
+                                log.trace("No payload location provided for payload [" + pl.getPayloadURI() + "]");
                             else {
                                 final File plFile = new File(pl.getContentLocation());
                                 if (plFile.exists() && plFile.delete()) {
-                                    log.debug("Removed payload data file " + pl.getContentLocation());
+                                    log.trace("Removed payload data file " + pl.getContentLocation());
                                     // Clear the payload location
                                     ((Payload) pl).setContentLocation(null);
                                 }  else if (plFile.exists())
@@ -111,12 +112,12 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
                             }
                         }
                     } else
-                        log.debug("User Message [" + msgUnit.getMessageId() + "] has no payloads");
+                        log.trace("User Message [" + msgUnit.getMessageId() + "] has no payloads");
                 }
                 // Remove meta-data from database
                 HolodeckB2BCore.getStorageManager().deleteMessageUnit(msgUnit);
-                log.info(MessageUnitUtils.getMessageUnitName(msgUnit)
-                         + " [msgId=" + msgUnit.getMessageId() + "] is removed");
+                log.debug(MessageUnitUtils.getMessageUnitName(msgUnit) + " [msgId=" + msgUnit.getMessageId() 
+                			+ "] is removed");
 
                 // Raise event so extension can process purge actions (for User Messages only)
                 if (msgUnit instanceof IUserMessage)

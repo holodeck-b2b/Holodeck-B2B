@@ -16,19 +16,15 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.spi.LoggingEvent;
-import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -36,21 +32,13 @@ import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
 
 /**
  * Created at 22:19 09.03.17
@@ -59,13 +47,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-@RunWith(MockitoJUnitRunner.class)
 public class StartProcessingUsrMessageTest {
-
-    @Mock
-    private Appender mockAppender;
-    @Captor
-    private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
 
     private static String baseDir;
 
@@ -84,34 +66,23 @@ public class StartProcessingUsrMessageTest {
     @Before
     public void setUp() throws Exception {
         handler = new StartProcessingUsrMessage();
-        LogManager.getRootLogger().addAppender(mockAppender);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        LogManager.getRootLogger().removeAppender(mockAppender);
     }
 
     @Test
     public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
+        MessageMetaData usrMsg = TestUtils.getMMD("handlers/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
         SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
+        OMElement umElement = UserMessageElement.createElement(headerBlock, usrMsg);
 
         MessageContext mc = new MessageContext();
 
-        UserMessage userMessage
-                = UserMessageElement.readElement(umElement);
-        String msgId = userMessage.getMessageId();
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        IUserMessageEntity userMessageEntity =
-                updateManager.storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                userMessageEntity);
+        IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(usrMsg);
+        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessageEntity);
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
@@ -120,12 +91,6 @@ public class StartProcessingUsrMessageTest {
             fail(e.getMessage());
         }
 
-        verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
-        LoggingEvent loggingEvent = captorLoggingEvent.getValue();
-        //Check log level
-        assertThat(loggingEvent.getLevel(), is(Level.WARN));
-        //Check the message being logged
-        assertThat(loggingEvent.getRenderedMessage(),
-                is("User message [msgId= " + msgId + "] is ready for processing"));
+        assertEquals(ProcessingState.PROCESSING, userMessageEntity.getCurrentProcessingState().getState());        
     }
 }

@@ -45,11 +45,12 @@ public class PackageUsermessageInfo extends AbstractUserMessageHandler {
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um) {
 
-        log.debug("Get the eb:Messaging header from the message");
+        log.trace("Get the eb:Messaging header from the message");
         final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
-        log.debug("Add eb:UserMessage element to the existing eb:Messaging header");
+        log.trace("Add eb:UserMessage element to the existing eb:Messaging header");
         UserMessageElement.createElement(messaging, um);
-        log.debug("eb:UserMessage element succesfully added to header");
+        log.debug("eb:UserMessage element for User Message [msgId=" + um.getMessageId() 
+        			+ "] succesfully added to header");
 
         return InvocationResponse.CONTINUE;
     }

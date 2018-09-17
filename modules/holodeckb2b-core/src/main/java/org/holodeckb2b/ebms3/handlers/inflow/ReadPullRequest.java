@@ -24,8 +24,8 @@ import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PullRequestElement;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is an in flow handler that checks if this message contains a Pull Request, i.e. contains a <eb:PullRequest> element
@@ -55,22 +55,19 @@ public class ReadPullRequest extends BaseHandler {
 
         if (messaging != null) {
             // Check if there is a Pull Request signal
-            log.debug("Check for PullRequest element to determine if message contains pull request");
+            log.trace("Check for PullRequest element to determine if message contains pull request");
             final OMElement prElement = PullRequestElement.getElement(messaging);
             if (prElement != null) {
                 log.debug("PullRequest found, read information from message");
                 // Read information into PullRequest object
                 org.holodeckb2b.common.messagemodel.PullRequest pullRequest = PullRequestElement.readElement(prElement);
                 // And store in database and message context for further processing
-                log.debug("Store PullRequest in database and message context");
+                log.trace("Store PullRequest in database and message context");
                 mc.setProperty(MessageContextProperties.IN_PULL_REQUEST,
                                HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(pullRequest));
                 log.info("PullRequest [msgId=" + pullRequest.getMessageId() + "] for MPC " + pullRequest.getMPC()
                         + " received.");
-            } else
-                log.debug("ebMS message does not contain PullRequest");
-        } else {
-            log.debug("Not an ebMS message, nothing to do.");
+            } 
         }
 
         return InvocationResponse.CONTINUE;

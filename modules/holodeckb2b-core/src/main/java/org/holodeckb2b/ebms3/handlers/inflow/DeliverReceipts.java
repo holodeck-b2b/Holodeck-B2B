@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import java.util.Collection;
+
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -26,13 +28,11 @@ import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
+import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-
-import java.util.Collection;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for checking if receipt messages should be delivered to the business
@@ -64,13 +64,12 @@ public class DeliverReceipts extends BaseHandler {
             // No receipts to deliver
             return InvocationResponse.CONTINUE;
 
-        log.debug("Message contains " + rcptSignals.size() + " Receipt Signals");
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Process each signal
         for(final IReceiptEntity receipt : rcptSignals) {
             // Prepare message for delivery by checking it is still ready for delivery and then
             // change its processing state to "out for delivery"
-            log.debug("Prepare message [" + receipt.getMessageId() + "] for delivery");
+            log.trace("Prepare message [" + receipt.getMessageId() + "] for delivery");
             if(updateManager.setProcessingState(receipt, ProcessingState.READY_FOR_DELIVERY,
                                                          ProcessingState.OUT_FOR_DELIVERY)) {
                 // Receipt in this signal can be delivered to business application
@@ -86,7 +85,7 @@ public class DeliverReceipts extends BaseHandler {
                     updateManager.setProcessingState(receipt, ProcessingState.WARNING);
                 }
             } else {
-                log.info("Receipt signal [" + receipt.getMessageId() + "] is already processed for delivery");
+                log.warn("Receipt signal [" + receipt.getMessageId() + "] is already processed for delivery");
             }
         }
         log.debug("Processed all Receipt signals in message");
@@ -114,7 +113,7 @@ public class DeliverReceipts extends BaseHandler {
             // Deliver the Receipt using deliverer
             try {
                 deliverer.deliver(receipt);
-                log.debug("Receipt successfully delivered!");
+                log.info("Receipt Signal [msgId=" + receipt.getMessageId() + "] successfully delivered!");
             } catch (final MessageDeliveryException ex) {
                 // There was an "normal/expected" issue during delivery, continue as normal
                 throw ex;
@@ -145,10 +144,10 @@ public class DeliverReceipts extends BaseHandler {
         final IReceiptConfiguration rcptConfig = leg.getReceiptConfiguration();
 
         if (rcptConfig != null && rcptConfig.shouldNotifyReceiptToBusinessApplication()) {
-            log.debug("Receipt should be delivered to business app, get delivery specification");
+            log.trace("Receipt should be delivered to business app, get delivery specification");
             deliverySpec = rcptConfig.getReceiptDelivery();
             if (deliverySpec == null) {
-                log.debug("No specific delivery specified for receipt, use default delivery");
+                log.trace("No specific delivery specified for receipt, use default delivery");
                 deliverySpec = leg.getDefaultDelivery();
             }
         }

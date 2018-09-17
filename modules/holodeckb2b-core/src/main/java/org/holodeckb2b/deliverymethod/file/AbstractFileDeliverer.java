@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
@@ -92,19 +93,19 @@ public abstract class AbstractFileDeliverer implements IMessageDeliverer {
         final Collection<IPayload>    copiedPLs = new ArrayList<>();
         try {
             if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
-                log.debug("Copy all payload files to delivery directory");
+                log.trace("Copy all payload files to delivery directory");
                 for(final IPayload p : mmd.getPayloads()) {
                     final Path newPath = copyPayloadFile(p, mmd.getMessageId());
                     if (newPath != null)
                         ((PartInfo) p).setContentLocation(newPath.toString());
                     copiedPLs.add(p);
                 }
-                log.debug("Copied all payload files, set as new payload info in MMD");
+                log.trace("Copied all payload files, set as new payload info in MMD");
                 mmd.setPayloads(copiedPLs);
             }
-            log.debug("Write message meta data to file");
+            log.trace("Write message meta data to file");
             writeUserMessageInfoToFile(mmd);
-            log.info("User message with msgID=" + mmd.getMessageId() + " successfully delivered");
+            log.debug("User message with msgID=" + mmd.getMessageId() + " successfully delivered");
         } catch (final IOException ex) {
             log.error("An error occurred while delivering the user message [" + mmd.getMessageId()
                                                                     + "]\n\tError details: " + ex.getMessage());

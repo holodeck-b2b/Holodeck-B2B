@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import java.util.Iterator;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
@@ -30,8 +32,6 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-
-import java.util.Iterator;
 
 
 /**
@@ -59,7 +59,7 @@ public class ReadError extends BaseHandler {
 
         if (messaging != null) {
             // Check if there are Error signals
-            log.debug("Check for Error elements to determine if message contains one or more errors");
+            log.trace("Check for Error elements to determine if message contains one or more errors");
             final Iterator<OMElement> errorSigs = ErrorSignalElement.getElements(messaging);
 
             if (!Utils.isNullOrEmpty(errorSigs)) {
@@ -69,18 +69,15 @@ public class ReadError extends BaseHandler {
                     final OMElement errElem = errorSigs.next();
                     // Read information into ErrorMessage object
                     ErrorMessage errorSignal = ErrorSignalElement.readElement(errElem);
-                    log.info("Succesfully read Error message meta data from header. Msg-id="
+                    log.debug("Succesfully read Error message meta data from header. Msg-id="
                             + errorSignal.getMessageId());
                     // And store in database and message context for further processing
-                    log.debug("Store Error Signal in database and message context");
+                    log.trace("Store Error Signal in database and message context");
                     MessageContextUtils.addRcvdError(mc, (IErrorMessageEntity) HolodeckB2BCore.getStorageManager()
                                                                                 .storeIncomingMessageUnit(errorSignal));
-                    log.debug("Error signal with msgId " + errorSignal.getMessageId() + " succesfully read");
+                    log.info("Error signal with msgId " + errorSignal.getMessageId() + " succesfully read");
                 }
-            } else
-                log.debug("ebMS message does not contain Error(s)");
-        } else {
-            log.debug("Not an ebMS message, nothing to do.");
+            } 
         }
 
         return InvocationResponse.CONTINUE;

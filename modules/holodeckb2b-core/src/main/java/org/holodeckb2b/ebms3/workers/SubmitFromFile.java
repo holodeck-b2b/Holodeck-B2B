@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
+
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.common.mmd.xml.PartInfo;
 import org.holodeckb2b.common.util.Utils;
@@ -83,12 +84,12 @@ public class SubmitFromFile extends DirWatcher {
             if( !f.renameTo(new File(tFileName)))
                 // Renaming failed, so file already processed by another worker or externally
                 // changed
-                log.info(f.getName() + " is not processed because it could not be renamed");
+                log.trace(f.getName() + " is not processed because it could not be renamed");
             else {
                 // The file can be processed
-                log.debug("Read message meta data from " + f.getName());
+                log.trace("Read message meta data from " + f.getName());
                 final MessageMetaData mmd = MessageMetaData.createFromFile(new File(tFileName));
-                log.debug("Succesfully read message meta data from " + f.getName());
+                log.trace("Succesfully read message meta data from " + f.getName());
                 // Convert relative paths in payload references to absolute ones to prevent file not found errors
                 convertPayloadPaths(mmd, f);
                 final IMessageSubmitter   submitter = HolodeckB2BCoreInterface.getMessageSubmitter();
@@ -143,7 +144,7 @@ public class SubmitFromFile extends DirWatcher {
             nameOnly = nameOnly.substring(0, startExt);
         final String errFileName = nameOnly + ".err";
 
-        log.debug("Writing submission error to error file: " + errFileName);
+        log.trace("Writing submission error to error file: " + errFileName);
         try (PrintWriter errorFile = new PrintWriter(new File(errFileName))) {
 
             errorFile.write("The message could not be submitted to Holodeck B2B due to an error:\n\n");

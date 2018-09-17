@@ -114,7 +114,7 @@ public class CheckSentResult extends BaseHandler {
                             // Signals are always set to delivered
                             updateManager.setProcessingState(mu, ProcessingState.DELIVERED);
                         } else {
-                            log.debug("User Message is sent, check P-Mode if Receipt is expected");
+                            log.trace("User Message is sent, check P-Mode if Receipt is expected");
                             // Because we only support One-Way the first leg determines
                             final ILeg leg = HolodeckB2BCore.getPModeSet().get(mu.getPModeId()).getLeg(mu.getLeg());
                             if (leg.getReceiptConfiguration() != null)
@@ -124,7 +124,7 @@ public class CheckSentResult extends BaseHandler {
                         }
                         transferEvent = new MessageTransferEvent(mu);
                     }
-                    log.debug("Processing state for message unit [" + mu.getMessageId() + "] changed to "
+                    log.trace("Processing state for message unit [" + mu.getMessageId() + "] changed to "
                                 + mu.getCurrentProcessingState().getState());
                     // Raise a message processing event about the transfer
                     HolodeckB2BCore.getEventProcessor().raiseEvent(transferEvent, mc);

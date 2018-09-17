@@ -16,7 +16,21 @@
  */
 package org.holodeckb2b.ebms3.handlers.outflow;
 
-import org.apache.axiom.soap.*;
+import java.util.Collection;
+import java.util.Iterator;
+
+import javax.xml.namespace.QName;
+
+import org.apache.axiom.soap.SOAP11Version;
+import org.apache.axiom.soap.SOAPBody;
+import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axiom.soap.SOAPFault;
+import org.apache.axiom.soap.SOAPFaultCode;
+import org.apache.axiom.soap.SOAPFaultReason;
+import org.apache.axiom.soap.SOAPFaultText;
+import org.apache.axiom.soap.SOAPFaultValue;
+import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -30,10 +44,6 @@ import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.module.HolodeckB2BCore;
-
-import javax.xml.namespace.QName;
-import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:SignalMessage</code> and child element for an
@@ -86,21 +96,21 @@ public class PackageErrorSignals extends BaseHandler {
         // There are error signals to be sent, add them to the message
         log.debug("Adding " + errors.size() + " error signal(s) to the message");
 
-        log.debug("Get the eb:Messaging header from the message");
+        log.trace("Get the eb:Messaging header from the message");
         final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
 
         // If one of the errors is of severity FAILURE a SOAP may be added
         boolean addSOAPFault = false;
         for(final IErrorMessageEntity e : errors) {
-            log.debug("Make sure that all meta-data on the error is loaded");
+            log.trace("Make sure that all meta-data on the error is loaded");
             if (!e.isLoadedCompletely()) {
-                log.debug("Not all meta-data is available, load now");
+                log.trace("Not all meta-data is available, load now");
                 HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(e);
             }
-            log.debug("Add eb:SignalMessage element to the existing eb:Messaging header");
+            log.trace("Add eb:SignalMessage element to the existing eb:Messaging header");
             ErrorSignalElement.createElement(messaging, e);
-            log.debug("eb:SignalMessage element succesfully added to header");
-
+            log.debug("eb:SignalMessage element for Error Signal [msgId=" + e.getMessageId() 
+            			+ "] succesfully added to header");
             // Check if a SOAPFault should be added
             addSOAPFault |= e.shouldHaveSOAPFault();
         }
@@ -109,12 +119,11 @@ public class PackageErrorSignals extends BaseHandler {
         if(addSOAPFault) {
             log.debug("A SOAPFaults should be added to message, check if possible due to UserMessage with body payload");
             if (isSOAPFaultAllowed(mc)) {
-                log.debug("SOAPFault can be added to message");
+                log.trace("SOAPFault can be added to message");
                 addSOAPFault(mc.getEnvelope());
-                log.debug("SOAPFault added to message");
+                log.trace("SOAPFault added to message");
             }
         }
-
         return InvocationResponse.CONTINUE;
     }
 

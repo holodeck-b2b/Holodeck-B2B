@@ -18,6 +18,7 @@ package org.holodeckb2b.core.validation;
 
 import java.util.Collection;
 import java.util.Iterator;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.util.Utils;
@@ -48,7 +49,7 @@ public class DefaultValidationExecutor implements IValidationExecutor {
                                                                                     throws MessageValidationException {
 
         if (validationSpec == null || Utils.isNullOrEmpty(validationSpec.getValidators())) {
-            log.debug("No custom validation specified in P-Mode, skipping custom validation");
+            log.trace("No custom validation specified in P-Mode, skipping custom validation");
             return null;
         }
         // Execute the validators as specified in the specification and collect found errors
@@ -96,7 +97,7 @@ public class DefaultValidationExecutor implements IValidationExecutor {
      */
     private IMessageValidator createValidator(final IMessageValidatorConfiguration validatorCfg)
                                                                                     throws MessageValidationException {
-        log.debug("Creating validator [{}]", validatorCfg.getId());
+        log.trace("Creating validator [{}]", validatorCfg.getId());
         IMessageValidator.Factory factory = null;
         try {
             String factoryClassname = validatorCfg.getFactory();
@@ -107,9 +108,9 @@ public class DefaultValidationExecutor implements IValidationExecutor {
             throw new MessageValidationException("Could not create validator factory class ["
                                                   + validatorCfg.getFactory() + "]!", ex);
         }
-        log.debug("Initialize the factory");
+        log.trace("Initialize the factory");
         factory.init(validatorCfg.getSettings());
-        log.debug("And create a validator");
+        log.trace("And create a validator");
         return factory.createMessageValidator();
     }
 

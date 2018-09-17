@@ -16,6 +16,9 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -36,9 +39,6 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeFinder;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for determining the P-Modes that define how the received message units
@@ -69,26 +69,21 @@ public class FindPModes extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        log.debug("Check for UserMessage message unit in received message");
         final IUserMessageEntity userMsg =
                                           (IUserMessageEntity) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
         if (userMsg != null) {
-            log.debug("Message contains a User Message [" + userMsg.getMessageId() + "], finding P-Mode");
+            log.debug("Finding P-Mode for User Message [" + userMsg.getMessageId() + "]");
             final IPMode pmode = PModeFinder.forReceivedUserMessage(userMsg);
             if (pmode == null) {
-                // No matching P-Mode could be found for this message, return error
                 createErrorNoPMode(mc, userMsg);
-                log.debug("Set the processing state of this User Message to failure");
+                log.trace("Set the processing state of this User Message to failure");
                 updateManager.setProcessingState(userMsg, ProcessingState.FAILURE);
             } else {
-                log.debug("Found P-Mode [" + pmode.getId() + "] for User Message [" + userMsg.getMessageId() + "]");
+                log.info("Found P-Mode [" + pmode.getId() + "] for User Message [" + userMsg.getMessageId() + "]");
                 updateManager.setPModeId(userMsg, pmode.getId());
             }
-        } else {
-            log.debug("Message does not contain user message");
-        }
+        } 
 
-        log.debug("Check for Error Signal message units");
         final ArrayList<IErrorMessageEntity>  errorSignals = (ArrayList<IErrorMessageEntity>)
                                                                     mc.getProperty(MessageContextProperties.IN_ERRORS);
         if (!Utils.isNullOrEmpty(errorSignals)) {
@@ -96,20 +91,16 @@ public class FindPModes extends BaseHandler {
             for (final IErrorMessageEntity e : errorSignals) {
                 final IPMode pmode = findForReceivedErrorSignal(e, mc);
                 if (pmode == null) {
-                    // No matching P-Mode could be found for this message, return error
                     createErrorNoPMode(mc, e);
-                    log.debug("Set the processing state of this Error Signal to failure");
+                    log.trace("Set the processing state of this Error Signal to failure");
                     updateManager.setProcessingState(e, ProcessingState.FAILURE);
                 } else {
-                    log.debug("Found P-Mode [" + pmode.getId() + "] for Error Signal [" + e.getMessageId() + "]");
+                    log.info("Found P-Mode [" + pmode.getId() + "] for Error Signal [" + e.getMessageId() + "]");
                     updateManager.setPModeId(e, pmode.getId());
                 }
             }
-        } else {
-            log.debug("Message does not contain Error Signals, continue processing");
-        }
+        } 
 
-        log.debug("Check for Receipt Signal message units");
         final ArrayList<IReceiptEntity>  rcptSignals = (ArrayList<IReceiptEntity>)
                                                                    mc.getProperty(MessageContextProperties.IN_RECEIPTS);
         if (!Utils.isNullOrEmpty(rcptSignals)) {
@@ -117,18 +108,15 @@ public class FindPModes extends BaseHandler {
             for (final IReceiptEntity r : rcptSignals) {
                 final IPMode pmode = getPModeFromRefdMessage(r.getRefToMessageId());
                 if (pmode == null) {
-                    // No matching P-Mode could be found for this message, return error
                     createErrorNoPMode(mc, r);
-                    log.debug("Set the processing state of this Receipt Signal to failure");
+                    log.trace("Set the processing state of this Receipt Signal to failure");
                     updateManager.setProcessingState(r, ProcessingState.FAILURE);
                 } else {
-                    log.debug("Found P-Mode [" + pmode.getId() + "] for message [" + r.getMessageId() + "]");
+                    log.info("Found P-Mode [" + pmode.getId() + "] for message [" + r.getMessageId() + "]");
                     updateManager.setPModeId(r, pmode.getId());
                 }
             }
-        } else {
-            log.debug("Message does not contain Receipt Signals, continue processing");
-        }
+        } 
 
         return InvocationResponse.CONTINUE;
     }
@@ -198,7 +186,7 @@ public class FindPModes extends BaseHandler {
      */
     private void createErrorNoPMode(final MessageContext mc, final IMessageUnit mu)
                                             throws PersistenceException {
-        log.error("No P-Mode found for message unit [" + mu.getMessageId() + "], unable to process it!");
+        log.info("No P-Mode found for message unit [" + mu.getMessageId() + "]");
         final ProcessingModeMismatch   noPmodeIdError = new ProcessingModeMismatch();
         noPmodeIdError.setRefToMessageInError(mu.getMessageId());
         noPmodeIdError.setErrorDetail("Can not process message [msgId=" + mu.getMessageId() + "] because no P-Mode"

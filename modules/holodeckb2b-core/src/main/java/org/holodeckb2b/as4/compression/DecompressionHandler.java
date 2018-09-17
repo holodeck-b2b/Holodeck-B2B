@@ -19,6 +19,7 @@ package org.holodeckb2b.as4.compression;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
@@ -68,7 +69,7 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
                     mimeType = CompressionFeature.MIME_TYPE_PROPERTY_NAME.equals(pp.getName()) ? pp.getValue() : null;
                 }
                 if (Utils.isNullOrEmpty(mimeType)) {
-                    log.warn("No source MIME Type specified for compressed payload!");
+                    log.info("No source MIME Type specified for compressed payload!");
                     // Generate error and stop processing this user messsage
                     final DeCompressionFailure decompressFailure = new DeCompressionFailure();
                     decompressFailure.setErrorDetail("Missing required MimeType part property for compressed payload ["
@@ -81,7 +82,7 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
                     try {
                         final String cid = p.getPayloadURI();
                         mc.addAttachment(cid, new CompressionDataHandler(mc.getAttachment(cid), mimeType));
-                        log.debug("Replaced DataHandler to enable decompression");
+                        log.trace("Replaced DataHandler to enable decompression");
                         // Remove part property specific to AS4 Compression feature
                         removeProperty(p);
                     } catch (final NullPointerException npe) {
@@ -114,7 +115,7 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
      */
     private boolean usesCompression(final IPayload p) {
         boolean compression = false;
-        for(final Iterator<IProperty> pps = (Iterator<IProperty>) p.getProperties().iterator()
+        for(final Iterator<IProperty> pps = p.getProperties().iterator()
                     ; pps.hasNext() && !compression ;) {
             final IProperty pp = pps.next();
             compression = CompressionFeature.FEATURE_PROPERTY_NAME.equals(pp.getName())
@@ -132,7 +133,7 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
      * @param p     The payload meta data object to remove the property from
      */
     private void removeProperty(final IPayload p) {
-        final Collection<IProperty> partProperties = (Collection<IProperty>) p.getProperties();
+        final Collection<IProperty> partProperties = p.getProperties();
         final Collection<IProperty> remove = new ArrayList<>();
 
         for(final IProperty pp : partProperties)

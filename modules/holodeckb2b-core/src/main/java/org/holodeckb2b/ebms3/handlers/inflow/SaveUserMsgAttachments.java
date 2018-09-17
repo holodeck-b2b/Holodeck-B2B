@@ -16,6 +16,22 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.zip.ZipException;
+
+import javax.activation.DataHandler;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axis2.AxisFault;
@@ -38,16 +54,6 @@ import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-
-import javax.activation.DataHandler;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.zip.ZipException;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for reading the payload content from the SOAP message. The payloads are
@@ -94,7 +100,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
         try {
             // Get the directory where to store the payloads from the configuration
             final File tmpPayloadDir = getTempDir();
-            log.debug("Payload content will be stored in " + tmpPayloadDir.getAbsolutePath());
+            log.trace("Payload content will be stored in " + tmpPayloadDir.getAbsolutePath());
 
             // Save each payload to a file
             // We built a new collection of payload meta-data so we can update the content location
@@ -105,19 +111,17 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                 // Create a unique filename for temporarily storing the payload
                 final File plFile = File.createTempFile("pl-", null, tmpPayloadDir);
 
-                log.debug("Check containment of payload");
                 // The reference defines how the payload is contained in the message
                 final String plRef = p.getPayloadURI();
-
                 switch (p.getContainment()) {
                     case BODY:
                         // Payload is a element from the SOAP body
                         OMElement plElement= null;
                         if (Utils.isNullOrEmpty(plRef)) {
-                            log.debug("No reference included in payload meta data => SOAP body is the payload");
+                            log.trace("No reference included in payload meta data => SOAP body is the payload");
                             plElement = mc.getEnvelope().getBody().getFirstElement();
                         } else {
-                            log.debug("Payload is element with id " + plRef + " of SOAP body");
+                            log.trace("Payload is element with id " + plRef + " of SOAP body");
                             plElement = getPayloadFromBody(mc.getEnvelope().getBody(), plRef);
                         }
                         if (plElement == null) {
@@ -127,15 +131,15 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                             return InvocationResponse.CONTINUE;
                         } else {
                             // Found the referenced element, save it (and its children) fo file
-                            log.debug("Found referenced element in SOAP body");
+                            log.trace("Found referenced element in SOAP body");
                             saveXMLPayload(plElement, plFile);
-                            log.debug("Payload saved to temporary file, set content location in meta data");
+                            log.trace("Payload saved to temporary file, set content location in meta data");
                             p.setMimeType("application/xml");
                             p.setContentLocation(plFile.getAbsolutePath());
                         }
                         break;
                     case ATTACHMENT:
-                        log.debug("Payload is contained in attachment with MIME Content-id= " + plRef);
+                        log.trace("Payload is contained in attachment with MIME Content-id= " + plRef);
                         // Get access to the actual content
                         log.debug("Get DataHandler for attachment");
                         final DataHandler dh = mc.getAttachment(plRef);
@@ -173,10 +177,10 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                                     writeFailure = new OtherContentError("Unexpected error in payload processing!",
                                                                         um.getMessageId());
                                 }
-                                log.error("Payload [" + plRef + "] in message [" + um.getMessageId() + "] could not be "
+                                log.info("Payload [" + plRef + "] in message [" + um.getMessageId() + "] could not be "
                                           + errMessage + "!\n\tDetails: " + rootCause.getMessage());
                                 MessageContextUtils.addGeneratedError(mc, writeFailure);
-                                log.debug("Error generated and stored in MC, change processing state of user message");
+                                log.trace("Error generated and stored in MC, change processing state of user message");
                                 updateManager.setProcessingState(um, ProcessingState.FAILURE);
                                 return InvocationResponse.CONTINUE;
                             }
@@ -197,7 +201,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
             // Update the message meta data in database 
             updateManager.setPayloadInformation(um, newPayloadData);
         } catch (IOException | XMLStreamException ex) {
-            log.fatal("Payload(s) could not be saved to temporary file! Details:" + ex.getMessage());
+            log.error("Payload(s) could not be saved to temporary file! Details:" + ex.getMessage());
             updateManager.setProcessingState(um, ProcessingState.FAILURE);
             // Stop processing as content can not be saved. Send error to sender of message
             throw new AxisFault("Unable to create file for temporarily storing payload content", ex);
@@ -263,10 +267,8 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      */
     private void createInconsistentError(final MessageContext mc, final IUserMessageEntity um, final String invalidRef)
                                                                                         throws PersistenceException {
-        log.warn("UserMessage with id " + um.getMessageId() +
-                 " can not be processed because payload"
-                 + (invalidRef != null ? " with href=" + invalidRef  : "")
-                 + " is not included in message");
+        log.info("UserMessage with id " + um.getMessageId() + " can not be processed because payload"
+                 + (invalidRef != null ? " with href=" + invalidRef  : "") + " is not included in message");
         EbmsError error = null;
         if(invalidRef == null || invalidRef.startsWith("#"))
             error = new ValueInconsistent();
@@ -276,9 +278,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
         error.setErrorDetail("The payload" + (invalidRef != null ? " with href=" + invalidRef  : "")
                                            + " could not be found in the message!");
         MessageContextUtils.addGeneratedError(mc, error);
-        log.debug("Error stored in message context for further processing");
-
-        log.debug("Change processing state of the user message");
+        log.trace("Error stored in message context, changing processing state of message");
         HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.FAILURE);
     }
 

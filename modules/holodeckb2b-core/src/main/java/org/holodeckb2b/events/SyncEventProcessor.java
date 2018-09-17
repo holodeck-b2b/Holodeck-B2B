@@ -77,8 +77,8 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
         final String msgUnitType = event.getSubject().getClass().getSimpleName();
         final String messageId = event.getSubject().getMessageId();
         try {
-            log.info("A " + eventType + " event [" + event.getId() + "] was raised for " + msgUnitType + " with msgId="
-                     + messageId);
+            log.debug("A " + eventType + " event [" + event.getId() + "] was raised for " + msgUnitType 
+            			+ " with msgId=" + messageId);
             final IMessageUnit subject = event.getSubject();
             final String pmodeId = subject.getPModeId();
             if (Utils.isNullOrEmpty(pmodeId)) {
@@ -97,18 +97,18 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
             final ILeg leg = pmode.getLeg(ILeg.Label.REQUEST);
             final List<IMessageProcessingEventConfiguration> eventHandlers = leg.getMessageProcessingEventConfiguration();
             if (Utils.isNullOrEmpty(eventHandlers)) {
-                log.debug(leg.getLabel() != null ? leg.getLabel().toString() : "REQUEST" + " leg of P-Mode [" + pmodeId
+                log.trace(leg.getLabel() != null ? leg.getLabel().toString() : "REQUEST" + " leg of P-Mode [" + pmodeId
                          + "] for event [" + event.getId() + "] has no event handlers configured => event is ignored");
                 return;
             }
-            log.debug(leg.getLabel() != null ? leg.getLabel().toString() : "REQUEST" + " leg of P-Mode [" + pmodeId
+            log.trace(leg.getLabel() != null ? leg.getLabel().toString() : "REQUEST" + " leg of P-Mode [" + pmodeId
                          + "] for event [" + event.getId() + "] has " + eventHandlers.size()
                          + " event handlers configured.");
             // Check each configured if it needs to handle this event
             for (final IMessageProcessingEventConfiguration c : eventHandlers) {
                 final boolean shouldHandle = EventUtils.shouldHandleEvent(c, event);
                 final String handlerClassname = c.getFactoryClass();
-                log.debug(handlerClassname + (shouldHandle ? " should" : " does not") + " handle " + eventType + " for "
+                log.trace(handlerClassname + (shouldHandle ? " should" : " does not") + " handle " + eventType + " for "
                           + msgUnitType + " with msgId=[" + messageId + "]");
                 if (shouldHandle) {
                     // Create the factory class
@@ -121,12 +121,12 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
                                   + ") due to a " + ex.getClass().getSimpleName());
                         return;
                     }
-                    log.debug("Initialize the handler factory");
+                    log.trace("Initialize the handler factory");
                     factory.init(c.getHandlerSettings());
                     // Catch exceptions while the event is processed by the handler to prevent that error in one handler
                     // will stop processing in others as well
                     try {
-                        log.debug("Pass event to handler for further processing");
+                        log.trace("Pass event to handler for further processing");
                         factory.createHandler().handleEvent(event);
                         log.info(eventType + "[id= " + event.getId() + "] for " + msgUnitType + " with msgId=["
                                 + messageId + "] handled by " + handlerClassname);

@@ -69,9 +69,7 @@ public class ProcessErrors extends BaseHandler {
                 if (e.getCurrentProcessingState().getState() != ProcessingState.FAILURE)
                     processErrorSignal(e, mc);
             log.debug("All Error Signals processed");
-        } else
-            log.debug("Message does not contain error signals, continue processing");
-
+        } 
         return InvocationResponse.CONTINUE;
     }
 
@@ -97,7 +95,7 @@ public class ProcessErrors extends BaseHandler {
         // Change processing state to indicate we start processing the error. Also checks that the error is not
         // already being processed
         if (!storageManager.setProcessingState(errSignal, ProcessingState.RECEIVED, ProcessingState.PROCESSING)) {
-            log.debug("Error Signal [msgId=" + errSignal.getMessageId() + "] is already being processed, skipping");
+            log.warn("Error Signal [msgId=" + errSignal.getMessageId() + "] is already being processed, skipping");
             return;
         }
 
@@ -107,7 +105,7 @@ public class ProcessErrors extends BaseHandler {
         else
             errorLog.error(MessageUnitUtils.errorSignalToString(errSignal));
 
-        log.debug("Get referenced message unit(s)");
+        log.trace("Get referenced message unit(s)");
         Collection<IMessageUnitEntity> refdMessages = null;
         // There may not be a refToMessageId in the error itself, in that case the message units from the request are
         // assumed to be referenced
@@ -117,8 +115,8 @@ public class ProcessErrors extends BaseHandler {
                         + refToMessageId);
             refdMessages = HolodeckB2BCore.getQueryManager().getMessageUnitsWithId(refToMessageId, Direction.OUT);
         } else if (isInFlow(INITIATOR)) {
-            log.warn("Error Signal [" + errSignal.getMessageId() + "] does not contain reference."
-                    + "Assuming it refers to sent messages");
+            log.debug("Error Signal [" + errSignal.getMessageId() + "] does not contain reference."
+            			+ "Assuming it refers to sent messages");
             refdMessages = MessageContextUtils.getSentMessageUnits(mc);
         }
 
@@ -145,7 +143,7 @@ public class ProcessErrors extends BaseHandler {
                     storageManager.setProcessingState(mu, ProcessingState.FAILURE);
                 }
             }
-            log.debug("Processed Error Signal [" + errSignal.getMessageId() + "]");
+            log.info("Processed Error Signal [" + errSignal.getMessageId() + "]");
             // Errors may need to be delivered to bussiness app which can be done now
             storageManager.setProcessingState(errSignal, ProcessingState.READY_FOR_DELIVERY);
         }

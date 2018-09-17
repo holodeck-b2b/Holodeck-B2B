@@ -16,6 +16,11 @@
  */
 package org.holodeckb2b.ebms3.handlers.outflow;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -24,15 +29,8 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.engine.Handler;
 import org.apache.axis2.wsdl.WSDLConstants;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -40,6 +38,8 @@ import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.junit.After;
@@ -47,16 +47,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import java.util.List;
-
-import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Created at 23:42 29.01.17
@@ -67,11 +58,6 @@ import static org.mockito.Mockito.*;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class CreateSOAPEnvelopeHandlerTest {
-
-    @Mock
-    private Appender mockAppender;
-    @Captor
-    private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
 
     private static String baseDir;
 
@@ -90,14 +76,10 @@ public class CreateSOAPEnvelopeHandlerTest {
     @Before
     public void setUp() throws Exception {
         handler = new CreateSOAPEnvelopeHandler();
-        Logger logger = LogManager.getRootLogger();
-        logger.addAppender(mockAppender);
-        logger.setLevel(Level.DEBUG);
     }
 
     @After
     public void tearDown() throws Exception {
-        LogManager.getRootLogger().removeAppender(mockAppender);
         core.getPModeSet().removeAll();
     }
 
@@ -141,11 +123,6 @@ public class CreateSOAPEnvelopeHandlerTest {
             fail(e.getMessage());
         }
 
-        verify(mockAppender, atLeastOnce())
-                .doAppend(captorLoggingEvent.capture());
-        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String msg = "Added SOAP envelope to message context";
-        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 
     @Test
@@ -168,12 +145,6 @@ public class CreateSOAPEnvelopeHandlerTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
-
-        verify(mockAppender, atLeastOnce())
-                .doAppend(captorLoggingEvent.capture());
-        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String msg = "Added SOAP envelope to message context";
-        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 
     @Test
@@ -197,10 +168,5 @@ public class CreateSOAPEnvelopeHandlerTest {
             fail(e.getMessage());
         }
 
-        verify(mockAppender, atLeastOnce())
-                .doAppend(captorLoggingEvent.capture());
-        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String msg = "Check that ebMS namespace is declared on the SOAP envelope";
-        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 }

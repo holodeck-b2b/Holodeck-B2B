@@ -17,6 +17,7 @@
 package org.holodeckb2b.multihop;
 
 import java.util.Collection;
+
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.addressing.EndpointReference;
@@ -82,7 +83,7 @@ public class ConfigureMultihop extends BaseHandler {
             final IProtocol prot = HolodeckB2BCore.getPModeSet().get(primMU.getPModeId())
                                                                 .getLeg(primMU.getLeg()).getProtocol();
             if (prot == null || !prot.shouldAddActorOrRoleAttribute())
-                log.debug("Primary message is a non multi-hop UserMessage");
+                log.trace("Primary message is a non multi-hop UserMessage");
             else {
                 // This is a multi-hop message, set the multi-hop target on the eb:Messaging element
                 log.debug("Primary message is a multi-hop UserMessage -> set multi-hop target");
@@ -92,7 +93,7 @@ public class ConfigureMultihop extends BaseHandler {
         } else if (primMU instanceof IPullRequest) {
             // If the primary message unit is a PullRequest the message is not sent using multi-hop as this is not
             // supported in AS4 multi-hop
-            log.debug("Primary message unit is a PullRequest -> no multi-hop");
+            log.trace("Primary message unit is a PullRequest -> no multi-hop");
         } else {
             // If the primary message unit is a Receipt or Error signal additional WS-A headers must be provided with
             // the necessary routing info. This info is retrieved from the UserMessage the signal is a response to.
@@ -103,7 +104,7 @@ public class ConfigureMultihop extends BaseHandler {
                 log.debug("Primary message unit is response signal to multi-hop User Message -> add routing info");
                 addRoutingInfo(mc, usrMessage, (ISignalMessage) primMU);
             } else
-                log.debug("Primary message unit is response signal to non (multi-hop) User Message");
+                log.trace("Primary message unit is response signal to non (multi-hop) User Message");
         }
 
         return InvocationResponse.CONTINUE;

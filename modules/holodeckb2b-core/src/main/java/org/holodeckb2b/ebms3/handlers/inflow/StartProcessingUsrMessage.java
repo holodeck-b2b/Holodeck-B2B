@@ -41,15 +41,14 @@ public class StartProcessingUsrMessage extends AbstractUserMessageHandler {
     protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
                                                                                         throws PersistenceException {
         final String msgId = um.getMessageId();
-        log.debug("Change processing state to indicate start of processing of message [" + msgId + "]" );
+        log.trace("Change processing state to indicate start of processing of message [" + msgId + "]" );
         if (!HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.RECEIVED,
                                                                        ProcessingState.PROCESSING)) {
-            // Changing the state failed which indicates that the message unit is already being processed
             log.warn("User message [msgId= " + msgId + "] is already being processed");
             // Remove the User Message from the context to prevent further processing
             mc.removeProperty(MessageContextProperties.IN_USER_MESSAGE);
         } else
-            log.warn("User message [msgId= " + msgId + "] is ready for processing");
+            log.trace("User message [msgId= " + msgId + "] is ready for processing");
 
         return InvocationResponse.CONTINUE;
     }

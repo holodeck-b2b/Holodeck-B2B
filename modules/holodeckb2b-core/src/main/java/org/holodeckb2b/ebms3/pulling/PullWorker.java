@@ -19,6 +19,7 @@ package org.holodeckb2b.ebms3.pulling;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.messagemodel.PullRequest;
@@ -103,7 +104,8 @@ public class PullWorker implements IWorkerTask {
      *
      * @return  The name of the pull worker
      */
-    public String getName() {
+    @Override
+	public String getName() {
         return name;
     }
 
@@ -159,7 +161,7 @@ public class PullWorker implements IWorkerTask {
         for(final IPMode p : pullForPModes) {
             log.debug("Start Pull operation for P-Mode [" + p.getId() +"]");
             // Get the MPC from the P-Mode
-            log.debug("Get MPC to pull from");
+            log.trace("Get MPC to pull from");
             String mpc = null;
             final ILeg leg = p.getLegs().iterator().next(); // currently only One-Way P-Modes, so only one leg
             // First check PullRequest flow (sub-channel) and then UserMessage flow
@@ -169,7 +171,7 @@ public class PullWorker implements IWorkerTask {
                 mpc = prf.getMPC() != null ? prf.getMPC() : null;
             }
             if (mpc == null || mpc.isEmpty()) {
-                log.debug("No MPC defined in PullRequest flow, check UserMessage flow");
+                log.trace("No MPC defined in PullRequest flow, check UserMessage flow");
                 final IUserMessageFlow flow = leg.getUserMessageFlow();
                 mpc = flow != null && flow.getBusinessInfo() != null ? flow.getBusinessInfo().getMpc() : null;
             }
@@ -177,7 +179,7 @@ public class PullWorker implements IWorkerTask {
             if (mpc == null || mpc.isEmpty())
                 // No MPC defined in P-Mode, use default MPC
                 mpc = EbMSConstants.DEFAULT_MPC;
-            log.debug("Using [" + mpc + "] as MPC for pull request");
+            log.trace("Using [" + mpc + "] as MPC for pull request");
 
             try {
                 // Submit the PullRequest to the Core, actual sending will be done by SenderWorker
@@ -185,7 +187,7 @@ public class PullWorker implements IWorkerTask {
                                                         .submitMessage(new PullRequest(p.getId(), mpc));
                 log.info("Submitted the PullRequest signal for P-Mode [" + p.getId() + "] and MPC=" + mpc);
             } catch (final MessageSubmitException ex) {
-                    log.error("Could not submit PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
+                log.error("Could not submit PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
             }
         }
     }
@@ -202,7 +204,7 @@ public class PullWorker implements IWorkerTask {
 
         log.debug("Check if given P-Modes are to be pulled or not");
         if(inclusive) {
-            log.debug("P-Modes to pull specified in parameter, check existence in configured P-Mode");
+            log.trace("P-Modes to pull specified in parameter, check existence in configured P-Mode");
             final IPModeSet     curPModeSet = HolodeckB2BCoreInterface.getPModeSet();
             for(final String pid : pmodes) {
                 final IPMode p = curPModeSet.get(pid);
@@ -218,11 +220,11 @@ public class PullWorker implements IWorkerTask {
                              + "[id=" + pid + "]");
             }
         } else {
-            log.debug("Should pull for all P-Modes except specified");
+            log.trace("Should pull for all P-Modes except specified");
             for(final IPMode p : HolodeckB2BCoreInterface.getPModeSet().getAll()) {
                 // Check if P-Mode is included at all
                 if (pmodes.contains(p.getId()))
-                    log.debug("P-Mode [id=" + p.getId() + "] is excluded from pulling by this pull worker");
+                    log.trace("P-Mode [id=" + p.getId() + "] is excluded from pulling by this pull worker");
                 else {
                     // Check if this P-Mode uses pulling
                     final ILeg leg = p.getLegs().iterator().next();
@@ -234,7 +236,7 @@ public class PullWorker implements IWorkerTask {
                 }
             }
         }
-        log.info("Pulling for " + pmodesToPull.size() + " P-Modes");
+        log.debug("Pulling for " + pmodesToPull.size() + " P-Modes");
 
         return pmodesToPull;
     }

@@ -16,47 +16,26 @@
  */
 package org.holodeckb2b.ebms3.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.spi.LoggingEvent;
-import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.junit.After;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import java.util.List;
-
-import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
 
 /**
  * Created at 18:28 27.03.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-@RunWith(MockitoJUnitRunner.class)
 public class SOAPEnvelopeLoggerTest {
-
-    @Mock
-    private Appender mockAppender;
-    @Captor
-    private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
 
     private static String baseDir;
 
@@ -75,12 +54,6 @@ public class SOAPEnvelopeLoggerTest {
     @Before
     public void setUp() throws Exception {
         handler = new SOAPEnvelopeLogger();
-        LogManager.getRootLogger().addAppender(mockAppender);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        LogManager.getRootLogger().removeAppender(mockAppender);
     }
 
     @Test
@@ -104,10 +77,5 @@ public class SOAPEnvelopeLoggerTest {
             fail(e.getMessage());
         }
 
-        verify(mockAppender, atLeastOnce())
-                .doAppend(captorLoggingEvent.capture());
-        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String msg = env.cloneOMElement().toStringWithConsume();
-        assertTrue(eventContainsMsg(events, Level.INFO, msg));
     }
 }

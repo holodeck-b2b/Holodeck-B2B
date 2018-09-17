@@ -17,6 +17,7 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
+
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -70,10 +71,8 @@ public class ProcessReceipts extends BaseHandler {
                 // Ignore Receipts that already failed
                 if (r.getCurrentProcessingState().getState() != ProcessingState.FAILURE)
                     processReceipt(r, mc);
-            log.debug("Receipts processed");
-        } else
-            log.debug("Message does not contain receipts, continue processing");
-
+            log.debug("All Receipts in message processed");
+        } 
         return InvocationResponse.CONTINUE;
     }
 
@@ -89,18 +88,18 @@ public class ProcessReceipts extends BaseHandler {
         // Change processing state to indicate we start processing the receipt. Also checks that the receipt is not
         // already being processed
         if (!updateManager.setProcessingState(receipt, ProcessingState.RECEIVED, ProcessingState.PROCESSING)) {
-            log.debug("Receipt [msgId=" + receipt.getMessageId() + "] is already being processed, skipping");
+            log.warn("Receipt [msgId=" + receipt.getMessageId() + "] is already being processed, skipping");
             return;
         }
 
         final String refToMsgId = receipt.getRefToMessageId();
-        log.debug("Start processing Receipt [msgId=" + receipt.getMessageId()
+        log.trace("Start processing Receipt [msgId=" + receipt.getMessageId()
                     + "] for referenced message with msgId=" + refToMsgId);
         Collection<IMessageUnitEntity> refdMsgs = HolodeckB2BCore.getQueryManager()
                                                                  .getMessageUnitsWithId(refToMsgId, Direction.OUT);
         if (Utils.isNullOrEmpty(refdMsgs)) {
             // This error SHOULD NOT occur because the reference is already checked when finding the P-Mode
-            log.error("Receipt [msgId=" + receipt.getMessageId() + "] contains unknown refToMessageId ["
+            log.warn("Receipt [msgId=" + receipt.getMessageId() + "] contains unknown refToMessageId ["
                         + refToMsgId + "]!");
             updateManager.setProcessingState(receipt, ProcessingState.FAILURE);
             // Create error and add to context
@@ -125,14 +124,14 @@ public class ProcessReceipts extends BaseHandler {
                     // Change to processing state of the reference message unit to delivered, but only if it is
                     // waiting for a receipt as we may otherwise overwrite an error state.
                     if (isWaitingForReceipt(ackedMessage)) {
-                        log.debug("Found message unit waiting for Receipt, setting processing state to delivered");
+                        log.trace("Found message unit waiting for Receipt, setting processing state to delivered");
                         updateManager.setProcessingState(ackedMessage, ProcessingState.DELIVERED);
                         // Maybe the Receipt must also be delivered to the business application, so change state
                         // to "ready for delivery"
-                        log.debug("Mark Receipt as ready for delivery to business application");
+                        log.trace("Mark Receipt as ready for delivery to business application");
                         updateManager.setProcessingState(receipt, ProcessingState.READY_FOR_DELIVERY);
                     } else {
-                        log.debug("Found message unit not waiting for receipt anymore, processing finished.");
+                        log.trace("Found message unit not waiting for receipt anymore, processing finished.");
                         updateManager.setProcessingState(receipt, ProcessingState.DONE);
                     }
                 }
@@ -146,11 +145,11 @@ public class ProcessReceipts extends BaseHandler {
                 viError.setRefToMessageInError(receipt.getMessageId());
                 MessageContextUtils.addGeneratedError(mc, viError);
                 // The message processing of the error fails
-                log.debug("Mark Receipt as failed");
+                log.trace("Mark Receipt as failed");
                 updateManager.setProcessingState(receipt, ProcessingState.FAILURE);
             }
         }
-        log.debug("Done processing Receipt");
+        log.trace("Done processing Receipt");
     }
 
     /**

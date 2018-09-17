@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import java.util.Iterator;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
@@ -30,8 +32,6 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-
-import java.util.Iterator;
 
 /**
  * Is the handler that checks if this message contains one or more Receipt signals, i.e. contains one or more
@@ -58,7 +58,7 @@ public class ReadReceipt extends BaseHandler {
 
         if (messaging != null) {
             // Check if there are Receipt signals
-            log.debug("Check for Receipt elements to determine if message contains one or more receipts");
+            log.trace("Check for Receipt elements to determine if message contains one or more receipts");
             final Iterator<OMElement> rcpts = ReceiptElement.getElements(messaging);
 
             if (!Utils.isNullOrEmpty(rcpts)) {
@@ -69,16 +69,13 @@ public class ReadReceipt extends BaseHandler {
                     Receipt receipt = ReceiptElement.readElement(rcptElem);
 
                     // And store in database and message context for further processing
-                    log.debug("Store Receipt in database");
+                    log.trace("Store Receipt in database");
                     MessageContextUtils.addRcvdReceipt(mc, (IReceiptEntity) HolodeckB2BCore.getStorageManager()
                                                                                   .storeIncomingMessageUnit(receipt));
                     log.info("Receipt [msgId=" + receipt.getMessageId() + "] received for message with id:"
                              + receipt.getRefToMessageId());
                 }
-            } else
-                log.debug("ebMS message does not contain Receipt(s)");
-        } else {
-            log.debug("Not an ebMS message, nothing to do.");
+            } 
         }
 
         return InvocationResponse.CONTINUE;

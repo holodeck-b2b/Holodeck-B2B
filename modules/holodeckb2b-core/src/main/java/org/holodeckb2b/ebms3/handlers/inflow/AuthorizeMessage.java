@@ -17,6 +17,7 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
+
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -33,11 +34,11 @@ import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.pmode.PModeUtils;
 import org.holodeckb2b.security.util.VerificationUtils;
-import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for authorizing the processing of a received message (and by that, the
@@ -72,7 +73,7 @@ public class AuthorizeMessage extends BaseHandler {
         Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
         if (Utils.isNullOrEmpty(msgUnits)) {
             // No message units in message, nothing to do
-            log.debug("Message does not contain a message unit, nothing to do");
+            log.trace("Message does not contain a message unit, nothing to do");
             return InvocationResponse.CONTINUE;
         }
 
@@ -83,13 +84,12 @@ public class AuthorizeMessage extends BaseHandler {
                 // Authorization of Pull Request is handled separately
                 continue;
 
-            log.debug("Get the P-Mode for the message unit and check if authorization is used");
+            log.trace("Get P-Mode for message unit [" + mu.getMessageId() + "] and check if authorization is used");
             final IPMode pmode = pmodes.get(mu.getPModeId());
-
             if (pmode == null) {
                 // This can happen for general Error signals that do not have a RefToMessageId and can not be linked to
                 // a sent message unit
-                log.warn("No P-Mode found for message unit [" + mu.getMessageId() + "], nothing to check!");
+                log.debug("No P-Mode found for message unit [" + mu.getMessageId() + "], nothing to check!");
                 continue;
             }
 
@@ -97,7 +97,7 @@ public class AuthorizeMessage extends BaseHandler {
             Initiator or Responder in this MEP. The security configuration that defines the authorization however
             is that of the other role as we authorize the other party and not ourselves!
             */
-            log.debug("Check security configuration for received message");
+            log.trace("Check security configuration for received message");
             final ITradingPartnerConfiguration tradingPartner = PModeUtils.isHolodeckB2BInitiator(pmode) ?
                                                                             pmode.getResponder() : pmode.getInitiator();
             final ISecurityConfiguration tpSecConfig = tradingPartner == null ? null :
@@ -119,7 +119,7 @@ public class AuthorizeMessage extends BaseHandler {
                                                                 mc.getProperty(MessageContextProperties.EBMS_UT_RESULT);
 
             if (!VerificationUtils.verifyUsernameToken(utConfig, utInMessage)) {
-                log.warn("Message unit [" + mu.getMessageId() + "] could not be authorized!");
+                log.info("Message unit [" + mu.getMessageId() + "] could not be authorized!");
                 handleAuthorizationFailure(mu, mc);
             } else {
                 log.info("Message unit [" + mu.getMessageId() + "] successfully authorized");

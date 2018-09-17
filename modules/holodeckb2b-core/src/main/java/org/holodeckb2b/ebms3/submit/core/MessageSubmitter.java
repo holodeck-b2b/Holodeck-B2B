@@ -24,6 +24,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.messagemodel.Payload;
@@ -78,10 +79,10 @@ public class MessageSubmitter implements IMessageSubmitter {
      */
     @Override
     public String submitMessage(final IUserMessage submission, final boolean movePayloads) throws MessageSubmitException {
-        log.trace("Start submission of new User Message");
+        log.debug("Start submission of new User Message");
 
         try {
-            log.debug("Get the P-Mode for the message");
+            log.trace("Get the P-Mode for the message");
             final IPMode  pmode = HolodeckB2BCore.getPModeSet().get(submission.getPModeId());
 
             if (pmode == null) {
@@ -90,17 +91,17 @@ public class MessageSubmitter implements IMessageSubmitter {
             }
             log.debug("Found P-Mode:" + pmode.getId());
 
-            log.debug("Check for completeness: combined with P-Mode all info must be known");
+            log.trace("Check for completeness: combined with P-Mode all info must be known");
             // The complete operation will throw aMessageSubmitException if meta-data is not complete
             final UserMessage completedMetadata = MMDCompleter.complete(submission, pmode);
 
-            log.debug("Checking availability of payloads");
+            log.trace("Checking availability of payloads");
             checkPayloads(completedMetadata, pmode); // Throws MessageSubmitException if there is a problem with a specified submissionPayloadInfo
 
-            log.debug("Validate submitted message if specified");
+            log.trace("Validate submitted message if specified");
             validateMessage(completedMetadata, pmode);
 
-            log.debug("Add message to database");
+            log.trace("Add message to database");
             final IUserMessageEntity newUserMessage = (IUserMessageEntity)
                                         HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(completedMetadata);
             try {
@@ -121,7 +122,7 @@ public class MessageSubmitter implements IMessageSubmitter {
                 HolodeckB2BCore.getStorageManager().setProcessingState(newUserMessage, ProcessingState.READY_TO_PUSH);
             }
 
-            log.info("User Message succesfully submitted");
+            log.info("User Message succesfully submitted, messageId=" + newUserMessage.getMessageId());
             return newUserMessage.getMessageId();
         } catch (final PersistenceException dbe) {
             log.error("An error occured when saving user message to database. Details: " + dbe.getMessage());
@@ -155,7 +156,7 @@ public class MessageSubmitter implements IMessageSubmitter {
 
         String prMessageId = null;
         try {
-            log.debug("Create and add PullRequest to database");
+            log.trace("Create and add PullRequest to database");
             PullRequest submission = new PullRequest(pullRequest);
             IPullRequestEntity submittedPR = HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(submission);
             prMessageId = submittedPR.getMessageId();
@@ -279,13 +280,12 @@ public class MessageSubmitter implements IMessageSubmitter {
                 final Path destPath = Utils.createFileWithUniqueName(internalPayloadDir + "/" + srcPath.getFileName());
                 try {
                     if (move) {
-                        log.debug("Moving payload [" + p.getContentLocation() + "] to internal directory");
+                        log.trace("Moving payload [" + p.getContentLocation() + "] to internal directory");
                         Files.move(srcPath, destPath, StandardCopyOption.REPLACE_EXISTING);
                     } else {
-                        log.debug("Copying payload [" + p.getContentLocation() + "] to internal directory");
+                        log.trace("Copying payload [" + p.getContentLocation() + "] to internal directory");
                         Files.copy(srcPath, destPath, StandardCopyOption.REPLACE_EXISTING);
                     }
-                    log.debug("Payload moved/copied to internal directory");
                     // Complete payload info to store
                     Payload completeInfo = new Payload(p);
                     completeInfo.setContentLocation(destPath.toString());
@@ -303,7 +303,7 @@ public class MessageSubmitter implements IMessageSubmitter {
                     throw io;
                 }
             }
-            log.debug("Update the stored information with new locations");
+            log.debug((move ? "Moved" : "Copied") + " all payloads to internal directory");
             HolodeckB2BCore.getStorageManager().setPayloadInformation(um, internalPayloadInfo);
         }
     }
@@ -328,13 +328,13 @@ public class MessageSubmitter implements IMessageSubmitter {
         }
 
         if (validationSpec == null)
-            log.debug("No custom validation specified for submitted message");
+            log.trace("No custom validation specified for submitted message");
         else {
             try {
                 ValidationResult validationResult = HolodeckB2BCore.getValidationExecutor().validate(submittedMsg,
                                                                                                      validationSpec);
                 if (validationResult == null || Utils.isNullOrEmpty(validationResult.getValidationErrors())) {
-                    log.debug("Submitted message is valid");
+                    log.trace("Submitted message is valid");
                 } else if (!validationResult.shouldRejectMessage()) {
                     log.warn("Submitted message contains validation errors, but can be processed");
                 } else {

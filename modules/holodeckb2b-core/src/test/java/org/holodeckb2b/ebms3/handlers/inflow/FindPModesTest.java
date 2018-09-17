@@ -16,20 +16,26 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.Date;
+
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
-import org.holodeckb2b.common.messagemodel.*;
+import org.holodeckb2b.common.messagemodel.AgreementReference;
+import org.holodeckb2b.common.messagemodel.EbmsError;
+import org.holodeckb2b.common.messagemodel.ErrorMessage;
+import org.holodeckb2b.common.messagemodel.Receipt;
+import org.holodeckb2b.common.messagemodel.TradingPartner;
+import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -37,32 +43,21 @@ import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.helpers.Agreement;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.PartnerConfig;
-import org.junit.*;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  * Created at 23:22 29.01.17
@@ -71,16 +66,9 @@ import static org.mockito.Mockito.verify;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-@RunWith(MockitoJUnitRunner.class)
 public class FindPModesTest {
 
     static final QName RECEIPT_CHILD_ELEMENT_NAME = new QName("ReceiptChild");
-
-    // Appender to control logging events
-    @Mock
-    private Appender mockAppender;
-    @Captor
-    private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
 
     private static String baseDir;
 
@@ -99,16 +87,11 @@ public class FindPModesTest {
     @Before
     public void setUp() throws Exception {
         handler = new FindPModes();
-        // Adding appender to the FindPModes logger
-        Logger logger = LogManager.getRootLogger();
-        logger.addAppender(mockAppender);
-        logger.setLevel(Level.DEBUG);
     }
 
     @After
     public void tearDown() throws Exception {
         TestUtils.cleanOldMessageUnitEntities();
-        LogManager.getRootLogger().removeAppender(mockAppender);
         core.getPModeSet().removeAll();
     }
 
@@ -184,13 +167,6 @@ public class FindPModesTest {
             fail(e.getMessage());
         }
 
-        // Checking log messages to make sure handler found pmode
-        verify(mockAppender, atLeastOnce())
-                .doAppend(captorLoggingEvent.capture());
-        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String msg = "Found P-Mode [" + pmode.getId()
-                + "] for User Message [" + msgId + "]";
-        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 
     @Test
@@ -313,12 +289,6 @@ public class FindPModesTest {
             fail(e.getMessage());
         }
 
-        // Checking log messages to make sure handler found pmode
-        verify(mockAppender, atLeastOnce())
-                .doAppend(captorLoggingEvent.capture());
-        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String msg = "Found P-Mode [" + pmode.getId()
-                + "] for User Message [" + msgId + "]";
-        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
+
     }
 }

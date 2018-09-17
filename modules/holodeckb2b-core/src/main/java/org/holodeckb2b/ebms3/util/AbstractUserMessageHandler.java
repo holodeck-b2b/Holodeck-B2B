@@ -58,7 +58,7 @@ public abstract class AbstractUserMessageHandler extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) throws Exception {
 
-        log.debug("Check if MessageContext contains a MessageUnit");
+        log.trace("Check if MessageContext contains a MessageUnit");
         IUserMessageEntity userMessage = null;
         try {
             userMessage = (IUserMessageEntity) mc.getProperty((isInFlow(IN_FLOW) ?
@@ -73,7 +73,6 @@ public abstract class AbstractUserMessageHandler extends BaseHandler {
 
         if (userMessage == null || ProcessingState.FAILURE == userMessage.getCurrentProcessingState().getState()) {
             // This flow does not contain a UserMessage message unit to process, so nothing to do
-            log.debug("MessageContext does not contain a UserMessage message unit for processing, continue flow");
             return InvocationResponse.CONTINUE;
         } else {
             // The flow contains a UserMessage, continue processing in implementation

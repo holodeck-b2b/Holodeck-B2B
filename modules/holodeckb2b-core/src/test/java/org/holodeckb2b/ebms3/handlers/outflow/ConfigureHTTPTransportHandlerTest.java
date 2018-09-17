@@ -16,6 +16,16 @@
  */
 package org.holodeckb2b.ebms3.handlers.outflow;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.net.URL;
+
+import javax.activation.DataHandler;
+
 import org.apache.axiom.attachments.Attachments;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -26,16 +36,9 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -44,6 +47,8 @@ import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.Protocol;
@@ -52,19 +57,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import javax.activation.DataHandler;
-import java.net.URL;
-import java.util.List;
-
-import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
 
 /**
  * Created at 15:48 27.02.17
@@ -75,12 +68,6 @@ import static org.mockito.Mockito.verify;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigureHTTPTransportHandlerTest {
-    // Appender to control logging events
-    @Mock
-    private Appender mockAppender;
-    @Captor
-    private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
-
     private static String baseDir;
 
     private static HolodeckB2BTestCore core;
@@ -98,15 +85,10 @@ public class ConfigureHTTPTransportHandlerTest {
     @Before
     public void setUp() throws Exception {
         handler = new ConfigureHTTPTransportHandler();
-        // Adding appender to the FindPModes logger
-        Logger logger = LogManager.getRootLogger();
-        logger.addAppender(mockAppender);
-        logger.setLevel(Level.DEBUG);
     }
 
     @After
     public void tearDown() throws Exception {
-        LogManager.getRootLogger().removeAppender(mockAppender);
         core.getPModeSet().removeAll();
     }
 
@@ -187,11 +169,5 @@ public class ConfigureHTTPTransportHandlerTest {
         assertTrue((Boolean) options.getProperty(HTTPConstants.MC_GZIP_REQUEST));
         assertTrue((Boolean) options.getProperty(HTTPConstants.CHUNKED));
         assertNull(options.getProperty(Constants.Configuration.ENABLE_SWA));
-
-        verify(mockAppender, atLeastOnce())
-                .doAppend(captorLoggingEvent.capture());
-        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        String msg = "HTTP configuration done";
-        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
     }
 }

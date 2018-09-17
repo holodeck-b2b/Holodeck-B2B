@@ -129,7 +129,7 @@ public class FindPModesForPullRequestTest {
 //        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
 //        String msg = "Store the list of " + 1
 //                + " authorized PModes so next handler can retrieve message unit to return";
-//        assertTrue(eventContainsMsg(events, Level.DEBUG, msg));
+//        assertTrue(eventContainsMsg(events, Level.TRACE, msg));
 //    }
 //
 //    /**

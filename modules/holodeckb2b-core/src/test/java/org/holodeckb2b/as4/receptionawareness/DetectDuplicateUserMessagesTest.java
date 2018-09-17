@@ -16,24 +16,19 @@
  */
 package org.holodeckb2b.as4.receptionawareness;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.handlers.inflow.DeliverUserMessage;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
@@ -41,27 +36,18 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.helpers.DeliverySpecification;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.ReceptionAwarenessConfig;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import java.util.List;
-
-import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
 
 /**
  * Created at 16:52 20.03.17
@@ -71,16 +57,9 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class DetectDuplicateUserMessagesTest {
 
-    @Mock
-    private Appender mockAppender;
-    @Captor
-    private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
-
     private static String baseDir;
 
     private static HolodeckB2BTestCore core;
-
-    private DeliverUserMessage deliverUserMessageHandler;
 
     private DetectDuplicateUserMessages handler;
 
@@ -94,18 +73,9 @@ public class DetectDuplicateUserMessagesTest {
 
     @Before
     public void setUp() throws Exception {
-        deliverUserMessageHandler = new DeliverUserMessage();
-
         handler = new DetectDuplicateUserMessages();
-        Logger logger = LogManager.getRootLogger();
-        logger.addAppender(mockAppender);
-        logger.setLevel(Level.ALL);
     }
 
-    @After
-    public void tearDown() throws Exception {
-        LogManager.getRootLogger().removeAppender(mockAppender);
-    }
 
     @Test
     public void testDoProcessing() throws Exception {
@@ -160,23 +130,8 @@ public class DetectDuplicateUserMessagesTest {
 
         core.getPModeSet().add(pmode);
 
-        assertEquals(ProcessingState.RECEIVED,
-                userMessageEntity.getCurrentProcessingState().getState());
-
-        // Delivering message
-        updateManager.setProcessingState(userMessageEntity,
-                ProcessingState.READY_FOR_DELIVERY);
-        assertEquals(ProcessingState.READY_FOR_DELIVERY,
-                        userMessageEntity.getCurrentProcessingState().getState());
-        try {
-            Handler.InvocationResponse invokeResp = deliverUserMessageHandler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-        assertEquals(ProcessingState.DELIVERED,
-                        userMessageEntity.getCurrentProcessingState().getState());
-
+        // Do as if message is already delivered
+        updateManager.setProcessingState(userMessageEntity, ProcessingState.DELIVERED);
         // Checking that the message with userMessage id was already delivered
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
@@ -185,13 +140,8 @@ public class DetectDuplicateUserMessagesTest {
             fail(e.getMessage());
         }
 
-        assertEquals(ProcessingState.DUPLICATE,
-                userMessageEntity.getCurrentProcessingState().getState());
-
-        verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
-        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        //Check the message being logged
-        assertTrue(eventContainsMsg(events, Level.DEBUG,
-                "Update processing state to duplicate"));
+        assertEquals(ProcessingState.DUPLICATE, HolodeckB2BCoreInterface.getQueryManager()
+										        		.getMessageUnitsWithId(userMessage.getMessageId())
+														.iterator().next().getCurrentProcessingState().getState()); 
     }
 }

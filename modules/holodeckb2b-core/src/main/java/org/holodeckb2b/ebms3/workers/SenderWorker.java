@@ -56,14 +56,14 @@ public class SenderWorker extends AbstractWorkerTask {
     @Override
     public void doProcessing() {
         try {
-            log.debug("Getting list of message units to send");
+            log.trace("Getting list of message units to send");
             List<IMessageUnitEntity> msgUnitsToSend = HolodeckB2BCore.getQueryManager()
                                                                .getMessageUnitsInState(IMessageUnit.class,
                                                                 Direction.OUT,
                                                                 new ProcessingState[] {ProcessingState.READY_TO_PUSH});
 
             if (!Utils.isNullOrEmpty(msgUnitsToSend)) {
-                log.info("Found " + msgUnitsToSend.size() + " message units to send");
+                log.trace("Found " + msgUnitsToSend.size() + " message units to send");
                 for (final IMessageUnitEntity msgUnit : msgUnitsToSend) {
                     // Only message units associated with a P-Mode can be send
                     if (Utils.isNullOrEmpty(msgUnit.getPModeId())) {
@@ -77,18 +77,17 @@ public class SenderWorker extends AbstractWorkerTask {
                     if (HolodeckB2BCore.getStorageManager().setProcessingState(msgUnit, ProcessingState.READY_TO_PUSH,
                                                                               ProcessingState.PROCESSING)) {
                         // only when we could succesfully set processing state really start processing
-                        log.debug("Start processing " + MessageUnitUtils.getMessageUnitName(msgUnit)
+                        log.trace("Start processing " + MessageUnitUtils.getMessageUnitName(msgUnit)
                                     + "[" + msgUnit.getMessageId() + "]");
                         // Ensure all data is available for processing
                         HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(msgUnit);
                         Axis2Sender.sendMessage(msgUnit, new ebMS3SendService(), log);
                     } else
                         // Message probably already in process
-                        log.debug("Could not start processing message [" + msgUnit.getMessageId()
+                        log.trace("Could not start processing message [" + msgUnit.getMessageId()
                                     + "] because switching to processing state was unsuccesful");
                 }
-            } else
-                log.info("No messages found that are ready for sending");
+            } 
         } catch (final PersistenceException dbError) {
             log.error("Could not process message because a database error occurred. Details:"
                         + dbError.toString() + "\n");

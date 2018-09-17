@@ -64,7 +64,7 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
         // First determine if duplicate check must be executed for this UserMessage
         //
         boolean detectDups = false;
-        log.debug("Check if duplicate check must be executed");
+        log.trace("Check if duplicate check must be executed");
 
         // Get P-Mode configuration
         final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
@@ -97,7 +97,7 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
             return InvocationResponse.CONTINUE;
         } else {
             final String msgId = um.getMessageId();
-            log.debug("Duplicate detection enabled. Check if this Usermessage [msgId=" + msgId
+            log.trace("Duplicate detection enabled. Check if this Usermessage [msgId=" + msgId
                         + "] has already been delivered");
 
             boolean isDuplicate = false;
@@ -108,7 +108,7 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
                 duplicateLog.info("UserMessage [msgId=" + msgId
                                             + "] is a duplicate of an already processed message");
 
-                log.debug("Update processing state to duplicate");
+                log.trace("Update processing state to duplicate");
                 HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.DUPLICATE);
                 // To prevent repeated delivery but still send a receipt set message as delivered
                 mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);

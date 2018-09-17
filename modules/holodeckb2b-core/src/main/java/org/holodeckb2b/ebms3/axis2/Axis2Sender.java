@@ -97,7 +97,7 @@ public class Axis2Sender {
             final HttpClient httpClient = new HttpClient();
             httpClient.getParams().setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT, 5000);
             msgCtx.setProperty(HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
-            log.debug("Axis2 client configured for sending ebMS message");
+            log.trace("Axis2 client configured for sending ebMS message");
         } catch (final AxisFault af) {
             // Setting up the Axis environment failed. As it prevents sending the message it is logged as a fatal error
             log.fatal("Setting up Axis2 to send message failed! Details: " + af.getReason());
@@ -105,7 +105,7 @@ public class Axis2Sender {
         }
 
         try {
-            log.debug("Start the message send process");
+            log.trace("Start the message send process");
             oc.execute(true);
         } catch (final AxisFault af) {
             /* An error occurred while sending the message, it should however be already processed by one of the

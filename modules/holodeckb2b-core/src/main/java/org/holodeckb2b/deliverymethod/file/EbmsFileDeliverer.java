@@ -21,9 +21,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -149,7 +151,7 @@ public class EbmsFileDeliverer extends AbstractFileDeliverer {
         container.declareNamespace(EbMSConstants.EBMS3_NS_URI, "eb");
 
         if (!Utils.isNullOrEmpty(mmd.getPayloads())) {
-            log.debug("Add payload info to XML container");
+            log.trace("Add payload info to XML container");
             // We add the local file location as a Part property
             for (final IPayload p : mmd.getPayloads()) {
                 final Property locationProp = new Property();
@@ -159,10 +161,10 @@ public class EbmsFileDeliverer extends AbstractFileDeliverer {
             }
         }
 
-        log.debug("Add message info to XML container");
+        log.trace("Add message info to XML container");
         // Add the information on the user message to the container
         final OMElement  usrMsgElement = UserMessageElement.createElement(container, mmd);
-        log.debug("Information complete, write XML document to file");
+        log.trace("Information complete, write XML document to file");
 
         writeXMLDocument(container, mmd.getMessageId());
     }
@@ -180,19 +182,19 @@ public class EbmsFileDeliverer extends AbstractFileDeliverer {
         final OMElement   container = createContainerElementName();
 
         if (sigMsgUnit instanceof IReceipt) {
-            log.debug("Create a new Receipt to prevent content from inclusion in XML");
+            log.trace("Create a new Receipt to prevent content from inclusion in XML");
             IReceipt deliveryReceipt = createDeliveryReceipt((IReceipt) sigMsgUnit);
-            log.debug("Add receipt meta data to XML");
+            log.trace("Add receipt meta data to XML");
             ReceiptElement.createElement(container, deliveryReceipt);
         } else if (sigMsgUnit instanceof IErrorMessage) {
-            log.debug("Add error meta data to XML");
+            log.trace("Add error meta data to XML");
             ErrorSignalElement.createElement(container, (IErrorMessage) sigMsgUnit);
         }
 
-        log.debug("Added signal meta data to XML, write to disk");
+        log.trace("Added signal meta data to XML, write to disk");
         try {
             writeXMLDocument(container, sigMsgUnit.getMessageId());
-            log.info("Signal message with msgID=" + sigMsgUnit.getMessageId() + " successfully delivered");
+            log.debug("Signal message with msgID=" + sigMsgUnit.getMessageId() + " successfully delivered");
         } catch (final IOException ex) {
             log.error("An error occurred while delivering the signal message [" + sigMsgUnit.getMessageId()
                                                                     + "]\n\tError details: " + ex.getMessage());

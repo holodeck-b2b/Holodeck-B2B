@@ -77,17 +77,17 @@ public class ProcessGeneratedErrors extends BaseHandler {
                                                             mc.getProperty(MessageContextProperties.GENERATED_ERRORS);
 
         if (Utils.isNullOrEmpty(errors)) {
-            log.debug("No errors were generated during this in flow, nothing to do");
+            log.debug("No errors were generated during this in flow");
         } else {
             StorageManager storageManager = HolodeckB2BCore.getStorageManager();
             log.debug(errors.size() + " error(s) were generated during this in flow");
 
             // First bundle the errors per message in error
-            log.debug("Bundling errors per message unit");
+            log.trace("Bundling errors per message unit");
             final HashMap<String, Collection<IEbmsError>> segmentedErrors = segmentErrors(errors);
             // Create Error signal for each bundle, i.e. each referenced message
             for(final String refToMsgId : segmentedErrors.keySet()) {
-                log.debug("Create the Error Signal and save to database");
+                log.trace("Create the Error Signal and save to database");
                 ErrorMessage tErrorMessage = new ErrorMessage(segmentedErrors.get(refToMsgId));
                 tErrorMessage.setRefToMessageId(refToMsgId.equals("null") ? null : refToMsgId);
                 final IErrorMessageEntity errorMessage = storageManager.storeOutGoingMessageUnit(tErrorMessage);
@@ -116,11 +116,11 @@ public class ProcessGeneratedErrors extends BaseHandler {
                     }
                 } else {
                     // This collection of errors references one of the received message units.
-                    log.debug("Check type of the message unit in error");
+                    log.trace("Check type of the message unit in error");
                     final IMessageUnitEntity muInError = getRefdMessageUnit(mc, refToMsgId);
                     final String pmodeId = muInError.getPModeId();
                     if (!Utils.isNullOrEmpty(pmodeId)) {
-                        log.debug("Set P-Mode Id [" + pmodeId + "] for generated Error Message");
+                        log.trace("Set P-Mode Id [" + pmodeId + "] for generated Error Message");
                         storageManager.setPModeId(errorMessage, pmodeId);
                     }
                     if (muInError instanceof IPullRequest) {

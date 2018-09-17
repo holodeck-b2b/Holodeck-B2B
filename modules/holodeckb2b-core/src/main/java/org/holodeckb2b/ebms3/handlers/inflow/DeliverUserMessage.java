@@ -56,10 +56,10 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Prepare message for delivery by checking it is still ready for delivery and then
         // change its processing state to "out for delivery"
-        log.debug("Prepare message [" + um.getMessageId() + "] for delivery");
+        log.trace("Prepare message [" + um.getMessageId() + "] for delivery");
         if(updateManager.setProcessingState(um, ProcessingState.READY_FOR_DELIVERY, ProcessingState.OUT_FOR_DELIVERY)) {
             // Message can be delivered to business application
-            log.debug("Start delivery of user message");
+            log.trace("Start delivery of user message");
             MessageDeliveryException failure = null;
             try {
                 // Get the delivery specification from the P-Mode
@@ -83,8 +83,7 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
                 // Indicate that message is delivered so receipt can be created
                 mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);
                 log.info("Successfully delivered user message [msgId=" + um.getMessageId() +"]");
-                log.debug("Set the processing state to delivered");
-                updateManager.setProcessingState(um, ProcessingState.DELIVERED);
+                updateManager.setProcessingState(um, ProcessingState.DELIVERED);                
             } catch (final MessageDeliveryException ex) {
                 failure = ex;
                 log.error("Could not deliver the user message [msgId=" + um.getMessageId()

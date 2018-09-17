@@ -16,25 +16,22 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
-import java.util.List;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.TestUtils;
-import static org.holodeckb2b.core.testhelpers.TestUtils.eventContainsMsg;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -49,19 +46,15 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.pmode.helpers.*;
+import org.holodeckb2b.pmode.helpers.DeliverySpecification;
+import org.holodeckb2b.pmode.helpers.ErrorHandlingConfig;
+import org.holodeckb2b.pmode.helpers.Leg;
+import org.holodeckb2b.pmode.helpers.PMode;
+import org.holodeckb2b.pmode.helpers.UserMessageFlow;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Created at 12:04 15.03.17
@@ -70,14 +63,7 @@ import org.mockito.junit.MockitoJUnitRunner;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-@RunWith(MockitoJUnitRunner.class)
 public class DeliverErrorsTest {
-
-    // Appender to control logging events
-    @Mock
-    private Appender mockAppender;
-    @Captor
-    private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
 
     private static String baseDir;
 
@@ -101,16 +87,11 @@ public class DeliverErrorsTest {
         processErrorsHandler = new ProcessErrors();
         // Executed after org.holodeckb2b.ebms3.handlers.inflow.ProcessErrors handler
         handler = new DeliverErrors();
-        // Adding appender to the FindPModes logger
-        Logger logger = LogManager.getRootLogger();
-        logger.addAppender(mockAppender);
-        logger.setLevel(Level.DEBUG);
     }
 
     @After
     public void tearDown() throws Exception {
         TestUtils.cleanOldMessageUnitEntities();
-        LogManager.getRootLogger().removeAppender(mockAppender);
         core.getPModeSet().removeAll();
     }
 
@@ -211,14 +192,5 @@ public class DeliverErrorsTest {
 
         assertEquals(ProcessingState.DONE,
                 errorMessageEntity.getCurrentProcessingState().getState());
-
-        verify(mockAppender, atLeastOnce()).doAppend(captorLoggingEvent.capture());
-        List<LoggingEvent> events = captorLoggingEvent.getAllValues();
-        // Check that error is successfully processed by ProcessErrors handler
-        String msg1 = "Processed Error Signal ["+errorId+"]";
-        assertTrue(eventContainsMsg(events, Level.DEBUG, msg1));
-        // Check that error is successfully delivered by DeliverErrors handler
-        String msg2 = "Error successfully delivered!";
-        assertTrue(eventContainsMsg(events, Level.DEBUG, msg2));
     }
 }

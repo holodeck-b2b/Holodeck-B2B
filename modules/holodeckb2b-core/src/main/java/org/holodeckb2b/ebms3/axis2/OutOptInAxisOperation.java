@@ -17,6 +17,7 @@
 package org.holodeckb2b.ebms3.axis2;
 
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
@@ -133,9 +134,6 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
          */
         @Override
         public void executeImpl(final boolean block) throws AxisFault {
-            if (log.isDebugEnabled()) {
-                log.debug("Entry: OutOptInAxisOperationClient::execute, " + block);
-            }
             if (completed) {
                 throw new AxisFault(Messages.getMessage("mepiscomplted"));
             }
@@ -315,16 +313,6 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
                 if (responseMessageContext.getReplyTo() != null) {
                     sc.setTargetEPR(responseMessageContext.getReplyTo());
                 }
-
-            // rampart handlers change the envelope and set the decrypted envelope
-//                // so need to check the new one else resenvelope.hasFault() become false.
-//                resenvelope = responseMessageContext.getEnvelope();
-//                if (resenvelope.hasFault() || responseMessageContext.isProcessingFault()) {
-//                    if (options.isExceptionToBeThrownOnSOAPFault()) {
-//                        // does the SOAPFault has a detail element for Excpetion
-//                        throw Utils.getInboundFaultFromMessageContext(responseMessageContext);
-//                    }
-//                }
             }
         }
 
@@ -385,7 +373,8 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
             this.axisCallback =axisCallback;
         }
 
-        public void run() {
+        @Override
+		public void run() {
             try {
                 // send the request and wait for response
                 MessageContext response = send(msgctx);
@@ -459,7 +448,8 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
          *
          * @param msgContext the (response) MessageContext
          */
-        public void onMessage(MessageContext msgContext) {
+        @Override
+		public void onMessage(MessageContext msgContext) {
             // Transport input stream gets closed after calling setComplete
             // method. Have to build the whole envelope including the
             // attachments at this stage. Data might get lost if the input
@@ -475,7 +465,8 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
          *
          * @param msgContext the MessageContext containing the fault.
          */
-        public void onFault(MessageContext msgContext) {
+        @Override
+		public void onFault(MessageContext msgContext) {
            error = Utils.getInboundFaultFromMessageContext(msgContext);
         }
 
@@ -483,7 +474,8 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
          * This is called at the end of the MEP no matter what happens, quite like a
          * finally block.
          */
-        public synchronized void onComplete() {
+        @Override
+		public synchronized void onComplete() {
 			complete = true;
             notify();
         }
@@ -492,7 +484,8 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
 
         private Exception error;
 
-        public void onError(Exception e) {
+        @Override
+		public void onError(Exception e) {
             if (log.isDebugEnabled()) {
                 log.debug("Entry: OutInAxisOperationClient$SyncCallBack::onError, " + e);
             }

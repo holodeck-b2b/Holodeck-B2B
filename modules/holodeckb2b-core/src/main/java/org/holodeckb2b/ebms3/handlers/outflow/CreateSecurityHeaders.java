@@ -19,6 +19,7 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
@@ -85,7 +86,7 @@ public class CreateSecurityHeaders extends BaseHandler {
 
     @Override
     protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
-        log.debug("Get the primary message unit for this message");
+        log.trace("Get the primary message unit for this message");
         final IMessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
         if (primaryMU == null)
             // No primary message => this is probably an empty response
@@ -118,7 +119,7 @@ public class CreateSecurityHeaders extends BaseHandler {
         if (primaryMU instanceof IPullRequest) {
             final IPullRequestFlow pullReqFlow = PModeUtils.getOutPullRequestFlow(pmode);
             if (pullReqFlow != null) {
-                log.debug("Using PullRequest specific settings for Sender's configuration");
+                log.trace("Using PullRequest specific settings for Sender's configuration");
                 senderConfig = pullReqFlow.getSecurityConfiguration();
             }
         }
@@ -131,18 +132,18 @@ public class CreateSecurityHeaders extends BaseHandler {
         final ITradingPartnerConfiguration tradingPartner = initiator ? pmode.getResponder() : pmode.getInitiator();
         receiverConfig = tradingPartner != null ? tradingPartner.getSecurityConfiguration() : null;
 
-        log.debug("Prepared security configuration based on P-Mode [" + pmode.getId()
+        log.trace("Prepared security configuration based on P-Mode [" + pmode.getId()
                     + "] of the primary message unit [" + primaryMU.getMessageId() + "]");
 
         // Create security headers using the installed security provider
-        log.debug("Get security header creator from security provider");
+        log.trace("Get security header creator from security provider");
         ISecurityHeaderCreator hdrCreator = HolodeckB2BCore.getSecurityProvider().getSecurityHeaderCreator();
         log.debug("Create the security headers in the message");
         try {
             Collection<ISecurityProcessingResult> results = hdrCreator.createHeaders(mc,
                                                                     MessageContextUtils.getSentMessageUnits(mc),
                                                                     senderConfig, receiverConfig);
-            log.debug("Security header creation finished, handle results");
+            log.trace("Security header creation finished, handle results");
             if (!Utils.isNullOrEmpty(results))
                 for(ISecurityProcessingResult r : results)
                     handleResult(r, mc);

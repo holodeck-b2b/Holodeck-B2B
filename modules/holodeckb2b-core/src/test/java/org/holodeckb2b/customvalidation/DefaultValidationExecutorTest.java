@@ -1,8 +1,5 @@
 package org.holodeckb2b.customvalidation;
 
-import org.apache.log4j.Appender;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.core.validation.DefaultValidationExecutor;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -16,9 +13,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 /**
@@ -30,11 +24,6 @@ import org.mockito.junit.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultValidationExecutorTest {
-
-    @Mock
-    private Appender mockAppender;
-    @Captor
-    private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
 
     private static String baseDir;
 
@@ -52,13 +41,11 @@ public class DefaultValidationExecutorTest {
 
     @Before
     public void setUp() throws Exception {
-        LogManager.getRootLogger().addAppender(mockAppender);
         validationExecutor = new DefaultValidationExecutor();
     }
 
     @After
     public void tearDown() throws Exception {
-        LogManager.getRootLogger().removeAppender(mockAppender);
         core.getPModeSet().removeAll();
     }
 

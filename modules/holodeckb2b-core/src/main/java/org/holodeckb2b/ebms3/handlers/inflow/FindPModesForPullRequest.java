@@ -19,6 +19,7 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -51,7 +52,6 @@ public class FindPModesForPullRequest extends BaseHandler {
 
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) throws Exception {
-        log.debug("Check if MessageContext contains a PullRequest");
         final IPullRequestEntity pullRequest = (IPullRequestEntity)
                                                             mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
         if (pullRequest != null) {
@@ -59,7 +59,8 @@ public class FindPModesForPullRequest extends BaseHandler {
              * Only when a specific message is pulled it the exact P-Mode is known. For finding the P-Mode both the
              * MPC and given authentication info are used.
              */
-            log.debug("Get available authentication info contained in pull request");
+            log.trace("Get available authentication info contained in pull request [" + pullRequest.getMessageId() 
+            																		+ "]");
             Map<String, ISecurityProcessingResult>    authInfo = new HashMap<>();
             ISecurityProcessingResult signature = (ISecurityProcessingResult)
                                                        mc.getProperty(MessageContextProperties.SIG_VERIFICATION_RESULT);
@@ -73,26 +74,23 @@ public class FindPModesForPullRequest extends BaseHandler {
                                                        mc.getProperty(MessageContextProperties.EBMS_UT_RESULT);
             if (ebmsUT != null)
                 authInfo.put(MessageContextProperties.EBMS_UT_RESULT, ebmsUT);
-            log.debug("Find P-Modes matching the pull request");
+            log.trace("Find P-Modes matching the pull request");
             final Collection<IPMode> pmodes = PModeFinder.findForPulling(authInfo, pullRequest.getMPC());
             if (Utils.isNullOrEmpty(pmodes)) {
                 // No P-Modes found for the MPC and authentication info provided in pull request
-                log.error("No P-Mode found for PullRequest [" + pullRequest.getMessageId()
-                                                                                         + "], unable to process it!");
+                log.info("No P-Mode found for PullRequest [" + pullRequest.getMessageId() + "]");
                 final ProcessingModeMismatch   noPmodeIdError =
-                                new ProcessingModeMismatch("Can not process pull request because no P-Mode was found!");
+                              new ProcessingModeMismatch("Can not process pull request because no P-Mode was found!");
                 noPmodeIdError.setRefToMessageInError(pullRequest.getMessageId());
                 MessageContextUtils.addGeneratedError(mc, noPmodeIdError);
-                log.debug("Set the processing state of this PullRequest to failure");
+                log.trace("Set the processing state of this PullRequest to failure");
                 HolodeckB2BCore.getStorageManager().setProcessingState(pullRequest, ProcessingState.FAILURE);
             } else {
                 log.debug("Store the list of " + pmodes.size()
                             + " authorized PModes so next handler can retrieve message unit to return");
                 mc.setProperty(MessageContextProperties.PULL_AUTH_PMODES, pmodes);
             }
-        } else {
-            log.debug("MessageContext does not contain a PullRequest message unit, continue flow");
-        }
+        } 
 
         return InvocationResponse.CONTINUE;
     }

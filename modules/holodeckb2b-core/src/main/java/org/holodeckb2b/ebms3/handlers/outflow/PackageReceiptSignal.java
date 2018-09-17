@@ -17,6 +17,7 @@
 package org.holodeckb2b.ebms3.handlers.outflow;
 
 import java.util.Collection;
+
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
@@ -69,22 +70,21 @@ public class PackageReceiptSignal extends BaseHandler {
             return InvocationResponse.CONTINUE;
 
         // There is a receipt signal to be sent, add to the message
-        log.debug("Adding receipt signal(s) to the message");
-
-        log.debug("Get the eb:Messaging header from the message");
+        log.trace("Adding receipt signal(s) to the message");
+        // Get the eb:Messaging header from the message
         final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
 
         for(final IReceiptEntity r : receipts) {
-            log.debug("Make sure that all meta-data on the Receipt is loaded");
+            log.trace("Make sure that all meta-data on the Receipt is loaded");
             if (!r.isLoadedCompletely()) {
-                log.debug("Not all meta-data is available, load now");
+                log.trace("Not all meta-data is available, load now");
                 HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(r);
             }
-            log.debug("Add eb:SignalMessage element to the existing eb:Messaging header");
+            log.trace("Add eb:SignalMessage element to the existing eb:Messaging header");
             ReceiptElement.createElement(messaging, r);
-            log.debug("eb:SignalMessage element succesfully added to header");
+            log.debug("eb:SignalMessage element for Receipt [msgId=" + r.getMessageId() 
+            			+ "] succesfully added to header");
         }
-
         return InvocationResponse.CONTINUE;
     }
 

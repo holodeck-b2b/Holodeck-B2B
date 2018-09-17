@@ -19,6 +19,7 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -51,7 +52,7 @@ public class GetMessageUnitForPulling extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         // First check whether this flow contained a valid pull request
-        log.debug("Check for authenticated pull request");
+        log.trace("Check for authenticated pull request");
         final List<IPMode> authPModes = (List<IPMode>) mc.getProperty(MessageContextProperties.PULL_AUTH_PMODES);
         if (Utils.isNullOrEmpty(authPModes)) {
             // Nothing to do, even if request contained a PullRequest no authorized P-modes could be found
@@ -61,11 +62,11 @@ public class GetMessageUnitForPulling extends BaseHandler {
         // The request contained a valid PullRequest, indicate start of processing
         final IPullRequestEntity pullRequest =
                                           (IPullRequestEntity) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
-        log.debug("Starting processing of received pull request");
+        log.trace("Starting processing of received pull request");
         if (!HolodeckB2BCore.getStorageManager().setProcessingState(pullRequest, ProcessingState.RECEIVED,
                                                                                 ProcessingState.PROCESSING)) {
             // Changing processing state failed, stop processing the pull request
-            log.info("Failed to change processing state! Can not process PullRequest in message.");
+            log.warn("Failed to change processing state! Can not process PullRequest in message.");
             return InvocationResponse.CONTINUE;
         }
 
@@ -81,12 +82,12 @@ public class GetMessageUnitForPulling extends BaseHandler {
             mpcEmptyError.setErrorDetail("The MPC " + pullRequest.getMPC() + " is empty!");
             mpcEmptyError.setRefToMessageInError(pullRequest.getMessageId());
             MessageContextUtils.addGeneratedError(mc, mpcEmptyError);
-            log.debug("Set processing state of Pull Request to indicate processing has completed");
+            log.trace("Set processing state of Pull Request to indicate processing has completed");
             HolodeckB2BCore.getStorageManager().setProcessingState(pullRequest, ProcessingState.DONE);
         } else {
             log.debug("Message selected for pulling, msgId=" + pulledUserMsg.getMessageId());
             mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, pulledUserMsg);
-            log.debug("Message stored in context for processing in out flow");
+            log.trace("Message stored in context for processing in out flow");
             mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
         }
 
@@ -109,7 +110,7 @@ public class GetMessageUnitForPulling extends BaseHandler {
      */
     private IUserMessageEntity getForPulling(final List<IPMode> authPModes, final String reqMPC)
                                                                                         throws PersistenceException {
-        log.debug("Get list of messages waiting to be pulled");
+        log.trace("Get list of messages waiting to be pulled");
         // Query is based on the P-Mode ids so convert given set of P-Modes to id only collection
         Set<String> pmodeIds = new HashSet<>(authPModes.size());
         for (IPMode p : authPModes) pmodeIds.add(p.getId());
@@ -129,21 +130,16 @@ public class GetMessageUnitForPulling extends BaseHandler {
             IUserMessageEntity userMsgToPull = null;
             do {
                 userMsgToPull = waitingUserMessages.get(i);
-                log.debug("Check if User Message [" + userMsgToPull.getMessageId() + "] can be pulled.");
+                log.trace("Check if User Message [" + userMsgToPull.getMessageId() + "] can be pulled.");
                 // The usermessage should be on assigned to the requested MPC or a parent MPC
                 if (reqMPC.startsWith(userMsgToPull.getMPC())) {
-                    log.debug("User Message can be pulled, set processing state to Processing");
-                    try {
-                        r = HolodeckB2BCore.getStorageManager().setProcessingState(userMsgToPull,
-                                                                                  ProcessingState.AWAITING_PULL,
-                                                                                  ProcessingState.PROCESSING);
-                    } catch (final PersistenceException ex) {
-                        log.error("An error occurred while setting processing state! Details: " + ex.getMessage());
-                        // Maybe the error is specific for this MU, so continue with others
-                    }
-                    log.debug("Processing state was " + (r ? "" : "not ")  + "changed");
+                    log.trace("User Message can be pulled, set processing state to Processing");
+                    r = HolodeckB2BCore.getStorageManager().setProcessingState(userMsgToPull,
+                                                                              ProcessingState.AWAITING_PULL,
+                                                                              ProcessingState.PROCESSING);
+                    log.trace("Processing state was " + (r ? "" : "not ")  + "changed");
                 } else
-                    log.debug("MPC value of selected message is different from requested MPC!");
+                    log.trace("MPC value of selected message is different from requested MPC!");
                 i++;
             } while (!r && i < waitingUserMessages.size());
 

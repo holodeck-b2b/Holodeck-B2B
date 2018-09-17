@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
@@ -65,7 +66,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
     public void doProcessing() {
 
         // Get all the message id's for unacknowledged user messages
-        log.debug("Get all user messages that may need to be resent");
+        log.trace("Get all user messages that may need to be resent");
         Collection<IUserMessageEntity> waitingForRcpt = null;
         try {
             waitingForRcpt = HolodeckB2BCore.getQueryManager()
@@ -86,7 +87,8 @@ public class RetransmissionWorker extends AbstractWorkerTask {
             // For each message check if it should be retransmitted or not
             for (final IUserMessageEntity um : waitingForRcpt) {
                 try {
-                    log.debug("Get retry configuration from P-Mode [" + um.getPModeId() + "]");
+                    log.trace("Check if User Message [msgId=" + um.getMessageId() 
+                    		  + "] should be resend using retry configuration from P-Mode [" + um.getPModeId() + "]");
                     // Retry information is contained in Leg, and as we only have One-way it is always the first
                     // and because retries is part of AS4 reception awareness feature leg should be instance of
                     // ILegAS4, if it is not we can not retransmit
@@ -125,34 +127,35 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         // has to be generated
                         if (attempts >= raConfig.getWaitIntervals().length) {
                             // No retries left, generate MissingReceipt error
+                        	log.info("Retry attempts exhausted for User Message [msgId=" + um.getMessageId() + "]!");
                             missingReceiptsLog.error("No Receipt received for UserMessage with messageId="
                                                         + um.getMessageId());
                             // Change processing state accordingly
                             storageManager.setProcessingState(um, ProcessingState.FAILURE);
-                            log.debug("Changed processing state of user message to reflect failure");
+                            log.trace("Changed processing state of user message to reflect failure");
                             // Generate and report (if requested) MissingReceipt
                             generateMissingReceiptError(um, leg);
                         } else {
                             // Message can be resend, is the message to be pushed or pulled?
+                        	log.debug("Sending of User Message [msgId=" + um.getMessageId() + "] should be retried");
                             if (PModeUtils.doesHolodeckB2BTrigger(leg)) {
-                                log.debug("Message must be pushed to receiver again");
+                                log.trace("Message must be pushed to receiver again");
                                 storageManager.setProcessingState(um, ProcessingState.READY_TO_PUSH);
                             } else {
-                                log.debug("Message must be pulled by receiver again");
+                                log.trace("Message must be pulled by receiver again");
                                 storageManager.setProcessingState(um, ProcessingState.AWAITING_PULL);
                             }
-                            log.debug("Message unit is ready for retransmission");                        }
+                        }
                     } else {
-                            // Time to wait for receipt has not expired yet, wait longer
-                            log.debug("Retransmit interval not expired yet. Nothing to do.");
+                        // Time to wait for receipt has not expired yet, wait longer
+                        log.trace("Retransmit interval not expired yet. Nothing to do.");
                     }
                 } catch (final PersistenceException dbe) {
                     log.error("An error occurred when checking retransmission of message unit [msgID="
                                 + um.getMessageId() + "]. Details: " + dbe.getMessage());
                 }
             }
-        } else
-            log.debug("No messages waiting for Receipt, nothing to do");
+        } 
     }
 
     /**
@@ -174,7 +177,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
      */
     private void generateMissingReceiptError(final IUserMessage um, final ILeg leg) {
 
-        log.debug("Create and store MissingReceipt error");
+        log.trace("Create and store MissingReceipt error");
         // Create the error and set reference to user message
         final ErrorMessage missingReceiptError = new ErrorMessage(new MissingReceipt());
         missingReceiptError.setRefToMessageId(um.getMessageId());
@@ -188,7 +191,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
             return;
         }
 
-        log.debug("Determine whether error must be reported");
+        log.trace("Determine whether error must be reported");
         final IReceiptConfiguration rcptConfig = leg.getReceiptConfiguration();
         boolean deliverError = (rcptConfig != null ? rcptConfig.shouldNotifyReceiptToBusinessApplication() : false);
         IDeliverySpecification deliverySpec = (rcptConfig != null ? rcptConfig.getReceiptDelivery() : null);
@@ -202,7 +205,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                 deliverySpec = errHandlingConfig.getErrorDelivery();
             }
         }
-        log.info("MissingReceipt error should " + (deliverError ? "" : "not") + " be reported" );
+        log.trace("MissingReceipt error should " + (deliverError ? "" : "not") + " be reported" );
 
         try {
             if (deliverError) {

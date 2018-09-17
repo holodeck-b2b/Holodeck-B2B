@@ -19,6 +19,7 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
@@ -53,37 +54,33 @@ public class PrepareResponseMessage extends BaseHandler {
     @Override
     protected InvocationResponse doProcessing(final MessageContext mc) throws AxisFault {
         // Check which response message units were set during in flow, starting with user message
-        log.debug("Check for response user message unit");
+        log.trace("Check for response user message unit");
         final IUserMessageEntity um = (IUserMessageEntity) MessageContextUtils.getPropertyFromInMsgCtx(mc,
                                                                             MessageContextProperties.OUT_USER_MESSAGE);
         if (um != null) {
             log.debug("Response contains an user message unit");
             // Copy to current context so it gets processed correctly
             mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, um);
-        } else
-            log.debug("Response does not contain a user message unit");
-
+        } 
         // Check if there is a receipt signal messages to be included
-        log.debug("Check for receipt signal to be included");
+        log.trace("Check for receipt signal to be included");
         final IReceiptEntity receipt = (IReceiptEntity) MessageContextUtils.getPropertyFromInMsgCtx(mc,
                                                                           MessageContextProperties.RESPONSE_RECEIPT);
         if (receipt != null) {
             log.debug("Response contains a receipt signal");
             // Copy to current context so it gets processed correctly
             MessageContextUtils.addReceiptToSend(mc, receipt);
-        } else
-            log.debug("Response does not contain receipt signal");
-
+        } 
         // Check if there are error signal messages to be included
-        log.debug("Check for error signals generated during in flow to be included");
+        log.trace("Check for error signals generated during in flow to be included");
         final Collection<IErrorMessageEntity> errors =
                             (Collection<IErrorMessageEntity>) MessageContextUtils.getPropertyFromInMsgCtx(mc,
                                                                                   MessageContextProperties.OUT_ERRORS);
         if (Utils.isNullOrEmpty(errors))
-            log.debug("Response does not contain error signal(s)");
+            log.trace("Response does not contain error signal(s)");
         else if (errors.size() > 1) {
             // The were multiple error signals generated in the in flow, check if bundling is allowed
-            log.debug("Response contains multiple error signals");
+            log.trace("Response contains multiple error signals");
             if (HolodeckB2BCore.getConfiguration().allowSignalBundling()) {
                 // Bundling is enabled, so include all errors
                 log.debug("Bundling allowed, add all errors to response");
@@ -91,7 +88,7 @@ public class PrepareResponseMessage extends BaseHandler {
                 mc.setProperty(MessageContextProperties.OUT_ERRORS, errors);
             } else {
                 // Bundling not allowed, select one error signal to include
-                log.debug("Bundling is not allowed, select one error to report");
+                log.trace("Bundling is not allowed, select one error to report");
                 final IErrorMessageEntity include = selectError(errors, mc);
                 errors.remove(include);
                 // The other errors can not be further processed, so change their state to failed
@@ -126,7 +123,7 @@ public class PrepareResponseMessage extends BaseHandler {
         IErrorMessageEntity    r = null;
         int             cp = -1; // The prio of the currently selected err, 0=Error or Receipt, 1=PullReq, 2=UsrMsg
 
-        log.debug("Get the messageIds and types of received message units");
+        log.trace("Get the messageIds and types of received message units");
         final Map<String, Class<? extends IMessageUnitEntity>>  rcvdMsgs = getReceivedMessageUnits(mc);
         // Now select the error with highest prio
         for(final IErrorMessageEntity e : errors) {
@@ -181,7 +178,7 @@ public class PrepareResponseMessage extends BaseHandler {
         for(final IErrorMessageEntity e : errors)
             try {
                 updateManager.setProcessingState(e, ProcessingState.FAILURE);
-                log.debug("Changed state of error [" + e.getMessageId()
+                log.trace("Changed state of error [" + e.getMessageId()
                             + "] to failed as it can not be included in response!");
             } catch (final PersistenceException dbe) {
                 // Log and ignore error

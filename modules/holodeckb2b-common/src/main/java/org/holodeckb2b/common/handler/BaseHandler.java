@@ -91,7 +91,8 @@ public abstract class BaseHandler extends AbstractHandler {
      * HandledMessagingProtocol</i> parameter of the module.
      *
      */
-    public void init(HandlerDescription handlerdesc) {
+    @Override
+	public void init(HandlerDescription handlerdesc) {
         super.init(handlerdesc);
         try {
     		handledMsgProtocol = (String) handlerdesc.getParent().getParameter("HandledMessagingProtocol").getValue();
@@ -131,7 +132,8 @@ public abstract class BaseHandler extends AbstractHandler {
      *                      processing. Note that this will stop processing of the complete flow and may leave message
      *                      units in an undefined state!
      */
-    public final InvocationResponse invoke(final MessageContext mc) throws AxisFault {
+    @Override
+	public final InvocationResponse invoke(final MessageContext mc) throws AxisFault {
         // Determine which flow the handler currently runs is
         if (mc.isServerSide()) {
             // Running serverside means Holodeck B2B acts as responder
@@ -176,7 +178,7 @@ public abstract class BaseHandler extends AbstractHandler {
             return result;
         } catch (final Throwable t) {
             // Unhandled exception during processing, should not happen!
-            log.fatal("An unhandled exception occurred while processing the message! Details: " + t.getMessage());
+            log.error("An unhandled exception occurred while processing the message! Details: " + t.getMessage());
             throw new AxisFault("Internal error", t);
         }
     }

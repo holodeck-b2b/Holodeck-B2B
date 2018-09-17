@@ -16,11 +16,13 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
 import java.io.File;
+
 import org.apache.axis2.context.MessageContext;
-import org.apache.log4j.Appender;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
@@ -30,29 +32,16 @@ import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.pmode.xml.PMode;
 import org.junit.AfterClass;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Created at 17:39 24.06.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-@RunWith(MockitoJUnitRunner.class)
 public class PerformCustomValidationsTest {
-
-    // Appender to control logging events
-    @Mock
-    private Appender mockAppender;
-    @Captor
-    private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
 
     private static HolodeckB2BTestCore core;
 
@@ -81,8 +70,6 @@ public class PerformCustomValidationsTest {
     public void setUp() throws Exception {
         mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-
-        LogManager.getRootLogger().addAppender(mockAppender);
     }
 
     @AfterClass

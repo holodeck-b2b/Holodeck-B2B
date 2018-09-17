@@ -63,14 +63,13 @@ public class PackagePullRequestSignal extends BaseHandler {
             return InvocationResponse.CONTINUE;
 
         // There is a pull request signal to be sent, add to the message
-        log.debug("Adding pull request signal to the message");
-
-        log.debug("Get the eb:Messaging header from the message");
+        log.trace("Adding pull request signal to the message");
+        // Get the eb:Messaging header from the message
         final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
 
-        log.debug("Add eb:SignalMessage element to the existing eb:Messaging header");
+        log.trace("Add eb:SignalMessage element to the existing eb:Messaging header");
         PullRequestElement.createElement(messaging, pullReq);
-        log.debug("eb:SignalMessage element succesfully added to header");
+        log.trace("eb:SignalMessage element for Pull Request succesfully added to header");
 
         return InvocationResponse.CONTINUE;
     }

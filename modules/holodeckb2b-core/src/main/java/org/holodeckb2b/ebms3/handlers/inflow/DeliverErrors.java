@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import java.util.Collection;
+
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
@@ -32,13 +34,15 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.pmode.*;
+import org.holodeckb2b.interfaces.pmode.IErrorHandling;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
+import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeUtils;
-
-import java.util.Collection;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for checking if error message should be delivered to the business
@@ -71,13 +75,12 @@ public class DeliverErrors extends BaseHandler {
             // No errors to deliver
             return InvocationResponse.CONTINUE;
 
-        log.debug("Message contains " + errorSignals.size() + " Error Signals");
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Process each signal
         for(final IErrorMessageEntity errorSignal : errorSignals) {
             // Prepare message for delivery by checking it is still ready for delivery and then
             // change its processing state to "out for delivery"
-            log.debug("Prepare Error Signal [" + errorSignal.getMessageId() + "] for delivery");
+            log.trace("Prepare Error Signal [" + errorSignal.getMessageId() + "] for delivery");
 
             if(updateManager.setProcessingState(errorSignal, ProcessingState.READY_FOR_DELIVERY,
                                                              ProcessingState.OUT_FOR_DELIVERY)) {
@@ -97,7 +100,7 @@ public class DeliverErrors extends BaseHandler {
                     updateManager.setProcessingState(errorSignal, ProcessingState.WARNING);
                 }
             } else {
-                log.info("Error signal [" + errorSignal.getMessageId() + "] is already processed for delivery");
+                log.warn("Error signal [" + errorSignal.getMessageId() + "] is already processed for delivery");
             }
         }
 
@@ -120,12 +123,12 @@ public class DeliverErrors extends BaseHandler {
             throws MessageDeliveryException, PersistenceException {
         IDeliverySpecification deliverySpec = null;
 
-        log.debug("Determine P-Mode for error");
+        log.trace("Determine P-Mode for error");
         // Does the error reference another message unit?
         String refToMsgId = MessageUnitUtils.getRefToMessageId(errorSignal);
 
         if (!Utils.isNullOrEmpty(refToMsgId)) {
-            log.debug("The error references message unit with msgId=" + refToMsgId);
+            log.trace("The error references message unit with msgId=" + refToMsgId);
             // Get the referenced message unit. There may be more than one MU with the given id, we assume they
             // all use the same P-Mode
             final Collection<IMessageUnitEntity> refdMsgUnits = HolodeckB2BCore.getQueryManager()
@@ -138,7 +141,7 @@ public class DeliverErrors extends BaseHandler {
             else
                 // No messsage units found for refToMsgId. This should not occur here as this is already checked in
                 // previous handler!
-                log.error("No referenced message unit found! Probably there is a configuration error!");
+                log.info("No referenced message unit found! Probably there is a configuration error!");
         } else {
             log.debug("Error does not directly reference a message unit");
             // If the error is a direct response and there was just on outgoing message unit we still have a
@@ -155,7 +158,6 @@ public class DeliverErrors extends BaseHandler {
         // If a delivery specification was found the error should be delivered, else no reporting is needed
         if (deliverySpec != null) {
             log.debug("Error Signal should be delivered using delivery specification with id:" + deliverySpec.getId());
-            log.debug("Get deliverer from Core");
             final IMessageDeliverer deliverer = HolodeckB2BCore.getMessageDeliverer(deliverySpec);
             log.debug("Delivering the error using deliverer");
             // Because the reference to the message in error may be derived, set it explicitly on signal meta-data
@@ -164,7 +166,7 @@ public class DeliverErrors extends BaseHandler {
                 ErrorMessage deliverySignal = new ErrorMessage(errorSignal);
                 deliverySignal.setRefToMessageId(refToMsgId);
                 deliverer.deliver(deliverySignal);
-                log.debug("Error successfully delivered!");
+                log.info("Error Signal [msgId= " + errorSignal.getMessageId() + "] successfully delivered!");
             } catch (final MessageDeliveryException ex) {
                 // There was an "normal/expected" issue during delivery, continue as normal
                 throw ex;

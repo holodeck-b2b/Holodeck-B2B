@@ -18,7 +18,9 @@ package org.holodeckb2b.as4.compression;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
 import javax.activation.DataHandler;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.messagemodel.Property;
@@ -59,7 +61,7 @@ public class CompressionHandler extends AbstractUserMessageHandler {
         if (Utils.isNullOrEmpty(um.getPayloads()))
             return InvocationResponse.CONTINUE;
 
-        log.debug("Check P-Mode configuration if AS4 compression must be used");
+        log.trace("Check P-Mode configuration if AS4 compression must be used");
         final IUserMessageFlow flow = HolodeckB2BCore.getPModeSet().get(um.getPModeId())
                                                                     .getLegs().iterator().next().getUserMessageFlow();
         final IPayloadProfile plProfile = (flow != null ? flow.getPayloadProfile() : null);
@@ -74,7 +76,7 @@ public class CompressionHandler extends AbstractUserMessageHandler {
                 if (p.getContainment() == IPayload.Containment.ATTACHMENT)
                     enableCompression(p, mc);
 
-            log.debug("Enabled compression for all attached payloads");
+            log.trace("Enabled compression for all attached payloads");
         } else
             log.debug("AS4 Compression feature is not used");
 
@@ -93,7 +95,7 @@ public class CompressionHandler extends AbstractUserMessageHandler {
         final String cid = p.getPayloadURI();
         final DataHandler source = mc.getAttachment(cid);
         mc.addAttachment(cid, new CompressionDataHandler(source));
-        log.debug("Replaced DataHandler to enable compression");
+        log.trace("Replaced DataHandler to enable compression");
 
         // Set the part properties to indicate AS4 Compression feature was used and original MIME Type
         // First ensure that there do not exists properties with this name
@@ -110,7 +112,7 @@ public class CompressionHandler extends AbstractUserMessageHandler {
         partProperties.add(new Property(CompressionFeature.FEATURE_PROPERTY_NAME,
                                         CompressionFeature.COMPRESSED_CONTENT_TYPE));
         partProperties.add(new Property(CompressionFeature.MIME_TYPE_PROPERTY_NAME, source.getContentType()));
-        log.debug("Set PartProperties to indicate compression");
+        log.trace("Set PartProperties to indicate compression");
     }
 
 }
