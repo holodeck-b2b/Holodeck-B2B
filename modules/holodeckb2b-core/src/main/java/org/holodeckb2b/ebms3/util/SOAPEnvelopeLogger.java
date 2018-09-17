@@ -20,6 +20,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.util.Utils;
 
 
 /**
@@ -44,7 +45,18 @@ public class SOAPEnvelopeLogger extends BaseHandler {
 
         // Only do something when logging is enabled
         if (soapEnvLog.isInfoEnabled()) {
-            soapEnvLog.info(mc.getEnvelope().cloneOMElement().toStringWithConsume() + "\n");
+            try {
+            	soapEnvLog.info(mc.getEnvelope().cloneOMElement().toStringWithConsume() + "\n");
+            } catch (Exception invalidSOAP) {
+            	if (isInFlow((byte) (IN_FLOW | IN_FAULT_FLOW))) {
+            		log.warn("Received a message with invalid SOAP envelope! Details: " 
+            				+ Utils.getExceptionTrace(invalidSOAP));
+            		soapEnvLog.error("Received message cannot be logged because its SOAP envelope is not valid!");
+            	} else {
+            		log.error("Created message does not contain a valid SOAP envelope! Details: " 
+            				+ Utils.getExceptionTrace(invalidSOAP));
+            	}
+            }
         }
 
         return InvocationResponse.CONTINUE;
