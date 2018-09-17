@@ -31,7 +31,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   yet use it!
 * Added optional parameter to `IQueryManager.getMessageUnitsWithId()` to indicate that only message units flowing in
   a specific direction should be returned
-* Added default initialization method to `IPModeSet` to pass the Holodeck B2B _home directory_ as parameter 
+* Added default initialization method to `IPModeSet` to pass the Holodeck B2B _home directory_ as parameter
   on creation of the P-Mode storage implementation.
 
 ### Changed
@@ -56,9 +56,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Refactored `IQueryManager.isAlreadyDelivered()` to `IQueryManager.isAlreadyProcessed()` to also take failed message
   units into account when determining if a user message is already processed and should be considered a duplicate.
 * Changed the API specification of the query methods in `IQueryManager` to return **empty** collections instead of
-  `null` when no matching message units have been found 
+  `null` when no matching message units have been found
 * Changed argument of the `IQueryManager.isAlreadyProcessed()` to full _message unit_ instead of just the
-  messageId 
+  messageId
 * Updated to Axis2 version 1.7.7 and Bouncy Castle version 1.59
 * The log name for message processing now includes indication of the message protocol being processed. The message
   protocol is retrieved from the _HandledMessagingProtocol_ parameter of the engaged Holodeck B2B module.
@@ -90,6 +90,27 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Method `IMessageSubmitter.submitMessage(IUserMessage)` and corresponding implementation.
 * Method `IPModeSet.listPModeIds()` and corresponding implementation.
 
+## Unreleased
+### Changed
+* Use 'exec' to start the Java program, instead of forking the process to simplify management of
+  the Java process.
+* Updated the example certificates and key stores to extend validity of certificates
+
+### Fixed
+* Checking of references in Error Signal has been corrected so Error with the reference contained
+  only in the Errors is not rejected.
+* Exception when processing an invalid SOAP message [#15](https://github.com/holodeck-b2b/Holodeck-B2B/issues/15)
+* Updated README regarding certificate management in `repository/certs` folder to include also
+  the keystore with the certificates of trusted certificate authorities.
+
+## 3.1.2
+##### 2018-05-28
+### Changed
+* Test for `org.holodeckb2b.ebms3.workers.SubmitFromFile` worker has been changed due to refactoring
+
+### Fixed
+* Skipped MMD files ignored until gateway restart [#86](https://github.com/holodeck-b2b/Holodeck-B2B/issues/86)
+>>>>>>> origin/R-3.x
 ## 3.1.1
 ###### 2018-01-15
 ### Fixed

@@ -50,9 +50,7 @@ import org.holodeckb2b.security.DefaultProvider;
  */
 public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
 
-    private static final class SubmitterSingletonHolder {
-        static final IMessageSubmitter instance = new MessageSubmitter();
-    }
+    private static IMessageSubmitter submitter = new MessageSubmitter();
 
     private IDAOFactory daoFactory;
 
@@ -86,6 +84,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
         config = new Config(homePath, pmodeValidatorClass, pmodeStorageClass);
         pmodeSet = new InMemoryPModeSet();
         eventProcessor = new SyncEventProcessor();
+        submitter = testSubmitter;
         initDAOFactory();
         try {
             securityProvider = new DefaultProvider();
@@ -137,7 +136,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
 
     @Override
     public IMessageSubmitter getMessageSubmitter() {
-        return SubmitterSingletonHolder.instance;
+        return submitter;
     }
 
     @Override
