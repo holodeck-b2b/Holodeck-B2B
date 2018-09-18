@@ -337,7 +337,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
                 mdf = (IMessageDelivererFactory) Class.forName(factoryClassName).newInstance();
                 // Initialize the new factory with the settings from the delivery spec
                 mdf.init(deliverySpec.getSettings());
-                log.info("Created factory [" + factoryClassName + "] for delivery specification ["
+                log.debug("Created factory [" + factoryClassName + "] for delivery specification ["
                         + deliverySpec.getId() + "]");
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
                      | ClassCastException | MessageDeliveryException ex) {

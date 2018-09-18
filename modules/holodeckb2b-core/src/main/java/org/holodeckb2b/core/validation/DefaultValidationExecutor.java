@@ -79,7 +79,7 @@ public class DefaultValidationExecutor implements IValidationExecutor {
         result.setShouldRejectMessage(rejectMessage);
 
         if (Utils.isNullOrEmpty(result.getValidationErrors()))
-            log.info("Successfully validated message unit [{}]", userMessage.getMessageId());
+            log.debug("Successfully validated message unit [{}]", userMessage.getMessageId());
         else {
             log.info("Found {} validation errors in message unit [{}]", result.getValidationErrors().size()
                         ,userMessage.getMessageId());

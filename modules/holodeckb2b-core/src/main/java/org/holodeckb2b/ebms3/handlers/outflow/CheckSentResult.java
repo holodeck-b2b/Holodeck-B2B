@@ -96,7 +96,7 @@ public class CheckSentResult extends BaseHandler {
         final Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
 
         if (!Utils.isNullOrEmpty(msgUnits)) {
-            log.debug("Check result of sent operation");
+            log.trace("Check result of sent operation");
             final boolean   success = isSuccessful(mc);
             log.debug("The sent operation was " + (success ? "" : "not ") + "successful");
 
@@ -124,7 +124,7 @@ public class CheckSentResult extends BaseHandler {
                         }
                         transferEvent = new MessageTransferEvent(mu);
                     }
-                    log.trace("Processing state for message unit [" + mu.getMessageId() + "] changed to "
+                    log.info("Processing state for message unit [" + mu.getMessageId() + "] changed to "
                                 + mu.getCurrentProcessingState().getState());
                     // Raise a message processing event about the transfer
                     HolodeckB2BCore.getEventProcessor().raiseEvent(transferEvent, mc);

@@ -124,7 +124,8 @@ public class ProcessReceipts extends BaseHandler {
                     // Change to processing state of the reference message unit to delivered, but only if it is
                     // waiting for a receipt as we may otherwise overwrite an error state.
                     if (isWaitingForReceipt(ackedMessage)) {
-                        log.trace("Found message unit waiting for Receipt, setting processing state to delivered");
+                        log.info("Receipt received for User Message [msgId= " + refToMsgId 
+                        			+ "] => successfully delivered");
                         updateManager.setProcessingState(ackedMessage, ProcessingState.DELIVERED);
                         // Maybe the Receipt must also be delivered to the business application, so change state
                         // to "ready for delivery"

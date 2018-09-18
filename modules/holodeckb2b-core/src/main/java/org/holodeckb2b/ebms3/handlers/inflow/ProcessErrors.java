@@ -29,6 +29,7 @@ import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -134,11 +135,17 @@ public class ProcessErrors extends BaseHandler {
             // Change the processing state of the found message unit(s)
             for (final IMessageUnitEntity mu : refdMessages) {
                 if (MessageUnitUtils.isWarning(errSignal)) {
+                    if (mu instanceof IUserMessage)
+                    	log.info("Received an Error Signal for User Message [msgId=" + mu.getMessageId() 
+                    			 + "] with severity warning, message may not have been processed by receiver!");
                     log.debug("Error level is warning, set processing state of referenced message ["
                               + mu.getMessageId() + "] to warning");
                     storageManager.setProcessingState(mu, ProcessingState.WARNING);
                 } else {
-                    log.debug("Error level is failure, set processing state of referenced message ["
+                    if (mu instanceof IUserMessage)
+                    	log.info("Received an Error Signal for User Message [msgId=" + mu.getMessageId() 
+                    			 + "] with severity failure, message has not been processed by receiver!");                	
+                	log.debug("Error level is failure, set processing state of referenced message ["
                               + mu.getMessageId() + "] to failure");
                     storageManager.setProcessingState(mu, ProcessingState.FAILURE);
                 }
