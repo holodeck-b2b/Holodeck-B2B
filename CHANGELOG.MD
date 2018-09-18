@@ -36,7 +36,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 * The default URL path where Holodeck B2B receives AS4 messages and which needs to be used by the _Sending MSH_ has been
-  changed to _/holodeckb2b2/as4_. For backward compatibility the old path _msh_ can still be used, its use however isn't
+  changed to _/holodeckb2b/as4_. For backward compatibility the old path _msh_ can still be used, its use however isn't
   recommended!
 * When multiple P-Modes match to a received message this is now considered as "no match found" and no result is
   returned instead of the first matching P-Mode.
@@ -109,7 +109,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 * Skipped MMD files ignored until gateway restart [#86](https://github.com/holodeck-b2b/Holodeck-B2B/issues/86)
->>>>>>> origin/R-3.x
+
 ## 3.1.1
 ###### 2018-01-15
 ### Fixed
