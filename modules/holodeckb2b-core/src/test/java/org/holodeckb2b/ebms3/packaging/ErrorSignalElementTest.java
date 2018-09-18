@@ -70,7 +70,7 @@ public class ErrorSignalElementTest {
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
@@ -82,7 +82,7 @@ public class ErrorSignalElementTest {
         OMElement eElement =
                 (OMElement)esElement.getChildrenWithName(ERROR_ELEMENT_NAME).next();
         assertEquals(ERROR_ELEMENT_NAME, eElement.getQName());
-        assertEquals(IEbmsError.Severity.FAILURE.toString(),
+        assertEquals(IEbmsError.Severity.failure.toString(),
                 eElement.getAttributeValue(SEVERITY_ATTR_NAME));
         assertEquals("some_error_code",
                 eElement.getAttributeValue(ERROR_CODE_ATTR_NAME));
@@ -93,7 +93,7 @@ public class ErrorSignalElementTest {
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
@@ -108,7 +108,7 @@ public class ErrorSignalElementTest {
         assertTrue(it.hasNext());
         ebmsError = (EbmsError)it.next();
         assertEquals("some_error_code", ebmsError.getErrorCode());
-        assertEquals(IEbmsError.Severity.FAILURE, ebmsError.getSeverity());
+        assertEquals(IEbmsError.Severity.failure, ebmsError.getSeverity());
     }
 
     @Test
@@ -116,7 +116,7 @@ public class ErrorSignalElementTest {
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
@@ -131,7 +131,7 @@ public class ErrorSignalElementTest {
         OMElement eElement =
                 (OMElement)esElement.getChildrenWithName(ERROR_ELEMENT_NAME).next();
         assertEquals(ERROR_ELEMENT_NAME, eElement.getQName());
-        assertEquals(IEbmsError.Severity.FAILURE.toString(),
+        assertEquals(IEbmsError.Severity.failure.toString(),
                 eElement.getAttributeValue(SEVERITY_ATTR_NAME));
         assertEquals("some_error_code",
                 eElement.getAttributeValue(ERROR_CODE_ATTR_NAME));
@@ -142,7 +142,7 @@ public class ErrorSignalElementTest {
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
@@ -151,14 +151,14 @@ public class ErrorSignalElementTest {
                 ErrorSignalElement.createElement(headerBlock, errorMessage);
 
         EbmsError newEbmsError = new EbmsError();
-        newEbmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        newEbmsError.setSeverity(IEbmsError.Severity.failure);
         newEbmsError.setErrorCode("some_new_error_code");
 
         OMElement eElement =
                 ErrorSignalElement.createErrorElement(esElement, newEbmsError);
 
         assertEquals(ERROR_ELEMENT_NAME, eElement.getQName());
-        assertEquals(IEbmsError.Severity.FAILURE.toString(),
+        assertEquals(IEbmsError.Severity.failure.toString(),
                 eElement.getAttributeValue(SEVERITY_ATTR_NAME));
         assertEquals("some_new_error_code",
                 eElement.getAttributeValue(ERROR_CODE_ATTR_NAME));
@@ -169,7 +169,7 @@ public class ErrorSignalElementTest {
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
@@ -180,7 +180,7 @@ public class ErrorSignalElementTest {
                 (OMElement) esElement.getChildrenWithName(ERROR_ELEMENT_NAME).next();
 
         ebmsError = ErrorSignalElement.readErrorElement(eElement);
-        assertEquals(IEbmsError.Severity.FAILURE, ebmsError.getSeverity());
+        assertEquals(IEbmsError.Severity.failure, ebmsError.getSeverity());
         assertEquals("some_error_code", ebmsError.getErrorCode());
     }
 }

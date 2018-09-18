@@ -203,9 +203,9 @@ public class ErrorSignalElement {
         error.setMessage(errorElement.getAttributeValue(new QName(SHORT_DESCR_ATTR)));
         error.setRefToMessageInError(errorElement.getAttributeValue(new QName(REF_TO_ATTR)));
         // Convert text of attribute to enum value of entity object
-        error.setSeverity( IEbmsError.Severity.FAILURE.toString()
+        error.setSeverity( IEbmsError.Severity.failure.toString()
                                 .equalsIgnoreCase(errorElement.getAttributeValue(new QName(SEVRITY_ATTR)))
-                           ? IEbmsError.Severity.FAILURE : IEbmsError.Severity.WARNING);
+                           ? IEbmsError.Severity.failure : IEbmsError.Severity.warning);
 
         // Read the ErrorDetail child element (if it exists)
         final OMElement errDetailElement = errorElement.getFirstChildWithName(Q_ERROR_DETAIL);

@@ -32,7 +32,7 @@ public class DeCompressionFailure extends org.holodeckb2b.common.messagemodel.Eb
     /**
      * The default severity of the error as defined in the core specification.
      */
-    private static final Severity ERROR_SEVERITY = Severity.FAILURE;
+    private static final Severity ERROR_SEVERITY = Severity.failure;
 
     /**
      * The origin of this error is normally the AS4 Compression feature module

@@ -31,7 +31,7 @@ public class FeatureNotSupported extends org.holodeckb2b.common.messagemodel.Ebm
     /**
      * The default severity of the error as defined in the core specification.
      */
-    private static final Severity ERROR_SEVERITY = Severity.WARNING;
+    private static final Severity ERROR_SEVERITY = Severity.warning;
 
     /**
      * The origin of this error is normally the ebms module

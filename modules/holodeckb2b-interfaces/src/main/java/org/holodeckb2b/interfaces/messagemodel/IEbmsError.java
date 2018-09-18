@@ -32,8 +32,8 @@ public interface IEbmsError {
      * The defined error severities in the ebMS specification (see §6.2.5).
      */
     public enum Severity {
-        WARNING,
-        FAILURE
+        warning,
+        failure
     }
 
     /**

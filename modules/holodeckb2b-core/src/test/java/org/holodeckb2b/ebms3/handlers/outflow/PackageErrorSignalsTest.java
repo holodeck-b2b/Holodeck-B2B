@@ -116,7 +116,7 @@ public class PackageErrorSignalsTest {
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
