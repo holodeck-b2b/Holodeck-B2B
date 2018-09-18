@@ -47,7 +47,6 @@ import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
@@ -173,7 +172,7 @@ public class PrepareResponseMessageTest {
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
@@ -222,7 +221,7 @@ public class PrepareResponseMessageTest {
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code1");
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
@@ -233,7 +232,7 @@ public class PrepareResponseMessageTest {
         errorMessage = new ErrorMessage();
         errors = new ArrayList<>();
         ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code2");
         errors.add(ebmsError);
         errorMessage.setErrors(errors);

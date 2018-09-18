@@ -16,23 +16,31 @@
  */
 package org.holodeckb2b.ebms3.packaging;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.holodeckb2b.common.messagemodel.*;
+import org.holodeckb2b.common.messagemodel.EbmsError;
+import org.holodeckb2b.common.messagemodel.ErrorMessage;
+import org.holodeckb2b.common.messagemodel.MessageUnit;
+import org.holodeckb2b.common.messagemodel.PullRequest;
+import org.holodeckb2b.common.messagemodel.Receipt;
+import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.junit.Before;
 import org.junit.Test;
-
-import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 15:15 19.02.17
@@ -103,7 +111,7 @@ public class MessageInfoElementTest {
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
@@ -150,7 +158,7 @@ public class MessageInfoElementTest {
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
@@ -222,7 +230,7 @@ public class MessageInfoElementTest {
 
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
         errors.add(ebmsError);
         errorMessage.setErrors(errors);

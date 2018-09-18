@@ -16,6 +16,15 @@
  */
 package org.holodeckb2b.ebms3.packaging;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -26,13 +35,6 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.junit.Before;
 import org.junit.Test;
-
-import javax.xml.namespace.QName;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 23:19 29.01.17
@@ -84,7 +86,7 @@ public class ErrorSignalElementTest {
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
@@ -96,7 +98,7 @@ public class ErrorSignalElementTest {
         OMElement eElement =
                 (OMElement)esElement.getChildrenWithName(ERROR_ELEMENT_NAME).next();
         assertEquals(ERROR_ELEMENT_NAME, eElement.getQName());
-        assertEquals(IEbmsError.Severity.FAILURE.toString(),
+        assertEquals(IEbmsError.Severity.failure.toString(),
                 eElement.getAttributeValue(SEVERITY_ATTR_NAME));
         assertEquals("some_error_code",
                 eElement.getAttributeValue(ERROR_CODE_ATTR_NAME));
@@ -108,7 +110,7 @@ public class ErrorSignalElementTest {
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
         ebmsError.setCategory("");
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
@@ -123,7 +125,7 @@ public class ErrorSignalElementTest {
         assertTrue(it.hasNext());
         ebmsError = (EbmsError)it.next();
         assertEquals("some_error_code", ebmsError.getErrorCode());
-        assertEquals(IEbmsError.Severity.FAILURE, ebmsError.getSeverity());
+        assertEquals(IEbmsError.Severity.failure, ebmsError.getSeverity());
     }
 
     @Test
@@ -132,7 +134,7 @@ public class ErrorSignalElementTest {
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
         ebmsError.setCategory("");
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
@@ -147,7 +149,7 @@ public class ErrorSignalElementTest {
         OMElement eElement =
                 (OMElement)esElement.getChildrenWithName(ERROR_ELEMENT_NAME).next();
         assertEquals(ERROR_ELEMENT_NAME, eElement.getQName());
-        assertEquals(IEbmsError.Severity.FAILURE.toString(),
+        assertEquals(IEbmsError.Severity.failure.toString(),
                 eElement.getAttributeValue(SEVERITY_ATTR_NAME));
         assertEquals("some_error_code",
                 eElement.getAttributeValue(ERROR_CODE_ATTR_NAME));
@@ -159,7 +161,7 @@ public class ErrorSignalElementTest {
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
         // Set required attributes
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
 
         errors.add(ebmsError);
@@ -170,7 +172,7 @@ public class ErrorSignalElementTest {
 
         EbmsError newEbmsError = new EbmsError();
         // Set required attributes
-        newEbmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        newEbmsError.setSeverity(IEbmsError.Severity.failure);
         newEbmsError.setErrorCode("some_new_error_code");
         // Set optonal attributes
         newEbmsError.setCategory("some_category");
@@ -188,7 +190,7 @@ public class ErrorSignalElementTest {
 
         assertEquals(ERROR_ELEMENT_NAME, eElement.getQName());
 
-        assertEquals(IEbmsError.Severity.FAILURE.toString(),
+        assertEquals(IEbmsError.Severity.failure.toString(),
                 eElement.getAttributeValue(SEVERITY_ATTR_NAME));
         assertEquals("some_new_error_code",
                 eElement.getAttributeValue(ERROR_CODE_ATTR_NAME));
@@ -217,7 +219,7 @@ public class ErrorSignalElementTest {
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
         // Required attributes
-        ebmsError.setSeverity(IEbmsError.Severity.FAILURE);
+        ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
         // Optional attributes
         ebmsError.setCategory("some_category");
@@ -238,7 +240,7 @@ public class ErrorSignalElementTest {
 
         ebmsError = ErrorSignalElement.readErrorElement(eElement);
 
-        assertEquals(IEbmsError.Severity.FAILURE, ebmsError.getSeverity());
+        assertEquals(IEbmsError.Severity.failure, ebmsError.getSeverity());
         assertEquals("some_error_code", ebmsError.getErrorCode());
 
         assertEquals("some_category", ebmsError.getCategory());

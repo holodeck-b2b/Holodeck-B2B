@@ -136,8 +136,8 @@ public class HeaderValidation extends BaseHandler {
                                      .insert(0, "The message was found to be invalid!\n\n");
             // Create the validationError
             InvalidHeader invalidHdr = new InvalidHeader(invalidHeaderErrorDetails.toString(), messageId);
-            invalidHdr.setSeverity(maxSeverity == MessageValidationError.Severity.Failure ? IEbmsError.Severity.FAILURE
-                                                                                         : IEbmsError.Severity.WARNING);
+            invalidHdr.setSeverity(maxSeverity == MessageValidationError.Severity.Failure ? IEbmsError.Severity.failure
+                                                                                         : IEbmsError.Severity.warning);
             ebmsErrors.add(invalidHdr);
         }
 

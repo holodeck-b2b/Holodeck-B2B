@@ -116,7 +116,7 @@ public class CatchAxisFault extends BaseHandler {
     private void createOtherError(final MessageContext mc) {
         final OtherContentError   otherError = new OtherContentError();
         otherError.setErrorDetail("An internal error occurred while processing the message.");
-        otherError.setSeverity(IEbmsError.Severity.WARNING);
+        otherError.setSeverity(IEbmsError.Severity.warning);
         ErrorMessage errorMessage = new ErrorMessage();
         errorMessage.addError(otherError);
         try {

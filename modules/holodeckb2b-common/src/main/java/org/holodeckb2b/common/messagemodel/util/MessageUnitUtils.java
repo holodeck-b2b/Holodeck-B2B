@@ -171,7 +171,7 @@ public class MessageUnitUtils {
 
         final Iterator<IEbmsError>  errs = errorSignal.getErrors().iterator();
         while (errs.hasNext() && isWarning) {
-            isWarning = (errs.next().getSeverity() == IEbmsError.Severity.WARNING);
+            isWarning = (errs.next().getSeverity() == IEbmsError.Severity.warning);
         }
 
         return isWarning;

@@ -39,7 +39,7 @@ public class MissingReceipt extends org.holodeckb2b.common.messagemodel.EbmsErro
     /**
      * The default severity of the error as defined in the AS4 specification.
      */
-    private static final Severity ERROR_SEVERITY = Severity.FAILURE;
+    private static final Severity ERROR_SEVERITY = Severity.failure;
 
     /**
      * The origin of this error is normally the ebms module

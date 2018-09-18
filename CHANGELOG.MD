@@ -100,6 +100,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Exception when processing an invalid SOAP message [#15](https://github.com/holodeck-b2b/Holodeck-B2B/issues/15)
 * Updated README regarding certificate management in `repository/certs` folder to include also
   the keystore with the certificates of trusted certificate authorities.
+* Severity attributes should be "warning" or "failure" not "WARNING" or "FAILURE" [#89](https://github.com/holodeck-b2b/Holodeck-B2B/issues/89)
 
 ## 3.1.2
 ##### 2018-05-28

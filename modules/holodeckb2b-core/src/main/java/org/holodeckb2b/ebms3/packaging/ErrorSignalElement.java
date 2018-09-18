@@ -18,7 +18,9 @@ package org.holodeckb2b.ebms3.packaging;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -59,7 +61,7 @@ public class ErrorSignalElement {
     private static final String REF_TO_ATTR = "refToMessageInError";
     private static final String ERROR_CODE_ATTR = "errorCode";
     private static final String ORIGIN_ATTR = "origin";
-    private static final String SEVRITY_ATTR = "severity";
+    private static final String SEVERITY_ATTR = "severity";
     private static final String SHORT_DESCR_ATTR = "shortDescription";
 
     /**
@@ -123,7 +125,7 @@ public class ErrorSignalElement {
 
         final ArrayList<OMElement>  errors = new ArrayList<>();
         while(signals.hasNext()) {
-            final OMElement signal  = (OMElement) signals.next();
+            final OMElement signal  = signals.next();
             // If this SignalMessage element has at least one Error child,
             //   it is an Error signal and should be returned
             if (signal.getFirstChildWithName(Q_ELEMENT_NAME) != null)
@@ -153,7 +155,7 @@ public class ErrorSignalElement {
         // errorCode attribute is mandatory
         errorElement.addAttribute(ERROR_CODE_ATTR, error.getErrorCode(), null);
         // severity attribute is mandatory
-        errorElement.addAttribute(SEVRITY_ATTR, error.getSeverity().toString(), null);
+        errorElement.addAttribute(SEVERITY_ATTR, error.getSeverity().toString(), null);
 
         // origin attribute
         final String origin = error.getOrigin();
@@ -204,11 +206,13 @@ public class ErrorSignalElement {
         error.setMessage(errorElement.getAttributeValue(new QName(SHORT_DESCR_ATTR)));
         error.setRefToMessageInError(errorElement.getAttributeValue(new QName(REF_TO_ATTR)));
         // Convert text of attribute to enum value of entity object
-        final String severity = errorElement.getAttributeValue(new QName(SEVRITY_ATTR));
+        final String severity = errorElement.getAttributeValue(new QName(SEVERITY_ATTR));
         if (!Utils.isNullOrEmpty(severity))
-            switch (severity.toLowerCase()) {
-                case "failure" : error.setSeverity(IEbmsError.Severity.FAILURE); break;
-                case "warning" : error.setSeverity(IEbmsError.Severity.WARNING);
+            try {
+            	error.setSeverity(IEbmsError.Severity.valueOf(severity.toLowerCase()));
+            } catch (IllegalArgumentException unknownSeverity) {
+            	// An unknown value has been provided for the Error's severity. 
+            	// Ignore and don't use this attribute
             }
 
         // Read the ErrorDetail child element (if it exists)
