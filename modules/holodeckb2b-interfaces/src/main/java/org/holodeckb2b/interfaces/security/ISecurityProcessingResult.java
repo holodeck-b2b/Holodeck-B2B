@@ -22,7 +22,7 @@ package org.holodeckb2b.interfaces.security;
  * interface is defined that includes method to get details on the processing specific to that feature.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public interface ISecurityProcessingResult {
 

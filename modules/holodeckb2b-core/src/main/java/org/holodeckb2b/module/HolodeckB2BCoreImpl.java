@@ -129,7 +129,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
 
     /**
      * The installed security provider responsible for the processing of the WS-Security header of messages.
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     private ISecurityProvider securityProvider = null;
 
@@ -423,7 +423,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * DefaultValidationExecutor}
      *
      * @return  The component responsible for execution of the custom validations.
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     IValidationExecutor getValidationExecutor() {
         return new DefaultValidationExecutor();
@@ -431,7 +431,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
 
     /**
      * {@inheritDoc}
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     @Override
     public ICertificateManager getCertificateManager() {
@@ -442,7 +442,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * Gets the active <i>security provider</i> of this Holodeck B2B instance.
      *
      * @return The active security provider
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      * @see ISecurityProvider
      */
     ISecurityProvider getSecurityProvider() {

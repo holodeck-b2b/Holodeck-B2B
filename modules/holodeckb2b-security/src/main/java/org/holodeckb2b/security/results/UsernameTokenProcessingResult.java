@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.security.UTPasswordType;
  * processing a username token in a message.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public class UsernameTokenProcessingResult extends AbstractSecurityProcessingResult
                                                 implements IUsernameTokenProcessingResult {

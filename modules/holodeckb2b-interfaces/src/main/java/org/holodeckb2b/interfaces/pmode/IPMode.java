@@ -166,7 +166,7 @@ public interface IPMode {
      * @return <code>true</code> if a strict validation of the ebMS header meta-data should be performed for message
      *         units which processing is governed by this P-Mode,<br>
      *         <code>false</code> if a basic validation is enough
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     boolean useStrictHeaderValidation();
 }

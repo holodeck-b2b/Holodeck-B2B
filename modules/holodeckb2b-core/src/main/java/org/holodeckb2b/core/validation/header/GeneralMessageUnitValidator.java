@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * Provides validation of the ebMS header information that should be available in all message units.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since  HB2B_NEXT_VERSION
+ * @since  4.0.0
  */
 abstract class GeneralMessageUnitValidator<M extends IMessageUnit> implements IMessageValidator<M> {
     /**

@@ -26,7 +26,7 @@ import org.apache.axiom.om.OMElement;
  * Signature of the message, which beside the digest itself is also the digest and transform algorithms.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public interface ISignedPartMetadata {
 
@@ -54,7 +54,7 @@ public interface ISignedPartMetadata {
      * ds:Transform</code> descendants of the <code>ds:Reference</code> element.
      *
      * @return List of the transforms applied to the payload before calculating the digest value.
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     List<ITransformMetadata> getTransforms();
 

@@ -22,7 +22,7 @@ package org.holodeckb2b.security;
  * failed in the {@link }.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public enum Action {
     SIGN, ENCRYPT, VERIFY, DECRYPT, USERNAME_TOKEN

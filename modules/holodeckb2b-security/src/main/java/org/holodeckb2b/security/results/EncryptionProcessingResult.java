@@ -31,7 +31,7 @@ import org.holodeckb2b.interfaces.security.X509ReferenceType;
  * the encryption of a message (includes decryption as well).
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public class EncryptionProcessingResult extends AbstractSecurityProcessingResult implements IEncryptionProcessingResult
 {

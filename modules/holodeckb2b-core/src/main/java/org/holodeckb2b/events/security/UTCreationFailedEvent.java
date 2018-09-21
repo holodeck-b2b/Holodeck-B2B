@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * header in the message containing a submitted message unit failed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public class UTCreationFailedEvent extends AbstractSecurityProcessingFailureEvent implements IUTCreationFailedEvent {
 

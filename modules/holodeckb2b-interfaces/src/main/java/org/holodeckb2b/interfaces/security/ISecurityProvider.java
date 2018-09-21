@@ -33,7 +33,7 @@ package org.holodeckb2b.interfaces.security;
  * an instance of the provider a default non-argument constructor must be provided by the implementation.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public interface ISecurityProvider {
 

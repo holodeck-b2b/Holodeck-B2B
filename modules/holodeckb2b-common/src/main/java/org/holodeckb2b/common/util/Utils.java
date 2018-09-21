@@ -422,7 +422,7 @@ public final class Utils {
      *
      * @param t The exception that occurred
      * @return  The list of exceptions that caused this exception including their error message
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public static String getExceptionTrace(final Throwable t) {
         final StringBuffer r = new StringBuffer();
@@ -486,7 +486,7 @@ public final class Utils {
      *
      * @param uri   The URI value to check
      * @return      <code>true</code> if the given string is a valid URI, <code>false</code> otherwise.
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public static boolean isValidURI(final String uri) {
         boolean isValid;

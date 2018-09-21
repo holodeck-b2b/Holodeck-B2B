@@ -30,7 +30,7 @@ import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
  * not required to immediately encrypt the payload data and that the can be done on the fly when the message is send.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public interface ISecurityHeaderCreator {
 

@@ -29,7 +29,7 @@ import org.simpleframework.xml.ElementList;
  * validation of message units.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public class CustomValidationSpecification implements IMessageValidationSpecification {
 

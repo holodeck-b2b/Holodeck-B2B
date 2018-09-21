@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
  * continues or not.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  * @see IMessageValidationSpecification
  */
 public interface ICustomValidationFailedEvent extends IMessageProcessingEvent {

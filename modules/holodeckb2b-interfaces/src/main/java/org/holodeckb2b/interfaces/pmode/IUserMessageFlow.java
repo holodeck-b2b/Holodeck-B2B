@@ -70,7 +70,7 @@ public interface IUserMessageFlow {
      *
      * @return An {@link IMessageValidationSpecification} object representing the custom validation configuration,or<br>
      *         <code>null</code> when no custom validation is needed
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     IMessageValidationSpecification getCustomValidationConfiguration();
 }

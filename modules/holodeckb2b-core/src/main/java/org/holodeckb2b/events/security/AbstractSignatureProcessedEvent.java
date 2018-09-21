@@ -33,7 +33,7 @@ import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
  * not be modified afterwards.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 abstract class AbstractSignatureProcessedEvent extends AbstractMessageProcessingEvent {
 

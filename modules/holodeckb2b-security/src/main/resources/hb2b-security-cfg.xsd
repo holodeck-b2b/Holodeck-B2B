@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
     targetNamespace="http://holodeck-b2b.org/schemas/2017/10/config/security"
-    version="HB2B_NEXT_VERSION" xmlns="http://holodeck-b2b.org/schemas/2017/10/config/security">
+    version="4.0.0" xmlns="http://holodeck-b2b.org/schemas/2017/10/config/security">
     <xs:annotation>
         <xs:documentation>This XML schema defines the structure of the configuration file of the default <i>Security Provider</i> of Holodeck B2B</xs:documentation>
     </xs:annotation>

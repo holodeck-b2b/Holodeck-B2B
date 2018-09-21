@@ -37,7 +37,7 @@ public interface IPModeSet {
 	 * easy implementation.   
 	 * 
 	 * @param hb2bHomeDir	Path of the Holodeck B2B home directory.
-	 * @since HB2B_NEXT_VERSION
+	 * @since 4.0.0
 	 */
 	default void init(final String hb2bHomeDir) {};
 

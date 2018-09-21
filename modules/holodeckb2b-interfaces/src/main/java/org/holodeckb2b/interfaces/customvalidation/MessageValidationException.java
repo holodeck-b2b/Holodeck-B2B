@@ -22,7 +22,7 @@ package org.holodeckb2b.interfaces.customvalidation;
  * validator's factory can not be initialized, or during the actual execution of the validation.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public class MessageValidationException extends Exception {
 

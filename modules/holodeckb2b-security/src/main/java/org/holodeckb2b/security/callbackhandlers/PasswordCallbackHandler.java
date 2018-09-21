@@ -28,7 +28,7 @@ import org.apache.wss4j.common.ext.WSPasswordCallback;
  * configuration itself. Username password combinations should be set before WSS4J starts processing the message.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public class PasswordCallbackHandler implements CallbackHandler {
 

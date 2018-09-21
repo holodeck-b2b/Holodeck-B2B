@@ -49,7 +49,7 @@ public class ReceptionAwarenessTest {
     }
 
     /**
-     * Test pre HB2B_NEXT_VERSION configuration with fixed intervals
+     * Test pre 4.0.0 configuration with fixed intervals
      */
     @Test
     public void testFixedIntervals() {
@@ -78,7 +78,7 @@ public class ReceptionAwarenessTest {
     }
 
     /**
-     * Test post HB2B_NEXT_VERSION configuration with flexible intervals
+     * Test post 4.0.0 configuration with flexible intervals
      */
     @Test
     public void testFlexibleIntervals() {

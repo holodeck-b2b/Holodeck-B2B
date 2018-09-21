@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * for a received message unit failed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public class SignatureVerificationFailedEvent extends AbstractSecurityProcessingFailureEvent
                                                 implements ISignatureVerificationFailedEvent {

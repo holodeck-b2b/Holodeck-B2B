@@ -143,13 +143,13 @@ public class Config implements InternalConfiguration {
 
     /*
      * The class name of the security provider that should be used to process the WS-Security header of messages
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     private String securityProviderClass = null;
 
     /*
      * Indicator whether strict header validation should be applied to all messages
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     private boolean useStrictHeaderValidation = false;
 
@@ -473,7 +473,7 @@ public class Config implements InternalConfiguration {
 
     /**
      * {@inheritDoc}
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     @Override
     public boolean useStrictHeaderValidation() {
@@ -482,7 +482,7 @@ public class Config implements InternalConfiguration {
 
     /**
      * {@inheritDoc}
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     @Override
     public String getSecurityProviderClass() {

@@ -36,7 +36,7 @@ import org.w3c.dom.NodeList;
  * <p>The information on the digest must be supplied when the object is created and can not be modified afterwards.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public class SignedPartMetadata implements ISignedPartMetadata {
 

@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * transfer a message unit to the other MSH, either by sending it as a request or including it as a response.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @@since HB2B_NEXT_VERSION
+ * @@since 4.0.0
  */
 public class MessageTransferEvent extends AbstractMessageProcessingEvent implements IMessageTransferEvent {
     /**

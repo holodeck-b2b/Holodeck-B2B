@@ -151,7 +151,7 @@ public class HolodeckB2BCoreInterface {
      * and certificates needed for the correct processing of messages can be managed.
      *
      * @return The active certificate manager
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public static ICertificateManager getCertificateManager() {
         assertInitialized();

@@ -23,7 +23,7 @@ package org.holodeckb2b.interfaces.customvalidation;
  * responsible the data provided in the error is up to the validator.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public class MessageValidationError {
 

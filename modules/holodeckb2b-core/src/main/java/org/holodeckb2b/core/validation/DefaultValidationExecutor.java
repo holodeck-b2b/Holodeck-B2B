@@ -35,7 +35,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * message unit. There is also no caching of validator factories.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public class DefaultValidationExecutor implements IValidationExecutor {
 

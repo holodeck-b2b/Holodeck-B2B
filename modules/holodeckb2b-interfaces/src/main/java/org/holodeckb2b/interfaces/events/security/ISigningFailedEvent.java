@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.events.security.ISecurityHeaderCreationFailure
  * could not be sent because it could not be signed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public interface ISigningFailedEvent extends ISecurityHeaderCreationFailureEvent {
 

@@ -92,7 +92,7 @@ public interface InternalConfiguration extends IConfiguration {
      *
      * @return The class name of the {@link ISecurityProvider} implementation to use for handling the WS-Security
      *         headers in messages
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     String getSecurityProviderClass();
 }

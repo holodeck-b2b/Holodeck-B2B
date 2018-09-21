@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * a message unit to the business application was executed.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public class MessageDeliveryEvent extends AbstractMessageProcessingEvent implements IMessageDeliveryEvent {
     /**

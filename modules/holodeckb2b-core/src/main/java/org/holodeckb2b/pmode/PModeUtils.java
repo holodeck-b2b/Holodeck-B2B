@@ -95,7 +95,7 @@ public class PModeUtils {
      * @param pmode     The P-Mode to check
      * @return          The {@link ILeg} that uses pulling to send the message, or<br>
      *                  <code>null</code> if there is no such leg
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public static ILeg getInPullRequestLeg(IPMode pmode) {
         final List<? extends ILeg> legs = pmode.getLegs();

@@ -41,7 +41,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * The handler always raises a {@link CustomValidationFailedEvent} to signal that validation issues were encountered.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  * @see IMessageValidationSpecification
  */
 public class PerformCustomValidations extends AbstractUserMessageHandler {

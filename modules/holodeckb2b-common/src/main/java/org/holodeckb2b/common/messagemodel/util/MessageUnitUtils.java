@@ -142,7 +142,7 @@ public class MessageUnitUtils {
      * @param property		The property's name 
      * @return				The property if it exists in the collection of message properties for the given message,
      * 						<br>or <code>null</code> if no such property exists.
-     * @since HB2B_NEXT_VERSION 
+     * @since 4.0.0 
      */
     public static IProperty getMessageProperty(final IUserMessage userMessage, final String property) {
     		if (Utils.isNullOrEmpty(property) || userMessage == null)
@@ -164,7 +164,7 @@ public class MessageUnitUtils {
      * @param errorSignal   The Error signal to check
      * @return              <code>true</code> if all errors in the signal have severity <i>warning</i>,<br>
      *                      <code>false</code> otherwise
-     * @since HB2B_NEXT_VERSION 
+     * @since 4.0.0 
      */
     public static boolean isWarning(final IErrorMessage errorSignal) {
         boolean isWarning = true;

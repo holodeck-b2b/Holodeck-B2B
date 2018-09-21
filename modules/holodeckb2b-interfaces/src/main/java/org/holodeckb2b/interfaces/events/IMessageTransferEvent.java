@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
  * Awareness feature should be used.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public interface IMessageTransferEvent extends IMessageProcessingEvent {
 

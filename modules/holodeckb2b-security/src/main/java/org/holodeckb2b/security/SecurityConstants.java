@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
  * Constants related to the identification of parts of the security header and messages.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public final class SecurityConstants {
 

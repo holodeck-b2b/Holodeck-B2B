@@ -45,7 +45,7 @@ import org.holodeckb2b.interfaces.general.Interval;
  * <p>Enabling the Reception Awareness feature itself (<b>PMode[1].ReceptionAwareness</b>) is done by including an
  * object of this type on the leg, i.e. when {@link IAS4Leg#getReceptionAwareness()} returns a non-null value. Note that
  * we use a special type of leg ({@link IAS4Leg}) to indicate that the leg includes AS4 specific features.
- * <b>NOTE:</b> In version HB2B_NEXT_VERSION the interface changed to allow a more flexible configuration of the
+ * <b>NOTE:</b> In version 4.0.0 the interface changed to allow a more flexible configuration of the
  * intervals between retries. To allow an easy migration path all methods related to the retry configuration have a
  * default implementation. New implementations of this interface <b>SHOULD only implement</b>{@link #getWaitIntervals()}
  * and {@link #useDuplicateDetection()}.
@@ -87,7 +87,7 @@ public interface IReceptionAwareness {
      * Therefore the number of retries is one less then the number of intervals specified!.
      *
      * @return The periods to wait for a <i>Receipt</i> Signal expressed as an array of {@link Interval}
-     * @since HB2B_NEXT_VERSION     <b>New implementation MUST override this method</b>
+     * @since 4.0.0     <b>New implementation MUST override this method</b>
      */
     public default Interval[] getWaitIntervals() {
         Interval[] intervals = new Interval[Integer.max(getMaxRetries(), 1)];

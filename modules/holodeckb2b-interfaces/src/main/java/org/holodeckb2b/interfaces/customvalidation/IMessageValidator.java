@@ -36,7 +36,7 @@ import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @param <M>   Indicates the type of message units the implementation can validate
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public interface IMessageValidator<M extends IMessageUnit> {
 
@@ -57,7 +57,7 @@ public interface IMessageValidator<M extends IMessageUnit> {
      * {@link IMessageValidationSpecification} that is part of the P-Mode.
      *
      * @author Sander Fieten (sander at holodeck-b2b.org)
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public interface Factory {
         /**

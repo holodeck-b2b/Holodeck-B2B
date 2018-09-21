@@ -130,7 +130,7 @@ public final class CompareUtils {
      * @param pl2   second payload
      * @return      <code>true</code> if the payloads are equal,
      *              <code>false</code> otherwise
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public static boolean areEqual(final IPayload pl1, final IPayload pl2) {
         return Utils.nullSafeEqual(pl1.getContainment(), pl2.getContainment()) &&

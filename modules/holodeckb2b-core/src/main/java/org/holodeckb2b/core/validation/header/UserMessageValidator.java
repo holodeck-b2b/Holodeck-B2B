@@ -37,7 +37,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * include checks on payloads included in the User Message and are separately configured in the P-Mode.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since  HB2B_NEXT_VERSION
+ * @since  4.0.0
  */
 class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
                            implements IMessageValidator<IUserMessage> {

@@ -197,7 +197,7 @@ public interface IConfiguration {
      * @return <code>true</code> if a strict validation of the ebMS header meta-data should be performed for all
      *         message units,<br>
      *         <code>false</code> if a basic validation is enough and strict validation can be configured on P-Mode base
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     boolean useStrictHeaderValidation();
 }

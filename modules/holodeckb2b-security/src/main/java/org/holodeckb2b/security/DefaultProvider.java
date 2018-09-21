@@ -55,7 +55,7 @@ import org.holodeckb2b.security.config.ProviderConfigurationType;
  * noted that this mode will be offered only temporarily and will be removed in a future version of the provider!
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public class DefaultProvider implements ISecurityProvider {
 

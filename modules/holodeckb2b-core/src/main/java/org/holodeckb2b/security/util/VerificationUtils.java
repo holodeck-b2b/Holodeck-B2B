@@ -97,7 +97,7 @@ public class VerificationUtils {
      * @return          The calculated digest: Base64 ( SHA-1 ( nonce + created + password ) )
      * @throws SecurityProcessingException When the input values can not be correctly transformed to a byte array or
      *                                     when there is no SHA-1 digester available
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     private static String calculatePwdDigest(final String nonce, final String created, final String password)
                                                                                     throws SecurityProcessingException {
@@ -126,7 +126,7 @@ public class VerificationUtils {
      *                  <code>false</code> otherwise
      * @throws SecurityProcessingException  When there is a problem to get the alias of the certificate used to create
      *                                      the signature of the received message
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public static boolean verifySigningCertificate(final ISigningConfiguration expected,
                                           final ISignatureProcessingResult actual) throws SecurityProcessingException {

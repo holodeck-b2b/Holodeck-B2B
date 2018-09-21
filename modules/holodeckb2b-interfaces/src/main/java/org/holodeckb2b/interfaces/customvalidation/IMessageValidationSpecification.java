@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
  * processing should fail when a validation error of a certain severity is detected.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public interface IMessageValidationSpecification {
 

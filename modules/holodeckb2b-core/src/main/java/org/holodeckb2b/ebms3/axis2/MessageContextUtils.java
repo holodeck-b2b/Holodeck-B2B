@@ -399,7 +399,7 @@ public class MessageContextUtils {
      *
      * @param mc    The current message context
      * @return      All User Message message units in the message
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public static Collection<IUserMessage> getUserMessagesFromMessage(final MessageContext mc) {
         Collection<IUserMessage> userMessages = new ArrayList<>();

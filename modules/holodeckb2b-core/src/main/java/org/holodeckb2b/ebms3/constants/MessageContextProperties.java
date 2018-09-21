@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
  * the processed ebMS message.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION     Converted to interface
+ * @since 4.0.0     Converted to interface
  */
 public interface MessageContextProperties {
 
@@ -104,27 +104,27 @@ public interface MessageContextProperties {
 
     /**
      * Holds the {@link ISignatureProcessingResult} object with the results of the signature verification
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     static final String SIG_VERIFICATION_RESULT = PREFIX + "signcheck-result";
 
     /**
      * Holds the {@link IEncryptionProcessingResult} object with the results of the processing of the encryption headers
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     static final String DECRYPTION_RESULT = PREFIX + "decryption-result";
 
     /**
      * Holds the {@link IUsernamTokenProcessingResult} object with the results of the processing of the username tokene
      * header targeted to the <i>default</i> role/actor.
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     static final String DEFAULT_UT_RESULT = PREFIX + "def-ut-result";
 
     /**
      * Holds the {@link IUsernamTokenProcessingResult} object with the results of the processing of the username tokene
      * header targeted to the <i>ebms</i> role/actor.
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     static final String EBMS_UT_RESULT = PREFIX + "ebms-ut-result";
 }

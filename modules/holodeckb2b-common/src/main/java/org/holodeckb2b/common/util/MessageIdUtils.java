@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
  * processing.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION     Replaces the old <code>org.holodeckb2b.common.util.MessageIdGenerator</code> class
+ * @since 4.0.0     Replaces the old <code>org.holodeckb2b.common.util.MessageIdGenerator</code> class
  */
 public class MessageIdUtils {
 
@@ -116,7 +116,7 @@ public class MessageIdUtils {
      * @param messageId     The message id to check for correct syntax
      * @return              <code>true</code> if the given messageId is in correct format,<br>
      *                      <code>false></code> otherwise
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public static boolean isCorrectFormat(final String messageId) {
         if (Utils.isNullOrEmpty(messageId))
@@ -130,7 +130,7 @@ public class MessageIdUtils {
      * 
      * @param messageId	The MessageId string
      * @return	The messageId value without brackets
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public static String stripBrackets(final String messageId) {
     	if (messageId == null)

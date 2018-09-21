@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * processing of the WS-Security header.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 abstract class AbstractSecurityProcessingFailureEvent extends AbstractMessageProcessingEvent {
 

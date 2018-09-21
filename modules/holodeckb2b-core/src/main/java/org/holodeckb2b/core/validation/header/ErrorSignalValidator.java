@@ -30,7 +30,7 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
  * Provides the validation of the ebMS header information specific for <i>Error Signal</i> message units.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since  HB2B_NEXT_VERSION
+ * @since  4.0.0
  */
 class ErrorSignalValidator extends GeneralMessageUnitValidator<IErrorMessage>
                            implements IMessageValidator<IErrorMessage> {

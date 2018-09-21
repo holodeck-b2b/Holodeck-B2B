@@ -72,7 +72,7 @@ import org.holodeckb2b.pmode.PModeUtils;
  * for each User Message message unit contained in the message.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  * @see ISecurityProvider
  * @see ISecurityHeaderCreator
  * @see ISecurityProcessingResult

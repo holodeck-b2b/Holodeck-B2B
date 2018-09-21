@@ -51,7 +51,7 @@ public interface IMessageUnitProcessingState {
      * delivery or reasons why the message processing failed.
      *
      * @return The details on this processing state, may be <code>null</code>
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     String getDescription();
 }

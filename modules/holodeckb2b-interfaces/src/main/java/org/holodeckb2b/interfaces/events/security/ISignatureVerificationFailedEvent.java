@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.events.security.ISecurityProcessingFailureEven
  * can not be delivered due to the invalid signature. Based on the event the problem might be handled out of band.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public interface ISignatureVerificationFailedEvent extends ISecurityProcessingFailureEvent {
 }

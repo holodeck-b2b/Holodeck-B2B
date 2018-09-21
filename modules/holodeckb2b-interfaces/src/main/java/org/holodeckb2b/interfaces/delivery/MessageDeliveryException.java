@@ -20,7 +20,7 @@ package org.holodeckb2b.interfaces.delivery;
  * Indicates a problem that occurred in the delivery of a message unit to the business application. This exception can
  * be thrown because a delivery method can not be successfully instantiated, i.e. the factory class can not be
  * initialized or during the actual delivery of a message.
- * <p>Since version HB2B_NEXT_VERSION the exception also has an indicator whether the encountered problem is
+ * <p>Since version 4.0.0 the exception also has an indicator whether the encountered problem is
  * permanent or not, i.e. any new attempt of delivery is guaranteed to fail as well making retries meaningless. This
  * indicator is used when the delivery of a <i>User Message</i> message unit fails. When the delivery error is permanent
  * the delivery handler can generate an ebMS Error Signal to inform the <i>Sending</i> MSH.
@@ -54,7 +54,7 @@ public class MessageDeliveryException extends Exception {
      *
      * @param message       Textual explanation of the failure
      * @param isPermanent   Indication whether the failure is permanent
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public MessageDeliveryException(final String message, final boolean isPermanent) {
         this(message, isPermanent, null);
@@ -67,7 +67,7 @@ public class MessageDeliveryException extends Exception {
      * @param message       Textual explanation of the failure
      * @param isPermanent   Indication whether the failure is permanent
      * @param cause         The exception that caused the delivery failure
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public MessageDeliveryException(final String message, final boolean isPermanent, final Throwable cause) {
         super(message, cause);
@@ -81,7 +81,7 @@ public class MessageDeliveryException extends Exception {
      *          result in an error, or<br>
      *         <code>false</code> if the error that causes this exception is recoverable and a new deliver attempt may
      *          succeed
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public boolean isPermanent() {
         return this.permanent;
@@ -91,7 +91,7 @@ public class MessageDeliveryException extends Exception {
      * Sets the indication whether this delivery failure is permanent.
      *
      * @param permanent Indicator whether this failure is permanent or not
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public void setPermanent(final boolean permanent) {
         this.permanent = permanent;

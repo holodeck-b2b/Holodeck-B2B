@@ -60,7 +60,7 @@ public class HolodeckB2BCore extends HolodeckB2BCoreInterface {
      * message validations.
      *
      * @return  The component responsible for execution of the custom validations.
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public static IValidationExecutor getValidationExecutor() {
         return ((HolodeckB2BCoreImpl) coreImplementation).getValidationExecutor();
@@ -70,7 +70,7 @@ public class HolodeckB2BCore extends HolodeckB2BCoreInterface {
      * Gets the active <i>security provider</i> of this Holodeck B2B instance.
      *
      * @return The active security provider
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      * @see ISecurityProvider
      */
     public static ISecurityProvider getSecurityProvider() {

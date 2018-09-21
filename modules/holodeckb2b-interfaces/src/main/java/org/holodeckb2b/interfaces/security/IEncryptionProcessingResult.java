@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
  * data.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public interface IEncryptionProcessingResult extends ISecurityProcessingResult {
 
@@ -80,7 +80,7 @@ public interface IEncryptionProcessingResult extends ISecurityProcessingResult {
      * and Processing Version 1.1</i> specification.
      *
      * @author Sander Fieten (sander at holodeck-b2b.org)
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public interface IKeyTransportInfo {
 

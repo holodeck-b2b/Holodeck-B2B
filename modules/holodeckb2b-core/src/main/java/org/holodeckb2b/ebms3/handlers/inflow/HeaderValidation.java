@@ -52,7 +52,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * the P-Mode.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public class HeaderValidation extends BaseHandler {
     /**

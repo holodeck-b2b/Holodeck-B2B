@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * Is the implementation of {@link ISigningFailedEvent} to indicate that signing of a submitted message unit failed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public class SigningFailedEvent extends AbstractSecurityProcessingFailureEvent implements ISigningFailedEvent {
 

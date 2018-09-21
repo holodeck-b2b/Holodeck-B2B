@@ -22,7 +22,7 @@ package org.holodeckb2b.interfaces.security;
  * section 7 of the specification for more information.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public enum SecurityHeaderTarget {
 

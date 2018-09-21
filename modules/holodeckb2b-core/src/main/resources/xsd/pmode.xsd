@@ -20,12 +20,12 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
     targetNamespace="http://holodeck-b2b.org/schemas/2014/10/pmode"
     attributeFormDefault="unqualified" xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
-    version="HB2B_NEXT_VERSION">
+    version="4.0.0">
     <xs:annotation>
         <xs:documentation><p>The ebMS specification only defines an abstract P-Mode model, the actual P-Mode definition is left up to implementations. This schema defines the XML structure for the representation of a P-Mode as used by the default implementation for maintaining the P-Mode set. In this implementation the P-Mode set consists of all XML documents in a directory. Each XML document represents one P-Mode and must conform to this schema. See the package <code>org.holodeckb2b.pmode.xml</code> for more info on the default implementation of P-Modes.</p></xs:documentation>
         <xs:documentation><p>In version 2.1.0 of the schema the <code>EventHandler</code> and <code>AddActorOrRoleAttribute</code> elements were added. As these are optional elements P-Mode documents constructed using the old version are still valid and result in unchanged processing. Therefore the same namespace is used and only the version has been increased</p></xs:documentation>
         <xs:documentation><p>In version 4.0.0 of the schema the optional <code>PMode/useStrictHeaderValidation</code> attribute was added. It can be use to enable strict validation of the ebMS header</p></xs:documentation>
-        <xs:documentation><p>In version HB2B_NEXT_VERSION of the schema the structure of the <code>ReceptionAwareness</code> element was changed to enable more flexible configuration of retries. For back-ward compatibility the old fixed intervals can also be used although there use
+        <xs:documentation><p>In version 4.0.0 of the schema the structure of the <code>ReceptionAwareness</code> element was changed to enable more flexible configuration of retries. For back-ward compatibility the old fixed intervals can also be used although there use
                              is NOT RECOMMENDED.</p></xs:documentation>
     </xs:annotation>
     <xs:element name="PMode" type="tns:PMode">
@@ -190,7 +190,7 @@ The ebMS specification defines the <b>PMode[1].Security.SendReceipt</b> paramete
 
 <p>The AS4 profile defines five additional P-Mode parameters for the reception awareness feature. This P-Mode definition however uses less parameters as some of the P-Mode parameters from the spec are combined.</p>
 
-<p>Since version HB2B_NEXT_VERSION the configuration of the retries is made more flexible and the interval for each retry can be specified separately.</p>
+<p>Since version 4.0.0 the configuration of the retries is made more flexible and the interval for each retry can be specified separately.</p>
 
 <p>When no Receipt is received before the last wait interval expires a <i>MissingReceipt</i> error is generated. This error is always logged by Holodeck B2B but whether the business application will be notified depends on the <i>NotifyReceiptToBusinessApplication</i> setting.</p></xs:documentation>
                 </xs:annotation>

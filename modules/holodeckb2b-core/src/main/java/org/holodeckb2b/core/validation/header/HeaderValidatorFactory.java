@@ -31,7 +31,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * message unit conforms to the ebMS specifications.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public class HeaderValidatorFactory implements IMessageValidator.Factory {
     /**

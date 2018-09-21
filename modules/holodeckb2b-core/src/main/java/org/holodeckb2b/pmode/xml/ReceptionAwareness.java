@@ -111,7 +111,7 @@ public class ReceptionAwareness implements IReceptionAwareness {
      * <p>If the fixed intervals are used in the XML it is converted to the new method.
      *
      * @return The periods to wait for a <i>Receipt</i> Signal expressed as an array of {@link Interval}
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     @Override
     public Interval[] getWaitIntervals() {

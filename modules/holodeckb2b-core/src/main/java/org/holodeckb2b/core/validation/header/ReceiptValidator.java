@@ -31,7 +31,7 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  * Provides the validation of the ebMS header information specific for <i>Receipt</i> message units.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since  HB2B_NEXT_VERSION
+ * @since  4.0.0
  */
 class ReceiptValidator extends GeneralMessageUnitValidator<IReceipt>
                        implements IMessageValidator<IReceipt> {

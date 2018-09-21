@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
  * submitted message unit could not be sent because it a required username token could not be added to the message.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public interface IUTCreationFailedEvent extends ISecurityHeaderCreationFailureEvent {
 

@@ -46,7 +46,7 @@ import org.w3c.dom.NodeList;
  * Is a container for general security related functions.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public final class SecurityUtils {
 

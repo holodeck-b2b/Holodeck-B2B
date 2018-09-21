@@ -149,7 +149,7 @@ public interface IQueryManager {
      *                    {@link ProcessingStates.DELIVERED} | {@link ProcessingStates.FAILURE},
      *                    <br><code>false</code> otherwise.
      * @throws PersistenceException If an error occurs when executing this query
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     boolean isAlreadyProcessed(final IUserMessage userMessage) throws PersistenceException;
 }

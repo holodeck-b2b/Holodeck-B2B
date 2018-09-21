@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
  * P-Mode of the message unit.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  * @see IReceptionAwareness
  */
 public interface IDuplicateReceivedEvent extends IMessageProcessingEvent {

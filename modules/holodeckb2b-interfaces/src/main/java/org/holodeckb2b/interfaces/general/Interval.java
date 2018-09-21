@@ -52,7 +52,7 @@ public class Interval {
      * Creates a new <code>Interval</code> instance that is a copy of the given instance.
      *
      * @param source    The <code>Interval</code> instance to copy
-     * @since HB2B_NEXT_VERSION
+     * @since 4.0.0
      */
     public Interval(final Interval source) {
         this.length = source.length;

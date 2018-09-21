@@ -30,7 +30,7 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * the P-Mode to define one handler for all events related to WS-Security problems.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public interface ISecurityHeaderCreationFailureEvent extends IMessageProcessingEvent {
 

@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
  * GeneralMessageUnitValidator#doBasicValidation(IMessageUnit, Collection)} method.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since  HB2B_NEXT_VERSION
+ * @since  4.0.0
  */
 class PullRequestValidator extends GeneralMessageUnitValidator<IPullRequest>
                            implements IMessageValidator<IPullRequest> {

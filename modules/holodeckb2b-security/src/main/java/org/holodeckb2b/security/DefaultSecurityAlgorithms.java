@@ -23,7 +23,7 @@ import org.holodeckb2b.interfaces.security.X509ReferenceType;
  * when no explicit settings are configured in the P-Mode.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.0.0
  */
 public final class DefaultSecurityAlgorithms {
 
