@@ -18,12 +18,17 @@ package org.holodeckb2b.security;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.security.Provider;
+import java.security.Security;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.holodeckb2b.common.config.ConfigXmlFile;
 import org.holodeckb2b.common.constants.ProductId;
 import org.holodeckb2b.common.util.Utils;
@@ -152,6 +157,13 @@ public class DefaultProvider implements ISecurityProvider {
             log.fatal("Could not create the Certificate Manager! Error message: {}", spe.getMessage());
             throw spe;
         }
+		// Make sure that BouncyCastle is the preferred security provider
+		final Provider[] providers = Security.getProviders();
+		if (providers != null && providers.length > 0)
+			Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);		
+		log.debug("Registering BouncyCastle as preferred Java security provider");
+		Security.insertProviderAt(new BouncyCastleProvider(), 1);		        
+        
         // Initialization done
         log.info("Default Security Provider version {}.{}.{} is ready!", ProductId.MAJOR_VERSION,
                   ProductId.MINOR_VERSION, ProductId.PATCH_VERSION);
