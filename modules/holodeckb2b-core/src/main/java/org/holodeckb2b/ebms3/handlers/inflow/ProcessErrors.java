@@ -50,7 +50,8 @@ public class ProcessErrors extends BaseHandler {
      * Errors will always be logged to a special error log. Using the logging configuration users can decide if this
      * logging should be enabled and how errors should be logged.
      */
-    private final Log     errorLog = LogFactory.getLog("org.holodeckb2b.msgproc.errors.received");
+    private final Log     errorLog = LogFactory.getLog("org.holodeckb2b.msgproc.errors.received." 
+    																						 + handledMsgProtocol);
 
     @Override
     protected byte inFlows() {

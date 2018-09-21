@@ -28,7 +28,7 @@ recommended to raise log levels to at least INFO.
         <RollingFile name="ebmsErrors" fileName="logs/ebms_errors.log"
             filePattern="logs/archive/ebms_errors-%d{MM-dd-yyyy}-%i.log.gz">
             <PatternLayout>
-                <Pattern>%d - %m%n</Pattern>
+                <Pattern>%d [%c{2}]- %m%n</Pattern>
             </PatternLayout>
             <Policies>
                 <SizeBasedTriggeringPolicy size="500MB"/>
