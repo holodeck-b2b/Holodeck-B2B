@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
@@ -215,7 +216,7 @@ public class BasicPModeValidator implements IPModeValidator {
         Collection<PModeValidationError>    errors = new ArrayList<>();
 
         // If a leg contains more than one PullRequestFlow, each one must define a MPC which must be a sub-channel of
-        // the MPC defined in the UserMessageFlow of the leg (if defined, otherwise any MPC is okay)
+        // the MPC defined in the UserMessageFlow of the leg (if defined, otherwise use default MPC)
         //
         List<? extends ILeg> legs = pmode.getLegs();
         if (!Utils.isNullOrEmpty(legs)) {
