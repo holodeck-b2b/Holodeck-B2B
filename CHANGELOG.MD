@@ -2,7 +2,8 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 4.0.0
+##### 2018-11-04
 ### Added
 * More flexible retry configuration of the AS4 Reception Feature where it is now possible to specify each interval
   separately. See refactored `org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness`.
