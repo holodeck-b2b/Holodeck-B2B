@@ -56,6 +56,7 @@ public class TestData {
     private static final String T_MSG_ID_9  = "0009-msgid@test.holodeck-b2b.org";
     private static final String T_MSG_ID_10 = "0010-msgid@test.holodeck-b2b.org";
     private static final String T_MSG_ID_11 = "0011-msgid@test.holodeck-b2b.org";
+    private static final String T_MSG_ID_12 = "0012-msgid@test.holodeck-b2b.org";
 
     private static final String T_PMODEID_1 = "PMODE-01";
     private static final String T_PMODEID_2 = "PMODE-02";
@@ -67,9 +68,13 @@ public class TestData {
     private static final String T_RECEIVER_1_PID  = "http://test.holodeck-b2b.org/partyids/Receiver/001";
     private static final String T_RECEIVER_1_ROLE = EbMSConstants.DEFAULT_ROLE;
 
+    private static final String T_MPC_1 = "http://test.holodeck-b2b.org/mpc/simple";
+
     private static final String T_SERVICE_1   = "http://test.holodeck-b2b.org/tests/ensureloaded";
     private static final String T_ACTION_1    = "LoadTest";
     private static final String T_AGREEMENT_1 = "AgreementReference-1";
+    private static final String T_AGREEMENT_TYPE_1 = "http://test.holodeck-b2b.org/tests/agreements";
+
 
     private static final IPayload.Containment T_PL_CONTAINMENT_1 = IPayload.Containment.BODY;
     private static final IPayload.Containment T_PL_CONTAINMENT_2 = IPayload.Containment.ATTACHMENT;
@@ -106,8 +111,11 @@ public class TestData {
     public static final PullRequest   pull5;
     public static final UserMessage   userMsg5;
 
+    public static final SelectivePullRequest pull6;
     public static final UserMessage   userMsg6;
     public static final Receipt       receipt6;
+
+    public static final SelectivePullRequest pull7;
 
     public static final Payload       payload1;
     public static final Payload       payload2;
@@ -242,6 +250,16 @@ public class TestData {
         userMsg5.setProcessingState(ProcessingState.DELIVERED);
         try { Thread.sleep(200); } catch (InterruptedException ex) {}
 
+        pull6 = new SelectivePullRequest();
+        pull6.setMessageId(T_MSG_ID_12);
+        pull6.setTimestamp(new Date());
+        pull6.setPModeId(T_PMODEID_1);
+        pull6.setDirection(Direction.OUT);
+        pull6.setMPC(T_MPC_1);
+        pull6.setProcessingState(ProcessingState.DONE);
+        pull6.setReferencedMessageId(T_MSG_ID_11);
+        try { Thread.sleep(200); } catch (InterruptedException ex) {}
+
         userMsg6 = new UserMessage();
         userMsg6.setMessageId(T_MSG_ID_11);
         userMsg6.setTimestamp(new Date());
@@ -269,6 +287,18 @@ public class TestData {
         ArrayList<OMElement> receiptContent = new ArrayList<>();
         receiptContent.add(receiptChildElement);
         receipt6.setContent(receiptContent);
+        try { Thread.sleep(200); } catch (InterruptedException ex) {}
+
+        pull7 = new SelectivePullRequest();
+        pull7.setMessageId(T_MSG_ID_4);
+        pull7.setTimestamp(new Date());
+        pull7.setPModeId(T_PMODEID_2);
+        pull7.setDirection(Direction.IN);
+        pull7.setProcessingState(ProcessingState.DONE);
+        pull7.setConversationId(T_MSG_ID_8);
+        pull7.setService(new Service(T_SERVICE_1));
+        pull7.setAgreementRef(new AgreementReference(T_AGREEMENT_1, T_AGREEMENT_TYPE_1, null));
+        try { Thread.sleep(200); } catch (InterruptedException ex) {}
     }
 
     enum SOAPVersion { SOAP_11, SOAP_12 }

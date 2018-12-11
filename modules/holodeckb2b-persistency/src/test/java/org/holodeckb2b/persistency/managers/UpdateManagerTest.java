@@ -42,18 +42,13 @@ import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
-import org.holodeckb2b.persistency.entities.ErrorMessageEntity;
-import org.holodeckb2b.persistency.entities.MessageUnitEntity;
-import org.holodeckb2b.persistency.entities.ReceiptEntity;
-import org.holodeckb2b.persistency.entities.UserMessageEntity;
-import org.holodeckb2b.persistency.jpa.ErrorMessage;
-import org.holodeckb2b.persistency.jpa.MessageUnit;
-import org.holodeckb2b.persistency.jpa.Receipt;
-import org.holodeckb2b.persistency.jpa.UserMessage;
+import org.holodeckb2b.persistency.entities.*;
+import org.holodeckb2b.persistency.jpa.*;
 import org.holodeckb2b.persistency.test.TestData;
 import org.holodeckb2b.persistency.util.EntityManagerUtil;
 import org.holodeckb2b.persistency.util.JPAEntityHelper;
@@ -130,10 +125,10 @@ public class UpdateManagerTest {
     }
 
     @Test
-    public void storeMessageUnit() throws PersistenceException {
+    public void storeUserMessage() throws PersistenceException {
         // Store a User Message
         UserMessageEntity userMsg =
-                    updManager.storeMessageUnit(new org.holodeckb2b.common.messagemodel.UserMessage(TestData.userMsg1));
+                updManager.storeMessageUnit(new org.holodeckb2b.common.messagemodel.UserMessage(TestData.userMsg1));
 
         assertNotNull(userMsg);
         assertNotNull(userMsg.getOID());
@@ -145,33 +140,93 @@ public class UpdateManagerTest {
         assertTrue(CompareUtils.areEqual(TestData.userMsg1.getReceiver(), userMsg.getReceiver()));
         assertFalse(Utils.isNullOrEmpty(userMsg.getProcessingStates()));
         assertEquals(TestData.userMsg1.getCurrentProcessingState().getStartTime(),
-                     userMsg.getCurrentProcessingState().getStartTime());
+                userMsg.getCurrentProcessingState().getStartTime());
         assertEquals(TestData.userMsg1.getCurrentProcessingState().getState(),
-                     userMsg.getCurrentProcessingState().getState());
+                userMsg.getCurrentProcessingState().getState());
 
         assertFalse(Utils.isNullOrEmpty(userMsg.getPayloads()));
         assertEquals(1, userMsg.getPayloads().size());
         IPayload savedPayload = userMsg.getPayloads().iterator().next();
-        IPayload orgPayload   = TestData.userMsg1.getPayloads().iterator().next();
+        IPayload orgPayload = TestData.userMsg1.getPayloads().iterator().next();
         assertEquals(orgPayload.getContainment(), savedPayload.getContainment());
         assertFalse(Utils.isNullOrEmpty(savedPayload.getProperties()));
         assertEquals(1, savedPayload.getProperties().size());
         assertTrue(CompareUtils.areEqual(orgPayload.getProperties().iterator().next(),
-                                         savedPayload.getProperties().iterator().next()));
+                savedPayload.getProperties().iterator().next()));
         assertEquals(orgPayload.getSchemaReference().getNamespace(), savedPayload.getSchemaReference().getNamespace());
         assertNull(savedPayload.getSchemaReference().getLocation());
         assertNotNull(savedPayload.getDescription());
         assertTrue(CompareUtils.areEqual(TestData.userMsg1.getCollaborationInfo().getService(),
-                                         userMsg.getCollaborationInfo().getService()));
+                userMsg.getCollaborationInfo().getService()));
         assertFalse(Utils.isNullOrEmpty(userMsg.getMessageProperties()));
         assertEquals(1, userMsg.getMessageProperties().size());
         assertTrue(CompareUtils.areEqual(TestData.userMsg1.getMessageProperties().iterator().next(),
-                                         userMsg.getMessageProperties().iterator().next()));
+                userMsg.getMessageProperties().iterator().next()));
+    }
 
+    @Test
+    public void storeReceipt() throws PersistenceException {
         ReceiptEntity receiptEntity =
                 updManager.storeMessageUnit(new org.holodeckb2b.common.messagemodel.Receipt(TestData.receipt6));
         assertNotNull(receiptEntity);
+
+        assertEquals(TestData.receipt6.getMessageId(), receiptEntity.getMessageId());
+        assertEquals(TestData.receipt6.getRefToMessageId(), receiptEntity.getRefToMessageId());
+        assertEquals(TestData.receipt6.getTimestamp(), receiptEntity.getTimestamp());
+
+        assertFalse(Utils.isNullOrEmpty(receiptEntity.getContent()));
+
+        assertEquals(TestData.receipt6.getContent().get(0).getQName(), receiptEntity.getContent().get(0).getQName());
+        assertEquals(TestData.receipt6.getContent().get(0).getText(), receiptEntity.getContent().get(0).getText());
     }
+
+    @Test
+    public void storePullRequest() throws PersistenceException {
+        PullRequestEntity pullEntity = updManager.storeMessageUnit(TestData.pull5);
+        assertNotNull(pullEntity);
+
+        assertEquals(TestData.pull5.getMessageId(), pullEntity.getMessageId());
+        assertEquals(TestData.pull5.getRefToMessageId(), pullEntity.getRefToMessageId());
+        assertEquals(TestData.pull5.getTimestamp(), pullEntity.getTimestamp());
+
+        pullEntity = updManager.storeMessageUnit(TestData.pull6);
+        assertNotNull(pullEntity);
+        assertTrue(pullEntity instanceof ISelectivePullRequest);
+
+        assertEquals(TestData.pull6.getMessageId(), pullEntity.getMessageId());
+        assertEquals(TestData.pull6.getRefToMessageId(), pullEntity.getRefToMessageId());
+        assertEquals(TestData.pull6.getTimestamp(), pullEntity.getTimestamp());
+
+        assertEquals(TestData.pull6.getReferencedMessageId(),
+                        ((ISelectivePullRequest) pullEntity).getReferencedMessageId());
+
+        assertNull(((ISelectivePullRequest) pullEntity).getConversationId());
+        assertNull(((ISelectivePullRequest) pullEntity).getAgreementRef());
+        assertNull(((ISelectivePullRequest) pullEntity).getService());
+        assertNull(((ISelectivePullRequest) pullEntity).getAction());
+
+        pullEntity = updManager.storeMessageUnit(TestData.pull7);
+        assertNotNull(pullEntity);
+        assertTrue(pullEntity instanceof ISelectivePullRequest);
+
+        assertEquals(TestData.pull7.getMessageId(), pullEntity.getMessageId());
+        assertEquals(TestData.pull7.getRefToMessageId(), pullEntity.getRefToMessageId());
+        assertEquals(TestData.pull7.getTimestamp(), pullEntity.getTimestamp());
+
+        assertNull(((ISelectivePullRequest) pullEntity).getReferencedMessageId());
+        assertEquals(TestData.pull7.getConversationId() ,((ISelectivePullRequest) pullEntity).getConversationId());
+        assertNotNull(((ISelectivePullRequest) pullEntity).getAgreementRef());
+        assertEquals(TestData.pull7.getAgreementRef().getName(),
+                                                    ((ISelectivePullRequest) pullEntity).getAgreementRef().getName());
+        assertEquals(TestData.pull7.getAgreementRef().getType(),
+                                                    ((ISelectivePullRequest) pullEntity).getAgreementRef().getType());
+        assertNotNull(((ISelectivePullRequest) pullEntity).getService());
+        assertTrue(CompareUtils.areEqual(TestData.pull7.getService(), ((ISelectivePullRequest) pullEntity).getService()));
+        assertNull(((ISelectivePullRequest) pullEntity).getAction());
+
+    }
+
+
 
     @Test
     public void setProcessingState() throws PersistenceException, InterruptedException {
