@@ -19,18 +19,30 @@ package org.holodeckb2b.ebms3.packaging;
 import java.util.Iterator;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.messagemodel.PullRequest;
+import org.holodeckb2b.common.messagemodel.SelectivePullRequest;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.general.IService;
+import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
+import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
+
+import static org.holodeckb2b.ebms3.packaging.CollaborationInfoElement.Q_ACTION;
+import static org.holodeckb2b.ebms3.packaging.CollaborationInfoElement.Q_CONVERSATIONID;
+import static org.holodeckb2b.ebms3.packaging.MessageInfoElement.Q_REFTO_MESSAGEID;
 
 /**
  * Is a helper class for handling the ebMS Pull Request signal message units in the ebMS SOAP header, i.e. the
  * <code>eb:PullRequest</code> element and its sibling <code>eb:MessageInfo</code>.
- * <p>This element is specified in section 5.2.3.1 of the ebMS 3 Core specification.
+ * <p>This element is specified in section 5.2.3.1 of the ebMS 3 Core specification and section 5.1 of ebMS 3 part 2
+ * that describes the <i>selective pulling</i> feature.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since HB2B_NEXT_VERSION Support for adding the <i>simple</i> selection items as described in {@link
+ * ISelectivePullRequest}
  */
 public class PullRequestElement {
 
@@ -55,7 +67,7 @@ public class PullRequestElement {
      */
     public static org.holodeckb2b.common.messagemodel.PullRequest readElement(final OMElement prElement) {
         // Create a new PullRequest entity object to store the information in
-        final PullRequest prData = new PullRequest();
+        PullRequest prData = new PullRequest();
 
         // The PullRequest itself only contains the [optional] mpc attribute
         String  mpc = prElement.getAttributeValue(new QName(MPC_ATTR));
@@ -63,6 +75,26 @@ public class PullRequestElement {
         // If there was no mpc attribute or it was empty (which formally is
         // illegal because the mpc should be a valid URI) it is set to the default MPC
         prData.setMPC(Utils.isNullOrEmpty(mpc) ? EbMSConstants.DEFAULT_MPC : mpc);
+
+        // Check if this is a selective PullRequest, i.e. has child elements in the ebMS3 namespace
+        final Iterator<OMElement> criteria = prElement.getChildrenWithNamespaceURI(EbMSConstants.EBMS3_NS_URI);
+        if (!Utils.isNullOrEmpty(criteria)) {
+            // This is a selective PR, read the selection criteria from child elements and store in specific PR instance
+            SelectivePullRequest selectivePR = new SelectivePullRequest(prData);
+            while (criteria.hasNext()) {
+                final OMElement criterion = criteria.next();
+                if (criterion.hasName(Q_REFTO_MESSAGEID))
+                    selectivePR.setReferencedMessageId(criterion.getText());
+                else if (criterion.hasName(Q_CONVERSATIONID))
+                    selectivePR.setConversationId(criterion.getText());
+                else if (criterion.hasName(AgreementRefElement.Q_ELEMENT_NAME))
+                    selectivePR.setAgreementRef(AgreementRefElement.readElement(criterion));
+                else if (criterion.hasName(ServiceElement.Q_ELEMENT_NAME))
+                    selectivePR.setService(ServiceElement.readElement(criterion));
+                else if (criterion.hasName(Q_ACTION))
+                    selectivePR.setAction(criterion.getText());
+            }
+        }
 
         // Beside the PullRequest element also the MessageInfo sibling should be
         //  processed to get complete set of information
@@ -112,10 +144,34 @@ public class PullRequestElement {
         MessageInfoElement.createElement(signalmessage, pullRequest);
 
         // Create the PullRequest element
-        final OMElement prElement = signalmessage.getOMFactory().createOMElement(Q_ELEMENT_NAME, signalmessage);
+        final OMFactory f = messaging.getOMFactory();
+        final OMElement prElement = f.createOMElement(Q_ELEMENT_NAME, signalmessage);
 
         // The only information specific to the PullRequest is the MPC on which the pull takes place
         prElement.addAttribute(MPC_ATTR, pullRequest.getMPC(), null);
+
+        // Add child elements if this is a selective Pull Request
+        if (pullRequest instanceof ISelectivePullRequest) {
+            ISelectivePullRequest selectivePull = (ISelectivePullRequest) pullRequest;
+            if (!Utils.isNullOrEmpty(selectivePull.getReferencedMessageId())) {
+                final OMElement  refToMsgIdElement = f.createOMElement(Q_REFTO_MESSAGEID, prElement);
+                refToMsgIdElement.setText(selectivePull.getReferencedMessageId());
+            }
+            if (!Utils.isNullOrEmpty(selectivePull.getConversationId())) {
+                final OMElement  convIdElement = f.createOMElement(Q_CONVERSATIONID, prElement);
+                convIdElement.setText(selectivePull.getConversationId());
+            }
+            final IAgreementReference agreementRef = selectivePull.getAgreementRef();
+            if (agreementRef != null && !Utils.isNullOrEmpty(agreementRef.getName()))
+                AgreementRefElement.createElement(prElement, agreementRef);
+            final IService service = selectivePull.getService();
+            if (service != null && !Utils.isNullOrEmpty(service.getName()))
+                ServiceElement.createElement(prElement, service);
+            if (!Utils.isNullOrEmpty(selectivePull.getAction())) {
+                final OMElement  actionElement = f.createOMElement(Q_ACTION, prElement);
+                actionElement.setText(selectivePull.getAction());
+            }
+        }
 
         return signalmessage;
     }
