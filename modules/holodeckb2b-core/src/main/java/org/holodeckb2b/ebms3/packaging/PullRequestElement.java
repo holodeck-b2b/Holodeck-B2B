@@ -94,6 +94,8 @@ public class PullRequestElement {
                 else if (criterion.hasName(Q_ACTION))
                     selectivePR.setAction(criterion.getText());
             }
+            // Continue processing with the selective pull
+            prData = selectivePR;
         }
 
         // Beside the PullRequest element also the MessageInfo sibling should be
