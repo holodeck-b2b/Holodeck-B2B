@@ -107,6 +107,7 @@ public class EntityManagerUtil {
                                      "org.holodeckb2b.persistency.jpa.PullRequest",
                                      "org.holodeckb2b.persistency.jpa.Receipt",
                                      "org.holodeckb2b.persistency.jpa.SchemaReference",
+                                     "org.holodeckb2b.persistency.jpa.SelectivePullRequest",
                                      "org.holodeckb2b.persistency.jpa.Service",
                                      "org.holodeckb2b.persistency.jpa.TradingPartner",
                                      "org.holodeckb2b.persistency.jpa.UserMessage");
