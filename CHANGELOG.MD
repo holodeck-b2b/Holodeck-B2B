@@ -2,11 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 4.1.0
-##### 2018-12-11
+## 4.1.0-SNAPSHOT
+##### Unreleased
 ### Added
 * Support for **sending** selective pull requests using simple selection items as described in section 5.1 of the
   ebMS 3 Part 2 (Advanced Features) specification.
+
+### Changed
+* Generalized the header validation handler so it can be more easily reused for other protocols.  
 
 ## 4.0.0
 ##### 2018-11-04
