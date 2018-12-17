@@ -2,7 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 4.1.0
+##### 2018-12-11
+### Added
+* Support for **sending** selective pull requests using simple selection items as described in section 5.1 of the
+  ebMS 3 Part 2 (Advanced Features) specification.
+
+## 4.0.0
+##### 2018-11-04
 ### Added
 * More flexible retry configuration of the AS4 Reception Feature where it is now possible to specify each interval
   separately. See refactored `org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness`.

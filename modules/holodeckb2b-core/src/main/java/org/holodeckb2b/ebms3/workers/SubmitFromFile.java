@@ -124,7 +124,7 @@ public class SubmitFromFile extends AbstractWorkerTask {
 	            }
 	        } catch (final Exception e) {
 	            // Something went wrong on reading the message meta data
-	            log.error("An error occured when reading message meta data from " + f.getName()
+	            log.error("An error occured when processing message meta data from " + f.getName()
 	                        + ". Details: " + e.getMessage());
 	            // Change extension to reflect error and write error information
 	            try {

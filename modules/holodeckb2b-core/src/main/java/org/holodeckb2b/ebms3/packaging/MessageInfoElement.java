@@ -42,17 +42,17 @@ public class MessageInfoElement {
     /**
      * The fully qualified name of the Timestamp element as an {@see QName}
      */
-    private static final QName  Q_TIMESTAMP = new QName(EbMSConstants.EBMS3_NS_URI, "Timestamp");
+    static final QName  Q_TIMESTAMP = new QName(EbMSConstants.EBMS3_NS_URI, "Timestamp");
 
     /**
      * The fully qualified name of the MessageId element as an {@see QName}
      */
-    private static final QName  Q_MESSAGEID = new QName(EbMSConstants.EBMS3_NS_URI, "MessageId");
+    static final QName  Q_MESSAGEID = new QName(EbMSConstants.EBMS3_NS_URI, "MessageId");
 
     /**
      * The fully qualified name of the RefToMessageId element as an {@see QName}
      */
-    private static final QName  Q_REFTO_MESSAGEID = new QName(EbMSConstants.EBMS3_NS_URI, "RefToMessageId");
+    static final QName  Q_REFTO_MESSAGEID = new QName(EbMSConstants.EBMS3_NS_URI, "RefToMessageId");
 
     /**
      * Creates a <code>eb:MessageInfo</code> element for the given {@link IMessageUnit} object. This element is added as

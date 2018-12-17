@@ -72,8 +72,7 @@ public class UpdateManager implements IUpdateManager {
         try {
             // Determine which JPA class should be created to store the meta-data
             Class jpaEntityClass = JPAEntityHelper.determineJPAClass(messageUnit);
-            Constructor cons = jpaEntityClass.getConstructor(
-                    new Class[] { MessageUnitUtils.getMessageUnitType(messageUnit) });
+            Constructor cons = jpaEntityClass.getConstructor(MessageUnitUtils.getMessageUnitType(messageUnit));
             jpaMsgUnit = (MessageUnit) cons.newInstance(messageUnit);
 
             em = EntityManagerUtil.getEntityManager();

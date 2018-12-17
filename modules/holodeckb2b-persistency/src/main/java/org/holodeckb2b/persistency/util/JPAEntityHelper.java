@@ -19,22 +19,10 @@ package org.holodeckb2b.persistency.util;
 import java.util.ArrayList;
 import java.util.List;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
-import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
-import org.holodeckb2b.interfaces.messagemodel.IReceipt;
-import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.messagemodel.*;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.persistency.entities.ErrorMessageEntity;
-import org.holodeckb2b.persistency.entities.MessageUnitEntity;
-import org.holodeckb2b.persistency.entities.PullRequestEntity;
-import org.holodeckb2b.persistency.entities.ReceiptEntity;
-import org.holodeckb2b.persistency.entities.UserMessageEntity;
-import org.holodeckb2b.persistency.jpa.ErrorMessage;
-import org.holodeckb2b.persistency.jpa.MessageUnit;
-import org.holodeckb2b.persistency.jpa.PullRequest;
-import org.holodeckb2b.persistency.jpa.Receipt;
-import org.holodeckb2b.persistency.jpa.UserMessage;
+import org.holodeckb2b.persistency.entities.*;
+import org.holodeckb2b.persistency.jpa.*;
 
 /**
  * Is a helper class that provides some utility methods to handle the JPA entity objects.
@@ -60,6 +48,8 @@ public class JPAEntityHelper {
         V msgUnitEntity = null;
         if (jpaObject instanceof UserMessage)
             msgUnitEntity = (V) new UserMessageEntity((UserMessage) jpaObject);
+        else if (jpaObject instanceof SelectivePullRequest)
+            msgUnitEntity = (V) new SelectivePullRequestEntity((SelectivePullRequest) jpaObject);
         else if (jpaObject instanceof PullRequest)
             msgUnitEntity = (V) new PullRequestEntity((PullRequest) jpaObject);
         else if (jpaObject instanceof Receipt)
@@ -113,6 +103,8 @@ public class JPAEntityHelper {
         Class  jpaEntityClass = null;
         if (IUserMessage.class.isAssignableFrom(msgUnitType))
             jpaEntityClass = UserMessage.class;
+        else if (ISelectivePullRequest.class.isAssignableFrom(msgUnitType))
+            jpaEntityClass = SelectivePullRequest.class;
         else if (IPullRequest.class.isAssignableFrom(msgUnitType))
             jpaEntityClass = PullRequest.class;
         else if (IReceipt.class.isAssignableFrom(msgUnitType))

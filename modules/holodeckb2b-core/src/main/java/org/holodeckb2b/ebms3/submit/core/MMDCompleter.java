@@ -336,7 +336,7 @@ final class MMDCompleter {
                 throw new MessageSubmitException("Different Agreement name values (submitted: " + sar.getName()
                                                     + ",P-Mode: " + pa.getName() + ") specified!");
             case -1 :
-                if (includeId)
+                if (includeId != null && includeId)
                     // Only when the P-Mode id is included there must be an agreement reference
                     throw new MessageSubmitException("Missing required Agreement name information");
                 else {

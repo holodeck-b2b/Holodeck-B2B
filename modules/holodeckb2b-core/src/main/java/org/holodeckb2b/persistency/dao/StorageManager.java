@@ -18,20 +18,11 @@ package org.holodeckb2b.persistency.dao;
 
 import java.util.Collection;
 import java.util.Date;
-import org.holodeckb2b.common.messagemodel.ErrorMessage;
-import org.holodeckb2b.common.messagemodel.MessageUnit;
-import org.holodeckb2b.common.messagemodel.PullRequest;
-import org.holodeckb2b.common.messagemodel.Receipt;
-import org.holodeckb2b.common.messagemodel.UserMessage;
+
+import org.holodeckb2b.common.messagemodel.*;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.messagemodel.Direction;
-import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
-import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
-import org.holodeckb2b.interfaces.messagemodel.IReceipt;
-import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.messagemodel.*;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -74,7 +65,7 @@ public class StorageManager {
      */
     public <T extends IMessageUnit, V extends IMessageUnitEntity> V storeIncomingMessageUnit(T messageUnit)
                                                                                            throws PersistenceException {
-        MessageUnit tempObject = createTempObject(messageUnit);
+        MessageUnit tempObject = createMutableObject(messageUnit);
         // Set correct direction
         tempObject.setDirection(Direction.IN);
         tempObject.setProcessingState(ProcessingState.RECEIVED);
@@ -93,20 +84,20 @@ public class StorageManager {
      */
     public <T extends IMessageUnit, V extends IMessageUnitEntity> V storeOutGoingMessageUnit(T messageUnit)
                                                                                         throws PersistenceException {
-        MessageUnit tempObject = createTempObject(messageUnit);
+        MessageUnit mutableObject = createMutableObject(messageUnit);
         // Set correct direction
-        tempObject.setDirection(Direction.OUT);
+        mutableObject.setDirection(Direction.OUT);
         if (messageUnit instanceof IUserMessage || messageUnit instanceof IPullRequest)
-            tempObject.setProcessingState(ProcessingState.SUBMITTED);
+            mutableObject.setProcessingState(ProcessingState.SUBMITTED);
         else
-            tempObject.setProcessingState(ProcessingState.CREATED);
+            mutableObject.setProcessingState(ProcessingState.CREATED);
 
-        if (Utils.isNullOrEmpty(tempObject.getMessageId()))
-            tempObject.setMessageId(MessageIdUtils.createMessageId());
-        if (tempObject.getTimestamp() == null)
-            tempObject.setTimestamp(new Date());
+        if (Utils.isNullOrEmpty(mutableObject.getMessageId()))
+            mutableObject.setMessageId(MessageIdUtils.createMessageId());
+        if (mutableObject.getTimestamp() == null)
+            mutableObject.setTimestamp(new Date());
 
-        V storedObject = parent.storeMessageUnit(tempObject);
+        V storedObject = parent.storeMessageUnit(mutableObject);
         parent.setLeg(storedObject, ILeg.Label.REQUEST);
 
         return storedObject;
@@ -224,9 +215,14 @@ public class StorageManager {
      * @param messageUnit   The message unit that needs to be stored
      * @return              A {@link MessageUnit} representing the given message unit
      */
-    private MessageUnit createTempObject(IMessageUnit messageUnit) {
+    private MessageUnit createMutableObject(IMessageUnit messageUnit) {
+        if (messageUnit instanceof MessageUnit)
+            return (MessageUnit) messageUnit;
+
         if (messageUnit instanceof IUserMessage)
             return new UserMessage((IUserMessage) messageUnit);
+        else if (messageUnit instanceof ISelectivePullRequest)
+            return new SelectivePullRequest((ISelectivePullRequest) messageUnit);
         else if (messageUnit instanceof IPullRequest)
             return new PullRequest((IPullRequest) messageUnit);
         else if (messageUnit instanceof IReceipt)
