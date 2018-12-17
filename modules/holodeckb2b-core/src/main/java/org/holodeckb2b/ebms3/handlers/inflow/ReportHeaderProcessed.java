@@ -16,16 +16,18 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
+import java.util.Iterator;
+
+import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.ebms3.packaging.Messaging;
 
 /**
- * Is the handler responsible for checking if a EBMS SOAPHeaderBlock is present
- * and setting it as processed.
+ * Is the handler responsible for checking if SOAPHeaderBlock(s) are present and setting them as processed. This
+ * will ensure that Axis2 will not reject the message because of unprocessed headers.  
  *
  * @author Bram Bakx (bram at holodeck-b2b.org)
  */
@@ -41,10 +43,9 @@ public class ReportHeaderProcessed extends BaseHandler {
 
         final SOAPEnvelope env = msgCtx.getEnvelope();
         if (env != null) {
-            final SOAPHeaderBlock messagingHdr = Messaging.getElement(env);
-            if (messagingHdr != null) {
-                messagingHdr.setProcessed();
-            }
+            final Iterator<OMElement> headers = env.getHeader().getChildElements();
+            while (headers.hasNext())
+                ((SOAPHeaderBlock) headers.next()).setProcessed();            
         }
 
         return InvocationResponse.CONTINUE;

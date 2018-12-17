@@ -14,12 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.core.validation.header;
+package org.holodeckb2b.ebms3.validation.header;
 
 import java.util.Collection;
 import java.util.HashSet;
+
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.handlers.inflow.HeaderValidation;
+import org.holodeckb2b.core.validation.header.HeaderValidationHandler;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -39,10 +40,10 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since  4.0.0
  */
-class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
+public class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
                            implements IMessageValidator<IUserMessage> {
 
-    UserMessageValidator(boolean useStrictValidation) {
+    public UserMessageValidator(boolean useStrictValidation) {
         super(useStrictValidation);
     }
 
@@ -61,31 +62,41 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
         super.doBasicValidation(messageUnit, validationErrors);
 
         // Cast to IUserMessage
-        IUserMessage userMessageInfo = (IUserMessage) messageUnit;
+        IUserMessage userMessageInfo = messageUnit;
         // Check that To and From party are included
         doBasicPartyInfoValidation(userMessageInfo.getSender(), "Sender", validationErrors);
         doBasicPartyInfoValidation(userMessageInfo.getReceiver(), "Receiver", validationErrors);
 
-        // Check collaboration information, i.e. Service, Action
-        final ICollaborationInfo collabInfo = userMessageInfo.getCollaborationInfo();
-        if (collabInfo == null)
-            validationErrors.add(new MessageValidationError("Collaboration information is missing"));
-        else {
-            if (Utils.isNullOrEmpty(collabInfo.getAction()))
-                validationErrors.add(new MessageValidationError("Action is missing"));
-            if (collabInfo.getService() == null || Utils.isNullOrEmpty(collabInfo.getService().getName()))
-                validationErrors.add(new MessageValidationError("Service information is missing"));
-        }
+        doBasicCollabInfoValidation(userMessageInfo.getCollaborationInfo(), validationErrors);
+        
         // Check MessageProperties (if provided)
         checkPropertiesNames(userMessageInfo.getMessageProperties(), "Message", validationErrors);
 
         // Check PayloadInfo, in this validator only the part properties are checked
-        final Collection<IPayload> payloadInfo = (Collection<IPayload>) userMessageInfo.getPayloads();
+        final Collection<IPayload> payloadInfo = userMessageInfo.getPayloads();
         if (!Utils.isNullOrEmpty(payloadInfo))
             for (IPayload p : payloadInfo)
                 checkPropertiesNames(p.getProperties(), "Part", validationErrors);
     }
 
+    /**
+     * Performs the basic validation of the collaboration information meta-data.
+     * 
+     * @param collabInfo		The collaboration info meta-data from the message unit
+     * @param validationErrors	Collection of {@link MessageValidationError}s to which validation errors must be added
+     */
+    protected void doBasicCollabInfoValidation(final ICollaborationInfo collabInfo, 
+    										   Collection<MessageValidationError> validationErrors) { 
+	    if (collabInfo == null)
+	        validationErrors.add(new MessageValidationError("Collaboration information is missing"));
+	    else {
+	        if (Utils.isNullOrEmpty(collabInfo.getAction()))
+	            validationErrors.add(new MessageValidationError("Action is missing"));
+	        if (collabInfo.getService() == null || Utils.isNullOrEmpty(collabInfo.getService().getName()))
+	            validationErrors.add(new MessageValidationError("Service information is missing"));
+	    }
+    }
+    
     /**
      * Performs the strict validation of the ebMS header meta-data specific for a User Message message unit
      * <p>In addition to the basic validations it is checked that:<ul>
@@ -109,14 +120,34 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
         super.doStrictValidation(messageUnit, validationErrors);
 
         // Cast to IUserMessage
-        IUserMessage userMessageInfo = (IUserMessage) messageUnit;
+        IUserMessage userMessageInfo = messageUnit;
 
         // Check the PartyIds of the sender and receiver
         doStrictPartyIdValidation(userMessageInfo.getSender().getPartyIds(), "Sender", validationErrors);
         doStrictPartyIdValidation(userMessageInfo.getReceiver().getPartyIds(), "Receiver", validationErrors);
 
+        doStrictCollabInfoValidation(userMessageInfo.getCollaborationInfo(), validationErrors);
+        
+        // Check that all properties have a value
+        // Check MessageProperties (if provided)
+        checkPropertiesValues(userMessageInfo.getMessageProperties(), "Message", validationErrors);
+
+        // Check PayloadInfo, in this validator only the part properties are checked
+        final Collection<IPayload> payloadInfo = userMessageInfo.getPayloads();
+        if (!Utils.isNullOrEmpty(payloadInfo))
+            for (IPayload p : payloadInfo)
+                checkPropertiesValues(p.getProperties(), "Part", validationErrors);
+    }
+
+    /**
+     * Performs the strict validation of the collaboration information meta-data.
+     * 
+     * @param collabInfo		The collaboration info meta-data from the message unit
+     * @param validationErrors	Collection of {@link MessageValidationError}s to which validation errors must be added
+	 */
+	protected void doStrictCollabInfoValidation(final ICollaborationInfo collabInfo,
+											  Collection<MessageValidationError> validationErrors) {
         // Check that the Service value is an URI if it's untyped
-        final ICollaborationInfo collabInfo = userMessageInfo.getCollaborationInfo();
         if (collabInfo != null) {
         	if (Utils.isNullOrEmpty(collabInfo.getConversationId()))
                 validationErrors.add(new MessageValidationError("ConversationId must have a non-empty value"));                        
@@ -125,32 +156,22 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
                 validationErrors.add(new MessageValidationError("Untype Service value [" + service.getName()
                                                                                                     + "] is not URI",
                                                                MessageValidationError.Severity.Failure,
-                                                               HeaderValidation.VALUE_INCONSISTENT_REQ));
+                                                               HeaderValidationHandler.VALUE_INCONSISTENT_REQ));
             if (EbMSConstants.TEST_ACTION_URI.equals(collabInfo.getAction())
                 && !EbMSConstants.TEST_SERVICE_URI.equals(service.getName()))
                 validationErrors.add(new MessageValidationError("Service must be " + EbMSConstants.TEST_SERVICE_URI +
                                                                "if Action is set to " + EbMSConstants.TEST_ACTION_URI));
-
         }
-        // Check that all properties have a value
-        // Check MessageProperties (if provided)
-        checkPropertiesValues(userMessageInfo.getMessageProperties(), "Message", validationErrors);
+	}
 
-        // Check PayloadInfo, in this validator only the part properties are checked
-        final Collection<IPayload> payloadInfo = (Collection<IPayload>) userMessageInfo.getPayloads();
-        if (!Utils.isNullOrEmpty(payloadInfo))
-            for (IPayload p : payloadInfo)
-                checkPropertiesValues(p.getProperties(), "Part", validationErrors);
-    }
-
-    /**
+	/**
      * Perform a basic checks of information about the sender or receiver contained in the User Message
      *
      * @param partnerInfo       The meta-data of the sender or receiver
      * @parem partnerName       The text to identify this partner in error message, i.e. "Sender" or "Receiver"
      * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
      */
-    private void doBasicPartyInfoValidation(final ITradingPartner partnerInfo, final String partnerName,
+    protected void doBasicPartyInfoValidation(final ITradingPartner partnerInfo, final String partnerName,
                                             Collection<MessageValidationError> validationErrors) {
         if (partnerInfo == null) {
             validationErrors.add(new MessageValidationError(partnerName + " information is missing"));
@@ -171,7 +192,7 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
      * @parem partnerName       The text to identify this partner in error message, i.e. "Sender" or "Receiver"
      * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
      */
-    private void doStrictPartyIdValidation(final Collection<IPartyId> partyIds, final String partnerName,
+    protected void doStrictPartyIdValidation(final Collection<IPartyId> partyIds, final String partnerName,
                                            Collection<MessageValidationError> validationErrors) {
         if (Utils.isNullOrEmpty(partyIds))
             return;
@@ -188,7 +209,7 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
                     validationErrors.add(new MessageValidationError(partnerName + " partyId [" + pid.getId()
                                                                            + " does not have a type and is not an URI",
                                                                     MessageValidationError.Severity.Failure,
-                                                                    HeaderValidation.VALUE_INCONSISTENT_REQ));
+                                                                    HeaderValidationHandler.VALUE_INCONSISTENT_REQ));
         }
         if (multipleSameType)
             validationErrors.add(new MessageValidationError(partnerName + " has multiple partyIds of the same type"));
@@ -201,7 +222,7 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
      * @param propSetName       The name of the set, i.e. "Message" or "Part"
      * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
      */
-    private void checkPropertiesNames(final Collection<IProperty> properties, final String propSetName,
+    protected void checkPropertiesNames(final Collection<IProperty> properties, final String propSetName,
                                           Collection<MessageValidationError> validationErrors) {
         if (!Utils.isNullOrEmpty(properties) && properties.stream().anyMatch(p -> Utils.isNullOrEmpty(p.getName())))
             validationErrors.add(new MessageValidationError("Unnamed " + propSetName + " property is not allowed"));
@@ -214,7 +235,7 @@ class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessage>
      * @param propSetName       The name of the set, i.e. "Message" or "Part"
      * @param validationErrors  Collection of {@link MessageValidationError}s to which validation errors must be added
      */
-    private void checkPropertiesValues(final Collection<IProperty> properties, final String propSetName,
+    protected void checkPropertiesValues(final Collection<IProperty> properties, final String propSetName,
                                           Collection<MessageValidationError> validationErrors) {
         if (!Utils.isNullOrEmpty(properties))
             properties.stream().filter(p -> Utils.isNullOrEmpty(p.getValue()))

@@ -14,11 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.core.validation.header;
+package org.holodeckb2b.ebms3.validation.header;
 
 import java.util.Collection;
 import java.util.List;
+
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.holodeckb2b.as4.handlers.inflow.CreateReceipt;
 import org.holodeckb2b.common.util.Utils;
@@ -33,7 +35,7 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since  4.0.0
  */
-class ReceiptValidator extends GeneralMessageUnitValidator<IReceipt>
+public class ReceiptValidator extends GeneralMessageUnitValidator<IReceipt>
                        implements IMessageValidator<IReceipt> {
 
     public ReceiptValidator(boolean useStrictValidation) {
@@ -74,10 +76,10 @@ class ReceiptValidator extends GeneralMessageUnitValidator<IReceipt>
         // First do genereal validation
         super.doStrictValidation(messageUnit, validationErrors);
 
-        if (((IReceipt) messageUnit).getContent().isEmpty())
+        if (messageUnit.getContent().isEmpty())
             validationErrors.add(new MessageValidationError("Receipt content is missing"));
         else {
-            List<OMElement> contentElements = ((IReceipt) messageUnit).getContent();
+            List<OMElement> contentElements = messageUnit.getContent();
             if (contentElements.size() > 1)
                 validationErrors.add(new MessageValidationError("Receipt content contains more than 1 element"));
             else {

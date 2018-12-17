@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.core.validation.header;
+package org.holodeckb2b.ebms3.validation.header;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
@@ -31,7 +32,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since  4.0.0
  */
-abstract class GeneralMessageUnitValidator<M extends IMessageUnit> implements IMessageValidator<M> {
+public abstract class GeneralMessageUnitValidator<M extends IMessageUnit> implements IMessageValidator<M> {
     /**
      * Indicator whether lax or strict validation should be applied
      */
@@ -54,7 +55,8 @@ abstract class GeneralMessageUnitValidator<M extends IMessageUnit> implements IM
      *                      When no problems were detected an empty Collection.
      * @throws MessageValidationException   When the validator can not complete the validation of the message unit
      */
-    public Collection<MessageValidationError> validate(final M messageUnit) throws MessageValidationException {
+    @Override
+	public Collection<MessageValidationError> validate(final M messageUnit) throws MessageValidationException {
 
         Collection<MessageValidationError>    validationErrors = new ArrayList<>();
 

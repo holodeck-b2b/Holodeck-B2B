@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.core.validation.header;
+package org.holodeckb2b.ebms3.validation.header;
 
 import java.util.Collection;
 import java.util.Iterator;
+
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
@@ -32,7 +33,7 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since  4.0.0
  */
-class ErrorSignalValidator extends GeneralMessageUnitValidator<IErrorMessage>
+public class ErrorSignalValidator extends GeneralMessageUnitValidator<IErrorMessage>
                            implements IMessageValidator<IErrorMessage> {
 
     public ErrorSignalValidator(boolean useStrictValidation) {

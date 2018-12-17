@@ -144,9 +144,8 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                         log.debug("Get DataHandler for attachment");
                         final DataHandler dh = mc.getAttachment(plRef);
                         if (dh == null) {
-                            // The reference is invalid as no element exists in the body with the given id. This makes
-                            // this an invalid UserMessage! Create an ValueInconsistent error and store it in the
-                            // MessageContext
+                            // The reference is invalid as no attachment with this Cid is available in the message.
+                        	// Create an ValueInconsistent error and store it in the MessageContext
                             createInconsistentError(mc, um, plRef);
                             return InvocationResponse.CONTINUE;
                         } else {

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.ebms3.handlers.inflow;
+package org.holodeckb2b.core.validation.header;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -29,6 +29,10 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisModule;
+import org.apache.axis2.description.HandlerDescription;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.ParameterInclude;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
@@ -36,13 +40,13 @@ import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PullRequestElement;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
+import org.holodeckb2b.ebms3.validation.header.Ebms3HeaderValidatorFactory;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -50,6 +54,8 @@ import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BCoreImpl;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -70,7 +76,7 @@ public class HeaderValidationTest {
 
     private static HolodeckB2BTestCore core;
 
-    private HeaderValidation handler;
+    private HeaderValidationHandler handler;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -81,9 +87,17 @@ public class HeaderValidationTest {
     }
     @Before
     public void setUp() throws Exception {
-        handler = new HeaderValidation();
+        handler = new HeaderValidationHandler();
+        
+        HandlerDescription handlerDesc = new HandlerDescription("testHeaderValidation");
+        handlerDesc.addParameter(new Parameter(HeaderValidationHandler.P_VALIDATOR_FACTORY, 
+        										Ebms3HeaderValidatorFactory.class.getName()));
+        
+        ParameterInclude parent = new AxisModule(HolodeckB2BCoreImpl.HOLODECKB2B_CORE_MODULE);
+        parent.addParameter(new Parameter("HandledMessagingProtocol", "AS4"));
+        handlerDesc.setParent(parent);
+        handler.init(handlerDesc);
     }
-
 
     @Test
     public void testDoProcessingOfUserMessage() throws Exception {

@@ -14,61 +14,139 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.ebms3.handlers.inflow;
+package org.holodeckb2b.core.validation.header;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.HandlerDescription;
+import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.validation.ValidationResult;
-import org.holodeckb2b.core.validation.header.HeaderValidationSpecification;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.interfaces.config.IConfiguration;
+import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
+import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
- * Is the <i>IN FLOW</i> handler responsible for checking conformance of the received ebMS header meta data to the ebMS
- * specifications.
+ * Is an <i>IN FLOW</i> handler for checking conformance of messages to the specification. 
  * <p>The validation performed has two modes, <i>basic</i> and <i>strict</i> validation. The <i>basic
  * validation</i> is only ensure that the messages can be processed by the Holodeck B2B Core. These validations don't
- * include detailed checks on allowed combinations or format of values, like for example the requirement from the ebMS
- * Specification that the Service name must be an URL if no type is given. These are part of the <i>strict validation
- * </i> mode. The validation mode to use is specified in the configuration of the Holodeck B2B gateway ({@link
- * IConfiguration#useStrictHeaderValidation()}) or in the P-Mode ({@link IPMode#useStrictHeaderValidation()}) with the
- * strongest validation mode having priority.
- * <p>Note that additional validations can be used for User Message message units by using custom @todo: IMessageValidators.
- * These validation can also include checks on payloads included in the User Message and are separately configured in
- * the P-Mode.
+ * include detailed checks on allowed combinations or format of values, like for example the requirement from the 
+ * ebMS V3 Core Specification that the Service name must be an URL if no type is given. These are part of the 
+ * <i>strict validation</i> mode. The validation mode to use is specified in the configuration of the Holodeck B2B 
+ * gateway ({@link IConfiguration#useStrictHeaderValidation()}) or in the P-Mode ({@link 
+ * IPMode#useStrictHeaderValidation()}) with the strongest validation mode having priority.
+ * <p>The actual conformance checks are performed by {@link IMessageValidator}s which are created by an 
+ * implementation of {@link AbstractHeaderValidatorFactory}. Which implementation the handler must use should be 
+ * configured in the handler's <i>validatorFactoryClass</i> parameter.
+ * <p>Note that additional validations can be used for User Message message units by using custom validation (see
+ * {@link IMessageValidationSpecification}). These validation can also include checks on payloads included in the 
+ * User Message and are separately configured in the P-Mode.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since 4.0.0
+ * @since  HB2B_NEXT_VERSION
  */
-public class HeaderValidation extends BaseHandler {
+public class HeaderValidationHandler extends BaseHandler {
     /**
-     * Value to set as {@link MessageValidationError#details} to indicate the resulting invalidHdr for this validation issue
- should be <i>ValueInconsistent</i> instead of <i>InvalidHeader</i>
+     * Value to set as {@link MessageValidationError#details} to indicate the resulting invalidHdr for this 
+     * validation issue should be <i>ValueInconsistent</i> instead of <i>InvalidHeader</i>
      */
     public static final String VALUE_INCONSISTENT_REQ = "ValueInconsistent";
 
-    @Override
+    /**
+     * Name of the handler parameter that contains the class name of the validator factory class
+     */
+    public static final String P_VALIDATOR_FACTORY = "validatorFactoryClass";
+    
+    /**
+	 * Maps holding the singletons of both the lax and strict header validator configs structured per message unit 
+	 * type
+	 */
+	private static Map<Class<? extends IMessageUnit>, HeaderValidationSpecification> laxValidatorSpecs;
+	private static Map<Class<? extends IMessageUnit>, HeaderValidationSpecification> strictValidatorSpecs;
+
+	@Override
     protected byte inFlows() {
         return IN_FLOW | IN_FAULT_FLOW;
     }
 
+	/**
+	 * 
+	 */
+    @Override
+	public void init(HandlerDescription handlerdesc) {
+    	super.init(handlerdesc);
+		// As the log is normally created dynamically when the handler is invoked (to include direction info),
+    	//  we need to set it here
+    	log = LogFactory.getLog("org.holodeckb2b.msgproc." + (!Utils.isNullOrEmpty(handledMsgProtocol) ?
+                										handledMsgProtocol + "." : "")
+    												 + getHandlerDesc().getName());
+    	log.trace("Retrieve the factory class for the header validators from configuration");
+    	String factoryClass = null;    	
+    	try { 
+    		factoryClass = (String) handlerdesc.getParameter(P_VALIDATOR_FACTORY).getValue();
+    		if (!AbstractHeaderValidatorFactory.class.isAssignableFrom(Class.forName(factoryClass))) {
+    			log.fatal("Specified class [" + factoryClass 
+    					  + "] is not an implementation of AbstractHeaderValidatorFactory!");
+    			factoryClass = null;
+    		}
+    	} catch (NullPointerException | ClassCastException invalidParameter) {
+    		log.fatal("Missing parameter specifying the validator factory class!");
+    	} catch (ClassNotFoundException factoryNotAvailable) {
+    		log.fatal("The specified factory class [" + factoryClass + "] is not available!");
+    	}
+    	if (factoryClass == null)
+    		return;
+    	
+    	// Create the validator specification instances
+		//
+		laxValidatorSpecs = new HashMap<>();
+		laxValidatorSpecs.put(IUserMessage.class, 
+							 	new HeaderValidationSpecification(factoryClass, IUserMessage.class, false));
+		laxValidatorSpecs.put(IPullRequest.class, 
+								new HeaderValidationSpecification(factoryClass, IPullRequest.class, false));
+		laxValidatorSpecs.put(IReceipt.class, 
+								new HeaderValidationSpecification(factoryClass, IReceipt.class, false));
+		laxValidatorSpecs.put(IErrorMessage.class, 
+								new HeaderValidationSpecification(factoryClass, IErrorMessage.class, false));
+		strictValidatorSpecs = new HashMap<>();
+		strictValidatorSpecs.put(IUserMessage.class, 
+								new HeaderValidationSpecification(factoryClass, IUserMessage.class, true));
+		strictValidatorSpecs.put(IPullRequest.class, 
+								new HeaderValidationSpecification(factoryClass, IPullRequest.class, true));
+		strictValidatorSpecs.put(IReceipt.class, 
+								new HeaderValidationSpecification(factoryClass, IReceipt.class, true));
+		strictValidatorSpecs.put(IErrorMessage.class, 
+								new HeaderValidationSpecification(factoryClass, IErrorMessage.class, true));
+	}
+	
     @Override
     protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
-
+    	if (laxValidatorSpecs == null || strictValidatorSpecs == null) {
+    		log.fatal("Handler not correctly initialized, header validators not available!");
+    		throw new AxisFault("Configuration error!");
+    	}
+    	
         // Get all message units and then validate each one at configured mode
         Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
 
@@ -80,8 +158,11 @@ public class HeaderValidation extends BaseHandler {
                 log.debug("Validate " + MessageUnitUtils.getMessageUnitName(m) + " header meta-data using "
                          + (useStrictValidation ? "strict" : "basic") + " validation");
 
-                ValidationResult validationResult = HolodeckB2BCore.getValidationExecutor().validate(m,
-                                               HeaderValidationSpecification.getValidationSpec(m, useStrictValidation));
+                final IMessageValidationSpecification validationSpec = useStrictValidation ? 
+                						strictValidatorSpecs.get(MessageUnitUtils.getMessageUnitType(m)) :
+                						laxValidatorSpecs.get(MessageUnitUtils.getMessageUnitType(m));                  		
+                ValidationResult validationResult = HolodeckB2BCore.getValidationExecutor()
+                																	.validate(m, validationSpec);
 
                 if (validationResult == null || Utils.isNullOrEmpty(validationResult.getValidationErrors()))
                     log.debug("Header of " + MessageUnitUtils.getMessageUnitName(m) + " [" + m.getMessageId()
@@ -98,7 +179,7 @@ public class HeaderValidation extends BaseHandler {
 
         return InvocationResponse.CONTINUE;
     }
-
+    
     /**
      * Creates the required ebMS errors based on the found validation issues. As specified in the ebMS V3 Core
      * Specification some issues with the meta-data from header should be reported using the <i>ValueInconsistent<i>

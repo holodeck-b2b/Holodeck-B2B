@@ -16,24 +16,20 @@
  */
 package org.holodeckb2b.core.validation.header;
 
-import java.util.HashMap;
 import java.util.Map;
+
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
-import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
-import org.holodeckb2b.interfaces.messagemodel.IReceipt;
-import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
  * Is the factory class for creating <i>ebMS header validators</i> that check whether the ebMS message header of a
  * message unit conforms to the ebMS specifications.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since 4.0.0
+ * @since  HB2B_NEXT_VERSION
  */
-public class HeaderValidatorFactory implements IMessageValidator.Factory {
+public abstract class AbstractHeaderValidatorFactory implements IMessageValidator.Factory {
     /**
      * Name of the parameter that indicates whether lax or strict validation should occur
      */
@@ -46,22 +42,9 @@ public class HeaderValidatorFactory implements IMessageValidator.Factory {
     /**
      * Maps holding the singletons of both the lax and strict header validators structured per message unit type
      */
-    private static final Map<Class<? extends IMessageUnit>, IMessageValidator>   laxValidators;
-    private static final Map<Class<? extends IMessageUnit>, IMessageValidator>   strictValidators;
-    static {
-        // Create the validator instances
-        //
-        laxValidators = new HashMap<>();
-        laxValidators.put(IUserMessage.class, new UserMessageValidator(false));
-        laxValidators.put(IPullRequest.class, new PullRequestValidator(false));
-        laxValidators.put(IReceipt.class, new ReceiptValidator(false));
-        laxValidators.put(IErrorMessage.class, new ErrorSignalValidator(false));
-        strictValidators = new HashMap<>();
-        strictValidators.put(IUserMessage.class, new UserMessageValidator(true));
-        strictValidators.put(IPullRequest.class, new PullRequestValidator(true));
-        strictValidators.put(IReceipt.class, new ReceiptValidator(true));
-        strictValidators.put(IErrorMessage.class, new ErrorSignalValidator(true));
-    }
+    protected static Map<Class<? extends IMessageUnit>, IMessageValidator>   laxValidators;
+    protected static Map<Class<? extends IMessageUnit>, IMessageValidator>   strictValidators;
+
     /**
      * The validator requested by this instance of the factory
      */
@@ -71,9 +54,9 @@ public class HeaderValidatorFactory implements IMessageValidator.Factory {
     public void init(Map<String, ?> parameters) throws MessageValidationException {
         // Get the correct validator depending on the preferred validation mode and message type
         if (Boolean.TRUE.equals(parameters.get(P_VALIDATION_MODE)))
-            validator = strictValidators.get((Class<? extends IMessageUnit>) parameters.get(P_MSGUNIT_TYPE));
+            validator = strictValidators.get(parameters.get(P_MSGUNIT_TYPE));
         else
-            validator = laxValidators.get((Class<? extends IMessageUnit>) parameters.get(P_MSGUNIT_TYPE));
+            validator = laxValidators.get(parameters.get(P_MSGUNIT_TYPE));
     }
 
     @Override
