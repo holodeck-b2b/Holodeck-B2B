@@ -111,7 +111,7 @@ recommended to raise log levels to at least INFO.
         WARN to log all Error Signals or set it to ERROR to log only Error
         Signals that contain a error with severity FAILURE.
 
-        The WARN log level is RECOMMENDED in case pulling is used to receive
+        The ERROR log level is RECOMMENDED in case pulling is used to receive
         messages as each "empty MPC" response will otherwise create a new
         log entry.
         -->
