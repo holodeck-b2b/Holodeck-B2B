@@ -26,7 +26,7 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.holodeckb2b.as4.receptionawareness.ReceiptCreatedEvent;
+import org.holodeckb2b.as4.receptionawareness.ReceiptCreated;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.common.testhelpers.NullDeliveryMethod;
@@ -159,6 +159,6 @@ public class CreateReceiptTest {
         }
 
         assertEquals(1, eventProcessor.events.size());
-        assertTrue(eventProcessor.events.get(0) instanceof ReceiptCreatedEvent);
+        assertTrue(eventProcessor.events.get(0) instanceof ReceiptCreated);
     }
 }

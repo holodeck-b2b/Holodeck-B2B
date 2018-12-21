@@ -26,12 +26,10 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
  * P-Mode of the message unit.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 4.0.0
+ * @since HB2B_NEXT_VERSION
  * @see IReceptionAwareness
- * @deprecated Use {@link IDuplicateReceived} instead
  */
-@Deprecated
-public interface IDuplicateReceivedEvent extends IMessageProcessingEvent {
+public interface IDuplicateReceived extends IMessageProcessingEvent, IDuplicateReceivedEvent {
 
     /**
      * Indicates whether this duplicate instance was eliminated, i.e. not delivered to the <i>Consumer</i> business
@@ -39,5 +37,6 @@ public interface IDuplicateReceivedEvent extends IMessageProcessingEvent {
      *
      * @return <code>true</code> when the duplicate is eliminated,<br><code>false</code> otherwise
      */
-    boolean isEliminated();
+    @Override
+	boolean isEliminated();
 }

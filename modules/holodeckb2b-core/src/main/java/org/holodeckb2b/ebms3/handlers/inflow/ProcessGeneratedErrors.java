@@ -147,8 +147,10 @@ public class ProcessGeneratedErrors extends BaseHandler {
                         // Should this error signal be combined with a SOAP Fault? Because SOAP Faults can confuse
                         // the MSH that receives the error Holodeck B2B by default does not add the SOAP, it should
                         // be configured explicitly in the P-Mode
-                        final boolean addSOAPFault = errorHandling != null ?  errorHandling.shouldAddSOAPFault()
-                                                                           : false;
+                        final boolean addSOAPFault = errorHandling != null 
+                        								&& errorHandling.shouldAddSOAPFault() != null ?
+                        										errorHandling.shouldAddSOAPFault().booleanValue()
+                                                              : false;
                         // For signals error reporting is optional, so check if error is for a signal and if P-Mode
                         // is configured to report errors. Default is not to report errors for signals
                         boolean sendError = true;

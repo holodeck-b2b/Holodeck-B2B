@@ -16,16 +16,23 @@
  */
 package org.holodeckb2b.interfaces.events.security;
 
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
+
 /**
- * Is the <i>message processing event</i> that indicates that the encryption of a message to be sent containing the
- * message unit failed. This event is to inform the business application (or extensions) that a submitted message unit
- * could not be sent because it could not be encrypted.
+ * Is the <i>message processing event</i> that indicates that a username token could not be added to the message to be
+ * sent containing the message unit failed. This event is to inform the business application (or extensions) that a
+ * submitted message unit could not be sent because it a required username token could not be added to the message.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 4.0.0
- * @deprecated Use {@link IEncryptionFailure} instead
+ * @since HB2B_NEXT_VERSION
  */
-@Deprecated
-public interface IEncryptionFailedEvent extends ISecurityHeaderCreationFailureEvent {
+public interface IUTCreationFailure extends ISecurityCreationFailure, IUTCreationFailedEvent {
 
+    /**
+     * Gets the target of Username token WS-Security header which could not be added to the message.
+     *
+     * @return The target of the Username token header
+     */
+    @Override
+	SecurityHeaderTarget getTargetedRole();
 }

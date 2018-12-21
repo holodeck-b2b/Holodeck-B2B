@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Holodeck B2B Team.
+ * Copyright (C) 2018 The Holodeck B2B Team.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -28,11 +28,9 @@ import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
  * were included in the signature. These can be for example be used to create specific evidences.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 4.0.0
- * @deprecated Use {@link ISignatureVerified} instead
+ * @since HB2B_NEXT_VERSION
  */
-@Deprecated
-public interface ISignatureVerifiedEvent extends IMessageProcessingEvent {
+public interface ISignatureVerified extends IMessageProcessingEvent, ISignatureVerifiedEvent {
 
     /**
      * Gets the information on the digest contained in the verified signature for the ebMS header of the message unit
@@ -40,7 +38,8 @@ public interface ISignatureVerifiedEvent extends IMessageProcessingEvent {
      *
      * @return  A {@link ISignedPartMetadata} object with information on the calculated digest of the ebMS header.
      */
-    ISignedPartMetadata getHeaderDigest();
+    @Override
+	ISignedPartMetadata getHeaderDigest();
 
     /**
      * Gets the information on the digests contained in the verified signature for the payloads of the User Message that
@@ -49,5 +48,6 @@ public interface ISignatureVerifiedEvent extends IMessageProcessingEvent {
      *
      * @return  A <code>Map</code> linking the digest meta-data to each payload from the user message.
      */
-    Map<IPayload, ISignedPartMetadata>   getPayloadDigests();
+    @Override
+	Map<IPayload, ISignedPartMetadata>   getPayloadDigests();
 }

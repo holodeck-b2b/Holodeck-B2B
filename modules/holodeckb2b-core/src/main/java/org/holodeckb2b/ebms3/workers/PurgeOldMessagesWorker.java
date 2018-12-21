@@ -27,7 +27,7 @@ import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
-import org.holodeckb2b.events.MessageUnitPurgedEvent;
+import org.holodeckb2b.events.MessageUnitPurged;
 import org.holodeckb2b.interfaces.events.IMessageUnitPurgedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
@@ -121,7 +121,7 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
 
                 // Raise event so extension can process purge actions (for User Messages only)
                 if (msgUnit instanceof IUserMessage)
-                    HolodeckB2BCore.getEventProcessor().raiseEvent(new MessageUnitPurgedEvent(tmpUserMessage), null);
+                    HolodeckB2BCore.getEventProcessor().raiseEvent(new MessageUnitPurged(tmpUserMessage), null);
             } catch (final PersistenceException dbe) {
                 log.error("Could not remove the meta-data of " + MessageUnitUtils.getMessageUnitName(msgUnit)
                         + " [msgId=" + msgUnit.getMessageId() + "]. Error details: " + dbe.getMessage());

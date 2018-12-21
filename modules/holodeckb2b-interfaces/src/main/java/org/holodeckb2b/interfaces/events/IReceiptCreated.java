@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Holodeck B2B Team.
+ * Copyright (C) 2018 The Holodeck B2B Team.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -29,11 +29,9 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  * will arrive.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.1.0
- * @deprecated Use {@link IReceiptCreated} instead
+ * @since HB2B_NEXT_VERSION
  */
-@Deprecated
-public interface IReceiptCreatedEvent extends IMessageProcessingEvent {
+public interface IReceiptCreated extends IMessageProcessingEvent, IReceiptCreatedEvent {
 
     /**
      * Gets the <i>Receipt</i> that was created to acknowledge that the <i>User Message</i> that is the subject of this
@@ -41,7 +39,8 @@ public interface IReceiptCreatedEvent extends IMessageProcessingEvent {
      *
      * @return The {@link IReceipt} that was created
      */
-    public IReceipt getReceipt();
+    @Override
+	public IReceipt getReceipt();
 
     /**
      * Indicates whether the received <i>User Message</i> for which this <i>Receipt</i> was created is a <i>duplicate
@@ -51,5 +50,6 @@ public interface IReceiptCreatedEvent extends IMessageProcessingEvent {
      * @return  <code>true</code> if the Receipt was created for a duplicate,<br>
      *          <code>false</code> otherwise
      */
-    public boolean isForEliminatedDuplicate();
+    @Override
+	public boolean isForEliminatedDuplicate();
 }

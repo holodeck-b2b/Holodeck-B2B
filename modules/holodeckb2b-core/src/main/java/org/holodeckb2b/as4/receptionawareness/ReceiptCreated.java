@@ -17,18 +17,18 @@
 package org.holodeckb2b.as4.receptionawareness;
 
 import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.IReceiptCreatedEvent;
+import org.holodeckb2b.interfaces.events.IReceiptCreated;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
- * Is the implementation class of {@link IReceiptCreatedEvent} to indicate that a Receipt is created for a received
+ * Is the implementation class of {@link IReceiptCreated} to indicate that a Receipt is created for a received
  * User Message.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
-public class ReceiptCreatedEvent extends AbstractMessageProcessingEvent implements IReceiptCreatedEvent {
+public class ReceiptCreated extends AbstractMessageProcessingEvent implements IReceiptCreated {
 
     /**
      * The Receipt that was created for the received User Message
@@ -43,19 +43,19 @@ public class ReceiptCreatedEvent extends AbstractMessageProcessingEvent implemen
     private final boolean     forDuplicate;
 
     /**
-     * Creates a new <code>ReceiptCreatedEvent</code> for the given User Message and Receipt without duplicate indicator
+     * Creates a new <code>ReceiptCreated</code> for the given User Message and Receipt without duplicate indicator
      * <p>NOTE: As Receipt can only be created for User Message message units there is no constructor for other message
      * unit types.
      *
      * @param subject The received User Message for which the Receipt was created
      * @param receipt The created Receipt
      */
-    public ReceiptCreatedEvent(final IUserMessage subject, final IReceipt receipt) {
+    public ReceiptCreated(final IUserMessage subject, final IReceipt receipt) {
         this(subject, receipt, false);
     }
 
     /**
-     * Creates a new <code>ReceiptCreatedEvent</code> for the given User Message, Receipt and duplicate indicator.
+     * Creates a new <code>ReceiptCreated</code> for the given User Message, Receipt and duplicate indicator.
      * <p>NOTE: As Receipt can only be created for User Message message units there is no constructor for other message
      * unit types.
      *
@@ -64,7 +64,7 @@ public class ReceiptCreatedEvent extends AbstractMessageProcessingEvent implemen
      * @param isForDuplicate    Indicates whether the received User Message is a duplicate and not delivered to the
      *                          business application.
      */
-    public ReceiptCreatedEvent(final IUserMessage subject, final IReceipt receipt, final boolean isForDuplicate) {
+    public ReceiptCreated(final IUserMessage subject, final IReceipt receipt, final boolean isForDuplicate) {
         super(subject);
         this.receipt = receipt;
         this.forDuplicate = isForDuplicate;

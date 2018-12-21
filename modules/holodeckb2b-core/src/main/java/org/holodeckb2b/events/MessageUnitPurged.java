@@ -17,20 +17,19 @@
 package org.holodeckb2b.events;
 
 import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.IMessageUnitPurgedEvent;
+import org.holodeckb2b.interfaces.events.IMessageUnitPurged;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
- * Is the implementation class of {@link IMessageUnitPurgedEvent} to indicate that a message unit is to deleted from the
+ * Is the implementation class of {@link IMessageUnitPurged} to indicate that a message unit is to deleted from the
  * Holodeck B2B Core message database because the period for maintaining it's meta-data has expired.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  2.1.0
  */
-public class MessageUnitPurgedEvent extends AbstractMessageProcessingEvent implements IMessageUnitPurgedEvent {
+public class MessageUnitPurged extends AbstractMessageProcessingEvent implements IMessageUnitPurged {
 
-
-    public MessageUnitPurgedEvent(final IMessageUnit subject) {
+    public MessageUnitPurged(final IMessageUnit subject) {
         super(subject);
     }
 

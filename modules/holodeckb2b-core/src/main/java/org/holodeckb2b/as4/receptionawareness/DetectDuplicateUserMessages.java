@@ -113,7 +113,7 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
                 // To prevent repeated delivery but still send a receipt set message as delivered
                 mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);
                 // Raise message processing event to inform other components of the duplicate message
-                HolodeckB2BCore.getEventProcessor().raiseEvent(new DuplicateReceivedEvent(um), null);
+                HolodeckB2BCore.getEventProcessor().raiseEvent(new DuplicateReceived(um), null);
             }
 
             return InvocationResponse.CONTINUE;

@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.core.validation.CustomValidationFailedEvent;
+import org.holodeckb2b.core.validation.CustomValidationFailure;
 import org.holodeckb2b.core.validation.ValidationResult;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.errors.OtherContentError;
@@ -38,7 +38,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * Is the <i>IN_FLOW</i> handler responsible for the execution of the custom validation of the User Message message unit
  * as specified in the P-Mode. How validation errors are handled depends on the validation configuration. When it
  * specifies that the message unit should be rejected an ebMS Error with error code EBMS:0004 (Other) will be generated.
- * The handler always raises a {@link CustomValidationFailedEvent} to signal that validation issues were encountered.
+ * The handler always raises a {@link CustomValidationFailure} to signal that validation issues were encountered.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
@@ -96,7 +96,7 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
                     HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, ProcessingState.FAILURE);
                 }
                 // Raise message processing event to inform other components of the validation issue
-                HolodeckB2BCore.getEventProcessor().raiseEvent(new CustomValidationFailedEvent(userMessage,
+                HolodeckB2BCore.getEventProcessor().raiseEvent(new CustomValidationFailure(userMessage,
                                                                                                validationResult), mc);
             }
         } catch (MessageValidationException ve) {

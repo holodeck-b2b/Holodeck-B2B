@@ -27,11 +27,9 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
  * Awareness feature should be used.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 4.0.0
- * @deprecated User {@link IMessageTransfer} instead
+ * @since HB2B_NEXT_VERSION
  */
-@Deprecated
-public interface IMessageTransferEvent extends IMessageProcessingEvent {
+public interface IMessageTransfer extends IMessageProcessingEvent, IMessageTransferEvent {
 
     /**
      * Indicates whether the transfer of the message unit was successful.
@@ -41,7 +39,8 @@ public interface IMessageTransferEvent extends IMessageProcessingEvent {
      * @return  <code>true</code> if the transfer was successful,<br>
      *          <code>false</code> if an exception occurred in the exchange.
      */
-    boolean isTransferSuccessful();
+    @Override
+	boolean isTransferSuccessful();
 
     /**
      * Gets the exception that caused the transfer to fail.
@@ -49,5 +48,6 @@ public interface IMessageTransferEvent extends IMessageProcessingEvent {
      *
      * @return  The exception that caused the transfer to fail
      */
-    Exception getFailureReason();
+    @Override
+	Exception getFailureReason();
 }

@@ -22,10 +22,8 @@ package org.holodeckb2b.interfaces.events.security;
  * could not be sent because it could not be encrypted.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 4.0.0
- * @deprecated Use {@link IEncryptionFailure} instead
+ * @since HB2B_NEXT_VERSION
  */
-@Deprecated
-public interface IEncryptionFailedEvent extends ISecurityHeaderCreationFailureEvent {
+public interface IEncryptionFailure extends ISecurityCreationFailure, ISecurityHeaderCreationFailureEvent {
 
 }

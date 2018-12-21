@@ -18,20 +18,21 @@ package org.holodeckb2b.core.validation;
 
 import java.util.Collection;
 import java.util.Map;
+
 import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
-import org.holodeckb2b.interfaces.events.ICustomValidationFailedEvent;
+import org.holodeckb2b.interfaces.events.ICustomValidationFailure;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
- * Is the implementation class of {@link ICustomValidationFailedEvent} to indicate that the custom validation of a
+ * Is the implementation class of {@link ICustomValidationFailure} to indicate that the custom validation of a
  * message unit failed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
  */
-public class CustomValidationFailedEvent extends AbstractMessageProcessingEvent implements ICustomValidationFailedEvent{
+public class CustomValidationFailure extends AbstractMessageProcessingEvent implements ICustomValidationFailure {
 
     /**
      * Holds the indicator whether all specified validators were executed
@@ -47,12 +48,12 @@ public class CustomValidationFailedEvent extends AbstractMessageProcessingEvent 
     private Map<String, Collection<MessageValidationError>> validationErrors;
 
     /**
-     * Creates a new <code>CustomValidationFailedEvent</code> for the given message unit and validation information.
+     * Creates a new <code>CustomValidationFailure</code> for the given message unit and validation information.
      *
      * @param subject               The message for which the validation failed
      * @param validationResult      The results of the validation
      */
-    public CustomValidationFailedEvent(IMessageUnit subject, ValidationResult validationResult) {
+    public CustomValidationFailure(IMessageUnit subject, ValidationResult validationResult) {
         super(subject);
         if (Utils.isNullOrEmpty(validationResult.getValidationErrors()))
             throw new IllegalArgumentException("This event can only be raised if validation errors were found!");

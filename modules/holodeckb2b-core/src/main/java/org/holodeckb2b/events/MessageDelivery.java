@@ -18,17 +18,17 @@ package org.holodeckb2b.events;
 
 import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
-import org.holodeckb2b.interfaces.events.IMessageDeliveryEvent;
+import org.holodeckb2b.interfaces.events.IMessageDelivery;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
- * Is the implementation class of {@link IMessageDeliveryEvent} to inform external components that an attempt to deliver
+ * Is the implementation class of {@link IMessageDelivery} to inform external components that an attempt to deliver
  * a message unit to the business application was executed.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
  */
-public class MessageDeliveryEvent extends AbstractMessageProcessingEvent implements IMessageDeliveryEvent {
+public class MessageDelivery extends AbstractMessageProcessingEvent implements IMessageDelivery {
     /**
      * Indicates whether the message unit was successful delivered
      */
@@ -38,7 +38,7 @@ public class MessageDeliveryEvent extends AbstractMessageProcessingEvent impleme
      */
     private final MessageDeliveryException failureReason;
 
-    public MessageDeliveryEvent(final IMessageUnit subject, final boolean successFulDelivery,
+    public MessageDelivery(final IMessageUnit subject, final boolean successFulDelivery,
                                 final MessageDeliveryException failureReason) {
         super(subject);
         this.successFulDelivery = successFulDelivery;

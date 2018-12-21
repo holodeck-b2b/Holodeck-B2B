@@ -26,11 +26,9 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
  * cause of failure is included in the event.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 4.0.0
- * @deprecated Use {@link IMessageDelivery} instead
+ * @since HB2B_NEXT_VERSION
  */
-@Deprecated
-public interface IMessageDeliveryEvent extends IMessageProcessingEvent {
+public interface IMessageDelivery extends IMessageProcessingEvent, IMessageDeliveryEvent {
 
     /**
      * Indicates whether the delivery attempt was successful or not, i.e. if no {@link MessageDeliveryException}s
@@ -38,7 +36,8 @@ public interface IMessageDeliveryEvent extends IMessageProcessingEvent {
      *
      * @return  <code>true</code> if the delivery attempt was successful, or<br><code>false</code> otherwise
      */
-    boolean isDeliverySuccessful();
+    @Override
+	boolean isDeliverySuccessful();
 
     /**
      * Gets the {@link MessageDeliveryException} that was thrown during the message delivery attempt.
@@ -46,6 +45,7 @@ public interface IMessageDeliveryEvent extends IMessageProcessingEvent {
      *
      * @return  The exception that caused the message delivery failure
      */
-    MessageDeliveryException getFailureReason();
+    @Override
+	MessageDeliveryException getFailureReason();
 }
 

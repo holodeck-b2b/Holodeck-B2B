@@ -25,10 +25,10 @@ import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.events.security.EncryptionFailedEvent;
-import org.holodeckb2b.events.security.SignatureCreatedEvent;
-import org.holodeckb2b.events.security.SigningFailedEvent;
-import org.holodeckb2b.events.security.UTCreationFailedEvent;
+import org.holodeckb2b.events.security.EncryptionFailed;
+import org.holodeckb2b.events.security.SignatureCreated;
+import org.holodeckb2b.events.security.SigningFailed;
+import org.holodeckb2b.events.security.UTCreationFailure;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.events.security.ISignatureCreatedEvent;
@@ -182,7 +182,7 @@ public class CreateSecurityHeaders extends BaseHandler {
                     ((IUserMessage) mu).getPayloads().forEach((pl)
                             -> digests.entrySet().stream().filter((d) -> CompareUtils.areEqual(d.getKey(), pl))
                                     .forEachOrdered((d) -> msgDigests.put(d.getKey(), d.getValue())));
-                    eventProcessor.raiseEvent(new SignatureCreatedEvent((IUserMessage) mu, msgDigests), mc);
+                    eventProcessor.raiseEvent(new SignatureCreated((IUserMessage) mu, msgDigests), mc);
                 });
             }
         } else {
@@ -202,11 +202,11 @@ public class CreateSecurityHeaders extends BaseHandler {
 
                 IMessageProcessingEvent event;
                 if (result instanceof ISignatureProcessingResult)
-                    event = new SigningFailedEvent(mu, reason);
+                    event = new SigningFailed(mu, reason);
                 else if (result instanceof IEncryptionProcessingResult)
-                    event = new EncryptionFailedEvent(mu, reason);
+                    event = new EncryptionFailed(mu, reason);
                 else
-                    event = new UTCreationFailedEvent(mu, result.getTargetedRole(), reason);
+                    event = new UTCreationFailure(mu, result.getTargetedRole(), reason);
                 eventProcessor.raiseEvent(event, mc);
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Holodeck B2B Team.
+ * Copyright (C) 2018 The Holodeck B2B Team.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -16,8 +16,6 @@
  */
 package org.holodeckb2b.interfaces.events.security;
 
-import org.holodeckb2b.interfaces.events.security.ISecurityProcessingFailureEvent;
-
 /**
  * Is the <i>message processing event</i> that indicates that the verification of a signature for a received message
  * unit failed. This event is to inform the business application (or extensions) that a message unit was received but
@@ -25,6 +23,8 @@ import org.holodeckb2b.interfaces.events.security.ISecurityProcessingFailureEven
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
+ * @deprecated Use {@link ISignatureVerificationFailure} instead
  */
+@Deprecated
 public interface ISignatureVerificationFailedEvent extends ISecurityProcessingFailureEvent {
 }

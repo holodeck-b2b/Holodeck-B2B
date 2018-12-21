@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Holodeck B2B Team.
+ * Copyright (C) 2018 The Holodeck B2B Team.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -23,6 +23,8 @@ package org.holodeckb2b.interfaces.events.security;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
+ * @deprecated Use {@link IDecryptionFailure} instead
  */
+@Deprecated
 public interface IDecryptionFailedEvent extends ISecurityProcessingFailureEvent {
 }

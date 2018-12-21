@@ -32,12 +32,10 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
  * continues or not.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 4.0.0
+ * @since HB2B_NEXT_VERSION
  * @see IMessageValidationSpecification
- * @deprecated Use {@link ICustomValidationFailure} instead
  */
-@Deprecated
-public interface ICustomValidationFailedEvent extends IMessageProcessingEvent {
+public interface ICustomValidationFailure extends IMessageProcessingEvent, ICustomValidationFailedEvent {
 
     /**
      * Gets the information on the errors that were found during the custom validation of the message unit, grouped by
@@ -48,7 +46,8 @@ public interface ICustomValidationFailedEvent extends IMessageProcessingEvent {
      *
      * @return  The detected validation errors, grouped per validator
      */
-    Map<String, Collection<MessageValidationError>> getValidationErrors();
+    @Override
+	Map<String, Collection<MessageValidationError>> getValidationErrors();
 
     /**
      * Indicates whether all configured validators were executed or whether the validation was stopped after errors
@@ -58,7 +57,8 @@ public interface ICustomValidationFailedEvent extends IMessageProcessingEvent {
      *
      * @return <code>true</code> when not all validators were executed, <br><code>false</code> otherwise
      */
-    boolean executedAllValidators();
+    @Override
+	boolean executedAllValidators();
 
     /**
      * Indicates whether the message unit was rejected and no further message processing takes place due to the detected
@@ -66,5 +66,6 @@ public interface ICustomValidationFailedEvent extends IMessageProcessingEvent {
      *
      * @return  <code>true</code> when the message processing was stopped,<br><code>false</code> otherwise
      */
-    boolean isMessageRejected();
+    @Override
+	boolean isMessageRejected();
 }

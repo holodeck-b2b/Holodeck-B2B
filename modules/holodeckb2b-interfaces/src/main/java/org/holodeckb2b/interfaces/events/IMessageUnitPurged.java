@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Holodeck B2B Team.
+ * Copyright (C) 2018 The Holodeck B2B Team.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -32,10 +32,8 @@ import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
  * if needed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.1.0
- * @deprecated Use {@link IMessageUnitPurged} instead
+ * @since HB2B_NEXT_VERSION
  */
-@Deprecated
-public interface IMessageUnitPurgedEvent extends IMessageProcessingEvent {
+public interface IMessageUnitPurged extends IMessageProcessingEvent, IMessageUnitPurgedEvent {
 
 }

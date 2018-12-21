@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Holodeck B2B Team.
+ * Copyright (C) 2018 The Holodeck B2B Team.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -16,8 +16,6 @@
  */
 package org.holodeckb2b.interfaces.events.security;
 
-import org.holodeckb2b.interfaces.events.security.ISecurityHeaderCreationFailureEvent;
-
 /**
  * Is the <i>message processing event</i> that indicates that the signing of a message to be sent containing the
  * message unit failed. This event is to inform the business application (or extensions) that a submitted message unit
@@ -25,7 +23,9 @@ import org.holodeckb2b.interfaces.events.security.ISecurityHeaderCreationFailure
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
+ * @deprecated Use {@link ISigningFailure} instead
  */
+@Deprecated
 public interface ISigningFailedEvent extends ISecurityHeaderCreationFailureEvent {
 
 }

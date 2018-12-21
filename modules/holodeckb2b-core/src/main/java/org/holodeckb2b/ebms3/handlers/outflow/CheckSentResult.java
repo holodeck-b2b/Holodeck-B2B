@@ -23,7 +23,7 @@ import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.events.MessageTransferEvent;
+import org.holodeckb2b.events.MessageTransfer;
 import org.holodeckb2b.interfaces.events.IMessageTransferEvent;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -107,7 +107,7 @@ public class CheckSentResult extends BaseHandler {
                     IMessageTransferEvent transferEvent;
                     if (!success) {
                         updateManager.setProcessingState(mu, ProcessingState.TRANSPORT_FAILURE);
-                        transferEvent = new MessageTransferEvent(mu, mc.getFailureReason());
+                        transferEvent = new MessageTransfer(mu, mc.getFailureReason());
                     } else {
                         // State to set depends on type of message unit
                         if (mu instanceof ISignalMessage) {
@@ -122,7 +122,7 @@ public class CheckSentResult extends BaseHandler {
                             else
                                 updateManager.setProcessingState(mu, ProcessingState.DELIVERED);
                         }
-                        transferEvent = new MessageTransferEvent(mu);
+                        transferEvent = new MessageTransfer(mu);
                     }
                     log.info("Processing state for message unit [" + mu.getMessageId() + "] changed to "
                                 + mu.getCurrentProcessingState().getState());

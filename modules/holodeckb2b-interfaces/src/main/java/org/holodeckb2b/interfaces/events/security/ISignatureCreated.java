@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Holodeck B2B Team.
+ * Copyright (C) 2018 The Holodeck B2B Team.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -30,11 +30,9 @@ import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
  * of a resulting <i>NRR</i>.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 2.1.0
- * @deprecated Use {@link ISignatureCreated} event
+ * @since HB2B_NEXT_VERSION
  */
-@Deprecated
-public interface ISignatureCreatedEvent extends IMessageProcessingEvent {
+public interface ISignatureCreated extends IMessageProcessingEvent, ISignatureCreatedEvent {
 
     /**
      * Gets the information on the digests that were calculated for the payloads in the User Message that is the <i>
@@ -42,5 +40,6 @@ public interface ISignatureCreatedEvent extends IMessageProcessingEvent {
      *
      * @return  A <code>Map</code> linking the digest meta-data to each payload from the user message
      */
-    public Map<IPayload, ISignedPartMetadata>   getPayloadDigests();
+    @Override
+	public Map<IPayload, ISignedPartMetadata>   getPayloadDigests();
 }

@@ -14,28 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.as4.receptionawareness;
+package org.holodeckb2b.events.security;
 
-import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
-import org.holodeckb2b.interfaces.events.IDuplicateReceivedEvent;
+import org.holodeckb2b.interfaces.events.security.ISigningFailure;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 
 /**
- * Is the implementation class of {@link IDuplicateReceivedEvent} to indicate that the received User Message has already
- * been received and processed.
+ * Is the implementation of {@link ISigningFailure} to indicate that signing of a submitted message unit failed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
  */
-public class DuplicateReceivedEvent extends AbstractMessageProcessingEvent implements IDuplicateReceivedEvent {
+public class SigningFailed extends AbstractSecurityProcessingFailureEvent implements ISigningFailure {
 
-    public DuplicateReceivedEvent(IMessageUnit subject) {
-        super(subject);
+    /**
+     * Creates a new <code>SigningFailed</code> for the given message unit and failure reason.
+     *
+     * @param subject   The message unit
+     * @param reason    The reason why the signing failed
+     */
+    public SigningFailed(IMessageUnit subject, SecurityProcessingException reason) {
+        super(subject, reason);
     }
-
-    @Override
-    public boolean isEliminated() {
-        return true; // Currently duplicates are always eliminated
-    }
-
 }

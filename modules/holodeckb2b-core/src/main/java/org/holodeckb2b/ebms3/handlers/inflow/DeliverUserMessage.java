@@ -21,7 +21,7 @@ import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.OtherContentError;
 import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
-import org.holodeckb2b.events.MessageDeliveryEvent;
+import org.holodeckb2b.events.MessageDelivery;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
@@ -99,7 +99,7 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
                 }
             }
             // Raise delivery event to inform external components
-            HolodeckB2BCore.getEventProcessor().raiseEvent(new MessageDeliveryEvent(um, failure == null, failure), mc);
+            HolodeckB2BCore.getEventProcessor().raiseEvent(new MessageDelivery(um, failure == null, failure), mc);
         } else {
             // This message is not ready for delivery now which is caused by it already been delivered by another
             // thread. This however should not occur normaly.

@@ -17,29 +17,29 @@
 package org.holodeckb2b.events.security;
 
 import java.util.Map;
+
+import org.holodeckb2b.interfaces.events.security.ISignatureCreated;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.events.security.ISignatureCreatedEvent;
-import org.holodeckb2b.interfaces.events.security.ISignatureVerifiedEvent;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 
 /**
- * Is the implementation class of {@link ISignatureVerifiedEvent} to indicate that a signature for a received User
+ * Is the implementation class of {@link ISignatureCreated} to indicate that a signature for a received User
  * Message is successfully verified. The information about the digests can only be set when the event is created and not
  * be modified afterwards.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
-public class SignatureCreatedEvent extends AbstractSignatureProcessedEvent implements ISignatureCreatedEvent {
+public class SignatureCreated extends AbstractSignatureProcessedEvent implements ISignatureCreated {
 
     /**
-     * Creates a new <code>SignatureCreatedEvent</code> for the given User Message and payload digests.
+     * Creates a new <code>SignatureCreated</code> for the given User Message and payload digests.
      *
      * @param subject   The User Message that was signed
      * @param digests   The information about the digests for the payloads that were part of the signature
      */
-    public SignatureCreatedEvent(final IUserMessage subject, final Map<IPayload, ISignedPartMetadata> digests) {
+    public SignatureCreated(final IUserMessage subject, final Map<IPayload, ISignedPartMetadata> digests) {
         super(subject, null, digests);
     }
 

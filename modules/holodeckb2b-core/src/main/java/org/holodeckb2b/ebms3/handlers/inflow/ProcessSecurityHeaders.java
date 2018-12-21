@@ -29,7 +29,7 @@ import org.holodeckb2b.ebms3.errors.FailedDecryption;
 import org.holodeckb2b.ebms3.errors.PolicyNoncompliance;
 import org.holodeckb2b.events.security.DecryptionFailedEvent;
 import org.holodeckb2b.events.security.SignatureVerificationFailedEvent;
-import org.holodeckb2b.events.security.SignatureVerifiedEvent;
+import org.holodeckb2b.events.security.SignatureVerified;
 import org.holodeckb2b.events.security.UTProcessingFailureEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
@@ -137,7 +137,7 @@ public class ProcessSecurityHeaders extends BaseHandler {
      * Handles the result of the processing a part of the WS-Security header.
      * <p>When the the part is successfully processed, the processing result is added to the message context so the next
      * handlers can use it for policy conformance, authentication or authorization. In case the result applies to the
-     * verification of the signature also a {@link SignatureVerifiedEvent} is raised.
+     * verification of the signature also a {@link SignatureVerified} is raised.
      * <p>If the processing failed, an ebMS Error will be generated for all the received message units, their processing
      * state is set to <i>FAILURE</i> and a message processing event will be raised. The ebMS Error generated depends on
      * the reason of failure and the part which failed to process; if the error indicate a security policy violation a
@@ -158,10 +158,10 @@ public class ProcessSecurityHeaders extends BaseHandler {
                 for (final IMessageUnitEntity mu : rcvdMsgUnits) {
                     ISignatureVerifiedEvent event;
                     if (mu instanceof IUserMessage)
-                        event = new SignatureVerifiedEvent((IUserMessage) mu, sigResult.getHeaderDigest(),
+                        event = new SignatureVerified((IUserMessage) mu, sigResult.getHeaderDigest(),
                                                            sigResult.getPayloadDigests());
                     else
-                        event = new SignatureVerifiedEvent((ISignalMessage) mu, sigResult.getHeaderDigest());
+                        event = new SignatureVerified((ISignalMessage) mu, sigResult.getHeaderDigest());
                     eventProcessor.raiseEvent(event, mc);
                 }
             } else if (result instanceof IEncryptionProcessingResult)

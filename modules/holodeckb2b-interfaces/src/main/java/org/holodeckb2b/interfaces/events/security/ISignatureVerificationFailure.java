@@ -17,15 +17,12 @@
 package org.holodeckb2b.interfaces.events.security;
 
 /**
- * Is the <i>message processing event</i> that indicates that the encryption of a message to be sent containing the
- * message unit failed. This event is to inform the business application (or extensions) that a submitted message unit
- * could not be sent because it could not be encrypted.
+ * Is the <i>message processing event</i> that indicates that the verification of a signature for a received message
+ * unit failed. This event is to inform the business application (or extensions) that a message unit was received but
+ * can not be delivered due to the invalid signature. Based on the event the problem might be handled out of band.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 4.0.0
- * @deprecated Use {@link IEncryptionFailure} instead
+ * @since HB2B_NEXT_VERSION
  */
-@Deprecated
-public interface IEncryptionFailedEvent extends ISecurityHeaderCreationFailureEvent {
-
+public interface ISignatureVerificationFailure extends ISecurityProcessingFailure, ISignatureVerificationFailedEvent {
 }
