@@ -168,8 +168,8 @@ public class HeaderValidationHandler extends BaseHandler {
                     log.debug("Header of " + MessageUnitUtils.getMessageUnitName(m) + " [" + m.getMessageId()
                             + "] successfully validated");
                 else {
-                    log.info("Header of " + MessageUnitUtils.getMessageUnitName(m) + " [" + m.getMessageId()
-                            + "] is invalid!\n\tDetails: " + validationResult);
+                	log.warn("Header of " + MessageUnitUtils.getMessageUnitName(m) + " [" + m.getMessageId()
+                            + "] is invalid!\n\tDetails: " + printErrors(validationResult.getValidationErrors()));
                     for(IEbmsError e : createEbMSErrors(m.getMessageId(), validationResult.getValidationErrors()))
                         MessageContextUtils.addGeneratedError(mc, e);
                     HolodeckB2BCore.getStorageManager().setProcessingState(m, ProcessingState.FAILURE);
@@ -178,6 +178,19 @@ public class HeaderValidationHandler extends BaseHandler {
         }
 
         return InvocationResponse.CONTINUE;
+    }
+    
+    /**
+     * Helper method to print the description of all validation errors to the log.
+     * 
+     * @param validationErrors	The validation errors found in the message
+     * @return					List of the error descriptions
+     */
+    private String printErrors(final Map<String, Collection<MessageValidationError>> validationErrors) {
+    	StringBuilder errList = new StringBuilder();
+    	for(MessageValidationError validationError : validationErrors.values().iterator().next())
+    		errList.append("\n\t\t").append(validationError.getDescription());    	
+    	return errList.toString();
     }
     
     /**
@@ -214,7 +227,7 @@ public class HeaderValidationHandler extends BaseHandler {
             // Add intro, including number of errors found.
             invalidHeaderErrorDetails.insert(0, " validation error(s) found in the message:\n")
                                      .insert(0, String.valueOf(totalErrors))
-                                     .insert(0, "The message was found to be invalid!\n\n");
+                                     .insert(0, "The message was found to be invalid!\n");
             // Create the validationError
             InvalidHeader invalidHdr = new InvalidHeader(invalidHeaderErrorDetails.toString(), messageId);
             invalidHdr.setSeverity(maxSeverity == MessageValidationError.Severity.Failure ? IEbmsError.Severity.failure
