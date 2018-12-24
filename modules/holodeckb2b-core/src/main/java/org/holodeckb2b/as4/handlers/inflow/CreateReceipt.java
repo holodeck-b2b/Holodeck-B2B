@@ -26,7 +26,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.as4.receptionawareness.ReceiptCreated;
+import org.holodeckb2b.as4.receptionawareness.ReceiptCreatedEvent;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -151,7 +151,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
                 log.debug("Receipt for message [msgId=" + um.getMessageId() + "] created successfully");
                 // Trigger event to signal that the event was created
                 HolodeckB2BCore.getEventProcessor().raiseEvent(
-                   new ReceiptCreated(um, receipt,
+                   new ReceiptCreatedEvent(um, receipt,
                                            um.getCurrentProcessingState().getState() == ProcessingState.DUPLICATE),
                    mc);
             } catch (final PersistenceException ex) {

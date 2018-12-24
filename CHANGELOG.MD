@@ -5,11 +5,27 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 4.1.0-SNAPSHOT
 ##### Unreleased
 ### Added
-* Support for **sending** selective pull requests using simple selection items as described in section 5.1 of the
-  ebMS 3 Part 2 (Advanced Features) specification.
+* Support for sending selective pull requests using simple selection items as described in section 5.1 of the
+  ebMS 3 Part 2 (Advanced Features) specification. NOTE: 4.1.0 only supports sending of selective pull requests. It does
+  not use selection criteria when processing received pull requests. 
+* Added two generic events to indicate that a problem occurred during the processing of a received message  
+  (`IReceivedMessageProcessingFailure`) or a message to be send (`ISendMessageProcessingFailure`). These event are
+  intended for use as _"filters"_ when configuring the event handling. Specific events, are available for specific
+  errors. Using the generic events the error reporting defined by the P-Mode parameters **PMode.ErrorHandling.Report.ProcessErrorNotifyProducer** and **PMode.ErrorHandling.Report.ProcessErrorNotifyConsumer**
+  can be implemented.
+* Added a new event (`org.holodeckb2b.interfaces.events.IHeaderValidationFailure`) to indicate that the validation 
+  of the message header failed 
+* New interfaces for all _message processing events_ without the _Event_ suffix. The old interfaces are still available
+  for backward compatibility, but should not be used anymore (see also below).  
 
 ### Changed
-* Generalized the header validation handler so it can be more easily reused for other protocols.  
+* Generalised the header validation handler so it can be more easily reused for other protocols.
+* Removed check on empty _ConversationId_ when submitting a User Message to the Core.
+* All event implementation classes to use the new event interface names
+
+### Deprecated
+* The interfaces for the  _message processing events_ with the _Event_ suffix. They are replaced with interfaces without
+  suffix to shorten the event names and prevent duplication of "event" in the qualifies class name.
 
 ## 4.0.0
 ##### 2018-11-04

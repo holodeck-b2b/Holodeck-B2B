@@ -27,9 +27,9 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
  */
-public class DuplicateReceived extends AbstractMessageProcessingEvent implements IDuplicateReceived {
+public class DuplicateReceivedEvent extends AbstractMessageProcessingEvent implements IDuplicateReceived {
 
-    public DuplicateReceived(IMessageUnit subject) {
+    public DuplicateReceivedEvent(IMessageUnit subject) {
         super(subject);
     }
 

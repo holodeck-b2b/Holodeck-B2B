@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
-public class ReceiptCreated extends AbstractMessageProcessingEvent implements IReceiptCreated {
+public class ReceiptCreatedEvent extends AbstractMessageProcessingEvent implements IReceiptCreated {
 
     /**
      * The Receipt that was created for the received User Message
@@ -43,19 +43,19 @@ public class ReceiptCreated extends AbstractMessageProcessingEvent implements IR
     private final boolean     forDuplicate;
 
     /**
-     * Creates a new <code>ReceiptCreated</code> for the given User Message and Receipt without duplicate indicator
+     * Creates a new <code>ReceiptCreatedEvent</code> for the given User Message and Receipt without duplicate indicator
      * <p>NOTE: As Receipt can only be created for User Message message units there is no constructor for other message
      * unit types.
      *
      * @param subject The received User Message for which the Receipt was created
      * @param receipt The created Receipt
      */
-    public ReceiptCreated(final IUserMessage subject, final IReceipt receipt) {
+    public ReceiptCreatedEvent(final IUserMessage subject, final IReceipt receipt) {
         this(subject, receipt, false);
     }
 
     /**
-     * Creates a new <code>ReceiptCreated</code> for the given User Message, Receipt and duplicate indicator.
+     * Creates a new <code>ReceiptCreatedEvent</code> for the given User Message, Receipt and duplicate indicator.
      * <p>NOTE: As Receipt can only be created for User Message message units there is no constructor for other message
      * unit types.
      *
@@ -64,7 +64,7 @@ public class ReceiptCreated extends AbstractMessageProcessingEvent implements IR
      * @param isForDuplicate    Indicates whether the received User Message is a duplicate and not delivered to the
      *                          business application.
      */
-    public ReceiptCreated(final IUserMessage subject, final IReceipt receipt, final boolean isForDuplicate) {
+    public ReceiptCreatedEvent(final IUserMessage subject, final IReceipt receipt, final boolean isForDuplicate) {
         super(subject);
         this.receipt = receipt;
         this.forDuplicate = isForDuplicate;

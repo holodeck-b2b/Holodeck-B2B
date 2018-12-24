@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
  */
-public class CustomValidationFailure extends AbstractMessageProcessingEvent implements ICustomValidationFailure {
+public class CustomValidationFailureEvent extends AbstractMessageProcessingEvent implements ICustomValidationFailure {
 
     /**
      * Holds the indicator whether all specified validators were executed
@@ -48,12 +48,12 @@ public class CustomValidationFailure extends AbstractMessageProcessingEvent impl
     private Map<String, Collection<MessageValidationError>> validationErrors;
 
     /**
-     * Creates a new <code>CustomValidationFailure</code> for the given message unit and validation information.
+     * Creates a new <code>CustomValidationFailureEvent</code> for the given message unit and validation information.
      *
      * @param subject               The message for which the validation failed
      * @param validationResult      The results of the validation
      */
-    public CustomValidationFailure(IMessageUnit subject, ValidationResult validationResult) {
+    public CustomValidationFailureEvent(IMessageUnit subject, ValidationResult validationResult) {
         super(subject);
         if (Utils.isNullOrEmpty(validationResult.getValidationErrors()))
             throw new IllegalArgumentException("This event can only be raised if validation errors were found!");

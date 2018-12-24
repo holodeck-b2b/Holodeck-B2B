@@ -23,19 +23,21 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
  * Defines the interface of the Holodeck B2B Core component that is responsible for the processing of {@link
  * IMessageProcessingEvent}s. When a component want to inform others about an event that occurred in the processing of a
  * message unit it MUST use the event processor to <i>"raise"</i> the event. The event processor will then ensure that
- * the event is handled as configured in the P-Mode that governs the processing of the message unit. To get access to
- * the running event processor use the {@link HolodeckB2BCoreInterface#getEventProcessor()} method.
+ * the event is handled as configured in either the global configuration (as registered with the Core) or the P-Mode 
+ * governing the processing of the message unit to which the event applies. To get access to the running event processor 
+ * classes should use the {@link HolodeckB2BCoreInterface#getEventProcessor()} method.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
+ * @since HB2B_NEXT_VERSION Requirement to take the global event configuration into account when processing the event.
  */
 public interface IMessageProcessingEventProcessor {
 
     /**
      * Raises an event for processing.
-     * <p>Because the event is only to inform about the message processing but not part of it the implementation will
+     * <p>Because the event is only to inform about the message processing but not part of it the implementation MUST
      * ensure that message processing is not affected, i.e. not change any information of the referenced message unit
-     * and not throw any exception.
+     * and not throw any exception. 
      *
      * @param event         The event that occurred while processing the message unit and that should be processed
      * @param msgContext    The Axis2 {@link MessageContext} of the message unit the event applies to, if available.

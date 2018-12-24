@@ -173,6 +173,9 @@ public class HeaderValidationHandler extends BaseHandler {
                     for(IEbmsError e : createEbMSErrors(m.getMessageId(), validationResult.getValidationErrors()))
                         MessageContextUtils.addGeneratedError(mc, e);
                     HolodeckB2BCore.getStorageManager().setProcessingState(m, ProcessingState.FAILURE);
+                    HolodeckB2BCore.getEventProcessor().raiseEvent(
+                					new HeaderValidationFailureEvent(m, 
+                								validationResult.getValidationErrors().values().iterator().next()), mc);
                 }
             }
         }
