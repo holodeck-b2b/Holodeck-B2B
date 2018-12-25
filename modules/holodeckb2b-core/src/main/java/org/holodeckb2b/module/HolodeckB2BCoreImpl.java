@@ -16,7 +16,9 @@
  */
 package org.holodeckb2b.module;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.axis2.AxisFault;
@@ -45,7 +47,10 @@ import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
@@ -132,6 +137,12 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * @since 4.0.0
      */
     private ISecurityProvider securityProvider = null;
+    
+    /**
+     * The list of globally configured event handlers 
+     * 
+     */
+    private List<IMessageProcessingEventConfiguration>	eventConfigurations = null;
 
     /**
      * Initializes the Holodeck B2B Core module.
@@ -225,6 +236,8 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
 
         log.trace("Create list of available message delivery methods");
         msgDeliveryFactories = new HashMap<>();
+        log.trace("Create list of globally configured event handlers");
+        eventConfigurations = new ArrayList<>();
 
         // From this point on other components can be started which need access to the Core
         log.debug("Make Core available to outside world");
@@ -447,5 +460,69 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      */
     ISecurityProvider getSecurityProvider() {
         return securityProvider;
+    }
+
+    /**
+     * Registers a <i>global</i> event handler for handling {@link IMessageProcessingEvent}s that occur during the 
+     * processing of messages. If there is already a configuration registered with the same <code>id</code> it will be
+     * replaced by the new configuration.
+     * <p>NOTE: When the P-Mode of a message also defines an event handler for an event for which also a global 
+     * configuration exists the one in the P-Mode takes precedence over the global configuration.
+     * 
+     * @param eventConfiguration	The event handler's configuration  	
+     * @return 						<code>true</code> if an existing event configuration was replaced,
+     * 								<code>false</code> if this was a new registration 
+     * @throws MessageProccesingEventHandlingException When the given event handler configuration cannot be registered,
+     * 												   for example because the handler class is not available or no id
+     * 												   is specified
+     * @since HB2B_NEXT_VERSION
+     */
+    @Override
+	public boolean registerEventHandler(IMessageProcessingEventConfiguration eventConfiguration) 
+    																	throws MessageProccesingEventHandlingException {
+    	final String id = eventConfiguration.getId();
+    	if (Utils.isNullOrEmpty(id)) {
+    		log.error("Event configuration must have an id to register!");
+    		throw new MessageProccesingEventHandlingException("No id specified");
+    	}
+    	int i; boolean exists = false;
+    	for(i = 0; i < eventConfigurations.size() && !exists; i++)
+    		exists = eventConfigurations.get(i).getId().equals(id);
+    	if (exists) {
+    		log.trace("Replacing existing event handler configuration [id=" + id + "]");
+    		eventConfigurations.set(i, eventConfiguration);
+    	} else 
+    		eventConfigurations.add(eventConfiguration);
+    	log.info("Registered event handler configuration [id" + id + "]");
+    	return exists;
+    }
+    
+    /**
+     * Removes a <i>global</i> event handler configuration.
+     * 
+     * @param id	The id of the event handler configuration to remove
+     * @since HB2B_NEXT_VERSION 
+     */
+    @Override
+	public void removeEventHandler(String id) {
+    	int i; boolean exists = false;
+    	for(i = 0; i < eventConfigurations.size() && !exists; i++)
+    		exists = eventConfigurations.get(i).getId().equals(id);
+    	if (exists) {    		
+    		eventConfigurations.remove(i);
+    		log.info("Removing event handler configuration [id=" + id + "]");
+    	} else
+    		log.warn("No event handler configuration registered for id=" + id);
+    }
+    
+    /**
+     * Gets the list of globally configured event handlers. 
+     *  
+     * @return		The list of event handler configurations 
+     * @since HB2B_NEXT_VERSION
+     */
+    @Override
+	public List<IMessageProcessingEventConfiguration> getEventHandlerConfiguration() {
+    	return eventConfigurations;
     }
 }

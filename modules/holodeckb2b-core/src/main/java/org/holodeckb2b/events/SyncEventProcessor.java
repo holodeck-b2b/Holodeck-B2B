@@ -22,6 +22,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.events.EventUtils;
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
@@ -37,11 +38,8 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
  * </i>that occur during the processing of a message unit and about which the business application may need to be
  * informed.
  * <p>Whether an event must be reported is configured in the P-Mode that governs the processing of the referenced
- * message unit. The P-Mode is however not part of the information set of {@link IMessageUnit} and the processor
- * therefore should find it. While the message units are processed by the Holodeck B2B Core the P-Mode is part of the
- * entity object implementation of {@link IMessageUnit}. This processor will therefore try to convert the referenced
- * message unit in the event to the {@link MessageUnit} entity class to get the P-Mode. As a result <b>this processor
- * can only handle events raised by Holodeck B2B Core components that include the entity object in the event!</b>
+ * message unit or in the global event configuration registered in the Holodeck B2B Core. As the P-Mode configuration
+ * takes precedence over the global one it is searched first for a event handler.  
  * <p>This implementation processes the events directly when raised to the processor, i.e. processing of the event is
  * done as part of the message processing. This processor only passes raised events to the handlers, there is no
  * archiving.
@@ -74,73 +72,84 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
             log.warn("A " + eventType + " was raised, but without reference to a message unit!");
             return;
         }
-        final String msgUnitType = event.getSubject().getClass().getSimpleName();
+        final String msgUnitType = MessageUnitUtils.getMessageUnitName(event.getSubject());
         final String messageId = event.getSubject().getMessageId();
-        try {
-            log.debug("A " + eventType + " event [" + event.getId() + "] was raised for " + msgUnitType 
-            			+ " with msgId=" + messageId);
-            final IMessageUnit subject = event.getSubject();
-            final String pmodeId = subject.getPModeId();
-            if (Utils.isNullOrEmpty(pmodeId)) {
-                // No P-Mode available for this message unit => no handler config
-                log.warn(msgUnitType + " with msgId=[" + messageId + "] has no P-Mode assigned. Can not handle event!");
-                return;
-            }
-            // Get the event handler configuration from the correct leg of the P-Mode. Because the message unit may not
-            // refer to a leg, we use the REQUEST leg as default
-            final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(pmodeId);
-            if (pmode == null) {
-                // The P-Mode is not available anymore (should not happen as the message unit is current in process)
-                log.error("The P-Mode for the message unit [" + pmodeId + "] is not available!");
-                return;
-            }
-            final ILeg leg = pmode.getLeg(ILeg.Label.REQUEST);
-            final List<IMessageProcessingEventConfiguration> eventHandlers = leg.getMessageProcessingEventConfiguration();
-            if (Utils.isNullOrEmpty(eventHandlers)) {
-                log.trace(leg.getLabel() != null ? leg.getLabel().toString() : "REQUEST" + " leg of P-Mode [" + pmodeId
-                         + "] for event [" + event.getId() + "] has no event handlers configured => event is ignored");
-                return;
-            }
-            log.trace(leg.getLabel() != null ? leg.getLabel().toString() : "REQUEST" + " leg of P-Mode [" + pmodeId
-                         + "] for event [" + event.getId() + "] has " + eventHandlers.size()
-                         + " event handlers configured.");
-            // Check each configured if it needs to handle this event
-            for (final IMessageProcessingEventConfiguration c : eventHandlers) {
-                final boolean shouldHandle = EventUtils.shouldHandleEvent(c, event);
-                final String handlerClassname = c.getFactoryClass();
-                log.trace(handlerClassname + (shouldHandle ? " should" : " does not") + " handle " + eventType + " for "
-                          + msgUnitType + " with msgId=[" + messageId + "]");
-                if (shouldHandle) {
-                    // Create the factory class
-                    IMessageProcessingEventHandlerFactory factory = null;
-                    try {
-                        factory = (IMessageProcessingEventHandlerFactory)
-                                                                    	Class.forName(handlerClassname).newInstance();
-                    }   catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-                        log.error("Could not create factory instance (specified class name=" + c.getFactoryClass()
-                                  + ") due to a " + ex.getClass().getSimpleName());
-                        return;
-                    }
-                    log.trace("Initialize the handler factory");
-                    factory.init(c.getHandlerSettings());
-                    // Catch exceptions while the event is processed by the handler to prevent that error in one handler
-                    // will stop processing in others as well
-                    try {
-                        log.trace("Pass event to handler for further processing");
-                        factory.createHandler().handleEvent(event);
-                        log.info(eventType + "[id= " + event.getId() + "] for " + msgUnitType + " with msgId=["
-                                + messageId + "] handled by " + handlerClassname);
-                    } catch (final Exception ex) {
-                        log.warn("An exception occurred when " + eventType + "[id= " + event.getId()
-                                + " was processed by " + handlerClassname
-                                + "\n\tException details: " + ex.getMessage());
-                    }
-                }
-            }
-        } catch (final Throwable t) {
-            // Ensure that any problem with handling the event does not affect the normal message processing
-            log.error("An " + t.getClass().getSimpleName() + " error occurred while processing a "
-                        + eventType + " event was raised for " + msgUnitType + " with msgId=" + messageId);
+        log.trace("A " + eventType + " event [" + event.getId() + "] was raised for " + msgUnitType 
+        			+ " with msgId=" + messageId);
+        final IMessageUnit subject = event.getSubject();
+        final String pmodeId = subject.getPModeId();
+        if (Utils.isNullOrEmpty(pmodeId)) {
+            // No P-Mode available for this message unit => no handler config
+            log.debug(msgUnitType + " with msgId=[" + messageId + "] has no P-Mode assigned. Can not handle event!");
+            return;
         }
+        // Get the event handler configuration from the correct leg of the P-Mode. Because the message unit may not
+        // refer to a leg, we use the REQUEST leg as default
+        final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(pmodeId);
+        if (pmode == null) {
+            // The P-Mode is not available anymore (should not happen as the message unit is current in process)
+            log.error("The P-Mode for the message unit [" + pmodeId + "] is not available!");
+            return;
+        }
+        final ILeg leg = pmode.getLeg(ILeg.Label.REQUEST);
+        final List<IMessageProcessingEventConfiguration> eventHandlers = leg.getMessageProcessingEventConfiguration();
+        if (Utils.isNullOrEmpty(eventHandlers)) 
+            log.debug("P-Mode [" + pmodeId + "] has no event handlers configured");                
+        else if (!handleEvent(eventHandlers, event, mc)) {
+        	log.trace(eventType + " not handled by P-Mode configured handlers => check global configuration");
+        	if (!handleEvent(HolodeckB2BCoreInterface.getMessageProcessingEventConfiguration(), event, mc))
+        		log.info("No handler defined for " + eventType + ", event [" + event.getId() + "] ignored!");
+        }            
     }
+
+	/**
+	 * Helper method to check if and handle the given event is handled by any of the given event handlers.
+	 *  
+	 * @param eventHandlers		The set of configured event handlers 
+	 * @param event				The event to be handled
+	 * @param mc				The message context
+	 */
+	private boolean handleEvent(List<IMessageProcessingEventConfiguration> eventHandlers, IMessageProcessingEvent event,
+			MessageContext mc) {
+		if (Utils.isNullOrEmpty(eventHandlers))
+			return false;
+		
+        final String eventType = event.getClass().getSimpleName();
+        final String msgUnitType = MessageUnitUtils.getMessageUnitName(event.getSubject());
+		// Check each configured if it needs to handle this event
+		for (final IMessageProcessingEventConfiguration c : eventHandlers) {
+			final boolean shouldHandle = EventUtils.shouldHandleEvent(c, event);
+			final String handlerClassname = c.getFactoryClass();
+			log.trace(handlerClassname + (shouldHandle ? " should" : " does not") + " handle " + eventType + " for "
+					+ msgUnitType);
+			if (shouldHandle) {
+				// Create the factory class
+				IMessageProcessingEventHandlerFactory factory = null;
+				try {
+					factory = (IMessageProcessingEventHandlerFactory) Class.forName(handlerClassname).newInstance();
+				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+					log.error("Could not create factory instance (specified class name=" + c.getFactoryClass() 
+								+ ") due to a " + ex.getClass().getSimpleName());
+					continue;
+				}
+				// Catch exceptions while the event is processed by the handler to prevent that error in one handler
+				// will stop processing in others as well
+				try {
+					log.trace("Initialize the handler factory");
+					factory.init(c.getHandlerSettings());
+					log.trace("Pass event to handler for further processing");
+					factory.createHandler().handleEvent(event);
+					log.info(eventType + "[id= " + event.getId() + "] for " + msgUnitType + "] handled by " 
+								+ handlerClassname);
+				} catch (final Throwable t) {
+					log.warn("An exception occurred when " + eventType + " [id= " + event.getId() + " was processed by "
+							+ handlerClassname + "\n\tException details: " + t.getMessage());
+				}
+				// Even if the handler failed to execute correctly we consider the event as handled because this was
+				// the first configured handler able to handle the event
+				return true;
+			}
+		}		
+		return false;
+	}
 }

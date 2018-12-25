@@ -16,11 +16,16 @@
  */
 package org.holodeckb2b.interfaces.core;
 
+import java.util.List;
+
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.ICertificateManager;
@@ -156,6 +161,50 @@ public class HolodeckB2BCoreInterface {
     public static ICertificateManager getCertificateManager() {
         assertInitialized();
         return coreImplementation.getCertificateManager();
+    }
+
+    /**
+     * Registers a <i>global</i> event handler for handling {@link IMessageProcessingEvent}s that occur during the 
+     * processing of messages. If there is already a configuration registered with the same <code>id</code> it will be
+     * replaced by the new configuration.
+     * <p>NOTE: When the P-Mode of a message also defines an event handler for an event for which also a global 
+     * configuration exists the one in the P-Mode takes precedence over the global configuration.
+     * 
+     * @param eventConfiguration	The event handler's configuration  	
+     * @return 						<code>true</code> if an existing event configuration was replaced,
+     * 								<code>false</code> if this was a new registration 
+     * @throws MessageProccesingEventHandlingException When the given event handler configuration cannot be registered,
+     * 												   for example because the handler class is not available or no id
+     * 												   is specified
+     * @since HB2B_NEXT_VERSION
+     */
+    public static boolean registerEventHandler(IMessageProcessingEventConfiguration eventConfiguration) 
+    																	throws MessageProccesingEventHandlingException {
+    	assertInitialized();
+    	return coreImplementation.registerEventHandler(eventConfiguration);
+    }
+    
+    
+    /**
+     * Removes a <i>global</i> event handler configuration.
+     * 
+     * @param id	The id of the event handler configuration to remove
+     * @since HB2B_NEXT_VERSION 
+     */
+    public static void removeEventHandler(String id) {
+    	assertInitialized();
+    	coreImplementation.removeEventHandler(id);
+    }
+    
+    /**
+     * Gets the list of globally configured event handlers. 
+     *  
+     * @return		The list of event handler configurations 
+     * @since HB2B_NEXT_VERSION
+     */
+    public static List<IMessageProcessingEventConfiguration> getMessageProcessingEventConfiguration() {
+    	assertInitialized();
+    	return coreImplementation.getEventHandlerConfiguration();
     }
 
    /**
