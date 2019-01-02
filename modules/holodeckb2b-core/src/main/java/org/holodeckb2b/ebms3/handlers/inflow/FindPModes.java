@@ -29,6 +29,7 @@ import org.holodeckb2b.ebms3.errors.ProcessingModeMismatch;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -52,7 +53,10 @@ import org.holodeckb2b.pmode.PModeFinder;
  * an Error signal for a message unit for which the P-Mode could not be determined).
  * <p>For Pull Request message units finding the P-Mode is dependent on the information supplied in the WS-Security
  * header. As we have not read the WSS header at this point the P-Mode can not be determined for Pull Request signals.
- * <p>Finding the P-Mode for a User Message is done by the {@link PModeFinder} utility class.
+ * <p>Finding the P-Mode for a User Message is done by the {@link PModeFinder} utility class by matching the meta-data 
+ * from the received message to the P-Mode configuration data. Since version HB2B_NEXT_VERSION this handler will check if the assign 
+ * the User Message was received as result of a Pull Request and if no P-Mode was found, assign the P-Mode used by the
+ * Pull Request to the User Message.
  * <p><b>NOTE:</b> The Error generated in case the P-Mode can not be determined is <i>ProcessingModeMismatch</i>. The
  * ebMS specification is not very clear if a specific error must be used. Current choice is based on discussion on <a
  * href="https://issues.oasis-open.org/browse/EBXMLMSG-67">issue 67 of ebMS TC</a>.
@@ -73,7 +77,15 @@ public class FindPModes extends BaseHandler {
                                           (IUserMessageEntity) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
         if (userMsg != null) {
             log.debug("Finding P-Mode for User Message [" + userMsg.getMessageId() + "]");
-            final IPMode pmode = PModeFinder.forReceivedUserMessage(userMsg);
+            IPMode pmode = PModeFinder.forReceivedUserMessage(userMsg);            
+            if (pmode == null && isInFlow(INITIATOR)) {
+            	final IPullRequest pullRequest = (IPullRequest) MessageContextUtils.getPropertyFromOutMsgCtx(mc, 
+            																MessageContextProperties.OUT_PULL_REQUEST);
+            	if (pullRequest != null) {
+            		log.debug("Using P-Mode of PullRequest");
+            		pmode = HolodeckB2BCoreInterface.getPModeSet().get(pullRequest.getPModeId());
+            	}
+            }
             if (pmode == null) {
                 createErrorNoPMode(mc, userMsg);
                 log.trace("Set the processing state of this User Message to failure");
@@ -186,7 +198,7 @@ public class FindPModes extends BaseHandler {
      */
     private void createErrorNoPMode(final MessageContext mc, final IMessageUnit mu)
                                             throws PersistenceException {
-        log.info("No P-Mode found for message unit [" + mu.getMessageId() + "]");
+        log.warn("No P-Mode found for message unit [" + mu.getMessageId() + "]");
         final ProcessingModeMismatch   noPmodeIdError = new ProcessingModeMismatch();
         noPmodeIdError.setRefToMessageInError(mu.getMessageId());
         noPmodeIdError.setErrorDetail("Can not process message [msgId=" + mu.getMessageId() + "] because no P-Mode"
