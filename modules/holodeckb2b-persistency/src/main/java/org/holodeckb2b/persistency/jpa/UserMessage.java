@@ -219,7 +219,7 @@ public class UserMessage extends MessageUnit implements IUserMessage, Serializab
     @JoinTable(name="UM_PARTNERS")
     @MapKeyColumn(name="PARTNERTYPE")
     @MapKeyEnumerated(EnumType.STRING)
-    private final Map<PartnerType, TradingPartner>      partners;
+    private Map<PartnerType, TradingPartner>      partners;
 
     @Embedded
     private CollaborationInfo   collaborationInfo;
