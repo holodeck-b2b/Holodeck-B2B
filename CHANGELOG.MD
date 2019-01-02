@@ -19,6 +19,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   for backward compatibility, but should not be used anymore (see also below).  
 
 ### Changed
+* When a pulled User Message cannot be matched to a P-Mode it is assigned to the P-Mode of the Pull Request.   
 * Generalised the header validation handler so it can be more easily reused for other protocols.
 * Removed check on empty _ConversationId_ when submitting a User Message to the Core.
 * All event implementation classes to use the new event interface names
@@ -26,6 +27,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Deprecated
 * The interfaces for the  _message processing events_ with the _Event_ suffix. They are replaced with interfaces without
   suffix to shorten the event names and prevent duplication of "event" in the qualifies class name.
+
+### Fixed
+* Name of the log used for reporting errors generated during processing of incoming messages. Did include _null_ instead
+  of the message protocol name  
 
 ## 4.0.0
 ##### 2018-11-04
