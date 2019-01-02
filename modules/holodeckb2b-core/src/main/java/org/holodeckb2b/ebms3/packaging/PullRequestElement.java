@@ -16,8 +16,14 @@
  */
 package org.holodeckb2b.ebms3.packaging;
 
+import static org.holodeckb2b.ebms3.packaging.CollaborationInfoElement.Q_ACTION;
+import static org.holodeckb2b.ebms3.packaging.CollaborationInfoElement.Q_CONVERSATIONID;
+import static org.holodeckb2b.ebms3.packaging.MessageInfoElement.Q_REFTO_MESSAGEID;
+
 import java.util.Iterator;
+
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -29,10 +35,6 @@ import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
-
-import static org.holodeckb2b.ebms3.packaging.CollaborationInfoElement.Q_ACTION;
-import static org.holodeckb2b.ebms3.packaging.CollaborationInfoElement.Q_CONVERSATIONID;
-import static org.holodeckb2b.ebms3.packaging.MessageInfoElement.Q_REFTO_MESSAGEID;
 
 /**
  * Is a helper class for handling the ebMS Pull Request signal message units in the ebMS SOAP header, i.e. the
@@ -150,7 +152,9 @@ public class PullRequestElement {
         final OMElement prElement = f.createOMElement(Q_ELEMENT_NAME, signalmessage);
 
         // The only information specific to the PullRequest is the MPC on which the pull takes place
-        prElement.addAttribute(MPC_ATTR, pullRequest.getMPC(), null);
+        final String mpc = pullRequest.getMPC();
+        if (!EbMSConstants.DEFAULT_MPC.equals(mpc))
+        	prElement.addAttribute(MPC_ATTR, mpc, null);
 
         // Add child elements if this is a selective Pull Request
         if (pullRequest instanceof ISelectivePullRequest) {
