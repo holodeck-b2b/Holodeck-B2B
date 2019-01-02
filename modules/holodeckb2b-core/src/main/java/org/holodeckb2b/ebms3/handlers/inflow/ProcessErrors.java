@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.HandlerDescription;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.handler.BaseHandler;
@@ -50,9 +51,14 @@ public class ProcessErrors extends BaseHandler {
      * Errors will always be logged to a special error log. Using the logging configuration users can decide if this
      * logging should be enabled and how errors should be logged.
      */
-    private final Log     errorLog = LogFactory.getLog("org.holodeckb2b.msgproc.errors.received." 
-    																						 + handledMsgProtocol);
-
+    private Log     errorLog;
+    
+    @Override
+	public void init(HandlerDescription handlerdesc) {
+    	super.init(handlerdesc);
+    	errorLog = LogFactory.getLog("org.holodeckb2b.msgproc.errors.received." + handledMsgProtocol);
+    }
+    
     @Override
     protected byte inFlows() {
         return IN_FLOW | IN_FAULT_FLOW;

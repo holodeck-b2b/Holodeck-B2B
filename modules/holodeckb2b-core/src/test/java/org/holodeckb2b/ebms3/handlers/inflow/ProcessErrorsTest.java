@@ -23,6 +23,9 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.HandlerDescription;
+import org.apache.axis2.description.ModuleConfiguration;
+import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
@@ -67,6 +70,11 @@ public class ProcessErrorsTest {
     public void setUp() throws Exception {
         // Executed after org.holodeckb2b.ebms3.handlers.inflow.DeliverReceipts handler
         handler = new ProcessErrors();
+        ModuleConfiguration moduleDescr = new ModuleConfiguration("test", null);
+        moduleDescr.addParameter(new Parameter("HandledMessagingProtocol", "TEST"));
+        HandlerDescription handlerDescr = new HandlerDescription();
+        handlerDescr.setParent(moduleDescr);
+        handler.init(handlerDescr);
     }
 
     /**
