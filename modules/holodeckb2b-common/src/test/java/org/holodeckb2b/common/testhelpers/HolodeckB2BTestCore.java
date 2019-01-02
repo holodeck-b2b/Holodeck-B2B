@@ -16,13 +16,19 @@
  */
 package org.holodeckb2b.common.testhelpers;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.ICertificateManager;
@@ -44,7 +50,7 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
 	private IMessageProcessingEventProcessor eventProcessor;
 	private ICertificateManager certManager;
 	private IQueryManager		queryManager;
-	
+	private List<IMessageProcessingEventConfiguration> eventConfig = new ArrayList<>();
 	
 	public HolodeckB2BTestCore() {
 	}
@@ -155,5 +161,45 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
 			} catch (SecurityProcessingException e) {				
 			}
 		return certManager;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#registerEventHandler(org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration)
+	 */
+	@Override
+	public boolean registerEventHandler(IMessageProcessingEventConfiguration eventConfiguration)
+			throws MessageProccesingEventHandlingException {
+    	final String id = eventConfiguration.getId();
+    	if (Utils.isNullOrEmpty(id))
+    		throw new MessageProccesingEventHandlingException("No id specified");
+    	
+    	int i; boolean exists = false;
+    	for(i = 0; i < eventConfig.size() && !exists; i++)
+    		exists = eventConfig.get(i).getId().equals(id);
+    	if (exists) 
+    		eventConfig.set(i, eventConfiguration);
+    	else 
+    		eventConfig.add(eventConfiguration);
+    	return exists;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#removeEventHandler(java.lang.String)
+	 */
+	@Override
+	public void removeEventHandler(String id) {
+    	int i; boolean exists = false;
+    	for(i = 0; i < eventConfig.size() && !exists; i++)
+    		exists = eventConfig.get(i).getId().equals(id);
+    	if (exists)     		
+    		eventConfig.remove(i);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getEventHandlerConfiguration()
+	 */
+	@Override
+	public List<IMessageProcessingEventConfiguration> getEventHandlerConfiguration() {
+		return eventConfig;
 	}
 }
