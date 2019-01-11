@@ -30,7 +30,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 * Name of the log used for reporting errors generated during processing of incoming messages. Did include _null_ instead
-  of the message protocol name  
+  of the message protocol name
+* When no retry configuration is available for a message but a Receipt is expected a MissingReceipt ebMS Error is 
+  generated and reported [as configured in the P-Mode] to the business application instead of only logging an error 
+  message.    
 
 ## 4.0.0
 ##### 2018-11-04

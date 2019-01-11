@@ -89,6 +89,11 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                 try {
                     log.trace("Check if User Message [msgId=" + um.getMessageId() 
                     		  + "] should be resend using retry configuration from P-Mode [" + um.getPModeId() + "]");
+                    // We need the current interval duration, the number of attempts already executed and the maximum
+                    // number of attempts allowed
+                    long intervalInMillis = 0;
+                    int  attempts = 0;
+                    int  maxAttempts = 1; // there is always the initial one
                     // Retry information is contained in Leg, and as we only have One-way it is always the first
                     // and because retries is part of AS4 reception awareness feature leg should be instance of
                     // ILegAS4, if it is not we can not retransmit
@@ -102,30 +107,25 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         log.error("Message [" + um.getMessageId() + "] can not be resent due to missing P-Mode ["
                                     + um.getPModeId() + "]");
                     }
-                    if (raConfig == null || raConfig.getWaitIntervals() == null
-                        || raConfig.getWaitIntervals().length == 0) {
-                        // Not an ILegAS4 instance or no retry config available, can't determine if and how to resend.
-                        log.error("Message [" + um.getMessageId() + "] can not be resent due to missing Reception"
-                                    + " Awareness retry configuration in P-Mode [" + um.getPModeId() + "]");
-                        // Because we don't know how to process this message further the only thing we can do is set
-                        // the processing to failed
-                        storageManager.setProcessingState(um, ProcessingState.FAILURE);
-                        continue; // with next message
-                    }
-
-                    // Check if retransmit interval has passed, because these are flexible first get the number of
-                    // send attempts already executed
-                    final int attempts = HolodeckB2BCore.getQueryManager().getNumberOfTransmissions(um);
-                    // Convert configured interval to milliseconds
-                    final Interval currentInterval = raConfig.getWaitIntervals()[attempts - 1];
-                    final long intervalInMillis = TimeUnit.MILLISECONDS.convert(currentInterval.getLength(),
-                                                                                currentInterval.getUnit());
+                    final Interval[] intervals = raConfig != null ? raConfig.getWaitIntervals() : new Interval[0]; 
+                    if (intervals.length > 0) {
+                    	// Check the current interval
+                    	attempts = HolodeckB2BCore.getQueryManager().getNumberOfTransmissions(um);
+                    	if (attempts <= intervals.length)
+                    		// Get the current applicable interval in milliseconds
+                    		intervalInMillis = TimeUnit.MILLISECONDS.convert(intervals[attempts-1].getLength(),
+                    														 intervals[attempts-1].getUnit());
+                    } else 
+                        // There is no retry config available, can't determine if and how to resend.
+                        log.warn("Message [" + um.getMessageId() + "] can not be resent due to missing Reception"
+                                 + " Awareness retry configuration in P-Mode [" + um.getPModeId() + "]");
+                    
                     // Check if the interval has expired
                     if (((new Date()).getTime() - um.getCurrentProcessingState().getStartTime().getTime())
                          >= intervalInMillis) {
                         // The interval expired, check if message can be resend or if a MissingReceipt error
                         // has to be generated
-                        if (attempts >= raConfig.getWaitIntervals().length) {
+                        if (attempts >= intervals.length) {
                             // No retries left, generate MissingReceipt error
                         	log.info("Retry attempts exhausted for User Message [msgId=" + um.getMessageId() + "]!");
                             missingReceiptsLog.error("No Receipt received for UserMessage with messageId="
@@ -151,7 +151,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         log.trace("Retransmit interval not expired yet. Nothing to do.");
                     }
                 } catch (final PersistenceException dbe) {
-                    log.error("An error occurred when checking retransmission of message unit [msgID="
+                    log.error("An error occurred when checking or updating the message unit meta-data [msgID="
                                 + um.getMessageId() + "]. Details: " + dbe.getMessage());
                 }
             }
