@@ -161,9 +161,6 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
             if (!mc.getOptions().isUseSeparateListener()) {
                 final Boolean useAsyncOption
                         = (Boolean) mc.getProperty(Constants.Configuration.USE_ASYNC_OPERATIONS);
-                if (log.isDebugEnabled()) {
-                    log.debug("OutInAxisOperationClient: useAsyncOption " + useAsyncOption);
-                }
                 if (useAsyncOption != null) {
                     useAsync = useAsyncOption.booleanValue();
                 }
