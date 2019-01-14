@@ -17,19 +17,18 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
-import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
-import org.holodeckb2b.interfaces.messagemodel.Direction;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -65,7 +64,8 @@ public class DeliverErrors extends BaseHandler {
         return IN_FLOW | IN_FAULT_FLOW;
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
         // Check if this message contains error signals
         final Collection<IErrorMessageEntity> errorSignals = (Collection<IErrorMessageEntity>)
@@ -76,7 +76,11 @@ public class DeliverErrors extends BaseHandler {
             return InvocationResponse.CONTINUE;
 
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        // Process each signal
+        // Get the mapping of Error siganls to referenced message units from the message context
+        final Map<IErrorMessage, Collection<IMessageUnitEntity>> errorToMsgMap = 
+												(Map<IErrorMessage, Collection<IMessageUnitEntity>>) 
+												mc.getProperty(MessageContextProperties.MAP_REFD_MSGS_BY_ERRORS);
+        // Process each signal        
         for(final IErrorMessageEntity errorSignal : errorSignals) {
             // Prepare message for delivery by checking it is still ready for delivery and then
             // change its processing state to "out for delivery"
@@ -86,99 +90,72 @@ public class DeliverErrors extends BaseHandler {
                                                              ProcessingState.OUT_FOR_DELIVERY)) {
                 // Errors in this signal can be delivered to business application
                 log.debug("Start delivery of Error Signal [" + errorSignal.getMessageId() + "]");
-                // We deliver each error in the signal separately because they can reference different
-                // messages and therefor have different delivery specs
-                try {
-                    checkAndDeliver(errorSignal, mc);
-                    // All errors in signal processed, change the processing state to done
-                    updateManager.setProcessingState(errorSignal, ProcessingState.DONE);
-                } catch (final MessageDeliveryException ex) {
-                    log.warn("Could not deliver Error Signal (msgId=" + errorSignal.getMessageId()
-                                    + "]) to application! Error details: " + ex.getMessage());
-                    // Although the error could not be delivered it was processed completely on the ebMS level,
-                    //  so processing state is set to warning instead of failure
-                    updateManager.setProcessingState(errorSignal, ProcessingState.WARNING);
-                }
-            } else {
-                log.warn("Error signal [" + errorSignal.getMessageId() + "] is already processed for delivery");
-            }
+            	// Get the message units referenced by this error
+            	Collection<IMessageUnitEntity> refdMessages = errorToMsgMap.get(errorSignal);
+            	boolean deliveredForAll = true;
+            	for(final IMessageUnitEntity msgInError : refdMessages)
+                	deliveredForAll &= deliverError(errorSignal, msgInError);
+            	log.debug("Reported Error Signal for all referenced message units");
+            	if (deliveredForAll) 
+	            	updateManager.setProcessingState(errorSignal, ProcessingState.DONE);
+            	else 
+            		updateManager.setProcessingState(errorSignal, ProcessingState.WARNING, 
+            										"Error could not be delivered for [all] referenced message units");
+            } else
+                log.info("Error signal [" + errorSignal.getMessageId() + "] is already processed for delivery");            
         }
-
         log.debug("Processed all Error signals in message");
         return InvocationResponse.CONTINUE;
     }
 
     /**
-     * Is a helper method responsible for checking whether and if so delivering an Error Signal to the business
-     * application. Delivery to the business application is done through a {@link IMessageDeliverer}.
+     * Is a helper method responsible for delivering an Error Signal to the business application. Whether the Error 
+     * needs to be delivered is defined by the P-Mode of the referenced message unit in the {@link 
+     * IDeliverySpecification} for errors. 
      *
      * @param errorSignal   The Error signal that must be delivered
-     * @param mc            The current message context which is needed when the error does not reference a message
-     *                      directly
-     * @throws MessageDeliveryException When the error should be delivered to the business application but an error
-     *                                  prevented successful delivery
+     * @param msgInError	The message unit referenced by the Error and which P-Mode defines if and how to report the
+     * 						error
+     * @return <code>false</code> if the delivery of the error to back-end failed,<br>
+     * 		   <code>true</code> otherwise 
      * @throws PersistenceException    When an error occurs retrieving the message unit referenced by the Error Signal
      */
-    private void checkAndDeliver(final IErrorMessageEntity errorSignal, final MessageContext mc)
-            throws MessageDeliveryException, PersistenceException {
-        IDeliverySpecification deliverySpec = null;
-
-        log.trace("Determine P-Mode for error");
-        // Does the error reference another message unit?
-        String refToMsgId = MessageUnitUtils.getRefToMessageId(errorSignal);
-
-        if (!Utils.isNullOrEmpty(refToMsgId)) {
-            log.trace("The error references message unit with msgId=" + refToMsgId);
-            // Get the referenced message unit. There may be more than one MU with the given id, we assume they
-            // all use the same P-Mode
-            final Collection<IMessageUnitEntity> refdMsgUnits = HolodeckB2BCore.getQueryManager()
-                                                                               .getMessageUnitsWithId(refToMsgId,
-                                                                            		   	 			  Direction.OUT);
-
-            if (!Utils.isNullOrEmpty(refdMsgUnits))
-                // Found referenced message unit (should be one), use its P-Mode to determine if and how to deliver
-                deliverySpec = getErrorDelivery(refdMsgUnits.iterator().next());
-            else
-                // No messsage units found for refToMsgId. This should not occur here as this is already checked in
-                // previous handler!
-                log.info("No referenced message unit found! Probably there is a configuration error!");
-        } else {
-            log.debug("Error does not directly reference a message unit");
-            // If the error is a direct response and there was just on outgoing message unit we still have a
-            // reference
-            final Collection<IMessageUnitEntity>  reqMUs = MessageContextUtils.getSentMessageUnits(mc);
-            if (reqMUs != null && reqMUs.size() == 1) {
-                log.debug("Request contained one message unit, assuming error applies to it");
-                final IMessageUnitEntity refdMU = reqMUs.iterator().next();
-                refToMsgId = refdMU.getMessageId();
-                deliverySpec = getErrorDelivery(refdMU);
-            }
-        }
-
+    private boolean deliverError(final IErrorMessageEntity errorSignal, final IMessageUnitEntity msgInError)
+            																			throws PersistenceException {
+        
+        log.trace("Get delivery specification for error from P-Mode of refd message [msgId=" 
+        			+ msgInError.getMessageId() + "]");
+        IDeliverySpecification deliverySpec = getErrorDelivery(msgInError);        
         // If a delivery specification was found the error should be delivered, else no reporting is needed
         if (deliverySpec != null) {
-            log.debug("Error Signal should be delivered using delivery specification with id:" + deliverySpec.getId());
-            final IMessageDeliverer deliverer = HolodeckB2BCore.getMessageDeliverer(deliverySpec);
-            log.debug("Delivering the error using deliverer");
-            // Because the reference to the message in error may be derived, set it explicitly on signal meta-data
-            // See issue #12
+        	IMessageDeliverer deliverer = null;
             try {
+                log.debug("Error Signal should be delivered using delivery specification with id:" 
+                			+ deliverySpec.getId());
+                deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec);
+                log.trace("Delivering the error using deliverer");
+                // Because the reference to the message in error may be derived, set it explicitly on signal meta-data
+                // See also issue #12
                 ErrorMessage deliverySignal = new ErrorMessage(errorSignal);
-                deliverySignal.setRefToMessageId(refToMsgId);
+                deliverySignal.setRefToMessageId(msgInError.getMessageId());
                 deliverer.deliver(deliverySignal);
-                log.info("Error Signal [msgId= " + errorSignal.getMessageId() + "] successfully delivered!");
-            } catch (final MessageDeliveryException ex) {
-                // There was an "normal/expected" issue during delivery, continue as normal
-                throw ex;
+                log.info("Error Signal [msgId= " + errorSignal.getMessageId() 
+                		+ "] successfully delivered for referenced message unit [msgId=" + msgInError.getMessageId() 
+                		+ "]!");
             } catch (final Throwable t) {
-                // Catch of Throwable used for extra safety in case the DeliveryMethod implementation does not
-                // handle all exceptions correctly
-                log.warn(deliverer.getClass().getSimpleName() + " threw " + t.getClass().getSimpleName()
-                         + " instead of MessageDeliveryException!");
-                throw new MessageDeliveryException("Unhandled exception during message delivery", t);
+            	if (!(t instanceof MessageDeliveryException))
+                    log.error(deliverer.getClass().getSimpleName() + " threw " + t.getClass().getSimpleName()
+                            	+ " instead of MessageDeliveryException!");
+            	
+                log.warn("Could not deliver Error Signal (msgId=" + errorSignal.getMessageId()
+	                		+ "]) for referenced message [msgId=" + msgInError.getMessageId() 
+	                		+ "] to application! Error details: " + t.getMessage());
+                return false;
             }
         } else
             log.debug("Error does not need to (or can not) be delivered");
+
+        return true;
     }
 
     /**

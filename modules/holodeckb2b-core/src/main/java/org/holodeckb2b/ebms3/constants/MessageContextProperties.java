@@ -127,4 +127,10 @@ public interface MessageContextProperties {
      * @since 4.0.0
      */
     static final String EBMS_UT_RESULT = PREFIX + "ebms-ut-result";
+    
+    /**
+     * Holds a map of the message units referenced per received Error messages.
+     * @since 4.1.0
+     */
+    static final String MAP_REFD_MSGS_BY_ERRORS = PREFIX + "errors-refd-msgs";
 }

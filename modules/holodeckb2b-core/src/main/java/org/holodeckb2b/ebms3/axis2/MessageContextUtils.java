@@ -18,11 +18,16 @@ package org.holodeckb2b.ebms3.axis2;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -411,5 +416,26 @@ public class MessageContextUtils {
         allMsgUnits.stream().filter(mu -> (mu instanceof IUserMessage))
                             .forEachOrdered(mu -> userMessages.add((IUserMessage) mu));
         return userMessages;
+    }
+    
+    /**
+     * Adds a set of message units that was referenced by an Error Message to the message context property {@link 
+     * MessageContextProperties#MAP_REFD_MSGS_BY_ERRORS}.
+     * 
+     * @param refdMessages	The collection of message units referenced by the Error
+     * @param error			The Error message unit
+     * @param msgCtx		The message context
+     * @since 4.1.0
+     */
+    public static void addRefdMsgUnitByError(final Collection<IMessageUnitEntity> refdMessages, final IErrorMessage error
+    										,final MessageContext msgCtx) {
+    	@SuppressWarnings("unchecked")
+		Map<IErrorMessage, Collection<IMessageUnitEntity>> map = (Map<IErrorMessage, Collection<IMessageUnitEntity>>) 
+    											msgCtx.getProperty(MessageContextProperties.MAP_REFD_MSGS_BY_ERRORS);
+    	if (map == null) {
+    		map = new HashMap<>();
+    		msgCtx.setProperty(MessageContextProperties.MAP_REFD_MSGS_BY_ERRORS, map);
+    	}
+    	map.put(error, refdMessages);
     }
 }

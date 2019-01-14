@@ -103,7 +103,7 @@ public class ProcessErrors extends BaseHandler {
         // Change processing state to indicate we start processing the error. Also checks that the error is not
         // already being processed
         if (!storageManager.setProcessingState(errSignal, ProcessingState.RECEIVED, ProcessingState.PROCESSING)) {
-            log.warn("Error Signal [msgId=" + errSignal.getMessageId() + "] is already being processed, skipping");
+            log.warn("Error Signal [msgId=" + errSignal.getMessageId() + "] is already (being) processed, skipping");
             return;
         }
 
@@ -124,7 +124,7 @@ public class ProcessErrors extends BaseHandler {
             refdMessages = HolodeckB2BCore.getQueryManager().getMessageUnitsWithId(refToMessageId, Direction.OUT);
         } else if (isInFlow(INITIATOR)) {
             log.debug("Error Signal [" + errSignal.getMessageId() + "] does not contain reference."
-            			+ "Assuming it refers to sent messages");
+            			+ "Assuming it refers to all sent messages");
             refdMessages = MessageContextUtils.getSentMessageUnits(mc);
         }
 
@@ -158,7 +158,9 @@ public class ProcessErrors extends BaseHandler {
                 }
             }
             log.info("Processed Error Signal [" + errSignal.getMessageId() + "]");
-            // Errors may need to be delivered to bussiness app which can be done now
+            // Errors may need to be delivered to business app which can be done now
+            // as the delivery will need to know the referenced message we store them in the message context
+            MessageContextUtils.addRefdMsgUnitByError(refdMessages, errSignal, mc);
             storageManager.setProcessingState(errSignal, ProcessingState.READY_FOR_DELIVERY);
         }
     }

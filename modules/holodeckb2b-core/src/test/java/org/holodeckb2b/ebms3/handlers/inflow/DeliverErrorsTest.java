@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -33,6 +34,7 @@ import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.common.testhelpers.NullDeliveryMethod;
 import org.holodeckb2b.core.testhelpers.TestUtils;
+import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
@@ -98,25 +100,12 @@ public class DeliverErrorsTest {
 
     @Test
     public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
+        MessageMetaData userMessage = TestUtils.getMMD("handlers/full_mmd.xml", this);
 
-        String msgId = "some_msg_id_01";
-        UserMessage userMessage = UserMessageElement.readElement(umElement);
-
-        String pmodeId =
-                userMessage.getCollaborationInfo().getAgreement().getPModeId();
-        userMessage.setPModeId(pmodeId);
-        userMessage.setMessageId(msgId);
+        String pmodeId = userMessage.getCollaborationInfo().getAgreement().getPModeId();
 
         PMode pmode = new PMode();
         pmode.setId(pmodeId);
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
 
         Leg leg = new Leg();
 
@@ -138,36 +127,30 @@ public class DeliverErrorsTest {
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
-
-        String errorId = "error_id";
         ErrorMessage errorMessage = new ErrorMessage();
         ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
         ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
-        ebmsError.setRefToMessageInError(msgId);
+        ebmsError.setRefToMessageInError(userMessage.getMessageId());
         ebmsError.setMessage("some error message");
 
         errors.add(ebmsError);
         errorMessage.setErrors(errors);
-        errorMessage.setRefToMessageId(msgId);
+        errorMessage.setRefToMessageId(userMessage.getMessageId());
         errorMessage.setMessageId("error_id");
 
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-        // Setting input errors property
-        ErrorSignalElement.createElement(headerBlock, errorMessage);
+        IUserMessageEntity userMessageEntity = storageManager.storeOutGoingMessageUnit(userMessage);        
         IErrorMessageEntity errorMessageEntity = storageManager.storeIncomingMessageUnit(errorMessage);
         storageManager.setProcessingState(errorMessageEntity, ProcessingState.READY_FOR_DELIVERY);
+        
         ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
         errorMessageEntities.add(errorMessageEntity);
-        mc.setProperty(MessageContextProperties.IN_ERRORS,
-                errorMessageEntities);
+        mc.setProperty(MessageContextProperties.IN_ERRORS, errorMessageEntities);
 
+        MessageContextUtils.addRefdMsgUnitByError(Collections.singletonList(userMessageEntity), errorMessageEntity, mc);
+        
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
@@ -175,7 +158,6 @@ public class DeliverErrorsTest {
             fail(e.getMessage());
         }
 
-        assertEquals(ProcessingState.DONE,
-                errorMessageEntity.getCurrentProcessingState().getState());
+        assertEquals(ProcessingState.DONE, errorMessageEntity.getCurrentProcessingState().getState());
     }
 }
