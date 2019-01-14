@@ -11,7 +11,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Added two generic events to indicate that a problem occurred during the processing of a received message  
   (`IReceivedMessageProcessingFailure`) or a message to be send (`ISendMessageProcessingFailure`). These event are
   intended for use as _"filters"_ when configuring the event handling. Specific events, are available for specific
-  errors. Using the generic events the error reporting defined by the P-Mode parameters **PMode.ErrorHandling.Report.ProcessErrorNotifyProducer** and **PMode.ErrorHandling.Report.ProcessErrorNotifyConsumer**
+  errors. Using the generic events the error reporting defined by the P-Mode parameters  
+  **PMode.ErrorHandling.Report.ProcessErrorNotifyProducer** and **PMode.ErrorHandling.Report.ProcessErrorNotifyConsumer**
   can be implemented.
 * Added a new event (`org.holodeckb2b.interfaces.events.IHeaderValidationFailure`) to indicate that the validation 
   of the message header failed 
@@ -19,7 +20,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   for backward compatibility, but should not be used anymore (see also below).  
 
 ### Changed
-* When a pulled User Message cannot be matched to a P-Mode it is assigned to the P-Mode of the Pull Request.   
+* When a pulled User Message cannot be matched to a P-Mode it is assigned to the P-Mode of the Pull Request.
+* The `mpc` attribute is not included in a Pull Request when the _default MPC_ is pulled.    
 * Generalised the header validation handler so it can be more easily reused for other protocols.
 * Removed check on empty _ConversationId_ when submitting a User Message to the Core.
 * All event implementation classes to use the new event interface names
@@ -36,7 +38,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   generated and reported [as configured in the P-Mode] to the business application instead of only logging an error 
   message.
 * Issue that integration tests were not executed when running them from the IDE and the `JAVA_HOME` system environment 
-  variable was not set. Now the JVM used by the IDE is used.      
+  variable was not set. Now the JVM used by the IDE is used.
+* Strict validation of the AgreementRef being an URI in case no type has been specified.       
 
 ## 4.0.0
 ##### 2018-11-04

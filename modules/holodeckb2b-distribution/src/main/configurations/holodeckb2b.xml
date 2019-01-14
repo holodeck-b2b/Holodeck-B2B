@@ -28,8 +28,19 @@
     ===================================================================== -->
     <!-- <parameter name="TempDir"/> -->
 
+	<!-- ====================================================================
+    - This parameter contains the global setting for the strict validation
+    - of message headers. By default Holodeck B2B only performs a basic 
+    - validation of the header to ensure it will be able to process the 
+    - message without checking all constraints defined in the protocol 
+    - specification. In strict validation mode these constraints are checked.
+    - The strict validation can be specified here for all exchanges at once
+    - or per exchange in the P-Mode.   
+    ===================================================================== -->
+    <!-- <parameter name="StrictHeaderValidation"/> -->	
+
     <!-- ====================================================================
-    - This parameter conatains the default setting whether Errors on Errors
+    - This parameter contains the default setting whether Errors on Errors
     - should be reported to the sender of the faulty error. This setting can
     - be overriden in the P-Mode configuration. However the problem that
     - causes an error to be in error is often an invalid message reference.
