@@ -217,7 +217,7 @@ public class HeaderValidationHandler extends BaseHandler {
         MessageValidationError.Severity maxSeverity = MessageValidationError.Severity.Warning;
         for(MessageValidationError validationError : validationErrors.values().iterator().next()) {
             if (VALUE_INCONSISTENT_REQ.equals(validationError.getDetails()))
-                ebmsErrors.add(new ValueInconsistent(validationError.getDescription()));
+                ebmsErrors.add(new ValueInconsistent(validationError.getDescription(), messageId));
             else {
                 // Error does not require special treatment, just add to description for the InvalidHeader invalidHdr
                 invalidHeaderErrorDetails.append(validationError.getDescription()).append('\n');
