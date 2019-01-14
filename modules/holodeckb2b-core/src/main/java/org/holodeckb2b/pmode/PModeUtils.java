@@ -44,6 +44,18 @@ public class PModeUtils {
     }
 
     /**
+     * Determines whether the given P-Mode contains a leg in which Holodeck B2B sends the Pull Request. 
+     *  
+     * @param pmode		The P-Mode to check
+     * @return			<code>true</code> if the P-Mode supports sending Pull Requests,<br>
+     * 					<code>false</code> otherwise
+     * @since 4.1.0
+     */
+    public static boolean doesHolodeckB2BPull(final IPMode pmode) {
+    	return getOutPullLeg(pmode) != null;
+    }
+    
+    /**
      * Checks if a P-Mode contains a specific pulling configuration in case Holodeck B2B is the sender of the Pull
      * Request.
      *
@@ -52,23 +64,7 @@ public class PModeUtils {
      *                  <code>null</code> if no specific configuration is given
      */
     public static IPullRequestFlow getOutPullRequestFlow(final IPMode pmode) {
-        // First we need to get the leg that configures the sending of the Pull Request
-        final List<? extends ILeg> legs = pmode.getLegs();
-        ILeg   pullLeg = null;
-        final String mepBinding = pmode.getMepBinding();
-        switch (mepBinding) {
-            case EbMSConstants.ONE_WAY_PULL :
-            case EbMSConstants.TWO_WAY_PULL_PUSH :
-                pullLeg = doesHolodeckB2BTrigger(legs.get(0)) ? legs.get(0) : null; break;
-            case EbMSConstants.TWO_WAY_PUSH_PULL :
-                pullLeg = doesHolodeckB2BTrigger(legs.get(1)) ? legs.get(1) : null; break;
-            case EbMSConstants.TWO_WAY_PULL_PULL :
-                // If both legs use pulling the one that has a target URL defined is the leg where Holodeck B2B sends
-                // the Pull Request
-                for (int i = 0; i < 2 && pullLeg == null; i++)
-                    pullLeg = doesHolodeckB2BTrigger(legs.get(i)) ? legs.get(i) : null;
-        }
-
+    	final ILeg pullLeg = getOutPullLeg(pmode);
         // And then check if that leg contains specific PullRequestFlow
         if (pullLeg != null && !Utils.isNullOrEmpty(pullLeg.getPullRequestFlows()))
             return pullLeg.getPullRequestFlows().iterator().next();
@@ -115,4 +111,32 @@ public class PModeUtils {
         }
         return inPullLeg;
     }
+
+    /**
+     * Helper method to get the configuration of the P-Mode's leg that configures the pulling by Holodeck B2B if any
+     * such leg exists.
+     *  
+     * @param pmode		The P-Mode to check
+     * @return			The "pulling" leg's configuration
+     * @since 4.1.0
+     */
+    private static ILeg getOutPullLeg(final IPMode pmode) {
+	    // First we need to get the leg that configures the sending of the Pull Request
+	    final List<? extends ILeg> legs = pmode.getLegs();
+	    ILeg   pullLeg = null;
+	    final String mepBinding = pmode.getMepBinding();
+	    switch (mepBinding) {
+	        case EbMSConstants.ONE_WAY_PULL :
+	        case EbMSConstants.TWO_WAY_PULL_PUSH :
+	            pullLeg = doesHolodeckB2BTrigger(legs.get(0)) ? legs.get(0) : null; break;
+	        case EbMSConstants.TWO_WAY_PUSH_PULL :
+	            pullLeg = doesHolodeckB2BTrigger(legs.get(1)) ? legs.get(1) : null; break;
+	        case EbMSConstants.TWO_WAY_PULL_PULL :
+	            // If both legs use pulling the one that has a target URL defined is the leg where Holodeck B2B sends
+	            // the Pull Request
+	            for (int i = 0; i < 2 && pullLeg == null; i++)
+	                pullLeg = doesHolodeckB2BTrigger(legs.get(i)) ? legs.get(i) : null;
+	    }	    
+        return pullLeg;
+    }    
 }

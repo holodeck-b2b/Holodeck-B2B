@@ -187,7 +187,8 @@ public class PullWorker implements IWorkerTask {
                                                         .submitMessage(new PullRequest(p.getId(), mpc));
                 log.info("Submitted the PullRequest signal for P-Mode [" + p.getId() + "] and MPC=" + mpc);
             } catch (final MessageSubmitException ex) {
-                log.error("Could not submit PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
+                log.error("Could not submit PullRequest for P-Mode [" + p.getId() + "] and MPC= [" + mpc 
+                			+ "]. Details: " + ex.getMessage());
             }
         }
     }

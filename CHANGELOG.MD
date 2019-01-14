@@ -21,7 +21,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 * When a pulled User Message cannot be matched to a P-Mode it is assigned to the P-Mode of the Pull Request.
-* The `mpc` attribute is not included in a Pull Request when the _default MPC_ is pulled.    
+* When no MPC is specified in either P-Mode or submission the _default MPC_ is used for the Pull Request. If a MPC is
+  specified in both the one in the submission **must** be a sub-channel of the one in the P-Mode.
+* The `mpc` attribute is not included in a Pull Request when the _default MPC_ is pulled.
 * Generalised the header validation handler so it can be more easily reused for other protocols.
 * Removed check on empty _ConversationId_ when submitting a User Message to the Core.
 * All event implementation classes to use the new event interface names
@@ -40,7 +42,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Issue that integration tests were not executed when running them from the IDE and the `JAVA_HOME` system environment 
   variable was not set. Now the JVM used by the IDE is used.
 * Strict validation of the AgreementRef being an URI in case no type has been specified.
-* Issues in processing User Messages without payloads.       
+* Issues in processing User Messages without payloads.
+* Check that P-Mode specified for a submitted Pull Request does support pulling and that there is no conflict in the
+  MPCs specified in both P-Mode and submission.       
 
 ## 4.0.0
 ##### 2018-11-04

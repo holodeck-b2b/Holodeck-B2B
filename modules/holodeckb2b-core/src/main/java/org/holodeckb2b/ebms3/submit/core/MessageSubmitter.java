@@ -33,6 +33,7 @@ import org.holodeckb2b.common.messagemodel.SelectivePullRequest;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.validation.ValidationResult;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -45,11 +46,13 @@ import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.submit.MessageSubmitException;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the default implementation of {@see IMessageSubmitter}.
@@ -60,25 +63,9 @@ public class MessageSubmitter implements IMessageSubmitter {
 
     private static final Log log = LogFactory.getLog(MessageSubmitter.class.getName());
 
-    /**
-     * Submits the specified <b>User Message</b> to Holodeck B2B for sending.
-     * <p>Whether the message will be sent immediately depends on the P-Mode that applies and the MEP being specified
-     * therein. If the MEP is Push the Holodeck B2B will try to send the message immediately. When the MEP is Pull the
-     * message is stored for retrieval by the receiving MSH.
-     * <p>It is REQUIRED that the meta data contains a reference to the P-Mode that should be used to handle the
-     * message. If the P-Mode specifies custom validation (in the User Message flow, see {@link
-     * IUserMessageFlow#getCustomValidationConfiguration()}) the submitted message will be validated and only accepted
-     * when successfully validated.
-     * <p><b>NOTE:</b> This method MAY return before the message is actually sent to the receiver. Successful return
-     * ONLY GUARANTEES that the message CAN be sent to the receiver and that Holodeck B2B will try to do so.
-     *
-     * @param submission            The meta data on the user message to be sent to the other trading partner.
-     * @param movePayloads          Indicator whether the files containing the payload data must be deleted or not
-     * @return                      The ebMS message-id assigned to the user message.
-     * @throws MessageSubmitException   When the user message can not be submitted successfully. Reasons for failure can
-     *                                  be that no P-Mode can be found to handle the message or the given P-Mode
-     *                                  conflicts with supplied meta-data.
-     */
+	/**
+	 * {@inheritDoc} 
+	 */
     @Override
     public String submitMessage(final IUserMessage submission, final boolean movePayloads) throws MessageSubmitException {
         log.debug("Start submission of new User Message");
@@ -133,33 +120,41 @@ public class MessageSubmitter implements IMessageSubmitter {
     }
 
     /**
-     * Submits the specified <b>Pull Request</b> to Holodeck B2B for sending.
-     * <p>With this submission the business application that expects to receive a User Message, i.e. the <i>Consumer</i>
-     * in ebMS specification terminology, can control the moments when the pull operation must be performed. Holodeck
-     * B2B will try to send the message directly.
-     * <p>The meta-data for the Pull Request MUST contain both the MPC and P-Mode [id]. A messageId MAY be included in
-     * the submission, but is NOT RECOMMENDED to do so and instead let Holodeck B2B generate one.
-     *
-     * @param pullRequest    The meta-data on the pull request that should be sent.
-     * @return               The ebMS message-id assigned to the pull request.
-     * @throws MessageSubmitException   When the pull request can not be submitted successfully. Reasons for failure can
-     *                                  be that the P-Mode can not be found or the given P-Mode and MPC conflict.
-     * @since  2.1.0
+     * {@inheritDoc}
      */
     @Override
     public String submitMessage(final IPullRequest pullRequest) throws MessageSubmitException {
         log.trace("Start submission of new Pull Request");
 
-        // Check if P-Mode id and MPC are specified
-        if (Utils.isNullOrEmpty(pullRequest.getPModeId()))
+        // Check if a valid P-Mode is specified
+        final String pmodeId = pullRequest.getPModeId();
+        if (Utils.isNullOrEmpty(pmodeId))
             throw new MessageSubmitException("P-Mode Id is missing");
-        if (Utils.isNullOrEmpty(pullRequest.getMPC()))
-            throw new MessageSubmitException("MPC is missing");
-
+        final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(pmodeId);
+        if (pmode == null)
+        	throw new MessageSubmitException("No P-Mode with id=" + pmodeId + " configured");
+        if (!PModeUtils.doesHolodeckB2BPull(pmode))
+        	throw new MessageSubmitException("PMode with id=" + pmodeId + " does not support pulling");
+        
+        // Check that when a MPC to pull from is available in both request and P-Mode they match or the one in the 
+        // request is a sub-channel MPC of the one in the P-Mode
+        final IPullRequestFlow pullRequestFlow = PModeUtils.getOutPullRequestFlow(pmode);
+        final String pmodeMPC = pullRequestFlow != null ? pullRequestFlow.getMPC() : null;
+        String pullMPC = pullRequest.getMPC();
+        
+        if (Utils.isNullOrEmpty(pullMPC) && Utils.isNullOrEmpty(pmodeMPC))
+        	pullMPC = EbMSConstants.DEFAULT_MPC;
+        else if (!Utils.isNullOrEmpty(pullMPC) && !Utils.isNullOrEmpty(pmodeMPC) && !pullMPC.startsWith(pmodeMPC))
+        	throw new MessageSubmitException("MPC in submission [" + pullMPC + "] conflicts with P-Mode defined MPC ]"
+        										+ pmodeMPC + "]");
+        else if (Utils.isNullOrEmpty(pullMPC))
+        	pullMPC = pmodeMPC;
+        
         String prMessageId = null;
         try {
-            log.trace("Add PullRequest to database");
-            IPullRequestEntity submittedPR = HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(pullRequest);
+            log.trace("Add PullRequest to database");            
+            IPullRequestEntity submittedPR = HolodeckB2BCore.getStorageManager()
+            												.storeOutGoingMessageUnit(new PullRequest(pmodeId, pullMPC));
             prMessageId = submittedPR.getMessageId();
             // Indicate that the PR can be directly pushed to other MSH
             HolodeckB2BCore.getStorageManager().setProcessingState(submittedPR, ProcessingState.READY_TO_PUSH);

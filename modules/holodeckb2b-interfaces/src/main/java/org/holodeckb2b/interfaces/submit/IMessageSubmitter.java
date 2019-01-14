@@ -19,6 +19,7 @@ package org.holodeckb2b.interfaces.submit;
 
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 
 /**
  * Describes the interface the Holodeck B2B Core exposes to create a new ebMS message unit for sending. Since version
@@ -37,14 +38,15 @@ public interface IMessageSubmitter {
      * <p>Whether the message will be sent immediately depends on the P-Mode that applies and the MEP being specified
      * therein. If the MEP is Push the Holodeck B2B will try to send the message immediately. When the MEP is Pull the
      * message is stored for retrieval by the receiving MSH.
+     * <p>It is REQUIRED that the meta data contains a reference to the P-Mode that should be used to handle the
+     * message. If the P-Mode specifies custom validation (in the User Message flow, see {@link
+     * IUserMessageFlow#getCustomValidationConfiguration()}) the submitted message will be validated and only accepted
+     * when successfully validated.
      * <p><b>NOTE:</b> This method MAY return before the message is actually sent to the receiver. Successful return
      * ONLY GUARANTEES that the message CAN be sent to the receiver and that Holodeck B2B will try to do so.
-     * <p>It is NOT REQUIRED that the meta data contains a reference to the P-Mode that should be used to handle the
-     * message. The first action of a <i>MessageSubmitter</i> is to find the correct P-Mode for the user message. It is
-     * however RECOMMENDED to include the P-Mode id to prevent mismatches.
      *
-     * @param um                    The meta data on the user message to be sent to the other trading partner.
-     * @param deletePayloadFiles    Indicator whether the files containing the payload data must be deleted or not
+     * @param submission            The meta data on the user message to be sent to the other trading partner.
+     * @param movePayloads          Indicator whether the files containing the payload data must be deleted or not
      * @return                      The ebMS message-id assigned to the user message.
      * @throws MessageSubmitException   When the user message can not be submitted successfully. Reasons for failure can
      *                                  be that no P-Mode can be found to handle the message or the given P-Mode
@@ -57,14 +59,15 @@ public interface IMessageSubmitter {
      * <p>With this submission the business application that expects to receive a User Message, i.e. the <i>Consumer</i>
      * in ebMS specification terminology, can control the moments when the pull operation must be performed. Holodeck
      * B2B will try to send the message directly.
-     * <p>The meta-data for the Pull Request MUST contain both the MPC and P-Mode [id]. A messageId SHOULD NOT be
-     * included in the submission as Holodeck B2B will generate one.
+     * <p>The meta-data for the Pull Request MUST contain the P-Mode [id] and MAY contain a MPC and messageId. If no
+     * MPC is defined in either the P-Mode and the submitted Pull Request the <i>default MPC</i> will be used. 
      *
-     * @param pr    The meta-data on the pull request that should be sent.
-     * @return      The ebMS message-id assigned to the pull request.
+     * @param pullRequest    The meta-data on the pull request that should be sent.
+     * @return               The ebMS message-id assigned to the pull request.
      * @throws MessageSubmitException   When the pull request can not be submitted successfully. Reasons for failure can
      *                                  be that the P-Mode can not be found or the given P-Mode and MPC conflict.
      * @since  2.1.0
+     * @since  4.1.0 Checks that the P-Mode specified can be used for pulling and use of default MPC when none specified
      */
     public String submitMessage(IPullRequest pr) throws MessageSubmitException;
 }
