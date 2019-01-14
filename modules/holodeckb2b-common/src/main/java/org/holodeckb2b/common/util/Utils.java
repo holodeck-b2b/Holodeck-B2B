@@ -491,8 +491,8 @@ public final class Utils {
     public static boolean isValidURI(final String uri) {
         boolean isValid;
         try {
-            new URI(uri);
-            isValid = true;
+            final URI parsedURI = new URI(uri);
+            isValid = !Utils.isNullOrEmpty(parsedURI.getScheme());            
         } catch (URISyntaxException ex) {
             isValid = false;
         }
