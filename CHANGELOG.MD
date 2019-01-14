@@ -39,7 +39,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   message.
 * Issue that integration tests were not executed when running them from the IDE and the `JAVA_HOME` system environment 
   variable was not set. Now the JVM used by the IDE is used.
-* Strict validation of the AgreementRef being an URI in case no type has been specified.       
+* Strict validation of the AgreementRef being an URI in case no type has been specified.
+* Issues in processing User Messages without payloads.       
 
 ## 4.0.0
 ##### 2018-11-04

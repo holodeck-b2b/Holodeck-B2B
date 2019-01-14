@@ -67,7 +67,8 @@ abstract class AbstractSignatureProcessedEvent extends AbstractMessageProcessing
     {
         super(subject);
         this.headerDigest = headerDigest;
-        this.payloadDigests = (Map<IPayload, ISignedPartMetadata>) Collections.unmodifiableMap(payloadDigests);
+        this.payloadDigests = payloadDigests == null ? null :
+        							(Map<IPayload, ISignedPartMetadata>) Collections.unmodifiableMap(payloadDigests) ;
     }
 
     /**

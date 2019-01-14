@@ -117,8 +117,9 @@ final class MMDCompleter {
         completeCollaborationInfo();
         completeProperties();
         // Set the containment of payloads if not already specified
-        submission.getPayloads().parallelStream().filter(p -> p.getContainment() == null)
-        										 .forEach(p -> ((Payload) p).setContainment(Containment.ATTACHMENT));
+        if (!Utils.isNullOrEmpty(submission.getPayloads()))
+        	submission.getPayloads().parallelStream().filter(p -> p.getContainment() == null)
+        										 	 .forEach(p -> ((Payload) p).setContainment(Containment.ATTACHMENT));
         
         return submission;
     }
