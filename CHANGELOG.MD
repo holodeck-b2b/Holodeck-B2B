@@ -33,7 +33,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   of the message protocol name
 * When no retry configuration is available for a message but a Receipt is expected a MissingReceipt ebMS Error is 
   generated and reported [as configured in the P-Mode] to the business application instead of only logging an error 
-  message.    
+  message.
+* Issue that integration tests were not executed when running them from the IDE and the `JAVA_HOME` system environment 
+  variable was not set. Now the JVM used by the IDE is used.      
 
 ## 4.0.0
 ##### 2018-11-04

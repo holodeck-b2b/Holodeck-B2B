@@ -27,6 +27,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import org.apache.commons.lang.SystemUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
@@ -161,7 +162,7 @@ public class ITHelper {
                         new ProcessBuilder("/bin/bash", "./startServer.sh");
                 pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                 pb.redirectError(new File(workingDirPath + "/error.log"));
-
+                pb.environment().put("JAVA_HOME", System.getProperty("java.home"));
                 pb.directory(
                         new File(workingDirPath + "/" + dADirName + "/" + "bin"));
                 processA = pb.start();
@@ -173,12 +174,14 @@ public class ITHelper {
                                 + "bin" + File.separator + "startServer.bat");
                 pbA.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                 pbA.redirectError(new File(workingDirPath + File.separator + "error.log"));
+                pbA.environment().put("JAVA_HOME", System.getProperty("java.home"));
                 processA = pbA.start();
 
                 ProcessBuilder pbB = new ProcessBuilder(workingDirPath + File.separator + dBDirName + File.separator
                                 + "bin" + File.separator + "startServer.bat");
                 pbB.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                 pbB.redirectError(new File(workingDirPath + File.separator + "error.log"));
+                pbB.environment().put("JAVA_HOME", System.getProperty("java.home"));
                 processB = pbB.start();
             }
         } catch (Exception e) {
