@@ -28,6 +28,7 @@ import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
+import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
@@ -147,16 +148,22 @@ public class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessa
 	 */
 	protected void doStrictCollabInfoValidation(final ICollaborationInfo collabInfo,
 											  Collection<MessageValidationError> validationErrors) {
-        // Check that the Service value is an URI if it's untyped
         if (collabInfo != null) {
+        	final IAgreementReference agreementRef = collabInfo.getAgreement();
+        	if (agreementRef != null && Utils.isNullOrEmpty(agreementRef.getType()) && !Utils.isValidURI(agreementRef.getName()))
+                validationErrors.add(new MessageValidationError("Untyped AgreementRef value [" + agreementRef.getName()
+                												+ "] is not URI", MessageValidationError.Severity.Failure,
+                												HeaderValidationHandler.VALUE_INCONSISTENT_REQ));        		
         	if (Utils.isNullOrEmpty(collabInfo.getConversationId()))
                 validationErrors.add(new MessageValidationError("ConversationId must have a non-empty value"));                        
-            IService service = collabInfo.getService();
+            final IService service = collabInfo.getService();
+            // Check that the Service value is an URI if it's untyped
             if (service != null && Utils.isNullOrEmpty(service.getType()) && !Utils.isValidURI(service.getName()))
-                validationErrors.add(new MessageValidationError("Untype Service value [" + service.getName()
+                validationErrors.add(new MessageValidationError("Untyped Service value [" + service.getName()
                                                                                                     + "] is not URI",
                                                                MessageValidationError.Severity.Failure,
                                                                HeaderValidationHandler.VALUE_INCONSISTENT_REQ));
+            // Check that test Action is used when test service is specified
             if (EbMSConstants.TEST_ACTION_URI.equals(collabInfo.getAction())
                 && !EbMSConstants.TEST_SERVICE_URI.equals(service.getName()))
                 validationErrors.add(new MessageValidationError("Service must be " + EbMSConstants.TEST_SERVICE_URI +
