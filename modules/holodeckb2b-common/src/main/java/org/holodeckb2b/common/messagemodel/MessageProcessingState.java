@@ -35,11 +35,25 @@ public class MessageProcessingState implements IMessageUnitProcessingState {
 
         /**
          * Creates a new <code>MessageProcessingState</code> object with the given state and the current time as start
+         * 
+         * @param	state 			The processing state to set
          */
         public MessageProcessingState(final ProcessingState state) {
-            this.state = state;
-            this.startTime = new Date();
-            this.description = null;
+            this(state, null);
+        }
+        
+        /**
+         * Creates a new <code>MessageProcessingState</code> object with the given state and description and sets the 
+         * current time as start
+         * 
+         * @param	state 			The processing state to set
+         * @param	description		Additional description of the processing state 
+         * @since 4.1.0
+         */
+        public MessageProcessingState(final ProcessingState state, final String description) {
+        	this.state = state;
+        	this.startTime = new Date();
+        	this.description = description;
         }
 
         /**

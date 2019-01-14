@@ -99,11 +99,18 @@ public class UpdateManager implements IUpdateManager {
     @Override
     public boolean setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState currentProcState,
                                       final ProcessingState newProcState) throws PersistenceException {
-    		EntityManager em = null;
+    	return this.setProcessingState(msgUnit, currentProcState, newProcState, null);
+    }
+    
+    @Override
+    public boolean setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState currentProcState,
+                                      final ProcessingState newProcState, final String description) 
+                                    		  											  throws PersistenceException {
+    	EntityManager em = null;
         EntityTransaction tx = null;
         try {
-        		em = EntityManagerUtil.getEntityManager();
-        	 	tx = em.getTransaction();
+        	em = EntityManagerUtil.getEntityManager();
+        	tx = em.getTransaction();
             tx.begin();
             // Reload the entity object from the database so we've actual data and a managed JPA object ready for change
             MessageUnit jpaMsgUnit = em.find(MessageUnit.class, ((MessageUnitEntity) msgUnit).getOID(),
@@ -117,7 +124,7 @@ public class UpdateManager implements IUpdateManager {
                 return false;
             }
             // Current state is as requested, update to new state
-            jpaMsgUnit.setProcessingState(new MessageProcessingState(newProcState));
+            jpaMsgUnit.setProcessingState(new MessageProcessingState(newProcState, description));
             // Save to database, the flush is used to trigger possible an optimistic lock exception
             em.flush();
             // Ensure that the object stays completely loaded if it was already so previously
@@ -135,7 +142,7 @@ public class UpdateManager implements IUpdateManager {
 	    		}
             return false;
         } catch (final Exception e) {
-            // Another error occured when updating the processing state. Rollback and rethrow as DatabaseException
+            // Another error occurred when updating the processing state. Rollback and rethrow as DatabaseException
             em.getTransaction().rollback();
             throw new PersistenceException("An error occurred while updating the processing state!", e);
         }finally {

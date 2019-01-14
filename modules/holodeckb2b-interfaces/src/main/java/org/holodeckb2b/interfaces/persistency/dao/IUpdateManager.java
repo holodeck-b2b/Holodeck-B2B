@@ -81,6 +81,27 @@ public interface IUpdateManager {
     boolean setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState currentProcState
                                                                , final ProcessingState newProcState)
                                                                                         throws PersistenceException;
+    
+    /**
+     * Updates the processing state of the given message unit to the specified state and given description.
+     * <p>If a current processing state is provided this method checks that the message unit is currently in this state
+     * before changing to the new state. The check and change need to be executed in one transaction to ensure that no
+     * other thread can make changes to the message unit's processing state.<br>
+     * The new processing state's start time will be set to the current time.
+     *
+     * @param msgUnit           The entity object representing the message unit
+     * @param currentProcState  The required current processing state of the message unit or<br>
+     *                          <code>null</code> if the state should always be changed regardless of current state
+     * @param newProcState      The new processing state
+     * @param description		The additional description for the new processing state
+     * @return                  <code>true</code> if the processing state was changed,<br>
+     *                          <code>false</code> if not because the current processing state has already changed
+     * @throws PersistenceException When a problem occurs updating the processing state of the message unit
+     * @since 4.1.0
+     */
+    boolean setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState currentProcState,
+    						   final ProcessingState newProcState, final String description)
+    								   													throws PersistenceException;
 
     /**
      * Sets the multi-hop indicator of the message unit.

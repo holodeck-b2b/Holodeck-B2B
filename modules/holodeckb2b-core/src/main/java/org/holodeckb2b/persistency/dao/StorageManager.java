@@ -124,7 +124,23 @@ public class StorageManager {
      */
     public void setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState newProcState)
                                                                                         throws PersistenceException {
-        this.setProcessingState(msgUnit, null, newProcState);
+        this.setProcessingState(msgUnit, null, newProcState, null);
+    }
+    
+    /**
+     * Updates the processing state of the given message unit to the specified state with given additional description
+     * without checking the current state.
+     * <br>The start time of the new processing state will be set to the current time.
+     *
+     * @param msgUnit           The entity object representing the message unit
+     * @param newProcState      The new processing state
+     * @param description		The additional description for the new processing state
+     * @throws PersistenceException When a problem occurs updating the processing state of the message unit
+     * @since 4.1.0
+     */
+    public void setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState newProcState,
+    							   final String description) throws PersistenceException {
+    	this.setProcessingState(msgUnit, null, newProcState, description);
     }
 
     /**
@@ -141,11 +157,32 @@ public class StorageManager {
      *                          <code>false</code> if not because the current processing state has already changed
      * @throws PersistenceException When a problem occurs updating the processing state of the message unit
      */
-    public boolean setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState currentProcState
-                                                                      , final ProcessingState newProcState)
+    public boolean setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState currentProcState,
+    								  final ProcessingState newProcState) throws PersistenceException {
+    	return this.setProcessingState(msgUnit, currentProcState, newProcState, null);
+    }
+    
+    /**
+     * Updates the processing state of the given message unit to the specified state with given additional description.
+     * <p>Before changing the processing state this method checks that the message unit is in a specific state. The
+     * check and change need to be executed in one transaction to ensure that no other thread can make changes to the
+     * message unit's processing state.<br>
+     * The new processing state's start time will be set to the current time.
+     *
+     * @param msgUnit           The entity object representing the message unit
+     * @param currentProcState  The required current processing state of the message unit
+     * @param newProcState      The new processing state
+     * @param description		The additional description for the new processing state
+     * @return                  <code>true</code> if the processing state was changed,<br>
+     *                          <code>false</code> if not because the current processing state has already changed
+     * @throws PersistenceException When a problem occurs updating the processing state of the message unit
+     * @since 4.1.0
+     */
+    public boolean setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState currentProcState,
+    								  final ProcessingState newProcState, final String description)
                                                                                         throws PersistenceException {
         //@todo Check if the processing state is allowed and ensure events are triggered using the ProcessingStateManager
-        return parent.setProcessingState(msgUnit, currentProcState, newProcState);
+        return parent.setProcessingState(msgUnit, currentProcState, newProcState, description);
     }
 
     /**

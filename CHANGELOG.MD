@@ -29,6 +29,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   suffix to shorten the event names and prevent duplication of "event" in the qualifies class name.
 
 ### Fixed
+* Corrected bug in 4.0.0 that description of processing states could not be saved due to missing API. 
 * Name of the log used for reporting errors generated during processing of incoming messages. Did include _null_ instead
   of the message protocol name
 * When no retry configuration is available for a message but a Receipt is expected a MissingReceipt ebMS Error is 
