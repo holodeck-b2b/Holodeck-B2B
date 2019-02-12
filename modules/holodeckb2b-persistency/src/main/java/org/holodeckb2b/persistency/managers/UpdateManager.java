@@ -127,10 +127,14 @@ public class UpdateManager implements IUpdateManager {
             jpaMsgUnit.setProcessingState(new MessageProcessingState(newProcState, description));
             // Save to database, the flush is used to trigger possible an optimistic lock exception
             em.flush();
-            // Ensure that the object stays completely loaded if it was already so previously
-            if (msgUnit.isLoadedCompletely())
-                QueryManager.loadCompletely(jpaMsgUnit);
             tx.commit();
+            
+            // Ensure that the object stays completely loaded if it was already so previously
+            if (msgUnit.isLoadedCompletely()) {
+            	tx.begin();
+                QueryManager.loadCompletely(jpaMsgUnit);
+                tx.commit();
+            }
             // Update the entity object
             ((MessageUnitEntity) msgUnit).updateJPAObject(jpaMsgUnit);
             return true;
