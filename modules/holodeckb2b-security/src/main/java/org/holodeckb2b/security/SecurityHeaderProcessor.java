@@ -171,7 +171,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         final IEncryptionConfiguration encConfig = receiverConfig != null ? receiverConfig.getEncryptionConfiguration()
                                                                           : null;
         if (encConfig != null)
-            ((PasswordCallbackHandler) reqData.getCallbackHandler()).addUser(encConfig.getKeystoreAlias(),
+            ((PasswordCallbackHandler) reqData.getCallbackHandler()).addUser(encConfig.getKeystoreAlias().toLowerCase(),
                                                                              encConfig.getCertificatePassword());
         try {
             log.debug("Process the default WS-Security header");

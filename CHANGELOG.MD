@@ -45,6 +45,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Issues in processing User Messages without payloads.
 * Check that P-Mode specified for a submitted Pull Request does support pulling and that there is no conflict in the
   MPCs specified in both P-Mode and submission.       
+* Fix issue in not finding the private key for description because alias is given in upper case in P-Mode.
 
 ## 4.0.0
 ##### 2018-11-04
