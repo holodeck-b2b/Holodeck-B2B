@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
+
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
@@ -127,12 +128,12 @@ public class PModeFinder {
             return null;
 
         for (final IPMode p : pmodes.getAll()) {
-            // Ignore this P-Mode if it is configured for sending
-            if (p.getMepBinding().equals(EbMSConstants.ONE_WAY_PUSH)
-                && p.getLeg(ILeg.Label.REQUEST).getProtocol() != null
-                && !Utils.isNullOrEmpty(p.getLeg(ILeg.Label.REQUEST).getProtocol().getAddress())) {
-                continue;
-            }
+            // Check if we should ignore this P-Mode because it is for sending of a User Message 
+        	final boolean initiator = PModeUtils.isHolodeckB2BInitiator(p);
+        	final String  mepBinding = p.getMepBinding();
+    		if ((initiator && !mepBinding.equals(EbMSConstants.ONE_WAY_PULL)) // sending using Push
+    		|| (!initiator && mepBinding.equals(EbMSConstants.ONE_WAY_PULL))) // sending using Pull
+                continue;            
 
             int cValue = 0;
             // P-Mode id and agreement info are contained in optional element
@@ -174,10 +175,10 @@ public class PModeFinder {
             // Check trading partner info
             final ITradingPartner from = mu.getSender(), to = mu.getReceiver();
             ITradingPartner fromPMode = null, toPMode = null;
-            if (p.getMepBinding().equals(EbMSConstants.ONE_WAY_PUSH)) {
-                fromPMode = p.getInitiator(); toPMode = p.getResponder();
-            } else {
+            if (mepBinding.equals(EbMSConstants.ONE_WAY_PULL)) {
                 fromPMode = p.getResponder(); toPMode = p.getInitiator();
+            } else {
+                fromPMode = p.getInitiator(); toPMode = p.getResponder();
             }
 
             // Check To info

@@ -50,6 +50,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   MPCs specified in both P-Mode and submission.
 * _UnsupportedException_s in `org.holodeckb2b.security.results.SignedPartMetadata.TransformMetadata` when getting 
   algorithm and parameters. 
+* Fixed issue in finding P-Mode for User Messages where message could be matches to a P-Mode configured for sending
+  message based on pull.   
+* NPE in file delivery of _Receipt_s without content (will only occur when used for non-AS4 Receipts)    
 * Fix issue in not finding the private key for description because alias is given in upper case in P-Mode.
 
 ## 4.0.0

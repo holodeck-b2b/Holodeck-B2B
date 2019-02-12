@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
@@ -264,9 +265,10 @@ public class EbmsFileDeliverer extends AbstractFileDeliverer {
         rcptChild.declareDefaultNamespace(RECEIPT_CHILD_NS_URI);
 
         // If there was actual content (and we could get access to it) use the name of first element
-        final String firstReceiptChildName = originalReceipt.getContent().get(0).getLocalName();
+        final List<OMElement> content = originalReceipt.getContent();
+        final OMElement firstReceiptChild = content != null ? content.get(0) : null;
         String mmdRcptName;
-        switch (firstReceiptChildName) {
+        switch (firstReceiptChild != null ? firstReceiptChild.getLocalName() : "") {
             case "NonRepudiationInformation" :
                 mmdRcptName = "ebbp:NonRepudiationInformation"; break;
             case "UserMessage" :
