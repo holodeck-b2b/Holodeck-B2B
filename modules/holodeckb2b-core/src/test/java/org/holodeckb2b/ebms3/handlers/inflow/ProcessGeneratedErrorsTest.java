@@ -17,71 +17,49 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Collection;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.HandlerDescription;
+import org.apache.axis2.description.ModuleConfiguration;
+import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
+import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.pmode.helpers.Leg;
-import org.holodeckb2b.pmode.helpers.PMode;
-import org.holodeckb2b.pmode.helpers.UserMessageFlow;
-import org.junit.After;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
-/**
- * Created at 12:07 15.03.17
- *
- * @author Timur Shakuov (t.shakuov at gmail.com)
- */
-@RunWith(MockitoJUnitRunner.class)
 public class ProcessGeneratedErrorsTest {
 
+	private ProcessGeneratedErrors handler;
 
-    private static String baseDir;
-
-    private static HolodeckB2BTestCore core;
-
-    private ProcessGeneratedErrors handler;
-
-    @BeforeClass
+	@BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = ProcessGeneratedErrorsTest.class.getClassLoader()
-                .getResource("handlers").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
+        String baseDir = ProcessGeneratedErrorsTest.class.getClassLoader().getResource("handlers").getPath();
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
     }
-
+	
     @AfterClass
     public static void tearDownClass() throws Exception {
         TestUtils.cleanOldMessageUnitEntities();
@@ -90,303 +68,151 @@ public class ProcessGeneratedErrorsTest {
     @Before
     public void setUp() throws Exception {
         handler = new ProcessGeneratedErrors();
+        ModuleConfiguration moduleDescr = new ModuleConfiguration("test", null);
+        moduleDescr.addParameter(new Parameter("HandledMessagingProtocol", "TEST"));
+        HandlerDescription handlerDescr = new HandlerDescription();
+        handlerDescr.setParent(moduleDescr);
+        handler.init(handlerDescr);        
     }
-
-    @After
-    public void tearDown() throws Exception {
-        core.getPModeSet().removeAll();
-    }
-
+    
     /**
-     * Test the case when there is a single error that references the specific
-     * message unit, which is not a pull request
+     * Test anonymous errors
      */
     @Test
-    public void testDoProcessingTheErrorRefsUserMessage() throws Exception {
-        UserMessage userMessage = new UserMessage(TestUtils.getMMD("handlers/full_mmd.xml", this));
-
-        final String pmodeId = "pmode_id_01";
-        final String msgId = "some_msg_id_01";
-        userMessage.setMessageId(msgId);
-        userMessage.setPModeId(pmodeId);
-
-        PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setId(pmodeId);
-
-        Leg leg = new Leg();
-        leg.setUserMessageFlow(new UserMessageFlow());
-        pmode.addLeg(leg);
-
-        core.getPModeSet().add(pmode);
-
+    public void testErrorsWithoutRef() {
+    	// Prepare msg ctx
         MessageContext mc = new MessageContext();
-        mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
-
-        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-
-        // Setting input message property
-        IUserMessageEntity userMessageEntity = storageManager.storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessageEntity);
-
+        
+        // Create the Error Signal 
         EbmsError error1 = new EbmsError();
-        error1.setRefToMessageInError(userMessageEntity.getMessageId());
         error1.setErrorDetail("Some error for testing.");
-
-        // Adding generated error
         MessageContextUtils.addGeneratedError(mc, error1);
-
+        EbmsError error2 = new EbmsError();
+        error2.setErrorDetail("Some other error for testing.");
+        MessageContextUtils.addGeneratedError(mc, error2);
+        
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
-
-        assertNotNull(mc.getProperty(MessageContextProperties.OUT_ERRORS));
-        Collection<IErrorMessageEntity> errors = (Collection<IErrorMessageEntity>) 
-        														mc.getProperty(MessageContextProperties.OUT_ERRORS);
-        assertTrue(!Utils.isNullOrEmpty(errors));
-        assertEquals(1, errors.size());
-        assertEquals(userMessage.getMessageId(), errors.iterator().next().getRefToMessageId());
+        
+        Collection<IErrorMessageEntity> errorSigs = (Collection<IErrorMessageEntity>) 
+													  mc.getProperty(MessageContextProperties.GENERATED_ERROR_SIGNALS);
+        assertFalse(Utils.isNullOrEmpty(errorSigs));
+        assertEquals(1, errorSigs.size());
+        IErrorMessageEntity errSig = errorSigs.iterator().next();
+        assertNull(errSig.getPModeId());
+        assertNull(errSig.getRefToMessageId());
+        assertNotNull(errSig.getErrors());
+        assertEquals(2, errSig.getErrors().size());
     }
-
+    
     /**
-     * Test the case when there is a single error that references the pull request
+     * Test errors with same reference
+     * @throws PersistenceException 
      */
     @Test
-    public void testDoProcessingTheErrorRefsPullRequest() throws Exception {
-        String msgId = "some_msg_id_01";
-        PullRequest pullRequest = new PullRequest();
-        pullRequest.setMPC("some_mpc");
-        pullRequest.setMessageId(msgId);
-
-        MessageContext mc = new MessageContext();
-        mc.setServerSide(true);
-        mc.setFLOW(MessageContext.IN_FLOW);
-
-        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-        IPullRequestEntity pullRequestEntity =
-                storageManager.storeIncomingMessageUnit(pullRequest);
-        mc.setProperty(MessageContextProperties.IN_PULL_REQUEST, pullRequestEntity);
-
-        EbmsError error1 = new EbmsError();
-        error1.setRefToMessageInError(pullRequestEntity.getMessageId());
-        error1.setErrorDetail("Some error for testing.");
-
-        // Adding generated error
-        MessageContextUtils.addGeneratedError(mc, error1);
-        try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-
-        assertTrue((Boolean)mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
-
-        assertNotNull(mc.getProperty(MessageContextProperties.OUT_ERRORS));
-        Collection<IErrorMessageEntity> errors = (Collection<IErrorMessageEntity>) 
-        														mc.getProperty(MessageContextProperties.OUT_ERRORS);
-        assertTrue(!Utils.isNullOrEmpty(errors));
-        assertEquals(1, errors.size());
-        assertEquals(pullRequest.getMessageId(), errors.iterator().next().getRefToMessageId());
+    public void testErrorsSameMsg() throws PersistenceException {
+    	// Prepare message in error
+    	UserMessage usrMsg = new UserMessage();
+    	usrMsg.setMessageId(MessageIdUtils.createMessageId());
+    	usrMsg.setPModeId("some-pmodeid-001");
+    	IUserMessageEntity usrMsgEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(usrMsg);
+    	
+    	// Prepare msg ctx
+    	MessageContext mc = new MessageContext();
+    	mc.setFLOW(MessageContext.IN_FLOW);
+    	mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, usrMsgEntity);
+    	
+    	// Create the Error Signal 
+    	EbmsError error1 = new EbmsError();
+    	error1.setErrorDetail("Some error for testing.");
+    	error1.setRefToMessageInError(usrMsg.getMessageId());
+    	MessageContextUtils.addGeneratedError(mc, error1);
+    	EbmsError error2 = new EbmsError();
+    	error2.setErrorDetail("Some other error for testing.");
+    	error2.setRefToMessageInError(usrMsg.getMessageId());
+    	MessageContextUtils.addGeneratedError(mc, error2);
+    	
+    	try {
+    		Handler.InvocationResponse invokeResp = handler.invoke(mc);
+    		assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+    	} catch (Exception e) {
+    		fail(e.getMessage());
+    	}
+    	
+    	Collection<IErrorMessageEntity> errorSigs = (Collection<IErrorMessageEntity>) 
+    												mc.getProperty(MessageContextProperties.GENERATED_ERROR_SIGNALS);
+    	assertFalse(Utils.isNullOrEmpty(errorSigs));
+    	assertEquals(1, errorSigs.size());
+    	IErrorMessageEntity errSig = errorSigs.iterator().next();
+    	assertEquals(usrMsg.getPModeId(), errSig.getPModeId());
+    	assertEquals(usrMsg.getMessageId(), errSig.getRefToMessageId());
+    	assertNotNull(errSig.getErrors());
+    	assertEquals(2, errSig.getErrors().size());
     }
-
+    
     /**
-     * Test the case when there is a single error that has no reference to the specific
-     * message unit
-     * @throws Exception
+     * Test errors with different references
+     * @throws PersistenceException 
      */
     @Test
-    public void testDoProcessingIfNoRefToMU() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-
-        String msgId = "some_msg_id_01";
-        UserMessage userMessage = UserMessageElement.readElement(umElement);
-
-        String pmodeId =
-                userMessage.getCollaborationInfo().getAgreement().getPModeId();
-        userMessage.setPModeId(pmodeId);
-        userMessage.setMessageId(msgId);
-
-        PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setId(pmodeId);
-
-        Leg leg = new Leg();
-        leg.setUserMessageFlow(new UserMessageFlow());
-        pmode.addLeg(leg);
-
-        core.getPModeSet().add(pmode);
-
-        MessageContext mc = new MessageContext();
-        mc.setServerSide(true);
-        mc.setFLOW(MessageContext.IN_FLOW);
-
-        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-
-        // Setting input message property
-        IUserMessageEntity userMessageEntity =
-                storageManager.storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                userMessageEntity);
-
-        EbmsError error1 = new EbmsError();
-        // We test the case when ref to message unit is not set
-//        error1.setRefToMessageInError(userMessageEntity.getMessageId());
-        error1.setErrorDetail("Some error for testing.");
-
-        // Adding generated error
-        MessageContextUtils.addGeneratedError(mc, error1);
-
-
-        try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-
-        assertNotNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
-
+    public void testErrorsDifferentMsg() throws PersistenceException {
+    	// Prepare message in error
+    	UserMessage usrMsg = new UserMessage();
+    	usrMsg.setMessageId(MessageIdUtils.createMessageId());
+    	usrMsg.setPModeId("some-pmodeid-001");
+    	IUserMessageEntity usrMsgEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(usrMsg);
+    	
+    	PullRequest pullReq = new PullRequest();
+    	pullReq.setMessageId(MessageIdUtils.createMessageId());
+    	pullReq.setPModeId("some-pmodeid-002");
+    	IPullRequestEntity pullReqEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(pullReq);
+    	
+    	// Prepare msg ctx
+    	MessageContext mc = new MessageContext();
+    	mc.setFLOW(MessageContext.IN_FLOW);
+    	mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, usrMsgEntity);
+    	mc.setProperty(MessageContextProperties.IN_PULL_REQUEST, pullReqEntity);
+    	
+    	// Create the Error Signal 
+    	EbmsError error1 = new EbmsError();
+    	error1.setErrorDetail("error-1");
+    	error1.setRefToMessageInError(usrMsg.getMessageId());
+    	MessageContextUtils.addGeneratedError(mc, error1);
+    	EbmsError error2 = new EbmsError();
+    	error2.setErrorDetail("error-2");
+    	error2.setRefToMessageInError(pullReq.getMessageId());
+    	MessageContextUtils.addGeneratedError(mc, error2);
+    	
+    	try {
+    		Handler.InvocationResponse invokeResp = handler.invoke(mc);
+    		assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+    	} catch (Exception e) {
+    		fail(e.getMessage());
+    	}
+    	
+    	Collection<IErrorMessageEntity> errorSigs = (Collection<IErrorMessageEntity>) 
+    											mc.getProperty(MessageContextProperties.GENERATED_ERROR_SIGNALS);
+    	assertFalse(Utils.isNullOrEmpty(errorSigs));
+    	assertEquals(2, errorSigs.size());
+    	
+    	assertTrue(errorSigs.parallelStream()
+    						.allMatch(e -> !Utils.isNullOrEmpty(e.getRefToMessageId())
+    									&& !Utils.isNullOrEmpty(e.getErrors())
+    									&& ( ( usrMsg.getMessageId().equals(e.getRefToMessageId())
+    										  && e.getErrors().iterator().next().getErrorDetail().equals(error1.getErrorDetail())
+    										 )
+    									   || ( pullReq.getMessageId().equals(e.getRefToMessageId())
+    										   && e.getErrors().iterator().next().getErrorDetail().equals(error2.getErrorDetail())
+    	    								  )
+    									   )));
+    	
     }
-
-    /**
-     * Test the case when there is a single error that has no reference to the specific
-     * message unit and we are initiating the flow
-     * @throws Exception
-     */
-    @Test
-    public void testDoProcessingIfNoRefToMUAndInflow() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-
-        String msgId = "some_msg_id_01";
-        UserMessage userMessage = UserMessageElement.readElement(umElement);
-
-        String pmodeId =
-                userMessage.getCollaborationInfo().getAgreement().getPModeId();
-        userMessage.setPModeId(pmodeId);
-        userMessage.setMessageId(msgId);
-
-        PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setId(pmodeId);
-
-        Leg leg = new Leg();
-        leg.setUserMessageFlow(new UserMessageFlow());
-        pmode.addLeg(leg);
-
-        core.getPModeSet().add(pmode);
-
-        MessageContext mc = new MessageContext();
-        mc.setFLOW(MessageContext.IN_FLOW);
-
-        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-
-        // Setting input message property
-        IUserMessageEntity userMessageEntity =
-                storageManager.storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                userMessageEntity);
-
-        EbmsError error1 = new EbmsError();
-        // We test the case when ref to message unit is not set
-//        error1.setRefToMessageInError(userMessageEntity.getMessageId());
-        error1.setErrorDetail("Some error for testing.");
-
-        // Adding generated error
-        MessageContextUtils.addGeneratedError(mc, error1);
-
-        try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-
-        assertNotNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
-
-        assertTrue((Boolean)mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
-    }
-
-    /**
-     * Test the case when there is a single error that has no reference to the specific
-     * message unit and all message unit failed to process successfully
-     * @throws Exception
-     */
-    @Test
-    public void testDoProcessingIfNoRefToMUAndAllMUFailed() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-
-        String msgId = "some_msg_id_01";
-        UserMessage userMessage = UserMessageElement.readElement(umElement);
-
-        String pmodeId =
-                userMessage.getCollaborationInfo().getAgreement().getPModeId();
-        userMessage.setPModeId(pmodeId);
-        userMessage.setMessageId(msgId);
-
-        PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setId(pmodeId);
-
-        Leg leg = new Leg();
-        leg.setUserMessageFlow(new UserMessageFlow());
-        pmode.addLeg(leg);
-
-        core.getPModeSet().add(pmode);
-
-        MessageContext mc = new MessageContext();
-        mc.setServerSide(true);
-        mc.setFLOW(MessageContext.IN_FLOW);
-
-        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-
-        // Setting input message property
-        IUserMessageEntity userMessageEntity =
-                storageManager.storeIncomingMessageUnit(userMessage);
-        storageManager.setProcessingState(userMessageEntity, ProcessingState.FAILURE);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                userMessageEntity);
-
-        EbmsError error1 = new EbmsError();
-        // We test the case when ref to message unit is not set
-//        error1.setRefToMessageInError(userMessageEntity.getMessageId());
-        error1.setErrorDetail("Some error for testing.");
-
-        // Adding generated error
-        MessageContextUtils.addGeneratedError(mc, error1);
-
-        try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-
-        assertNotNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
-
-        assertTrue((Boolean)mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
-
-    }
+    
+    
+    
 }

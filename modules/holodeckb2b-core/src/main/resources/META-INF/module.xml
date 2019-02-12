@@ -140,6 +140,9 @@
         <handler name="ProcessGeneratedErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessGeneratedErrors">
             <order phase="protocolInPhase" after="DeliverErrors"/>
         </handler>
+        <handler name="DetermineErrorReporting" class="org.holodeckb2b.ebms3.handlers.inflow.DetermineErrorReporting">
+            <order phase="protocolInPhase" after="ProcessGeneratedErrors"/>
+        </handler>
         <!-- Indicate the ebMS header is processed by Holodeck B2B -->
         <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
             <order phase="protocolInPhase" phaseLast="true"/>
@@ -261,6 +264,9 @@
         <handler name="ProcessGeneratedErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessGeneratedErrors">
             <order phase="protocolInPhase" after="DeliverErrors"/>
         </handler>
+        <handler name="DetermineErrorReporting" class="org.holodeckb2b.ebms3.handlers.inflow.DetermineErrorReporting">
+            <order phase="protocolInPhase" after="ProcessGeneratedErrors"/>
+        </handler>        
         <!-- Indicate the ebMS header is processed by Holodeck B2B -->
         <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
             <order phase="protocolInPhase" phaseLast="true"/>

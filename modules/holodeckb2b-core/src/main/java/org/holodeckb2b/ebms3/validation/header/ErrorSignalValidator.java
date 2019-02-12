@@ -97,8 +97,7 @@ public class ErrorSignalValidator extends GeneralMessageUnitValidator<IErrorMess
         final Iterator<IEbmsError> it = errorSignal.getErrors().iterator();
         boolean consistent = true;
         boolean allowNull = false;
-        if (Utils.isNullOrEmpty(refToMessageId)
-                && !HolodeckB2BCoreInterface.getConfiguration().useStrictErrorRefCheck()) {
+        if (Utils.isNullOrEmpty(refToMessageId) && !strict) {
             // Signal level ref == null => all individual refs should be same, take first as leading
             refToMessageId = it.next().getRefToMessageInError();
         } else

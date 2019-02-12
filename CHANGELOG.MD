@@ -26,7 +26,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * The `mpc` attribute is not included in a Pull Request when the _default MPC_ is pulled.
 * Generalised the header validation handler so it can be more easily reused for other protocols.
 * Removed check on empty _ConversationId_ when submitting a User Message to the Core.
-* All event implementation classes to use the new event interface names
+* All event implementation classes to use the new event interface names.
+* Split handling of errors generated during processing of a received message in two handlers, one bundling the 
+  individual errors into Error Signals and one for determining how to report the Error Signals. Allows for re-use of
+  "bundling" handler in different messaging protocols.
 
 ### Deprecated
 * The interfaces for the  _message processing events_ with the _Event_ suffix. They are replaced with interfaces without

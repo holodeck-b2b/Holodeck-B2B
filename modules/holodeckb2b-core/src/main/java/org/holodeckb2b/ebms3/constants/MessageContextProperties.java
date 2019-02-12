@@ -19,7 +19,6 @@ package org.holodeckb2b.ebms3.constants;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.security.IEncryptionProcessingResult;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
-import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
 
 /**
  * Defines constants for <code>MessageContext</code> properties used by the Holodeck B2B Core to store information about
@@ -76,6 +75,12 @@ public interface MessageContextProperties {
      */
     static final String GENERATED_ERRORS = PREFIX + "gen-errors";
 
+    /**
+     * Holds an array of ebMS Error Signals that where generated during message processing
+     * @since 4.1.0
+     */
+    static final String GENERATED_ERROR_SIGNALS = PREFIX + "gen-error-sigs";
+    
     /**
      * Holds an array of Error Signals that should be sent.
      */
