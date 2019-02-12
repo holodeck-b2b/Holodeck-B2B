@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.axis2.context.MessageContext;
-import org.apache.commons.logging.Log;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
@@ -57,7 +56,7 @@ public class DetermineErrorReporting extends BaseHandler {
     }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, Log log) throws PersistenceException {
+    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
 
     	log.debug("Check if error signals were generated");
         @SuppressWarnings("unchecked")
@@ -81,7 +80,7 @@ public class DetermineErrorReporting extends BaseHandler {
                  * Therefore we only sent out this error if there no message unit with a processing state different 
                  * then FAILURE
                  */ 
-                if (isInFlow(RESPONSE) && 
+                if (isInFlow(RESPONDER) && 
                 	 (!Utils.isNullOrEmpty(error.getRefToMessageId()) || onlyFailedMessageUnits(mc))) {
                     log.debug("Error Signal [msgId=" + error.getMessageId() + "] should be send as response");
                     MessageContextUtils.addErrorSignalToSend(mc, error);
@@ -92,7 +91,7 @@ public class DetermineErrorReporting extends BaseHandler {
                             + " or because message in error was received as response");
                     // As we can not do anything with the error change its processing state to WARNING and then DONE
                     storageManager.setProcessingState(error, ProcessingState.WARNING, 
-		                    								 	isInFlow(REQUEST) ? "No P-Mode available for sending" 
+		                    								 	isInFlow(INITIATOR) ? "No P-Mode available for sending" 
 		                    								 						: "Ambigious error");
                     storageManager.setProcessingState(error, ProcessingState.DONE);
                 }
@@ -130,7 +129,7 @@ public class DetermineErrorReporting extends BaseHandler {
                     // Default is to send error as response when the message in error is received as a request
                     final boolean asResponse = errorHandling != null ?
                                                     errorHandling.getPattern() == ReplyPattern.RESPONSE :
-                                                    isInFlow(RESPONSE);
+                                                    isInFlow(RESPONDER);
                     /* Should this error signal be combined with a SOAP Fault? Because SOAP Faults can confuse
                      * the MSH that receives the error Holodeck B2B by default does not add the SOAP, it should
                      * be configured explicitly in the P-Mode
