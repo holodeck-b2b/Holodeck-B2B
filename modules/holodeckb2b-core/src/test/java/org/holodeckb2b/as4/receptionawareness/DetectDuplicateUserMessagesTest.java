@@ -19,27 +19,21 @@ package org.holodeckb2b.as4.receptionawareness;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.HandlerDescription;
+import org.apache.axis2.description.ModuleConfiguration;
+import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.Handler;
-import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.pmode.helpers.DeliverySpecification;
 import org.holodeckb2b.pmode.helpers.Leg;
 import org.holodeckb2b.pmode.helpers.PMode;
 import org.holodeckb2b.pmode.helpers.ReceptionAwarenessConfig;
@@ -74,61 +68,36 @@ public class DetectDuplicateUserMessagesTest {
     @Before
     public void setUp() throws Exception {
         handler = new DetectDuplicateUserMessages();
+        ModuleConfiguration moduleDescr = new ModuleConfiguration("test", null);
+        moduleDescr.addParameter(new Parameter("HandledMessagingProtocol", "TEST"));
+        HandlerDescription handlerDescr = new HandlerDescription();
+        handlerDescr.setParent(moduleDescr);
+        handler.init(handlerDescr);        
     }
 
 
     @Test
     public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-
-        MessageContext mc = new MessageContext();
-        mc.setFLOW(MessageContext.IN_FLOW);
-
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
+        MessageMetaData userMessage = TestUtils.getMMD("handlers/full_mmd.xml", this);
 
         PMode pmode = new PMode();
         pmode.setMep(EbMSConstants.ONE_WAY_MEP);
         pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-
         Leg leg = new Leg();
-
-        // Needed to emulate the message delivery
-        DeliverySpecification deliverySpec = new DeliverySpecification();
-        deliverySpec.setId("some_delivery_spec_01");
-        leg.setDefaultDelivery(deliverySpec);
 
         // Turning on duplicate detection
         ReceptionAwarenessConfig rac = new ReceptionAwarenessConfig();
         rac.setDuplicateDetection(true);
         leg.setReceptionAwareness(rac);
         pmode.addLeg(leg);
-
-        UserMessage userMessage
-                = UserMessageElement.readElement(umElement);
-
-        String pmodeId =
-                userMessage.getCollaborationInfo().getAgreement().getPModeId();
-        userMessage.setPModeId(pmodeId);
-        pmode.setId(pmodeId);
+        pmode.setId(userMessage.getCollaborationInfo().getAgreement().getPModeId());
+        core.getPModeSet().add(pmode);
 
         // Setting input message property
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        IUserMessageEntity userMessageEntity =
-                updateManager.storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                userMessageEntity);
-
-        core.getPModeSet().add(pmode);
+        IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(userMessage);
+        MessageContext mc = new MessageContext();
+        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessageEntity);
 
         // Do as if message is already delivered
         updateManager.setProcessingState(userMessageEntity, ProcessingState.DELIVERED);

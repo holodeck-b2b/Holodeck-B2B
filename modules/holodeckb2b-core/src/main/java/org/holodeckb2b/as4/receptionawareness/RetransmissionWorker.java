@@ -80,7 +80,9 @@ public class RetransmissionWorker extends AbstractWorkerTask {
             return;
         }
 
-        if (!Utils.isNullOrEmpty(waitingForRcpt)) {
+        if (Utils.isNullOrEmpty(waitingForRcpt)) 
+        	log.trace("There are no messages waiting for a Receipt");
+        else {
             log.debug(waitingForRcpt.size() + " messages may be waiting for a Receipt");
 
             StorageManager storageManager = HolodeckB2BCore.getStorageManager();

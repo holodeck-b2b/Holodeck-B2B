@@ -87,13 +87,14 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
             log.trace("Removing " + MessageUnitUtils.getMessageUnitName(msgUnit) + " with msgId: " 
             			+ msgUnit.getMessageId());
             try {
+            	// Complete loading is needed as it is not done when querying
+            	log.trace("Load all meta-data of message unit");
+                queryManager.ensureCompletelyLoaded(msgUnit);
                 // If the message unit to delete is a User Message we need to have a temp object so we can change the
                 // payload location info as we may need to trigger purge event.
                 UserMessage tmpUserMessage = null;
                 if (msgUnit instanceof IUserMessage) {
                     log.trace("Delete the payload data of the User Message");
-                    // Complete loading is needed as it is not done when querying
-                    queryManager.ensureCompletelyLoaded(msgUnit);
                     tmpUserMessage = new UserMessage((IUserMessage) msgUnit);
                     final Collection<IPayload> payloads = tmpUserMessage.getPayloads();
                     if (!Utils.isNullOrEmpty(payloads)) {
@@ -114,7 +115,7 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
                     } else
                         log.trace("User Message [" + msgUnit.getMessageId() + "] has no payloads");
                 }
-                // Remove meta-data from database
+                log.trace("Removing meta-data of message unit [" + msgUnit.getMessageId() + "] from database.");
                 HolodeckB2BCore.getStorageManager().deleteMessageUnit(msgUnit);
                 log.debug(MessageUnitUtils.getMessageUnitName(msgUnit) + " [msgId=" + msgUnit.getMessageId() 
                 			+ "] is removed");

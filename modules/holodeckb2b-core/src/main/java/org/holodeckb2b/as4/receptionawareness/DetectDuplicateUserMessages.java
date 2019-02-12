@@ -17,6 +17,7 @@
 package org.holodeckb2b.as4.receptionawareness;
 
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.HandlerDescription;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.ebms3.constants.MessageContextProperties;
@@ -40,7 +41,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * <p>How a duplicate should be handled is configured by the P-Mode parameter <b>ReceptionAwareness.DuplicateDetection.Eliminate</b>.
  * When set to <code>true</code> the duplicate will not be processed and its processing state set to {@link ProcessingState#DUPLICATE}.
  * Because the duplicate may be a retry due to a missing Receipt signal a new Receipt will be sent as response. This is
- * done by marking this message unit as delivered.
+ * done by marking in the message context this message unit as delivered.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
@@ -51,8 +52,14 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
      * configuration users can decide if this logging should be enabled and
      * how duplicates should be logged.
      */
-    private final Log     duplicateLog = LogFactory.getLog("org.holodeckb2b.msgproc.duplicates");
+    private static Log     duplicateLog;
 
+    @Override
+	public void init(HandlerDescription handlerdesc) {
+    	super.init(handlerdesc);
+    	duplicateLog = LogFactory.getLog("org.holodeckb2b.msgproc.duplicates." + handledMsgProtocol);
+    }
+    
     @Override
     protected byte inFlows() {
         return IN_FLOW;
