@@ -21,6 +21,7 @@ import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
 import java.util.List;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.OperationClient;
 import org.apache.axis2.client.Options;
@@ -61,6 +62,9 @@ public class Axis2Sender {
         ServiceClient sc;
         OperationClient oc;
         final MessageContext msgCtx = new MessageContext();
+        // For routing signals through the I-Cloud WS-A headers are used. We use the Axis2 addressing module to create
+        // the headers. But we don't need these headers normally, so disable the module by default
+        msgCtx.setProperty(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES, Boolean.TRUE);
 
         try {
             log.debug("Prepare Axis2 client to send " + MessageUnitUtils.getMessageUnitName(messageUnit)

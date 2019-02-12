@@ -21,9 +21,6 @@ import javax.xml.namespace.QName;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.Constants;
-import org.apache.axis2.addressing.AddressingConstants;
-import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.OperationClient;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.async.AxisCallback;
@@ -38,7 +35,6 @@ import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.i18n.Messages;
 import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.axis2.util.CallbackReceiver;
 import org.apache.axis2.util.Utils;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
@@ -153,132 +149,13 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
                 mc.setTransportIn(options.getTransportIn());
             }
 
-            /**
-             * If a module has set the USE_ASYNC_OPERATIONS option then we override the behaviour for sync calls, and
-             * effectively USE_CUSTOM_LISTENER too. However we leave real async calls alone.
-             */
-            boolean useAsync = false;
-            if (!mc.getOptions().isUseSeparateListener()) {
-                final Boolean useAsyncOption
-                        = (Boolean) mc.getProperty(Constants.Configuration.USE_ASYNC_OPERATIONS);
-                if (useAsyncOption != null) {
-                    useAsync = useAsyncOption.booleanValue();
-                }
-            }
-
-            final EndpointReference replyTo = mc.getReplyTo();
-            if (replyTo != null) {
-                if (replyTo.isWSAddressingAnonymous()
-                        && replyTo.getAllReferenceParameters() != null) {
-                    mc.setProperty(AddressingConstants.INCLUDE_OPTIONAL_HEADERS, Boolean.TRUE);
-                }
-
-                final String customReplyTo = (String) options.getProperty(Options.CUSTOM_REPLYTO_ADDRESS);
-                if (!(Options.CUSTOM_REPLYTO_ADDRESS_TRUE.equals(customReplyTo))) {
-                    if (!replyTo.hasAnonymousAddress()) {
-                        useAsync = true;
-                    }
-                }
-            }
-
-            if (useAsync || mc.getOptions().isUseSeparateListener()) {
-                sendAsync(useAsync, mc);
+            if (block) {
+                // Send the SOAP Message and receive a response
+                send(mc);
+                completed = true;
             } else {
-                if (block) {
-                    // Send the SOAP Message and receive a response
-                    send(mc);
-                    completed = true;
-                } else {
-                sc.getConfigurationContext().getThreadPool().execute(
-                        new OutOptInAxisOperationClient.NonBlockingInvocationWorker(mc, axisCallback));
-                }
-            }
-        }
-
-        private void sendAsync(boolean useAsync, MessageContext mc)
-                throws AxisFault {
-            if (log.isDebugEnabled()) {
-                log.debug("useAsync=" + useAsync + ", seperateListener=" +
-                        mc.getOptions().isUseSeparateListener());
-            }
-            /**
-             * We are following the async path. If the user hasn't set a callback object then we must
-             * block until the whole MEP is complete, as they have no other way to get their reply message.
-             */
-            // THREADSAFE issue: Multiple threads could be trying to initialize the callback receiver
-            // so it is synchronized.  It is not done within the else clause to avoid the
-            // double-checked lock antipattern.
-            CallbackReceiver callbackReceiver;
-            synchronized (axisOp) {
-                if (axisOp.getMessageReceiver() != null &&
-                        axisOp.getMessageReceiver() instanceof CallbackReceiver) {
-                    callbackReceiver = (CallbackReceiver) axisOp.getMessageReceiver();
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Creating new callback receiver");
-                    }
-                    callbackReceiver = new CallbackReceiver();
-                    axisOp.setMessageReceiver(callbackReceiver);
-                    if (log.isDebugEnabled()) log.debug("OutInAxisOperation: callbackReceiver " + callbackReceiver + " : " + axisOp);
-                }
-            }
-
-            OutOptInAxisOperationClient.SyncCallBack internalCallback = null;
-            if (axisCallback != null) {
-                callbackReceiver.addCallback(mc.getMessageID(), axisCallback);
-                if (log.isDebugEnabled()) log.debug("OutInAxisOperationClient: Creating axis callback");
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Creating internal callback");
-                }
-                internalCallback = new OutOptInAxisOperationClient.SyncCallBack();
-                callbackReceiver.addCallback(mc.getMessageID(), internalCallback);
-                if (log.isDebugEnabled()) log.debug("OutInAxisOperationClient: Creating internal callback");
-            }
-
-            /**
-             * If USE_CUSTOM_LISTENER is set to 'true' the replyTo value will not be replaced and Axis2 will not
-             * start its internal listner. Some other enntity (e.g. a module) should take care of obtaining the
-             * response message.
-             */
-            Boolean useCustomListener =
-                    (Boolean) options.getProperty(Constants.Configuration.USE_CUSTOM_LISTENER);
-            if (useAsync) {
-                useCustomListener = Boolean.TRUE;
-            }
-            if (useCustomListener == null || !useCustomListener.booleanValue()) {
-                EndpointReference replyTo = mc.getReplyTo();
-                if (replyTo == null || replyTo.hasAnonymousAddress()){
-                    EndpointReference replyToFromTransport =
-                            mc.getConfigurationContext().getListenerManager().
-                                    getEPRforService(sc.getAxisService().getName(),
-                                            axisOp.getName().getLocalPart(), mc
-                                            .getTransportIn().getName());
-
-                    if (replyTo == null) {
-                        mc.setReplyTo(replyToFromTransport);
-                    } else {
-                        replyTo.setAddress(replyToFromTransport.getAddress());
-                    }
-                }
-            }
-
-            //if we don't do this , this guy will wait till it gets HTTP 202 in the HTTP case
-            mc.setProperty(MessageContext.CLIENT_API_NON_BLOCKING, Boolean.TRUE);
-            mc.getConfigurationContext().registerOperationContext(mc.getMessageID(), oc);
-            AxisEngine.send(mc);
-            if (internalCallback != null) {
-                internalCallback.waitForCompletion(options.getTimeOutInMilliSeconds());
-
-                // process the result of the invocation
-                if (internalCallback.envelope == null) {
-                    if (internalCallback.error == null) {
-                        log.error("Callback had neither error nor response");
-                    }
-                    if (options.isExceptionToBeThrownOnSOAPFault()) {
-                        throw AxisFault.makeFault(internalCallback.error);
-                    }
-                }
+            sc.getConfigurationContext().getThreadPool().execute(
+                    new OutOptInAxisOperationClient.NonBlockingInvocationWorker(mc, axisCallback));
             }
         }
 
