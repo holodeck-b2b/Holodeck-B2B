@@ -16,11 +16,31 @@
  */
 package org.holodeckb2b.persistency.test;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+
+import javax.persistence.EntityManager;
+
 //import com.sun.xml.internal.ws.api.SOAPVersion;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPFactory;
-import org.holodeckb2b.common.messagemodel.*;
+import org.holodeckb2b.common.messagemodel.AgreementReference;
+import org.holodeckb2b.common.messagemodel.CollaborationInfo;
+import org.holodeckb2b.common.messagemodel.Description;
+import org.holodeckb2b.common.messagemodel.EbmsError;
+import org.holodeckb2b.common.messagemodel.ErrorMessage;
+import org.holodeckb2b.common.messagemodel.PartyId;
+import org.holodeckb2b.common.messagemodel.Payload;
+import org.holodeckb2b.common.messagemodel.Property;
+import org.holodeckb2b.common.messagemodel.PullRequest;
+import org.holodeckb2b.common.messagemodel.Receipt;
+import org.holodeckb2b.common.messagemodel.SchemaReference;
+import org.holodeckb2b.common.messagemodel.SelectivePullRequest;
+import org.holodeckb2b.common.messagemodel.Service;
+import org.holodeckb2b.common.messagemodel.TradingPartner;
+import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -29,13 +49,6 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.jpa.MessageUnit;
 import org.holodeckb2b.persistency.jpa.MessageUnitProcessingState;
 import org.holodeckb2b.persistency.util.EntityManagerUtil;
-
-import javax.persistence.EntityManager;
-import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
 
 /**
  * Helper class to create a set of message unit meta-data for testing.
@@ -279,10 +292,8 @@ public class TestData {
         receipt6.setRefToMessageId(T_MSG_ID_11);
         receipt6.setProcessingState(ProcessingState.DELIVERY_FAILED);
         // Adding content data
-        final QName RECEIPT_CHILD_ELEMENT_NAME = new QName("ReceiptChild");
-        org.apache.axiom.soap.SOAPEnvelope env = createEnvelope(SOAPVersion.SOAP_12);
-        OMElement receiptChildElement =
-                env.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
+        OMElement receiptChildElement = OMAbstractFactory.getOMFactory().createOMElement("JustATestElement",
+        															"http://test.holodeck-b2b.org/persistency", "p");
         receiptChildElement.setText("eb3:UserMessage");
         ArrayList<OMElement> receiptContent = new ArrayList<>();
         receiptContent.add(receiptChildElement);
@@ -299,28 +310,6 @@ public class TestData {
         pull7.setService(new Service(T_SERVICE_1));
         pull7.setAgreementRef(new AgreementReference(T_AGREEMENT_1, T_AGREEMENT_TYPE_1, null));
         try { Thread.sleep(200); } catch (InterruptedException ex) {}
-    }
-
-    enum SOAPVersion { SOAP_11, SOAP_12 }
-
-    private static org.apache.axiom.soap.SOAPEnvelope createEnvelope(final SOAPVersion v) {
-        SOAPFactory omFactory = null;
-        // Check which SOAP version to use
-        if (v == SOAPVersion.SOAP_11) {
-            omFactory = OMAbstractFactory.getSOAP11Factory();
-        } else {
-            omFactory = OMAbstractFactory.getSOAP12Factory();
-        }
-        final org.apache.axiom.soap.SOAPEnvelope envelope = omFactory.getDefaultEnvelope();
-        declareNamespaces(envelope);
-        return envelope;
-    }
-
-    private static void declareNamespaces(final org.apache.axiom.soap.SOAPEnvelope envelope) {
-        // Declare all namespaces that are needed by default
-        envelope.declareNamespace("http://www.w3.org/1999/XMLSchema-instance/", "xsi");
-        envelope.declareNamespace("http://www.w3.org/1999/XMLSchema", "xsd");
-        envelope.declareNamespace(EbMSConstants.EBMS3_NS_URI, EbMSConstants.EBMS3_NS_PREFIX);
     }
 
     /**
