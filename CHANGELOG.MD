@@ -47,7 +47,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Strict validation of the AgreementRef being an URI in case no type has been specified.
 * Issues in processing User Messages without payloads.
 * Check that P-Mode specified for a submitted Pull Request does support pulling and that there is no conflict in the
-  MPCs specified in both P-Mode and submission.       
+  MPCs specified in both P-Mode and submission.
+* _UnsupportedException_s in `org.holodeckb2b.security.results.SignedPartMetadata.TransformMetadata` when getting 
+  algorithm and parameters. 
 * Fix issue in not finding the private key for description because alias is given in upper case in P-Mode.
 
 ## 4.0.0

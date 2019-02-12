@@ -21,6 +21,7 @@ package org.holodeckb2b.security.results;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.apache.axiom.om.OMElement;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
@@ -59,7 +60,7 @@ public class SignedPartMetadata implements ISignedPartMetadata {
         String digestValue = null;
         String digestAlgorithm = null;
         List<ITransformMetadata> digestTransforms = new ArrayList<>();
-        NodeList children = reference.getChildNodes();
+        NodeList children = reference.getElementsByTagName("*");
         for (int i = 0; i  < children.getLength(); i++) {
             Node child = children.item(i);
             switch (child.getLocalName()) {
@@ -139,12 +140,12 @@ public class SignedPartMetadata implements ISignedPartMetadata {
 
         @Override
         public String getTransformAlgorithm() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return algorithm;
         }
 
         @Override
         public List<OMElement> getTransformParameters() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return parameters;
         }
 
     }
