@@ -19,10 +19,22 @@ package org.holodeckb2b.persistency.dao;
 import java.util.Collection;
 import java.util.Date;
 
-import org.holodeckb2b.common.messagemodel.*;
+import org.holodeckb2b.common.messagemodel.ErrorMessage;
+import org.holodeckb2b.common.messagemodel.MessageUnit;
+import org.holodeckb2b.common.messagemodel.PullRequest;
+import org.holodeckb2b.common.messagemodel.Receipt;
+import org.holodeckb2b.common.messagemodel.SelectivePullRequest;
+import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.messagemodel.*;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -230,7 +242,7 @@ public class StorageManager {
      * @param addSOAPFault      The indicator whether to add a SOAP fault.
      * @throws PersistenceException  If an error occurs when updating the indicator
      */
-    void setAddSOAPFault(final IErrorMessageEntity errorMessage, final boolean addSOAPFault)
+    public void setAddSOAPFault(final IErrorMessageEntity errorMessage, final boolean addSOAPFault)
                                                                                         throws PersistenceException {
         parent.setAddSOAPFault(errorMessage, addSOAPFault);
     }
