@@ -17,7 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Added a new event (`org.holodeckb2b.interfaces.events.IHeaderValidationFailure`) to indicate that the validation 
   of the message header failed 
 * New interfaces for all _message processing events_ without the _Event_ suffix. The old interfaces are still available
-  for backward compatibility, but should not be used anymore (see also below).  
+  for backward compatibility, but should not be used anymore (see also below).
 
 ### Changed
 * When a pulled User Message cannot be matched to a P-Mode it is assigned to the P-Mode of the Pull Request.

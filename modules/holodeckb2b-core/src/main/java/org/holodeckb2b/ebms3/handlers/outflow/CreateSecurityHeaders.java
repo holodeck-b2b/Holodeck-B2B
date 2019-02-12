@@ -21,17 +21,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.axis2.context.MessageContext;
+import org.apache.commons.logging.Log;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.events.security.EncryptionFailed;
+import org.holodeckb2b.events.security.EncryptionFailure;
 import org.holodeckb2b.events.security.SignatureCreated;
-import org.holodeckb2b.events.security.SigningFailed;
+import org.holodeckb2b.events.security.SigningFailure;
 import org.holodeckb2b.events.security.UTCreationFailure;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
-import org.holodeckb2b.interfaces.events.security.ISignatureCreatedEvent;
+import org.holodeckb2b.interfaces.events.security.ISignatureCreated;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -68,7 +69,7 @@ import org.holodeckb2b.pmode.PModeUtils;
  * <i>FAILURE</i> and raise the applicable <i>message processing event</i> to inform the back-end application (or an
  * extension/connector) about the problem. Note however that the security provider may not complete the encryption of
  * attached payloads at this time but only when creating the final message, so a problem may occur when sending.
- * <p>When the message is successfully signed a {@link ISignatureCreatedEvent} message processing event will be raised
+ * <p>When the message is successfully signed a {@link ISignatureCreated} message processing event will be raised
  * for each User Message message unit contained in the message.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
@@ -159,9 +160,9 @@ public class CreateSecurityHeaders extends BaseHandler {
 
     /**
      * Handles the result of the creating a part of the WS-Security header.
-     * <p>If the processing failed the processing of all the received message units state is set to <i>FAILURE</i> and
+     * <p>If the processing failed the processing state of all the message units is set to <i>FAILURE</i> and
      * a message processing event will be raised to signal the problem in creating the header.
-     * <p>For a successfully created signature a {@link ISignatureCreatedEvent} event will be raised for each User
+     * <p>For a successfully created signature a {@link ISignatureCreated} event will be raised for each User
      * Message contained in the message.
      *
      * @param result    The result of creating a part of the security header
@@ -202,9 +203,9 @@ public class CreateSecurityHeaders extends BaseHandler {
 
                 IMessageProcessingEvent event;
                 if (result instanceof ISignatureProcessingResult)
-                    event = new SigningFailed(mu, reason);
+                    event = new SigningFailure(mu, reason);
                 else if (result instanceof IEncryptionProcessingResult)
-                    event = new EncryptionFailed(mu, reason);
+                    event = new EncryptionFailure(mu, reason);
                 else
                     event = new UTCreationFailure(mu, result.getTargetedRole(), reason);
                 eventProcessor.raiseEvent(event, mc);

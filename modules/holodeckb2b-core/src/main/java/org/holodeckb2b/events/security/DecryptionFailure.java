@@ -16,26 +16,26 @@
  */
 package org.holodeckb2b.events.security;
 
-import org.holodeckb2b.interfaces.events.security.IEncryptionFailure;
+import org.holodeckb2b.interfaces.events.security.IDecryptionFailure;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 
 /**
- * Is the implementation of {@link IEncryptionFailure} to indicate that the encryption of a submitted message unit
+ * Is the implementation of {@link IDecryptionFailed} to indicate that the decryption of a received message unit
  * failed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
  */
-public class EncryptionFailed extends AbstractSecurityProcessingFailureEvent implements IEncryptionFailure {
+public class DecryptionFailure extends AbstractSecurityProcessingFailureEvent implements IDecryptionFailure {
 
     /**
-     * Creates a new <code>EncryptionFailed</code> for the given message unit and failure reason.
+     * Creates a new <code>DecryptionFailedEvent</code> for the given message unit and failure reason.
      *
      * @param subject   The message unit
-     * @param reason    The reason why the encryption failed
+     * @param reason    The reason why the decryption failed
      */
-    public EncryptionFailed(IMessageUnit subject, SecurityProcessingException reason) {
+    public DecryptionFailure(IMessageUnit subject, SecurityProcessingException reason) {
         super(subject, reason);
     }
 }

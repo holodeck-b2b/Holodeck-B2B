@@ -19,6 +19,7 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import java.util.Collection;
 
 import org.apache.axis2.context.MessageContext;
+import org.apache.commons.logging.Log;
 import org.holodeckb2b.common.handler.BaseHandler;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.util.Utils;
@@ -27,10 +28,10 @@ import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.FailedAuthentication;
 import org.holodeckb2b.ebms3.errors.FailedDecryption;
 import org.holodeckb2b.ebms3.errors.PolicyNoncompliance;
-import org.holodeckb2b.events.security.DecryptionFailedEvent;
-import org.holodeckb2b.events.security.SignatureVerificationFailedEvent;
+import org.holodeckb2b.events.security.DecryptionFailure;
+import org.holodeckb2b.events.security.SignatureVerificationFailure;
 import org.holodeckb2b.events.security.SignatureVerified;
-import org.holodeckb2b.events.security.UTProcessingFailureEvent;
+import org.holodeckb2b.events.security.UTProcessingFailure;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.events.security.ISignatureVerifiedEvent;
@@ -196,11 +197,11 @@ public class ProcessSecurityHeaders extends BaseHandler {
 
                 IMessageProcessingEvent event;
                 if (result instanceof ISignatureProcessingResult)
-                    event = new SignatureVerificationFailedEvent(mu, reason);
+                    event = new SignatureVerificationFailure(mu, reason);
                 else if (result instanceof IEncryptionProcessingResult)
-                    event = new DecryptionFailedEvent(mu, reason);
+                    event = new DecryptionFailure(mu, reason);
                 else
-                    event = new UTProcessingFailureEvent(mu, result.getTargetedRole(), reason);
+                    event = new UTProcessingFailure(mu, result.getTargetedRole(), reason);
                 eventProcessor.raiseEvent(event, mc);
             }
         }

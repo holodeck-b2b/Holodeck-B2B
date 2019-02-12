@@ -16,25 +16,27 @@
  */
 package org.holodeckb2b.events.security;
 
-import org.holodeckb2b.interfaces.events.security.ISigningFailure;
+import org.holodeckb2b.interfaces.events.security.ISignatureVerificationFailure;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 
 /**
- * Is the implementation of {@link ISigningFailure} to indicate that signing of a submitted message unit failed.
+ * Is the implementation of {@link ISignatureVerificationFailure} to indicate that the signature verification
+ * for a received message unit failed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
  */
-public class SigningFailed extends AbstractSecurityProcessingFailureEvent implements ISigningFailure {
+public class SignatureVerificationFailure extends AbstractSecurityProcessingFailureEvent
+                                                implements ISignatureVerificationFailure {
 
     /**
-     * Creates a new <code>SigningFailed</code> for the given message unit and failure reason.
+     * Creates a new <code>SignatureVerificationFailedEvent</code> for the given message unit and failure reason.
      *
      * @param subject   The message unit
-     * @param reason    The reason why the signing failed
+     * @param reason    The reason why the signature verification failed
      */
-    public SigningFailed(IMessageUnit subject, SecurityProcessingException reason) {
+    public SignatureVerificationFailure(IMessageUnit subject, SecurityProcessingException reason) {
         super(subject, reason);
     }
 }

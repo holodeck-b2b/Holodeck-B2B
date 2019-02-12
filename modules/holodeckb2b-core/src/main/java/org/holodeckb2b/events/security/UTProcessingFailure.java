@@ -16,20 +16,19 @@
  */
 package org.holodeckb2b.events.security;
 
-import org.holodeckb2b.events.security.AbstractSecurityProcessingFailureEvent;
-import org.holodeckb2b.interfaces.events.security.IUTProcessingFailureEvent;
+import org.holodeckb2b.interfaces.events.security.IUTProcessingFailure;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 
 /**
- * Is the implementation of {@link IUTProcessingFailureEvent} to indicate that the processing of a username token in a
+ * Is the implementation of {@link IUTProcessingFailure} to indicate that the processing of a username token in a
  * received message failed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
  */
-public class UTProcessingFailureEvent extends AbstractSecurityProcessingFailureEvent implements IUTProcessingFailureEvent {
+public class UTProcessingFailure extends AbstractSecurityProcessingFailureEvent implements IUTProcessingFailure {
 
     /**
      * The role/actor targeted by the username token which failed to process
@@ -44,7 +43,7 @@ public class UTProcessingFailureEvent extends AbstractSecurityProcessingFailureE
      * @param target    The target of the header which processing failed
      * @param reason    The reason why the username token processing failed
      */
-    public UTProcessingFailureEvent(IMessageUnit subject, SecurityHeaderTarget target,
+    public UTProcessingFailure(IMessageUnit subject, SecurityHeaderTarget target,
                                     SecurityProcessingException reason) {
         super(subject, reason);
         this.target = target;

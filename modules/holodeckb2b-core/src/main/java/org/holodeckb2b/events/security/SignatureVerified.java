@@ -33,7 +33,7 @@ import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
  */
-public class SignatureVerified extends AbstractSignatureProcessedEvent implements ISignatureVerified {
+public class SignatureVerified extends AbstractSignatureEvent implements ISignatureVerified {
 
     /**
      * Creates a new <code>SignatureVerified</code> for the given Signal Message Unit and digest of its ebMS header

@@ -31,7 +31,7 @@ import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  */
-public class SignatureCreated extends AbstractSignatureProcessedEvent implements ISignatureCreated {
+public class SignatureCreated extends AbstractSignatureEvent implements ISignatureCreated {
 
     /**
      * Creates a new <code>SignatureCreated</code> for the given User Message and payload digests.

@@ -35,7 +35,7 @@ import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
  */
-abstract class AbstractSignatureProcessedEvent extends AbstractMessageProcessingEvent {
+abstract class AbstractSignatureEvent extends AbstractMessageProcessingEvent {
 
     private final ISignedPartMetadata   headerDigest;
     private final Map<IPayload, ISignedPartMetadata>  payloadDigests;
@@ -47,7 +47,7 @@ abstract class AbstractSignatureProcessedEvent extends AbstractMessageProcessing
      * @param subject         The message unit that was signed
      * @param headerDigest    The digest of the ebMS header
      */
-    public AbstractSignatureProcessedEvent(final ISignalMessage subject, final ISignedPartMetadata headerDigest) {
+    public AbstractSignatureEvent(final ISignalMessage subject, final ISignedPartMetadata headerDigest) {
         super(subject);
         this.headerDigest = headerDigest;
         this.payloadDigests = null;
@@ -62,7 +62,7 @@ abstract class AbstractSignatureProcessedEvent extends AbstractMessageProcessing
      * @param payloadDigests  The information about the digests that were calculated for the payloads contained
      *                        in the User Message
      */
-    public AbstractSignatureProcessedEvent(final IUserMessage subject, final ISignedPartMetadata headerDigest,
+    public AbstractSignatureEvent(final IUserMessage subject, final ISignedPartMetadata headerDigest,
                                            final Map<IPayload, ISignedPartMetadata> payloadDigests)
     {
         super(subject);
