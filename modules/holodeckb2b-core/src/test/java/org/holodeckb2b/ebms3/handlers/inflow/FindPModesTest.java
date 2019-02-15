@@ -17,45 +17,39 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.util.ArrayList;
-import java.util.Date;
 
 import javax.xml.namespace.QName;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.AgreementReference;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.TradingPartner;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
+import org.holodeckb2b.common.testhelpers.pmode.Agreement;
+import org.holodeckb2b.common.testhelpers.pmode.Leg;
+import org.holodeckb2b.common.testhelpers.pmode.PMode;
+import org.holodeckb2b.common.testhelpers.pmode.PartnerConfig;
+import org.holodeckb2b.common.util.MessageIdUtils;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.pmode.helpers.Agreement;
-import org.holodeckb2b.pmode.helpers.Leg;
-import org.holodeckb2b.pmode.helpers.PMode;
-import org.holodeckb2b.pmode.helpers.PartnerConfig;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -70,50 +64,32 @@ public class FindPModesTest {
 
     static final QName RECEIPT_CHILD_ELEMENT_NAME = new QName("ReceiptChild");
 
-    private static String baseDir;
-
-    private static HolodeckB2BTestCore core;
-
-    private FindPModes handler;
-
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = FindPModesTest.class.getClassLoader()
-                .getResource("handlers").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        handler = new FindPModes();
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
     }
 
     @After
     public void tearDown() throws Exception {
         TestUtils.cleanOldMessageUnitEntities();
-        core.getPModeSet().removeAll();
+        HolodeckB2BCore.getPModeSet().removeAll();
     }
 
     /**
-     *
+     * Test of User Message
      */
     @Test
     public void testDoProcessingOfUserMessage() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
 
+        UserMessage userMessage = new UserMessage(TestUtils.getMMD("handlers/full_mmd.xml", this));
+        
+        // Create matching P-Mode
         PMode pmode = new PMode();
         pmode.setMep(EbMSConstants.ONE_WAY_MEP);
         pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
+        pmode.setId("matching-pmode");
 
         PartnerConfig initiator = new PartnerConfig();
         pmode.setInitiator(initiator);
@@ -123,11 +99,6 @@ public class FindPModesTest {
 
         Leg leg = new Leg();
         pmode.addLeg(leg);
-
-        UserMessage userMessage
-                = UserMessageElement.readElement(umElement);
-
-        String msgId = userMessage.getMessageId();
 
         TradingPartner sender = userMessage.getSender();
         initiator.setRole(sender.getRole());
@@ -139,156 +110,177 @@ public class FindPModesTest {
 
         AgreementReference agreementReference =
                 userMessage.getCollaborationInfo().getAgreement();
-        String pmodeId = agreementReference.getPModeId();
         String agreementRefName = agreementReference.getName();
         String agreementRefType = agreementReference.getType();
-
-        pmode.setId(pmodeId);
-
+        
         Agreement agreement = new Agreement();
         agreement.setName(agreementRefName);
         agreement.setType(agreementRefType);
         pmode.setAgreement(agreement);
 
-        core.getPModeSet().add(pmode);
+        HolodeckB2BCore.getPModeSet().add(pmode);
 
         // Setting input message property
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        System.out.println("um: " + updateManager.getClass());
-        IUserMessageEntity userMessageEntity =
-                updateManager.storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                userMessageEntity);
-
+        IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(userMessage);
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setUserMessage(userMessageEntity);
+        
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, new FindPModes().invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
+        assertEquals(pmode.getId(), userMessageEntity.getPModeId());
     }
 
     @Test
     public void testDoProcessingOfErrorSignal() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
-  
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-        // Setting input message property
-        IUserMessageEntity userMessageEntity = storageManager.storeOutGoingMessageUnit(mmd);
-
-        String pmodeId = userMessageEntity.getPModeId();
-
+        
+        // Create matching P-Mode
         PMode pmode = new PMode();
         pmode.setMep(EbMSConstants.ONE_WAY_MEP);
         pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-        Leg leg = new Leg();
-        pmode.addLeg(leg);
-        pmode.setId(pmodeId);
+        pmode.setId("t-error-pmode");
+        HolodeckB2BCore.getPModeSet().add(pmode);
+        
+        // Setting input message property
+        UserMessage usrMessage = new UserMessage();
+        usrMessage.setMessageId(MessageIdUtils.createMessageId());
+        usrMessage.setPModeId(pmode.getId());
+        IUserMessageEntity userMessageEntity = storageManager.storeOutGoingMessageUnit(usrMessage);
 
-        core.getPModeSet().add(pmode);
-
-        // Initialising Errors
-        String errMsgId = "some_err_message_id";
-        ErrorMessage error = new ErrorMessage();
-        error.setMessageId(errMsgId);
-        error.setTimestamp(new Date());
-        ArrayList<IEbmsError> errors = new ArrayList<>();
+        // Initialising Error
         EbmsError ebmsError = new EbmsError();
         ebmsError.setRefToMessageInError(userMessageEntity.getMessageId());
-        errors.add(ebmsError);
-        error.setErrors(errors);
-
-        // Setting input Receipt property
-        IErrorMessageEntity errorMessageEntity =
-                storageManager.storeIncomingMessageUnit(error);
-        System.out.println("errors: " + errorMessageEntity.getErrors());
-        ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
-        errorMessageEntities.add(errorMessageEntity);
+        ErrorMessage error = new ErrorMessage(ebmsError);
+        error.setMessageId(MessageIdUtils.createMessageId());
+        
+        // Setting input Error
+        IErrorMessageEntity errorMessageEntity = storageManager.storeIncomingMessageUnit(error);
+        
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        mc.setProperty(MessageContextProperties.IN_ERRORS, errorMessageEntities);
-
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.addReceivedError(errorMessageEntity);
+        
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, new FindPModes().invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
-        // Checking log handler found pmode
-        assertEquals(pmodeId, errorMessageEntity.getPModeId());
+        assertEquals(userMessageEntity.getPModeId(), errorMessageEntity.getPModeId());
     }
 
     @Test
     public void testDoProcessingOfReceipt() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-
-        MessageContext mc = new MessageContext();
-        mc.setFLOW(MessageContext.IN_FLOW);
-
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
+        
+        // Create matching P-Mode
         PMode pmode = new PMode();
         pmode.setMep(EbMSConstants.ONE_WAY_MEP);
         pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-
-        Leg leg = new Leg();
-        pmode.addLeg(leg);
-
-        UserMessage userMessage
-                = UserMessageElement.readElement(umElement);
-
-        String msgId = userMessage.getMessageId();
-
-        AgreementReference agreementReference =
-                userMessage.getCollaborationInfo().getAgreement();
-        String pmodeId = agreementReference.getPModeId();
-
-        pmode.setId(pmodeId);
-
-        core.getPModeSet().add(pmode);
-
-        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-
+        pmode.setId("t-receipt-pmode");
+        HolodeckB2BCore.getPModeSet().add(pmode);
+                
         // Setting input message property
-        System.out.println("um: " + storageManager.getClass());
-        IUserMessageEntity userMessageEntity =
-                storageManager.storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                userMessageEntity);
+        UserMessage usrMessage = new UserMessage();
+        usrMessage.setMessageId(MessageIdUtils.createMessageId());
+        usrMessage.setPModeId(pmode.getId());
+        IUserMessageEntity userMessageEntity = storageManager.storeOutGoingMessageUnit(usrMessage);
 
-        // Adding Receipts
+        // Initialising Error
         Receipt receipt = new Receipt();
-        receipt.setMessageId("some_receipt_id");
-        receipt.setRefToMessageId(msgId);
-        receipt.setTimestamp(new Date());
-        ArrayList<OMElement> receiptContent = new ArrayList<>();
-
-        OMElement receiptChildElement = headerBlock.getOMFactory()
-                .createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
-        receiptChildElement.setText("eb3:UserMessage");
-        receiptContent.add(receiptChildElement);
-        receipt.setContent(receiptContent);
-
-        IReceiptEntity receiptEntity =
-                storageManager.storeIncomingMessageUnit(receipt);
-        ArrayList<IReceiptEntity> receiptEntities = new ArrayList<>();
-        receiptEntities.add(receiptEntity);
-        mc.setProperty(MessageContextProperties.IN_RECEIPTS,
-                receiptEntities);
-
+        receipt.setMessageId(MessageIdUtils.createMessageId());
+        receipt.setRefToMessageId(userMessageEntity.getMessageId());
+        
+        // Setting input Receipt 
+        IReceiptEntity rcptEntity = storageManager.storeIncomingMessageUnit(receipt);
+        
+        MessageContext mc = new MessageContext();
+        mc.setFLOW(MessageContext.IN_FLOW);
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.addReceivedReceipt(rcptEntity);
+        
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, new FindPModes().invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
-
+        assertEquals(userMessageEntity.getPModeId(), rcptEntity.getPModeId());
     }
+    
+   /**
+    * Test no matching P-Mode
+    */
+   @Test
+   public void testNoPModeFound() throws Exception {
+       MessageContext mc = new MessageContext();
+       mc.setFLOW(MessageContext.IN_FLOW);
+
+       UserMessage userMessage = new UserMessage(TestUtils.getMMD("handlers/full_mmd.xml", this));
+       userMessage.setPModeId(null);
+       
+       // Create matching P-Mode
+       PMode pmode = new PMode();
+       pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+       pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
+       pmode.setId("not-matching-pmode");
+
+       PartnerConfig initiator = new PartnerConfig();
+       pmode.setInitiator(initiator);
+
+       PartnerConfig responder = new PartnerConfig();
+       pmode.setResponder(responder);
+
+       Leg leg = new Leg();
+       pmode.addLeg(leg);
+
+       TradingPartner sender = userMessage.getSender();
+       initiator.setRole(sender.getRole());
+       initiator.setPartyIds(sender.getPartyIds());
+
+       TradingPartner receiver = userMessage.getReceiver();
+       responder.setRole("no-match");
+       responder.setPartyIds(receiver.getPartyIds());
+
+       AgreementReference agreementReference =
+               userMessage.getCollaborationInfo().getAgreement();
+       String agreementRefName = agreementReference.getName();
+       String agreementRefType = agreementReference.getType();
+       
+       Agreement agreement = new Agreement();
+       agreement.setName(agreementRefName);
+       agreement.setType(agreementRefType);
+       pmode.setAgreement(agreement);
+
+       HolodeckB2BCore.getPModeSet().add(pmode);
+
+       // Setting input message property
+       StorageManager updateManager = HolodeckB2BCore.getStorageManager();
+       IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(userMessage);
+       
+       MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+       procCtx.setUserMessage(userMessageEntity);
+       
+       try {
+           assertEquals(Handler.InvocationResponse.CONTINUE, new FindPModes().invoke(mc));
+       } catch (Exception e) {
+           fail(e.getMessage());
+       }
+
+       assertNull(userMessageEntity.getPModeId());
+       assertEquals(ProcessingState.FAILURE, userMessageEntity.getCurrentProcessingState().getState());
+       assertFalse(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
+       assertTrue(procCtx.getGeneratedErrors().get(userMessageEntity.getMessageId()).size() == 1);
+       assertEquals("EBMS:0010", 
+    		   	procCtx.getGeneratedErrors().get(userMessageEntity.getMessageId()).iterator().next().getErrorCode());	
+   }    
 }

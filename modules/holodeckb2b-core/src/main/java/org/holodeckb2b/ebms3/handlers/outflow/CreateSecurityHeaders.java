@@ -20,12 +20,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.events.security.EncryptionFailure;
 import org.holodeckb2b.events.security.SignatureCreated;
 import org.holodeckb2b.events.security.SigningFailure;
@@ -78,17 +77,12 @@ import org.holodeckb2b.pmode.PModeUtils;
  * @see ISecurityHeaderCreator
  * @see ISecurityProcessingResult
  */
-public class CreateSecurityHeaders extends BaseHandler {
+public class CreateSecurityHeaders extends AbstractBaseHandler {
 
     @Override
-    protected byte inFlows() {
-        return OUT_FLOW | OUT_FAULT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
+    protected InvocationResponse doProcessing(MessageProcessingContext procCtx, final Log log) throws Exception {
         log.trace("Get the primary message unit for this message");
-        final IMessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+        final IMessageUnit primaryMU = procCtx.getPrimaryMessageUnit();
         if (primaryMU == null)
             // No primary message => this is probably an empty response
             return InvocationResponse.CONTINUE;
@@ -141,13 +135,13 @@ public class CreateSecurityHeaders extends BaseHandler {
         ISecurityHeaderCreator hdrCreator = HolodeckB2BCore.getSecurityProvider().getSecurityHeaderCreator();
         log.debug("Create the security headers in the message");
         try {
-            Collection<ISecurityProcessingResult> results = hdrCreator.createHeaders(mc,
-                                                                    MessageContextUtils.getSentMessageUnits(mc),
+            Collection<ISecurityProcessingResult> results = hdrCreator.createHeaders(procCtx.getParentContext(),
+                                                                    procCtx.getSendingMessageUnits(),
                                                                     senderConfig, receiverConfig);
             log.trace("Security header creation finished, handle results");
             if (!Utils.isNullOrEmpty(results))
                 for(ISecurityProcessingResult r : results)
-                    handleResult(r, mc);
+                    handleResult(r, procCtx, log);
 
             return InvocationResponse.CONTINUE;
         } catch (SecurityProcessingException spe) {
@@ -166,11 +160,12 @@ public class CreateSecurityHeaders extends BaseHandler {
      * Message contained in the message.
      *
      * @param result    The result of creating a part of the security header
-     * @param mc        The current message context
+     * @param procCtx   The current message processing context
+     * @param log		The log to be used
      */
-    private void handleResult(final ISecurityProcessingResult result, final MessageContext mc)
-                                                                                        throws PersistenceException {
-        final Collection<IMessageUnitEntity> sentMsgUnits = MessageContextUtils.getSentMessageUnits(mc);
+    private void handleResult(final ISecurityProcessingResult result, final MessageProcessingContext procCtx,
+    						  final Log log) throws PersistenceException {
+        final Collection<IMessageUnitEntity> sentMsgUnits = procCtx.getSendingMessageUnits();
         final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
         if (result.isSuccessful()) {
             if (result instanceof ISignatureProcessingResult) {
@@ -183,7 +178,7 @@ public class CreateSecurityHeaders extends BaseHandler {
                     ((IUserMessage) mu).getPayloads().forEach((pl)
                             -> digests.entrySet().stream().filter((d) -> CompareUtils.areEqual(d.getKey(), pl))
                                     .forEachOrdered((d) -> msgDigests.put(d.getKey(), d.getValue())));
-                    eventProcessor.raiseEvent(new SignatureCreated((IUserMessage) mu, msgDigests), mc);
+                    eventProcessor.raiseEvent(new SignatureCreated((IUserMessage) mu, msgDigests));
                 });
             }
         } else {
@@ -208,7 +203,7 @@ public class CreateSecurityHeaders extends BaseHandler {
                     event = new EncryptionFailure(mu, reason);
                 else
                     event = new UTCreationFailure(mu, result.getTargetedRole(), reason);
-                eventProcessor.raiseEvent(event, mc);
+                eventProcessor.raiseEvent(event);
             }
         }
     }

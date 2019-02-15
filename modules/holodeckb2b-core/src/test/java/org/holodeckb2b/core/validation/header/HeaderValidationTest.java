@@ -17,7 +17,7 @@
 package org.holodeckb2b.core.validation.header;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -34,14 +34,15 @@ import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.ParameterInclude;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PullRequestElement;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
@@ -101,7 +102,6 @@ public class HeaderValidationTest {
 
     @Test
     public void testDoProcessingOfUserMessage() throws Exception {
-        // todo Can we remove dependency from the xml data?
         MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
@@ -119,9 +119,9 @@ public class HeaderValidationTest {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IUserMessageEntity userMessageEntity =
                 updateManager.storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                userMessageEntity);
-
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setUserMessage(userMessageEntity);
+        
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertNotNull(invokeResp);
@@ -129,7 +129,7 @@ public class HeaderValidationTest {
             fail(e.getMessage());
         }
         // When validation is successful there should be no error in the message context
-        assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+        assertTrue(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
     }
 
     @Test
@@ -154,9 +154,9 @@ public class HeaderValidationTest {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IPullRequestEntity pullRequestEntity =
                 updateManager.storeIncomingMessageUnit(pullRequest);
-        mc.setProperty(MessageContextProperties.IN_PULL_REQUEST,
-                pullRequestEntity);
-
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setPullRequest(pullRequestEntity);
+        
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertNotNull(invokeResp);
@@ -164,7 +164,7 @@ public class HeaderValidationTest {
             fail(e.getMessage());
         }
         // When validation is succesful there should be no error in the message context
-        assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+        assertTrue(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
     }
 
     @Test
@@ -183,8 +183,7 @@ public class HeaderValidationTest {
         OMElement receiptChildElement =
                 headerBlock.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
         receiptChildElement.setText("eb3:UserMessage");
-        System.out.println("receiptChildElement: " + receiptChildElement);
-
+        
         receiptContent.add(receiptChildElement);
 
         receipt.setContent(receiptContent);
@@ -197,10 +196,8 @@ public class HeaderValidationTest {
 
         IReceiptEntity receiptEntity =
                 updateManager.storeIncomingMessageUnit(receipt);
-        ArrayList<IReceiptEntity> receiptEntities = new ArrayList<>();
-        receiptEntities.add(receiptEntity);
-        mc.setProperty(MessageContextProperties.IN_RECEIPTS,
-                receiptEntities);
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.addReceivedReceipt(receiptEntity);
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
@@ -209,7 +206,7 @@ public class HeaderValidationTest {
             fail(e.getMessage());
         }
         // When validation is successful there should be no error in the message context
-        assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+        assertTrue(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
     }
 
     @Test
@@ -229,11 +226,8 @@ public class HeaderValidationTest {
 
         IErrorMessageEntity errorMessageEntity =
                 updateManager.storeIncomingMessageUnit(error);
-        System.out.println("errors: " + errorMessageEntity.getErrors());
-        ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
-        errorMessageEntities.add(errorMessageEntity);
-        mc.setProperty(MessageContextProperties.IN_ERRORS,
-                errorMessageEntities);
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.addReceivedError(errorMessageEntity);
 
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
@@ -242,6 +236,6 @@ public class HeaderValidationTest {
             fail(e.getMessage());
         }
         // When validation is successful there should be no error in the message context
-        assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+        assertTrue(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
     }
 }

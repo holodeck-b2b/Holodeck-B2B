@@ -20,33 +20,28 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.as4.receptionawareness.ReceiptCreatedEvent;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.common.testhelpers.NullDeliveryMethod;
 import org.holodeckb2b.common.testhelpers.TestEventProcessor;
-import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.handlers.inflow.DeliverUserMessage;
+import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.common.testhelpers.pmode.Leg;
+import org.holodeckb2b.common.testhelpers.pmode.PMode;
+import org.holodeckb2b.common.testhelpers.pmode.ReceiptConfiguration;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.pmode.helpers.DeliverySpecification;
-import org.holodeckb2b.pmode.helpers.Leg;
-import org.holodeckb2b.pmode.helpers.PMode;
-import org.holodeckb2b.pmode.helpers.ReceiptConfiguration;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -62,8 +57,6 @@ public class CreateReceiptTest {
 
     private static HolodeckB2BTestCore core;
 
-    private DeliverUserMessage deliverUserMessageHandler;
-
     private CreateReceipt handler;
 
     @BeforeClass
@@ -76,75 +69,39 @@ public class CreateReceiptTest {
 
     @Before
     public void setUp() throws Exception {
-        deliverUserMessageHandler = new DeliverUserMessage();
-        // Executed after org.holodeckb2b.ebms3.handlers.inflow.DeliverUserMessage handler
         handler = new CreateReceipt();
     }
 
     @Test
     public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
+    	MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
         // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-
-        MessageContext mc = new MessageContext();
-
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
-
-        UserMessage userMessage
-                = UserMessageElement.readElement(umElement);
-        String pmodeId =
-                userMessage.getCollaborationInfo().getAgreement().getPModeId();
-        userMessage.setPModeId(pmodeId);
-
+    	SOAPEnvelope soapEnvelope = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        UserMessageElement.createElement(Messaging.createElement(soapEnvelope), mmd);
+        
         PMode pmode = new PMode();
-        pmode.setId(pmodeId);
-
+        pmode.setId("pm-pmodeid-1");
         Leg leg = new Leg();
-        DeliverySpecification deliverySpec = new DeliverySpecification();
-        deliverySpec.setFactory(NullDeliveryMethod.class.getName());
-        deliverySpec.setId("some_delivery_spec_01");
-        leg.setDefaultDelivery(deliverySpec);
-
         ReceiptConfiguration receiptConfig = new ReceiptConfiguration();
-        receiptConfig.setNotifyReceiptToBusinessApplication(true);
-        receiptConfig.setReceiptDelivery(deliverySpec);
+        receiptConfig.setPattern(ReplyPattern.RESPONSE);
         leg.setReceiptConfiguration(receiptConfig);
-
         pmode.addLeg(leg);
-
         HolodeckB2BCore.getPModeSet().add(pmode);
 
+        UserMessage userMessage = new UserMessage(mmd);
+        userMessage.setPModeId(pmode.getId());
+
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        IUserMessageEntity userMessageEntity =
-                updateManager.storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                userMessageEntity);
-
-        updateManager.setProcessingState(userMessageEntity,
-                ProcessingState.READY_FOR_DELIVERY);
-
-        assertEquals(ProcessingState.READY_FOR_DELIVERY,
-                userMessageEntity.getCurrentProcessingState().getState());
-
-        try {
-            Handler.InvocationResponse invokeResp =
-                    deliverUserMessageHandler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-
-        assertEquals(ProcessingState.DELIVERED,
-                userMessageEntity.getCurrentProcessingState().getState());
+        IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(userMessage);
+        
+        MessageContext mc = new MessageContext();
+        mc.setEnvelope(soapEnvelope);
+        mc.setFLOW(MessageContext.IN_FLOW);
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setUserMessage(userMessageEntity);
+        
+        updateManager.setProcessingState(userMessageEntity, ProcessingState.DELIVERED);
 
         // Adding event processor to make sure the ReceiptCreatedEvent
         // is actually raised.

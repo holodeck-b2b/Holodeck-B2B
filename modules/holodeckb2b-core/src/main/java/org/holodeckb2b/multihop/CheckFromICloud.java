@@ -17,9 +17,9 @@
 package org.holodeckb2b.multihop;
 
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
@@ -37,17 +37,12 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class CheckFromICloud extends BaseHandler {
+public class CheckFromICloud extends AbstractBaseHandler {
 
     @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws Exception {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) throws Exception {
         // First get the ebMS header block, that is the eb:Messaging element
-        final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
+        final SOAPHeaderBlock messaging = Messaging.getElement(procCtx.getParentContext().getEnvelope());
 
         if (messaging != null) {
             // Check if the message was received through I-Cloud, i.e. if eb:Messaging header was targeted to
@@ -57,7 +52,7 @@ public class CheckFromICloud extends BaseHandler {
             if (isMultiHop) {
                 log.debug("Message received through I-Cloud, update message units");
                 StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-                for (final IMessageUnitEntity mu : MessageContextUtils.getReceivedMessageUnits(mc))
+                for (final IMessageUnitEntity mu : procCtx.getReceivedMessageUnits())
                     updateManager.setMultiHop(mu, isMultiHop);
             }
         }

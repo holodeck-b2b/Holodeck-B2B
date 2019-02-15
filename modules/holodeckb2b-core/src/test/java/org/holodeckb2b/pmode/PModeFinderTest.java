@@ -18,31 +18,23 @@ package org.holodeckb2b.pmode;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.IPMode;
-import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
 import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
-import org.holodeckb2b.pmode.helpers.EncryptionConfig;
-import org.holodeckb2b.pmode.helpers.PMode;
-import org.holodeckb2b.pmode.helpers.PartnerConfig;
-import org.holodeckb2b.pmode.helpers.PullRequestFlow;
-import org.holodeckb2b.pmode.helpers.SecurityConfig;
-import org.holodeckb2b.pmode.helpers.UsernameTokenConfig;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.pmode.xml.PModeWatcher;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -73,14 +65,14 @@ public class PModeFinderTest {
     @Test
     public void testPartnerDefinedEbmsUTOnly() throws Exception {
 
-        final Map<String, ISecurityProcessingResult> authInfo = new HashMap<>();
+        final Collection<ISecurityProcessingResult> authInfo = new ArrayList<>();
         IUsernameTokenProcessingResult utResultMock = mock(IUsernameTokenProcessingResult.class);
         when(utResultMock.getUsername()).thenReturn("johndoe");
         when(utResultMock.getPassword()).thenReturn("secret");
         when(utResultMock.getPasswordType()).thenReturn(UTPasswordType.TEXT);
         when(utResultMock.getTargetedRole()).thenReturn(SecurityHeaderTarget.EBMS);
 
-        authInfo.put(MessageContextProperties.EBMS_UT_RESULT, utResultMock);
+        authInfo.add(utResultMock);
 
         Collection<IPMode> pmodes = PModeFinder.findForPulling(authInfo, null);
         assertFalse(Utils.isNullOrEmpty(pmodes));
@@ -90,14 +82,14 @@ public class PModeFinderTest {
     @Test
     public void testFlowDefinedEbmsUTOnly() throws Exception {
 
-        final Map<String, ISecurityProcessingResult> authInfo = new HashMap<>();
+    	final Collection<ISecurityProcessingResult> authInfo = new ArrayList<>();
         IUsernameTokenProcessingResult utResultMock = mock(IUsernameTokenProcessingResult.class);
         when(utResultMock.getUsername()).thenReturn("johndoe");
         when(utResultMock.getPassword()).thenReturn("secret");
         when(utResultMock.getPasswordType()).thenReturn(UTPasswordType.TEXT);
         when(utResultMock.getTargetedRole()).thenReturn(SecurityHeaderTarget.EBMS);
 
-        authInfo.put(MessageContextProperties.EBMS_UT_RESULT, utResultMock);
+        authInfo.add(utResultMock);
 
         Collection<IPMode> pmodes = PModeFinder.findForPulling(authInfo,
                                                                 "http://test.holodeck-b2b.org/sampleMPC/subchannel1");
@@ -108,14 +100,14 @@ public class PModeFinderTest {
     @Test
     public void testFlowOverrideEbmsUTOnly() throws Exception {
 
-        final Map<String, ISecurityProcessingResult> authInfo = new HashMap<>();
+    	final Collection<ISecurityProcessingResult> authInfo = new ArrayList<>();
         IUsernameTokenProcessingResult utResultMock = mock(IUsernameTokenProcessingResult.class);
         when(utResultMock.getUsername()).thenReturn("janedoe");
         when(utResultMock.getPassword()).thenReturn("secret");
         when(utResultMock.getPasswordType()).thenReturn(UTPasswordType.TEXT);
         when(utResultMock.getTargetedRole()).thenReturn(SecurityHeaderTarget.EBMS);
 
-        authInfo.put(MessageContextProperties.EBMS_UT_RESULT, utResultMock);
+        authInfo.add(utResultMock);
 
         Collection<IPMode> pmodes = PModeFinder.findForPulling(authInfo, null);
 
@@ -124,36 +116,18 @@ public class PModeFinderTest {
     }
 
     @Test
-    public void testVerifyPullRequestAuthorization() throws Exception {
-        PMode p = new PMode();
-        p.setMep(EbMSConstants.ONE_WAY_MEP);
-        p.setMepBinding(EbMSConstants.ONE_WAY_PULL);
+    public void testNoneFound() throws Exception {
+    	final Collection<ISecurityProcessingResult> authInfo = new ArrayList<>();
+        IUsernameTokenProcessingResult utResultMock = mock(IUsernameTokenProcessingResult.class);
+        when(utResultMock.getUsername()).thenReturn("nothere");
+        when(utResultMock.getPassword()).thenReturn("notsosecret");
+        when(utResultMock.getPasswordType()).thenReturn(UTPasswordType.TEXT);
+        when(utResultMock.getTargetedRole()).thenReturn(SecurityHeaderTarget.EBMS);
 
-        UsernameTokenConfig tokenConfig = new UsernameTokenConfig();
-        tokenConfig.setUsername("username");
-        tokenConfig.setPassword("secret");
+        authInfo.add(utResultMock);
 
-        PartnerConfig initiator = new PartnerConfig();
-        SecurityConfig secConfig = new SecurityConfig();
+        Collection<IPMode> pmodes = PModeFinder.findForPulling(authInfo, null);
 
-        EncryptionConfig encConfig = new EncryptionConfig();
-        encConfig.setKeystoreAlias("exampleca");
-        secConfig.setEncryptionConfiguration(encConfig);
-        secConfig.setUsernameTokenConfiguration(
-                SecurityHeaderTarget.EBMS, tokenConfig);
-        initiator.setSecurityConfiguration(secConfig);
-        p.setInitiator(initiator);
-
-        PullRequestFlow prFlow = new PullRequestFlow();
-        prFlow.setSecurityConfiguration(secConfig);
-
-        Method method = PModeFinder.class
-                .getDeclaredMethod("verifyPullRequestAuthorization",
-                        ISecurityConfiguration.class,
-                        ISecurityConfiguration.class, Map.class);
-        method.setAccessible(true);
-//        boolean result = (Boolean) method.invoke(null, prFlow.getSecurityConfiguration(),
-//                p.getInitiator().getSecurityConfiguration(), authInfo);
-//        assertTrue(result);
+        assertTrue(Utils.isNullOrEmpty(pmodes));            	
     }
 }

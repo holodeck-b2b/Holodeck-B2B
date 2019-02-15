@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.interfaces.eventprocessing;
 
-import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.events.security.ISecurityCreationFailure;
 import org.holodeckb2b.interfaces.events.security.ISigningFailure;
@@ -48,7 +47,6 @@ public interface IMessageProcessingEventProcessor {
      * {@link ISigningFailure} before {@link ISecurityCreationFailure}.
      *
      * @param event         The event that occurred while processing the message unit and that should be processed
-     * @param msgContext    The Axis2 {@link MessageContext} of the message unit the event applies to, if available.
      */
-    public void raiseEvent(IMessageProcessingEvent event, MessageContext msgContext);
+    public void raiseEvent(IMessageProcessingEvent event);
 }

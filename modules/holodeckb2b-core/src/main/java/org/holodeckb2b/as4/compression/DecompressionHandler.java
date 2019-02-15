@@ -21,9 +21,10 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.axis2.context.MessageContext;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractUserMessageHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -48,8 +49,8 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
 
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
-                                                                                          throws PersistenceException {
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx,
+    										  final Log log) throws PersistenceException {
         // Decompression is only needed if the message contains payloads at all
         if (Utils.isNullOrEmpty(um.getPayloads()))
             return InvocationResponse.CONTINUE;
@@ -75,12 +76,13 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
                     decompressFailure.setErrorDetail("Missing required MimeType part property for compressed payload ["
                             + p.getPayloadURI() + "]!");
                     decompressFailure.setRefToMessageInError(um.getMessageId());
-                    MessageContextUtils.addGeneratedError(mc, decompressFailure);
+                    procCtx.addGeneratedError(decompressFailure);
                     HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.FAILURE);
                 } else {
                     // Replace DataHandler to enable decompression
                     try {
                         final String cid = p.getPayloadURI();
+                        final MessageContext mc = procCtx.getParentContext();
                         mc.addAttachment(cid, new CompressionDataHandler(mc.getAttachment(cid), mimeType));
                         log.trace("Replaced DataHandler to enable decompression");
                         // Remove part property specific to AS4 Compression feature
@@ -97,11 +99,6 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
 
 
         return InvocationResponse.CONTINUE;
-    }
-
-    @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
     }
 
     /**

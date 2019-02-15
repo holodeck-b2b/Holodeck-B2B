@@ -26,12 +26,14 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
+import org.apache.commons.logging.Log;
 import org.holodeckb2b.as4.receptionawareness.ReceiptCreatedEvent;
+import org.holodeckb2b.common.handler.AbstractUserMessageHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.Receipt;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
-import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -41,6 +43,7 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
@@ -88,16 +91,12 @@ public class CreateReceipt extends AbstractUserMessageHandler {
 
 
     @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um) {
-        // Only when user message was successfully delivered to business application the Receipt should be created
-        final Boolean delivered = (Boolean) mc.getProperty(MessageContextProperties.DELIVERED_USER_MSG);
-
-        if (delivered != null && delivered) {
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx,
+    										  final Log log) {
+        // Only when user message was successfully delivered to business application the Receipt should be created,
+    	// this can also be the case when the message is a duplicate and delivered earlier
+    	final ProcessingState currentState = um.getCurrentProcessingState().getState();
+        if (currentState == ProcessingState.DELIVERED || currentState == ProcessingState.DUPLICATE) {
             log.trace("User message was succesfully delivered, check if Receipt is needed");
 
             final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
@@ -126,12 +125,12 @@ public class CreateReceipt extends AbstractUserMessageHandler {
 
             log.trace("Determine type of Receipt that should be sent");
             // Check if message was signed,
-            if (mc.getProperty(MessageContextProperties.SIG_VERIFICATION_RESULT) != null) {
+            if (!Utils.isNullOrEmpty(procCtx.getSecurityProcessingResults(ISignatureProcessingResult.class))) {
                 log.debug("Received message was signed, created NRR receipt");
-                rcptData.setContent(createNRRContent(mc));
+                rcptData.setContent(createNRRContent(procCtx.getParentContext()));
             } else {
                 log.debug("Received message not signed, create reception awareness receipt");
-                rcptData.setContent(createRARContent(mc));
+                rcptData.setContent(createRARContent(procCtx.getParentContext()));
             }
 
             // Check reply patten to see if receipt should be sent as response
@@ -141,19 +140,18 @@ public class CreateReceipt extends AbstractUserMessageHandler {
                 IReceiptEntity receipt = (IReceiptEntity) HolodeckB2BCore.getStorageManager()
                                                                                 .storeOutGoingMessageUnit(rcptData);
                 if (asResponse) {
-                    log.trace("Store the receipt in the MessageContext");
-                    mc.setProperty(MessageContextProperties.RESPONSE_RECEIPT, receipt);
-                    mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
+                    log.trace("Store the receipt in the processing context");
+                    procCtx.addSendingReceipt(receipt);
+                    procCtx.setNeedsResponse(true);
                 } else {
                     log.trace("The Receipt should be sent separately");
                     HolodeckB2BCore.getStorageManager().setProcessingState(receipt, ProcessingState.READY_TO_PUSH);
                 }
                 log.debug("Receipt for message [msgId=" + um.getMessageId() + "] created successfully");
                 // Trigger event to signal that the event was created
-                HolodeckB2BCore.getEventProcessor().raiseEvent(
-                   new ReceiptCreatedEvent(um, receipt,
-                                           um.getCurrentProcessingState().getState() == ProcessingState.DUPLICATE),
-                   mc);
+                HolodeckB2BCore.getEventProcessor()
+                			   .raiseEvent(new ReceiptCreatedEvent(um, receipt,
+	                                           um.getCurrentProcessingState().getState() == ProcessingState.DUPLICATE));
             } catch (final PersistenceException ex) {
                 // Storing the new Receipt signal failed! This is a severe problem, but it does not
                 // need to stop processing because the user message is already delivered. The receipt

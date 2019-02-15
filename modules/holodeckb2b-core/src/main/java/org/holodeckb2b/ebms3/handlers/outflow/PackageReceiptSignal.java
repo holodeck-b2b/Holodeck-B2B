@@ -19,10 +19,10 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import java.util.Collection;
 
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.ReceiptElement;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -32,9 +32,6 @@ import org.holodeckb2b.module.HolodeckB2BCore;
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:Receipt</code> element in the ebMS messaging
  * header if a receipt signal should be sent.
- * <p>Whether a receipt signal must be sent is determined by the existence of the {@link
- * MessageContextProperties#OUT_RECEIPTS} property.  It contains an collection of entity objects representing the
- * Receipt Signal message units to include.
  * <p>NOTE: This handler will insert more than one Receipt Signal if the collection contains multiple objects. The
  * resulting ebMS message will <b>not conform</b> to the Core Spec and AS4 profile as they do not allow bundling signal
  * message of the same type. It is the responsibility of the other handlers not to insert more than one receipt if
@@ -42,37 +39,22 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class PackageReceiptSignal extends BaseHandler {
-
-    /**
-     * @return Indication that this handler should run in the OUT_FLOW
-     */
-    @Override
-    protected byte inFlows() {
-        return OUT_FLOW;
-    }
+public class PackageReceiptSignal extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    																					throws PersistenceException {
         // First check if there is a receipt to include
-        Collection<IReceiptEntity> receipts = null;
-
-        try {
-            receipts =  (Collection<IReceiptEntity>) mc.getProperty(MessageContextProperties.OUT_RECEIPTS);
-        } catch (final ClassCastException e) {
-            log.fatal("Illegal state of processing! MessageContext contained a "
-                        + mc.getProperty(MessageContextProperties.OUT_RECEIPTS).getClass().getName()
-                        + " object as collection of receipts!");
-            throw new IllegalStateException("MessageContext contained a wrong object as collection of receipts!");
-        }
-        if (Utils.isNullOrEmpty(receipts))
+        Collection<IReceiptEntity> receipts = procCtx.getSendingReceipts(); 
+        
+		if (Utils.isNullOrEmpty(receipts))
             // No receipt in this message, continue processing
             return InvocationResponse.CONTINUE;
 
         // There is a receipt signal to be sent, add to the message
         log.trace("Adding receipt signal(s) to the message");
         // Get the eb:Messaging header from the message
-        final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
+        final SOAPHeaderBlock messaging = Messaging.getElement(procCtx.getParentContext().getEnvelope());
 
         for(final IReceiptEntity r : receipts) {
             log.trace("Make sure that all meta-data on the Receipt is loaded");

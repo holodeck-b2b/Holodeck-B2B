@@ -19,12 +19,13 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import java.util.Collection;
 
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.events.MessageTransfer;
-import org.holodeckb2b.interfaces.events.IMessageTransferEvent;
+import org.holodeckb2b.interfaces.events.IMessageTransfer;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -37,22 +38,14 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * Is the <i>OUT_FLOW</i> handler responsible for changing the processing state of message units that are and have been
  * sent out in the current SOAP message.
  * <p>When the handler is executed in the flow the processing state of all message units contained in the message is
- * set to {@link ProcessingState#SENDING}. When {@link #flowComplete(org.apache.axis2.context.MessageContext)} is
+ * set to {@link ProcessingState#SENDING}. When {@link #doFlowComplete(MessageProcessingContext, Log)} is
  * executed the handler checks if the sent operation was successful and changes the processing state accordingly to
  * either {@link ProcessingState#TRANSPORT_FAILURE} or {@link ProcessingState#DELIVERED} /
  * {@link ProcessingState#AWAITING_RECEIPT} (for User Message that should be acknowledged through a Receipt).
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class CheckSentResult extends BaseHandler {
-
-    /**
-     * @return Indication that this is an OUT_FLOW handler
-     */
-    @Override
-    protected byte inFlows() {
-        return OUT_FLOW | OUT_FAULT_FLOW;
-    }
+public class CheckSentResult extends AbstractBaseHandler {
 
     /**
      * This method changes the processing state of the message units to {@link ProcessingState#SENDING} to indicate
@@ -64,11 +57,12 @@ public class CheckSentResult extends BaseHandler {
      * @throws PersistenceException    When the processing state can not be changed
      */
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
-        // Get all message units in this message
-        final Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    																					throws PersistenceException {
+    	final StorageManager updateManager = HolodeckB2BCore.getStorageManager();        
+    	// Get all message units in this message
+        final Collection<IMessageUnitEntity> msgUnits = procCtx.getSendingMessageUnits();
         // And change their processing state
-        final StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         for (final IMessageUnitEntity mu : msgUnits) {
             updateManager.setProcessingState(mu, ProcessingState.SENDING);
             log.info(MessageUnitUtils.getMessageUnitName(mu) + " with msg-id ["
@@ -91,23 +85,23 @@ public class CheckSentResult extends BaseHandler {
      * @param mc    The current message that was sent out
      */
     @Override
-    public void doFlowComplete(final MessageContext mc) {
+    public void doFlowComplete(final MessageProcessingContext procCtx, final Log log) {
         // First check if there were messaging units sent
-        final Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getSentMessageUnits(mc);
+        final Collection<IMessageUnitEntity> msgUnits = procCtx.getSendingMessageUnits();
 
         if (!Utils.isNullOrEmpty(msgUnits)) {
             log.trace("Check result of sent operation");
-            final boolean   success = isSuccessful(mc);
+            final boolean   success = isSuccessful(procCtx.getParentContext());
             log.debug("The sent operation was " + (success ? "" : "not ") + "successful");
 
             //Change processing state of all message units in the message accordingly
             final StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             for (final IMessageUnitEntity mu : msgUnits) {
                 try {
-                    IMessageTransferEvent transferEvent;
+                    IMessageTransfer transferEvent;
                     if (!success) {
                         updateManager.setProcessingState(mu, ProcessingState.TRANSPORT_FAILURE);
-                        transferEvent = new MessageTransfer(mu, mc.getFailureReason());
+                        transferEvent = new MessageTransfer(mu, procCtx.getParentContext().getFailureReason());
                     } else {
                         // State to set depends on type of message unit
                         if (mu instanceof ISignalMessage) {
@@ -127,7 +121,7 @@ public class CheckSentResult extends BaseHandler {
                     log.info("Processing state for message unit [" + mu.getMessageId() + "] changed to "
                                 + mu.getCurrentProcessingState().getState());
                     // Raise a message processing event about the transfer
-                    HolodeckB2BCore.getEventProcessor().raiseEvent(transferEvent, mc);
+                    HolodeckB2BCore.getEventProcessor().raiseEvent(transferEvent);
                 } catch (final PersistenceException databaseException) {
                     // Ai, something went wrong updating the processing state of the message unit. As the message unit
                     // is already processed there is nothing we can other than logging the error

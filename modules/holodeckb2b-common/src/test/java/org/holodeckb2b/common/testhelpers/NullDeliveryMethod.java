@@ -42,15 +42,7 @@ public class NullDeliveryMethod implements IMessageDelivererFactory {
 		if (deliverer == null)
 			deliverer = new NullDeliverer();
 		return deliverer;
-	}
-	
-	public boolean wasDelivered(final String msgId) {
-		return deliveredMessages.containsKey(msgId);
-	}
-	
-	public IMessageUnit getMessageUnit(final String msgId) {
-		return deliveredMessages.get(msgId);
-	}
+	}	
 	
 	public class NullDeliverer implements IMessageDeliverer {
 		/* (non-Javadoc)
@@ -59,6 +51,14 @@ public class NullDeliveryMethod implements IMessageDelivererFactory {
 		@Override
 		public void deliver(IMessageUnit rcvdMsgUnit) throws MessageDeliveryException {
 			deliveredMessages.put(rcvdMsgUnit.getMessageId(), rcvdMsgUnit);			
+		}
+
+		public boolean wasDelivered(final String msgId) {
+			return deliveredMessages.containsKey(msgId);
+		}
+		
+		public IMessageUnit getMessageUnit(final String msgId) {
+			return deliveredMessages.get(msgId);
 		}		
 	}	
 		

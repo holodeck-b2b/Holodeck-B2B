@@ -18,7 +18,9 @@ package org.holodeckb2b.security.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
@@ -38,16 +40,16 @@ import org.w3c.dom.Element;
  */
 public final class Axis2XMLUtils {
 
-    /**
-     * Converts the SOAP Envelope element from the Axis2 representation to the standard DOM representation.
-     *
-     * @param mc The MessageContext representing the SOAP message
-     * @return A {@link Document} object that represents to the SOAP envelope element contained in the message, or<br>
-     * <code>null</code> when the SOAP envelope can not be converted to a standard DOM representation
-     */
-    public static Document convertAxiomSOAPEnvToDOM(final MessageContext mc) {
+	/**
+	 * Converts the SOAP Envelope element from the Axis2 representation to the standard DOM representation.
+	 *
+	 * @param mc The MessageContext representing the SOAP message
+	 * @return A {@link Document} object that represents to the SOAP envelope element contained in the message, or<br>
+	 * <code>null</code> when the SOAP envelope can not be converted to a standard DOM representation
+	 */
+	public static Document convertAxiomSOAPEnvToDOM(final MessageContext mc) {
         try {
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        	final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             mc.getEnvelope().serialize(baos);
             final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 

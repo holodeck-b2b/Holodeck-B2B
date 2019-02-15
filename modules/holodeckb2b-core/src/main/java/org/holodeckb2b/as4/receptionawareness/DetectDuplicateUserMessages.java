@@ -16,12 +16,11 @@
  */
 package org.holodeckb2b.as4.receptionawareness;
 
-import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
+import org.holodeckb2b.common.handler.AbstractUserMessageHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -61,13 +60,8 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
     }
     
     @Override
-    protected byte inFlows() {
-        return IN_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
-                                                                                        throws PersistenceException {
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx,
+    										  final Log log) throws PersistenceException {
         // First determine if duplicate check must be executed for this UserMessage
         //
         boolean detectDups = false;
@@ -117,10 +111,8 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
 
                 log.trace("Update processing state to duplicate");
                 HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.DUPLICATE);
-                // To prevent repeated delivery but still send a receipt set message as delivered
-                mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);
                 // Raise message processing event to inform other components of the duplicate message
-                HolodeckB2BCore.getEventProcessor().raiseEvent(new DuplicateReceivedEvent(um), null);
+                HolodeckB2BCore.getEventProcessor().raiseEvent(new DuplicateReceivedEvent(um));
             }
 
             return InvocationResponse.CONTINUE;

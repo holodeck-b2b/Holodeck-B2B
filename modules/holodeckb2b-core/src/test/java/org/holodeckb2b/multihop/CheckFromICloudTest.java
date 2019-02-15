@@ -17,22 +17,18 @@
 package org.holodeckb2b.multihop;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
+import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
@@ -73,38 +69,30 @@ public class CheckFromICloudTest {
 
     @Test
     public void testMessageReceivedFromICloud() throws PersistenceException {
-        MessageMetaData mmd = TestUtils.getMMD("multihop/icloud/full_mmd.xml", this);
         // Creating SOAP envelope
-        SOAPEnvelope env =
-                SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement userMessage = UserMessageElement.createElement(headerBlock, mmd);
-
-        IUserMessageEntity userMessageEntity =
-                HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(
-                                UserMessageElement.readElement(userMessage));
-
+        SOAPHeaderBlock messaging = Messaging.createElement(env);
+        // Setting Role, as stated in paragraph 4.3 of AS4 profile
+        messaging.setRole(MultiHopConstants.NEXT_MSH_TARGET);
+        
         MessageContext mc = new MessageContext();
-
-        // Setting input message property
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessageEntity);
+        mc.setFLOW(MessageContext.IN_FLOW);
         try {
             mc.setEnvelope(env);
         } catch (AxisFault axisFault) {
             fail(axisFault.getMessage());
         }
 
-        SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
-        // Setting Role, as stated in paragraph 4.3 of AS4 profile
-        messaging.setRole(MultiHopConstants.NEXT_MSH_TARGET);
-
-        assertNotNull(MessageContextUtils.getReceivedMessageUnits(mc));
-
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);        
+        IUserMessageEntity userMessageEntity = HolodeckB2BCore.getStorageManager()
+        													  .storeIncomingMessageUnit(new UserMessage());
+        procCtx.setUserMessage(userMessageEntity);
         try {
             Handler.InvocationResponse invokeResp = handler.invoke(mc);
             assertEquals("InvocationResponse.CONTINUE", invokeResp.toString());
+            
+            assertTrue(userMessageEntity.usesMultiHop());
         } catch (Exception e) {
             fail(e.getMessage());
         }

@@ -17,16 +17,15 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
+import java.util.Optional;
 
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.FailedAuthentication;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
@@ -34,6 +33,7 @@ import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
 import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.module.HolodeckB2BCore;
@@ -55,22 +55,12 @@ import org.holodeckb2b.security.util.VerificationUtils;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class AuthorizeMessage extends BaseHandler {
-
-    /**
-     * This handler runs in both in flows
-     *
-     * @return Fixed value: <code>IN_FLOW | IN_FAULT_FLOW</code>
-     */
-    @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
+public class AuthorizeMessage extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws Exception {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) throws Exception {
 
-        Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
+        Collection<IMessageUnitEntity> msgUnits = procCtx.getReceivedMessageUnits();
         if (Utils.isNullOrEmpty(msgUnits)) {
             // No message units in message, nothing to do
             log.trace("Message does not contain a message unit, nothing to do");
@@ -115,33 +105,26 @@ public class AuthorizeMessage extends BaseHandler {
             }
 
             log.debug("Message must be authorized, get authentication info from message");
-            IUsernameTokenProcessingResult utInMessage = (IUsernameTokenProcessingResult)
-                                                                mc.getProperty(MessageContextProperties.EBMS_UT_RESULT);
 
-            if (!VerificationUtils.verifyUsernameToken(utConfig, utInMessage)) {
+            final Optional<ISecurityProcessingResult> utToken = 
+            									 procCtx.getSecurityProcessingResults()
+            											.parallelStream()
+														.filter(t -> t instanceof IUsernameTokenProcessingResult 
+																 && t.getTargetedRole() == SecurityHeaderTarget.EBMS)
+														.findFirst();
+
+            if (!VerificationUtils.verifyUsernameToken(utConfig, 
+            										   utToken.isPresent() ? (IUsernameTokenProcessingResult) utToken.get()
+            												   			   : null)) {
                 log.info("Message unit [" + mu.getMessageId() + "] could not be authorized!");
-                handleAuthorizationFailure(mu, mc);
+                procCtx.addGeneratedError(new FailedAuthentication("Authentication of message unit failed!",
+                												   mu.getMessageId()));
+                HolodeckB2BCore.getStorageManager().setProcessingState(mu, ProcessingState.FAILURE);                
             } else {
                 log.info("Message unit [" + mu.getMessageId() + "] successfully authorized");
             }
         }
 
         return InvocationResponse.CONTINUE;
-    }
-
-    /**
-     * Handles an authorization failure for a message unit by generating a <i>FailedAuthentication</i> ebMS Error and
-     * setting the processing state of the message unit to <i>FAILURE</i> so it is not processed further.
-     *
-     * @param mu    The message unit
-     * @param mc    The message context of the message that failed
-     * @throws PersistenceException When there is a problem in updating the processing state
-     */
-    protected void handleAuthorizationFailure(final IMessageUnitEntity mu, final MessageContext mc)
-                                                                                        throws PersistenceException {
-        final FailedAuthentication authError = new FailedAuthentication("Authentication of message unit failed!");
-        authError.setRefToMessageInError(mu.getMessageId());
-        MessageContextUtils.addGeneratedError(mc, authError);
-        HolodeckB2BCore.getStorageManager().setProcessingState(mu, ProcessingState.FAILURE);
     }
 }

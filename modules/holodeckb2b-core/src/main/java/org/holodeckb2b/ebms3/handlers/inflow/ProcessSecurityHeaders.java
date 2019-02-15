@@ -17,14 +17,13 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
+import java.util.Collections;
 
-import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.FailedAuthentication;
 import org.holodeckb2b.ebms3.errors.FailedDecryption;
 import org.holodeckb2b.ebms3.errors.PolicyNoncompliance;
@@ -34,7 +33,7 @@ import org.holodeckb2b.events.security.SignatureVerified;
 import org.holodeckb2b.events.security.UTProcessingFailure;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
-import org.holodeckb2b.interfaces.events.security.ISignatureVerifiedEvent;
+import org.holodeckb2b.interfaces.events.security.ISignatureVerified;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
@@ -77,17 +76,12 @@ import org.holodeckb2b.pmode.PModeUtils;
  * @see ISecurityHeaderProcessor
  * @see ISecurityProcessingResult
  */
-public class ProcessSecurityHeaders extends BaseHandler {
+public class ProcessSecurityHeaders extends AbstractBaseHandler {
 
     @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
+    protected InvocationResponse doProcessing(MessageProcessingContext procCtx, final Log log) throws Exception {
 
-    @Override
-    protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
-
-        IMessageUnit primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+        IMessageUnit primaryMU = procCtx.getPrimaryMessageUnit();
         if (primaryMU == null)
             return InvocationResponse.CONTINUE;
         
@@ -114,19 +108,20 @@ public class ProcessSecurityHeaders extends BaseHandler {
             log.debug("Prepared security configuration based on P-Mode [" + pmode.getId()
                         + "] of the primary message unit [" + primaryMU.getMessageId() + "]");
         }
-        // Get all User Message message units from the message
-        Collection<IUserMessage> userMessages = MessageContextUtils.getUserMessagesFromMessage(mc);
+        // Get the User Message message unit from the message
+        IUserMessage userMessage = procCtx.getReceivedUserMessage();
 
         // Process the available security headers using the installed security provider
         log.trace("Get security header processor from security provider");
         ISecurityHeaderProcessor hdrProcessor = HolodeckB2BCore.getSecurityProvider().getSecurityHeaderProcessor();
         log.trace("Process the available security headers in the message");
-        Collection<ISecurityProcessingResult> results = hdrProcessor.processHeaders(mc, userMessages,
-                                                                                    senderConfig, receiverConfig);
+        Collection<ISecurityProcessingResult> results = hdrProcessor.processHeaders(procCtx.getParentContext(), 
+        																		Collections.singletonList(userMessage),
+                                                                                senderConfig, receiverConfig);
         if (!Utils.isNullOrEmpty(results)) {
         	log.trace("Security header processing finished, handle results");
             for(ISecurityProcessingResult r : results)
-                handleProcessingResult(r, mc);
+                handleProcessingResult(r, procCtx, log);
             log.debug("Processing of the security headers completed");
         } else
             log.debug("Message did not contain security headers");
@@ -136,9 +131,9 @@ public class ProcessSecurityHeaders extends BaseHandler {
 
     /**
      * Handles the result of the processing a part of the WS-Security header.
-     * <p>When the the part is successfully processed, the processing result is added to the message context so the next
-     * handlers can use it for policy conformance, authentication or authorization. In case the result applies to the
-     * verification of the signature also a {@link SignatureVerified} is raised.
+     * <p>When the the part is successfully processed, the processing result is added to the message processing context 
+     * so the next handlers can use it for policy conformance, authentication or authorization. In case the result 
+     * applies to the verification of the signature also a {@link SignatureVerified} is raised.
      * <p>If the processing failed, an ebMS Error will be generated for all the received message units, their processing
      * state is set to <i>FAILURE</i> and a message processing event will be raised. The ebMS Error generated depends on
      * the reason of failure and the part which failed to process; if the error indicate a security policy violation a
@@ -147,31 +142,25 @@ public class ProcessSecurityHeaders extends BaseHandler {
      *
      * @param result    The result of processing a part of the security header
      * @param mc        The current message context
+     * @param log		Log to be used
      */
-    private void handleProcessingResult(final ISecurityProcessingResult result, final MessageContext mc)
-                                                                                        throws PersistenceException {
+    private void handleProcessingResult(final ISecurityProcessingResult result, final MessageProcessingContext procCtx,
+    									final Log log) throws PersistenceException {
         final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
-        final Collection<IMessageUnitEntity> rcvdMsgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
-        if (result.isSuccessful()) {
-            if (result instanceof ISignatureProcessingResult) {
-                mc.setProperty(MessageContextProperties.SIG_VERIFICATION_RESULT, result);
-                ISignatureProcessingResult sigResult = (ISignatureProcessingResult) result;
-                for (final IMessageUnitEntity mu : rcvdMsgUnits) {
-                    ISignatureVerifiedEvent event;
-                    if (mu instanceof IUserMessage)
-                        event = new SignatureVerified((IUserMessage) mu, sigResult.getHeaderDigest(),
-                                                           sigResult.getPayloadDigests());
-                    else
-                        event = new SignatureVerified((ISignalMessage) mu, sigResult.getHeaderDigest());
-                    eventProcessor.raiseEvent(event, mc);
-                }
-            } else if (result instanceof IEncryptionProcessingResult)
-                mc.setProperty(MessageContextProperties.DECRYPTION_RESULT, result);
-            else if (result.getTargetedRole() == SecurityHeaderTarget.DEFAULT)
-                mc.setProperty(MessageContextProperties.DEFAULT_UT_RESULT, result);
-            else
-                mc.setProperty(MessageContextProperties.EBMS_UT_RESULT, result);
-        } else {
+        final Collection<IMessageUnitEntity> rcvdMsgUnits = procCtx.getReceivedMessageUnits();
+        procCtx.addSecurityProcessingResult(result);
+    	if (result.isSuccessful() && result instanceof ISignatureProcessingResult) {
+            ISignatureProcessingResult sigResult = (ISignatureProcessingResult) result;
+            for (final IMessageUnitEntity mu : rcvdMsgUnits) {
+                ISignatureVerified event;
+                if (mu instanceof IUserMessage)
+                    event = new SignatureVerified((IUserMessage) mu, sigResult.getHeaderDigest(),
+                                                       sigResult.getPayloadDigests());
+                else
+                    event = new SignatureVerified((ISignalMessage) mu, sigResult.getHeaderDigest());
+                eventProcessor.raiseEvent(event);                
+            } 
+        } else if (!result.isSuccessful()) {
             final SecurityProcessingException reason = result.getFailureReason();
             final StorageManager storageManager = HolodeckB2BCore.getStorageManager();
             final boolean decryptionFailure = (result instanceof IEncryptionProcessingResult);
@@ -192,7 +181,7 @@ public class ProcessSecurityHeaders extends BaseHandler {
                 else
                     error = new FailedAuthentication("Authentication of message unit failed!");
                 error.setRefToMessageInError(mu.getMessageId());
-                MessageContextUtils.addGeneratedError(mc, error);
+                procCtx.addGeneratedError(error);
                 storageManager.setProcessingState(mu, ProcessingState.FAILURE);
 
                 IMessageProcessingEvent event;
@@ -202,7 +191,7 @@ public class ProcessSecurityHeaders extends BaseHandler {
                     event = new DecryptionFailure(mu, reason);
                 else
                     event = new UTProcessingFailure(mu, result.getTargetedRole(), reason);
-                eventProcessor.raiseEvent(event, mc);
+                eventProcessor.raiseEvent(event);
             }
         }
     }

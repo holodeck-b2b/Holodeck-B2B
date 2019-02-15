@@ -16,9 +16,9 @@
  */
 package org.holodeckb2b.pmode;
 
+import org.holodeckb2b.common.testhelpers.pmode.*;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
-import org.holodeckb2b.pmode.helpers.*;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;

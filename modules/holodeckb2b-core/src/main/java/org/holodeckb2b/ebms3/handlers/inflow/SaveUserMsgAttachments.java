@@ -34,18 +34,17 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.MessageContext;
+import org.apache.commons.logging.Log;
 import org.holodeckb2b.as4.compression.DeCompressionFailure;
+import org.holodeckb2b.common.handler.AbstractUserMessageHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.errors.FailedDecryption;
 import org.holodeckb2b.ebms3.errors.MimeInconsistency;
 import org.holodeckb2b.ebms3.errors.OtherContentError;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
-import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -60,8 +59,6 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * stored temporarily on the file system.
  * <p>Once the payloads are successfully read the UserMessage is ready for delivery to the business application. So this
  * handler changes the processing state to {@link ProcessingState#READY_FOR_DELIVERY}.
- * <p>As this handler is only useful when a {@link IUserMessageEntity} object is already available in the message context this
- * handler extends from {@link AbstractUserMessageHandler} to ensure it only runs when a UserMessage is available.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
@@ -72,21 +69,14 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      */
     private static final String PAYLOAD_DIR = "plcin";
 
-    @Override
-    protected byte inFlows() {
-        return IN_FLOW;
-    }
-
     /**
      * Saves the payload contents to file
      *
-     * @throws AxisFault    When the directory or a file for temporarily storing the payload contents is not available
-     *                      and can not be created
-     * @throws PersistenceException When a database problem occurs when changing the processing state of the message unit
+     * @throws PersistenceException When a database problem occurs changing the processing state of the message unit
      */
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
-                                                                            throws AxisFault, PersistenceException {
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
+    										  final Log log) throws PersistenceException {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
 
         final Collection<IPayload> payloads = um.getPayloads();
@@ -119,15 +109,15 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                         OMElement plElement= null;
                         if (Utils.isNullOrEmpty(plRef)) {
                             log.trace("No reference included in payload meta data => SOAP body is the payload");
-                            plElement = mc.getEnvelope().getBody().getFirstElement();
+                            plElement = procCtx.getParentContext().getEnvelope().getBody().getFirstElement();
                         } else {
                             log.trace("Payload is element with id " + plRef + " of SOAP body");
-                            plElement = getPayloadFromBody(mc.getEnvelope().getBody(), plRef);
+                            plElement = getPayloadFromBody(procCtx.getParentContext().getEnvelope().getBody(), plRef);
                         }
                         if (plElement == null) {
                             // The reference is invalid as no element exists in the body. This makes this an
                             // invalid UserMessage! Create an ValueInconsistent error and store it in the MessageContext
-                            createInconsistentError(mc, um, null);
+                            createInconsistentError(procCtx, um, null, log);
                             return InvocationResponse.CONTINUE;
                         } else {
                             // Found the referenced element, save it (and its children) fo file
@@ -142,11 +132,11 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                         log.trace("Payload is contained in attachment with MIME Content-id= " + plRef);
                         // Get access to the actual content
                         log.debug("Get DataHandler for attachment");
-                        final DataHandler dh = mc.getAttachment(plRef);
+                        final DataHandler dh = procCtx.getParentContext().getAttachment(plRef);
                         if (dh == null) {
                             // The reference is invalid as no attachment with this Cid is available in the message.
                         	// Create an ValueInconsistent error and store it in the MessageContext
-                            createInconsistentError(mc, um, plRef);
+                            createInconsistentError(procCtx, um, plRef, log);
                             return InvocationResponse.CONTINUE;
                         } else {
                             try (final OutputStream aOS = new FileOutputStream(plFile))
@@ -178,7 +168,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                                 }
                                 log.info("Payload [" + plRef + "] in message [" + um.getMessageId() + "] could not be "
                                           + errMessage + "!\n\tDetails: " + rootCause.getMessage());
-                                MessageContextUtils.addGeneratedError(mc, writeFailure);
+                                procCtx.addGeneratedError( writeFailure);
                                 log.trace("Error generated and stored in MC, change processing state of user message");
                                 updateManager.setProcessingState(um, ProcessingState.FAILURE);
                                 return InvocationResponse.CONTINUE;
@@ -201,9 +191,9 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
             updateManager.setPayloadInformation(um, newPayloadData);
         } catch (IOException | XMLStreamException ex) {
             log.error("Payload(s) could not be saved to temporary file! Details:" + ex.getMessage());
+            procCtx.addGeneratedError(new OtherContentError("Internal error", um.getMessageId()));
             updateManager.setProcessingState(um, ProcessingState.FAILURE);
-            // Stop processing as content can not be saved. Send error to sender of message
-            throw new AxisFault("Unable to create file for temporarily storing payload content", ex);
+            
         }
 
         return InvocationResponse.CONTINUE;
@@ -220,17 +210,9 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
     private File getTempDir() throws IOException {
         final String tmpPayloadDirPath = HolodeckB2BCoreInterface.getConfiguration().getTempDirectory() + PAYLOAD_DIR;
         final File tmpPayloadDir = new File(tmpPayloadDirPath);
-        if (!tmpPayloadDir.exists()) {
-            log.debug("Temp directory for payloads does not exist");
-            if(tmpPayloadDir.mkdirs())
-                log.info("Created temp directory for payloads");
-            else {
-                // The payload directory could not be created, so no place to store payloads. Abort processing
-                // message and return error
-                log.fatal("Temp directory for payloads (" + tmpPayloadDirPath + ") could not be created!");
-                throw new IOException("Temp directory for payloads (" + tmpPayloadDirPath + ") could not be created!");
-            }
-        }
+        if (!tmpPayloadDir.exists() && !tmpPayloadDir.mkdirs())
+        	throw new IOException("Temp directory for payloads (" + tmpPayloadDirPath + ") could not be created!");
+        
         return tmpPayloadDir;
     }
 
@@ -262,10 +244,11 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      * @param mc            The current message context
      * @param um            The user message containing the invalid reference
      * @param invalidRef    The invalid payload reference, can be <code>null</code> if the body payload is missing
+     * @param log			The Log to be used
      * @throws PersistenceException When updating the processing state fails.
      */
-    private void createInconsistentError(final MessageContext mc, final IUserMessageEntity um, final String invalidRef)
-                                                                                        throws PersistenceException {
+    private void createInconsistentError(final MessageProcessingContext procCtx, final IUserMessageEntity um, 
+    									 final String invalidRef, final Log log) throws PersistenceException {
         log.info("UserMessage with id " + um.getMessageId() + " can not be processed because payload"
                  + (invalidRef != null ? " with href=" + invalidRef  : "") + " is not included in message");
         EbmsError error = null;
@@ -276,7 +259,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
         error.setRefToMessageInError(um.getMessageId());
         error.setErrorDetail("The payload" + (invalidRef != null ? " with href=" + invalidRef  : "")
                                            + " could not be found in the message!");
-        MessageContextUtils.addGeneratedError(mc, error);
+        procCtx.addGeneratedError(error);
         log.trace("Error stored in message context, changing processing state of message");
         HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.FAILURE);
     }

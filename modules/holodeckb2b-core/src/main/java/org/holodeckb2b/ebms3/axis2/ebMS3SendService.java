@@ -21,6 +21,7 @@ import org.apache.axis2.AxisFault;
 import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
+import org.holodeckb2b.common.axis2.OutOptInAxisOperation;
 import org.holodeckb2b.module.HolodeckB2BCoreImpl;
 
 /**

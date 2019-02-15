@@ -17,18 +17,16 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
-import java.util.Map;
 
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
-import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -57,29 +55,19 @@ import org.holodeckb2b.pmode.PModeUtils;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class DeliverErrors extends BaseHandler {
-
-    @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
+public class DeliverErrors extends AbstractBaseHandler {
 
     @SuppressWarnings("unchecked")
 	@Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) throws PersistenceException {
         // Check if this message contains error signals
-        final Collection<IErrorMessageEntity> errorSignals = (Collection<IErrorMessageEntity>)
-                                                                    mc.getProperty(MessageContextProperties.IN_ERRORS);
+        final Collection<IErrorMessageEntity> errorSignals = procCtx.getReceivedErrors();
 
         if (Utils.isNullOrEmpty(errorSignals))
             // No errors to deliver
             return InvocationResponse.CONTINUE;
 
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        // Get the mapping of Error siganls to referenced message units from the message context
-        final Map<IErrorMessage, Collection<IMessageUnitEntity>> errorToMsgMap = 
-												(Map<IErrorMessage, Collection<IMessageUnitEntity>>) 
-												mc.getProperty(MessageContextProperties.MAP_REFD_MSGS_BY_ERRORS);
         // Process each signal        
         for(final IErrorMessageEntity errorSignal : errorSignals) {
             // Prepare message for delivery by checking it is still ready for delivery and then
@@ -91,10 +79,9 @@ public class DeliverErrors extends BaseHandler {
                 // Errors in this signal can be delivered to business application
                 log.debug("Start delivery of Error Signal [" + errorSignal.getMessageId() + "]");
             	// Get the message units referenced by this error
-            	Collection<IMessageUnitEntity> refdMessages = errorToMsgMap.get(errorSignal);
             	boolean deliveredForAll = true;
-            	for(final IMessageUnitEntity msgInError : refdMessages)
-                	deliveredForAll &= deliverError(errorSignal, msgInError);
+            	for(final IMessageUnitEntity msgInError : procCtx.getRefdMsgUnitByError(errorSignal))
+                	deliveredForAll &= deliverError(errorSignal, msgInError, log);
             	log.debug("Reported Error Signal for all referenced message units");
             	if (deliveredForAll) 
 	            	updateManager.setProcessingState(errorSignal, ProcessingState.DONE);
@@ -116,12 +103,13 @@ public class DeliverErrors extends BaseHandler {
      * @param errorSignal   The Error signal that must be delivered
      * @param msgInError	The message unit referenced by the Error and which P-Mode defines if and how to report the
      * 						error
+     * @param log			Log to be used
      * @return <code>false</code> if the delivery of the error to back-end failed,<br>
      * 		   <code>true</code> otherwise 
      * @throws PersistenceException    When an error occurs retrieving the message unit referenced by the Error Signal
      */
-    private boolean deliverError(final IErrorMessageEntity errorSignal, final IMessageUnitEntity msgInError)
-            																			throws PersistenceException {
+    private boolean deliverError(final IErrorMessageEntity errorSignal, final IMessageUnitEntity msgInError,
+    							 final Log log) throws PersistenceException {
         
         log.trace("Get delivery specification for error from P-Mode of refd message [msgId=" 
         			+ msgInError.getMessageId() + "]");
@@ -185,11 +173,9 @@ public class DeliverErrors extends BaseHandler {
             return null; // Referenced message unit without P-Mode, can not determine delivery
 
         final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(refdMU.getPModeId());
-        if (pmode == null) {
-            log.warn("Sent message unit [" + refdMU.getMessageId() +"] does not reference valid P-Mode ["
-                        + refdMU.getPModeId() + "]!");
+        if (pmode == null) 
             return null;
-        }
+        
         // First get the delivery specification for errors related to the user message as this will also be the fall
         // back for errors related to pull request if nothing is specified specifically for pull requests
         final ILeg leg = pmode.getLeg(refdMU.getLeg());

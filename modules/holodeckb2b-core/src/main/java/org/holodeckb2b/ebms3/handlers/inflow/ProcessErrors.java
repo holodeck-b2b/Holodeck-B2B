@@ -16,18 +16,16 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
-import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
@@ -40,12 +38,12 @@ import org.holodeckb2b.persistency.dao.StorageManager;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received error signals. For each error contained in one of
- * the {@link IErrorMessageEntity}s available in the message context property {@link MessageContextProperties#IN_ERRORS} it
- * will check if there is a {@link IMessageUnitEntity} in the database and mark that message as failed.
+ * the {@link IErrorMessageEntity}s available in the message processing context it will check if there is a {@link 
+ * IMessageUnitEntity} in the database and mark that message as failed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class ProcessErrors extends BaseHandler {
+public class ProcessErrors extends AbstractBaseHandler {
 
     /**
      * Errors will always be logged to a special error log. Using the logging configuration users can decide if this
@@ -58,24 +56,19 @@ public class ProcessErrors extends BaseHandler {
     	super.init(handlerdesc);
     	errorLog = LogFactory.getLog("org.holodeckb2b.msgproc.errors.received." + handledMsgProtocol);
     }
-    
-    @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    																					throws PersistenceException {
         log.debug("Check for received errors in message.");
-        final ArrayList<IErrorMessageEntity>  errorSignals =
-                              (ArrayList<IErrorMessageEntity>) mc.getProperty(MessageContextProperties.IN_ERRORS);
-
+        final Collection<IErrorMessageEntity> errorSignals = procCtx.getReceivedErrors();
+        
         if (!Utils.isNullOrEmpty(errorSignals)) {
             log.debug("Message contains " + errorSignals.size() + " Error signals, start processing");
             for (final IErrorMessageEntity e : errorSignals)
                 // Ignore Errors that already failed
                 if (e.getCurrentProcessingState().getState() != ProcessingState.FAILURE)
-                    processErrorSignal(e, mc);
+                    processErrorSignal(e, procCtx, log);
             log.debug("All Error Signals processed");
         } 
         return InvocationResponse.CONTINUE;
@@ -93,11 +86,11 @@ public class ProcessErrors extends BaseHandler {
      * needed.
      *
      * @param errSignal    The {@link IErrorMessageEntity} object representing the Error Signal to process
-     * @param mc                The current message context
+     * @param procCtx      The current message processing context
      * @throws PersistenceException When a database error occurs while processing the Error Signal
      */
-    protected void processErrorSignal(final IErrorMessageEntity errSignal, final MessageContext mc)
-                                                                                        throws PersistenceException {
+    protected void processErrorSignal(final IErrorMessageEntity errSignal, final MessageProcessingContext procCtx, 
+    								  final Log log) throws PersistenceException {
         log.debug("Start processing Error Signal [msgId=" + errSignal.getMessageId() + "]");
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();
         // Change processing state to indicate we start processing the error. Also checks that the error is not
@@ -121,21 +114,23 @@ public class ProcessErrors extends BaseHandler {
         if (!Utils.isNullOrEmpty(refToMessageId)) {
             log.debug("Error Signal [" + errSignal.getMessageId() + "] references messageId: "
                         + refToMessageId);
-            refdMessages = HolodeckB2BCore.getQueryManager().getMessageUnitsWithId(refToMessageId, Direction.OUT);
-        } else if (isInFlow(INITIATOR)) {
+            final IMessageUnitEntity sentMessage = procCtx.getSendingMessageUnit(refToMessageId);
+            if (sentMessage != null)
+            	refdMessages = Collections.singletonList(sentMessage);
+            else
+            	refdMessages = HolodeckB2BCore.getQueryManager().getMessageUnitsWithId(refToMessageId, Direction.OUT);        
+        } else {
             log.debug("Error Signal [" + errSignal.getMessageId() + "] does not contain reference."
             			+ "Assuming it refers to all sent messages");
-            refdMessages = MessageContextUtils.getSentMessageUnits(mc);
+            refdMessages = procCtx.getSendingMessageUnits();
         }
 
         // An error should reference a message unit
         if (Utils.isNullOrEmpty(refdMessages)) {
             log.warn("Error Signal [" + errSignal.getMessageId() + "] does not reference a known message unit!");
             // Create error and add to context
-            final ValueInconsistent   viError = new ValueInconsistent();
-            viError.setErrorDetail("Error does not reference a sent message unit");
-            viError.setRefToMessageInError(errSignal.getMessageId());
-            MessageContextUtils.addGeneratedError(mc, viError);
+            procCtx.addGeneratedError(new ValueInconsistent("Error does not reference a sent message unit",
+            												errSignal.getMessageId()));
             // The message processing of the error fails
             storageManager.setProcessingState(errSignal, ProcessingState.FAILURE);
         } else {
@@ -158,10 +153,8 @@ public class ProcessErrors extends BaseHandler {
                 }
             }
             log.info("Processed Error Signal [" + errSignal.getMessageId() + "]");
-            // Errors may need to be delivered to business app which can be done now
-            // as the delivery will need to know the referenced message we store them in the message context
-            MessageContextUtils.addRefdMsgUnitByError(refdMessages, errSignal, mc);
             storageManager.setProcessingState(errSignal, ProcessingState.READY_FOR_DELIVERY);
+            procCtx.addRefdMsgUnitByError(errSignal, refdMessages);
         }
     }
 }

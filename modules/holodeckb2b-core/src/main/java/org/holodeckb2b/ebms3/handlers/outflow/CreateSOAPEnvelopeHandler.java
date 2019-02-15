@@ -21,8 +21,9 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.wsdl.WSDLConstants;
-import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -37,26 +38,22 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class CreateSOAPEnvelopeHandler extends BaseHandler {
+public class CreateSOAPEnvelopeHandler extends AbstractBaseHandler {
 
     @Override
-    protected byte inFlows() {
-        return OUT_FLOW | OUT_FAULT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws AxisFault {
-        SOAPEnvelope    env = null;
-
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) throws AxisFault {
+        final MessageContext mc = procCtx.getParentContext();
+    	SOAPEnvelope    env = mc.getEnvelope();
+        
         // SOAP Envelope only needs to be created when Holodeck B2B initiates the exchange
         //  or when response does not yet contain one
-        if ((isInFlow(RESPONDER) && (env = mc.getEnvelope()) == null) || isInFlow(INITIATOR)) {
+        if (procCtx.isHB2BInitiated() || env == null) {
             // For request use P-Mode, for response use SOAP version from request
             log.trace("Check for SOAP version");
             SOAPEnv.SOAPVersion version;
-            if (isInFlow(INITIATOR)) {
+            if (procCtx.isHB2BInitiated()) {
                 log.trace("Use P-Mode of primary message unit to get SOAP version");
-                final IMessageUnitEntity primaryMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+                final IMessageUnitEntity primaryMU = procCtx.getPrimaryMessageUnit();
                 if (primaryMU == null) {
                     log.debug("No message unit in this response, no envelope needed");
                     return InvocationResponse.CONTINUE;

@@ -17,30 +17,31 @@
 package org.holodeckb2b.ebms3.handlers.outflow;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 
-import java.util.ArrayList;
+import javax.xml.namespace.QName;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
+import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -53,115 +54,53 @@ import org.junit.Test;
  */
 public class PackageErrorSignalsTest {
 
-    private static String baseDir;
-
-    private static HolodeckB2BTestCore core;
-
-    private PackageErrorSignals handler;
-
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = PackageErrorSignalsTest.class.getClassLoader()
-                .getResource("handlers").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
     }
-
-    @Before
-    public void setUp() throws Exception {
-        handler = new PackageErrorSignals();
-    }
-
 
     @Test
     public void testDoProcessing() throws Exception {
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
+        SOAPHeaderBlock messaging = Messaging.createElement(env);
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
 
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        
         try {
             mc.setEnvelope(env);
         } catch (AxisFault axisFault) {
             fail(axisFault.getMessage());
         }
 
-        ErrorMessage errorMessage = new ErrorMessage();
-        ArrayList<IEbmsError> errors = new ArrayList<>();
         EbmsError ebmsError = new EbmsError();
         ebmsError.setSeverity(IEbmsError.Severity.failure);
         ebmsError.setErrorCode("some_error_code");
-        errors.add(ebmsError);
-        errorMessage.setErrors(errors);
-
-        ErrorSignalElement.createElement(headerBlock, errorMessage);
-
+        ErrorMessage errorMessage = new ErrorMessage(ebmsError);
+        errorMessage.setMessageId(MessageIdUtils.createMessageId());
+        
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        IErrorMessageEntity errorMessageEntity =
-                updateManager.storeIncomingMessageUnit(errorMessage);
-        ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
-        errorMessageEntities.add(errorMessageEntity);
-        mc.setProperty(MessageContextProperties.OUT_ERRORS,
-                errorMessageEntities);
+        IErrorMessageEntity errorMessageEntity = updateManager.storeOutGoingMessageUnit(errorMessage);
+        procCtx.addSendingError(errorMessageEntity);
 
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, new PackageErrorSignals().invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
-
-
-    }
-
-    @Test
-    public void testDoProcessingIfShouldHaveSOAPFault() throws Exception {
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-
-        MessageContext mc = new MessageContext();
-        mc.setFLOW(MessageContext.OUT_FLOW);
-
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
-
-        ErrorMessage errorMessage = new ErrorMessage();
-        ArrayList<IEbmsError> errors = new ArrayList<>();
-        EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.failure);
-        ebmsError.setErrorCode("some_error_code");
-        errors.add(ebmsError);
-        errorMessage.setErrors(errors);
-
-        ErrorSignalElement.createElement(headerBlock, errorMessage);
-
-        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        IErrorMessageEntity errorMessageEntity =
-                updateManager.storeIncomingMessageUnit(errorMessage);
-
-        IErrorMessageEntity errMESpy = spy(errorMessageEntity);
-        doReturn(true).when(errMESpy).shouldHaveSOAPFault();
-
-        ArrayList<IErrorMessageEntity> errorMessageEntities = new ArrayList<>();
-        errorMessageEntities.add(errMESpy);
-        mc.setProperty(MessageContextProperties.OUT_ERRORS,
-                errorMessageEntities);
-
-        try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-
-
+        
+        assertTrue(messaging.getChildElements().hasNext());
+        OMElement signalElem = (OMElement) messaging.getChildElements().next();
+        assertEquals("SignalMessage", signalElem.getLocalName());
+        assertEquals(EbMSConstants.EBMS3_NS_URI, signalElem.getNamespaceURI());
+        assertNotNull(signalElem.getFirstChildWithName(new QName(EbMSConstants.EBMS3_NS_URI, "Error")));
+        OMElement msgInfoElem = signalElem.getFirstChildWithName(new QName(EbMSConstants.EBMS3_NS_URI, "MessageInfo"));
+        assertNotNull(msgInfoElem);
+        assertEquals(errorMessage.getMessageId(), 
+        			 msgInfoElem.getFirstChildWithName(new QName(EbMSConstants.EBMS3_NS_URI, "MessageId")).getText());
     }
 }

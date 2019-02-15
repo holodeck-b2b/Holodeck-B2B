@@ -17,27 +17,30 @@
 package org.holodeckb2b.ebms3.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.apache.axiom.om.OMElement;
+import java.util.Collection;
+
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
+import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.common.util.MessageIdUtils;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -50,78 +53,94 @@ import org.junit.Test;
  */
 public class CatchAxisFaultTest {
 
-    private static String baseDir;
-
     private static HolodeckB2BTestCore core;
 
     private CatchAxisFault handler;
 
+    private MessageProcessingContext procCtx;
+    private UserMessage				 userMessage;
+    private Receipt					 receipt;
+    
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = CatchAxisFaultTest.class.getClassLoader()
-                .getResource("handlers").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
+        core = new HolodeckB2BTestCore(CatchAxisFaultTest.class.getClassLoader().getResource(".").getPath());
         HolodeckB2BCoreInterface.setImplementation(core);
     }
 
     @Before
     public void setUp() throws Exception {
         handler = new CatchAxisFault();
-    }
 
-
-    @Test
-    public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("security/handlers/full_mmd.xml", this);
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-
-        UserMessage um = UserMessageElement.readElement(umElement);
-
-        String pmodeId = um.getCollaborationInfo().getAgreement().getPModeId();
-
-        um.setPModeId(pmodeId);
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
         mc.setServerSide(true);
-
         try {
             mc.setEnvelope(env);
         } catch (AxisFault axisFault) {
             fail(axisFault.getMessage());
         }
 
-        UserMessage userMessage
-                = UserMessageElement.readElement(umElement);
+        procCtx = new MessageProcessingContext(mc);
+        
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        IUserMessageEntity userMessageEntity =
-                updateManager.storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                userMessageEntity);
+        userMessage = new UserMessage();
+        userMessage.setMessageId(MessageIdUtils.createMessageId());
+        procCtx.setUserMessage(updateManager.storeIncomingMessageUnit(userMessage));
 
-        Exception exception = new Exception("Some exception.");
-        mc.setFailureReason(exception);
-
+        receipt = new Receipt();
+        receipt.setMessageId(MessageIdUtils.createMessageId());
+        procCtx.addReceivedReceipt(updateManager.storeIncomingMessageUnit(receipt));
+        
+    }
+    
+    @Test
+    public void testAllGood() {
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            handler.flowComplete(procCtx.getParentContext());            
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+        
+        assertFalse(Utils.isNullOrEmpty(procCtx.getReceivedMessageUnits()));
+        assertEquals(2, procCtx.getReceivedMessageUnits().size());
+        
+        final IMessageUnitEntity usrMsgInCtx = procCtx.getReceivedMessageUnit(userMessage.getMessageId());
+        assertNotNull(usrMsgInCtx);
+        assertTrue(usrMsgInCtx instanceof IUserMessageEntity);
+        assertNotEquals(ProcessingState.FAILURE, usrMsgInCtx.getCurrentProcessingState().getState());
+        assertNotNull(procCtx.getReceivedReceipts());
+        assertNotEquals(ProcessingState.FAILURE, procCtx.getReceivedReceipts().iterator().next()
+        																	  .getCurrentProcessingState().getState());
+    }
+    
+    @Test
+    public void testAxisFaultThrown() {
+
+        Exception exception = new Exception("Some exception.");        
+        procCtx.getParentContext().setFailureReason(exception);
+        try {
+            handler.flowComplete(procCtx.getParentContext());            
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
+        assertTrue(Utils.isNullOrEmpty(procCtx.getReceivedMessageUnits()));
+        
         try {
-            handler.flowComplete(mc);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-
-        assertNotNull(mc.getProperty(MessageContextProperties.OUT_ERRORS));
-
-        assertNull(mc.getFailureReason());
+			Collection<IMessageUnitEntity> storedMsg = HolodeckB2BCore.getQueryManager()
+																	.getMessageUnitsWithId(userMessage.getMessageId());
+			assertFalse(Utils.isNullOrEmpty(storedMsg));
+			assertEquals(ProcessingState.FAILURE, storedMsg.iterator().next().getCurrentProcessingState().getState());
+			
+			storedMsg = HolodeckB2BCore.getQueryManager().getMessageUnitsWithId(receipt.getMessageId());
+			assertFalse(Utils.isNullOrEmpty(storedMsg));
+			assertEquals(ProcessingState.FAILURE, storedMsg.iterator().next().getCurrentProcessingState().getState());			
+		} catch (PersistenceException e) {
+			fail("Message not found");
+		}        
+        
     }
 }

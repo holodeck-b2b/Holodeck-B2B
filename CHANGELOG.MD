@@ -18,6 +18,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   of the message header failed 
 * New interfaces for all _message processing events_ without the _Event_ suffix. The old interfaces are still available
   for backward compatibility, but should not be used anymore (see also below).
+* A Holodeck B2B specific _message processing context_ that holds all information about the message that is processed
+  in the current processing pipe line. Refactored all handler classes to use new context.  
 
 ### Changed
 * When a pulled User Message cannot be matched to a P-Mode it is assigned to the P-Mode of the Pull Request.
@@ -30,6 +32,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Split handling of errors generated during processing of a received message in two handlers, one bundling the 
   individual errors into Error Signals and one for determining how to report the Error Signals. Allows for re-use of
   "bundling" handler in different messaging protocols.
+* Moved common classes from core to the common module.
 
 ### Deprecated
 * The interfaces for the  _message processing events_ with the _Event_ suffix. They are replaced with interfaces without
@@ -53,7 +56,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Fixed issue in finding P-Mode for User Messages where message could be matches to a P-Mode configured for sending
   message based on pull.   
 * NPE in file delivery of _Receipt_s without content (will only occur when used for non-AS4 Receipts)    
-* Fix issue in not finding the private key for description because alias is given in upper case in P-Mode.
 
 ## 4.0.0
 ##### 2018-11-04

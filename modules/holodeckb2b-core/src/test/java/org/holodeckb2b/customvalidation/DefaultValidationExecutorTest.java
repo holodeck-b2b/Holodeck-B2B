@@ -1,14 +1,14 @@
 package org.holodeckb2b.customvalidation;
 
 import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.common.testhelpers.pmode.CustomValidationSpec;
+import org.holodeckb2b.common.testhelpers.pmode.Leg;
+import org.holodeckb2b.common.testhelpers.pmode.PMode;
+import org.holodeckb2b.common.testhelpers.pmode.UserMessageFlow;
 import org.holodeckb2b.core.validation.DefaultValidationExecutor;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.holodeckb2b.pmode.helpers.CustomValidationSpec;
-import org.holodeckb2b.pmode.helpers.Leg;
-import org.holodeckb2b.pmode.helpers.PMode;
-import org.holodeckb2b.pmode.helpers.UserMessageFlow;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -26,18 +26,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultValidationExecutorTest {
 
-    private static String baseDir;
-
-    private static org.holodeckb2b.module.HolodeckB2BTestCore core;
-
     private DefaultValidationExecutor validationExecutor;
 
     @BeforeClass
-    public static void setUpClass() throws Exception {
-        baseDir = DefaultValidationExecutorTest.class.getClassLoader()
-                .getResource("customvalidation").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
+    public static void setUpClass() throws Exception {        
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
     }
 
     @Before
@@ -47,7 +40,7 @@ public class DefaultValidationExecutorTest {
 
     @After
     public void tearDown() throws Exception {
-        core.getPModeSet().removeAll();
+        HolodeckB2BCore.getPModeSet().removeAll();
     }
 
     @Test
@@ -60,7 +53,7 @@ public class DefaultValidationExecutorTest {
         leg.setUserMessageFlow(flow);
         pMode.addLeg(leg);
         pMode.setId("some_id");
-        core.getPModeSet().add(pMode);
+        HolodeckB2BCore.getPModeSet().add(pMode);
 
         UserMessage userMessage = new UserMessage();
         userMessage.setPModeId(pMode.getId());

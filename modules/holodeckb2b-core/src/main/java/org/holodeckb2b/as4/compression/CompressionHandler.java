@@ -23,9 +23,11 @@ import javax.activation.DataHandler;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractUserMessageHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.Property;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4PayloadProfile;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -53,10 +55,9 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  */
 public class CompressionHandler extends AbstractUserMessageHandler {
 
-
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
-                                                                                                    throws AxisFault {
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
+    										  final Log log) throws AxisFault {
         // First check if this message contains payloads at all
         if (Utils.isNullOrEmpty(um.getPayloads()))
             return InvocationResponse.CONTINUE;
@@ -74,7 +75,7 @@ public class CompressionHandler extends AbstractUserMessageHandler {
             for (final IPayload p : um.getPayloads())
                 // Only payloads contained in attachment can use compression
                 if (p.getContainment() == IPayload.Containment.ATTACHMENT)
-                    enableCompression(p, mc);
+                    enableCompression(p, procCtx.getParentContext());
 
             log.trace("Enabled compression for all attached payloads");
         } else
@@ -83,19 +84,12 @@ public class CompressionHandler extends AbstractUserMessageHandler {
         return InvocationResponse.CONTINUE;
     }
 
-    @Override
-    protected byte inFlows() {
-        return OUT_FLOW | OUT_FAULT_FLOW;
-    }
-
-
     private void enableCompression(final IPayload p, final MessageContext mc) {
 
-        // Replace current datahandler of attachment with CompressionDataHandler to facilitate compression
+        // Replace current data handler of attachment with CompressionDataHandler to facilitate compression
         final String cid = p.getPayloadURI();
         final DataHandler source = mc.getAttachment(cid);
         mc.addAttachment(cid, new CompressionDataHandler(source));
-        log.trace("Replaced DataHandler to enable compression");
 
         // Set the part properties to indicate AS4 Compression feature was used and original MIME Type
         // First ensure that there do not exists properties with this name
@@ -108,11 +102,9 @@ public class CompressionHandler extends AbstractUserMessageHandler {
                 || CompressionFeature.MIME_TYPE_PROPERTY_NAME.equals(pp.getName()))
                 remove.add(pp);
         partProperties.removeAll(remove);
-
         partProperties.add(new Property(CompressionFeature.FEATURE_PROPERTY_NAME,
                                         CompressionFeature.COMPRESSED_CONTENT_TYPE));
         partProperties.add(new Property(CompressionFeature.MIME_TYPE_PROPERTY_NAME, source.getContentType()));
-        log.trace("Set PartProperties to indicate compression");
     }
 
 }

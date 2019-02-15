@@ -22,14 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.HandlerDescription;
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.validation.ValidationResult;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.errors.InvalidHeader;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.interfaces.config.IConfiguration;
@@ -64,9 +64,9 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * User Message and are separately configured in the P-Mode.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since  HB2B_NEXT_VERSION
+ * @since  4.1.0
  */
-public class HeaderValidationHandler extends BaseHandler {
+public class HeaderValidationHandler extends AbstractBaseHandler {
     /**
      * Value to set as {@link MessageValidationError#details} to indicate the resulting invalidHdr for this 
      * validation issue should be <i>ValueInconsistent</i> instead of <i>InvalidHeader</i>
@@ -85,11 +85,6 @@ public class HeaderValidationHandler extends BaseHandler {
 	private static Map<Class<? extends IMessageUnit>, HeaderValidationSpecification> laxValidatorSpecs;
 	private static Map<Class<? extends IMessageUnit>, HeaderValidationSpecification> strictValidatorSpecs;
 
-	@Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
-
 	/**
 	 * 
 	 */
@@ -98,7 +93,7 @@ public class HeaderValidationHandler extends BaseHandler {
     	super.init(handlerdesc);
 		// As the log is normally created dynamically when the handler is invoked (to include direction info),
     	//  we need to set it here
-    	log = LogFactory.getLog("org.holodeckb2b.msgproc." + (!Utils.isNullOrEmpty(handledMsgProtocol) ?
+    	final Log log = LogFactory.getLog("org.holodeckb2b.msgproc." + (!Utils.isNullOrEmpty(handledMsgProtocol) ?
                 										handledMsgProtocol + "." : "")
     												 + getHandlerDesc().getName());
     	log.trace("Retrieve the factory class for the header validators from configuration");
@@ -141,14 +136,14 @@ public class HeaderValidationHandler extends BaseHandler {
 	}
 	
     @Override
-    protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
+    protected InvocationResponse doProcessing(MessageProcessingContext procCtx, final Log log) throws Exception {
     	if (laxValidatorSpecs == null || strictValidatorSpecs == null) {
     		log.fatal("Handler not correctly initialized, header validators not available!");
     		throw new AxisFault("Configuration error!");
     	}
     	
         // Get all message units and then validate each one at configured mode
-        Collection<IMessageUnitEntity> msgUnits = MessageContextUtils.getReceivedMessageUnits(mc);
+        Collection<IMessageUnitEntity> msgUnits = procCtx.getReceivedMessageUnits();
 
         if (!Utils.isNullOrEmpty(msgUnits)) {
             for (IMessageUnitEntity m : msgUnits) {
@@ -171,11 +166,11 @@ public class HeaderValidationHandler extends BaseHandler {
                 	log.warn("Header of " + MessageUnitUtils.getMessageUnitName(m) + " [" + m.getMessageId()
                             + "] is invalid!\n\tDetails: " + printErrors(validationResult.getValidationErrors()));
                     for(IEbmsError e : createEbMSErrors(m.getMessageId(), validationResult.getValidationErrors()))
-                        MessageContextUtils.addGeneratedError(mc, e);
+                        procCtx.addGeneratedError(e);
                     HolodeckB2BCore.getStorageManager().setProcessingState(m, ProcessingState.FAILURE);
                     HolodeckB2BCore.getEventProcessor().raiseEvent(
                 					new HeaderValidationFailureEvent(m, 
-                								validationResult.getValidationErrors().values().iterator().next()), mc);
+                								validationResult.getValidationErrors().values().iterator().next()));
                 }
             }
         }

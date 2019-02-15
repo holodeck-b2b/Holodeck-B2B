@@ -17,7 +17,6 @@
 package org.holodeckb2b.ebms3.handlers.outflow;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import javax.xml.namespace.QName;
 
@@ -31,26 +30,22 @@ import org.apache.axiom.soap.SOAPFaultReason;
 import org.apache.axiom.soap.SOAPFaultText;
 import org.apache.axiom.soap.SOAPFaultValue;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:SignalMessage</code> and child element for an
  * Error Signal in the ebMS messaging header when Error Signals must be sent.
- * <p>If there are error signal message units to be sent, the corresponding entity objects MUST be included in the
- * <code>MessageContext</code> property {@link MessageContextProperties#OUT_ERRORS}.<br>
- * Section 5.2.4 of the ebMS Core specification specifies that a message MUST NOT contain more than one <code>
+ * <p>Section 5.2.4 of the ebMS Core specification specifies that a message MUST NOT contain more than one <code>
  * SignalMessage</code> message per signal type. This handler does however support adding multiple error signals to the
  * message, which would create an ebMS message that <b>does not conform</b> to the ebMS V3 Core and AS4 specifications.
  * It is the responsibility of the other handlers not to insert more than one error signal in the message context
@@ -64,7 +59,7 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * code, but the bundled message units indicate successful processing which requires a 200 HTTP status code.<br>
  * The resolution to this issue as noted in <a href="https://issues.oasis-open.org/browse/EBXMLMSG-4">issue #4</a> in
  * the issue tracker of the ebMS TC is that the insertion of the SOAP Fault is optional.<br>
- * Holodeck B2B will therefor by default not add a SOAP Fault to an ebMS message containing an Error Signal with errors
+ * Holodeck B2B will therefore by default not add a SOAP Fault to an ebMS message containing an Error Signal with errors
  * of severity <i>FAILURE</i>. If in a message exchange it is preferred to add the SOAP Fault it should be configured
  * in the P-Mode using the parameter returned by {@link IErrorHandling#shouldAddSOAPFault()}. Note however that Holodeck
  * B2B will only add the SOAP Fault when the error signal(s) is/are not bundled with another message unit to prevent
@@ -73,21 +68,13 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IErrorHandling
  */
-public class PackageErrorSignals extends BaseHandler {
-
-    /**
-     * This handler will run in both the regular as well as the fault out flow
-     */
-    @Override
-    protected byte inFlows() {
-        return OUT_FLOW | OUT_FAULT_FLOW;
-    }
+public class PackageErrorSignals extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 	
+    																					throws PersistenceException {
         // First check if there are any errors to include
-        final Collection<IErrorMessageEntity> errors =
-                    (Collection<IErrorMessageEntity>) mc.getProperty(MessageContextProperties.OUT_ERRORS);
+        final Collection<IErrorMessageEntity> errors = procCtx.getSendingErrors();
 
         if (Utils.isNullOrEmpty(errors))
             // No errors in this message, continue processing
@@ -97,7 +84,7 @@ public class PackageErrorSignals extends BaseHandler {
         log.debug("Adding " + errors.size() + " error signal(s) to the message");
 
         log.trace("Get the eb:Messaging header from the message");
-        final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
+        final SOAPHeaderBlock messaging = Messaging.getElement(procCtx.getParentContext().getEnvelope());
 
         // If one of the errors is of severity FAILURE a SOAP may be added
         boolean addSOAPFault = false;
@@ -118,32 +105,13 @@ public class PackageErrorSignals extends BaseHandler {
         // If SOAP Fault should be added, check if possible
         if(addSOAPFault) {
             log.debug("A SOAPFaults should be added to message, check if possible due to UserMessage with body payload");
-            if (isSOAPFaultAllowed(mc)) {
+            if (procCtx.getSendingMessageUnits().parallelStream().allMatch(m -> m instanceof IErrorMessage)) {
                 log.trace("SOAPFault can be added to message");
-                addSOAPFault(mc.getEnvelope());
+                addSOAPFault(procCtx.getParentContext().getEnvelope());
                 log.trace("SOAPFault added to message");
             }
         }
         return InvocationResponse.CONTINUE;
-    }
-
-    /**
-     * Checks if a SOAPFault can be added to the current message. This is allowed when there is no other message unit
-     * that must be contained in the SOAP message.
-     *
-     * @param mc        The current message context
-     * @return          <code>true</code> if a SOAPFault can be added, <code>false</code> otherwise
-     */
-    protected boolean isSOAPFaultAllowed(final MessageContext mc) {
-        // Check if message contains a non Error Signal message unit
-        boolean onlyErrorMU = true;
-        final Iterator<IMessageUnitEntity> msgUnitsIt = MessageContextUtils.getSentMessageUnits(mc).iterator();
-
-        while (onlyErrorMU && msgUnitsIt.hasNext()) {
-            onlyErrorMU = msgUnitsIt.next() instanceof IErrorMessage;
-        }
-
-        return onlyErrorMU;
     }
 
     /**

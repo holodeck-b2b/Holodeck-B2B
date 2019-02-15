@@ -19,8 +19,8 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.pmode.xml.PModeWatcher;
 import org.junit.BeforeClass;
 
@@ -49,7 +49,7 @@ public class FindPModesForPullRequestTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         String baseDir = FindPModesForPullRequestTest.class.getClassLoader()
-                    .getResource(FindPModesForPullRequestTest.class.getName().replace('.', '/')).getPath();
+                    .getResource(FindPModesForPullRequestTest.class.getSimpleName()).getPath();
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
 
         // Read the set of test P-Modes

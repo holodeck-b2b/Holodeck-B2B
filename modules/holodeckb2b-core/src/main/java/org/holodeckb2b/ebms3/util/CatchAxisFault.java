@@ -17,21 +17,21 @@
 package org.holodeckb2b.ebms3.util;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.MessageIdUtils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.OtherContentError;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
@@ -39,49 +39,43 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * Is a special handler to handle unexpected and previously unhandled errors. When such errors are detected the
  * processing state of message units currently being processed will be changed to either indicate failed processing.
  * This means that the processing state of all message units in the current flow are set to <i>FAILURE</i>.
- * <p>When the error occurs while processing a request or creating a response to a PullRequest an ebMS <i>Other</i>
- * error is generated and reported to the sender of the request. No other message unit is included in the response to
- * the sender.<br>
- * Because error reporting to the <i>Producer</i> of a message is currently not supported the error is only logged when
- * it occurs when processing an outgoing request.
+ * <p>When the error occurs while processing a request an ebMS <i>Other</i> error is generated and reported to the 
+ * sender of the request. No other message unit is included in the response to the sender.<br>
  * <p>Note that this is a kind of "last resort" error handler and therefore is not supposed to handle normal errors that
  * can occur in the processing of ebMS messages. These errors should all result in an ebMS error and handled
  * accordingly.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class CatchAxisFault extends BaseHandler {
+public class CatchAxisFault extends AbstractBaseHandler {
 
     @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW | OUT_FLOW | RESPONDER;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws AxisFault {
+    protected InvocationResponse doProcessing(final MessageProcessingContext mc, final Log log) throws AxisFault {
         return InvocationResponse.CONTINUE;
     }
 
     @Override
-    public void doFlowComplete(final MessageContext mc) {
+    public void doFlowComplete(final MessageProcessingContext procCtx, final Log log) {
+    	final MessageContext msgContext = procCtx.getParentContext();
         // This handler only needs to act when there was an unexpected failure
-        if (mc.getFailureReason() != null) {
+        if (msgContext.getFailureReason() != null) {
             log.error("A Fault was raised while processing messages!  Reported cause= "
-                        + mc.getFailureReason().getMessage());
+                        + msgContext.getFailureReason().getMessage());
             // As we don't know the exact cause of the error the processing state of all message units that are being
             // currently processed should be set to failed if there processing is not completed yet
-            Collection<IMessageUnitEntity>  msgUnitsInProcessing = null;
+            Collection<IMessageUnitEntity>  msgUnitsInProcess = null;
 
-            if (isInFlow(OUT_FLOW))
-                msgUnitsInProcessing = MessageContextUtils.getSentMessageUnits(mc);
+            if (msgContext.getFLOW() == MessageContext.IN_FLOW)
+                msgUnitsInProcess = procCtx.getReceivedMessageUnits();
             else
-                msgUnitsInProcessing = MessageContextUtils.getReceivedMessageUnits(mc);
+                msgUnitsInProcess = procCtx.getSendingMessageUnits();
 
-            for (final IMessageUnitEntity mu : msgUnitsInProcessing) {
+            for (final IMessageUnitEntity mu : msgUnitsInProcess) {
                 // Changing the processing state may fail if the problems are caused by the database.
                 try {
                     final ProcessingState curState = mu.getCurrentProcessingState().getState();
-                    if (ProcessingState.DELIVERED != curState && ProcessingState.AWAITING_RECEIPT != curState) {
+                    if (ProcessingState.DELIVERED != curState && ProcessingState.AWAITING_RECEIPT != curState
+                    	&& ProcessingState.DONE != curState) {
                         log.error(MessageUnitUtils.getMessageUnitName(mu) + " with msg-id [" + mu.getMessageId()
                                     + "] could not be processed due to an internal error.");
                         HolodeckB2BCore.getStorageManager().setProcessingState(mu, ProcessingState.FAILURE);
@@ -93,16 +87,16 @@ public class CatchAxisFault extends BaseHandler {
                 }
             }
 
-            log.trace("Remove existing outgoing message units from context");
-            mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, null);
-            mc.setProperty(MessageContextProperties.OUT_RECEIPTS, null);
-            mc.setProperty(MessageContextProperties.OUT_ERRORS, null);
-
-            // If we are in the in flow and responding to received messages or when we were sending response to a
-            // PullRequest we will sent an ebMS "Other" error to indicate the problem
-            if (isInFlow((byte) (IN_FLOW | RESPONDER)) ||
-                MessageContextUtils.getPropertyFromInMsgCtx(mc, MessageContextProperties.IN_PULL_REQUEST) != null)
-                createOtherError(mc);
+            log.debug("Clear the message processing context");
+            procCtx.removeAllMessages();
+            
+            // If we are in the in flow and responding to received messages 
+            if (msgContext.isServerSide() && (msgContext.getFLOW() == MessageContext.IN_FLOW 
+            							     || msgContext.getFLOW() == MessageContext.IN_FAULT_FLOW)) {                 
+            	procCtx.addSendingError(createOtherError(log));
+            }
+        	// We have handled the error, so nothing to do for Axis
+        	msgContext.setFailureReason(null);
         }
     }
 
@@ -113,27 +107,49 @@ public class CatchAxisFault extends BaseHandler {
      *
      * @param mc    The current message context to which the error is added
      */
-    private void createOtherError(final MessageContext mc) {
+    private IErrorMessageEntity createOtherError(final Log log) {
         final OtherContentError   otherError = new OtherContentError();
         otherError.setErrorDetail("An internal error occurred while processing the message.");
         otherError.setSeverity(IEbmsError.Severity.warning);
-        ErrorMessage errorMessage = new ErrorMessage();
-        errorMessage.addError(otherError);
+        ErrorMessage errorMessage = new ErrorMessage(otherError);
         try {
-            log.trace("Create the Error signal message");
-            IErrorMessageEntity storedError = (IErrorMessageEntity) HolodeckB2BCore.getStorageManager()
-                                                                                .storeOutGoingMessageUnit(errorMessage);
-            log.trace("Created a new Error signal message");
-            mc.setProperty(MessageContextProperties.OUT_ERRORS, Collections.singletonList(storedError));
-            log.trace("Set the Error signal as the only ebMS message to return");
+            return (IErrorMessageEntity) HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(errorMessage);
         } catch (final PersistenceException dbe) {
             // (Still) a problem with the database, create the Error signal message without storing it
             log.fatal("Could not store error signal message in database! Details: " + dbe.getMessage());
-            log.trace("Set the non-persisted ErrorMessage in message context");
+            log.trace("Create a non-persisted ErrorMessageEntity so we can still send the message");
             errorMessage.setMessageId(MessageIdUtils.createMessageId());
-            mc.setProperty(MessageContextProperties.OUT_ERRORS, Collections.singletonList(errorMessage));
+            return new NonPersistedErrorMessage(errorMessage);
         }
-        // Remove the error condition from the context as we handled the error here
-        mc.setFailureReason(null);
+    }
+    
+    /**
+     * Helper class to allow sending of an error the sender of the message even if the persistency layer is down. 
+     */
+    class NonPersistedErrorMessage extends ErrorMessage implements IErrorMessageEntity {
+    	
+    	public NonPersistedErrorMessage(final ErrorMessage source) {
+			super(source);
+		}
+
+		@Override
+		public boolean isLoadedCompletely() {
+			return true;
+		}
+
+		@Override
+		public Label getLeg() {
+			return Label.REQUEST;
+		}
+
+		@Override
+		public boolean usesMultiHop() {
+			return false;
+		}
+
+		@Override
+		public boolean shouldHaveSOAPFault() {
+			return true;
+		}
     }
 }

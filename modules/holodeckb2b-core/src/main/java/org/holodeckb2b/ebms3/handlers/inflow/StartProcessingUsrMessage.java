@@ -16,9 +16,9 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractUserMessageHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -33,20 +33,15 @@ import org.holodeckb2b.module.HolodeckB2BCore;
 public class StartProcessingUsrMessage extends AbstractUserMessageHandler {
 
     @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
-                                                                                        throws PersistenceException {
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx,
+    										  final Log log) throws PersistenceException {
         final String msgId = um.getMessageId();
         log.trace("Change processing state to indicate start of processing of message [" + msgId + "]" );
         if (!HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.RECEIVED,
                                                                        ProcessingState.PROCESSING)) {
             log.warn("User message [msgId= " + msgId + "] is already being processed");
             // Remove the User Message from the context to prevent further processing
-            mc.removeProperty(MessageContextProperties.IN_USER_MESSAGE);
+            procCtx.setUserMessage(null);
         } else
             log.trace("User message [msgId= " + msgId + "] is ready for processing");
 

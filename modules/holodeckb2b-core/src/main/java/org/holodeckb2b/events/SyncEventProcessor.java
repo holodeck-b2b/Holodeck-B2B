@@ -66,7 +66,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
      *               not used.
      */
     @Override
-    public void raiseEvent(final IMessageProcessingEvent event, final MessageContext mc) {
+    public void raiseEvent(final IMessageProcessingEvent event) {
         final String eventType = event.getClass().getSimpleName();
         if (event.getSubject() == null) {
             log.warn("A " + eventType + " was raised, but without reference to a message unit!");
@@ -90,13 +90,13 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
 	        	final ILeg leg = pmode.getLeg(ILeg.Label.REQUEST);
 	        	final List<IMessageProcessingEventConfiguration> eventHandlers = leg == null ? null :
 	        															leg.getMessageProcessingEventConfiguration();
-	        	isEventHandled = handleEvent(eventHandlers, event, mc);
+	        	isEventHandled = handleEvent(eventHandlers, event);
 	        }
         }
         
         if (!isEventHandled) {
         	log.trace(eventType + " not handled by P-Mode configured handlers => check global configuration");
-        	if (!handleEvent(HolodeckB2BCoreInterface.getMessageProcessingEventConfiguration(), event, mc))
+        	if (!handleEvent(HolodeckB2BCoreInterface.getMessageProcessingEventConfiguration(), event))
         		log.info("No handler defined for " + eventType + ", event [" + event.getId() + "] ignored!");
         }            
     }
@@ -106,10 +106,9 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
 	 *  
 	 * @param eventHandlers		The set of configured event handlers 
 	 * @param event				The event to be handled
-	 * @param mc				The message context
 	 */
-	private boolean handleEvent(List<IMessageProcessingEventConfiguration> eventHandlers, IMessageProcessingEvent event,
-			MessageContext mc) {
+	private boolean handleEvent(List<IMessageProcessingEventConfiguration> eventHandlers, IMessageProcessingEvent event)
+	{
 		if (Utils.isNullOrEmpty(eventHandlers))
 			return false;
 		

@@ -18,29 +18,22 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.AxisFault;
+import java.io.StringReader;
+
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.soap.SOAPModelBuilder;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessageElement;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Created at 23:28 21.09.16
+ * Created at 23:23 29.01.17
  *
  * Checked for cases coverage (04.05.2017)
  *
@@ -48,52 +41,79 @@ import org.junit.Test;
  */
 public class ReadUserMessageTest {
 
-    private static String baseDir;
-
-    private ReadUserMessage handler;
-
+	private static final String T_MSG_ID = "test-msg-id@test.holodeck-b2b.org";
+	
+	private static final String SOAP_XML = 
+			"<soapenv:Envelope xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" + 
+			"    xmlns:eb3=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\"\n" + 
+			"    xmlns:xsd=\"http://www.w3.org/1999/XMLSchema\"\n" + 
+			"    xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance/\">\n" + 
+			"    <soapenv:Header>       \n" + 
+			"        <eb3:Messaging xmlns:mustUnderstand=\"http://www.w3.org/2003/05/soap-envelope\"\n" + 
+			"            mustUnderstand:mustUnderstand=\"true\">\n" + 
+			"            <eb3:UserMessage>\n" + 
+			"                <eb3:MessageInfo>\n" + 
+			"                    <eb3:Timestamp>2019-02-08T09:20:06.101Z</eb3:Timestamp>\n" + 
+			"                    <eb3:MessageId>" + T_MSG_ID + "</eb3:MessageId>\n" + 
+			"                </eb3:MessageInfo>\n" + 
+			"                <eb3:PartyInfo>\n" + 
+			"                    <eb3:From>\n" + 
+			"                        <eb3:PartyId>org:holodeckb2b:example:company:A</eb3:PartyId>\n" + 
+			"                        <eb3:Role>Sender</eb3:Role>\n" + 
+			"                    </eb3:From>\n" + 
+			"                    <eb3:To>\n" + 
+			"                        <eb3:PartyId>org:holodeckb2b:example:company:B</eb3:PartyId>\n" + 
+			"                        <eb3:Role>Receiver</eb3:Role>\n" + 
+			"                    </eb3:To>\n" + 
+			"                </eb3:PartyInfo>\n" + 
+			"                <eb3:CollaborationInfo>\n" + 
+			"                    <eb3:AgreementRef>http://agreements.holodeckb2b.org/examples/agreement0</eb3:AgreementRef>\n" + 
+			"                    <eb3:Service type=\"org:holodeckb2b:services\">Test</eb3:Service>\n" + 
+			"                    <eb3:Action>StoreMessage</eb3:Action>\n" + 
+			"                    <eb3:ConversationId>org:holodeckb2b:test:conversation</eb3:ConversationId>\n" + 
+			"                </eb3:CollaborationInfo>\n" + 
+			"                <eb3:PayloadInfo>\n" + 
+			"                    <eb3:PartInfo>\n" + 
+			"                        <eb3:PartProperties>\n" + 
+			"                            <eb3:Property name=\"original-file-name\">simple_document.xml</eb3:Property>\n" + 
+			"                        </eb3:PartProperties>\n" + 
+			"                    </eb3:PartInfo>\n" + 
+			"                    <eb3:PartInfo href=\"cid:ff4d26fd-173e-445c-8f40-2ab96d72b3c7-1824330587@gecko.fritz.box\"/>\n" + 
+			"                </eb3:PayloadInfo>\n" + 
+			"            </eb3:UserMessage>\n" + 
+			"        </eb3:Messaging>\n" + 
+			"    </soapenv:Header>\n" + 
+			"    <soapenv:Body>\n" + 
+			"        <example-document>\n" + 
+			"            <content>This is just a very simple XML document to show transport of XML payloads in\n" + 
+			"                the SOAP body </content>\n" + 
+			"        </example-document>\n" + 
+			"    </soapenv:Body>\n" + 
+			"</soapenv:Envelope>\n" + 
+			""; 
+			
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = ReadUserMessageTest.class.getClassLoader()
-                .getResource("handlers").getPath();
-        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
     }
 
-    @Before
-    public void setUp() throws Exception {
-        handler = new ReadUserMessage();
-    }
-
-    /**
-     * Test construction of the user message to be successfully consumed by
-     * {@link org.holodeckb2b.ebms3.handlers.inflow.ReadUserMessage ReadUserMessage} handler
-     */
     @Test
-    public void testProcessing() {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        UserMessageElement.createElement(headerBlock, mmd);
-
+    public void testUserMessage() throws Exception {        
+    	SOAPModelBuilder soapModelBuilder = OMXMLBuilderFactory.createSOAPModelBuilder(new StringReader(SOAP_XML));
+    	
         MessageContext mc = new MessageContext();
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
+        mc.setFLOW(MessageContext.IN_FLOW);
+        mc.setEnvelope(soapModelBuilder.getSOAPEnvelope());
 
-        assertNull(mc.getProperty(MessageContextProperties.IN_USER_MESSAGE));
-
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, new ReadUserMessage().invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
-        assertNotNull(mc.getProperty(MessageContextProperties.IN_USER_MESSAGE));
+        assertNotNull(procCtx.getReceivedUserMessage());
+        assertEquals(T_MSG_ID, procCtx.getReceivedUserMessage().getMessageId());                
     }
 }

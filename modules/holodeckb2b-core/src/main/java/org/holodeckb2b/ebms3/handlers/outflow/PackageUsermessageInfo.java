@@ -17,36 +17,27 @@
 package org.holodeckb2b.ebms3.handlers.outflow;
 
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractUserMessageHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
-import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:UserMessage</code> element in the ebMS messaging
  * header when a User Message must be sent.
- * <p>If a user message unit is to be sent, the entity object representing the User Message MUST be included in the
- * <code>MessageContext</code> parameter {@link MessageContextProperties#OUT_USER_MESSAGE}.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PackageUsermessageInfo extends AbstractUserMessageHandler {
 
-    /**
-     * This handler should run only in a normal <i>OUT_FLOW</i>
-     */
     @Override
-    protected byte inFlows() {
-        return OUT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um) {
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
+    										  final Log log) {
 
         log.trace("Get the eb:Messaging header from the message");
-        final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
+        final SOAPHeaderBlock messaging = Messaging.getElement(procCtx.getParentContext().getEnvelope());
         log.trace("Add eb:UserMessage element to the existing eb:Messaging header");
         UserMessageElement.createElement(messaging, um);
         log.debug("eb:UserMessage element for User Message [msgId=" + um.getMessageId() 

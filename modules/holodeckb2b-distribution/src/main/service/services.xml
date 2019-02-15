@@ -20,14 +20,8 @@
   <description>
         Holodeck B2B AS4 Message Service Handler
   </description>
-  <messageReceivers>
-    <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out"
-                     class="org.holodeckb2b.ebms3.handlers.inflow.CheckForResponse"/>
-  </messageReceivers>
-
   <operation name="Receive">
-     <messageReceiver
-         class="org.holodeckb2b.ebms3.handlers.inflow.CheckForResponse"/>
+     <messageReceiver class="org.holodeckb2b.common.handler.DefaultMessageReceiver"/>
   </operation>
 
   <parameter name="supportSingleOperation" locked="xsd:true">true</parameter>
