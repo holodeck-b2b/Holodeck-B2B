@@ -126,35 +126,16 @@ public class MessageSubmitter implements IMessageSubmitter {
     public String submitMessage(final IPullRequest pullRequest) throws MessageSubmitException {
         log.trace("Start submission of new Pull Request");
 
-        // Check if a valid P-Mode is specified
-        final String pmodeId = pullRequest.getPModeId();
-        if (Utils.isNullOrEmpty(pmodeId))
+        // Check if P-Mode id and MPC are specified
+        if (Utils.isNullOrEmpty(pullRequest.getPModeId()))
             throw new MessageSubmitException("P-Mode Id is missing");
-        final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(pmodeId);
-        if (pmode == null)
-        	throw new MessageSubmitException("No P-Mode with id=" + pmodeId + " configured");
-        if (!PModeUtils.doesHolodeckB2BPull(pmode))
-        	throw new MessageSubmitException("PMode with id=" + pmodeId + " does not support pulling");
-        
-        // Check that when a MPC to pull from is available in both request and P-Mode they match or the one in the 
-        // request is a sub-channel MPC of the one in the P-Mode
-        final IPullRequestFlow pullRequestFlow = PModeUtils.getOutPullRequestFlow(pmode);
-        final String pmodeMPC = pullRequestFlow != null ? pullRequestFlow.getMPC() : null;
-        String pullMPC = pullRequest.getMPC();
-        
-        if (Utils.isNullOrEmpty(pullMPC) && Utils.isNullOrEmpty(pmodeMPC))
-        	pullMPC = EbMSConstants.DEFAULT_MPC;
-        else if (!Utils.isNullOrEmpty(pullMPC) && !Utils.isNullOrEmpty(pmodeMPC) && !pullMPC.startsWith(pmodeMPC))
-        	throw new MessageSubmitException("MPC in submission [" + pullMPC + "] conflicts with P-Mode defined MPC ]"
-        										+ pmodeMPC + "]");
-        else if (Utils.isNullOrEmpty(pullMPC))
-        	pullMPC = pmodeMPC;
-        
+        if (Utils.isNullOrEmpty(pullRequest.getMPC()))
+            throw new MessageSubmitException("MPC is missing");
+
         String prMessageId = null;
         try {
-            log.trace("Add PullRequest to database");            
-            IPullRequestEntity submittedPR = HolodeckB2BCore.getStorageManager()
-            												.storeOutGoingMessageUnit(new PullRequest(pmodeId, pullMPC));
+            log.trace("Add PullRequest to database");
+            IPullRequestEntity submittedPR = HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(pullRequest);
             prMessageId = submittedPR.getMessageId();
             // Indicate that the PR can be directly pushed to other MSH
             HolodeckB2BCore.getStorageManager().setProcessingState(submittedPR, ProcessingState.READY_TO_PUSH);
