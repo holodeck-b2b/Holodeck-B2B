@@ -112,7 +112,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                     final Interval[] intervals = raConfig != null ? raConfig.getWaitIntervals() : new Interval[0]; 
                     if (intervals.length > 0) {
                     	// Check the current interval
-                    	attempts = HolodeckB2BCore.getQueryManager().getNumberOfTransmissions(um);
+                    	attempts = Integer.max(1, HolodeckB2BCore.getQueryManager().getNumberOfTransmissions(um));
                     	if (attempts <= intervals.length)
                     		// Get the current applicable interval in milliseconds
                     		intervalInMillis = TimeUnit.MILLISECONDS.convert(intervals[attempts-1].getLength(),
