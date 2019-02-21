@@ -89,7 +89,7 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
         // Do actual processing in implementation
         try {
             log.trace("Start processing");
-            final InvocationResponse result = doProcessing(getProcContext(mc), log);
+            final InvocationResponse result = doProcessing(MessageProcessingContext.getFromMessageContext(mc), log);
             log.trace("End processing");
             return result;
         } catch (final Throwable t) {
@@ -108,7 +108,7 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
     @Override
     public final void flowComplete(final MessageContext mc) {
         if (!runOnlyAsResponder || mc.isServerSide())
-            doFlowComplete(getProcContext(mc), prepareLog(mc));
+            doFlowComplete(MessageProcessingContext.getFromMessageContext(mc), prepareLog(mc));
     }
     
     /**
@@ -138,22 +138,6 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
         													+ currentFlowName + "." + getHandlerDesc().getName());
     }
     
-    /**
-     * Helper method to get the Holodeck B2B processing context from the Axis message context. If not yet set a new
-     * processing context will be created and set.
-     * 
-     * @param mc	The Axis2 message context
-     * @return		The Holodeck B2B processing context
-     */
-    private MessageProcessingContext getProcContext(final MessageContext mc) {
-    	MessageProcessingContext procCtx = (MessageProcessingContext) 
-    														mc.getProperty(MessageProcessingContext.AXIS_MSG_CTX_PROP);
-    	if (procCtx == null)
-    		procCtx = new MessageProcessingContext(mc);
-    	
-    	return procCtx;
-    }
-
     /**
      * Abstract method that implementations must use to do the actual message processing.
      *

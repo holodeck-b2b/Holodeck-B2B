@@ -39,13 +39,13 @@ import org.apache.axis2.util.Utils;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 
 
 /**
  * Is a special Axis2 {@link AxisOperation} implementation that supports the Out In MEP but does not require a response
- * message. This implementation is create because the default Axis2 implementation for the OutIn MEP throws an AxisFault
- * if no response is received. In an ebMS exchange however it can not be guaranteed that there is a response a replies
- * may be sent asynchronously.
+ * message and which allows to specify  
+ * 
  * <p>This class extends {@link OutInAxisOperation} to return a different {@link OperationClient} implementation.
  * Although there is just one method that changes in the <code>OperationClient</code> it must be copied from the super
  * class a an inner class can not be extended.
@@ -81,11 +81,11 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
      * The client to handle the MEP. This is a copy of <code>OutInAxisOperationClient<code> inner class of {@link
      * OutInAxisOperation} with an adjusted {@link #handleResponse(MessageContext)} method.
      */
-    class OutOptInAxisOperationClient extends OperationClient {
+    protected class OutOptInAxisOperationClient extends OperationClient {
 
         private final Log log = LogFactory.getLog(OutOptInAxisOperationClient.class);
 
-        OutOptInAxisOperationClient(final OutInAxisOperation axisOp, final ServiceContext sc, final Options options) {
+        public OutOptInAxisOperationClient(final OutInAxisOperation axisOp, final ServiceContext sc, final Options options) {
             super(axisOp, sc, options);
         }
 
@@ -217,9 +217,12 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
             AxisEngine.send(msgContext);
 
             responseMessageContext.setDoingREST(msgContext.isDoingREST());
-
-        // Copy RESPONSE properties which the transport set onto the request message context when it processed
+            
+            // Copy RESPONSE properties which the transport set onto the request message context when it processed
             // the incoming response recieved in reply to an outgoing request.
+            MessageProcessingContext hb2bMsgProcCtx = MessageProcessingContext.getFromMessageContext(msgContext);
+            hb2bMsgProcCtx.setParentContext(responseMessageContext);
+            
             responseMessageContext.setProperty(MessageContext.TRANSPORT_HEADERS,
                     msgContext.getProperty(MessageContext.TRANSPORT_HEADERS));
             responseMessageContext.setProperty(HTTPConstants.MC_HTTP_STATUS_CODE,

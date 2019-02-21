@@ -52,7 +52,7 @@ public class MessageProcessingContext {
 	/**
 	 * The name of the Axis2 message context property used to store this Holodeck B2B message processing context
 	 */
-	static final String	AXIS_MSG_CTX_PROP = "hb2b-msgprocctx";
+	private static final String	AXIS_MSG_CTX_PROP = "hb2b-msgprocctx";
         
 	private MessageContext						axisParentCtx;
 	
@@ -100,13 +100,27 @@ public class MessageProcessingContext {
 	 */
 	private Map<String, Object>		properties = new HashMap<>();
 	
+	/**
+	 * Gets the message processing associated with the given Axis2 message context. If the context does not contain a
+	 * processing context, a new one will be created and linked to it. 
+	 * 
+	 * @param mc	The Axis2 message context
+	 * @return		The Holodeck B2B processing context associated with it
+	 */
+	public static MessageProcessingContext getFromMessageContext(final MessageContext mc) {
+		MessageProcessingContext procCtx = (MessageProcessingContext) mc.getProperty(AXIS_MSG_CTX_PROP);
+		if (procCtx == null) 
+			procCtx = new MessageProcessingContext(mc);
+		
+		return procCtx;
+	}
 
 	/**
 	 * Creates a new instance based on the given Axis2 message context.
 	 * 
 	 * @param axisMsgCtx	The Axis2 message context
 	 */
-	public MessageProcessingContext(final MessageContext axisMsgCtx) {
+	private MessageProcessingContext(final MessageContext axisMsgCtx) {
 		this.setParentContext(axisMsgCtx);		
 	}
 	

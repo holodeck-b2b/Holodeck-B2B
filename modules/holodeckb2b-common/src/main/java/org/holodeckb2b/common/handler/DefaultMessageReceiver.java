@@ -35,13 +35,11 @@ public class DefaultMessageReceiver implements MessageReceiver {
 	
     @Override
     public void receive(MessageContext messageCtx) throws AxisFault {
-    	final MessageProcessingContext hb2bCtx = 
-    					(MessageProcessingContext) messageCtx.getProperty(MessageProcessingContext.AXIS_MSG_CTX_PROP);
+    	final MessageProcessingContext hb2bCtx = MessageProcessingContext.getFromMessageContext(messageCtx);
     	if (hb2bCtx.responseNeeded()) {
             final MessageContext outMsgContext = MessageContextBuilder.createOutMessageContext(messageCtx);
             // Copy the HB2B message processing context to the outgoing context
-            hb2bCtx.setParentContext(outMsgContext);
-            outMsgContext.setProperty(MessageProcessingContext.AXIS_MSG_CTX_PROP, hb2bCtx);
+            hb2bCtx.setParentContext(outMsgContext);            
             // Handle protocol specific requirement (if any)
             prepareOutMessageContext(outMsgContext);
             // Start the outgoing flow

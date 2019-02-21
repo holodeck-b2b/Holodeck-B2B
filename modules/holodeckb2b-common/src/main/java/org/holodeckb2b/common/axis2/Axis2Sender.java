@@ -102,7 +102,7 @@ public class Axis2Sender {
 
         try {
             log.debug("Create an empty MessageProcessingContext for message with current configuration");
-            final MessageProcessingContext procCtx = new MessageProcessingContext(msgCtx);
+            final MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(msgCtx);
             if (messageUnit instanceof IUserMessage)
                 procCtx.setUserMessage((IUserMessageEntity) messageUnit);
             else if (messageUnit instanceof IPullRequest)
