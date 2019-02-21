@@ -20,27 +20,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -53,81 +43,61 @@ import org.junit.Test;
  */
 public class AddPayloadsTest {
 
-    private static org.holodeckb2b.module.HolodeckB2BTestCore core;
+	private static String baseDir;
 
-    private static String baseDir;
+	@BeforeClass
+	public static void setUpClass() throws Exception {
+		baseDir = AddPayloadsTest.class.getClassLoader()
+				.getResource(AddPayloadsTest.class.getSimpleName()).getPath();
+		HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
+	}
 
-    private AddPayloads handler;
+	@Test
+	public void testDoProcessing() throws Exception {
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        baseDir = AddPayloadsTest.class.getClassLoader()
-                .getResource("handlers").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
-    }
+		MessageContext mc = new MessageContext();
+		mc.setFLOW(MessageContext.OUT_FLOW);
+		// Envelope is needed to add body payload
+		try {
+			mc.setEnvelope(SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12));
+		} catch (AxisFault axisFault) {
+			fail(axisFault.getMessage());
+		}
 
-    @Before
-    public void setUp() throws Exception {
-        handler = new AddPayloads();
-    }
+		UserMessage userMessage = new UserMessage();
+		userMessage.setMessageId("payload-adder-01");
+		// Programmatically added attachment payload
+		Payload payload = new Payload();
+		payload.setContainment(IPayload.Containment.ATTACHMENT);
+		String payloadURI = "some_URI_01";
+		payload.setPayloadURI(payloadURI);
+		payload.setContentLocation(baseDir + "/flower.jpg");
+		userMessage.addPayload(payload);
 
-    @After
-    public void tearDown() throws Exception {
-        core.getPModeSet().removeAll();
-    }
+		// Programmatically added body payload
+		payload = new Payload();
+		payload.setContainment(IPayload.Containment.BODY);
+		payload.setPayloadURI("some_URI_03");
+		payload.setContentLocation(baseDir + "/document.xml");
+		userMessage.addPayload(payload);
 
-    @Test
-    public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd_add_payloads.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
+		// Setting input message property
+		IUserMessageEntity userMessageEntity = HolodeckB2BCore.getStorageManager()
+																.storeIncomingMessageUnit(userMessage);
+		
+		MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+		procCtx.setUserMessage(userMessageEntity);
 
-        MessageContext mc = new MessageContext();
-        mc.setFLOW(MessageContext.OUT_FLOW);
-        // Envelope is needed to add body payload
-        try {
-        	mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-        	fail(axisFault.getMessage());
-        }
-        UserMessage userMessage = new UserMessage();        
-        userMessage.setMessageId("payload-adder-01");
-        
-        // Programmatically added attachment payload
-        Payload payload = new Payload();
-        payload.setContainment(IPayload.Containment.ATTACHMENT);
-        String payloadURI = "some_URI_01";
-        payload.setPayloadURI(payloadURI);
-        payload.setContentLocation(baseDir + "/flower.jpg");
-        userMessage.addPayload(payload);
+		try {
+			new AddPayloads().invoke(mc);			
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
 
-        // Programmatically added body payload
-        payload = new Payload();
-        payload.setContainment(IPayload.Containment.BODY);
-        payload.setPayloadURI("some_URI_03");
-        payload.setContentLocation(baseDir + "/document.xml");
-        userMessage.addPayload(payload);
-
-        // Setting input message property
-        IUserMessageEntity userMessageEntity = 
-        		HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, userMessageEntity);
-
-        try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertNotNull(invokeResp);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-
-        assertNotNull(mc.getAttachmentMap());
-        assertEquals(1, mc.getAttachmentMap().getAllContentIDs().length);
-        
-        assertNotNull(mc.getEnvelope().getBody().getFirstElement());        
-    }
+		assertNotNull(mc.getAttachmentMap());
+		assertEquals(1, mc.getAttachmentMap().getAllContentIDs().length);
+		
+		assertNotNull(mc.getEnvelope().getBody().getFirstElement());
+		assertEquals("document", mc.getEnvelope().getBody().getFirstElement().getLocalName());
+	}
 }

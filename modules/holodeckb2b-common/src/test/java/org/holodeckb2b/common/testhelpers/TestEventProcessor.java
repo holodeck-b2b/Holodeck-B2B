@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.common.testhelpers;
 
-import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 
@@ -32,8 +31,7 @@ public class TestEventProcessor implements IMessageProcessingEventProcessor {
     public ArrayList<IMessageProcessingEvent> events = new ArrayList<>();
 
     @Override
-    public void raiseEvent(final IMessageProcessingEvent event,
-                           final MessageContext msgContext) {
+    public void raiseEvent(final IMessageProcessingEvent event) {
         events.add(event);
     }
 }

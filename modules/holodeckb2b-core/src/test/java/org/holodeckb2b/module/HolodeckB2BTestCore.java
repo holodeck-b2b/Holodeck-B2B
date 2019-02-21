@@ -72,6 +72,10 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl {
     	daoFactory = dbProvider.getDAOFactory();
     }
 
+    public void cleanTemp() {
+    	coreImplementation.cleanTemp();
+    }
+    
     @Override
 	public InternalConfiguration getConfiguration() {
         return (InternalConfiguration) coreImplementation.getConfiguration();

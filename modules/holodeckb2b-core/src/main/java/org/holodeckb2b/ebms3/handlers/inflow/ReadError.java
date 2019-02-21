@@ -20,16 +20,14 @@ import java.util.Iterator;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
@@ -38,24 +36,19 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * Is the handler that checks if this message contains one or more Error signals, i.e. the ebMS header contains one or
  * more <code>eb:SignalMessage</code> elements that have a <code>eb:Error</code> child. When such signal message units
  * are found the information is read from the message into a array of {@link ErrorMessage} objects and stored in the
- * database and in the message context (under key {@link MessageContextProperties#IN_ERRORS}). Its processing state will
- * be set to {@link ProcessingState#RECEIVED}.
+ * database and in the message processing context. Its processing state will be set to {@link ProcessingState#RECEIVED}.
  * <p><b>NOTE: </b>This handler will process all error signals that are in the message although the ebMS Core
  * Specification does not allow more than one.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class ReadError extends BaseHandler {
+public class ReadError extends AbstractBaseHandler {
 
     @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    																					throws PersistenceException {
         // First get the ebMS header block, that is the eb:Messaging element
-        final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
+        final SOAPHeaderBlock messaging = Messaging.getElement(procCtx.getParentContext().getEnvelope());
 
         if (messaging != null) {
             // Check if there are Error signals
@@ -73,8 +66,7 @@ public class ReadError extends BaseHandler {
                             + errorSignal.getMessageId());
                     // And store in database and message context for further processing
                     log.trace("Store Error Signal in database and message context");
-                    MessageContextUtils.addRcvdError(mc, (IErrorMessageEntity) HolodeckB2BCore.getStorageManager()
-                                                                                .storeIncomingMessageUnit(errorSignal));
+                    procCtx.addReceivedError(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(errorSignal));
                     log.info("Error signal with msgId " + errorSignal.getMessageId() + " succesfully read");
                 }
             } 

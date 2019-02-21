@@ -17,13 +17,13 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
+import java.util.Collections;
 
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
@@ -38,39 +38,34 @@ import org.holodeckb2b.persistency.dao.StorageManager;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received receipt signals.
- * <p>For each {@link IReceiptEntity} in the message (indicated by message context property
- * {@link MessageContextProperties#IN_RECEIPTS}) it will check if the referenced {@link IMessageUnitEntity} expects a Receipt
- * anyway. This is done by checking the <i>ReceiptConfiguration</i> for the leg ({@link ILeg#getReceiptConfiguration()}.
- * If no configuration exists Receipt are not expected and a <i>ProcessingModeMismatch</i> error is generated for the
+ * <p>For each {@link IReceiptEntity} in the message processing context it will check if the referenced <i>User Message
+ * </i> expects a Receipt and if so mark it as delivered. This is done by checking the <i>ReceiptConfiguration</i> for 
+ * the leg ({@link ILeg#getReceiptConfiguration()} and the referenced User Message's processing state. If no 
+ * configuration exists Receipts are not expected and a <i>ProcessingModeMismatch</i> error is generated for the
  * Receipt and its processing state is set to {@link ProcessingState#FAILURE}.<br>
- * If a receipt configuration exists and if the user message is waiting for a receipt it will be marked as delivered and
- * the Receipt's state will be set to {@link ProcessingState#READY_FOR_DELIVERY} to indicate that it can be delivered
- * to the business application. The actual delivery is done by the {@link DeliverReceipts} handler.<br>
+ * If a receipt configuration exists and if there is a User Message waiting for a Receipt it will be marked as delivered 
+ * and the Receipt's state will be set to {@link ProcessingState#READY_FOR_DELIVERY} to indicate that it can be 
+ * delivered to the business application. The actual delivery is done by the {@link DeliverReceipts} handler.<br>
  * If a receipt configuration exists but the user message is not waiting for a receipt anymore (because it is already
  * acknowledged by another Receipt or it has failed due to an Error) the Receipt's processing state will be changed to
  * {@link ProcessingState#DONE}.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class ProcessReceipts extends BaseHandler {
+public class ProcessReceipts extends AbstractBaseHandler {
 
     @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log)
+    																					throws PersistenceException {
         log.debug("Check for received receipts in message.");
-        final Collection<IReceiptEntity>  receipts =
-                                (Collection<IReceiptEntity>) mc.getProperty(MessageContextProperties.IN_RECEIPTS);
+        final Collection<IReceiptEntity>  receipts = procCtx.getReceivedReceipts();
 
         if (!Utils.isNullOrEmpty(receipts)) {
             log.debug("Message contains " + receipts.size() + " Receipts signals, start processing");
             for (final IReceiptEntity r : receipts)
                 // Ignore Receipts that already failed
                 if (r.getCurrentProcessingState().getState() != ProcessingState.FAILURE)
-                    processReceipt(r, mc);
+                    processReceipt(r, procCtx, log);
             log.debug("All Receipts in message processed");
         } 
         return InvocationResponse.CONTINUE;
@@ -80,10 +75,12 @@ public class ProcessReceipts extends BaseHandler {
      * Processes one Receipt signal.
      *
      * @param receipt   The receipt signal to process
-     * @param mc        The message context of the message containing the receipt
+     * @param procCtx   The message processing context of the message containing the receipt
+     * @param log		Log to be used
      * @throws PersistenceException When a database error occurs while processing the Receipt Signal
      */
-    protected void processReceipt(final IReceiptEntity receipt, final MessageContext mc) throws PersistenceException {
+    protected void processReceipt(final IReceiptEntity receipt, final MessageProcessingContext procCtx,
+    							  final Log log) throws PersistenceException {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Change processing state to indicate we start processing the receipt. Also checks that the receipt is not
         // already being processed
@@ -95,17 +92,21 @@ public class ProcessReceipts extends BaseHandler {
         final String refToMsgId = receipt.getRefToMessageId();
         log.trace("Start processing Receipt [msgId=" + receipt.getMessageId()
                     + "] for referenced message with msgId=" + refToMsgId);
-        Collection<IMessageUnitEntity> refdMsgs = HolodeckB2BCore.getQueryManager()
-                                                                 .getMessageUnitsWithId(refToMsgId, Direction.OUT);
+        
+        Collection<IMessageUnitEntity> refdMsgs = null;  
+        final IMessageUnitEntity sentMessage = procCtx.getSendingMessageUnit(refToMsgId);
+        if (sentMessage != null)
+        	refdMsgs = Collections.singletonList(sentMessage);
+        else
+        	refdMsgs = HolodeckB2BCore.getQueryManager().getMessageUnitsWithId(refToMsgId, Direction.OUT);
         if (Utils.isNullOrEmpty(refdMsgs)) {
             // This error SHOULD NOT occur because the reference is already checked when finding the P-Mode
             log.warn("Receipt [msgId=" + receipt.getMessageId() + "] contains unknown refToMessageId ["
                         + refToMsgId + "]!");
             updateManager.setProcessingState(receipt, ProcessingState.FAILURE);
             // Create error and add to context
-            MessageContextUtils.addGeneratedError(mc, new ValueInconsistent("Receipt contains unknown reference ["
-                                                                            + refToMsgId + "]",
-                                                                            receipt.getMessageId()));
+            procCtx.addGeneratedError(new ValueInconsistent("Receipt contains unknown reference [" + refToMsgId + "]",
+                                                            receipt.getMessageId()));
         } else {
             // The collection can only contain one User Message as messageId of sent message are guaranteed to be unique
             IMessageUnitEntity  ackedMessage = refdMsgs.iterator().next();
@@ -116,10 +117,9 @@ public class ProcessReceipts extends BaseHandler {
                     // The P-Mode is not configured for receipts, generate error
                     updateManager.setProcessingState(receipt, ProcessingState.FAILURE);
                     // Create error and add to context
-                    MessageContextUtils.addGeneratedError(mc,
-                                            new ValueInconsistent("P-Mode of referenced message [" + refToMsgId
-                                                                  + "] is not configured for receipts",
-                                                                  receipt.getMessageId()));
+                    procCtx.addGeneratedError(new ValueInconsistent("P-Mode of referenced message [" + refToMsgId
+                    												+ "] is not configured for receipts",
+                    												receipt.getMessageId()));
                 }  else {
                     // Change to processing state of the reference message unit to delivered, but only if it is
                     // waiting for a receipt as we may otherwise overwrite an error state.
@@ -141,10 +141,8 @@ public class ProcessReceipts extends BaseHandler {
                 // => create an error
                 log.warn("Receipt [" + receipt.getMessageId() + "] must refer to User Message, but refers to "
                          + MessageUnitUtils.getMessageUnitName(ackedMessage) + "[" + refToMsgId + "]!");
-                final ValueInconsistent   viError = new ValueInconsistent();
-                viError.setErrorDetail("Receipt does not reference a User Message message unit");
-                viError.setRefToMessageInError(receipt.getMessageId());
-                MessageContextUtils.addGeneratedError(mc, viError);
+                procCtx.addGeneratedError(new ValueInconsistent("Receipt does not reference a User Message message unit"
+                												, receipt.getMessageId()));
                 // The message processing of the error fails
                 log.trace("Mark Receipt as failed");
                 updateManager.setProcessingState(receipt, ProcessingState.FAILURE);

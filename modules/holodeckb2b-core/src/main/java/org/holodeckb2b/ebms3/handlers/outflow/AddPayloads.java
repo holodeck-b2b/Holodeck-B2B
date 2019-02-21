@@ -33,10 +33,12 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axis2.context.MessageContext;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractUserMessageHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -58,17 +60,9 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  */
 public class AddPayloads extends AbstractUserMessageHandler {
 
-    /**
-     * This handler should run only in a normal <i>OUT_FLOW</i>
-     */
     @Override
-    protected byte inFlows() {
-        return OUT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
-                                                                                          throws PersistenceException {
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
+    										  final Log log) throws PersistenceException {
 
         log.trace("Check that all meta-data of the User Message is available for processing");
         if (!um.isLoadedCompletely()) {
@@ -103,7 +97,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
                 newPayloadInfo.add(p);
                 // Add the content of the payload to the SOAP message
                 try {
-                    addContent(p, mc);
+                    addContent(p, procCtx.getParentContext(), log);
                 } catch (final Exception e) {
                     log.error("Adding the payload content to message failed. Error details: " + e.getMessage());
                     // If adding the payload fails, the message is in an incomplete state and should not
@@ -127,8 +121,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
      * as a SOAP attachment. The payload will be referred to from the ebMS header by the MIME Content-id of the MIME
      * part. This Content-id MUST specified in the message meta-data ({@link IPayload#getPayloadURI()}).
      * <p>When the containment is specified as {@link IPayload.Containment#EXTERNAL} no content will
-     * be added to SOAP message. It is assumed that transfer of the content takes place out
-     * of band.
+     * be added to SOAP message. It is assumed that transfer of the content takes place out of band.
      * <p>When {@link IPayload.Containment#BODY} is specified as containment the content should be added to the SOAP
      * Body. This requires the payload content to be a XML document. If the specified content is not, an exception is
      * thrown.<br>
@@ -140,10 +133,11 @@ public class AddPayloads extends AbstractUserMessageHandler {
      *
      * @param p             The payload that should be added to the message
      * @param mc            The Axis2 message context for the outgoing message
+     * @param log 			The Log to be used
      * @throws Exception    When a problem occurs while adding the payload contents to
      *                      the message
      */
-    protected void addContent(final IPayload p, final MessageContext mc) throws Exception {
+    protected void addContent(final IPayload p, final MessageContext mc, Log log) throws Exception {
         File f = null;
 
         switch (p.getContainment()) {
@@ -201,6 +195,8 @@ public class AddPayloads extends AbstractUserMessageHandler {
                                         parseError);
                 }
                 return;
+            case EXTERNAL : 
+            	log.warn("Payload containment is set to EXTERNAL, handling by receiver unspecified!");
         }
     }
 }

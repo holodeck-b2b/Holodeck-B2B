@@ -20,11 +20,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.workerpool.WorkerPool;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
+import org.holodeckb2b.module.HolodeckB2BCore;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Namespace;

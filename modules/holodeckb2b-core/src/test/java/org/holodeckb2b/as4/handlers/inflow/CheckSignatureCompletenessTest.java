@@ -16,32 +16,35 @@
  */
 package org.holodeckb2b.as4.handlers.inflow;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
+import org.holodeckb2b.common.testhelpers.pmode.Leg;
+import org.holodeckb2b.common.testhelpers.pmode.PMode;
+import org.holodeckb2b.common.testhelpers.pmode.ReceiptConfiguration;
 import org.holodeckb2b.common.util.MessageIdUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.pmode.xml.PMode;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -56,78 +59,81 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class CheckSignatureCompletenessTest {
 
-    private static PMode                pmode;
-    private static UserMessage          userMessage;
-    private static ArrayList<IPayload>  payloads;
-
-    private MessageContext  mc;
-
+	private static UserMessage	userMessage;
+    
+	private MessageContext mc;
+	private MessageProcessingContext procCtx;
+	
     @BeforeClass
     public static void setUpClass() throws Exception {
-        String baseDir = CheckSignatureCompletenessTest.class.getClassLoader()
-                    .getResource(CheckSignatureCompletenessTest.class.getName().replace('.', '/')).getPath();
-        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
 
         // Create the basic test data
-        pmode = PMode.createFromFile(new File(baseDir + "/pmode.xml"));
+        PMode pmode = new PMode();
+        pmode.setId("pm-pmodeid-1");
+        Leg leg = new Leg();
+        ReceiptConfiguration receiptConfig = new ReceiptConfiguration();
+        receiptConfig.setPattern(ReplyPattern.RESPONSE);
+        leg.setReceiptConfiguration(receiptConfig);
+        pmode.addLeg(leg);
         HolodeckB2BCore.getPModeSet().add(pmode);
 
         userMessage = new UserMessage();
         userMessage.setPModeId(pmode.getId());
 
-        payloads = new ArrayList<>();
         Payload pl1 = new Payload();
         pl1.setContainment(IPayload.Containment.ATTACHMENT);
         pl1.setPayloadURI("first-payload-ref");
-        payloads.add(pl1);
+        userMessage.addPayload(pl1);
         Payload pl2 = new Payload();
         pl2.setContainment(IPayload.Containment.ATTACHMENT);
         pl2.setPayloadURI("first-payload-ref");
-        payloads.add(pl2);
+        userMessage.addPayload(pl2);
         Payload pl3 = new Payload();
         pl1.setContainment(IPayload.Containment.BODY);
-        payloads.add(pl3);
-        userMessage.setPayloads(payloads);
+        userMessage.addPayload(pl3);
     }
 
     @Before
-    public void setupMessageContext() throws PersistenceException {
-        userMessage.setMessageId(MessageIdUtils.createMessageId());
-        IUserMessage umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
-
+    public void prepareContext() throws PersistenceException {
         mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umEntity);
+        
+        procCtx = new MessageProcessingContext(mc);
+        userMessage.setMessageId(MessageIdUtils.createMessageId());
+        procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
     }
-
+    
     @Test
-    public void testNotSigned() throws Exception {
+    public void testUnSigned() throws Exception {
         try {
             new CheckSignatureCompleteness().invoke(mc);
         } catch (AxisFault e) {
             fail("Unexpected exception: " + e.getClass().getSimpleName() + "/" + e.getMessage());
         }
 
-        assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+        assertTrue(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
     }
 
     @Test
     public void testSignedCompletely() throws Exception {
-
         // Create complete set of digests
-        Map<IPayload, ISignedPartMetadata>  digestData = new HashMap<>();
-        payloads.forEach((p) -> digestData.put(p, null));
+        
+    	Map<IPayload, ISignedPartMetadata>  digestData = new HashMap<>();
+        userMessage.getPayloads().forEach((p) -> digestData.put(p, null));
 
         ISignatureProcessingResult  signatureResult = mock(ISignatureProcessingResult.class);
         when(signatureResult.getPayloadDigests()).thenReturn(digestData);
-        mc.setProperty(MessageContextProperties.SIG_VERIFICATION_RESULT, signatureResult);
+        
+        procCtx.addSecurityProcessingResult(signatureResult);
 
         try {
-            new CheckSignatureCompleteness().invoke(mc);
+        	new CheckSignatureCompleteness().invoke(mc);
         } catch (AxisFault e) {
             fail("Unexpected exception: " + e.getClass().getSimpleName() + "/" + e.getMessage());
         }
-        assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+        
+        assertTrue(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
     }
 
     @Test
@@ -135,18 +141,23 @@ public class CheckSignatureCompletenessTest {
         // Create complete set of digests
         Map<IPayload, ISignedPartMetadata>  digestData = new HashMap<>();
 
-        for (int i = 0; i < payloads.size() - 1; i++) {
-            digestData.put(payloads.get(i), null);
+        Iterator<IPayload> iterator = userMessage.getPayloads().iterator();
+        for (int i = 0; i < userMessage.getPayloads().size() - 1; i++) {
+            digestData.put(iterator.next(), null);
         }
+        
         ISignatureProcessingResult  signatureResult = mock(ISignatureProcessingResult.class);
         when(signatureResult.getPayloadDigests()).thenReturn(digestData);
-        mc.setProperty(MessageContextProperties.SIG_VERIFICATION_RESULT, signatureResult);
+        procCtx.addSecurityProcessingResult(signatureResult);
 
         try {
-            new CheckSignatureCompleteness().invoke(mc);
+        	new CheckSignatureCompleteness().invoke(mc);
         } catch (AxisFault e) {
             fail("Unexpected exception: " + e.getClass().getSimpleName() + "/" + e.getMessage());
         }
-        assertNotNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+        
+        assertFalse(Utils.isNullOrEmpty(procCtx.getGeneratedErrors().get(userMessage.getMessageId())));
+        assertEquals("EBMS:0103", 
+        				procCtx.getGeneratedErrors().get(userMessage.getMessageId()).iterator().next().getErrorCode());
     }
 }

@@ -16,19 +16,16 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.ProcessingModeMismatch;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
-import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -54,8 +51,8 @@ import org.holodeckb2b.pmode.PModeFinder;
  * <p>For Pull Request message units finding the P-Mode is dependent on the information supplied in the WS-Security
  * header. As we have not read the WSS header at this point the P-Mode can not be determined for Pull Request signals.
  * <p>Finding the P-Mode for a User Message is done by the {@link PModeFinder} utility class by matching the meta-data 
- * from the received message to the P-Mode configuration data. Since version HB2B_NEXT_VERSION this handler will check if the assign 
- * the User Message was received as result of a Pull Request and if no P-Mode was found, assign the P-Mode used by the
+ * from the received message to the P-Mode configuration data. Since version 4.1.0 this handler will check if the User 
+ * Message was received as result of a Pull Request and if no P-Mode was found, assign the P-Mode used by the
  * Pull Request to the User Message.
  * <p><b>NOTE:</b> The Error generated in case the P-Mode can not be determined is <i>ProcessingModeMismatch</i>. The
  * ebMS specification is not very clear if a specific error must be used. Current choice is based on discussion on <a
@@ -63,31 +60,29 @@ import org.holodeckb2b.pmode.PModeFinder;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class FindPModes extends BaseHandler {
+public class FindPModes extends AbstractBaseHandler {
+
 
     @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    																					throws PersistenceException {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        final IUserMessageEntity userMsg =
-                                          (IUserMessageEntity) mc.getProperty(MessageContextProperties.IN_USER_MESSAGE);
+        final IUserMessageEntity userMsg = procCtx.getReceivedUserMessage();
         if (userMsg != null) {
             log.debug("Finding P-Mode for User Message [" + userMsg.getMessageId() + "]");
             IPMode pmode = PModeFinder.forReceivedUserMessage(userMsg);            
-            if (pmode == null && isInFlow(INITIATOR)) {
-            	final IPullRequest pullRequest = (IPullRequest) MessageContextUtils.getPropertyFromOutMsgCtx(mc, 
-            																MessageContextProperties.OUT_PULL_REQUEST);
+            if (pmode == null && procCtx.isHB2BInitiated()) {
+            	final IPullRequest pullRequest = procCtx.getSendingPullRequest();
             	if (pullRequest != null) {
-            		log.debug("Using P-Mode of PullRequest");
+            		log.debug("Using P-Mode of sent PullRequest");
             		pmode = HolodeckB2BCoreInterface.getPModeSet().get(pullRequest.getPModeId());
             	}
             }
             if (pmode == null) {
-                createErrorNoPMode(mc, userMsg);
+                log.warn("No P-Mode found for User Message [" + userMsg.getMessageId() + "]");
+                procCtx.addGeneratedError(new ProcessingModeMismatch(
+                								"Can not process message because no P-Mode was found for the message!",
+                								userMsg.getMessageId()));
                 log.trace("Set the processing state of this User Message to failure");
                 updateManager.setProcessingState(userMsg, ProcessingState.FAILURE);
             } else {
@@ -96,14 +91,16 @@ public class FindPModes extends BaseHandler {
             }
         } 
 
-        final ArrayList<IErrorMessageEntity>  errorSignals = (ArrayList<IErrorMessageEntity>)
-                                                                    mc.getProperty(MessageContextProperties.IN_ERRORS);
+        final Collection<IErrorMessageEntity>  errorSignals = procCtx.getReceivedErrors();
         if (!Utils.isNullOrEmpty(errorSignals)) {
             log.debug("Message contains " + errorSignals.size() + " Error Signals, finding P-Modes");
             for (final IErrorMessageEntity e : errorSignals) {
-                final IPMode pmode = findForReceivedErrorSignal(e, mc);
+                final IPMode pmode = findForReceivedErrorSignal(e, procCtx);
                 if (pmode == null) {
-                    createErrorNoPMode(mc, e);
+                    log.warn("No P-Mode found for Error Signal [" + e.getMessageId() + "]");
+                    procCtx.addGeneratedError(new ProcessingModeMismatch(
+                    								"Can not process message because no P-Mode was found for the message!",
+                    								e.getMessageId()));
                     log.trace("Set the processing state of this Error Signal to failure");
                     updateManager.setProcessingState(e, ProcessingState.FAILURE);
                 } else {
@@ -113,14 +110,16 @@ public class FindPModes extends BaseHandler {
             }
         } 
 
-        final ArrayList<IReceiptEntity>  rcptSignals = (ArrayList<IReceiptEntity>)
-                                                                   mc.getProperty(MessageContextProperties.IN_RECEIPTS);
+        final Collection<IReceiptEntity>  rcptSignals = procCtx.getReceivedReceipts();
         if (!Utils.isNullOrEmpty(rcptSignals)) {
-            log.debug("Message contains " + rcptSignals.size() + " Receipt Signals, finding P-Modes                                                                                                                                                                                                                                                                     ");
+            log.debug("Message contains " + rcptSignals.size() + " Receipt Signals, finding P-Modes");
             for (final IReceiptEntity r : rcptSignals) {
                 final IPMode pmode = getPModeFromRefdMessage(r.getRefToMessageId());
                 if (pmode == null) {
-                    createErrorNoPMode(mc, r);
+                    log.warn("No P-Mode found for Receipt Signal [" + r.getMessageId() + "]");
+                    procCtx.addGeneratedError(new ProcessingModeMismatch(
+                    								"Can not process message because no P-Mode was found for the message!",
+                    								r.getMessageId()));
                     log.trace("Set the processing state of this Receipt Signal to failure");
                     updateManager.setProcessingState(r, ProcessingState.FAILURE);
                 } else {
@@ -147,16 +146,16 @@ public class FindPModes extends BaseHandler {
      * @param mc    The message context of the Error signal
      * @return      The P-Mode that handles this Error signal if the referenced message id can be matched to a sent
      *              message unit,<br><code>null</code> otherwise.
+     * @throws PersistenceException When an error occurs retrieving the referenced message unit
      */
-    private IPMode findForReceivedErrorSignal(final IErrorMessageEntity e, final MessageContext mc)
-                                                                                          throws PersistenceException {
+    private IPMode findForReceivedErrorSignal(final IErrorMessageEntity e, final MessageProcessingContext procCtx) throws PersistenceException {
         IPMode pmode = null;
         // First get the referenced message id, starting with information from the header
         final String refToMessageId = MessageUnitUtils.getRefToMessageId(e);
         // If there is no referenced message unit and the error is received as a response to a single message unit
         //  we sent out we still have a reference
-        if (Utils.isNullOrEmpty(refToMessageId) && isInFlow(INITIATOR)) {
-            final Collection<IMessageUnitEntity>  reqMUs = MessageContextUtils.getSentMessageUnits(mc);
+        if (Utils.isNullOrEmpty(refToMessageId) && !procCtx.getParentContext().isServerSide()) {
+            final Collection<IMessageUnitEntity>  reqMUs = procCtx.getSendingMessageUnits();
             if (reqMUs.size() == 1)
                 // Request contained one message unit, assuming error applies to it, use its P-Mode
                pmode = HolodeckB2BCore.getPModeSet().get(reqMUs.iterator().next().getPModeId());
@@ -188,21 +187,4 @@ public class FindPModes extends BaseHandler {
         return pmode;
     }
 
-    /**
-     * Helper method to create a Error to signal that no P-Mode can be found for a message unit and to change the
-     * processing state of the message unit to {@link ProcessingState#FAILURE}.
-     *
-     * @param mc    The message context
-     * @param mu    The message unit for which the P-Mode could not be found
-     * @throws PersistenceException    When changing the processing state fails.
-     */
-    private void createErrorNoPMode(final MessageContext mc, final IMessageUnit mu)
-                                            throws PersistenceException {
-        log.warn("No P-Mode found for message unit [" + mu.getMessageId() + "]");
-        final ProcessingModeMismatch   noPmodeIdError = new ProcessingModeMismatch();
-        noPmodeIdError.setRefToMessageInError(mu.getMessageId());
-        noPmodeIdError.setErrorDetail("Can not process message [msgId=" + mu.getMessageId() + "] because no P-Mode"
-                                        + " was found for the message!");
-        MessageContextUtils.addGeneratedError(mc, noPmodeIdError);
-    }
 }

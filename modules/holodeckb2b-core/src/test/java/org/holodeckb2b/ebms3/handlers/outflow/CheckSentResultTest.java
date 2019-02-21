@@ -18,35 +18,21 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.engine.Handler;
-import org.apache.axis2.wsdl.WSDLConstants;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessageElement;
+import org.holodeckb2b.common.testhelpers.pmode.Leg;
+import org.holodeckb2b.common.testhelpers.pmode.PMode;
+import org.holodeckb2b.common.testhelpers.pmode.ReceiptConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.pmode.helpers.Leg;
-import org.holodeckb2b.pmode.helpers.PMode;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -59,92 +45,103 @@ import org.junit.Test;
  */
 public class CheckSentResultTest {
 
-    private static String baseDir;
-
-    private static HolodeckB2BTestCore core;
-
-    private CheckSentResult handler;
-
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = CheckSentResultTest.class.getClassLoader()
-                .getResource("handlers").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
     }
 
-    @Before
-    public void setUp() throws Exception {
-        handler = new CheckSentResult();
-    }
-
+    
     @After
     public void tearDown() throws Exception {
-        core.getPModeSet().removeAll();
+        HolodeckB2BCore.getPModeSet().removeAll();
     }
 
     @Test
     public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env =
-                SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-
-        MessageContext mc = new MessageContext();
-        mc.setFLOW(MessageContext.OUT_FLOW);
-
-        UserMessage userMessage = UserMessageElement.readElement(umElement);
-
-        OperationContext operationContext = mock(OperationContext.class);
-        when(operationContext
-                .getMessageContext(WSDLConstants.MESSAGE_LABEL_OUT_VALUE))
-                .thenReturn(mc);
-
-        mc.setOperationContext(operationContext);
-
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
-
-        PMode pmode = new PMode();
+        
+    	MessageContext mc = new MessageContext();
+    	mc.setFLOW(MessageContext.OUT_FLOW);
+    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        
+    	PMode pmode = new PMode();
+    	pmode.setId("no-receipt-needed");
         Leg leg = new Leg();
         pmode.addLeg(leg);
-        String pmodeId =
-                userMessage.getCollaborationInfo().getAgreement().getPModeId();
-        userMessage.setPModeId(pmodeId);
-        pmode.setId(pmodeId);
-        core.getPModeSet().add(pmode);
-
-        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
+        HolodeckB2BCore.getPModeSet().add(pmode);
+    	
+    	StorageManager storageManager = HolodeckB2BCore.getStorageManager();
         // Setting input message property
-        IUserMessageEntity userMessageEntity =
-                storageManager.storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
-                userMessageEntity);
-
+    	UserMessage usrMessage = new UserMessage();
+    	usrMessage.setPModeId(pmode.getId());
+        IUserMessageEntity userMessageEntity = storageManager.storeOutGoingMessageUnit(usrMessage);
+        
+        procCtx.setUserMessage(userMessageEntity);
+        
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            Handler.InvocationResponse invokeResp = new CheckSentResult().invoke(mc);
             assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
-        assertEquals(ProcessingState.SENDING,
-                userMessageEntity.getCurrentProcessingState().getState());
-
+        assertEquals(ProcessingState.SENDING, userMessageEntity.getCurrentProcessingState().getState());
+    }
+    
+    @Test
+    public void testSuccessNoReceipt() throws Exception {
+        
+    	MessageContext mc = new MessageContext();
+    	mc.setFLOW(MessageContext.OUT_FLOW);
+    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        
+    	PMode pmode = new PMode();
+    	pmode.setId("no-receipt-needed");
+        Leg leg = new Leg();
+        pmode.addLeg(leg);
+        HolodeckB2BCore.getPModeSet().add(pmode);
+    	
+    	StorageManager storageManager = HolodeckB2BCore.getStorageManager();
+        // Setting input message property
+    	UserMessage usrMessage = new UserMessage();
+    	usrMessage.setPModeId(pmode.getId());
+        IUserMessageEntity userMessageEntity = storageManager.storeOutGoingMessageUnit(usrMessage);
+        
+        procCtx.setUserMessage(userMessageEntity);
         try {
-            handler.flowComplete(mc);
+        	new CheckSentResult().flowComplete(mc);
         } catch (Exception e) {
             fail(e.getMessage());
         }
-
-        assertEquals(ProcessingState.DELIVERED,
-                userMessageEntity.getCurrentProcessingState().getState());
+        assertEquals(ProcessingState.DELIVERED, userMessageEntity.getCurrentProcessingState().getState());
     }
+    
+    @Test
+    public void testSuccessAwaitReceipt() throws Exception {
+    	
+    	MessageContext mc = new MessageContext();
+    	mc.setFLOW(MessageContext.OUT_FLOW);
+    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+    	
+    	PMode pmode = new PMode();
+    	pmode.setId("receipt-needed");
+    	Leg leg = new Leg();
+    	leg.setReceiptConfiguration(new ReceiptConfiguration());
+    	pmode.addLeg(leg);
+    	HolodeckB2BCore.getPModeSet().add(pmode);
+    	
+    	StorageManager storageManager = HolodeckB2BCore.getStorageManager();
+    	// Setting input message property
+    	UserMessage usrMessage = new UserMessage();
+    	usrMessage.setPModeId(pmode.getId());
+    	IUserMessageEntity userMessageEntity = storageManager.storeOutGoingMessageUnit(usrMessage);
+    	
+    	procCtx.setUserMessage(userMessageEntity);
+    	try {
+    		new CheckSentResult().flowComplete(mc);
+    	} catch (Exception e) {
+    		fail(e.getMessage());
+    	}
+    	assertEquals(ProcessingState.AWAITING_RECEIPT, userMessageEntity.getCurrentProcessingState().getState());
+    }
+
 }

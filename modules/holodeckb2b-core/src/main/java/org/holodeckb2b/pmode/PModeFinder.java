@@ -22,10 +22,10 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IAgreement;
@@ -299,7 +299,7 @@ public class PModeFinder {
      *                  MPC and authentication info
      * @throws SecurityProcessingException
      */
-    public static Collection<IPMode> findForPulling(final Map<String, ISecurityProcessingResult> authInfo,
+    public static Collection<IPMode> findForPulling(final Collection<ISecurityProcessingResult> authInfo,
                                                     final String mpc) throws SecurityProcessingException {
         final ArrayList<IPMode> pmodesForPulling = new ArrayList<>();
 
@@ -411,16 +411,14 @@ public class PModeFinder {
      *                      <i>PullRequest</i>
      * @param tpSecCfg      The {@link ISecurityConfiguration} specified for the trading partner that is the sender of
      *                      the <i>PullRequest</i>
-     * @param authInfo      A map containing key value pairs representing all authentication info provided in the
-     *                      received message. The keys identify the role defined in the WSS header in which the
-     *                      authentication info was found.
+     * @param authInfo      All authentication info provided in the received message. 
      * @return              <code>true</code> if the received message satisfies the authentication requirements defined
      *                      in the flow, <br>
      *                      <code>false</code> otherwise.
      */
     private static boolean verifyPullRequestAuthorization(final ISecurityConfiguration pullSecCfg,
                                                           final ISecurityConfiguration tpSecCfg,
-                                                          final Map<String, ISecurityProcessingResult> authInfo)
+                                                          final Collection<ISecurityProcessingResult> authInfo)
                                                                                     throws SecurityProcessingException {
         boolean verified = true;
 
@@ -438,23 +436,34 @@ public class PModeFinder {
             // if not fall back to trading partner config
             expectedUT = tpSecCfg == null ? null : tpSecCfg.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS);
 
-        verified = VerificationUtils.verifyUsernameToken(expectedUT,
-                                 (IUsernameTokenProcessingResult) authInfo.get(MessageContextProperties.EBMS_UT_RESULT));
+        Optional<ISecurityProcessingResult> secToken = authInfo.parallelStream()
+        												  .filter(ai -> ai instanceof IUsernameTokenProcessingResult 
+        													   	 && ai.getTargetedRole() == SecurityHeaderTarget.EBMS)
+        												  .findFirst();
+        
+        verified = VerificationUtils.verifyUsernameToken(expectedUT, 
+        								 secToken.isPresent() ? (IUsernameTokenProcessingResult) secToken.get() : null);
 
         // Verify user name token in default header
         expectedUT = tpSecCfg == null ? null :
                                 tpSecCfg.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT);
+        secToken = authInfo.parallelStream().filter(ai -> ai instanceof IUsernameTokenProcessingResult 
+				   	 									&& ai.getTargetedRole() == SecurityHeaderTarget.DEFAULT)
+				  						    .findFirst();
         verified &= VerificationUtils.verifyUsernameToken(expectedUT,
-                              (IUsernameTokenProcessingResult) authInfo.get(MessageContextProperties.DEFAULT_UT_RESULT));
-
+        								 secToken.isPresent() ? (IUsernameTokenProcessingResult) secToken.get() : null);
+        
         // Verify that the expected certificate was used for creating the signature, again start with configuration from
         // PR-flow and fall back to TP
         ISigningConfiguration expectedSig = pullSecCfg == null ? null : pullSecCfg.getSignatureConfiguration();
         if (expectedSig == null)
             expectedSig = tpSecCfg == null ? null : tpSecCfg.getSignatureConfiguration();
 
+        secToken = authInfo.parallelStream().filter(ai -> ai instanceof ISignatureProcessingResult 
+													   && ai.getTargetedRole() == SecurityHeaderTarget.DEFAULT)
+        									.findFirst();
         verified &= VerificationUtils.verifySigningCertificate(expectedSig,
-                           (ISignatureProcessingResult) authInfo.get(MessageContextProperties.SIG_VERIFICATION_RESULT));
+        									secToken.isPresent() ? (ISignatureProcessingResult) secToken.get() : null);
 
         return verified;
     }

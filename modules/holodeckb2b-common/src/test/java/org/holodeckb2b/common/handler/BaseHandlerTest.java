@@ -16,8 +16,19 @@
  */
 package org.holodeckb2b.common.handler;
 
+import static org.holodeckb2b.common.testhelpers.TestUtils.eventContainsMsg;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
+
+import java.util.List;
+
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+import org.apache.commons.logging.Log;
+import org.apache.log4j.Appender;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -33,15 +44,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import org.apache.log4j.Appender;
-
-import java.util.List;
-
-import static org.holodeckb2b.common.testhelpers.TestUtils.eventContainsMsg;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
 
 /**
  * Created at 13:41 28.03.17
@@ -106,15 +108,10 @@ public class BaseHandlerTest {
 /**
  *
  */
-class BaseHandlerImplForTest extends BaseHandler {
+class BaseHandlerImplForTest extends AbstractBaseHandler {
 
     @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(MessageContext mc) throws Exception {
+    protected InvocationResponse doProcessing(MessageProcessingContext mc, Log log) throws Exception {
         log.debug("doProcessing");
         return InvocationResponse.CONTINUE;
     }

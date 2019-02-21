@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
  */
-public interface IMessageTransfer extends IMessageProcessingEvent, IMessageTransferEvent {
+public interface IMessageTransfer extends IMessageProcessingEvent, ISendMessageProcessingFailure, IMessageTransferEvent {
 
     /**
      * Indicates whether the transfer of the message unit was successful.

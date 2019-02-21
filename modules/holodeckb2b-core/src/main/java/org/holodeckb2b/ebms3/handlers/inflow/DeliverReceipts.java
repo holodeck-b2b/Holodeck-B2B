@@ -18,10 +18,10 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
 
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
@@ -47,24 +47,19 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class DeliverReceipts extends BaseHandler {
+public class DeliverReceipts extends AbstractBaseHandler {
 
     @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    																					throws PersistenceException {
         // Check if this message contains receipt signals
-        final Collection<IReceiptEntity> rcptSignals = (Collection<IReceiptEntity>)
-                                                                mc.getProperty(MessageContextProperties.IN_RECEIPTS);
+        final Collection<IReceiptEntity> rcptSignals = procCtx.getReceivedReceipts();
 
         if (Utils.isNullOrEmpty(rcptSignals))
             // No receipts to deliver
             return InvocationResponse.CONTINUE;
 
-        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
+        final StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Process each signal
         for(final IReceiptEntity receipt : rcptSignals) {
             // Prepare message for delivery by checking it is still ready for delivery and then
@@ -74,7 +69,7 @@ public class DeliverReceipts extends BaseHandler {
                                                          ProcessingState.OUT_FOR_DELIVERY)) {
                 // Receipt in this signal can be delivered to business application
                 try {
-                    deliverReceipt(receipt);
+                    deliverReceipt(receipt, log);
                     // Receipt signal processed, change the processing state to done
                     updateManager.setProcessingState(receipt, ProcessingState.DONE);
                 } catch (final MessageDeliveryException ex) {
@@ -96,11 +91,12 @@ public class DeliverReceipts extends BaseHandler {
      * Is a helper method responsible for checking whether and if so delivering a receipt to the business application.
      * Delivery to the business application is done through a {@link IMessageDeliverer}.
      *
-     * @param receipt       The Receipt Signal to process
+     * @param receipt   The Receipt Signal to process
+     * @param log		The log to be used
      * @throws MessageDeliveryException When the receipt should be delivered to the business application but an error
      *                                  prevented successful delivery
      */
-    private void deliverReceipt(final IReceiptEntity receipt) throws MessageDeliveryException {
+    private void deliverReceipt(final IReceiptEntity receipt, final Log log) throws MessageDeliveryException {
         IDeliverySpecification deliverySpec = null;
 
         // Get delivery specification from P-Mode
@@ -130,7 +126,7 @@ public class DeliverReceipts extends BaseHandler {
 
 
     /**
-     * Is a helper method to determine if and how an error should be delivered to the business application.
+     * Is a helper method to determine if and how an receipt should be delivered to the business application.
      *
      * @param receipt   The Receipt Signal message unit to get delivery spec for
      * @return          When the receipt should be delivered to the business application, the {@link
@@ -144,12 +140,9 @@ public class DeliverReceipts extends BaseHandler {
         final IReceiptConfiguration rcptConfig = leg.getReceiptConfiguration();
 
         if (rcptConfig != null && rcptConfig.shouldNotifyReceiptToBusinessApplication()) {
-            log.trace("Receipt should be delivered to business app, get delivery specification");
             deliverySpec = rcptConfig.getReceiptDelivery();
-            if (deliverySpec == null) {
-                log.trace("No specific delivery specified for receipt, use default delivery");
-                deliverySpec = leg.getDefaultDelivery();
-            }
+            if (deliverySpec == null)                
+                deliverySpec = leg.getDefaultDelivery();            
         }
 
         return deliverySpec;

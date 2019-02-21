@@ -16,20 +16,22 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
 
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.common.util.MessageIdUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.pmode.xml.PMode;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -55,7 +57,7 @@ public class PerformCustomValidationsTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         String baseDir = PerformCustomValidationsTest.class.getClassLoader()
-                .getResource(PerformCustomValidationsTest.class.getName().replace('.', '/')).getPath();
+                .getResource(PerformCustomValidationsTest.class.getSimpleName()).getPath();
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
 
@@ -74,7 +76,6 @@ public class PerformCustomValidationsTest {
 
     @AfterClass
     public static void tearDownClass() throws Exception {
-//        LogManager.getRootLogger().removeAppender(mockAppender);
         core.getPModeSet().removeAll();
     }
 
@@ -84,14 +85,16 @@ public class PerformCustomValidationsTest {
         userMessage.setPModeId(rejectOnWarnPmode.getId());
         userMessage.setMessageId(MessageIdUtils.createMessageId());
         umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umEntity);
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setUserMessage(umEntity);
 
         try {
             new PerformCustomValidations().invoke(mc);
         } catch (Exception e) {
             fail(e.getMessage());
         }
-        assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+        assertTrue(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
     }
 
     @Test
@@ -100,13 +103,17 @@ public class PerformCustomValidationsTest {
         userMessage.setPModeId(rejectOnFailurePmode.getId());
         userMessage.setMessageId(MessageIdUtils.createMessageId());
         umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umEntity);
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setUserMessage(umEntity);
 
         try {
             new PerformCustomValidations().invoke(mc);
         } catch (Exception e) {
             fail(e.getMessage());
         }
-        assertNotNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+        assertFalse(Utils.isNullOrEmpty(procCtx.getGeneratedErrors().get(umEntity.getMessageId())));
+        assertEquals("EBMS:0004" ,
+        			 procCtx.getGeneratedErrors().get(umEntity.getMessageId()).iterator().next().getErrorCode());    
     }
 }

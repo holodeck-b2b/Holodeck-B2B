@@ -24,9 +24,12 @@ import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.description.ModuleConfiguration;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.testhelpers.pmode.Leg;
+import org.holodeckb2b.common.testhelpers.pmode.PMode;
+import org.holodeckb2b.common.testhelpers.pmode.ReceptionAwarenessConfig;
 import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
@@ -34,9 +37,6 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.pmode.helpers.Leg;
-import org.holodeckb2b.pmode.helpers.PMode;
-import org.holodeckb2b.pmode.helpers.ReceptionAwarenessConfig;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -96,8 +96,11 @@ public class DetectDuplicateUserMessagesTest {
         // Setting input message property
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(userMessage);
+        
         MessageContext mc = new MessageContext();
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessageEntity);
+        mc.setFLOW(MessageContext.IN_FLOW);
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setUserMessage(userMessageEntity);
 
         // Do as if message is already delivered
         updateManager.setProcessingState(userMessageEntity, ProcessingState.DELIVERED);

@@ -20,10 +20,11 @@ import java.util.Iterator;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.holodeckb2b.core.validation.header.HeaderValidationHandler;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -35,10 +36,9 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  * received message (if such a message unit is included in the message). This data is contained in the
  * <code>eb:UserMessage</code> element in the ebMS header.
  * <p>This handler will only read the meta-data that is available in the ebMS header without performing a validation on
- * it. This is done later in the {@link BasicHeaderValidation} and optionally in custom validators specified in the
- * P-Mode. The meta data is stored in an {@link UserMessageElement} entity object which is stored in the database and added to
- * the message context under key {@link MessageContextProperties#IN_USER_MESSAGE}. The processing state of the user
- * message is set to {@link ProcessingState#PROCESSING}.
+ * it. This is done later in the {@link HeaderValidationHandler} and optionally in custom validators specified in the
+ * P-Mode. The meta data is stored in an entity object which is stored in the database and added to the message 
+ * processing context. The processing state of the user message is set to {@link ProcessingState#RECEIVED}.
  * <p><b>NOTE:</b> The XML schema definition from the ebMS specification allows for multiple <code>eb:UserMessage</code>
  * elements in the ebMS header. In the Core Specification however the number of user message units in the message
  * is limited to just one. Holodeck B2B therefor only uses the first occurrence of <code>eb:UserMessage</code> and
@@ -46,17 +46,13 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class ReadUserMessage extends BaseHandler {
+public class ReadUserMessage extends AbstractBaseHandler {
 
     @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procContext, final Log log) 
+    																					throws PersistenceException {
         // First get the ebMS header block, that is the eb:Messaging element
-        final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
+        final SOAPHeaderBlock messaging = Messaging.getElement(procContext.getParentContext().getEnvelope());
 
         if (messaging != null) {
             // Check if there is a user message unit
@@ -72,8 +68,7 @@ public class ReadUserMessage extends BaseHandler {
 
                 // Store it in both database and message context for further processing
                 log.trace("Saving user message meta data to database and message context");
-                mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                               HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
+                procContext.setUserMessage(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
                 log.info("User message with msgId " + userMessage.getMessageId() + " succesfully read");
             }
         }

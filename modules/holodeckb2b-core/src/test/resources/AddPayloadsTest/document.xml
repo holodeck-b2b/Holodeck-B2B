@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<d:document xmlns:d="urn:test:busdoc">
+    <From>
+        <PartyId>IYYUUHdhdh73773299HHHhdn</PartyId>
+    </From>
+    <To>
+        <PartyId type="pGksuoWh6B_Bhh4efISydLBgaaD316">TUojxGOtP6vcbUr</PartyId>
+        <PartyId type="IDfGubOn2Mmvr4_lUWBVefSSkfto3t">pjtrp</PartyId>
+    </To>
+</d:document>

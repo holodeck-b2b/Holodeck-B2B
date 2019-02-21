@@ -18,9 +18,9 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PullRequestElement;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
@@ -28,36 +28,16 @@ import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:PullRequest</code> element in the ebMS messaging
  * header if a pull request signal should be sent.
- * <p>Whether a Pull Request signal must be sent is determined by the existence of the message context property {@link
- * MessageContextProperties#OUT_PULL_REQUEST}. It contains the entity object representing the Pull Request signal to
- * include.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class PackagePullRequestSignal extends BaseHandler {
-
-    /**
-     * @return Indication that this handler should run in the OUT_FLOW
-     */
-    @Override
-    protected byte inFlows() {
-        return OUT_FLOW;
-    }
+public class PackagePullRequestSignal extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws AxisFault {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) throws AxisFault {
         // First check if there is a pull request to include
-        IPullRequestEntity pullReq = null;
-
-        try {
-            pullReq = (IPullRequestEntity) mc.getProperty(MessageContextProperties.OUT_PULL_REQUEST);
-        } catch (final ClassCastException cce) {
-            log.fatal("Illegal state of processing! MessageContext contained a "
-                        + mc.getProperty(MessageContextProperties.OUT_PULL_REQUEST).getClass().getName() + " object as PullRequest!");
-            throw new IllegalStateException("MessageContext contained a wrong object for pull request!");
-
-        }
-
+        IPullRequestEntity pullReq = procCtx.getSendingPullRequest();
+        		
         if (pullReq == null)
             // No pull request in this message, continue processing
             return InvocationResponse.CONTINUE;
@@ -65,7 +45,7 @@ public class PackagePullRequestSignal extends BaseHandler {
         // There is a pull request signal to be sent, add to the message
         log.trace("Adding pull request signal to the message");
         // Get the eb:Messaging header from the message
-        final SOAPHeaderBlock messaging = Messaging.getElement(mc.getEnvelope());
+        final SOAPHeaderBlock messaging = Messaging.getElement(procCtx.getParentContext().getEnvelope());
 
         log.trace("Add eb:SignalMessage element to the existing eb:Messaging header");
         PullRequestElement.createElement(messaging, pullReq);

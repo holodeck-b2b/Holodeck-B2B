@@ -17,6 +17,7 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -26,31 +27,19 @@ import java.net.URL;
 import javax.activation.DataHandler;
 
 import org.apache.axiom.attachments.Attachments;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.holodeckb2b.as4.compression.CompressionFeature;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
+import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.holodeckb2b.pmode.helpers.Leg;
-import org.holodeckb2b.pmode.helpers.PMode;
-import org.holodeckb2b.pmode.helpers.PayloadProfile;
-import org.holodeckb2b.pmode.helpers.UserMessageFlow;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,95 +55,55 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class SaveUserMsgAttachmentsTest {
 
-    private static HolodeckB2BTestCore core;
-
     private static String baseDir;
-
-    private SaveUserMsgAttachments handler;
+	private static HolodeckB2BTestCore holodeckB2BTestCore;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        // When we need to create directories this method causes the emerge of the UnknownHostException.
-        // baseDir = TestUtils.getPath(SaveUserMsgAttachmentsTest.class, "handlers");
-        baseDir = SaveUserMsgAttachmentsTest.class.getClassLoader().getResource("handlers").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
+        baseDir = SaveUserMsgAttachmentsTest.class.getClassLoader()
+        						.getResource(SaveUserMsgAttachmentsTest.class.getSimpleName()).getPath();        
+        holodeckB2BTestCore = new HolodeckB2BTestCore(baseDir);
+        HolodeckB2BCoreInterface.setImplementation(holodeckB2BTestCore);
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
-        TestUtils.cleanOldMessageUnitEntities();
-        core.getPModeSet().removeAll();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        // Executed after org.holodeckb2b.as4.compression.DecompressionHandler
-        handler = new SaveUserMsgAttachments();
+        TestUtils.cleanOldMessageUnitEntities();    
+        holodeckB2BTestCore.cleanTemp();
     }
 
     @Test
     public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd_att.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        PMode pmode = new PMode();
-
-        Leg leg = new Leg();
-
-        UserMessageFlow umFlow = new UserMessageFlow();
-
-        PayloadProfile plProfile = new PayloadProfile();
-        plProfile.setCompressionType(CompressionFeature.COMPRESSED_CONTENT_TYPE);
-        umFlow.setPayloadProfile(plProfile);
-
-        leg.setUserMessageFlow(umFlow);
-
-        pmode.addLeg(leg);
-
-        UserMessage userMessage = UserMessageElement.readElement(umElement);
-
-        Attachments attachments = new Attachments();
-
+        UserMessage userMessage = new UserMessage();        
+        Payload payload = new Payload();
+        payload.setContainment(Containment.ATTACHMENT);
+        payload.setMimeType("image/jpeg");
+        payload.setPayloadURI("some-att-cid");
+        userMessage.addPayload(payload);
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        IUserMessageEntity userMsgEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
+        procCtx.setUserMessage(userMsgEntity);
+        
         // Adding data handler for the payload described in mmd
+        Attachments attachments = new Attachments();
         DataHandler dh = new DataHandler(new URL("file://" + baseDir + "/dandelion.jpg"));
-        attachments.addDataHandler("some_URI_01", dh);
+        attachments.addDataHandler(payload.getPayloadURI(), dh);
 
         mc.setAttachmentMap(attachments);
 
-        String pmodeId =
-                userMessage.getCollaborationInfo().getAgreement().getPModeId();
-        // Copy pmodeId of the agreement to the user message
-        userMessage.setPModeId(pmodeId);
-        pmode.setId(pmodeId);
-
-        core.getPModeSet().add(pmode);
-
-        // Setting input message property
-        IUserMessageEntity userMessageEntity =
-                HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE,
-                userMessageEntity);
-
-        assertEquals(ProcessingState.RECEIVED,
-                userMessageEntity.getCurrentProcessingState().getState());
-
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, new SaveUserMsgAttachments().invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
-        File tempFile = new File(userMessageEntity.getPayloads().iterator().next().getContentLocation());
-        assertTrue(tempFile.exists());        
+        String storedPayload = userMsgEntity.getPayloads().iterator().next().getContentLocation();
+        assertFalse(Utils.isNullOrEmpty(storedPayload));        
+        assertTrue(new File(storedPayload).exists());        
     }
 }

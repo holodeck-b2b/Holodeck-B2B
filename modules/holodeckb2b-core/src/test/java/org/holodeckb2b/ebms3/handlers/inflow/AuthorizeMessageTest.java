@@ -17,32 +17,29 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.common.util.MessageIdUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.pmode.xml.PMode;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -63,14 +60,13 @@ public class AuthorizeMessageTest {
     private static PMode    pmodeAuth;
     private static PMode    pmodeNoAuth;
 
-    private MessageContext  mc;
-
-    private IUserMessageEntity umEntity;
+    private MessageContext mc;
+    private MessageProcessingContext  procCtx;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         String baseDir = AuthorizeMessageTest.class.getClassLoader()
-                    .getResource(AuthorizeMessageTest.class.getName().replace('.', '/')).getPath();
+                    .getResource(AuthorizeMessageTest.class.getSimpleName()).getPath();
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
 
         // Create the basic test data
@@ -85,18 +81,17 @@ public class AuthorizeMessageTest {
     public void setUp() throws Exception {
         mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-
+        procCtx = new MessageProcessingContext(mc);
+        
         UserMessage userMessage = new UserMessage();
         userMessage.setPModeId(pmodeAuth.getId());
         userMessage.setMessageId(MessageIdUtils.createMessageId());
-        umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, umEntity);
+        procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
 
         Receipt receipt = new Receipt();
         receipt.setPModeId(pmodeNoAuth.getId());
         receipt.setMessageId(MessageIdUtils.createMessageId());
-        IReceiptEntity  rcptEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(receipt);
-        mc.setProperty(MessageContextProperties.IN_RECEIPTS, Arrays.asList(new IReceiptEntity[] {rcptEntity}));
+        procCtx.addReceivedReceipt(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(receipt));
     }
 
     @Test
@@ -104,18 +99,19 @@ public class AuthorizeMessageTest {
 
         // Mock username token result
         IUsernameTokenProcessingResult utResultMock = mock(IUsernameTokenProcessingResult.class);
+        when(utResultMock.getTargetedRole()).thenReturn(SecurityHeaderTarget.EBMS);
         when(utResultMock.getUsername()).thenReturn("johndoe");
         when(utResultMock.getPassword()).thenReturn("secret");
         when(utResultMock.getPasswordType()).thenReturn(UTPasswordType.TEXT);
 
-        mc.setProperty(MessageContextProperties.EBMS_UT_RESULT, utResultMock);
+        procCtx.addSecurityProcessingResult(utResultMock);
 
         try {
             new AuthorizeMessage().invoke(mc);
         } catch (AxisFault e) {
             fail("Unexpected exception: " + e.getClass().getSimpleName() + "/" + e.getMessage());
         }
-        assertNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
+        assertTrue(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
     }
 
     @Test
@@ -123,19 +119,22 @@ public class AuthorizeMessageTest {
 
         // Mock username token result
         IUsernameTokenProcessingResult utResultMock = mock(IUsernameTokenProcessingResult.class);
+        when(utResultMock.getTargetedRole()).thenReturn(SecurityHeaderTarget.EBMS);
         when(utResultMock.getUsername()).thenReturn("janedoe");
         when(utResultMock.getPasswordType()).thenReturn(UTPasswordType.TEXT);
 
-        mc.setProperty(MessageContextProperties.EBMS_UT_RESULT, utResultMock);
+        procCtx.addSecurityProcessingResult(utResultMock);
 
+        IUserMessageEntity umEntity = procCtx.getReceivedUserMessage();
         try {
-            new AuthorizeMessage().invoke(mc);
+        	new AuthorizeMessage().invoke(mc);
         } catch (AxisFault e) {
             fail("Unexpected exception: " + e.getClass().getSimpleName() + "/" + e.getMessage());
         }
-        assertNotNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
-        assertTrue(((Collection<IEbmsError>) mc.getProperty(MessageContextProperties.GENERATED_ERRORS))
-                    .parallelStream().anyMatch((e) -> e.getRefToMessageInError().equals(umEntity.getMessageId())));
+        
+        assertFalse(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
+        assertEquals(1, procCtx.getGeneratedErrors().get(umEntity.getMessageId()).size());
+        assertEquals("EBMS:0101", procCtx.getGeneratedErrors().get(umEntity.getMessageId()).iterator().next().getErrorCode());
         assertEquals(umEntity.getCurrentProcessingState().getState(), ProcessingState.FAILURE);
     }
 

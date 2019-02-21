@@ -17,47 +17,29 @@
 package org.holodeckb2b.ebms3.handlers.outflow;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.net.URL;
-
 import javax.activation.DataHandler;
 
-import org.apache.axiom.attachments.Attachments;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.apache.axis2.transport.http.HTTPConstants;
-import org.holodeckb2b.common.messagemodel.Payload;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessageElement;
+import org.holodeckb2b.common.testhelpers.pmode.Leg;
+import org.holodeckb2b.common.testhelpers.pmode.PMode;
+import org.holodeckb2b.common.testhelpers.pmode.Protocol;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.pmode.helpers.Leg;
-import org.holodeckb2b.pmode.helpers.PMode;
-import org.holodeckb2b.pmode.helpers.Protocol;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Created at 15:48 27.02.17
@@ -66,98 +48,47 @@ import org.mockito.junit.MockitoJUnitRunner;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-@RunWith(MockitoJUnitRunner.class)
 public class ConfigureHTTPTransportHandlerTest {
-    private static String baseDir;
-
-    private static HolodeckB2BTestCore core;
-
-    private ConfigureHTTPTransportHandler handler;
-
+   
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = ConfigureHTTPTransportHandlerTest.class.getClassLoader()
-                .getResource("security").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
     }
 
-    @Before
-    public void setUp() throws Exception {
-        handler = new ConfigureHTTPTransportHandler();
-    }
-
+    
     @After
     public void tearDown() throws Exception {
-        core.getPModeSet().removeAll();
+        HolodeckB2BCore.getPModeSet().removeAll();
     }
 
-    /**
-     *
-     * @throws Exception
-     */
     @Test
-    public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-
+    public void testDefault() throws Exception {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
 
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
-
         PMode pmode = new PMode();
-
+        pmode.setId("http-def-cfg");
         Leg leg = new Leg();
         // Setting all protocol configurations checked by the tested handler
         Protocol protocolConfig = new Protocol();
-        String destUrl = "http://example.com";
+        String destUrl = "http://default.example.com";
         protocolConfig.setAddress(destUrl);
-        protocolConfig.setHTTPCompression(true);
-        protocolConfig.setChunking(true);
         leg.setProtocol(protocolConfig);
         pmode.addLeg(leg);
 
-        UserMessage userMessage = UserMessageElement.readElement(umElement);
+        HolodeckB2BCore.getPModeSet().add(pmode);
 
-        // Setting attachments
-        Attachments attachments = new Attachments();
-        Payload payload = new Payload();
-        payload.setContainment(IPayload.Containment.ATTACHMENT);
-        String payloadPath = "file://./flower.jpg";
-        payload.setPayloadURI(payloadPath);
-        payload.setContentLocation(baseDir + "/flower.jpg");
-        userMessage.addPayload(payload);
-        attachments.addDataHandler(payloadPath,
-                new DataHandler(new URL(payload.getPayloadURI())));
-
-        mc.setAttachmentMap(attachments);
-
-        String pmodeId =
-                userMessage.getCollaborationInfo().getAgreement().getPModeId();
-        userMessage.setPModeId(pmodeId);
-        pmode.setId(pmodeId);
-
-        core.getPModeSet().add(pmode);
-
-        // Setting input message property
-        IUserMessageEntity userMessageEntity =
-                HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
-                userMessageEntity);
+        UserMessage userMessage = new UserMessage();
+        userMessage.setPModeId(pmode.getId());
+        
+        // Simulate a payload attachment
+        mc.addAttachment("pl-1", new DataHandler("Some text", "application/text"));
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
 
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, new ConfigureHTTPTransportHandler().invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -166,8 +97,48 @@ public class ConfigureHTTPTransportHandlerTest {
 
         Options options = mc.getOptions();
         assertNotNull(options);
-        assertTrue((Boolean) options.getProperty(HTTPConstants.MC_GZIP_REQUEST));
-        assertTrue((Boolean) options.getProperty(HTTPConstants.CHUNKED));
-        assertNull(options.getProperty(Constants.Configuration.ENABLE_SWA));
+        assertFalse((Boolean) options.getProperty(HTTPConstants.MC_GZIP_REQUEST));
+        assertFalse((Boolean) options.getProperty(HTTPConstants.CHUNKED));
+        assertTrue((Boolean) options.getProperty(Constants.Configuration.ENABLE_SWA));
+    }
+
+    @Test
+    public void testDoProcessing() throws Exception {
+    	MessageContext mc = new MessageContext();
+    	mc.setFLOW(MessageContext.OUT_FLOW);
+    	
+    	PMode pmode = new PMode();
+    	pmode.setId("http-cfg");
+    	Leg leg = new Leg();
+    	// Setting all protocol configurations checked by the tested handler
+    	Protocol protocolConfig = new Protocol();
+    	String destUrl = "http://example.com";
+    	protocolConfig.setAddress(destUrl);
+    	protocolConfig.setHTTPCompression(true);
+    	protocolConfig.setChunking(true);
+    	leg.setProtocol(protocolConfig);
+    	pmode.addLeg(leg);
+    	
+    	HolodeckB2BCore.getPModeSet().add(pmode);
+    	
+    	UserMessage userMessage = new UserMessage();
+    	userMessage.setPModeId(pmode.getId());
+    	
+    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+    	procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
+    	
+    	try {
+    		assertEquals(Handler.InvocationResponse.CONTINUE, new ConfigureHTTPTransportHandler().invoke(mc));
+    	} catch (Exception e) {
+    		fail(e.getMessage());
+    	}
+    	
+    	assertEquals(destUrl, mc.getProperty(Constants.Configuration.TRANSPORT_URL));
+    	
+    	Options options = mc.getOptions();
+    	assertNotNull(options);
+    	assertTrue((Boolean) options.getProperty(HTTPConstants.MC_GZIP_REQUEST));
+    	assertTrue((Boolean) options.getProperty(HTTPConstants.CHUNKED));
+    	assertFalse((Boolean) options.getProperty(Constants.Configuration.ENABLE_SWA));
     }
 }

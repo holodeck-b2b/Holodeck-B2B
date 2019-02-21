@@ -85,7 +85,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     /**
      * Logger
      */
-    private static Log log = LogFactory.getLog(HolodeckB2BCoreImpl.class);
+    private static final Log log = LogFactory.getLog(HolodeckB2BCoreImpl.class);
 
     /**
      * The configuration of this Holodeck B2B instance

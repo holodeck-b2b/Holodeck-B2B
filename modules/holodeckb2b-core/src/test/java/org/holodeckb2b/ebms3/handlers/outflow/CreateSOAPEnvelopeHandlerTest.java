@@ -21,30 +21,20 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.engine.Handler;
+import org.apache.axis2.namespace.Constants;
 import org.apache.axis2.wsdl.WSDLConstants;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
-import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessageElement;
+import org.holodeckb2b.common.testhelpers.pmode.Leg;
+import org.holodeckb2b.common.testhelpers.pmode.PMode;
+import org.holodeckb2b.common.testhelpers.pmode.Protocol;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.holodeckb2b.pmode.helpers.Leg;
-import org.holodeckb2b.pmode.helpers.PMode;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,114 +50,115 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class CreateSOAPEnvelopeHandlerTest {
 
-    private static String baseDir;
-
-    private static HolodeckB2BTestCore core;
-
-    private CreateSOAPEnvelopeHandler handler;
-
     @BeforeClass
-    public static void setUpClass() throws Exception {
-        baseDir = CreateSOAPEnvelopeHandlerTest.class.getClassLoader()
-                .getResource("handlers").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        handler = new CreateSOAPEnvelopeHandler();
+    public static void setUpClass() throws Exception {       
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
     }
 
     @After
     public void tearDown() throws Exception {
-        core.getPModeSet().removeAll();
+        HolodeckB2BCore.getPModeSet().removeAll();
     }
 
     @Test
-    public void testDoProcessingIfInitiator() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-
+    public void testSOAP11Env() throws Exception {
+    	MessageContext mc = new MessageContext();
+    	mc.setFLOW(MessageContext.OUT_FLOW);
+    	
+    	PMode pmode = new PMode();
+    	pmode.setId("soap-11");
+    	Leg leg = new Leg();
+    	Protocol protocolConfig = new Protocol();
+    	protocolConfig.setSOAPVersion("1.1");
+    	leg.setProtocol(protocolConfig);
+    	pmode.addLeg(leg);
+    	
+    	HolodeckB2BCore.getPModeSet().add(pmode);
+    	
+    	// Setting input message property
+    	UserMessage userMessage = new UserMessage();
+    	userMessage.setPModeId(pmode.getId());
+    	
+    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+    	procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
+    	
+    	try {
+    		assertEquals(Handler.InvocationResponse.CONTINUE, new CreateSOAPEnvelopeHandler().invoke(mc));
+    	} catch (Exception e) {
+    		fail(e.getMessage());
+    	}
+    	
+    	assertEquals(Constants.URI_SOAP11_ENV, mc.getEnvelope().getNamespaceURI());
+    }
+    
+    @Test
+    public void testSOAP12Env() throws Exception {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
-
+        
         PMode pmode = new PMode();
-
+        pmode.setId("soap-12");
         Leg leg = new Leg();
+        Protocol protocolConfig = new Protocol();
+        protocolConfig.setSOAPVersion("1.2");
+        leg.setProtocol(protocolConfig);
         pmode.addLeg(leg);
 
-        UserMessage userMessage = UserMessageElement.readElement(umElement);
-
-        String pmodeId =
-                userMessage.getCollaborationInfo().getAgreement().getPModeId();
-        userMessage.setPModeId(pmodeId);
-        pmode.setId(pmodeId);
-
-        core.getPModeSet().add(pmode);
+        HolodeckB2BCore.getPModeSet().add(pmode);
 
         // Setting input message property
-        IUserMessageEntity userMessageEntity =
-                HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
-        mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE,
-                userMessageEntity);
+        UserMessage userMessage = new UserMessage();
+        userMessage.setPModeId(pmode.getId());
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
 
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, new CreateSOAPEnvelopeHandler().invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
+        assertEquals(Constants.URI_SOAP12_ENV, mc.getEnvelope().getNamespaceURI());
     }
 
     @Test
-    public void testDoProcessingIfResponder() throws Exception {
-        MessageContext mc = new MessageContext();
-        mc.setServerSide(true);
-        mc.setFLOW(MessageContext.OUT_FLOW);
-
-        // Mocking the Axis2 Operation Context
+    public void testSameVersionAsRequest() throws Exception {
+    	MessageContext mc = new MessageContext();
+    	mc.setFLOW(MessageContext.OUT_FLOW);
+    	mc.setServerSide(true);
+    	
+    	PMode pmode = new PMode();
+    	pmode.setId("soap-12");
+    	Leg leg = new Leg();
+    	Protocol protocolConfig = new Protocol();
+    	protocolConfig.setSOAPVersion("1.2");
+    	leg.setProtocol(protocolConfig);
+    	pmode.addLeg(leg);
+    	
+    	HolodeckB2BCore.getPModeSet().add(pmode);
+    	
+    	// Setting input message property
+    	UserMessage userMessage = new UserMessage();
+    	userMessage.setPModeId(pmode.getId());
+    	
+    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+    	procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
+    	
+    	// Mocking the Axis2 Operation Context
+    	MessageContext inCtx = mock(MessageContext.class);
+    	when(inCtx.isSOAP11()).thenReturn(true);
         OperationContext operationContext = mock(OperationContext.class);
-        when(operationContext
-                .getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE))
-                .thenReturn(mc);
-
+        when(operationContext.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE)).thenReturn(inCtx);
         mc.setOperationContext(operationContext);
-
-        try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
+            	
+    	try {
+    		assertEquals(Handler.InvocationResponse.CONTINUE, new CreateSOAPEnvelopeHandler().invoke(mc));
+    	} catch (Exception e) {
+    		fail(e.getMessage());
+    	}
+    	
+    	assertEquals(Constants.URI_SOAP11_ENV, mc.getEnvelope().getNamespaceURI());
     }
 
-    @Test
-    public void testDoProcessingIfResponderWithExistingEnvelope() throws Exception {
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-
-        MessageContext mc = new MessageContext();
-        mc.setServerSide(true);
-        mc.setFLOW(MessageContext.OUT_FLOW);
-
-        try {
-            mc.setEnvelope(env);
-        } catch (AxisFault axisFault) {
-            fail(axisFault.getMessage());
-        }
-
-        try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-
-    }
 }

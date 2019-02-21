@@ -17,35 +17,28 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
-
-import javax.xml.namespace.QName;
-
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
+import org.holodeckb2b.common.testhelpers.pmode.Leg;
+import org.holodeckb2b.common.testhelpers.pmode.PMode;
+import org.holodeckb2b.common.testhelpers.pmode.ReceiptConfiguration;
 import org.holodeckb2b.common.util.MessageIdUtils;
-import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.pmode.helpers.Leg;
-import org.holodeckb2b.pmode.helpers.PMode;
-import org.holodeckb2b.pmode.helpers.ReceiptConfiguration;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -57,30 +50,15 @@ import org.junit.Test;
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class ProcessReceiptsTest {
-    private static final QName RECEIPT_CHILD_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "ReceiptChild");
-
-    private static String baseDir;
-
-    private static HolodeckB2BTestCore core;
-
-    private ProcessReceipts handler;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = ProcessReceiptsTest.class.getClassLoader()
-                .getResource("handlers").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
     }
-    @Before
-    public void setUp() throws Exception {
-        // Executed after org.holodeckb2b.ebms3.handlers.inflow.GetMessageUnitForPulling handler
-        handler = new ProcessReceipts();
-    }
-
+    
     @After
     public void tearDown() throws Exception {    	
-        core.getPModeSet().removeAll();
+        HolodeckB2BCore.getPModeSet().removeAll();
     }
 
     /**
@@ -88,54 +66,43 @@ public class ProcessReceiptsTest {
      */
     @Test
     public void testDoProcessing() throws Exception {
-        UserMessage userMessage = new UserMessage(TestUtils.getMMD("handlers/full_mmd.xml", this));
-
-        PMode pmode = new PMode();
+    
+    	PMode pmode = new PMode();
         pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-
-        String msgId = MessageIdUtils.createMessageId();
-        String pmodeId = "pmodeid-01";
-        userMessage.setPModeId(pmodeId);
-        userMessage.setMessageId(msgId);
-
-        pmode.setId(pmodeId);
-
-        MessageContext mc = new MessageContext();
-        mc.setServerSide(true);
-        mc.setFLOW(MessageContext.IN_FLOW);
+        pmode.setId("pmode-test-id");
 
         Leg leg = new Leg();
         ReceiptConfiguration receiptConfiguration = new ReceiptConfiguration();
         leg.setReceiptConfiguration(receiptConfiguration);
         pmode.addLeg(leg);
 
-        core.getPModeSet().add(pmode);
+        HolodeckB2BCore.getPModeSet().add(pmode);
+
+        MessageContext mc = new MessageContext();
+        mc.setFLOW(MessageContext.IN_FLOW);
 
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();
 
         // Setting input message property
+        UserMessage userMessage = new UserMessage();
+        userMessage.setMessageId(MessageIdUtils.createMessageId());
+        userMessage.setPModeId(pmode.getId());
+        
         IUserMessageEntity userMessageEntity = storageManager.storeOutGoingMessageUnit(userMessage);
-
         storageManager.setProcessingState(userMessageEntity, ProcessingState.AWAITING_RECEIPT);
-
+        
         // Setting input receipts property
         Receipt receipt = new Receipt();
-        OMElement receiptChildElement = OMAbstractFactory.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
-        ArrayList<OMElement> content = new ArrayList<>();
-        content.add(receiptChildElement);
-        receipt.setContent(content);
-        receipt.setRefToMessageId(msgId);
-        receipt.setMessageId("receipt_id");
-
-        IReceiptEntity receiptEntity =
-                storageManager.storeIncomingMessageUnit(receipt);
-        ArrayList<IReceiptEntity> receiptEntities = new ArrayList<>();
-        receiptEntities.add(receiptEntity);
-        mc.setProperty(MessageContextProperties.IN_RECEIPTS, receiptEntities);
-
-        try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        receipt.setRefToMessageId(userMessage.getMessageId());
+        receipt.setMessageId(MessageIdUtils.createMessageId());
+        
+        IReceiptEntity receiptEntity = storageManager.storeIncomingMessageUnit(receipt);
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.addReceivedReceipt(receiptEntity);
+        
+        try {           
+            assertEquals(Handler.InvocationResponse.CONTINUE, new ProcessReceipts().invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -152,32 +119,28 @@ public class ProcessReceiptsTest {
     @Test
     public void testDoProcessingIfNoRefToMsgId() throws Exception {
         MessageContext mc = new MessageContext();
-        mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
+
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
 
         // Setting input receipts property
         Receipt receipt = new Receipt();
-        OMElement receiptChildElement = OMAbstractFactory.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
-        ArrayList<OMElement> content = new ArrayList<>();
-        content.add(receiptChildElement);
-        receipt.setContent(content);
-        receipt.setMessageId("receipt_id");
-
-
-        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
+        receipt.setMessageId(MessageIdUtils.createMessageId());
+        receipt.setRefToMessageId(MessageIdUtils.createMessageId());
         IReceiptEntity receiptEntity = storageManager.storeIncomingMessageUnit(receipt);
-        ArrayList<IReceiptEntity> receiptEntities = new ArrayList<>();
-        receiptEntities.add(receiptEntity);
-        mc.setProperty(MessageContextProperties.IN_RECEIPTS, receiptEntities);
-
-        try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.addReceivedReceipt(receiptEntity);
+        
+        try {           
+            assertEquals(Handler.InvocationResponse.CONTINUE, new ProcessReceipts().invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
-        assertNotNull(mc.getProperty(MessageContextProperties.GENERATED_ERRORS));
         assertEquals(ProcessingState.FAILURE, receiptEntity.getCurrentProcessingState().getState());
+        assertFalse(Utils.isNullOrEmpty(procCtx.getGeneratedErrors().get(receiptEntity.getMessageId())));
+        assertEquals("EBMS:0003", 
+        			 procCtx.getGeneratedErrors().get(receiptEntity.getMessageId()).iterator().next().getErrorCode());
     }
 }

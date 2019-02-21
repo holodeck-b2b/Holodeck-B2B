@@ -19,7 +19,8 @@ package org.holodeckb2b.ebms3.util;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
 
 
@@ -30,25 +31,21 @@ import org.holodeckb2b.common.util.Utils;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class SOAPEnvelopeLogger extends BaseHandler {
+public class SOAPEnvelopeLogger extends AbstractBaseHandler {
 
     @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW | OUT_FLOW | OUT_FAULT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws Exception {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) throws Exception {
         // We use a specific log for the SOAP headers so it can easily be enabled or disabled
-        final Log soapEnvLog = LogFactory.getLog("org.holodeckb2b.msgproc.soapenvlog."
-                                            + (isInFlow(IN_FLOW) || isInFlow(IN_FAULT_FLOW) ? "IN" : "OUT"));
+    	final int currentFlow = procCtx.getParentContext().getFLOW();
+        final boolean incoming = currentFlow == MessageContext.IN_FLOW || currentFlow == MessageContext.IN_FAULT_FLOW;
+        final Log soapEnvLog = LogFactory.getLog("org.holodeckb2b.msgproc.soapenvlog." + (incoming ? "IN" : "OUT"));
 
         // Only do something when logging is enabled
         if (soapEnvLog.isInfoEnabled()) {
             try {
-            	soapEnvLog.info(mc.getEnvelope().cloneOMElement().toStringWithConsume() + "\n");
+            	soapEnvLog.info(procCtx.getParentContext().getEnvelope().cloneOMElement().toStringWithConsume() + "\n");
             } catch (Exception invalidSOAP) {
-            	if (isInFlow((byte) (IN_FLOW | IN_FAULT_FLOW))) {
+            	if (incoming) {
             		log.warn("Received a message with invalid SOAP envelope! Details: " 
             				+ Utils.getExceptionTrace(invalidSOAP));
             		soapEnvLog.error("Received message cannot be logged because its SOAP envelope is not valid!");

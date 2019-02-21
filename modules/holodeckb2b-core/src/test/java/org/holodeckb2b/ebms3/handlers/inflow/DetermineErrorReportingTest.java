@@ -18,69 +18,58 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.description.ModuleConfiguration;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.PullRequest;
+import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.common.testhelpers.pmode.ErrorHandlingConfig;
+import org.holodeckb2b.common.testhelpers.pmode.Leg;
+import org.holodeckb2b.common.testhelpers.pmode.PMode;
+import org.holodeckb2b.common.testhelpers.pmode.UserMessageFlow;
+import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError.Severity;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
+import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.pmode.helpers.ErrorHandlingConfig;
-import org.holodeckb2b.pmode.helpers.Leg;
-import org.holodeckb2b.pmode.helpers.PMode;
-import org.holodeckb2b.pmode.helpers.UserMessageFlow;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Created at 12:07 15.03.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-@RunWith(MockitoJUnitRunner.class)
 public class DetermineErrorReportingTest {
-
-
-    private static String baseDir;
-
-    private static HolodeckB2BTestCore core;
-
+	private static StorageManager storageManager;
+	
     private DetermineErrorReporting handler;
 
     @BeforeClass
-    public static void setUpClass() throws Exception {
-        baseDir = DetermineErrorReportingTest.class.getClassLoader()
-                .getResource("handlers").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
+    public static void setUpClass() throws Exception {        
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
+        storageManager = HolodeckB2BCore.getStorageManager();        
     }
 
     @AfterClass
@@ -100,7 +89,7 @@ public class DetermineErrorReportingTest {
 
     @After
     public void tearDown() throws Exception {
-        core.getPModeSet().removeAll();
+        HolodeckB2BCore.getPModeSet().removeAll();
     }
 
     /**
@@ -109,13 +98,11 @@ public class DetermineErrorReportingTest {
      */
     @Test
     public void testDefaultConfig() throws Exception {
-    	StorageManager storageManager = HolodeckB2BCore.getStorageManager();
     	final String pmodeId = "pmode_id_01";
-        final String msgId = "some_msg_id_01";
         
         // Prepare message in error
-    	UserMessage userMessage = new UserMessage(TestUtils.getMMD("handlers/full_mmd.xml", this));
-        userMessage.setMessageId(msgId);
+    	UserMessage userMessage = new UserMessage();
+        userMessage.setMessageId(MessageIdUtils.createMessageId());
         userMessage.setPModeId(pmodeId);
         IUserMessageEntity userMessageEntity = storageManager.storeIncomingMessageUnit(userMessage);
 
@@ -123,18 +110,21 @@ public class DetermineErrorReportingTest {
         PMode pmode = new PMode();
         pmode.setMep(EbMSConstants.ONE_WAY_MEP);
         pmode.setId(pmodeId);
+        
         Leg leg = new Leg();
         leg.setUserMessageFlow(new UserMessageFlow());
         pmode.addLeg(leg);
-        core.getPModeSet().add(pmode);
+        
+        HolodeckB2BCore.getPModeSet().add(pmode);
 
         // Prepare msg ctx
         MessageContext mc = new MessageContext();
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
         
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessageEntity);
-
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setUserMessage(userMessageEntity);
+        
         // Create the Error Signal referencing the message unit
         EbmsError error1 = new EbmsError();
         error1.setRefToMessageInError(userMessageEntity.getMessageId());
@@ -142,24 +132,16 @@ public class DetermineErrorReportingTest {
         ErrorMessage errorMsg = new ErrorMessage(error1);
         errorMsg.setRefToMessageId(userMessage.getMessageId());
         errorMsg.setPModeId(pmodeId);
-        final ArrayList<IErrorMessageEntity> newSignals = new ArrayList<IErrorMessageEntity>();
-        newSignals.add(storageManager.storeOutGoingMessageUnit(errorMsg));
-        mc.setProperty(MessageContextProperties.GENERATED_ERROR_SIGNALS, newSignals);
+        procCtx.addSendingError(storageManager.storeOutGoingMessageUnit(errorMsg));
         
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, handler.invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
-        assertNotNull(mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
-        assertTrue((Boolean) mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
-        Collection<IErrorMessageEntity> errors = (Collection<IErrorMessageEntity>) 
-        															mc.getProperty(MessageContextProperties.OUT_ERRORS);
-        assertFalse(Utils.isNullOrEmpty(errors));
-        assertEquals(1, errors.size());
-        assertEquals(userMessage.getMessageId(), errors.iterator().next().getRefToMessageId());
+        assertTrue(procCtx.responseNeeded());
+        assertEquals(1, procCtx.getSendingErrors().size());        
     }
 
     /**
@@ -167,46 +149,54 @@ public class DetermineErrorReportingTest {
      */
     @Test
     public void testErrorRefsPullRequest() throws Exception {
-    	StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-        String msgId = "some_msg_id_01";
-        
+    	final String pmodeId = "pmode_id_02";
+    	
         // Prepare message in error
         PullRequest pullRequest = new PullRequest();
         pullRequest.setMPC("some_mpc");
-        pullRequest.setMessageId(msgId);
+        pullRequest.setMessageId(MessageIdUtils.createMessageId());
         IPullRequestEntity pullRequestEntity = storageManager.storeIncomingMessageUnit(pullRequest);
         
         // Prepare msg ctx
         MessageContext mc = new MessageContext();
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
-        mc.setProperty(MessageContextProperties.IN_PULL_REQUEST, pullRequestEntity);
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setPullRequest(pullRequestEntity);
 
+        // Setup P-Mode
+        PMode pmode = new PMode();
+        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+        pmode.setId(pmodeId);
+        
+        Leg leg = new Leg();
+        UserMessageFlow umFlow = new UserMessageFlow();
+        ErrorHandlingConfig errorHandlingConfig = new ErrorHandlingConfig();
+        errorHandlingConfig.setPattern(ReplyPattern.CALLBACK);        
+        umFlow.setErrorHandlingConfiguration(errorHandlingConfig);
+        leg.setUserMessageFlow(umFlow);
+        pmode.addLeg(leg);
+        
+        HolodeckB2BCore.getPModeSet().add(pmode);
+        
         // Create the Error Signal referencing the message unit
         EbmsError error1 = new EbmsError();
         error1.setRefToMessageInError(pullRequestEntity.getMessageId());
         error1.setErrorDetail("Some error for testing.");
         ErrorMessage errorMsg = new ErrorMessage(error1);
+        errorMsg.setPModeId(pmodeId);
         errorMsg.setRefToMessageId(pullRequest.getMessageId());
-        final ArrayList<IErrorMessageEntity> newSignals = new ArrayList<IErrorMessageEntity>();
-        newSignals.add(storageManager.storeOutGoingMessageUnit(errorMsg));
-        mc.setProperty(MessageContextProperties.GENERATED_ERROR_SIGNALS, newSignals);
+        procCtx.addSendingError(storageManager.storeOutGoingMessageUnit(errorMsg));
         
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+        	assertEquals(Handler.InvocationResponse.CONTINUE, handler.invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
        
-        assertNotNull(mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
-        assertTrue((Boolean) mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
-        assertNotNull(mc.getProperty(MessageContextProperties.OUT_ERRORS));
-        Collection<IErrorMessageEntity> errors = (Collection<IErrorMessageEntity>) 
-        														mc.getProperty(MessageContextProperties.OUT_ERRORS);
-        assertFalse(Utils.isNullOrEmpty(errors));
-        assertEquals(1, errors.size());
-        assertEquals(pullRequest.getMessageId(), errors.iterator().next().getRefToMessageId());
+        assertTrue(procCtx.responseNeeded());
+        assertEquals(1, procCtx.getSendingErrors().size());
     }
 
     /**
@@ -215,13 +205,11 @@ public class DetermineErrorReportingTest {
      */
     @Test
     public void testAsyncReporting() throws Exception {
-    	StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-    	final String pmodeId = "pmode_id_01";
-        final String msgId = "some_msg_id_01";
+    	final String pmodeId = "pmode_id_03";
         
         // Prepare message in error
-    	UserMessage userMessage = new UserMessage(TestUtils.getMMD("handlers/full_mmd.xml", this));
-        userMessage.setMessageId(msgId);
+    	UserMessage userMessage = new UserMessage();
+        userMessage.setMessageId(MessageIdUtils.createMessageId());
         userMessage.setPModeId(pmodeId);
         IUserMessageEntity userMessageEntity = storageManager.storeIncomingMessageUnit(userMessage);
 
@@ -229,22 +217,24 @@ public class DetermineErrorReportingTest {
         PMode pmode = new PMode();
         pmode.setMep(EbMSConstants.ONE_WAY_MEP);
         pmode.setId(pmodeId);
+        
         Leg leg = new Leg();
         UserMessageFlow umFlow = new UserMessageFlow();
-        ErrorHandlingConfig errHandling = new ErrorHandlingConfig();
-        errHandling.setPattern(ReplyPattern.CALLBACK);
-        umFlow.setErrorHandlingConfiguration(errHandling);
+        ErrorHandlingConfig errorHandlingConfig = new ErrorHandlingConfig();
+        errorHandlingConfig.setPattern(ReplyPattern.CALLBACK);        
+        umFlow.setErrorHandlingConfiguration(errorHandlingConfig);
         leg.setUserMessageFlow(umFlow);
         pmode.addLeg(leg);
-        core.getPModeSet().add(pmode);
-
+        
+        HolodeckB2BCore.getPModeSet().add(pmode);
+         
         // Prepare msg ctx
         MessageContext mc = new MessageContext();
-        mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
         
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessageEntity);
-
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setUserMessage(userMessageEntity);
+        
         // Create the Error Signal referencing the message unit
         EbmsError error1 = new EbmsError();
         error1.setRefToMessageInError(userMessageEntity.getMessageId());
@@ -253,21 +243,16 @@ public class DetermineErrorReportingTest {
         errorMsg.setRefToMessageId(userMessage.getMessageId());
         errorMsg.setPModeId(pmodeId);
         IErrorMessageEntity errorSig = storageManager.storeOutGoingMessageUnit(errorMsg);
-        final ArrayList<IErrorMessageEntity> newSignals = new ArrayList<IErrorMessageEntity>();
-        newSignals.add(errorSig);
-        mc.setProperty(MessageContextProperties.GENERATED_ERROR_SIGNALS, newSignals);
+        procCtx.addSendingError(errorSig);
         
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, handler.invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
-        assertNull(mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
-        Collection<IErrorMessageEntity> errors = (Collection<IErrorMessageEntity>) 
-        															mc.getProperty(MessageContextProperties.OUT_ERRORS);
-        assertTrue(Utils.isNullOrEmpty(errors));
+        assertFalse(procCtx.responseNeeded());
+        assertTrue(procCtx.getSendingErrors().isEmpty());
         assertEquals(ProcessingState.READY_TO_PUSH, errorSig.getCurrentProcessingState().getState());
     }
 
@@ -276,44 +261,36 @@ public class DetermineErrorReportingTest {
      */
     @Test
     public void testNoPModeButWithRef() throws Exception {
-    	StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-        final String msgId = "some_msg_id_01";
         
         // Prepare message in error
-    	UserMessage userMessage = new UserMessage(TestUtils.getMMD("handlers/full_mmd.xml", this));
-        userMessage.setMessageId(msgId);
+    	UserMessage userMessage = new UserMessage();
+        userMessage.setMessageId(MessageIdUtils.createMessageId());        
         IUserMessageEntity userMessageEntity = storageManager.storeIncomingMessageUnit(userMessage);
 
         // Prepare msg ctx
         MessageContext mc = new MessageContext();
         mc.setServerSide(true);
-        mc.setFLOW(MessageContext.IN_FLOW);        
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessageEntity);
-
+        mc.setFLOW(MessageContext.IN_FLOW);
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setUserMessage(userMessageEntity);
+        
         // Create the Error Signal referencing the message unit
         EbmsError error1 = new EbmsError();
         error1.setRefToMessageInError(userMessageEntity.getMessageId());
         error1.setErrorDetail("Some error for testing.");
         ErrorMessage errorMsg = new ErrorMessage(error1);
         errorMsg.setRefToMessageId(userMessage.getMessageId());
-        final ArrayList<IErrorMessageEntity> newSignals = new ArrayList<IErrorMessageEntity>();
-        newSignals.add(storageManager.storeOutGoingMessageUnit(errorMsg));
-        mc.setProperty(MessageContextProperties.GENERATED_ERROR_SIGNALS, newSignals);
+        procCtx.addSendingError(storageManager.storeOutGoingMessageUnit(errorMsg));
         
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, handler.invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
-        assertNotNull(mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
-        assertTrue((Boolean) mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
-        Collection<IErrorMessageEntity> errors = (Collection<IErrorMessageEntity>) 
-        															mc.getProperty(MessageContextProperties.OUT_ERRORS);
-        assertFalse(Utils.isNullOrEmpty(errors));
-        assertEquals(1, errors.size());
-        assertEquals(userMessage.getMessageId(), errors.iterator().next().getRefToMessageId());
+        assertTrue(procCtx.responseNeeded());
+        assertEquals(1, procCtx.getSendingErrors().size());
     }
 
     /**
@@ -321,43 +298,41 @@ public class DetermineErrorReportingTest {
      */
     @Test
     public void testNoRefAllFailed() throws Exception {
-    	StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-    	final String msgId = "some_msg_id_01";
-    	
-    	// Prepare message in error
-    	UserMessage userMessage = new UserMessage(TestUtils.getMMD("handlers/full_mmd.xml", this));
-    	userMessage.setMessageId(msgId);
-    	IUserMessageEntity userMessageEntity = storageManager.storeIncomingMessageUnit(userMessage);
-    	storageManager.setProcessingState(userMessageEntity, ProcessingState.FAILURE);
-    	
-    	// Prepare msg ctx
-    	MessageContext mc = new MessageContext();
-    	mc.setServerSide(true);
-    	mc.setFLOW(MessageContext.IN_FLOW);        
-    	mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessageEntity);
-    	
-    	// Create the Error Signal referencing the message unit
-    	EbmsError error1 = new EbmsError();
-    	error1.setErrorDetail("Some error for testing.");
-    	ErrorMessage errorMsg = new ErrorMessage(error1);
-    	IErrorMessageEntity errorSig = storageManager.storeOutGoingMessageUnit(errorMsg);
-    	final ArrayList<IErrorMessageEntity> newSignals = new ArrayList<IErrorMessageEntity>();
-    	newSignals.add(errorSig);
-    	mc.setProperty(MessageContextProperties.GENERATED_ERROR_SIGNALS, newSignals);
-    	
-    	try {
-    		Handler.InvocationResponse invokeResp = handler.invoke(mc);
-    		assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
-    	} catch (Exception e) {
-    		fail(e.getMessage());
-    	}
-    	
-		assertNotNull(mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
-		assertTrue((Boolean) mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
-		Collection<IErrorMessageEntity> errors = (Collection<IErrorMessageEntity>) 
-																	mc.getProperty(MessageContextProperties.OUT_ERRORS);
-		assertFalse(Utils.isNullOrEmpty(errors));
-		assertEquals(1, errors.size());
+        // Prepare messages in error
+    	UserMessage userMessage = new UserMessage();
+        userMessage.setMessageId(MessageIdUtils.createMessageId());        
+        IUserMessageEntity userMessageEntity = storageManager.storeIncomingMessageUnit(userMessage);
+        storageManager.setProcessingState(userMessageEntity, ProcessingState.FAILURE);
+        
+        Receipt receipt = new Receipt();
+        receipt.setMessageId(MessageIdUtils.createMessageId());
+        IReceiptEntity rcptEntity = storageManager.storeIncomingMessageUnit(receipt);
+        storageManager.setProcessingState(rcptEntity, ProcessingState.FAILURE);
+        
+        // Prepare msg ctx
+        MessageContext mc = new MessageContext();
+        mc.setServerSide(true);
+        mc.setFLOW(MessageContext.IN_FLOW);
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setUserMessage(userMessageEntity);
+        procCtx.addReceivedReceipt(rcptEntity);
+        
+        // Create the Error Signal referencing the message unit
+        EbmsError error1 = new EbmsError();
+        error1.setErrorDetail("Some error for testing.");
+        error1.setSeverity(Severity.failure);
+        ErrorMessage errorMsg = new ErrorMessage(error1);
+        procCtx.addSendingError(storageManager.storeOutGoingMessageUnit(errorMsg));
+        
+        try {
+            assertEquals(Handler.InvocationResponse.CONTINUE, handler.invoke(mc));
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        assertTrue(procCtx.responseNeeded());
+        assertEquals(1, procCtx.getSendingErrors().size());
     }
     
     /**
@@ -365,42 +340,45 @@ public class DetermineErrorReportingTest {
      */
     @Test
     public void testNoRefConflict() throws Exception {
-    	StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-    	final String msgId = "some_msg_id_01";
-    	
-    	// Prepare message in error
-    	UserMessage userMessage = new UserMessage(TestUtils.getMMD("handlers/full_mmd.xml", this));
-    	userMessage.setMessageId(msgId);
-    	IUserMessageEntity userMessageEntity = storageManager.storeIncomingMessageUnit(userMessage);
-    	storageManager.setProcessingState(userMessageEntity, ProcessingState.DELIVERED);
-    	
-    	// Prepare msg ctx
-    	MessageContext mc = new MessageContext();
-    	mc.setServerSide(true);
-    	mc.setFLOW(MessageContext.IN_FLOW);        
-    	mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessageEntity);
-    	
-    	// Create the Error Signal referencing the message unit
-    	EbmsError error1 = new EbmsError();
-    	error1.setErrorDetail("Some error for testing.");
-    	ErrorMessage errorMsg = new ErrorMessage(error1);
-    	IErrorMessageEntity errorSig = storageManager.storeOutGoingMessageUnit(errorMsg);
-        final ArrayList<IErrorMessageEntity> newSignals = new ArrayList<IErrorMessageEntity>();
-        newSignals.add(errorSig);
-        mc.setProperty(MessageContextProperties.GENERATED_ERROR_SIGNALS, newSignals);
-    	
-    	try {
-    		Handler.InvocationResponse invokeResp = handler.invoke(mc);
-    		assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
-    	} catch (Exception e) {
-    		fail(e.getMessage());
-    	}
-    	
-        assertNull(mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
-        Collection<IErrorMessageEntity> errors = (Collection<IErrorMessageEntity>) 
-        															mc.getProperty(MessageContextProperties.OUT_ERRORS);
-        assertTrue(Utils.isNullOrEmpty(errors));
-        assertEquals(ProcessingState.DONE, errorSig.getCurrentProcessingState().getState()); 
+        // Prepare messages in error
+    	UserMessage userMessage = new UserMessage();
+        userMessage.setMessageId(MessageIdUtils.createMessageId());        
+        IUserMessageEntity userMessageEntity = storageManager.storeIncomingMessageUnit(userMessage);
+        storageManager.setProcessingState(userMessageEntity, ProcessingState.FAILURE);
+        
+        Receipt receipt = new Receipt();
+        receipt.setMessageId(MessageIdUtils.createMessageId());
+        IReceiptEntity rcptEntity = storageManager.storeIncomingMessageUnit(receipt);
+        storageManager.setProcessingState(rcptEntity, ProcessingState.DONE);
+        
+        // Prepare msg ctx
+        MessageContext mc = new MessageContext();
+        mc.setServerSide(true);
+        mc.setFLOW(MessageContext.IN_FLOW);
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setUserMessage(userMessageEntity);
+        procCtx.addReceivedReceipt(rcptEntity);
+        
+        // Create the Error Signal referencing the message unit
+        EbmsError error1 = new EbmsError();
+        error1.setErrorDetail("Some error for testing.");
+        error1.setSeverity(Severity.failure);
+        ErrorMessage errorMsg = new ErrorMessage(error1);
+        IErrorMessageEntity errorSig = storageManager.storeOutGoingMessageUnit(errorMsg);
+        procCtx.addSendingError(errorSig);
+        
+        try {
+            assertEquals(Handler.InvocationResponse.CONTINUE, handler.invoke(mc));
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+        assertFalse(procCtx.responseNeeded());
+        assertTrue(procCtx.getSendingErrors().isEmpty());    	
+        assertEquals(ProcessingState.DONE, errorSig.getCurrentProcessingState().getState());
+        assertEquals(ProcessingState.WARNING, 
+        				errorSig.getProcessingStates().get(errorSig.getProcessingStates().size()-2).getState());
     }
 
     /**
@@ -408,44 +386,38 @@ public class DetermineErrorReportingTest {
      */
     @Test
     public void testNoPModeOnResponse() throws Exception {
-    	StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-        final String msgId = "some_msg_id_01";
-        
-        // Prepare message in error
-    	UserMessage userMessage = new UserMessage(TestUtils.getMMD("handlers/full_mmd.xml", this));
-        userMessage.setMessageId(msgId);
+    	// Prepare messages in error
+    	UserMessage userMessage = new UserMessage();
+        userMessage.setMessageId(MessageIdUtils.createMessageId());        
         IUserMessageEntity userMessageEntity = storageManager.storeIncomingMessageUnit(userMessage);
-
+        storageManager.setProcessingState(userMessageEntity, ProcessingState.FAILURE);
+        
         // Prepare msg ctx
         MessageContext mc = new MessageContext();
-        mc.setServerSide(false);
-        mc.setFLOW(MessageContext.IN_FLOW);        
-        mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, userMessageEntity);
-
+        mc.setFLOW(MessageContext.IN_FLOW);
+        
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        procCtx.setUserMessage(userMessageEntity);
+        
         // Create the Error Signal referencing the message unit
         EbmsError error1 = new EbmsError();
-        error1.setRefToMessageInError(userMessageEntity.getMessageId());
         error1.setErrorDetail("Some error for testing.");
+        error1.setSeverity(Severity.failure);
         ErrorMessage errorMsg = new ErrorMessage(error1);
         errorMsg.setRefToMessageId(userMessage.getMessageId());
         IErrorMessageEntity errorSig = storageManager.storeOutGoingMessageUnit(errorMsg);
-        final ArrayList<IErrorMessageEntity> newSignals = new ArrayList<IErrorMessageEntity>();
-        newSignals.add(errorSig);
-        mc.setProperty(MessageContextProperties.GENERATED_ERROR_SIGNALS, newSignals);
+        procCtx.addSendingError(errorSig);
         
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, handler.invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
-        assertNull(mc.getProperty(MessageContextProperties.RESPONSE_REQUIRED));
-        Collection<IErrorMessageEntity> errors = (Collection<IErrorMessageEntity>) 
-        															mc.getProperty(MessageContextProperties.OUT_ERRORS);
-        assertTrue(Utils.isNullOrEmpty(errors));
-        assertEquals(ProcessingState.DONE, errorSig.getCurrentProcessingState().getState());        
+        assertFalse(procCtx.responseNeeded());
+        assertTrue(procCtx.getSendingErrors().isEmpty());    	
+        assertEquals(ProcessingState.DONE, errorSig.getCurrentProcessingState().getState());
+        assertEquals(ProcessingState.WARNING, 
+        				errorSig.getProcessingStates().get(errorSig.getProcessingStates().size()-2).getState());
     }
-    
-    
 }

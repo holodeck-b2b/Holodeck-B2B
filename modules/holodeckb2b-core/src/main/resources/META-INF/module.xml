@@ -27,7 +27,7 @@
     <InFlow>
         <!-- Catch a raised Fault and translate it into an EbMS Error -->
         <handler name="CatchFaults" class="org.holodeckb2b.ebms3.util.CatchAxisFault">
-            <order phase="protocolInPhase" phaseFirst="true"/>
+            <order phase="protocolInPhase" phaseFirst="true"/>            
         </handler>
         <!-- Log the SOAP envelope -->
         <handler name="SOAPLog" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger">
@@ -143,16 +143,12 @@
         <handler name="DetermineErrorReporting" class="org.holodeckb2b.ebms3.handlers.inflow.DetermineErrorReporting">
             <order phase="protocolInPhase" after="ProcessGeneratedErrors"/>
         </handler>
-        <!-- Indicate the ebMS header is processed by Holodeck B2B -->
-        <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
-            <order phase="protocolInPhase" phaseLast="true"/>
-        </handler>
     </InFlow>
-
+    
     <InFaultFlow>
         <!-- Catch a raised Fault and translate it into an EbMS Error -->
         <handler name="CatchFaults" class="org.holodeckb2b.ebms3.util.CatchAxisFault">
-            <order phase="protocolInPhase" phaseFirst="true"/>
+            <order phase="protocolInPhase" phaseFirst="true"/>            
         </handler>
         <!-- Log the SOAP envelope -->
         <handler name="SOAPLog" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger">
@@ -192,6 +188,7 @@
             <order phase="protocolInPhase" after="FindPModes"/>
             <parameter name="validatorFactoryClass">org.holodeckb2b.ebms3.validation.header.Ebms3HeaderValidatorFactory</parameter>
         </handler>
+
         <!--
             Process and validate the WS-Security
         -->
@@ -266,17 +263,14 @@
         </handler>
         <handler name="DetermineErrorReporting" class="org.holodeckb2b.ebms3.handlers.inflow.DetermineErrorReporting">
             <order phase="protocolInPhase" after="ProcessGeneratedErrors"/>
-        </handler>        
-        <!-- Indicate the ebMS header is processed by Holodeck B2B -->
-        <handler name="ReportHeaderProcessed" class="org.holodeckb2b.ebms3.handlers.inflow.ReportHeaderProcessed">
-            <order phase="protocolInPhase" phaseLast="true"/>
         </handler>
     </InFaultFlow>
 
     <OutFlow>
         <handler name="PrepareResponseMessage"
-           class="org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage">
+            class="org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage">
             <order phase="protocolOutPhase" phaseFirst="true"/>
+            <parameter name="onlyAsResponder">true</parameter>
         </handler>
         <handler name="CreateSOAPEnvelope"
             class="org.holodeckb2b.ebms3.handlers.outflow.CreateSOAPEnvelopeHandler">
@@ -328,11 +322,12 @@
             <order phase="protocolOutPhase" phaseLast="true"/>
         </handler>
     </OutFlow>
-    
+
     <OutFaultFlow>
         <handler name="PrepareResponseMessage"
-           class="org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage">
+            class="org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage">
             <order phase="protocolOutPhase" phaseFirst="true"/>
+            <parameter name="onlyAsResponder">true</parameter>
         </handler>
         <handler name="CreateSOAPEnvelope"
             class="org.holodeckb2b.ebms3.handlers.outflow.CreateSOAPEnvelopeHandler">
@@ -383,5 +378,6 @@
         <handler name="SOAPLog" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger">
             <order phase="protocolOutPhase" phaseLast="true"/>
         </handler>
-    </OutFaultFlow>    
+    </OutFaultFlow>
+   
 </module>

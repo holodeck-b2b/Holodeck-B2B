@@ -22,11 +22,12 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
@@ -49,17 +50,12 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class ConfigureMultihop extends BaseHandler {
+public class ConfigureMultihop extends AbstractBaseHandler {
 
     // Ensure that the I-Cloud URI that is set in the wsa:To header is interpreted as anonymous by the Axis2 addressing
     // module
     static {
         EndpointReference.addAnonymousEquivalentURI(MultiHopConstants.WSA_TO_ICLOUD);
-    }
-
-    @Override
-    protected byte inFlows() {
-        return OUT_FLOW | OUT_FAULT_FLOW;
     }
 
     /**
@@ -69,14 +65,10 @@ public class ConfigureMultihop extends BaseHandler {
      * that the signal is a response to. See section 4.4 of the AS4 profile how the WS-A headers are constructed.
      */
     @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws Exception {
-        // For routing signals through the I-Cloud WS-A headers are used. We use the Axis2 addressing module to create
-        // the headers. But this only needed for signals, so we disable the module by default
-        mc.setProperty(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES, Boolean.TRUE);
-
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) throws Exception {
         // If the primary message unit is a user message it can be multi-hop in itself. Receipt and/or Error signals
         // depends on whether the original message was sent using multi-hop.
-        final IMessageUnitEntity primMU = MessageContextUtils.getPrimaryMessageUnit(mc);
+        final IMessageUnitEntity primMU = procCtx.getPrimaryMessageUnit();
         if (primMU instanceof IUserMessage) {
             // Whether the user message is sent using multi-hop is defined by P-Mode parameter
             // PMode[1].Protocol.AddActorOrRoleAttribute
@@ -87,7 +79,7 @@ public class ConfigureMultihop extends BaseHandler {
             else {
                 // This is a multi-hop message, set the multi-hop target on the eb:Messaging element
                 log.debug("Primary message is a multi-hop UserMessage -> set multi-hop target");
-                final SOAPHeaderBlock ebHeader = Messaging.getElement(mc.getEnvelope());
+                final SOAPHeaderBlock ebHeader = Messaging.getElement(procCtx.getParentContext().getEnvelope());
                 ebHeader.setRole(MultiHopConstants.NEXT_MSH_TARGET);
             }
         } else if (primMU instanceof IPullRequest) {
@@ -97,12 +89,12 @@ public class ConfigureMultihop extends BaseHandler {
         } else {
             // If the primary message unit is a Receipt or Error signal additional WS-A headers must be provided with
             // the necessary routing info. This info is retrieved from the UserMessage the signal is a response to.
-            final IUserMessageEntity usrMessage = getReferencedUserMsg(mc, (ISignalMessage) primMU);
+            final IUserMessageEntity usrMessage = getReferencedUserMsg(procCtx, (ISignalMessage) primMU);
 
             // Check if the user message was received over multi-hop
             if (usrMessage != null && usrMessage.usesMultiHop()) {
                 log.debug("Primary message unit is response signal to multi-hop User Message -> add routing info");
-                addRoutingInfo(mc, usrMessage, (ISignalMessage) primMU);
+                addRoutingInfo(procCtx.getParentContext(), usrMessage, (ISignalMessage) primMU);
             } else
                 log.trace("Primary message unit is response signal to non (multi-hop) User Message");
         }
@@ -117,12 +109,12 @@ public class ConfigureMultihop extends BaseHandler {
      * first one is used as it assumed that all entity object represent the same User Message (based on the ebMS V3
      * Specification's requirement that <i>messageId</i>s must be unique this is a safe assumption).
      *
-     * @param mc        The message context
+     * @param procCtx   The Holodeck B2B message processing context
      * @param signal    The signal message unit to get the reference user message for
      * @return          The referenced {@link UserMessage} or <code>null</code> if no unique referenced user message
      *                  can be found
      */
-    private IUserMessageEntity getReferencedUserMsg(final MessageContext mc, final ISignalMessage signal)
+    private IUserMessageEntity getReferencedUserMsg(final MessageProcessingContext procCtx, final ISignalMessage signal)
                                                                                         throws PersistenceException {
         String refToMsgId = MessageUnitUtils.getRefToMessageId(signal);
         // If the signal does not contain a reference to another message unit there is nothing to do here
@@ -130,23 +122,21 @@ public class ConfigureMultihop extends BaseHandler {
             return null;
 
         // If the signal is the primary message unit in a response it is sent synchronously and the related user
-        // message must be available in the message context of the in flow
-        if (isInFlow(RESPONDER)) {
-            for(IMessageUnitEntity mu : MessageContextUtils.getReceivedMessageUnits(mc))
-                if (mu instanceof IUserMessage && refToMsgId.equals(mu.getMessageId()))
-                    return (IUserMessageEntity) mu;
-            return null;
-        } else {
-            // Not sent as response, so get the information from the database
-            Collection<IMessageUnitEntity> refdMessages = HolodeckB2BCore.getQueryManager()
+        // message must be available in the context 
+        for(IMessageUnitEntity mu : procCtx.getReceivedMessageUnits())
+            if (mu instanceof IUserMessage && refToMsgId.equals(mu.getMessageId()))
+                return (IUserMessageEntity) mu;
+
+        // If not sent as response, get the information from the database
+        final Collection<IMessageUnitEntity> refdMessages = HolodeckB2BCore.getQueryManager()
                                                                          .getMessageUnitsWithId(refToMsgId, 
                                                                         		 				Direction.OUT);
-            if (!Utils.isNullOrEmpty(refdMessages)) {
-                IMessageUnitEntity sentMsgUnit = refdMessages.iterator().next();
-                return (sentMsgUnit instanceof IUserMessageEntity) ? (IUserMessageEntity) sentMsgUnit : null;
-            } else
-                return null;
-        }
+        if (!Utils.isNullOrEmpty(refdMessages)) {
+            IMessageUnitEntity sentMsgUnit = refdMessages.iterator().next();
+            return (sentMsgUnit instanceof IUserMessageEntity) ? (IUserMessageEntity) sentMsgUnit : null;
+        } 
+        
+        return null;        
     }
 
     /**

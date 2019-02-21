@@ -16,11 +16,10 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractUserMessageHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.ebms3.errors.OtherContentError;
-import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.events.MessageDelivery;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
@@ -46,13 +45,8 @@ import org.holodeckb2b.persistency.dao.StorageManager;
 public class DeliverUserMessage extends AbstractUserMessageHandler {
 
     @Override
-    protected byte inFlows() {
-        return IN_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um)
-                                                                                        throws PersistenceException {
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
+    										  final Log log) throws PersistenceException {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Prepare message for delivery by checking it is still ready for delivery and then
         // change its processing state to "out for delivery"
@@ -80,8 +74,6 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
                              + " instead of MessageDeliveryException!");
                     throw new MessageDeliveryException("Unhandled exception during message delivery", t);
                 }
-                // Indicate that message is delivered so receipt can be created
-                mc.setProperty(MessageContextProperties.DELIVERED_USER_MSG, true);
                 log.info("Successfully delivered user message [msgId=" + um.getMessageId() +"]");
                 updateManager.setProcessingState(um, ProcessingState.DELIVERED);                
             } catch (final MessageDeliveryException ex) {
@@ -94,12 +86,12 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
                 //  an ebMS Error to the sender
                 if (ex.isPermanent()) {
                     updateManager.setProcessingState(um, ProcessingState.FAILURE);
-                    MessageContextUtils.addGeneratedError(mc, new OtherContentError("Message delivery impossible!",
+                    procCtx.addGeneratedError( new OtherContentError("Message delivery impossible!",
                                                                                 um.getMessageId()));
                 }
             }
             // Raise delivery event to inform external components
-            HolodeckB2BCore.getEventProcessor().raiseEvent(new MessageDelivery(um, failure == null, failure), mc);
+            HolodeckB2BCore.getEventProcessor().raiseEvent(new MessageDelivery(um, failure == null, failure));
         } else {
             // This message is not ready for delivery now which is caused by it already been delivered by another
             // thread. This however should not occur normaly.

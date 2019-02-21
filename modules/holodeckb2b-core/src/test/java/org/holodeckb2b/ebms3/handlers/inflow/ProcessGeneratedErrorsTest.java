@@ -30,14 +30,13 @@ import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.description.ModuleConfiguration;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -84,23 +83,23 @@ public class ProcessGeneratedErrorsTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
         
+        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        
         // Create the Error Signal 
         EbmsError error1 = new EbmsError();
         error1.setErrorDetail("Some error for testing.");
-        MessageContextUtils.addGeneratedError(mc, error1);
+        procCtx.addGeneratedError(error1);
         EbmsError error2 = new EbmsError();
         error2.setErrorDetail("Some other error for testing.");
-        MessageContextUtils.addGeneratedError(mc, error2);
+        procCtx.addGeneratedError(error2);
         
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
-            assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+            assertEquals(Handler.InvocationResponse.CONTINUE, handler.invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
         
-        Collection<IErrorMessageEntity> errorSigs = (Collection<IErrorMessageEntity>) 
-													  mc.getProperty(MessageContextProperties.GENERATED_ERROR_SIGNALS);
+        Collection<IErrorMessageEntity> errorSigs = procCtx.getSendingErrors();
         assertFalse(Utils.isNullOrEmpty(errorSigs));
         assertEquals(1, errorSigs.size());
         IErrorMessageEntity errSig = errorSigs.iterator().next();
@@ -124,29 +123,29 @@ public class ProcessGeneratedErrorsTest {
     	
     	// Prepare msg ctx
     	MessageContext mc = new MessageContext();
-    	mc.setFLOW(MessageContext.IN_FLOW);
-    	mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, usrMsgEntity);
+    	mc.setFLOW(MessageContext.IN_FLOW);    	
+    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+       
+    	procCtx.setUserMessage(usrMsgEntity);
     	
     	// Create the Error Signal 
     	EbmsError error1 = new EbmsError();
     	error1.setErrorDetail("Some error for testing.");
     	error1.setRefToMessageInError(usrMsg.getMessageId());
-    	MessageContextUtils.addGeneratedError(mc, error1);
+    	procCtx.addGeneratedError(error1);
     	EbmsError error2 = new EbmsError();
     	error2.setErrorDetail("Some other error for testing.");
     	error2.setRefToMessageInError(usrMsg.getMessageId());
-    	MessageContextUtils.addGeneratedError(mc, error2);
+    	procCtx.addGeneratedError(error2);
     	
     	try {
-    		Handler.InvocationResponse invokeResp = handler.invoke(mc);
-    		assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+    		assertEquals(Handler.InvocationResponse.CONTINUE, handler.invoke(mc));
     	} catch (Exception e) {
     		fail(e.getMessage());
     	}
     	
-    	Collection<IErrorMessageEntity> errorSigs = (Collection<IErrorMessageEntity>) 
-    												mc.getProperty(MessageContextProperties.GENERATED_ERROR_SIGNALS);
-    	assertFalse(Utils.isNullOrEmpty(errorSigs));
+    	Collection<IErrorMessageEntity> errorSigs = procCtx.getSendingErrors();
+        assertFalse(Utils.isNullOrEmpty(errorSigs));
     	assertEquals(1, errorSigs.size());
     	IErrorMessageEntity errSig = errorSigs.iterator().next();
     	assertEquals(usrMsg.getPModeId(), errSig.getPModeId());
@@ -175,28 +174,27 @@ public class ProcessGeneratedErrorsTest {
     	// Prepare msg ctx
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.IN_FLOW);
-    	mc.setProperty(MessageContextProperties.IN_USER_MESSAGE, usrMsgEntity);
-    	mc.setProperty(MessageContextProperties.IN_PULL_REQUEST, pullReqEntity);
+    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+    	procCtx.setUserMessage(usrMsgEntity);
+    	procCtx.setPullRequest(pullReqEntity);
     	
-    	// Create the Error Signal 
+    	// Create the Errors 
     	EbmsError error1 = new EbmsError();
     	error1.setErrorDetail("error-1");
     	error1.setRefToMessageInError(usrMsg.getMessageId());
-    	MessageContextUtils.addGeneratedError(mc, error1);
+    	procCtx.addGeneratedError(error1);
     	EbmsError error2 = new EbmsError();
     	error2.setErrorDetail("error-2");
     	error2.setRefToMessageInError(pullReq.getMessageId());
-    	MessageContextUtils.addGeneratedError(mc, error2);
+    	procCtx.addGeneratedError(error2);
     	
-    	try {
-    		Handler.InvocationResponse invokeResp = handler.invoke(mc);
-    		assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
+       	try {
+    		assertEquals(Handler.InvocationResponse.CONTINUE, handler.invoke(mc));
     	} catch (Exception e) {
     		fail(e.getMessage());
     	}
     	
-    	Collection<IErrorMessageEntity> errorSigs = (Collection<IErrorMessageEntity>) 
-    											mc.getProperty(MessageContextProperties.GENERATED_ERROR_SIGNALS);
+    	Collection<IErrorMessageEntity> errorSigs = procCtx.getSendingErrors();
     	assertFalse(Utils.isNullOrEmpty(errorSigs));
     	assertEquals(2, errorSigs.size());
     	

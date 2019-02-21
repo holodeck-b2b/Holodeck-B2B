@@ -16,14 +16,14 @@
  */
 package org.holodeckb2b.as4.handlers.inflow;
 
+import java.util.Collection;
 import java.util.Set;
 
-import org.apache.axis2.context.MessageContext;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractUserMessageHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.PolicyNoncompliance;
-import org.holodeckb2b.ebms3.util.AbstractUserMessageHandler;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
@@ -46,12 +46,8 @@ import org.holodeckb2b.module.HolodeckB2BCore;
 public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
 
     @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc, final IUserMessageEntity um) throws Exception {
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
+    										  final Log log) throws Exception {
         // First check if this message needs a Receipt and is signed
         final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
         if (pmode == null) {
@@ -69,11 +65,11 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
         }
 
         // Check if received message was signed
-        final ISignatureProcessingResult signatureResult =
-                          (ISignatureProcessingResult) mc.getProperty(MessageContextProperties.SIG_VERIFICATION_RESULT);        
-        if (signatureResult != null && !Utils.isNullOrEmpty(um.getPayloads())) {
+        final Collection<ISignatureProcessingResult> signatureResults = 
+        										procCtx.getSecurityProcessingResults(ISignatureProcessingResult.class);
+        if (!Utils.isNullOrEmpty(signatureResults) && !Utils.isNullOrEmpty(um.getPayloads())) {
         	log.trace("Message is signed, check that each payload has been included in the Signature");
-            Set<IPayload> signedPayloads = signatureResult.getPayloadDigests().keySet();
+            Set<IPayload> signedPayloads = signatureResults.iterator().next().getPayloadDigests().keySet();
             if (!um.getPayloads().parallelStream().allMatch(
                             (mp) -> signedPayloads.parallelStream()
                                                   .anyMatch((sp) -> areSamePayloadRef(mp, sp)))) {
@@ -82,7 +78,7 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
                 // that all payloads should be signed. Therefore create the PolicyNoncompliance error
                 final PolicyNoncompliance   error = new PolicyNoncompliance("Not all payloads are signed");
                 error.setRefToMessageInError(um.getMessageId());
-                MessageContextUtils.addGeneratedError(mc, error);
+                procCtx.addGeneratedError( error);
                 HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.FAILURE);
             }
         }

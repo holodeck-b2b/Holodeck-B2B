@@ -20,11 +20,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handler.BaseHandler;
+import org.apache.commons.logging.Log;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.ebms3.errors.EmptyMessagePartitionChannel;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -42,53 +41,37 @@ import org.holodeckb2b.module.HolodeckB2BCore;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class GetMessageUnitForPulling extends BaseHandler {
+public class GetMessageUnitForPulling extends AbstractBaseHandler {
 
     @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    																					throws PersistenceException {
+        final IPullRequestEntity pullRequest = procCtx.getReceivedPullRequest();        
+        if (pullRequest == null || pullRequest.getCurrentProcessingState().getState() == ProcessingState.FAILURE)
+        	return InvocationResponse.CONTINUE;
 
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
-        // First check whether this flow contained a valid pull request
-        log.trace("Check for authenticated pull request");
-        final List<IPMode> authPModes = (List<IPMode>) mc.getProperty(MessageContextProperties.PULL_AUTH_PMODES);
-        if (Utils.isNullOrEmpty(authPModes)) {
-            // Nothing to do, even if request contained a PullRequest no authorized P-modes could be found
-            return InvocationResponse.CONTINUE;
-        }
-
-        // The request contained a valid PullRequest, indicate start of processing
-        final IPullRequestEntity pullRequest =
-                                          (IPullRequestEntity) mc.getProperty(MessageContextProperties.IN_PULL_REQUEST);
         log.trace("Starting processing of received pull request");
-        if (!HolodeckB2BCore.getStorageManager().setProcessingState(pullRequest, ProcessingState.RECEIVED,
-                                                                                ProcessingState.PROCESSING)) {
-            // Changing processing state failed, stop processing the pull request
-            log.warn("Failed to change processing state! Can not process PullRequest in message.");
-            return InvocationResponse.CONTINUE;
-        }
+        HolodeckB2BCore.getStorageManager().setProcessingState(pullRequest, ProcessingState.PROCESSING);
 
+        @SuppressWarnings("unchecked")
+		final List<IPMode> authPModes = (List<IPMode>) procCtx.getProperty(FindPModesForPullRequest.FOUND_PULL_PMODES);
+        
         log.debug("Get the oldest message that can be pulled for the MPC in pull request");
-        final IUserMessageEntity pulledUserMsg = getForPulling(authPModes, pullRequest.getMPC());
-
+        final IUserMessageEntity pulledUserMsg = getForPulling(authPModes, pullRequest.getMPC(), log);
         if (pulledUserMsg == null) {
             // No message available -> return Empty MPC error
             log.debug("No message unit available for pulling, return empty MPC error");
             // Create the error and store it in the message context so it can be processed later
             // in the pipeline
-            final EmptyMessagePartitionChannel mpcEmptyError = new EmptyMessagePartitionChannel();
-            mpcEmptyError.setErrorDetail("The MPC " + pullRequest.getMPC() + " is empty!");
-            mpcEmptyError.setRefToMessageInError(pullRequest.getMessageId());
-            MessageContextUtils.addGeneratedError(mc, mpcEmptyError);
+            procCtx.addGeneratedError(new EmptyMessagePartitionChannel("The MPC " + pullRequest.getMPC() + " is empty!", 
+            															pullRequest.getMessageId()));
             log.trace("Set processing state of Pull Request to indicate processing has completed");
-            HolodeckB2BCore.getStorageManager().setProcessingState(pullRequest, ProcessingState.DONE);
+            HolodeckB2BCore.getStorageManager().setProcessingState(pullRequest, ProcessingState.WARNING, "Empty");            
         } else {
             log.debug("Message selected for pulling, msgId=" + pulledUserMsg.getMessageId());
-            mc.setProperty(MessageContextProperties.OUT_USER_MESSAGE, pulledUserMsg);
-            log.trace("Message stored in context for processing in out flow");
-            mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
+            procCtx.setResponseUserMessage(pulledUserMsg);
+            log.trace("Set processing state of Pull Request to indicate processing has completed");
+            HolodeckB2BCore.getStorageManager().setProcessingState(pullRequest, ProcessingState.DONE);
         }
 
         return InvocationResponse.CONTINUE;
@@ -104,11 +87,12 @@ public class GetMessageUnitForPulling extends BaseHandler {
      *
      * @param authPModes    The list of P-Modes messages may be selected from
      * @param reqMPC        The MPC contained in the pull request
+     * @param log			The Log to be used
      * @return              The User Message message unit to returned as result for Pull Request or,<br>
      *                      <code>null</code> if no User Message message unit is available for processing
      * @throws PersistenceException When a database error occurs while retrieving the message units waiting to be pulled.
      */
-    private IUserMessageEntity getForPulling(final List<IPMode> authPModes, final String reqMPC)
+    private IUserMessageEntity getForPulling(final List<IPMode> authPModes, final String reqMPC, final Log log)
                                                                                         throws PersistenceException {
         log.trace("Get list of messages waiting to be pulled");
         // Query is based on the P-Mode ids so convert given set of P-Modes to id only collection

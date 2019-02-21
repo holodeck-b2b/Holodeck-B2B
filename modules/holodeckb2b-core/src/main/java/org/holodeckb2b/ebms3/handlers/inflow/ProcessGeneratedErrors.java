@@ -16,21 +16,17 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.handler.BaseHandler;
-import org.holodeckb2b.common.messagemodel.EbmsError;
+import org.holodeckb2b.common.handler.AbstractBaseHandler;
+import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.ebms3.axis2.MessageContextUtils;
-import org.holodeckb2b.ebms3.constants.MessageContextProperties;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -50,7 +46,7 @@ import org.holodeckb2b.persistency.dao.StorageManager;
  * @since 4.1.0 This handler only bundles the individually generated Errors into Error Signals. If and how to report
  *  			the signals is now done in {@link DetermineErrorReporting}
  */
-public class ProcessGeneratedErrors extends BaseHandler {
+public class ProcessGeneratedErrors extends AbstractBaseHandler {
 	
     /**
      * Errors will always be logged to a special error log. Using the logging
@@ -66,35 +62,25 @@ public class ProcessGeneratedErrors extends BaseHandler {
     }
     
     @Override
-    protected byte inFlows() {
-        return IN_FLOW | IN_FAULT_FLOW;
-    }
-
-    @Override
-    protected InvocationResponse doProcessing(final MessageContext mc) throws PersistenceException {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    																					throws PersistenceException {
         log.debug("Check if errors were generated");
-        @SuppressWarnings("unchecked")
-		final ArrayList<EbmsError>    errors = (ArrayList<EbmsError>)
-                                                            mc.getProperty(MessageContextProperties.GENERATED_ERRORS);
+        final Map<String, Collection<IEbmsError>> errors = procCtx.getGeneratedErrors();
 
         if (Utils.isNullOrEmpty(errors)) {
             log.debug("No errors were generated during this in flow");
             return InvocationResponse.CONTINUE;
         }
         
-        log.debug(errors.size() + " error(s) were generated during this in flow");
+        log.trace("Processing error(s) generated during this in flow");
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();      
-        log.trace("Bundling errors per message unit");
-        final HashMap<String, Collection<IEbmsError>> segmentedErrors = segmentErrors(errors);
-        final ArrayList<IErrorMessageEntity> newSignals = new ArrayList<IErrorMessageEntity>(segmentedErrors.size());
-        mc.setProperty(MessageContextProperties.GENERATED_ERROR_SIGNALS, newSignals);
         // Create Error signal for each bundle, i.e. each referenced message
-        for(final String refToMsgId : segmentedErrors.keySet()) {
-            log.debug("Creating new Error Signal for errors " 
-            			+ (Utils.isNullOrEmpty(refToMsgId) ? "without reference" : 
-            												 "referencing messsage unit with msgId=" + refToMsgId));
-            ErrorMessage tErrorMessage = new ErrorMessage(segmentedErrors.get(refToMsgId));
-            tErrorMessage.setRefToMessageId(refToMsgId.equals("null") ? null : refToMsgId);
+        for(final String refToMsgId : errors.keySet()) {
+        	final boolean noRef = MessageProcessingContext.UNREFD_ERRORS.equals(refToMsgId);
+            log.debug("Creating new Error Signal for errors " + (noRef ? "without reference" : 
+            													"referencing messsage unit with msgId=" + refToMsgId));
+            ErrorMessage tErrorMessage = new ErrorMessage(errors.get(refToMsgId));
+            tErrorMessage.setRefToMessageId(noRef ? null : refToMsgId);
             log.trace("Saving new Error Signal in database");
             final IErrorMessageEntity errorMessage = storageManager.storeOutGoingMessageUnit(tErrorMessage);
             // Log to the error log
@@ -104,9 +90,13 @@ public class ProcessGeneratedErrors extends BaseHandler {
         		errorLog.error(MessageUnitUtils.errorSignalToString(errorMessage));
             
             log.trace("Determine P-Mode for new Error Signal");
-            if (!Utils.isNullOrEmpty(errorMessage.getRefToMessageId())) {
+            if (!noRef) {
                 // This collection of errors references one of the received message units.
-                final IMessageUnitEntity muInError = getRefdMessageUnit(mc, refToMsgId);
+                final IMessageUnitEntity muInError = procCtx.getReceivedMessageUnits()
+                											.parallelStream()
+                											.filter(mu -> refToMsgId.equals(mu.getMessageId()))
+                											.findFirst()
+                											.get();
                 final String pmodeId = muInError.getPModeId();
                 if (!Utils.isNullOrEmpty(pmodeId)) {
                     log.trace("Set P-Mode Id [" + pmodeId + "] for generated Error Message");
@@ -114,48 +104,9 @@ public class ProcessGeneratedErrors extends BaseHandler {
                 }
             }
             // Save the new Error Message in the message context 
-            newSignals.add(errorMessage);
+            procCtx.addSendingError(errorMessage);
         }
         
         return InvocationResponse.CONTINUE;
-    }
-    
-    /**
-     * Segments the given collection of errors into bundles of errors based on the referenced message unit.
-     *
-     * @param errors        The collection of errors to segment
-     * @return              A collection of errors per messageId. Errors that do not reference another message unit are
-     *                      bundled under key <i>"null"</i>
-     */
-    private HashMap<String, Collection<IEbmsError>> segmentErrors(final Collection<EbmsError> errors) {
-        final HashMap<String, Collection<IEbmsError>> segmentedErrors = new HashMap<>();
-        for(final EbmsError e : errors) {
-            String  refToMsgId = e.getRefToMessageInError();
-            // Check if the error is related to another message (it may be a general error)
-            if (Utils.isNullOrEmpty(refToMsgId))
-                refToMsgId = "null"; // general error
-            Collection<IEbmsError> errForMsg = segmentedErrors.get(refToMsgId);
-            if (errForMsg == null) {
-                // No errors known for this referenced message unit
-                errForMsg = new ArrayList<>();
-                segmentedErrors.put(refToMsgId, errForMsg);
-            }
-            errForMsg.add(e);
-        }
-        return segmentedErrors;
-    }  
-
-    /**
-     * Helper method to get the meta-data on the received message unit that is referenced by the error.
-     *
-     * @param mc            The current message context
-     * @param refToMsgId    The messageId that the error refers to
-     * @return  The referenced message unit
-     */
-    private IMessageUnitEntity getRefdMessageUnit(MessageContext mc, String refToMsgId) {
-        for(IMessageUnitEntity m : MessageContextUtils.getReceivedMessageUnits(mc))
-            if (m.getMessageId().equals(refToMsgId))
-                return m;
-        return null;
     }    
 }

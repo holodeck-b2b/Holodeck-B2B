@@ -16,8 +16,11 @@
  */
 package org.holodeckb2b.common.testhelpers;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
@@ -51,6 +54,7 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
 	private ICertificateManager certManager;
 	private IQueryManager		queryManager;
 	private List<IMessageProcessingEventConfiguration> eventConfig = new ArrayList<>();
+	private Map<String, IMessageDelivererFactory> msgDeliveryMethods = new HashMap<>();
 	
 	public HolodeckB2BTestCore() {
 	}
@@ -70,22 +74,47 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
 	public IConfiguration getConfiguration() {
 		return configuration;
 	}
+	
+	public void cleanTemp() {
+		String tmpDir = configuration != null ? configuration.getTempDirectory() : null;
+		if (tmpDir != null) 
+			deleteDirectory(new File(tmpDir));
+	}
 
+	private static boolean deleteDirectory(File directory) {
+	    if(directory.exists()){
+	        File[] files = directory.listFiles();
+	        if(null!=files){
+	            for(int i=0; i<files.length; i++) {
+	                if(files[i].isDirectory()) {
+	                    deleteDirectory(files[i]);
+	                }
+	                else {
+	                    files[i].delete();
+	                }
+	            }
+	        }
+	    }
+	    return(directory.delete());
+	}	
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getMessageDeliverer(org.holodeckb2b.interfaces.delivery.IDeliverySpecification)
 	 */
 	@Override
 	public IMessageDeliverer getMessageDeliverer(IDeliverySpecification deliverySpec) throws MessageDeliveryException {
-		IMessageDelivererFactory mdf;
-        try {
-            final String factoryClassName = deliverySpec.getFactory();
-            mdf = (IMessageDelivererFactory) Class.forName(factoryClassName).newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
-            // Somehow the factory class failed to load
-            throw new MessageDeliveryException("Factory class not available!", ex);
-        }
-        // Initialize the new factory with the settings from the delivery spec
-        mdf.init(deliverySpec.getSettings());
+		IMessageDelivererFactory mdf = msgDeliveryMethods.get(deliverySpec.getId());
+		if (mdf == null) {
+	        try {
+	            final String factoryClassName = deliverySpec.getFactory();
+	            mdf = (IMessageDelivererFactory) Class.forName(factoryClassName).newInstance();
+	        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
+	            // Somehow the factory class failed to load
+	            throw new MessageDeliveryException("Factory class not available!", ex);
+	        }
+	        // Initialize the new factory with the settings from the delivery spec
+	        mdf.init(deliverySpec.getSettings());
+	        msgDeliveryMethods.put(deliverySpec.getId(), mdf);
+		}
         return mdf.createMessageDeliverer();
 	}
 	

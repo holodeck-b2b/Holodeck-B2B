@@ -28,8 +28,6 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.messagemodel.Payload;
-import org.holodeckb2b.common.messagemodel.PullRequest;
-import org.holodeckb2b.common.messagemodel.SelectivePullRequest;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.validation.ValidationResult;
@@ -39,7 +37,6 @@ import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
-import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
@@ -47,7 +44,6 @@ import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
-import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.submit.MessageSubmitException;
@@ -127,15 +123,30 @@ public class MessageSubmitter implements IMessageSubmitter {
         log.trace("Start submission of new Pull Request");
 
         // Check if P-Mode id and MPC are specified
-        if (Utils.isNullOrEmpty(pullRequest.getPModeId()))
-            throw new MessageSubmitException("P-Mode Id is missing");
-        if (Utils.isNullOrEmpty(pullRequest.getMPC()))
-            throw new MessageSubmitException("MPC is missing");
-
+        final String pmodeId = pullRequest.getPModeId();
+        if (Utils.isNullOrEmpty(pmodeId))
+            throw new MessageSubmitException("P-Mode Id is missing");        
+        final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(pmodeId);
+        if (pmode == null)
+        	throw new MessageSubmitException("No P-Mode with id=" + pmodeId + " configured");
+        if (!PModeUtils.doesHolodeckB2BPull(pmode))
+        	throw new MessageSubmitException("PMode with id=" + pmodeId + " does not support pulling");
+        	
+        // Check that when a MPC to pull from is available in both request and P-Mode they match or the one in the 
+        // request is a sub-channel MPC of the one in the P-Mode
+        final IPullRequestFlow pullRequestFlow = PModeUtils.getOutPullRequestFlow(pmode);
+        final String pmodeMPC = pullRequestFlow != null ? pullRequestFlow.getMPC() : null;
+        final String pullMPC = pullRequest.getMPC();
+        
+        if (   (!Utils.isNullOrEmpty(pmodeMPC)) && (Utils.isNullOrEmpty(pullMPC) || !pullMPC.startsWith(pmodeMPC)))
+        	throw new MessageSubmitException("MPC in submission [" + pullMPC + "] conflicts with P-Mode defined MPC ]"
+        										+ pmodeMPC + "]");
+        
         String prMessageId = null;
         try {
-            log.trace("Add PullRequest to database");
-            IPullRequestEntity submittedPR = HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(pullRequest);
+            log.trace("Add PullRequest to database");            
+            IPullRequestEntity submittedPR = HolodeckB2BCore.getStorageManager()
+            												.storeOutGoingMessageUnit(pullRequest);
             prMessageId = submittedPR.getMessageId();
             // Indicate that the PR can be directly pushed to other MSH
             HolodeckB2BCore.getStorageManager().setProcessingState(submittedPR, ProcessingState.READY_TO_PUSH);

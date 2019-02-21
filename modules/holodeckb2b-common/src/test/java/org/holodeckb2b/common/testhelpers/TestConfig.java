@@ -25,12 +25,12 @@ import org.holodeckb2b.common.config.InternalConfiguration;
  */
 public class TestConfig implements InternalConfiguration {
 
-    private String hb2b_home;
-    private String pmodeValidatorClass = null;
-    private String pmodeStorageClass = null;
-    private boolean useStrictHeaderValidation = false;
+    public String hb2b_home;
+    public String pmodeValidatorClass = null;
+    public String pmodeStorageClass = null;
+    public boolean useStrictHeaderValidation = false;
 
-    private boolean allowSignalBundling = false;
+    public boolean allowSignalBundling = false;
 
     public TestConfig(final String homeDir) {
         hb2b_home = homeDir;
@@ -80,7 +80,8 @@ public class TestConfig implements InternalConfiguration {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public String getWorkerPoolCfgFile() {
+    @Override
+	public String getWorkerPoolCfgFile() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
