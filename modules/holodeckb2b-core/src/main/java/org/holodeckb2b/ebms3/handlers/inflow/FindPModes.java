@@ -71,7 +71,7 @@ public class FindPModes extends AbstractBaseHandler {
         if (userMsg != null) {
             log.debug("Finding P-Mode for User Message [" + userMsg.getMessageId() + "]");
             IPMode pmode = PModeFinder.forReceivedUserMessage(userMsg);            
-            if (pmode == null && !procCtx.getParentContext().isServerSide()) {
+            if (pmode == null && procCtx.isHB2BInitiated()) {
             	final IPullRequest pullRequest = procCtx.getSendingPullRequest();
             	if (pullRequest != null) {
             		log.debug("Using P-Mode of sent PullRequest");

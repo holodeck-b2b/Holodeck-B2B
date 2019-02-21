@@ -18,7 +18,6 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 
 import java.util.Collection;
 
-import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.holodeckb2b.common.handler.AbstractBaseHandler;
 import org.holodeckb2b.common.handler.MessageProcessingContext;
@@ -91,7 +90,7 @@ public class CheckSentResult extends AbstractBaseHandler {
 
         if (!Utils.isNullOrEmpty(msgUnits)) {
             log.trace("Check result of sent operation");
-            final boolean   success = isSuccessful(procCtx.getParentContext());
+            final boolean   success = isSuccessful(procCtx);
             log.debug("The sent operation was " + (success ? "" : "not ") + "successful");
 
             //Change processing state of all message units in the message accordingly
@@ -136,11 +135,11 @@ public class CheckSentResult extends AbstractBaseHandler {
      * Checks whether the message exchange was successful, which in case of AS4 is when there were no exceptions 
      * raised.
      *  
-     * @param msgContext	The message context of the sent message
+     * @param procCtx	The message processing context of the sent message
      * @return	<code>true</code> if no exceptions were raised during the message exchange,<br>
      * 			<code>false</code> if there was an exception during the message processing.
      */
-    protected boolean isSuccessful(final MessageContext msgContext) {
-    	return msgContext.getFailureReason() == null;
+    protected boolean isSuccessful(final MessageProcessingContext procCtx) {
+    	return procCtx.getParentContext().getFailureReason() == null;
     }
 }
