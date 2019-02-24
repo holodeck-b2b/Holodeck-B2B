@@ -63,7 +63,7 @@ public class PrepareResponseMessageTest {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IErrorMessageEntity errorMessageEntity = updateManager.storeOutGoingMessageUnit(errorMessage);
 
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addSendingError(errorMessageEntity);
         
         try {
@@ -84,7 +84,7 @@ public class PrepareResponseMessageTest {
     	mc.setServerSide(true);
     	mc.setFLOW(MessageContext.IN_FLOW);
     	
-    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	
     	UserMessage usrMessage = new UserMessage();
     	usrMessage.setMessageId(MessageIdUtils.createMessageId());
@@ -118,7 +118,7 @@ public class PrepareResponseMessageTest {
     	mc.setServerSide(true);
     	mc.setFLOW(MessageContext.IN_FLOW);
     	
-    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	
     	UserMessage usrMessage = new UserMessage();
     	usrMessage.setMessageId(MessageIdUtils.createMessageId());

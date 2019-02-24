@@ -92,7 +92,7 @@ public class DeliverUserMessageTest {
 		IUserMessageEntity umEntity = storageManager.storeIncomingMessageUnit(userMessage);
 		storageManager.setProcessingState(umEntity, ProcessingState.READY_FOR_DELIVERY);
 		
-		MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+		MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
 		procCtx.setUserMessage(umEntity);
 
 		try {

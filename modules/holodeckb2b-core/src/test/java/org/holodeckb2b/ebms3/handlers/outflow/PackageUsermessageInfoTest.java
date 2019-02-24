@@ -77,7 +77,7 @@ public class PackageUsermessageInfoTest {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(userMessage);
 
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         
         try {

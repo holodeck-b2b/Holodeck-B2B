@@ -99,7 +99,7 @@ public class CheckSignatureCompletenessTest {
         mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
         
-        procCtx = new MessageProcessingContext(mc);
+        procCtx = MessageProcessingContext.getFromMessageContext(mc);
         userMessage.setMessageId(MessageIdUtils.createMessageId());
         procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
     }

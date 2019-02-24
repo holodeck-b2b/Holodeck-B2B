@@ -72,7 +72,7 @@ public class PackageReceiptSignalTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
 
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         
         try {
             mc.setEnvelope(env);

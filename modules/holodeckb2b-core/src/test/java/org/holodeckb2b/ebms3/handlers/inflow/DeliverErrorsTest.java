@@ -119,7 +119,7 @@ public class DeliverErrorsTest {
         IErrorMessageEntity errorMessageEntity = storageManager.storeIncomingMessageUnit(errorMessage);        
         storageManager.setProcessingState(errorMessageEntity, ProcessingState.READY_FOR_DELIVERY);
         
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addReceivedError(errorMessageEntity);        
         procCtx.addRefdMsgUnitByError(errorMessageEntity, Collections.singletonList(umEntity));
         

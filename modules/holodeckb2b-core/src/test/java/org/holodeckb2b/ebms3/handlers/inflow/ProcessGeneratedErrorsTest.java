@@ -83,7 +83,7 @@ public class ProcessGeneratedErrorsTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
         
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         
         // Create the Error Signal 
         EbmsError error1 = new EbmsError();
@@ -124,7 +124,7 @@ public class ProcessGeneratedErrorsTest {
     	// Prepare msg ctx
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.IN_FLOW);    	
-    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
        
     	procCtx.setUserMessage(usrMsgEntity);
     	
@@ -174,7 +174,7 @@ public class ProcessGeneratedErrorsTest {
     	// Prepare msg ctx
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.IN_FLOW);
-    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	procCtx.setUserMessage(usrMsgEntity);
     	procCtx.setPullRequest(pullReqEntity);
     	

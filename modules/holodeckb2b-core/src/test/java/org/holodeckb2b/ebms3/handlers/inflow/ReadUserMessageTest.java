@@ -105,7 +105,7 @@ public class ReadUserMessageTest {
         mc.setFLOW(MessageContext.IN_FLOW);
         mc.setEnvelope(soapModelBuilder.getSOAPEnvelope());
 
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         
         try {
             assertEquals(Handler.InvocationResponse.CONTINUE, new ReadUserMessage().invoke(mc));

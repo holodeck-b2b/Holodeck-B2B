@@ -86,7 +86,7 @@ public class PerformCustomValidationsTest {
         userMessage.setMessageId(MessageIdUtils.createMessageId());
         umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
         
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(umEntity);
 
         try {
@@ -104,7 +104,7 @@ public class PerformCustomValidationsTest {
         userMessage.setMessageId(MessageIdUtils.createMessageId());
         umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
         
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(umEntity);
 
         try {

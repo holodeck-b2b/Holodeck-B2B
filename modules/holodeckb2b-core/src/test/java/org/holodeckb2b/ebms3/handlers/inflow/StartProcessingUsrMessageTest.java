@@ -54,7 +54,7 @@ public class StartProcessingUsrMessageTest {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(new UserMessage());
         
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         
         try {
@@ -75,7 +75,7 @@ public class StartProcessingUsrMessageTest {
         IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(new UserMessage());
         updateManager.setProcessingState(userMessageEntity, ProcessingState.OUT_FOR_DELIVERY);
         
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         
         try {

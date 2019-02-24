@@ -84,7 +84,7 @@ public class ConfigureHTTPTransportHandlerTest {
         // Simulate a payload attachment
         mc.addAttachment("pl-1", new DataHandler("Some text", "application/text"));
         
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
 
         try {
@@ -124,7 +124,7 @@ public class ConfigureHTTPTransportHandlerTest {
     	UserMessage userMessage = new UserMessage();
     	userMessage.setPModeId(pmode.getId());
     	
-    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
     	
     	try {

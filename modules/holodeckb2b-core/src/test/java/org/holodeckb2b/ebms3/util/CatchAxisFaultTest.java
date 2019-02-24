@@ -83,7 +83,7 @@ public class CatchAxisFaultTest {
             fail(axisFault.getMessage());
         }
 
-        procCtx = new MessageProcessingContext(mc);
+        procCtx = MessageProcessingContext.getFromMessageContext(mc);
         
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         userMessage = new UserMessage();

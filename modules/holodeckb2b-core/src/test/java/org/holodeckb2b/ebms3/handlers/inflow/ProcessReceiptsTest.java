@@ -98,7 +98,7 @@ public class ProcessReceiptsTest {
         
         IReceiptEntity receiptEntity = storageManager.storeIncomingMessageUnit(receipt);
         
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addReceivedReceipt(receiptEntity);
         
         try {           
@@ -129,7 +129,7 @@ public class ProcessReceiptsTest {
         receipt.setRefToMessageId(MessageIdUtils.createMessageId());
         IReceiptEntity receiptEntity = storageManager.storeIncomingMessageUnit(receipt);
         
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addReceivedReceipt(receiptEntity);
         
         try {           

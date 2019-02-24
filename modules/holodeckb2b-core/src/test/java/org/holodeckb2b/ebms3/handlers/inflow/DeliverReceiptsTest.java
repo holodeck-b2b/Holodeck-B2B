@@ -118,7 +118,7 @@ public class DeliverReceiptsTest {
            IReceiptEntity rcptMessageEntity = storageManager.storeIncomingMessageUnit(receipt);        
            storageManager.setProcessingState(rcptMessageEntity, ProcessingState.READY_FOR_DELIVERY);
            
-           MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+           MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
            procCtx.addReceivedReceipt(rcptMessageEntity);        
            
            try {

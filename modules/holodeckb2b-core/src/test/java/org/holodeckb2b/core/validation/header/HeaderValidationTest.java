@@ -119,7 +119,7 @@ public class HeaderValidationTest {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IUserMessageEntity userMessageEntity =
                 updateManager.storeIncomingMessageUnit(userMessage);
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         
         try {
@@ -154,7 +154,7 @@ public class HeaderValidationTest {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IPullRequestEntity pullRequestEntity =
                 updateManager.storeIncomingMessageUnit(pullRequest);
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setPullRequest(pullRequestEntity);
         
         try {
@@ -196,7 +196,7 @@ public class HeaderValidationTest {
 
         IReceiptEntity receiptEntity =
                 updateManager.storeIncomingMessageUnit(receipt);
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addReceivedReceipt(receiptEntity);
 
         try {
@@ -226,7 +226,7 @@ public class HeaderValidationTest {
 
         IErrorMessageEntity errorMessageEntity =
                 updateManager.storeIncomingMessageUnit(error);
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addReceivedError(errorMessageEntity);
 
         try {

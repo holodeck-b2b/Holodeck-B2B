@@ -61,7 +61,7 @@ public class CheckSentResultTest {
         
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.OUT_FLOW);
-    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         
     	PMode pmode = new PMode();
     	pmode.setId("no-receipt-needed");
@@ -92,7 +92,7 @@ public class CheckSentResultTest {
         
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.OUT_FLOW);
-    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         
     	PMode pmode = new PMode();
     	pmode.setId("no-receipt-needed");
@@ -120,7 +120,7 @@ public class CheckSentResultTest {
     	
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.OUT_FLOW);
-    	MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	
     	PMode pmode = new PMode();
     	pmode.setId("receipt-needed");

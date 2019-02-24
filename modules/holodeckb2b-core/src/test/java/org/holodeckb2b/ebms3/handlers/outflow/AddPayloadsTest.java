@@ -85,7 +85,7 @@ public class AddPayloadsTest {
 		IUserMessageEntity userMessageEntity = HolodeckB2BCore.getStorageManager()
 																.storeIncomingMessageUnit(userMessage);
 		
-		MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+		MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
 		procCtx.setUserMessage(userMessageEntity);
 
 		try {

@@ -98,7 +98,7 @@ public class CreateReceiptTest {
         mc.setEnvelope(soapEnvelope);
         mc.setFLOW(MessageContext.IN_FLOW);
         
-        MessageProcessingContext procCtx = new MessageProcessingContext(mc);
+        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         
         updateManager.setProcessingState(userMessageEntity, ProcessingState.DELIVERED);
