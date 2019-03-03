@@ -33,6 +33,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   individual errors into Error Signals and one for determining how to report the Error Signals. Allows for re-use of
   "bundling" handler in different messaging protocols.
 * Moved common classes from core to the common module.
+* Core submission function now first checks whether the specified payloads can be copied/moved to internal storage 
+  before saving the message meta-data. This allows back-end applications to re-submit messages in case there is an error
+  in moving the payloads.
 
 ### Deprecated
 * The interfaces for the  _message processing events_ with the _Event_ suffix. They are replaced with interfaces without
