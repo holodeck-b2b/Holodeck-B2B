@@ -13,53 +13,35 @@ recommended to raise log levels to at least INFO.
         <!-- 
             The main log file for all Holodeck B2B related logging 
         -->
-        <RollingFile name="holodeckb2b-main" fileName="logs/holodeckb2b.log"
-            filePattern="logs/archive/holodeckb2b-%d{MM-dd-yyyy}-%i.log.gz">
+        <File name="holodeckb2b-main" fileName="logs/holodeckb2b.log">
             <PatternLayout>
                 <Pattern>%d (%t)[%-5p] %c - %m%n</Pattern>
             </PatternLayout>
-            <Policies>
-                <SizeBasedTriggeringPolicy size="500MB"/>
-            </Policies>
-        </RollingFile>        
+        </File>        
         <!--
             Log file for received ebMS errors
         -->
-        <RollingFile name="ebmsErrors" fileName="logs/ebms_errors.log"
-            filePattern="logs/archive/ebms_errors-%d{MM-dd-yyyy}-%i.log.gz">
+        <File name="ebmsErrors" fileName="logs/ebms_errors.log">
             <PatternLayout>
                 <Pattern>%d [%c{2}]- %m%n</Pattern>
             </PatternLayout>
-            <Policies>
-                <SizeBasedTriggeringPolicy size="500MB"/>
-            </Policies>            
-        </RollingFile>        
+        </File>        
         <!--
             Log file for the SOAP Envelopes of outgoing messages.
         -->        
-        <RollingFile name="soapout" fileName="logs/soap_out.log"
-            filePattern="logs/archive/soap_out-%d{MM-dd-yyyy}-%i.log.gz">
+        <File name="soapout" fileName="logs/soap_out.log">
             <PatternLayout>
                 <Pattern>[%d] %m%n</Pattern>
             </PatternLayout>
-            <Policies>
-                <TimeBasedTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="1GB"/>
-            </Policies>            
-        </RollingFile>        
+        </File>        
         <!--
             Log file for the SOAP Envelopes of received messages.
         -->        
-        <RollingFile name="soapin" fileName="logs/soap_in.log"
-            filePattern="logs/archive/soap_in-%d{MM-dd-yyyy}-%i.log.gz">
+        <File name="soapin" fileName="logs/soap_in.log">
             <PatternLayout>
                 <Pattern>[%d] %m%n</Pattern>
             </PatternLayout>
-            <Policies>
-                <TimeBasedTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="1GB"/>
-            </Policies>            
-        </RollingFile>        
+        </File>        
     </Appenders>
     <Loggers>
         <!--
