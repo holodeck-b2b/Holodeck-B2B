@@ -21,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -86,18 +85,17 @@ public class MessageSubmitter implements IMessageSubmitter {
             log.trace("Validate submitted message if specified");
             validateMessage(completedMetadata, pmode);
 
+            try {
+                moveOrCopyPayloads(completedMetadata, movePayloads);
+            } catch (final IOException ex) {
+                log.error("Could not move/copy payload(s) to the internal storage! Unable to process message!"
+                            + "\n\tError details: " + ex.getMessage());                
+                throw new MessageSubmitException("Could not move/copy payload(s) to the internal storage!", ex);
+            }
             log.trace("Add message to database");
             final IUserMessageEntity newUserMessage = (IUserMessageEntity)
                                         HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(completedMetadata);
-            try {
-                moveOrCopyPayloads(newUserMessage, movePayloads);
-            } catch (final IOException ex) {
-                log.error("Could not move/copy payload(s) to the internal storage! Unable to process message!"
-                            + "\n\tError details: " + ex.getMessage());
-                HolodeckB2BCore.getStorageManager().setProcessingState(newUserMessage, ProcessingState.FAILURE);
-                throw new MessageSubmitException("Could not move/copy payload(s) to the internal storage!", ex);
-            }
-
+            
             //Use P-Mode to find out if this message is to be pulled or pushed to receiver
             if (EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(pmode.getMepBinding())) {
                 log.debug("Message is to be pulled by receiver, change ProcessingState to wait for pull");
@@ -148,8 +146,6 @@ public class MessageSubmitter implements IMessageSubmitter {
             IPullRequestEntity submittedPR = HolodeckB2BCore.getStorageManager()
             												.storeOutGoingMessageUnit(pullRequest);
             prMessageId = submittedPR.getMessageId();
-            // Indicate that the PR can be directly pushed to other MSH
-            HolodeckB2BCore.getStorageManager().setProcessingState(submittedPR, ProcessingState.READY_TO_PUSH);
             log.info("Submitted PullRequest, assigned messageId=" + prMessageId);
         } catch (final PersistenceException ex) {
             log.error("Could not create the PullRequest because a error occurred in the database! Details: "
@@ -246,10 +242,8 @@ public class MessageSubmitter implements IMessageSubmitter {
      * @param um     The meta data on the submitted user message
      * @param pmode  The P-Mode that governs the processing this user message
      * @throws IOException  When the payload could not be moved/copied to the internal payload storage
-     * @throws PersistenceException When the new payload locations couldn't be saved to the database
      */
-    private void moveOrCopyPayloads(final IUserMessageEntity um, final boolean move) throws IOException,
-                                                                                            PersistenceException {
+    private void moveOrCopyPayloads(final UserMessage um, final boolean move) throws IOException {
         // Path to the "temp" dir where to store submissionPayloadInfo during processing
         final String internalPayloadDir = HolodeckB2BCore.getConfiguration().getTempDirectory() + "plcout";
         // Create the directory if needed
@@ -259,10 +253,9 @@ public class MessageSubmitter implements IMessageSubmitter {
             Files.createDirectories(pathPlDir);
         }
 
-        final Collection<? extends IPayload> submissionPayloadInfo = um.getPayloads();
-        Collection<IPayload> internalPayloadInfo = new ArrayList<>();
-        if (!Utils.isNullOrEmpty(submissionPayloadInfo)) {
-            for (final IPayload p : submissionPayloadInfo) {
+        final Collection<? extends IPayload> payloads = um.getPayloads();
+        if (!Utils.isNullOrEmpty(payloads)) {
+            for (final IPayload p : payloads) {
                 final Path srcPath = Paths.get(p.getContentLocation());
                 // Ensure that the filename in the temp directory is unique
                 final Path destPath = Utils.createFileWithUniqueName(internalPayloadDir + "/" + srcPath.getFileName());
@@ -275,9 +268,7 @@ public class MessageSubmitter implements IMessageSubmitter {
                         Files.copy(srcPath, destPath, StandardCopyOption.REPLACE_EXISTING);
                     }
                     // Complete payload info to store
-                    Payload completeInfo = new Payload(p);
-                    completeInfo.setContentLocation(destPath.toString());
-                    internalPayloadInfo.add(completeInfo);
+                    ((Payload) p).setContentLocation(destPath.toString());
                 } catch (IOException io) {
                     log.error("Could not copy/move the payload [" + p.getContentLocation() + "] to internal directory"
                              + " [" + internalPayloadDir + "].\n\tError details: " + io.getMessage());
@@ -292,7 +283,6 @@ public class MessageSubmitter implements IMessageSubmitter {
                 }
             }
             log.debug((move ? "Moved" : "Copied") + " all payloads to internal directory");
-            HolodeckB2BCore.getStorageManager().setPayloadInformation(um, internalPayloadInfo);
         }
     }
 
