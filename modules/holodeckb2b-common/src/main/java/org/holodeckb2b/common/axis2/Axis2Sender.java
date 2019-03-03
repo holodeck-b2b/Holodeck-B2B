@@ -110,7 +110,7 @@ public class Axis2Sender {
             else if (messageUnit instanceof IErrorMessage)
                 procCtx.addSendingError((IErrorMessageEntity) messageUnit);
             else if (messageUnit instanceof IReceipt)
-                procCtx.addReceivedReceipt((IReceiptEntity) messageUnit);
+                procCtx.addSendingReceipt((IReceiptEntity) messageUnit);
             log.trace("Start the message send process");
             oc.execute(true);
         } catch (final AxisFault af) {
