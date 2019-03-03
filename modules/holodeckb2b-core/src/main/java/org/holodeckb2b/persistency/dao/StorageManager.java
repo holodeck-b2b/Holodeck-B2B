@@ -99,9 +99,12 @@ public class StorageManager {
         MessageUnit mutableObject = createMutableObject(messageUnit);
         // Set correct direction
         mutableObject.setDirection(Direction.OUT);
-        if (messageUnit instanceof IUserMessage || messageUnit instanceof IPullRequest)
+        if (messageUnit instanceof IUserMessage)
             mutableObject.setProcessingState(ProcessingState.SUBMITTED);
-        else
+        else if (messageUnit instanceof IPullRequest) {
+        	mutableObject.setProcessingState(ProcessingState.SUBMITTED);
+        	mutableObject.setProcessingState(ProcessingState.READY_TO_PUSH);
+        } else
             mutableObject.setProcessingState(ProcessingState.CREATED);
 
         if (Utils.isNullOrEmpty(mutableObject.getMessageId()))
