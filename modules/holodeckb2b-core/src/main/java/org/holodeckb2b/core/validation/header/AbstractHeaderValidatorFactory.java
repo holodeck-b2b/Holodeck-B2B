@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * message unit conforms to the ebMS specifications.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
- * @since  HB2B_NEXT_VERSION
+ * @since  4.1.0
  */
 public abstract class AbstractHeaderValidatorFactory implements IMessageValidator.Factory {
     /**

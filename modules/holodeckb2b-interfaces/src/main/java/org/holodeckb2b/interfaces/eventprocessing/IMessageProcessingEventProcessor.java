@@ -31,7 +31,7 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
- * @since HB2B_NEXT_VERSION Requirement to take the global event configuration into account when processing the event.
+ * @since 4.1.0 Requirement to take the global event configuration into account when processing the event.
  * @see ILeg#getMessageProcessingEventConfiguration()
  * @see HolodeckB2BCoreInterface#getMessageProcessingEventConfiguration()
  */

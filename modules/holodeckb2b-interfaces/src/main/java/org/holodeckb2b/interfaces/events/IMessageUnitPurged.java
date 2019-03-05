@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
  * if needed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.1.0
  */
 public interface IMessageUnitPurged extends IMessageProcessingEvent, IMessageUnitPurgedEvent {
 

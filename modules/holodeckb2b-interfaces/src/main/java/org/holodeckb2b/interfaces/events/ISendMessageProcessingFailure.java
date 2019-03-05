@@ -13,7 +13,7 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
  * defined. 
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since  HB2B_NEXT_VERSION
+ * @since  4.1.0
  */
 public interface ISendMessageProcessingFailure extends IMessageProcessingEvent {
 

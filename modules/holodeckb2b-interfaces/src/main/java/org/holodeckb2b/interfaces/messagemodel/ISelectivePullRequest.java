@@ -50,7 +50,7 @@ import org.holodeckb2b.interfaces.general.IService;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IMessageUnit
- * @since HB2B_NEXT_VERSION
+ * @since 4.1.0
  */
 public interface ISelectivePullRequest extends IPullRequest {
 

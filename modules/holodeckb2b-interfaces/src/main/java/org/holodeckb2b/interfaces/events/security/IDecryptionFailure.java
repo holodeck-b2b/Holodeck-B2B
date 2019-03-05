@@ -22,7 +22,7 @@ package org.holodeckb2b.interfaces.events.security;
  * because it can not be decrypted. Based on the event the problem might be handled out of band.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.1.0
  */
 public interface IDecryptionFailure extends ISecurityProcessingFailure, IDecryptionFailedEvent {
 }

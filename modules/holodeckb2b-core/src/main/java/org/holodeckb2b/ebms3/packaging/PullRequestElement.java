@@ -43,7 +43,7 @@ import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
  * that describes the <i>selective pulling</i> feature.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION Support for adding the <i>simple</i> selection items as described in {@link
+ * @since 4.1.0 Support for adding the <i>simple</i> selection items as described in {@link
  * ISelectivePullRequest}
  */
 public class PullRequestElement {

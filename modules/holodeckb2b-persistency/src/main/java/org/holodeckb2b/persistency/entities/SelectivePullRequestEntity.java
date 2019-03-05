@@ -28,7 +28,7 @@ import org.holodeckb2b.persistency.jpa.SelectivePullRequest;
  * Is the {@link ISelectivePullRequestEntity} implementation of the default persistency provider of Holodeck B2B.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since  HB2B_NEXT_VERSION
+ * @since  4.1.0
  */
 public class SelectivePullRequestEntity extends PullRequestEntity implements ISelectivePullRequestEntity {
 

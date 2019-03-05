@@ -26,7 +26,7 @@ import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
  * selective Pull Request Signal message unit.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since  HB2B_NEXT_VERSION
+ * @since  4.1.0
  */
 public class SelectivePullRequest extends PullRequest implements ISelectivePullRequest {
 

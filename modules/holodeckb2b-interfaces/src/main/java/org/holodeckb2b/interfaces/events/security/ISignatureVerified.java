@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
  * were included in the signature. These can be for example be used to create specific evidences.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.1.0
  */
 public interface ISignatureVerified extends IMessageProcessingEvent, ISignatureVerifiedEvent {
 

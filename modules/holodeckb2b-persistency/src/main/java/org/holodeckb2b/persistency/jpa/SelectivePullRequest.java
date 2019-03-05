@@ -30,7 +30,7 @@ import java.io.Serializable;
  * <p><b>NOTE:</b> The current version only supports the <b>simple</b> selection items as described in the interface.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since  HB2B_NEXT_VERSION
+ * @since  4.1.0
  */
 @Entity
 @Table(name="SELECTPULLREQUEST")

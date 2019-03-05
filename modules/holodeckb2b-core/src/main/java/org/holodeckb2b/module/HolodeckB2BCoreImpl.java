@@ -475,7 +475,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * @throws MessageProccesingEventHandlingException When the given event handler configuration cannot be registered,
      * 												   for example because the handler class is not available or no id
      * 												   is specified
-     * @since HB2B_NEXT_VERSION
+     * @since 4.1.0
      */
     @Override
 	public boolean registerEventHandler(IMessageProcessingEventConfiguration eventConfiguration) 
@@ -501,7 +501,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * Removes a <i>global</i> event handler configuration.
      * 
      * @param id	The id of the event handler configuration to remove
-     * @since HB2B_NEXT_VERSION 
+     * @since 4.1.0 
      */
     @Override
 	public void removeEventHandler(String id) {
@@ -519,7 +519,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * Gets the list of globally configured event handlers. 
      *  
      * @return		The list of event handler configurations 
-     * @since HB2B_NEXT_VERSION
+     * @since 4.1.0
      */
     @Override
 	public List<IMessageProcessingEventConfiguration> getEventHandlerConfiguration() {

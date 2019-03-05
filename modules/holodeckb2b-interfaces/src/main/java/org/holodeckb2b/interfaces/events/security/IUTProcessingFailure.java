@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
  * can not be delivered due to the invalid user name token. Based on the event the problem might be handled out of band.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 4.1.0
  */
 public interface IUTProcessingFailure extends ISecurityProcessingFailure, IUTProcessingFailureEvent {
 
