@@ -43,6 +43,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.Before;
@@ -118,11 +119,14 @@ public class CheckSignatureCompletenessTest {
     @Test
     public void testSignedCompletely() throws Exception {
         // Create complete set of digests
-        
+        ISignedPartMetadata headerData = mock(ISignedPartMetadata.class);
+    	
     	Map<IPayload, ISignedPartMetadata>  digestData = new HashMap<>();
         userMessage.getPayloads().forEach((p) -> digestData.put(p, null));
 
         ISignatureProcessingResult  signatureResult = mock(ISignatureProcessingResult.class);
+        when(signatureResult.getTargetedRole()).thenReturn(SecurityHeaderTarget.DEFAULT);
+        when(signatureResult.getHeaderDigest()).thenReturn(headerData);
         when(signatureResult.getPayloadDigests()).thenReturn(digestData);
         
         procCtx.addSecurityProcessingResult(signatureResult);
@@ -137,9 +141,37 @@ public class CheckSignatureCompletenessTest {
     }
 
     @Test
+    public void testUnsignedebMSHeader() throws Exception {
+    	// Create complete set of digests
+    	
+    	Map<IPayload, ISignedPartMetadata>  digestData = new HashMap<>();
+    	
+    	Iterator<IPayload> iterator = userMessage.getPayloads().iterator();
+    	userMessage.getPayloads().forEach((p) -> digestData.put(p, null));
+
+    	ISignatureProcessingResult  signatureResult = mock(ISignatureProcessingResult.class);
+    	when(signatureResult.getTargetedRole()).thenReturn(SecurityHeaderTarget.DEFAULT);
+    	when(signatureResult.getHeaderDigest()).thenReturn(null);
+    	when(signatureResult.getPayloadDigests()).thenReturn(digestData);
+    	procCtx.addSecurityProcessingResult(signatureResult);
+    	
+    	try {
+    		new CheckSignatureCompleteness().invoke(mc);
+    	} catch (AxisFault e) {
+    		fail("Unexpected exception: " + e.getClass().getSimpleName() + "/" + e.getMessage());
+    	}
+    	
+    	assertFalse(Utils.isNullOrEmpty(procCtx.getGeneratedErrors().get(userMessage.getMessageId())));
+    	assertEquals("EBMS:0103", 
+    			procCtx.getGeneratedErrors().get(userMessage.getMessageId()).iterator().next().getErrorCode());
+    }
+    
+    @Test
     public void testUnsignedPayload() throws Exception {
         // Create complete set of digests
-        Map<IPayload, ISignedPartMetadata>  digestData = new HashMap<>();
+    	ISignedPartMetadata headerData = mock(ISignedPartMetadata.class);
+    	
+    	Map<IPayload, ISignedPartMetadata>  digestData = new HashMap<>();
 
         Iterator<IPayload> iterator = userMessage.getPayloads().iterator();
         for (int i = 0; i < userMessage.getPayloads().size() - 1; i++) {
@@ -147,6 +179,8 @@ public class CheckSignatureCompletenessTest {
         }
         
         ISignatureProcessingResult  signatureResult = mock(ISignatureProcessingResult.class);
+        when(signatureResult.getTargetedRole()).thenReturn(SecurityHeaderTarget.DEFAULT);
+        when(signatureResult.getHeaderDigest()).thenReturn(headerData);
         when(signatureResult.getPayloadDigests()).thenReturn(digestData);
         procCtx.addSecurityProcessingResult(signatureResult);
 

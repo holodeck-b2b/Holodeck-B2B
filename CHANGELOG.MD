@@ -18,6 +18,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   of the message header failed 
 * New interfaces for all _message processing events_ without the _Event_ suffix. The old interfaces are still available
   for backward compatibility, but should not be used anymore (see also below).
+* Option to register "_global event handlers_" in the Holodeck B2B Core. These handlers will be used to process events 
+  if the P-Mode does not specify one.
 * A Holodeck B2B specific _message processing context_ that holds all information about the message that is processed
   in the current processing pipe line. Refactored all handler classes to use new context.  
 
@@ -58,7 +60,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   algorithm and parameters. 
 * Fixed issue in finding P-Mode for User Messages where message could be matches to a P-Mode configured for sending
   message based on pull.   
-* NPE in file delivery of _Receipt_s without content (will only occur when used for non-AS4 Receipts)    
+* NPE in file delivery of _Receipt_s without content (will only occur when used for non-AS4 Receipts)
+* NPE when ebMS3 message is received that contains a WS-Security Signature which does not sign the ebMS message header
+  (i.e. there is no `ds:Reference` element for the `eb3:Messaging` element)       
 
 ## 4.0.0
 ##### 2018-11-04

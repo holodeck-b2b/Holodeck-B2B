@@ -16,11 +16,16 @@
  */
 package org.holodeckb2b.security.util;
 
+import static org.holodeckb2b.interfaces.security.X509ReferenceType.BSTReference;
+import static org.holodeckb2b.interfaces.security.X509ReferenceType.IssuerAndSerial;
+import static org.holodeckb2b.interfaces.security.X509ReferenceType.KeyIdentifier;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
+
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.str.STRParser;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
@@ -33,7 +38,6 @@ import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.X509ReferenceType;
-import static org.holodeckb2b.interfaces.security.X509ReferenceType.*;
 import org.holodeckb2b.security.SecurityConstants;
 import org.holodeckb2b.security.results.SignedPartMetadata;
 import org.w3c.dom.Attr;
@@ -108,10 +112,10 @@ public final class SecurityUtils {
         // Get the data related to the ebMS header
         final String ebMSHeaderId = getEbMSHeaderId(domEnvelope);
         SignedPartMetadata ebMSHeaderDigest = null;
-        for (Iterator<Element> it = sigRefs.iterator(); it.hasNext() && ebMSHeaderDigest == null;) {
-            Element ref = it.next();
-            if (ref.getAttribute("URI").endsWith(ebMSHeaderId))
-                ebMSHeaderDigest = new SignedPartMetadata(ref);
+        if (ebMSHeaderId != null) {
+			Optional<Element> ref = sigRefs.parallelStream()
+										   .filter(r -> r.getAttribute("URI").endsWith(ebMSHeaderId)).findFirst();
+			ebMSHeaderDigest = ref.isPresent() ? new SignedPartMetadata(ref.get()) : null;
         }
 
         // For each payload try to get the applicable reference element and create the SignedPartMetadata instance

@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.as4.handlers.inflow;
 
-import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -30,6 +30,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
@@ -65,22 +66,33 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
         }
 
         // Check if received message was signed
-        final Collection<ISignatureProcessingResult> signatureResults = 
-        										procCtx.getSecurityProcessingResults(ISignatureProcessingResult.class);
-        if (!Utils.isNullOrEmpty(signatureResults) && !Utils.isNullOrEmpty(um.getPayloads())) {
-        	log.trace("Message is signed, check that each payload has been included in the Signature");
-            Set<IPayload> signedPayloads = signatureResults.iterator().next().getPayloadDigests().keySet();
-            if (!um.getPayloads().parallelStream().allMatch(
-                            (mp) -> signedPayloads.parallelStream()
-                                                  .anyMatch((sp) -> areSamePayloadRef(mp, sp)))) {
-                log.info("Not all payloads in user message [" + um.getMessageId() + "] are signed!");
+        final Optional<ISignatureProcessingResult> sigResult = 
+		        		procCtx.getSecurityProcessingResults(ISignatureProcessingResult.class).parallelStream()
+		        									.filter(r -> r.getTargetedRole() == SecurityHeaderTarget.DEFAULT)
+		        									.findFirst();
+        if (sigResult.isPresent()) {
+        	boolean allEbMSPartsSigned = false;
+        	log.trace("Message is signed, check that both ebMS Header and each payload are included in the Signature");
+        	allEbMSPartsSigned = sigResult.get().getHeaderDigest() != null;
+        	if (!Utils.isNullOrEmpty(um.getPayloads())) {
+        		log.trace("Check each payload of the message is signed");
+	        	Set<IPayload> signedPayloads = sigResult.get().getPayloadDigests().keySet();
+	            allEbMSPartsSigned &= um.getPayloads().parallelStream()
+	            									  .allMatch((mp) -> signedPayloads.parallelStream()
+	            											  						  .anyMatch((sp) -> 
+	            											   						   		areSamePayloadRef(mp, sp)));
+        	}
+	        
+        	if (!allEbMSPartsSigned) {
+        		log.error("Not all parts (ebMS header and payloads) of the user message [" + um.getMessageId() 
+        				  + "] are signed!");
                 // If not all payloads of  the message are signum.getMessageIded it does not conform to the AS4 requirements
                 // that all payloads should be signed. Therefore create the PolicyNoncompliance error
                 final PolicyNoncompliance   error = new PolicyNoncompliance("Not all payloads are signed");
                 error.setRefToMessageInError(um.getMessageId());
                 procCtx.addGeneratedError( error);
                 HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.FAILURE);
-            }
+        	}
         }
 
         return InvocationResponse.CONTINUE;
