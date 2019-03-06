@@ -2,12 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 4.1.0-SNAPSHOT
+## 4.1.0
 ##### Unreleased
 ### Added
-* Support for sending selective pull requests using simple selection items as described in section 5.1 of the
-  ebMS 3 Part 2 (Advanced Features) specification. NOTE: 4.1.0 only supports sending of selective pull requests. It does
-  not use selection criteria when processing received pull requests. 
+* Support for sending _selective pull requests_ using simple selection items as described in section 5.1 of the
+  ebMS 3 Part 2 (Advanced Features) specification.   
+  NOTE: In version 4.1.0 the support is limited to sending of selective pull requests with "simple selection items"
+  as described in the specification. Selection criteria are not used when processing received pull requests. 
 * Added two generic events to indicate that a problem occurred during the processing of a received message  
   (`IReceivedMessageProcessingFailure`) or a message to be send (`ISendMessageProcessingFailure`). These event are
   intended for use as _"filters"_ when configuring the event handling. Specific events, are available for specific
