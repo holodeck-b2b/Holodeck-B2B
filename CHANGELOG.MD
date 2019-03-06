@@ -3,14 +3,14 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 4.1.0-SNAPSHOT
-##### Unreleased
+##### 2019-03-06
 ### Added
 * Support for sending selective pull requests using simple selection items as described in section 5.1 of the
   ebMS 3 Part 2 (Advanced Features) specification. NOTE: 4.1.0 only supports sending of selective pull requests. It does
   not use selection criteria when processing received pull requests. 
 * Added two generic events to indicate that a problem occurred during the processing of a received message  
-  (`IReceivedMessageProcessingFailure`) or a message to be send (`ISendMessageProcessingFailure`). These event are
-  intended for use as _"filters"_ when configuring the event handling. Specific events, are available for specific
+  (`IReceivedMessageProcessingFailure`) or a message to be sent (`ISendMessageProcessingFailure`). These events are
+  intended for use as _"filters"_ when configuring the event handling. Specific events are available for specific
   errors. Using the generic events the error reporting defined by the P-Mode parameters  
   **PMode.ErrorHandling.Report.ProcessErrorNotifyProducer** and **PMode.ErrorHandling.Report.ProcessErrorNotifyConsumer**
   can be implemented.
@@ -23,11 +23,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Option to register "_global event handlers_" in the Holodeck B2B Core. These handlers will be used to process events 
   if the P-Mode does not specify one.
 * A Holodeck B2B specific _message processing context_ that holds all information about the message that is processed
-  in the current processing pipe line. Refactored all handler classes to use new context.  
+  in the current processing pipeline. Refactored all handler classes to use new context.  
 
 ### Changed
 * When a pulled User Message cannot be matched to a P-Mode it is assigned to the P-Mode of the Pull Request.
-* When no MPC is specified in either P-Mode or submission the _default MPC_ is used for the Pull Request. If a MPC is
+* When no MPC is specified in either P-Mode or submission the _default MPC_ is used for the Pull Request. If an MPC is
   specified in both the one in the submission **must** be a sub-channel of the one in the P-Mode.
 * The `mpc` attribute is not included in a Pull Request when the _default MPC_ is pulled.
 * Generalised the header validation handler so it can be more easily reused for other protocols.
@@ -43,26 +43,26 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Deprecated
 * The interfaces for the  _message processing events_ with the _Event_ suffix. They are replaced with interfaces without
-  suffix to shorten the event names and prevent duplication of "event" in the qualifies class name.
+  suffix to shorten the event names and prevent duplication of "event" in the qualified class name.
 
 ### Fixed
-* Corrected bug in 4.0.0 that description of processing states could not be saved due to missing API. 
-* Name of the log used for reporting errors generated during processing of incoming messages. Did include _null_ instead
-  of the message protocol name
+* Description of processing states could not be saved due to missing API. (In Holodeck B2B 4.0.0.)  
+* Name of the log used for reporting errors generated during processing of incoming messages included _null_ instead
+  of the message protocol name.
 * When no retry configuration is available for a message but a Receipt is expected a MissingReceipt ebMS Error is 
   generated and reported [as configured in the P-Mode] to the business application instead of only logging an error 
   message.
-* Issue that integration tests were not executed when running them from the IDE and the `JAVA_HOME` system environment 
-  variable was not set. Now the JVM used by the IDE is used.
-* Strict validation of the AgreementRef being an URI in case no type has been specified.
-* Issues in processing User Messages without payloads.
-* Check that P-Mode specified for a submitted Pull Request does support pulling and that there is no conflict in the
+* Integration tests were not executed when running them from the IDE with the `JAVA_HOME` system environment 
+  variable not set. Now the JVM used by the IDE is used.
+* Strict validation of the AgreementRef being a URI in case no type has been specified.
+* Exceptions in processing User Messages without payloads.
+* Check that P-Mode specified for a submitted Pull Request supports pulling and that there is no conflict in the
   MPCs specified in both P-Mode and submission.
 * _UnsupportedException_s in `org.holodeckb2b.security.results.SignedPartMetadata.TransformMetadata` when getting 
   algorithm and parameters. 
-* Fixed issue in finding P-Mode for User Messages where message could be matches to a P-Mode configured for sending
-  message based on pull.   
-* NPE in file delivery of _Receipt_s without content (will only occur when used for non-AS4 Receipts)
+* Issue in finding P-Mode for User Messages when message received could be matched to a P-Mode configured for sending
+  messages based on pull.   
+* NPE in file delivery of _Receipt_ without content (will only occur when used for non-AS4 Receipts)
 * NPE when ebMS3 message is received that contains a WS-Security Signature which does not sign the ebMS message header
   (i.e. there is no `ds:Reference` element for the `eb3:Messaging` element)       
 
