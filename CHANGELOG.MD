@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 4.1.0-SNAPSHOT
+## 4.1.0
 ##### 2019-03-06
 ### Added
 * Support for sending selective pull requests using simple selection items as described in section 5.1 of the
