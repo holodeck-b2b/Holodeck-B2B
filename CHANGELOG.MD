@@ -14,6 +14,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   errors. Using the generic events the error reporting defined by the P-Mode parameters  
   **PMode.ErrorHandling.Report.ProcessErrorNotifyProducer** and **PMode.ErrorHandling.Report.ProcessErrorNotifyConsumer**
   can be implemented.
+* Added a new event (`org.holodeckb2b.interfaces.events.IMessageSubmission`) to indicate that a _User Message_ or _Pull
+  Request_ message unit was submitted to the Holodeck B2B Core 
 * Added a new event (`org.holodeckb2b.interfaces.events.IHeaderValidationFailure`) to indicate that the validation 
   of the message header failed 
 * New interfaces for all _message processing events_ without the _Event_ suffix. The old interfaces are still available

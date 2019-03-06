@@ -30,9 +30,11 @@ import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.validation.ValidationResult;
+import org.holodeckb2b.events.MessageSubmission;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
+import org.holodeckb2b.interfaces.events.IMessageSubmission;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
@@ -60,9 +62,31 @@ public class MessageSubmitter implements IMessageSubmitter {
 
 	/**
 	 * {@inheritDoc} 
+	 * <p>After completing the submission process a {@link IMessageSubmission} event will be raised to inform external
+	 * components about the result of the submission. 
 	 */
     @Override
     public String submitMessage(final IUserMessage submission, final boolean movePayloads) throws MessageSubmitException {
+    	try {
+    		final IUserMessage acceptedUM = doSubmission(submission, movePayloads);
+    		HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new MessageSubmission(acceptedUM));
+    		return acceptedUM.getMessageId();
+    	} catch (MessageSubmitException mse) {
+    		HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new MessageSubmission(submission, mse));
+    		throw mse;
+    	}
+    }
+    
+    /**
+     * Executes the actual submission process by checking the availability of the payloads, P-Mode for handling the 
+     * message and validation (including custom validation specified in P-Mode).
+     *  
+     * @param submission		The submitted <i>User Message</i>
+     * @param movePayloads		Indicator whether the payloads should be moved to internal HB2B storage or copied 
+     * @return					The meta-data of the <i>User Message</i> as accepted by the Core   
+     * @throws MessageSubmitException	When the given message unit cannot be submitted to the Core
+     */
+	private IUserMessage doSubmission(final IUserMessage submission, final boolean movePayloads) throws MessageSubmitException {
         log.debug("Start submission of new User Message");
 
         try {
@@ -106,7 +130,7 @@ public class MessageSubmitter implements IMessageSubmitter {
             }
 
             log.info("User Message succesfully submitted, messageId=" + newUserMessage.getMessageId());
-            return newUserMessage.getMessageId();
+            return newUserMessage;
         } catch (final PersistenceException dbe) {
             log.error("An error occured when saving user message to database. Details: " + dbe.getMessage());
             throw new MessageSubmitException("Message could not be saved to database", dbe);
@@ -115,9 +139,29 @@ public class MessageSubmitter implements IMessageSubmitter {
 
     /**
      * {@inheritDoc}
+	 * <p>After completing the submission process a {@link IMessageSubmission} event will be raised to inform external
+	 * components about the result of the submission. 
      */
     @Override
     public String submitMessage(final IPullRequest pullRequest) throws MessageSubmitException {
+    	try {
+    		final IPullRequest acceptedPR = doSubmission(pullRequest);
+    		HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new MessageSubmission(acceptedPR));
+    		return acceptedPR.getMessageId();
+    	} catch (MessageSubmitException mse) {
+    		HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new MessageSubmission(pullRequest, mse));
+    		throw mse;
+    	}
+    }
+    
+    /**
+     * Executes the actual submission process by checking that the indicated P-Mode can be used for pulling.
+     *  
+     * @param pullRequest		The submitted <i>Pull Request</i>
+     * @return					The meta-data of the <i>Pull Request</i> as accepted by the Core 
+     * @throws MessageSubmitException	When the given message unit cannot be submitted to the Core
+     */
+	private IPullRequest doSubmission(final IPullRequest pullRequest) throws MessageSubmitException {
         log.trace("Start submission of new Pull Request");
 
         // Check if P-Mode id and MPC are specified
@@ -140,18 +184,17 @@ public class MessageSubmitter implements IMessageSubmitter {
         	throw new MessageSubmitException("MPC in submission [" + pullMPC + "] conflicts with P-Mode defined MPC ]"
         										+ pmodeMPC + "]");
         
-        String prMessageId = null;
         try {
             log.trace("Add PullRequest to database");            
             IPullRequestEntity submittedPR = HolodeckB2BCore.getStorageManager()
             												.storeOutGoingMessageUnit(pullRequest);
-            prMessageId = submittedPR.getMessageId();
-            log.info("Submitted PullRequest, assigned messageId=" + prMessageId);
-        } catch (final PersistenceException ex) {
+            log.info("Submitted PullRequest, assigned messageId=" + submittedPR.getMessageId());
+            return submittedPR;
+        } catch (final PersistenceException dbe) {
             log.error("Could not create the PullRequest because a error occurred in the database! Details: "
-                        + ex.getMessage());
+                        + dbe.getMessage());
+            throw new MessageSubmitException("Message could not be saved to database", dbe);
         }
-        return prMessageId;
     }
 
     /**
