@@ -49,6 +49,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.submit.MessageSubmitException;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.persistency.dao.StorageManager;
 import org.holodeckb2b.pmode.PModeUtils;
 
 /**
@@ -185,10 +186,14 @@ public class MessageSubmitter implements IMessageSubmitter {
         										+ pmodeMPC + "]");
         
         try {
+        	final StorageManager storageManager = HolodeckB2BCore.getStorageManager();
             log.trace("Add PullRequest to database");            
-            IPullRequestEntity submittedPR = HolodeckB2BCore.getStorageManager()
-            												.storeOutGoingMessageUnit(pullRequest);
+            IPullRequestEntity submittedPR = storageManager.storeOutGoingMessageUnit(pullRequest);
             log.info("Submitted PullRequest, assigned messageId=" + submittedPR.getMessageId());
+            // Pull Request are always pushed, so change the processing state
+            log.trace("Setting the processing state of new Pull Request to READY_TO_PUSH");
+            storageManager.setProcessingState(submittedPR, ProcessingState.READY_TO_PUSH);
+            log.debug("Processing state of new Pull Request set to READY_TO_PUSH");
             return submittedPR;
         } catch (final PersistenceException dbe) {
             log.error("Could not create the PullRequest because a error occurred in the database! Details: "
