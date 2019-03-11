@@ -128,7 +128,10 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
 	@Override
 	public IMessageSubmitter getMessageSubmitter() {
 		if (messageSubmitter == null)
-			messageSubmitter = new Submitter();
+			synchronized (this) {
+				if (messageSubmitter == null)
+					messageSubmitter = new Submitter();
+			}
 		return messageSubmitter;
 	}
 
