@@ -24,8 +24,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.util.Utils;
@@ -59,7 +59,7 @@ import org.holodeckb2b.pmode.PModeUtils;
  */
 public class MessageSubmitter implements IMessageSubmitter {
 
-    private static final Log log = LogFactory.getLog(MessageSubmitter.class.getName());
+    private static final Logger log = LogManager.getLogger(MessageSubmitter.class);
 
 	/**
 	 * {@inheritDoc} 
@@ -90,33 +90,33 @@ public class MessageSubmitter implements IMessageSubmitter {
 	private IUserMessage doSubmission(final IUserMessage submission, final boolean movePayloads) throws MessageSubmitException {
         log.debug("Start submission of new User Message");
 
+        log.trace("Get the P-Mode for the message");
+        final IPMode  pmode = HolodeckB2BCore.getPModeSet().get(submission.getPModeId());
+
+        if (pmode == null) {
+            log.warn("No P-Mode found for submitted message, rejecting message!");
+            throw new MessageSubmitException("No P-Mode found for message");
+        }
+        log.debug("Found P-Mode: {}", pmode.getId());
+
+        log.trace("Check for completeness: combined with P-Mode all info must be known");
+        // The complete operation will throw aMessageSubmitException if meta-data is not complete
+        final UserMessage completedMetadata = MMDCompleter.complete(submission, pmode);
+
+        log.trace("Checking availability of payloads");
+        checkPayloads(completedMetadata, pmode); // Throws MessageSubmitException if there is a problem with a payload
+        
+        log.trace("Validate submitted message if specified");
+        validateMessage(completedMetadata, pmode);
+
         try {
-            log.trace("Get the P-Mode for the message");
-            final IPMode  pmode = HolodeckB2BCore.getPModeSet().get(submission.getPModeId());
-
-            if (pmode == null) {
-                log.warn("No P-Mode found for submitted message, rejecting message!");
-                throw new MessageSubmitException("No P-Mode found for message");
-            }
-            log.debug("Found P-Mode:" + pmode.getId());
-
-            log.trace("Check for completeness: combined with P-Mode all info must be known");
-            // The complete operation will throw aMessageSubmitException if meta-data is not complete
-            final UserMessage completedMetadata = MMDCompleter.complete(submission, pmode);
-
-            log.trace("Checking availability of payloads");
-            checkPayloads(completedMetadata, pmode); // Throws MessageSubmitException if there is a problem with a specified submissionPayloadInfo
-
-            log.trace("Validate submitted message if specified");
-            validateMessage(completedMetadata, pmode);
-
-            try {
-                moveOrCopyPayloads(completedMetadata, movePayloads);
-            } catch (final IOException ex) {
-                log.error("Could not move/copy payload(s) to the internal storage! Unable to process message!"
-                            + "\n\tError details: " + ex.getMessage());                
-                throw new MessageSubmitException("Could not move/copy payload(s) to the internal storage!", ex);
-            }
+            moveOrCopyPayloads(completedMetadata, movePayloads);
+        } catch (final IOException ex) {
+            log.error("Could not move/copy payload(s) to the internal storage! Unable to process message!"
+                        + "\n\tError details: {}", ex.getMessage());                
+            throw new MessageSubmitException("Could not move/copy payload(s) to the internal storage!", ex);
+        }
+        try {
             log.trace("Add message to database");
             final IUserMessageEntity newUserMessage = (IUserMessageEntity)
                                         HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(completedMetadata);
@@ -130,10 +130,19 @@ public class MessageSubmitter implements IMessageSubmitter {
                 HolodeckB2BCore.getStorageManager().setProcessingState(newUserMessage, ProcessingState.READY_TO_PUSH);
             }
 
-            log.info("User Message succesfully submitted, messageId=" + newUserMessage.getMessageId());
+            log.info("User Message succesfully submitted, messageId={}", newUserMessage.getMessageId());
             return newUserMessage;
         } catch (final PersistenceException dbe) {
-            log.error("An error occured when saving user message to database. Details: " + dbe.getMessage());
+            log.error("An error occured when saving user message to database. Details: {}", dbe.getMessage());
+            // Remove the payloads that were already moved to internal storage
+            for (IPayload p : completedMetadata.getPayloads()) {
+            	try {
+					Files.delete(Paths.get(p.getContentLocation()));
+				} catch (IOException e) {
+					log.error("Could not delete payload file [{}] from internal storage! Error details: {}",
+							  p.getContentLocation(), e.getMessage());
+				}
+            }
             throw new MessageSubmitException("Message could not be saved to database", dbe);
         }
     }
@@ -189,15 +198,15 @@ public class MessageSubmitter implements IMessageSubmitter {
         	final StorageManager storageManager = HolodeckB2BCore.getStorageManager();
             log.trace("Add PullRequest to database");            
             IPullRequestEntity submittedPR = storageManager.storeOutGoingMessageUnit(pullRequest);
-            log.info("Submitted PullRequest, assigned messageId=" + submittedPR.getMessageId());
+            log.info("Submitted PullRequest, assigned messageId={}", submittedPR.getMessageId());
             // Pull Request are always pushed, so change the processing state
             log.trace("Setting the processing state of new Pull Request to READY_TO_PUSH");
             storageManager.setProcessingState(submittedPR, ProcessingState.READY_TO_PUSH);
             log.debug("Processing state of new Pull Request set to READY_TO_PUSH");
             return submittedPR;
         } catch (final PersistenceException dbe) {
-            log.error("Could not create the PullRequest because a error occurred in the database! Details: "
-                        + dbe.getMessage());
+            log.error("Could not create the PullRequest because a error occurred in the database! Details: {}",
+                       dbe.getMessage());
             throw new MessageSubmitException("Message could not be saved to database", dbe);
         }
     }
@@ -297,7 +306,7 @@ public class MessageSubmitter implements IMessageSubmitter {
         // Create the directory if needed
         final Path pathPlDir = Paths.get(internalPayloadDir);
         if (!Files.exists(pathPlDir)) {
-            log.debug("Create the directory [" + internalPayloadDir + "] for storing payload files");
+            log.debug("Create the directory [{}] for storing payload files", internalPayloadDir);
             Files.createDirectories(pathPlDir);
         }
 
@@ -308,29 +317,29 @@ public class MessageSubmitter implements IMessageSubmitter {
                 // Ensure that the filename in the temp directory is unique
                 final Path destPath = Utils.createFileWithUniqueName(internalPayloadDir + "/" + srcPath.getFileName());
                 try {
-                    if (move) {
-                        log.trace("Moving payload [" + p.getContentLocation() + "] to internal directory");
+                	log.trace("{} payload [{}] to internal directory", move ? "Moving" : "Copying", 
+                													   p.getContentLocation());
+                    if (move)
                         Files.move(srcPath, destPath, StandardCopyOption.REPLACE_EXISTING);
-                    } else {
-                        log.trace("Copying payload [" + p.getContentLocation() + "] to internal directory");
+                    else 
                         Files.copy(srcPath, destPath, StandardCopyOption.REPLACE_EXISTING);
-                    }
+                   
                     // Complete payload info to store
                     ((Payload) p).setContentLocation(destPath.toString());
                 } catch (IOException io) {
-                    log.error("Could not copy/move the payload [" + p.getContentLocation() + "] to internal directory"
-                             + " [" + internalPayloadDir + "].\n\tError details: " + io.getMessage());
+                    log.error("Could not copy/move the payload [{}] to internal directory [{}].\n\tError details: {}",  
+                    			p.getContentLocation(), internalPayloadDir, io.getMessage());
                     // Remove the already created file for storing the payload
                     try {
                         Files.deleteIfExists(destPath);
                     } catch (IOException removeFailure) {
-                        log.error("Could not remove the temporary payload file [" + destPath.toString() + "]!" +
-                                  " Please remove manually.");
+                        log.error("Could not remove the temporary payload file [{}]! Please remove manually.",
+                        			destPath.toString());
                     }
                     throw io;
                 }
             }
-            log.debug((move ? "Moved" : "Copied") + " all payloads to internal directory");
+            log.debug("{} all payloads to internal directory", move ? "Moved" : "Copied");
         }
     }
 
@@ -349,8 +358,8 @@ public class MessageSubmitter implements IMessageSubmitter {
                     .getUserMessageFlow().getCustomValidationConfiguration();
         } catch (NullPointerException npe) {
             // Some element in the path to the validation spec is not available, so there is nothing to do
-            log.error("The was a problem retrieving the validation specifcation from P-Mode ["
-                    + submittedMsg.getPModeId() + "]!");
+            log.error("The was a problem retrieving the validation specifcation from P-Mode [{}]!",
+            		  submittedMsg.getPModeId());
         }
 
         if (validationSpec == null)
@@ -368,7 +377,7 @@ public class MessageSubmitter implements IMessageSubmitter {
                     throw new MessageSubmitException("Message rejected due to fatal validation errors!");
                 }
             } catch (MessageValidationException ex) {
-                log.error("Could not execute the validation of the submitted message!\n\tDetails: " + ex.getMessage());
+                log.error("Could not execute the validation of the submitted message!\n\tDetails: {}", ex.getMessage());
                 throw new MessageSubmitException("Could not execute the validation of the submitted message!", ex);
             }
         }
