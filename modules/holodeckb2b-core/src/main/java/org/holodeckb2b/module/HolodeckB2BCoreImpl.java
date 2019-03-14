@@ -238,7 +238,11 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         msgDeliveryFactories = new HashMap<>();
         log.trace("Create list of globally configured event handlers");
         eventConfigurations = new ArrayList<>();
-
+        log.trace("Create the pull worker pool");
+        // The pull worker pool is only created here, initialization is done by the worker part of the normal
+        //  worker pool
+        pullWorkers = new WorkerPool(PullConfiguration.PULL_WORKER_POOL_NAME);
+        
         // From this point on other components can be started which need access to the Core
         log.debug("Make Core available to outside world");
         HolodeckB2BCore.setImplementation(this);
@@ -257,11 +261,6 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
                                 + instanceConfiguration.getWorkerPoolCfgFile());
         }
 
-        log.trace("Create the pull worker pool");
-        // The pull worker pool is only created here, initialization is done by the worker part of the normal
-        //  worker pool
-        pullWorkers = new WorkerPool(PullConfiguration.PULL_WORKER_POOL_NAME);
-        log.debug("Pull worker pool created");
 
         log.info("Holodeck B2B Core module STARTED.");
     }
