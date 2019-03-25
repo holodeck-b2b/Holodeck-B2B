@@ -16,8 +16,11 @@
  */
 package org.holodeckb2b.module;
 
+import java.security.Provider;
+import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisDescription;
@@ -27,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.common.util.Utils;
@@ -179,6 +183,13 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
           }
         }
 
+        // Set BouncyCastle as preferred crypto provider
+ 		final Provider[] providers = Security.getProviders();
+ 		if (providers != null && providers.length > 0)
+ 			Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);		
+ 		log.debug("Registering BouncyCastle as preferred Java security provider");
+ 		Security.insertProviderAt(new BouncyCastleProvider(), 1);        
+        
         log.debug("Initialize worker pool");
         final IWorkerPoolConfiguration poolCfg =
                                         XMLWorkerPoolConfig.loadFromFile(instanceConfiguration.getWorkerPoolCfgFile());
@@ -241,7 +252,8 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      *
      * @return  The current configuration as a {@link IConfiguration} object
      */
-    public IConfiguration getConfiguration() {
+    @Override
+	public IConfiguration getConfiguration() {
         if (instanceConfiguration == null) {
             log.fatal("Missing configuration for this Holodeck B2B instance!");
             throw new IllegalStateException("Missing configuration for this Holodeck B2B instance!");
@@ -255,7 +267,8 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      *
      * @return  A {@link IMessageSubmitter} object to use for submission of User Messages
      */
-    public IMessageSubmitter getMessageSubmitter() {
+    @Override
+	public IMessageSubmitter getMessageSubmitter() {
         return SubmitterSingletonHolder.instance;
     }
 
@@ -268,7 +281,8 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * @throws MessageDeliveryException When no delivery specification is given or when the message deliverer can not
      *                                  be created
      */
-    public IMessageDeliverer getMessageDeliverer(final IDeliverySpecification deliverySpec)
+    @Override
+	public IMessageDeliverer getMessageDeliverer(final IDeliverySpecification deliverySpec)
                                                         throws MessageDeliveryException {
         if (deliverySpec == null) {
             log.error("No delivery specification given!");
@@ -330,7 +344,8 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * @return  The current set of P-Modes as a {@link IPModeSet}
      * @see IPMode
      */
-    public IPModeSet getPModeSet() {
+    @Override
+	public IPModeSet getPModeSet() {
         return pmodeSet;
     }
 
