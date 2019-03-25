@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.1.5
+### Fixed
+* Issue in handling certificates that include a Name Constraint and/or Policy Constraint extension. 
+
 ## 2.1.4
 ###### 2018-05-28
 ### Fixed
