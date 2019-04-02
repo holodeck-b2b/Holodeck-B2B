@@ -173,11 +173,15 @@ public class PModeManager implements IPModeSet {
 
     @Override
     public void remove(String id) throws PModeSetException {
-        deployedPModes.remove(id);
+    	log.trace("Request to remove P-Mode [{}]", id);
+    	deployedPModes.remove(id);
+    	log.trace("P-Mode [{}] removed", id);    	
     }
 
     @Override
     public void removeAll() throws PModeSetException {
+    	log.trace("Request to remove all P-Modes");
         deployedPModes.removeAll();
+        log.trace("Removed all P-Modes");        
     }
 }
