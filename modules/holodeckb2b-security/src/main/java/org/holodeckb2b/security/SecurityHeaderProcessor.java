@@ -23,7 +23,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
@@ -35,14 +37,14 @@ import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.WSDataRef;
 import org.apache.wss4j.dom.WSDocInfo;
-import org.apache.wss4j.dom.WSSConfig;
-import org.apache.wss4j.dom.WSSecurityEngine;
-import org.apache.wss4j.dom.WSSecurityEngineResult;
+import org.apache.wss4j.dom.callback.DOMCallbackLookup;
+import org.apache.wss4j.dom.engine.WSSConfig;
+import org.apache.wss4j.dom.engine.WSSecurityEngine;
+import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
 import org.apache.wss4j.dom.handler.RequestData;
 import org.apache.wss4j.dom.message.token.UsernameToken;
 import org.apache.wss4j.dom.processor.Processor;
 import org.apache.wss4j.dom.str.STRParser;
-import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.apache.wss4j.dom.validate.Validator;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -111,10 +113,10 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
     private static final Map<QName, Action> FAULT_CAUSES;
     static {
         final Map<QName, Action> tmp = new HashMap<>();
-        tmp.put(WSSecurityEngine.ENCRYPTED_KEY, Action.DECRYPT);
-        tmp.put(WSSecurityEngine.SIGNATURE, Action.VERIFY);
-        tmp.put(WSSecurityEngine.USERNAME_TOKEN, Action.USERNAME_TOKEN);
-        tmp.put(WSSecurityEngine.REFERENCE_LIST, Action.DECRYPT);
+        tmp.put(WSConstants.ENCRYPTED_KEY, Action.DECRYPT);
+        tmp.put(WSConstants.SIGNATURE, Action.VERIFY);
+        tmp.put(WSConstants.USERNAME_TOKEN, Action.USERNAME_TOKEN);
+        tmp.put(WSConstants.REFERENCE_LIST, Action.DECRYPT);
         FAULT_CAUSES = java.util.Collections.unmodifiableMap(tmp);
     }
 
@@ -142,7 +144,8 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
     /**
      * {@inheritDoc}
      */
-    @Override
+    @SuppressWarnings("incomplete-switch")
+	@Override
     public Collection<ISecurityProcessingResult> processHeaders(MessageContext mc, Collection<IUserMessage> userMsgs,
                                                                 ISecurityConfiguration senderConfig,
                                                                 ISecurityConfiguration receiverConfig)
@@ -237,11 +240,11 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
      */
     private RequestData prepare() throws SecurityProcessingException {
         final RequestData reqData = new RequestData();
+
         final WSSConfig wssConfig = WSSConfig.getNewInstance();
         // Disable validator of the Usernametoken so no validation is done by the security provider
-        wssConfig.setValidator(WSSecurityEngine.USERNAME_TOKEN, (Validator) null);
+        wssConfig.setValidator(WSConstants.USERNAME_TOKEN, (Validator) null);
         reqData.setWssConfig(wssConfig);
-        reqData.setMsgContext(msgContext);
 
         // Disable BSP conformance check. Although AS4 requires conformance with BSP1.1 the check is disable to allow
         // more recent encryption algorithms.
@@ -252,21 +255,28 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
 
         // Usernametokens are checked for replay attacks in 5 minute window and their created timestamp may only be
         // one minute ahead
-        wssConfig.setUtTTL(300);
-        wssConfig.setUtFutureTTL(60);
-        wssConfig.setAllowNamespaceQualifiedPasswordTypes(true);
-        wssConfig.setAllowUsernameTokenNoPassword(true);
+        reqData.setUtTTL(300);
+        reqData.setUtFutureTTL(60);
+        reqData.setAllowNamespaceQualifiedPasswordTypes(true);
+        reqData.setAllowUsernameTokenNoPassword(true);
 
         // Configure signature verification action
         reqData.setSigVerCrypto(certManager.getWSS4JCrypto(org.holodeckb2b.security.Action.VERIFY));
         reqData.setEnableRevocation(false);
-        wssConfig.setEnableSignatureConfirmation(false);
+        reqData.setEnableSignatureConfirmation(false);
         // Configure decryption action
         reqData.setDecCrypto(certManager.getWSS4JCrypto(org.holodeckb2b.security.Action.DECRYPT));
         reqData.setCallbackHandler(new PasswordCallbackHandler());
         reqData.setAllowRSA15KeyTransportAlgorithm(false);
         reqData.setRequireSignedEncryptedDataElements(false);
 
+        // Gather some info about the document to process and store it for retrieval by the processors.
+        final WSDocInfo wsDocInfo = new WSDocInfo(domEnvelope);
+        wsDocInfo.setCrypto(reqData.getSigVerCrypto());
+        wsDocInfo.setCallbackLookup(new DOMCallbackLookup(domEnvelope));
+        reqData.setWsDocInfo(wsDocInfo);
+        reqData.setMsgContext(msgContext);
+        
         return reqData;
     }
 
@@ -300,15 +310,11 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
             return new ArrayList();
         }
 
-        // Gather some info about the document to process and store it for retrieval by the processors.
-        final WSDocInfo wsDocInfo = new WSDocInfo(securityHeader.getOwnerDocument());
-        wsDocInfo.setCrypto(requestData.getSigVerCrypto());
-        wsDocInfo.setSecurityHeader(securityHeader);
-        final WSSConfig wssConfig = requestData.getWssConfig();
-
         // Handle all childs in the securty header, but only process the ones relevant for ebMS
-        Node node = securityHeader.getFirstChild();
+        final WSSConfig wssConfig = requestData.getWssConfig();
+        requestData.getWsDocInfo().setSecurityHeader(securityHeader);
         final List<WSSecurityEngineResult> results = new LinkedList<>();
+        Node node = securityHeader.getFirstChild();
         while (node != null) {
             final Node nextSibling = node.getNextSibling();
             if (Node.ELEMENT_NODE == node.getNodeType()) {
@@ -331,8 +337,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                 } else if (action != null && p != null) {
                     try {
                         log.debug("Performing {} action in {} WS-Security header", action, target);
-                        List<WSSecurityEngineResult> actionResults = p.handleToken((Element) node, requestData,
-                                                                                    wsDocInfo);
+                        List<WSSecurityEngineResult> actionResults = p.handleToken((Element) node, requestData);
                         log.debug("Completed {} action in {} WS-Security header", action, target);
                         if (!actionResults.isEmpty())
                             results.addAll(actionResults);
@@ -355,7 +360,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                 node = node.getNextSibling();
         }
 
-        return convertResults(target, results, wsDocInfo);
+        return convertResults(target, results, requestData.getWsDocInfo());
     }
 
     /**
@@ -375,7 +380,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         log.debug("Converting WSS4J results of processing the {} header to Holodeck B2B format", target);
         Collection<ISecurityProcessingResult> results = new ArrayList<>();
         // Check if a username token was processed
-        final WSSecurityEngineResult utResult = WSSecurityUtil.fetchActionResult(wss4jResults, WSConstants.UT);
+        final WSSecurityEngineResult utResult = fetchActionResult(wss4jResults, WSConstants.UT);
         if (utResult != null) {
             log.debug("Converting username token result");
             results.add(new UsernameTokenProcessingResult(target, (UsernameToken)
@@ -383,7 +388,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         }
         if (target == SecurityHeaderTarget.DEFAULT) {
             // Check if message was signed
-            final WSSecurityEngineResult signResult = WSSecurityUtil.fetchActionResult(wss4jResults, WSConstants.SIGN);
+            final WSSecurityEngineResult signResult = fetchActionResult(wss4jResults, WSConstants.SIGN);
             if (signResult != null) {
                 log.debug("Converting signature verification result");
                 // Collect information about the processed signature
@@ -398,7 +403,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                                                           signedPartsInfo.getEbmsHeaderInfo(),
                                                           signedPartsInfo.getPayloadInfo()));
             }
-            final WSSecurityEngineResult decResult = WSSecurityUtil.fetchActionResult(wss4jResults, WSConstants.ENCR);
+            final WSSecurityEngineResult decResult = fetchActionResult(wss4jResults, WSConstants.ENCR);
             if (decResult != null) {
                 log.debug("Converting decryption result");
                 // Collect information about the performed decryption
@@ -450,4 +455,20 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         return results;
     }
 
+    /**
+     * Fetch the result of a given action from a given result list
+     * 
+     * @param resultList 	The result list to fetch an action from
+     * @param action 		The action to fetch
+     * @return The first result fetched from the result list, <code>null</code> if the result
+     *         could not be found
+     */
+    private WSSecurityEngineResult fetchActionResult(final List<WSSecurityEngineResult> resultList, final int action) {
+        WSSecurityEngineResult result = null;        
+        for (int i = 0; i < resultList.size() && result == null; i++) 
+            if (action == (Integer) resultList.get(i).get(WSSecurityEngineResult.TAG_ACTION)) 
+                result = resultList.get(i);            
+        
+        return result;
+    }
 }

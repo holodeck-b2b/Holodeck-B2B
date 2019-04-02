@@ -17,7 +17,8 @@
 package org.holodeckb2b.security;
 
 import javax.xml.namespace.QName;
-import org.apache.wss4j.dom.WSSecurityEngineResult;
+
+import org.apache.wss4j.dom.engine.WSSecurityEngineResult;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 
 /**

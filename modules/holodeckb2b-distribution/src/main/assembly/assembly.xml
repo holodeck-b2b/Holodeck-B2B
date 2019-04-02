@@ -119,7 +119,7 @@
         </fileSet>
 
         <!--
-              (6a) Copy the patched versions of libs
+              (6a) Copy the patched versions of libs (if any)
         -->
         <fileSet>
             <directory>src/main/patches/</directory>

@@ -16,6 +16,10 @@
  */
 package org.holodeckb2b.security;
 
+import static org.holodeckb2b.security.Action.ENCRYPT;
+import static org.holodeckb2b.security.Action.SIGN;
+import static org.holodeckb2b.security.Action.USERNAME_TOKEN;
+
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +27,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
 import javax.security.auth.callback.CallbackHandler;
+
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
@@ -32,15 +39,18 @@ import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.ConfigurationConstants;
 import org.apache.wss4j.common.EncryptionActionToken;
 import org.apache.wss4j.common.SignatureActionToken;
+import org.apache.wss4j.common.WSS4JConstants;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.WSConstants;
-import org.apache.wss4j.dom.WSSConfig;
+import org.apache.wss4j.dom.WsuIdAllocator;
+import org.apache.wss4j.dom.engine.WSSConfig;
 import org.apache.wss4j.dom.handler.HandlerAction;
 import org.apache.wss4j.dom.handler.RequestData;
 import org.apache.wss4j.dom.handler.WSHandler;
 import org.apache.wss4j.dom.message.WSSecHeader;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
+import org.holodeckb2b.common.constants.ProductId;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -57,7 +67,6 @@ import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
 import org.holodeckb2b.interfaces.security.X509ReferenceType;
-import static org.holodeckb2b.security.Action.*;
 import org.holodeckb2b.security.callbackhandlers.AttachmentCallbackHandler;
 import org.holodeckb2b.security.callbackhandlers.PasswordCallbackHandler;
 import org.holodeckb2b.security.results.EncryptionProcessingResult;
@@ -314,7 +323,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
         final String ktAlgorithm = ktConfig.getAlgorithm();
         processingParams.put(ConfigurationConstants.ENC_KEY_TRANSPORT, ktAlgorithm);
         // If key transport algorithm is RSA-OAEP also the MGF must be set
-        if (WSConstants.KEYTRANSPORT_RSAOEP_XENC11.equalsIgnoreCase(ktAlgorithm))
+        if (WSS4JConstants.KEYTRANSPORT_RSAOAEP_XENC11.equalsIgnoreCase(ktAlgorithm))
             processingParams.put(ConfigurationConstants.ENC_MGF_ALGO, ktConfig.getMGFAlgorithm());
         // Message digest
         processingParams.put(ConfigurationConstants.ENC_DIGEST_ALGO, ktConfig.getDigestAlgorithm());
@@ -413,7 +422,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
                                 convertAction(actionToDo) + "action in the " + target.id() + " security header", wse);
             }
             try {
-                doit.execute(this, actionToDo.getActionToken(), domEnvelope, reqData);
+                doit.execute(this, actionToDo.getActionToken(), reqData);
             } catch (WSSecurityException ex) {
                 log.error("A problem occurred when executing the ({}) action! Details: {}", convertAction(actionToDo),
                           ex.getMessage());
@@ -434,6 +443,18 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
                                                                                             throws WSSecurityException {
         final RequestData reqData = new RequestData();
         final WSSConfig wssConfig = WSSConfig.getNewInstance();
+        wssConfig.setIdAllocator(new WsuIdAllocator() {
+        	private static final String HB2B_ID_PREFIX = "4b28" + ProductId.MAJOR_VERSION 
+		        												+ ProductId.MINOR_VERSION 
+		        												+ ProductId.PATCH_VERSION; 
+            public String createId(String prefix, Object o) {
+                return !Utils.isNullOrEmpty(prefix) ? prefix : "" + HB2B_ID_PREFIX + UUID.randomUUID().toString();
+            }
+
+            public String createSecureId(String prefix, Object o) {
+            	return !Utils.isNullOrEmpty(prefix) ? prefix : "" + HB2B_ID_PREFIX + UUID.randomUUID().toString();
+            }
+        });
         reqData.setWssConfig(wssConfig);
         reqData.setMsgContext(msgContext);
         reqData.setActor(target.id());
@@ -445,15 +466,12 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
 
         // Are we processing a request or response?
         final boolean isRequest = !msgContext.isServerSide();
-        wssConfig.setPasswordsAreEncoded(decodeUseEncodedPasswords(reqData));
-        wssConfig.setPrecisionInMilliSeconds(decodeTimestampPrecision(reqData));
 
-        WSSecHeader secHeader = new WSSecHeader(target.id(), true);
-        secHeader.insertSecurityHeader(domEnvelope);
+        WSSecHeader secHeader = new WSSecHeader(target.id(), domEnvelope);
+        secHeader.insertSecurityHeader();
 
         reqData.setSecHeader(secHeader);
         reqData.setSoapConstants(WSSecurityUtil.getSOAPConstants(domEnvelope.getDocumentElement()));
-        wssConfig.setAddInclusivePrefixes(decodeAddInclusivePrefixes(reqData));
 
         // Perform action specific configuration
         for (HandlerAction actionToDo : actions) {
@@ -543,7 +561,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
                                                    .forEach(p -> encryptedPayloads.add(p)));
 
         // Get the Certificate used for encryption
-        final X509Certificate cert = (X509Certificate) certManager.getCertificate(CertificateUsage.Encryption,
+        final X509Certificate cert = certManager.getCertificate(CertificateUsage.Encryption,
                                                                                 encryptionConfig.getKeystoreAlias());
         final IKeyTransport ktInfo = encryptionConfig.getKeyTransport();
         return new EncryptionProcessingResult(cert, ktInfo.getKeyReferenceMethod(), ktInfo.getAlgorithm(),

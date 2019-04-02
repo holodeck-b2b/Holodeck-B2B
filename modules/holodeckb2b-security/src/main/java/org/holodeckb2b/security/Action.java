@@ -19,7 +19,7 @@ package org.holodeckb2b.security;
 /**
  * Enumerates the actions that the security provider can be perform on a message. This is used to indicate which access
  * to is required to the keystores of the {@link CertificateManager} and to signal during which action the processing
- * failed in the {@link }.
+ * failed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
