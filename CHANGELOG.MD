@@ -14,7 +14,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * The default security provider now uses version 2.2.2 and 2.1.2 of WSS4J and Apache Santuario (xml-sec)
 
 ### Removed
-* Deprecated `org.holodeckb2b.interfaces.submit.IMessageSubmitterFactory` interface
+* `org.holodeckb2b.interfaces.submit.IMessageSubmitterFactory` interface
 
 ## 4.1.0
 ##### 2019-03-06
