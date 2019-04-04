@@ -2,6 +2,20 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 4.1.1
+##### Unreleased
+### Fixed
+* Misleading result of PullRequest submission [#91](https://github.com/holodeck-b2b/Holodeck-B2B/issues/91)
+* NPE on first initialization of pull workers [#92](https://github.com/holodeck-b2b/Holodeck-B2B/issues/92)
+* Disk resource leakage when submission fails [#94](https://github.com/holodeck-b2b/Holodeck-B2B/issues/94)
+* Trusted certificate with name constraints extension results in failed processing [#97](https://github.com/holodeck-b2b/Holodeck-B2B/issues/97)
+
+### Changed
+* The default security provider now uses version 2.2.2 and 2.1.2 of WSS4J and Apache Santuario (xml-sec)
+
+### Removed
+* Deprecated `org.holodeckb2b.interfaces.submit.IMessageSubmitterFactory` interface
+
 ## 4.1.0
 ##### 2019-03-06
 ### Added
