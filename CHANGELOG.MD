@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 4.1.1
-##### Unreleased
+##### 2019-04-04
 ### Fixed
 * Misleading result of PullRequest submission [#91](https://github.com/holodeck-b2b/Holodeck-B2B/issues/91)
 * NPE on first initialization of pull workers [#92](https://github.com/holodeck-b2b/Holodeck-B2B/issues/92)
