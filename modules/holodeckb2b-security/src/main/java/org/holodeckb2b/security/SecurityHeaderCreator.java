@@ -447,12 +447,14 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
         	private static final String HB2B_ID_PREFIX = "4b28" + ProductId.MAJOR_VERSION 
 		        												+ ProductId.MINOR_VERSION 
 		        												+ ProductId.PATCH_VERSION; 
-            public String createId(String prefix, Object o) {
-                return !Utils.isNullOrEmpty(prefix) ? prefix : "" + HB2B_ID_PREFIX + UUID.randomUUID().toString();
+            @Override
+			public String createId(String prefix, Object o) {
+                return (!Utils.isNullOrEmpty(prefix) ? prefix : "") + HB2B_ID_PREFIX + UUID.randomUUID().toString();
             }
 
-            public String createSecureId(String prefix, Object o) {
-            	return !Utils.isNullOrEmpty(prefix) ? prefix : "" + HB2B_ID_PREFIX + UUID.randomUUID().toString();
+            @Override
+			public String createSecureId(String prefix, Object o) {
+            	return (!Utils.isNullOrEmpty(prefix) ? prefix : "") + HB2B_ID_PREFIX + UUID.randomUUID().toString();
             }
         });
         reqData.setWssConfig(wssConfig);
