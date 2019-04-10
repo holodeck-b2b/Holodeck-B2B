@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 4.1.1
-##### Unreleased
+##### 2019-04-04
 ### Fixed
 * Misleading result of PullRequest submission [#91](https://github.com/holodeck-b2b/Holodeck-B2B/issues/91)
 * NPE on first initialization of pull workers [#92](https://github.com/holodeck-b2b/Holodeck-B2B/issues/92)
@@ -14,7 +14,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * The default security provider now uses version 2.2.2 and 2.1.2 of WSS4J and Apache Santuario (xml-sec)
 
 ### Removed
-* Deprecated `org.holodeckb2b.interfaces.submit.IMessageSubmitterFactory` interface
+* `org.holodeckb2b.interfaces.submit.IMessageSubmitterFactory` interface
 
 ## 4.1.0
 ##### 2019-03-06
