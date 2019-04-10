@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 4.1.2
+##### 2019-04-10
+### Fixed
+* Incorrectly generated IDs within WS-Security header [#98](https://github.com/holodeck-b2b/Holodeck-B2B/issues/98)
+
 ## 4.1.1
 ##### 2019-04-04
 ### Fixed
