@@ -2,6 +2,24 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## HB2B_NEXT_VERSION
+##### Unreleased
+
+### Added
+* A default user interface that supports basic monitoring of a running Holodeck B2B instance. The UI is available both
+  using a command line as well as a desktop GUI application.
+    
+
+### Changed
+* Refactored the default P-Mode implementation so it also supports setting of parameters and serialization to XML. The
+  implementation has also been moved to the _common_ module.
+* Renamed abstract worker implementations to include _Abstract_ prefix.
+* Moved workers `SubmitFromFile` and `PModeWatcher` which are not strictly required to the core message processing 
+  functionality to `org.holodeckb2b.common.workers` package.
+
+### Fixed
+* Concurrency issue in `SubmitFromFile` worker that may caused a single MMD to be submitted multiple times.
+
 ## 4.1.2
 ##### 2019-04-10
 ### Fixed

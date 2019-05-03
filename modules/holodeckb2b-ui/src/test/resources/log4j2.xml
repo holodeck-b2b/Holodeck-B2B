@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- Holodeck B2B Logging Configuration for test classes -->
+<Configuration status="warn" monitorInterval="30">
+    <Appenders>        
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout>
+                <Pattern>%d (%t)[%-5p] %c - %m%n</Pattern>
+            </PatternLayout>
+        </Console>        
+    </Appenders>
+    <Loggers>
+        <!--
+            Everything with level ERROR or higher will be logged
+        -->
+        <Root level="WARN">
+            <AppenderRef ref="STDOUT"/>
+        </Root>        
+
+        <!--
+           If more HB2B logging is needed, enable below logger and set log
+           level as preferred
+        -->
+        <Logger name="org.holodeckb2b" level="INFO" />
+                
+	</Loggers>        
+</Configuration>

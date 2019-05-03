@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     Copyright (C) 2014-2017 The Holodeck B2B Team, Sander Fieten
@@ -97,7 +98,8 @@
         <module>modules/holodeckb2b-core</module>
         <module>modules/holodeckb2b-distribution</module>
         <module>modules/holodeckb2b-it</module>
-    </modules>
+        <module>modules/holodeckb2b-ui</module>
+  </modules>
 
     <licenses>
         <license>
@@ -135,6 +137,11 @@
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
                 <artifactId>holodeckb2b-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.holodeckb2b</groupId>
+                <artifactId>holodeckb2b-ui</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
