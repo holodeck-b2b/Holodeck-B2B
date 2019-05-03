@@ -94,7 +94,7 @@ public class FileWatcherTest {
 
             instance.run();
 
-            assertEquals(PathWatcher.Event.ADDED, instance.e);
+            assertEquals(AbstractPathWatcher.Event.ADDED, instance.e);
 
             f.delete();
         } catch (final Exception e) {
@@ -119,12 +119,12 @@ public class FileWatcherTest {
             }
 
             instance.run();
-            assertEquals(PathWatcher.Event.ADDED, instance.e);
+            assertEquals(AbstractPathWatcher.Event.ADDED, instance.e);
 
             f.delete();
 
             instance.run();
-            assertEquals(PathWatcher.Event.REMOVED, instance.e);
+            assertEquals(AbstractPathWatcher.Event.REMOVED, instance.e);
 
         } catch (final Exception e) {
             e.printStackTrace();
@@ -148,7 +148,7 @@ public class FileWatcherTest {
             }
 
             instance.run();
-            assertEquals(PathWatcher.Event.ADDED, instance.e);
+            assertEquals(AbstractPathWatcher.Event.ADDED, instance.e);
 
             Thread.sleep(1000); // This sleep is necessary because changes might otherwise not be detected!
 
@@ -158,7 +158,7 @@ public class FileWatcherTest {
             }
 
             instance.run();
-            assertEquals(PathWatcher.Event.CHANGED, instance.e);
+            assertEquals(AbstractPathWatcher.Event.CHANGED, instance.e);
 
             f.delete();
 
@@ -169,7 +169,7 @@ public class FileWatcherTest {
     }
 
 
-    public class FileWatcherImpl extends FileWatcher {
+    public class FileWatcherImpl extends AbstractFileWatcher {
 
         Event   e = null;
 

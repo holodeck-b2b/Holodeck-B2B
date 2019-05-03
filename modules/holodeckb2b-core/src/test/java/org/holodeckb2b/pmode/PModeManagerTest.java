@@ -21,11 +21,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.holodeckb2b.common.config.InternalConfiguration;
-import org.holodeckb2b.common.testhelpers.pmode.Leg;
-import org.holodeckb2b.common.testhelpers.pmode.PMode;
+import org.holodeckb2b.common.pmode.Leg;
+import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.After;

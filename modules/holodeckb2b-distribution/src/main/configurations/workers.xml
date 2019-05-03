@@ -17,7 +17,7 @@
     to process messages!
     =============================================================== -->
     <worker name="pmodeWatcher" interval="20" activate="true"
-        workerClass="org.holodeckb2b.pmode.xml.PModeWatcher">
+        workerClass="org.holodeckb2b.common.workers.PModeWatcher">
         <parameter name="watchPath">conf/pmodes</parameter>
     </worker>
 
@@ -93,7 +93,7 @@
     =============================================================== -->
     <worker name="submitFromFileWorker" interval="10" activate="true"
         delay="5"
-        workerClass="org.holodeckb2b.ebms3.workers.SubmitFromFile">
+        workerClass="org.holodeckb2b.common.workers.SubmitFromFile">
         <parameter name="watchPath">data/msg_out</parameter>
     </worker>
 </workers>

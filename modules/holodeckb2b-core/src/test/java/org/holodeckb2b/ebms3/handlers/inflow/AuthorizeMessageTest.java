@@ -23,13 +23,14 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
+import java.io.FileInputStream;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -40,7 +41,6 @@ import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.holodeckb2b.pmode.xml.PMode;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -70,8 +70,8 @@ public class AuthorizeMessageTest {
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
 
         // Create the basic test data
-        pmodeAuth = PMode.createFromFile(new File(baseDir + "/pm-auth-messages.xml"));
-        pmodeNoAuth = PMode.createFromFile(new File(baseDir + "/pm-no-auth-messages.xml"));
+        pmodeAuth = PMode.createFromXML(new FileInputStream(baseDir + "/pm-auth-messages.xml"));
+        pmodeNoAuth = PMode.createFromXML(new FileInputStream(baseDir + "/pm-no-auth-messages.xml"));
 
         HolodeckB2BCore.getPModeSet().add(pmodeAuth);
         HolodeckB2BCore.getPModeSet().add(pmodeNoAuth);

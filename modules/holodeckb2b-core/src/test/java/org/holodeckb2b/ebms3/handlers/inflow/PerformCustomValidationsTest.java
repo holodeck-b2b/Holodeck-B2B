@@ -21,18 +21,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.File;
+import java.io.FileInputStream;
 
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.holodeckb2b.pmode.xml.PMode;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -61,8 +61,8 @@ public class PerformCustomValidationsTest {
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
 
-        rejectOnFailurePmode = PMode.createFromFile(new File(baseDir + "/reject-on-failure-pmode.xml"));
-        rejectOnWarnPmode = PMode.createFromFile(new File(baseDir + "/reject-on-warn-pmode.xml"));
+        rejectOnFailurePmode = PMode.createFromXML(new FileInputStream(baseDir + "/reject-on-failure-pmode.xml"));
+        rejectOnWarnPmode = PMode.createFromXML(new FileInputStream(baseDir + "/reject-on-warn-pmode.xml"));
 
         core.getPModeSet().add(rejectOnFailurePmode);
         core.getPModeSet().add(rejectOnWarnPmode);

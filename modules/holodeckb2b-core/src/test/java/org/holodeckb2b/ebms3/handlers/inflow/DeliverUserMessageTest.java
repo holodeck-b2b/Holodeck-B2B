@@ -24,11 +24,11 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.common.pmode.DeliveryConfiguration;
+import org.holodeckb2b.common.pmode.Leg;
+import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.testhelpers.NullDeliveryMethod;
 import org.holodeckb2b.common.testhelpers.NullDeliveryMethod.NullDeliverer;
-import org.holodeckb2b.common.testhelpers.pmode.DeliverySpecification;
-import org.holodeckb2b.common.testhelpers.pmode.Leg;
-import org.holodeckb2b.common.testhelpers.pmode.PMode;
 import org.holodeckb2b.common.testhelpers.TestEventProcessor;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -72,7 +72,7 @@ public class DeliverUserMessageTest {
 		pmode.setId(T_PMODE_ID);
 		Leg leg = new Leg();
 
-		DeliverySpecification deliverySpecification = new DeliverySpecification();
+		DeliveryConfiguration deliverySpecification = new DeliveryConfiguration();
 		deliverySpecification.setFactory(NullDeliveryMethod.class.getName());
 		deliverySpecification.setId("delivery_spec_id");
 		leg.setDefaultDelivery(deliverySpecification);

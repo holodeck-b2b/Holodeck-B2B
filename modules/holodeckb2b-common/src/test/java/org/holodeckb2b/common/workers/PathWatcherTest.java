@@ -58,7 +58,7 @@ public class PathWatcherTest {
         assertEquals(baseDir, watcher.getWatchPath());
     }
 
-    class PathWatcherImpl extends PathWatcher {
+    class PathWatcherImpl extends AbstractPathWatcher {
 
         @Override
         protected void onChange(File f, Event event) {

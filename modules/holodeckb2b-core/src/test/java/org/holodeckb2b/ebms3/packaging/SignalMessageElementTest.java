@@ -16,18 +16,19 @@
  */
 package org.holodeckb2b.ebms3.packaging;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Iterator;
+
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.junit.Before;
 import org.junit.Test;
-
-import javax.xml.namespace.QName;
-
-import java.util.Iterator;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 15:18 19.02.17

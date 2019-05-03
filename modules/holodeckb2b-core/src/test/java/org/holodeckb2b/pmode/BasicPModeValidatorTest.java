@@ -20,21 +20,20 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.holodeckb2b.common.testhelpers.pmode.BusinessInfo;
-import org.holodeckb2b.common.testhelpers.pmode.EncryptionConfig;
-import org.holodeckb2b.common.testhelpers.pmode.Leg;
-import org.holodeckb2b.common.testhelpers.pmode.PMode;
-import org.holodeckb2b.common.testhelpers.pmode.PartnerConfig;
-import org.holodeckb2b.common.testhelpers.pmode.Protocol;
-import org.holodeckb2b.common.testhelpers.pmode.PullRequestFlow;
-import org.holodeckb2b.common.testhelpers.pmode.SecurityConfig;
-import org.holodeckb2b.common.testhelpers.pmode.SigningConfig;
-import org.holodeckb2b.common.testhelpers.pmode.UserMessageFlow;
-import org.holodeckb2b.common.testhelpers.pmode.UsernameTokenConfig;
+import org.holodeckb2b.common.pmode.BusinessInfo;
+import org.holodeckb2b.common.pmode.EncryptionConfig;
+import org.holodeckb2b.common.pmode.Leg;
+import org.holodeckb2b.common.pmode.PMode;
+import org.holodeckb2b.common.pmode.PartnerConfig;
+import org.holodeckb2b.common.pmode.Protocol;
+import org.holodeckb2b.common.pmode.PullRequestFlow;
+import org.holodeckb2b.common.pmode.SecurityConfig;
+import org.holodeckb2b.common.pmode.SigningConfig;
+import org.holodeckb2b.common.pmode.UserMessageFlow;
+import org.holodeckb2b.common.pmode.UsernameTokenConfig;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.After;
@@ -208,7 +207,7 @@ public class BasicPModeValidatorTest {
 
         assertFalse(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
 
-        invalidPMode.removeLegs();
+        invalidPMode.setLegs(null);
         invalidPMode.setMep(EbMSConstants.TWO_WAY_MEP);
         invalidPMode.addLeg(new Leg()); // adding only one leg into two way mep
 

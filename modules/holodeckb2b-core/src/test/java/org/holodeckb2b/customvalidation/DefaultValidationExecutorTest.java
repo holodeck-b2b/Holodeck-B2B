@@ -1,12 +1,13 @@
 package org.holodeckb2b.customvalidation;
 
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.testhelpers.pmode.CustomValidationSpec;
-import org.holodeckb2b.common.testhelpers.pmode.Leg;
-import org.holodeckb2b.common.testhelpers.pmode.PMode;
-import org.holodeckb2b.common.testhelpers.pmode.UserMessageFlow;
+import org.holodeckb2b.common.pmode.CustomValidationConfiguration;
+import org.holodeckb2b.common.pmode.Leg;
+import org.holodeckb2b.common.pmode.PMode;
+import org.holodeckb2b.common.pmode.UserMessageFlow;
 import org.holodeckb2b.core.validation.DefaultValidationExecutor;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.customvalidation.MessageValidationError.Severity;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.After;
@@ -48,7 +49,9 @@ public class DefaultValidationExecutorTest {
         PMode pMode = new PMode();
         Leg leg = new Leg();
         UserMessageFlow flow = new UserMessageFlow();
-        CustomValidationSpec validationSpec = new CustomValidationSpec("info", "info");
+        CustomValidationConfiguration validationSpec = new CustomValidationConfiguration();
+        validationSpec.setStopSeverity(Severity.Info);
+        validationSpec.setRejectSeverity(Severity.Info);
         flow.setCustomValidationConfiguration(validationSpec);
         leg.setUserMessageFlow(flow);
         pMode.addLeg(leg);

@@ -58,7 +58,9 @@ public class Submitter implements IMessageSubmitter {
 		String msgId = mu.getMessageId();
 		if (Utils.isNullOrEmpty(msgId))
 			msgId = MessageIdUtils.createMessageId();
-		submittedMessages.put(msgId, mu);	
+		synchronized (submittedMessages) {			
+			submittedMessages.put(msgId, mu);	
+		}
 		return msgId;
 	}
 }

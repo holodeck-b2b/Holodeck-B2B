@@ -16,6 +16,16 @@
  */
 package org.holodeckb2b.ebms3.packaging;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Collection;
+import java.util.Iterator;
+
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
@@ -30,12 +40,6 @@ import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.junit.Before;
 import org.junit.Test;
-
-import javax.xml.namespace.QName;
-import java.util.Collection;
-import java.util.Iterator;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 13:14 15.10.16

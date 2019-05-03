@@ -3,9 +3,13 @@ package org.holodeckb2b.customvalidation.helpers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import org.holodeckb2b.interfaces.customvalidation.*;
+
+import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
+import org.holodeckb2b.interfaces.customvalidation.IMessageValidatorConfiguration;
+import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
+import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.pmode.*;
+import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 
 /**
  * Created at 16:13 25.06.17

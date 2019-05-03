@@ -28,13 +28,13 @@ import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.common.pmode.DeliveryConfiguration;
+import org.holodeckb2b.common.pmode.ErrorHandlingConfig;
+import org.holodeckb2b.common.pmode.Leg;
+import org.holodeckb2b.common.pmode.PMode;
+import org.holodeckb2b.common.pmode.UserMessageFlow;
 import org.holodeckb2b.common.testhelpers.NullDeliveryMethod;
 import org.holodeckb2b.common.testhelpers.NullDeliveryMethod.NullDeliverer;
-import org.holodeckb2b.common.testhelpers.pmode.DeliverySpecification;
-import org.holodeckb2b.common.testhelpers.pmode.ErrorHandlingConfig;
-import org.holodeckb2b.common.testhelpers.pmode.Leg;
-import org.holodeckb2b.common.testhelpers.pmode.PMode;
-import org.holodeckb2b.common.testhelpers.pmode.UserMessageFlow;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -84,7 +84,7 @@ public class DeliverErrorsTest {
         ErrorHandlingConfig errorHandlingConfig = new ErrorHandlingConfig();
         errorHandlingConfig.setNotifyErrorToBusinessApplication(true);
         
-        DeliverySpecification deliverySpecification = new DeliverySpecification();
+        DeliveryConfiguration deliverySpecification = new DeliveryConfiguration();
         deliverySpecification.setFactory(NullDeliveryMethod.class.getName());
         deliverySpecification.setId("delivery_spec_id");
         errorHandlingConfig.setErrorDelivery(deliverySpecification);

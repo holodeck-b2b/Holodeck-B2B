@@ -16,12 +16,16 @@
  */
 package org.holodeckb2b.pmode;
 
-import org.holodeckb2b.common.testhelpers.pmode.*;
+import static org.junit.Assert.assertNotNull;
+
+import org.holodeckb2b.common.pmode.Leg;
+import org.holodeckb2b.common.pmode.PMode;
+import org.holodeckb2b.common.pmode.PartnerConfig;
+import org.holodeckb2b.common.pmode.Protocol;
+import org.holodeckb2b.common.pmode.PullRequestFlow;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.junit.Test;
-
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Created at 14:02 10.09.16

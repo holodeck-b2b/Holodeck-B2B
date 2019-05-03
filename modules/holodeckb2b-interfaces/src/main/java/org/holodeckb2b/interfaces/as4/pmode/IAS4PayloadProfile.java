@@ -24,7 +24,12 @@ import org.holodeckb2b.interfaces.pmode.IPayloadProfile;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IAS4PayloadProfile extends IPayloadProfile {
-
+	
+    /**
+     * The content type for compression the payload data using GZip.
+     */
+    public static final String GZIP_CONTENT_TYPE = "application/gzip";
+    
     /**
      * Indicates whether the payload data of user messages should be compressed using the AS4 Compression Feature as
      * described in section 3.1 of the AS4 profile. Represents the <code>PMode[1].PayloadService.CompressionType</code>

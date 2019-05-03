@@ -33,10 +33,11 @@ import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.TradingPartner;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.testhelpers.pmode.Agreement;
-import org.holodeckb2b.common.testhelpers.pmode.Leg;
-import org.holodeckb2b.common.testhelpers.pmode.PMode;
-import org.holodeckb2b.common.testhelpers.pmode.PartnerConfig;
+import org.holodeckb2b.common.pmode.Agreement;
+import org.holodeckb2b.common.pmode.Leg;
+import org.holodeckb2b.common.pmode.PMode;
+import org.holodeckb2b.common.pmode.PartnerConfig;
+import org.holodeckb2b.common.pmode.PartyId;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.testhelpers.TestUtils;
@@ -102,11 +103,11 @@ public class FindPModesTest {
 
         TradingPartner sender = userMessage.getSender();
         initiator.setRole(sender.getRole());
-        initiator.setPartyIds(sender.getPartyIds());
+        sender.getPartyIds().forEach(pid -> initiator.addPartyId(new PartyId(pid)));
 
         TradingPartner receiver = userMessage.getReceiver();
         responder.setRole(receiver.getRole());
-        responder.setPartyIds(receiver.getPartyIds());
+        receiver.getPartyIds().forEach(pid -> responder.addPartyId(new PartyId(pid)));
 
         AgreementReference agreementReference =
                 userMessage.getCollaborationInfo().getAgreement();
@@ -245,11 +246,11 @@ public class FindPModesTest {
 
        TradingPartner sender = userMessage.getSender();
        initiator.setRole(sender.getRole());
-       initiator.setPartyIds(sender.getPartyIds());
+       sender.getPartyIds().forEach(pid -> initiator.addPartyId(new PartyId(pid)));
 
        TradingPartner receiver = userMessage.getReceiver();
        responder.setRole("no-match");
-       responder.setPartyIds(receiver.getPartyIds());
+       receiver.getPartyIds().forEach(pid -> responder.addPartyId(new PartyId(pid)));
 
        AgreementReference agreementReference =
                userMessage.getCollaborationInfo().getAgreement();

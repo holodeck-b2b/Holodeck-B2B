@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.holodeckb2b.common.testhelpers.pmode.EventHandlerConfig;
+import org.holodeckb2b.common.pmode.EventHandlerConfig;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandler;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;

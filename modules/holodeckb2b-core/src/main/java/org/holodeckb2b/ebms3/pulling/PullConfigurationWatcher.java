@@ -19,7 +19,7 @@ package org.holodeckb2b.ebms3.pulling;
 import java.io.File;
 
 import org.holodeckb2b.common.workerpool.WorkerPool;
-import org.holodeckb2b.common.workers.FileWatcher;
+import org.holodeckb2b.common.workers.AbstractFileWatcher;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  * @see WorkerPool
  * @see PullConfiguration
  */
-public class PullConfigurationWatcher extends FileWatcher {
+public class PullConfigurationWatcher extends AbstractFileWatcher {
 
     /**
      * Process a change of the file containing the pull configuration.

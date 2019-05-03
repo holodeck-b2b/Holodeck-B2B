@@ -16,6 +16,11 @@
  */
 package org.holodeckb2b.multihop;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Iterator;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
@@ -23,11 +28,6 @@ import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.junit.Test;
-
-import java.util.Iterator;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test if correct ebint:RoutingInput element is created

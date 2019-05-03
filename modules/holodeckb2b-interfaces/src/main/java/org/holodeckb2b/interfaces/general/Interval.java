@@ -17,6 +17,7 @@
 package org.holodeckb2b.interfaces.general;
 
 
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,9 +26,10 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class Interval {
+public class Interval implements Serializable {
+	private static final long serialVersionUID = -8248625111840397966L;
 
-    /**
+	/**
      * The unit of time the interval is specified in
      */
     private TimeUnit  unit;

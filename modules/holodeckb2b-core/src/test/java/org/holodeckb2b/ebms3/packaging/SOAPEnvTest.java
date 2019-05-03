@@ -16,12 +16,14 @@
  */
 package org.holodeckb2b.ebms3.packaging;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.HashSet;
 import java.util.Iterator;
+
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**

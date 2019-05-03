@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.common.workers.PModeWatcher;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
@@ -35,7 +36,6 @@ import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.holodeckb2b.pmode.xml.PModeWatcher;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

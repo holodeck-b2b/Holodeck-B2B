@@ -172,7 +172,7 @@ public class DirWatcherTest {
         assertEquals(2, instance.c);
     }
 
-    public class DirWatcherImpl extends DirWatcher {
+    public class DirWatcherImpl extends AbstractDirWatcher {
         public int c = 0;
 
         @Override
