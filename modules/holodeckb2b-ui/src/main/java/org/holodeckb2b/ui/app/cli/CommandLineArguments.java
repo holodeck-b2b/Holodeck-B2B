@@ -16,6 +16,11 @@
  */
 package org.holodeckb2b.ui.app.cli;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.holodeckb2b.common.constants.ProductId;
+
 /**
  * Utility class for parsing the command line arguments.
  * 
@@ -24,28 +29,51 @@ package org.holodeckb2b.ui.app.cli;
  */
 public class CommandLineArguments {
 	/**
-	 * Enumeration of all actions that can be used as argument when invoking the app
+	 * Represents the options that can be supplied for a command. Consists of the command line flag, an indication 
+	 * whether the option is required (not really an option then ;-) ) and a short description used when printing help
+	 * instruction.
+	 */
+	static class Option {		
+		String flag, description;
+		boolean isRequired;
+		
+		Option(String f, boolean r, String d) { 
+			this.flag = f;
+			this.isRequired = r;
+			this.description = d; 
+		}		
+	}
+	
+	final static Option PORT_OPTION = new Option("-p", false, "The RMI port used by the Holodeck B2B instance");
+	
+	final static Option PRT_PMODE_ID = new Option("-id", true , "The identifier of the P-Mode to print");
+	
+	
+	/**
+	 * Enumeration of all actions that can be used as argument when invoking the app. Each command contains the name
+	 * of the command, the list of available options and a short description used for printing a help instruction.
 	 */
 	enum Action {
-		LIST_PMODES("listPModes", false, "Lists all loaded P-Modes"),
-		PRINT_PMODE("printPMode", true, "Print details of P-Mode with specified id");
+		LIST_PMODES("listPModes", new Option[] { PORT_OPTION }, "Lists all loaded P-Modes"),
+		PRINT_PMODE("printPMode", new Option[] { PORT_OPTION, PRT_PMODE_ID } , "Print details of P-Mode with specified id");
 		
-		String  optionFlag;
-		boolean parameterRequired;
-		String  description; 
+		String   name;
+		Option[] options;
+		String   description; 
 
-		Action(String optionFlag, boolean valueRequired, String description) {
-			this.optionFlag = optionFlag;
-			this.parameterRequired = valueRequired;
+		Action(String name, Option[] options, String description) {
+			this.name = name;
+			this.options = options;
 			this.description = description;	
 		}
 	}
+	
 
 	/**
 	 * The requested action to execute and its parameter 
 	 */
-	private Action	curAction;
-	private String  parameter;
+	private Action				 curAction;
+	private Map<String, String>  parameters;
 		
 	/**
 	 * Parses the arguments provided to the current invocation of the application.
@@ -58,16 +86,29 @@ public class CommandLineArguments {
 			throw new IllegalArgumentException("No action specified");
 	
 		for (Action action : Action.values()) {
-			if (action.optionFlag.equals(clArgs[0])) {
-				curAction = action;				
-				if (action.parameterRequired && clArgs.length == 2)
-					parameter = clArgs[1];
-				else if (action.parameterRequired) 
-					throw new IllegalArgumentException("Missing required parameter for action " + action.optionFlag);
-			}
+			if (action.name.equals(clArgs[0]))
+				curAction = action;							
 		}
 		if (curAction == null) 
-			throw new IllegalArgumentException("Argument " + clArgs[0] + " not recognized as valid action.");					
+			throw new IllegalArgumentException(clArgs[0] + " not recognized as valid action.");
+		
+		// Parse the remainder of command line to find parameters
+		parameters = new HashMap<>(curAction.options.length);
+		for (int i = 1; i < clArgs.length - 1; i++) {
+			Option o = null;
+			for (int j = 0; j < curAction.options.length && o == null; j++) 
+				if (curAction.options[j].flag.equals(clArgs[i])) 
+					// Found a valid option of this command
+					o = curAction.options[j];
+			if (o != null)
+				parameters.put(o.flag, clArgs[++i]);			
+		}
+		// Now check that all required options were provided
+		boolean arp = true;
+		for (int i = 0; i < curAction.options.length && arp; i++)
+			arp &= !curAction.options[i].isRequired || parameters.containsKey(curAction.options[i].flag);
+		if (!arp) 
+			throw new IllegalArgumentException("Not all required options for action " + curAction.name + "provided!");
 	}
 	
 	/**
@@ -82,22 +123,32 @@ public class CommandLineArguments {
 	/**
 	 * Gets the value for the action's parameter as specified on the command line when invoking the application.
 	 * 
+	 * @param  opt	The parameter's flag which value to get, expressed as {@link Option} 
 	 * @return The value for the action's parameter
 	 */
-	public String getParameter() {
-		return parameter;
+	public String getParameter(final Option opt) {		
+		return parameters.get(opt.flag);
 	}
 	
 	/**
 	 * Prints a simple "usage" message to the console.
 	 */
 	public static void printUsage() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(System.lineSeparator()).append("Use one of following arguments to execute an action: ")
-		  .append(System.lineSeparator());
-		for (Action option : Action.values()) 
-			sb.append(option.optionFlag).append('\t').append(option.description).append(System.lineSeparator());
-		System.out.println(sb.toString());
+		System.out.println(ProductId.FULL_NAME + " - Monitoring Tool");
+		System.out.println();
+		System.out.println("Usage: nc1701a <action> [options...]");
+		System.out.println();
+		System.out.println("Available actions:");
+		for (Action a : Action.values()) 
+			System.out.printf("\t%-20s %s%n", a.name, a.description); 
+		System.out.println();
+		System.out.println("Available options for actions:");
+		for (Action a : Action.values()) {
+			System.out.println();
+			System.out.println("Action:" + a.name);
+			for (Option o : a.options)
+				System.out.printf("\t%-20s %s%n", o.flag, o.description);			
+		}
 	}
 
 }
