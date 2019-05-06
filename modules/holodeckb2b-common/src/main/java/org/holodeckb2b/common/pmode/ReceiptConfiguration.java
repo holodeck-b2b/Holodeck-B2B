@@ -18,6 +18,7 @@ package org.holodeckb2b.common.pmode;
 
 import java.io.Serializable;
 
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
@@ -68,7 +69,8 @@ public class ReceiptConfiguration implements IReceiptConfiguration, Serializable
 
     @Override
     public ReplyPattern getPattern() {
-        return ReplyPattern.valueOf(replyPattern.toUpperCase());
+        return Utils.isNullOrEmpty(replyPattern) ? ReplyPattern.RESPONSE 
+        										 : ReplyPattern.valueOf(replyPattern.toUpperCase());
     }
 
     public void setPattern(final ReplyPattern pattern) {

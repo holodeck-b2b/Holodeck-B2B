@@ -43,8 +43,10 @@ public class UsernameTokenConfig implements IUsernameTokenConfiguration, Seriali
     /**
      *  Represents the password element with type attribute
      */
-    static class Password {
-        @Text(required = true)
+    static class Password implements Serializable {
+		private static final long serialVersionUID = -2561070532874543228L;
+
+		@Text(required = true)
         private String value;
 
         @Attribute(required = false)
