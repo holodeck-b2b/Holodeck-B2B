@@ -35,19 +35,28 @@ public interface CoreInfo extends Remote {
 	/**
 	 * The name used for the RMI Server
 	 */
-	final String RMI_SVC_NAME = "HB2B_UI_API";
+	String RMI_SVC_NAME = "HB2B_UI_API";
+
+	/**
+	 * The default port number used for the RMI server
+	 */
+	int	DEFAULT_PORT = 1701;
 	
+	/**
+	 * Gets the host name as used by this Holodeck B2B instance. It is used when constructing identifiers and intended
+	 * for identifying the gateway externally. Can therefore be useful for display purposes as well.
+	 * 
+	 * @return	The host name 
+	 */
+	public String getHostName() throws RemoteException;
+
 	/**
 	 * Gets all currently loaded P-Modes. 
 	 *  
 	 * @return The collection of configured P-Modes
 	 */
 	public PMode[] getPModes() throws RemoteException;
+
 	
-	/**
-	 * Gets the host name as used by Holodeck B2B when constructing identifiers.
-	 * 
-	 * @return	The host name 
-	 */
-	public String getHostName() throws RemoteException;
+	
 }

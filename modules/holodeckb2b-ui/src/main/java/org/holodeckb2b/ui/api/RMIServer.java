@@ -29,7 +29,8 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
  * Is the Holodeck B2B <i>worker</i> to initialise the RMI server that the default User Interface uses to retrieve 
- * information from the gateway. 
+ * information from the gateway. The worker has one optional parameter <i>port</i> that can be used to specify the port
+ * number that should be used by the RMI server. The default port is set to 1701.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
@@ -37,13 +38,32 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 public class RMIServer extends AbstractWorkerTask {
 	private static final Logger	log = LogManager.getLogger(RMIServer.class);
 
-	private static Registry registry;
+	/**
+	 * The name of the parameter to be used to specify the port number for the RMI server
+	 */
+	public static final String P_PORT = "port";
 	
-	private static CoreInfo serverImpl;
+	/**
+	 * The actual port the RMI server uses
+	 */
+	private int	port;
+	
+	/**
+	 * The implementation of the interface
+	 */
+	private static CoreInfo serverImpl;  
 	
 	@Override
 	public void setParameters(Map<String, ?> parameters) throws TaskConfigurationException {
 		setName("Holodeck B2B UI API");
+		
+		port = CoreInfo.DEFAULT_PORT;
+		try {
+			port = Integer.parseInt((String) parameters.get(P_PORT));
+		} catch (NumberFormatException invalidPort) { 
+			log.error("Invalid value provided for the \"port\" parameter ({}). Using default port {}", 
+					parameters.get(P_PORT), CoreInfo.DEFAULT_PORT);
+		} catch (Exception noPort) {};
 	}
 
 	@Override
@@ -51,11 +71,11 @@ public class RMIServer extends AbstractWorkerTask {
 
         try {
         	log.trace("Creating the API implementation");
-        	serverImpl = new CoreInfoImpl();
+			serverImpl = new CoreInfoImpl();
         	log.trace("Creating RMI stub for UI access");
         	Remote stub = UnicastRemoteObject.exportObject(serverImpl, 0);
-        	log.trace("Creating the RMI registry");
-        	registry = LocateRegistry.createRegistry(10888);
+        	log.trace("Creating the RMI registry on port {}", port);
+        	Registry registry = LocateRegistry.createRegistry(port);
         	log.trace("Binding stub in RMI registry");
         	registry.rebind(CoreInfo.RMI_SVC_NAME, stub);
         	log.info("Registered the RMI service for the local UI");        	

@@ -53,13 +53,13 @@ public class HB2BInfoTool {
 		} catch (IllegalArgumentException invalidInvocation) {
 			CommandLineArguments.printUsage();
 			System.exit(-1);
-
 		}
+				
         try {
-			coreAPI = (CoreInfo) LocateRegistry.getRegistry(10888).lookup(CoreInfo.RMI_SVC_NAME);
+			coreAPI = (CoreInfo) LocateRegistry.getRegistry(getServerPort(clArgs)).lookup(CoreInfo.RMI_SVC_NAME);
 			hb2bHostName = coreAPI.getHostName();
 		} catch (RemoteException | NotBoundException e) {
-			System.err.println("Could not connect the Holodeck B2B instance!");
+			System.err.println("Could not connect the Holodeck B2B instance on port " + getServerPort(clArgs) + "!");
 			System.exit(-2);
 		}            
 				
@@ -67,7 +67,21 @@ public class HB2BInfoTool {
 		case LIST_PMODES :
 			listPModes(); break;
 		case PRINT_PMODE :
-			printPMode(clArgs.getParameter()); break;
+			printPMode(clArgs.getParameter(CommandLineArguments.PRT_PMODE_ID)); break;
+		}
+	}
+
+	/**
+	 * Gets the server port to use for retrieving info from the Holodeck B2B instance
+	 * 
+	 * @param clArgs	The parsed command line arguments
+	 * @return			The port to connect to
+	 */
+	private static int getServerPort(CommandLineArguments clArgs) {
+		try {
+			return Integer.parseInt(clArgs.getParameter(CommandLineArguments.PORT_OPTION));
+		} catch (Exception useDefault) {
+			return CoreInfo.DEFAULT_PORT;
 		}
 	}
 
