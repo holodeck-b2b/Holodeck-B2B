@@ -54,6 +54,12 @@ public class Submitter implements IMessageSubmitter {
 		return submittedMessages.values();
 	}
 	
+	public void clear() {
+		synchronized (submittedMessages) {			
+			submittedMessages.clear();	
+		}		
+	}
+	
 	private  String submitMessageUnit(IMessageUnit mu) throws MessageSubmitException {
 		String msgId = mu.getMessageId();
 		if (Utils.isNullOrEmpty(msgId))

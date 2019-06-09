@@ -25,6 +25,7 @@
   </operation>
 
   <parameter name="supportSingleOperation" locked="xsd:true">true</parameter>
+  <parameter name="disableREST" locked="xsd:true">true</parameter>
 
   <module ref="addressing"/>
   <module ref="holodeckb2b-core" />

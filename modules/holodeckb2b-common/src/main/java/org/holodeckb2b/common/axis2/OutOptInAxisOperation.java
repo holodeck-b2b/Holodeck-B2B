@@ -16,14 +16,18 @@
  */
 package org.holodeckb2b.common.axis2;
 
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.xml.namespace.QName;
 
-import org.apache.axiom.soap.SOAPBody;
+import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.builder.Builder;
 import org.apache.axis2.client.OperationClient;
 import org.apache.axis2.client.Options;
-import org.apache.axis2.client.async.AxisCallback;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.ServiceContext;
@@ -35,11 +39,11 @@ import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.i18n.Messages;
 import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.axis2.util.Utils;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.handler.MessageProcessingContext;
+import org.holodeckb2b.common.util.Utils;
 
 
 /**
@@ -59,7 +63,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
      */
     public OutOptInAxisOperation(final QName name) {
         super(name);
-        setMessageExchangePattern(WSDL2Constants.MEP_URI_OUT_IN);
+        setMessageExchangePattern(WSDL2Constants.MEP_URI_OUT_OPTIONAL_IN);
     }
 
     /**
@@ -85,7 +89,8 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
 
         private final Log log = LogFactory.getLog(OutOptInAxisOperationClient.class);
 
-        public OutOptInAxisOperationClient(final OutInAxisOperation axisOp, final ServiceContext sc, final Options options) {
+        public OutOptInAxisOperationClient(final OutInAxisOperation axisOp, final ServiceContext sc, 
+        								   final Options options) {
             super(axisOp, sc, options);
         }
 
@@ -113,20 +118,15 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
          * @throws AxisFault
          */
         @Override
-        public MessageContext getMessageContext(final String messageLabel)
-                throws AxisFault {
+        public MessageContext getMessageContext(final String messageLabel) throws AxisFault {
             return oc.getMessageContext(messageLabel);
         }
 
         /**
-         * Executes the MEP. What this does depends on the specific MEP client. The basic idea is to have the MEP client
-         * execute and do something with the messages that have been added to it so far. For example, if its an Out-In
-         * MEP, then if the Out message has been set, then executing the client asks it to send the message and get the
-         * In message, possibly using a different thread.
+         * Executes the MEP. 
          *
-         * @param block Indicates whether execution should block or return ASAP. What block means is of course a
-         * function of the specific MEP client. IGNORED BY THIS MEP CLIENT.
-         * @throws AxisFault if something goes wrong during the execution of the MEP.
+         * @param block 		IGNORED BY THIS MEP CLIENT.
+         * @throws AxisFault 	if something goes wrong during the execution of the MEP.
          */
         @Override
         public void executeImpl(final boolean block) throws AxisFault {
@@ -143,51 +143,15 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
             prepareMessageContext(cc, mc);
 
             if (options.getTransportIn() == null && mc.getTransportIn() == null) {
-                mc.setTransportIn(ClientUtils.inferInTransport(cc
-                        .getAxisConfiguration(), options, mc));
+                mc.setTransportIn(ClientUtils.inferInTransport(cc .getAxisConfiguration(), options, mc));
             } else if (mc.getTransportIn() == null) {
                 mc.setTransportIn(options.getTransportIn());
             }
 
-            if (block) {
-                // Send the SOAP Message and receive a response
-                send(mc);
-                completed = true;
-            } else {
-            sc.getConfigurationContext().getThreadPool().execute(
-                    new OutOptInAxisOperationClient.NonBlockingInvocationWorker(mc, axisCallback));
-            }
-        }
-
-        /**
-         * When synchronous send() gets back a response MessageContext, this is the workhorse method which processes it.
-         *
-         * @param responseMessageContext the active response MessageContext
-         * @throws AxisFault if something went wrong
-         */
-        protected void handleResponse(final MessageContext responseMessageContext) throws AxisFault {
-        // Options object reused above so soapAction needs to be removed so
-            // that soapAction+wsa:Action on response don't conflict
-            responseMessageContext.setSoapAction(null);
-
-            if (responseMessageContext.getEnvelope() == null) {
-                try {
-                    final SOAPEnvelope resenvelope = TransportUtils.createSOAPMessage(responseMessageContext);
-                    if (resenvelope != null)
-                        responseMessageContext.setEnvelope(resenvelope);
-                } catch (final AxisFault af) {
-                    // This AxisFault indicates that there was no response received. Because this is allowd in ebMS
-                    // exchanges we just ignore this.
-                }
-
-            }
-            SOAPEnvelope resenvelope = responseMessageContext.getEnvelope();
-            if (resenvelope != null) {
-                AxisEngine.receive(responseMessageContext);
-                if (responseMessageContext.getReplyTo() != null) {
-                    sc.setTargetEPR(responseMessageContext.getReplyTo());
-                }
-            }
+            // Send the SOAP Message and receive a response
+            MessageContext responseMessageContext = send(mc);
+            handleResponse(responseMessageContext);
+            completed = true;
         }
 
         /**
@@ -210,8 +174,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
             responseMessageContext.setMessageID(msgContext.getMessageID());
             addMessageContext(responseMessageContext);
             responseMessageContext.setServiceContext(msgContext.getServiceContext());
-            responseMessageContext.setAxisMessage(
-                    axisOp.getMessage(WSDLConstants.MESSAGE_LABEL_IN_VALUE));
+            responseMessageContext.setAxisMessage(axisOp.getMessage(WSDLConstants.MESSAGE_LABEL_IN_VALUE));
 
             //sending the message
             AxisEngine.send(msgContext);
@@ -219,12 +182,20 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
             responseMessageContext.setDoingREST(msgContext.isDoingREST());
             
             // Copy RESPONSE properties which the transport set onto the request message context when it processed
-            // the incoming response recieved in reply to an outgoing request.
+            // the incoming response received in reply to an outgoing request.
             MessageProcessingContext hb2bMsgProcCtx = MessageProcessingContext.getFromMessageContext(msgContext);
             hb2bMsgProcCtx.setParentContext(responseMessageContext);
+            // We convert the http headers to lowercase for unambigious processing
+            @SuppressWarnings("unchecked")
+			final Map<String, String> httpHeaders = (Map<String, String>) 
+            												msgContext.getProperty(MessageContext.TRANSPORT_HEADERS);
+            if (!Utils.isNullOrEmpty(httpHeaders)) {
+            		final Map<String, String> lcHeaders = new HashMap<>(httpHeaders.size());
+            		httpHeaders.entrySet().forEach(e -> lcHeaders.put(e.getKey().toLowerCase(), e.getValue()));
+            		responseMessageContext.setProperty(MessageContext.TRANSPORT_HEADERS, lcHeaders);
+            } else
+            	responseMessageContext.setProperty(MessageContext.TRANSPORT_HEADERS, httpHeaders);
             
-            responseMessageContext.setProperty(MessageContext.TRANSPORT_HEADERS,
-                    msgContext.getProperty(MessageContext.TRANSPORT_HEADERS));
             responseMessageContext.setProperty(HTTPConstants.MC_HTTP_STATUS_CODE,
                     msgContext.getProperty(HTTPConstants.MC_HTTP_STATUS_CODE));
 
@@ -232,146 +203,55 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
                     .getProperty(MessageContext.TRANSPORT_IN));
             responseMessageContext.setTransportIn(msgContext.getTransportIn());
             responseMessageContext.setTransportOut(msgContext.getTransportOut());
-            handleResponse(responseMessageContext);
+            
             return responseMessageContext;
         }
-
-    /**
-     * This class is the workhorse for a non-blocking invocation that uses a two
-     * way transport.
-     */
-    private class NonBlockingInvocationWorker implements Runnable {
-        private MessageContext msgctx;
-        private AxisCallback axisCallback;
-
-        public NonBlockingInvocationWorker(MessageContext msgctx ,
-                                           AxisCallback axisCallback) {
-            this.msgctx = msgctx;
-            this.axisCallback =axisCallback;
-        }
-
-        @Override
-		public void run() {
-            try {
-                // send the request and wait for response
-                MessageContext response = send(msgctx);
-                // call the callback
-                if (response != null) {
-                    SOAPEnvelope resenvelope = response.getEnvelope();
-
-                    if (resenvelope.hasFault()) {
-                        SOAPBody body = resenvelope.getBody();
-                        // If a fault was found, create an AxisFault with a MessageContext so that
-                        // other programming models can deserialize the fault to an alternative form.
-                        AxisFault fault = new AxisFault(body.getFault(), response);
-                        if (axisCallback != null) {
-                            if (options.isExceptionToBeThrownOnSOAPFault()) {
-                                axisCallback.onError(fault);
-                            } else {
-                                axisCallback.onFault(response);
-                            }
-                        }
-
-                    } else {
-                        if (axisCallback != null) {
-                            axisCallback.onMessage(response);
-                        }
-
-                    }
-                }
-
-            } catch (Exception e) {
-                if (axisCallback != null) {
-                    axisCallback.onError(e);
-                }
-
-            } finally {
-                if (axisCallback != null) {
-                    axisCallback.onComplete();
-                }
-            }
-        }
-    }
-
-    /**
-     * This class acts as a callback that allows users to wait on the result.
-     */
-    private class SyncCallBack implements AxisCallback {
-        boolean complete;
-        boolean receivedFault;
-
-        public boolean waitForCompletion(long timeout) throws AxisFault {
-            synchronized (this) {
-                try {
-                    if (complete) return !receivedFault;
-                    wait(timeout);
-                    if (!complete) {
-                        // We timed out!
-                        throw new AxisFault( Messages.getMessage("responseTimeOut"));
-                    }
-                } catch (InterruptedException e) {
-                    // Something interrupted our wait!
-                    error = e;
-                }
-            }
-
-            if (error != null) throw AxisFault.makeFault(error);
-
-            return !receivedFault;
-        }
-
+        
         /**
-         * This is called when we receive a message.
+         * Handles the (optional) response.
          *
-         * @param msgContext the (response) MessageContext
+         * @param responseMessageContext the active response MessageContext
+         * @throws AxisFault if something went wrong
          */
-        @Override
-		public void onMessage(MessageContext msgContext) {
-            // Transport input stream gets closed after calling setComplete
-            // method. Have to build the whole envelope including the
-            // attachments at this stage. Data might get lost if the input
-            // stream gets closed before building the whole envelope.
-
-            // TODO: Shouldn't need to do this - need to hook up stream closure to Axiom completion
-            this.envelope = msgContext.getEnvelope();
-            this.envelope.buildWithAttachments();
-        }
-
-        /**
-         * This gets called when a fault message is received.
-         *
-         * @param msgContext the MessageContext containing the fault.
-         */
-        @Override
-		public void onFault(MessageContext msgContext) {
-           error = Utils.getInboundFaultFromMessageContext(msgContext);
-        }
-
-        /**
-         * This is called at the end of the MEP no matter what happens, quite like a
-         * finally block.
-         */
-        @Override
-		public synchronized void onComplete() {
-			complete = true;
-            notify();
-        }
-
-        private SOAPEnvelope envelope;
-
-        private Exception error;
-
-        @Override
-		public void onError(Exception e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Entry: OutInAxisOperationClient$SyncCallBack::onError, " + e);
+        protected void handleResponse(final MessageContext responseMessageContext) throws AxisFault {  
+        	SOAPEnvelope resenvelope = responseMessageContext.getEnvelope(); 
+    		final InputStream is = (InputStream) responseMessageContext.getProperty(MessageContext.TRANSPORT_IN);
+        	if (resenvelope == null && is != null) {        		
+            	@SuppressWarnings("unchecked")
+				Map<String, String> httpHeaders = (Map<String, String>) 
+         										 responseMessageContext.getProperty(MessageContext.TRANSPORT_HEADERS);
+            	final String contentType = httpHeaders.get(HTTPConstants.CONTENT_TYPE.toLowerCase());            	
+        		
+        		// Check if the Service specifies its own Message Builder
+            	final Builder msgBuilder = Axis2Utils.getBuilderFromService(responseMessageContext.getAxisService());
+            	try {
+					if (msgBuilder != null) {
+						log.debug("Using " + msgBuilder.getClass().getSimpleName() 
+																		+ " Builder to prepare messaging processing");					
+						// The builder SHOULD return a SOAP info-set, but for safety we do an extra check
+						final OMElement response = msgBuilder.processDocument(is, contentType, responseMessageContext);
+						if (response != null)
+							resenvelope = TransportUtils.createSOAPEnvelope(response);
+					} else {
+			        	// Options object reused above so soapAction needs to be removed so
+			            // that soapAction+wsa:Action on response don't conflict
+			            responseMessageContext.setSoapAction(null);
+	                    resenvelope = TransportUtils.createSOAPMessage(responseMessageContext);
+					}
+            	} catch (Exception responseBuildError) {
+            		// This probably indicates that there was no response, therefore only log
+            		log.debug("Execption in building response message: " + responseBuildError.getMessage());
+            	}
+                responseMessageContext.setEnvelope(resenvelope);
             }
-            error = e;
-            if (log.isDebugEnabled()) {
-                log.debug("Exit: OutInAxisOperationClient$SyncCallBack::onError");
+            if (resenvelope != null) {
+                AxisEngine.receive(responseMessageContext);
+                if (responseMessageContext.getReplyTo() != null) {
+                    sc.setTargetEPR(responseMessageContext.getReplyTo());
+                }
             }
         }
-    }
-    }
+        
+    }        	    
 }
 

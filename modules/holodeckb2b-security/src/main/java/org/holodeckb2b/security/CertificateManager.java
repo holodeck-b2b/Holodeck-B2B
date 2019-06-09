@@ -54,7 +54,7 @@ import org.holodeckb2b.security.util.SecurityUtils;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
  */
-class CertificateManager implements ICertificateManager {
+public class CertificateManager implements ICertificateManager {
 
     private final Logger log = LogManager.getLogger(CertificateManager.class);
 
@@ -214,6 +214,33 @@ class CertificateManager implements ICertificateManager {
                     + "\n\tError details: {}-{}", alias, ex.getClass().getSimpleName(), ex.getMessage());
             throw new SecurityProcessingException("Error retrieving the keypair", ex);
         }
+    }
+    
+    /**
+     * Gets only the certificate part of the key pair registered under the given alias. This method is used by the UI
+     * for display information about the private key without exposing it.
+     * 
+     * @param alias		The alias of the key pair
+     * @return			The certificate of the key pair registered under this alias, or<br>
+     * 					<code>null</code> when no key pair is found 
+     * @throws SecurityProcessingException When there is an error retrieving the certificate
+     * @since HB2B_NEXT_VERSION
+     */
+    public X509Certificate getPrivateKeyCertificate(final String alias) throws SecurityProcessingException {
+        // Load keystore and retrieve the entry from it
+        KeyStore ks = KeystoreUtils.load(privateKeystorePath, privateKeystorePwd);
+    	
+        try {
+            // Check if the alias exists, in compatibility mode also encryption certs must be checked for verification
+            if (ks.containsAlias(alias))
+                return (X509Certificate) ks.getCertificate(alias);
+            else 
+                return null;
+        } catch (KeyStoreException ex) {
+            log.error("Problem retrieving certificate of private key with alias {} from keystore!"
+                    + "\n\tError details: {}", alias, ex.getMessage());
+            throw new SecurityProcessingException("Error retrieving the certificate", ex);
+        }    	
     }
 
     @Override

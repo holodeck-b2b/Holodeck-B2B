@@ -8,17 +8,26 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * A default user interface that supports basic monitoring of a running Holodeck B2B instance. The UI is available both
   using a command line as well as a desktop GUI application.
-    
+* Custom implementation of the Axis2 `TransportListener` interface which can use a _Service_ specified _Message Builder_  
 
 ### Changed
 * Refactored the default P-Mode implementation so it also supports setting of parameters and serialization to XML. The
   implementation has also been moved to the _common_ module.
+* Refactored send process to make it more flexible and use *PMode.MEPBinding* to select the Axis2 _Service_ to use for
+  sending. This removes the need for coded _Services_ and specialised senders or sender worker when implementing an
+  additional messaging protocol.
+* Refactored `org.holodeckb2b.common.axis2.OutOptInAxisOperation` so it will also use the _Service_ specified _Message 
+  Builder_ for building the response message.  
 * Renamed abstract worker implementations to include _Abstract_ prefix.
 * Moved workers `SubmitFromFile` and `PModeWatcher` which are not strictly required to the core message processing 
   functionality to `org.holodeckb2b.common.workers` package.
+* Constructor of `org.holodeckb2b.interfaces.submit.MessageSubmitException` now accepts `Throwable` instead of 
+  `Exception`
+
 
 ### Fixed
 * Concurrency issue in `SubmitFromFile` worker that may caused a single MMD to be submitted multiple times.
+* NPE in case white space is contained between the `ds:Signature` and `ds:SignedInfo` elements of a received message. 
 
 ## 4.1.2
 ##### 2019-04-10

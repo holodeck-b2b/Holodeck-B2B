@@ -16,18 +16,17 @@
  */
 package org.holodeckb2b.common.testhelpers;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.spi.LoggingEvent;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.util.List;
-
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.List;
 
-import static org.junit.Assert.fail;
+import org.apache.log4j.Level;
+import org.apache.log4j.spi.LoggingEvent;
+import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 
 /**
  * Created at 15:22 19.02.17
@@ -53,6 +52,10 @@ public class TestUtils {
             e.printStackTrace();
         }
         return basePath;
+    }
+    
+    public static String getPath(String resourceName) {
+    	return getPath(TestUtils.class, resourceName);
     }
 
     /**

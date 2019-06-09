@@ -246,11 +246,8 @@ public final class SecurityUtils {
         if (signatureElems == null || signatureElems.getLength() == 0)
             return null; // No Signature element available in header
 
-        // The ds:SignedInfo element is the first child of ds:Signature
-        Element signedInfoElement = (Element) signatureElems.item(0).getFirstChild();
-
-        // Collect all ds:Reference contained in it
-        NodeList referenceElems = signedInfoElement.getElementsByTagNameNS(
+        // Collect all ds:Reference elements contained in it. 
+        NodeList referenceElems = ((Element) signatureElems.item(0)).getElementsByTagNameNS(
                                                                     SecurityConstants.REFERENCE_ELEM.getNamespaceURI(),
                                                                     SecurityConstants.REFERENCE_ELEM.getLocalPart());
         // Convert NodeList to Collection

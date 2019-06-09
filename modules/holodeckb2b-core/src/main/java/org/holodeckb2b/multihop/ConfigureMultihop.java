@@ -66,7 +66,11 @@ public class ConfigureMultihop extends AbstractBaseHandler {
      */
     @Override
     protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) throws Exception {
-        // If the primary message unit is a user message it can be multi-hop in itself. Receipt and/or Error signals
+        // For routing signals through the I-Cloud WS-A headers are used. We use the Axis2 addressing module to create
+        // the headers. But we don't need these headers normally, so disable the module by default
+        procCtx.getParentContext().setProperty(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES, Boolean.TRUE);
+
+    	// If the primary message unit is a user message it can be multi-hop in itself. Receipt and/or Error signals
         // depends on whether the original message was sent using multi-hop.
         final IMessageUnitEntity primMU = procCtx.getPrimaryMessageUnit();
         if (primMU instanceof IUserMessage) {

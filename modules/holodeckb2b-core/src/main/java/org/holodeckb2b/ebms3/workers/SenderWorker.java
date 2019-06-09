@@ -19,14 +19,12 @@ package org.holodeckb2b.ebms3.workers;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.axis2.Axis2Sender;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
-import org.holodeckb2b.ebms3.axis2.ebMS3SendService;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -36,13 +34,12 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
- * Is responsible for starting the send process of message units. It looks for all messages waiting in the database to
- * get send and starts an Axis2 client for each of them. The ebMS specific handlers in the Axis2 handler chain will then
- * take over and do the actual message processing. This worker is only to kick-off the process.
+ * Is responsible for selecting the message units to be send. It looks for all messages waiting in the database to
+ * get send and starts the send process for each of them. 
  * <p>This worker does not need configuration to run. As this worker is needed for Holodeck B2B to work properly it is
  * included in the default worker pool.
  *
- * @author Sander Fieten
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class SenderWorker extends AbstractWorkerTask {
 
@@ -81,7 +78,7 @@ public class SenderWorker extends AbstractWorkerTask {
                                     + "[" + msgUnit.getMessageId() + "]");
                         // Ensure all data is available for processing
                         HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(msgUnit);
-                        Axis2Sender.sendMessage(msgUnit, new ebMS3SendService(), log);
+                        Axis2Sender.sendMessage(msgUnit);
                     } else
                         // Message probably already in process
                         log.trace("Could not start processing message [" + msgUnit.getMessageId()
@@ -91,9 +88,7 @@ public class SenderWorker extends AbstractWorkerTask {
         } catch (final PersistenceException dbError) {
             log.error("Could not process message because a database error occurred. Details:"
                         + dbError.toString() + "\n");
-        } catch (AxisFault sendFailure) {
-            log.error("An unhandled error occurred when sending a message. Details:" + sendFailure.getMessage());
-		}
+        } 
     }
 
     /**
