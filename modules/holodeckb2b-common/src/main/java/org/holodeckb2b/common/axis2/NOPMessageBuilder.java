@@ -18,13 +18,11 @@ package org.holodeckb2b.common.axis2;
 
 import java.io.InputStream;
 
-import javax.xml.namespace.QName;
-
-import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.builder.Builder;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.transport.TransportUtils;
 
 /**
  * Is a {@link Builder} implementation that does not process the received message content but just adds a reference to
@@ -40,9 +38,7 @@ public class NOPMessageBuilder implements Builder {
 	 * Name of the Axis2 Message Context property in which the request input stream is stored 
 	 */
 	public static final String REQUEST_INPUTSTREAM = "hb2b-rest:is";
-		
-	private static final QName docElement = new QName("InputStream");
-	
+			
 	@Override
 	public OMElement processDocument(InputStream inputStream, String contentType, MessageContext messageContext)
 			throws AxisFault {		
@@ -50,7 +46,7 @@ public class NOPMessageBuilder implements Builder {
 		messageContext.setDoingREST(true);
 		messageContext.setProperty(REQUEST_INPUTSTREAM, inputStream);
 				
-		return OMAbstractFactory.getOMFactory().createOMElement(docElement);
+		return TransportUtils.createSOAPEnvelope(null);
 
 	}
 }
