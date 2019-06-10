@@ -89,7 +89,7 @@ public class Axis2Sender {
         // The default protocol is AS4, so we will use the "as4" Service unless P-Mode indicates something else 
         String svcName = "as4";
         if (pmode.getMepBinding().startsWith("http://holodeck-b2b.org/pmode/mepBinding/"))  
-        	svcName = pmode.getMepBinding().substring(pmode.getMepBinding().lastIndexOf('/'));
+        	svcName = pmode.getMepBinding().substring(pmode.getMepBinding().lastIndexOf('/') + 1);
         
         ConfigurationContext configContext = ((InternalConfiguration) HolodeckB2BCoreInterface.getConfiguration())
         																				.getAxisConfigurationContext();
@@ -103,7 +103,7 @@ public class Axis2Sender {
         if (service == null) {
         	log.error("Cannot send {} [msgId={}] because required {} Service is not installed!", 
     				   MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId(), 
-    				   messageUnit.getPModeId());
+    				   svcName);
         	return;	
         }
         
