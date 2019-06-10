@@ -256,8 +256,8 @@ public class HTTPWorker implements Worker {
         String charSetEnc = BuilderUtil.getCharSetEncoding(contentType);
         if (Utils.isNullOrEmpty(charSetEnc))
             charSetEnc = MessageContext.DEFAULT_CHAR_SET_ENCODING;       
-        msgContext.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, charSetEnc);
-        
+        msgContext.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, charSetEnc);        
         msgContext.setProperty(MessageContext.TRANSPORT_OUT, response.getOutputStream());
+        MessageProcessingContext.getFromMessageContext(msgContext);
 	}
 }
