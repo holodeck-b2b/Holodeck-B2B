@@ -59,9 +59,9 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
  * Is responsible for sending the message unit using the Axis2 framework. Depending on the messaging protocol the 
  * correct <i>Service</i> is chosen to ensure that the correct handlers are invoked. The <i>Service</i> to use is 
  * determined based on the value of the <b>PMode.MEPBinding</b> parameter. If its value starts with <i>
- * "http://holodeck-b2b.org/pmode/mepBinding/"</i> this class will look for a registered service with the name that
- * matches the last part of the MEPBinding, e.g. if the MEPBinding is ""http://holodeck-b2b.org/pmode/mepBinding/as2" it
- * looks for a Service named "as2". 
+ * "http://holodeck-b2b.org/pmode/mepBinding/"</i> this class will look for a registered service with the name that 
+ * matches the next path segment of the MEPBinding value. Examples: For "http://holodeck-b2b.org/pmode/mepBinding/as2" 
+ * the expected Service is "as2" and for "http://holodeck-b2b.org/pmode/mepBinding/ebms2/oneWay" the Service is "ebms2".
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
@@ -88,8 +88,14 @@ public class Axis2Sender {
         }
         // The default protocol is AS4, so we will use the "as4" Service unless P-Mode indicates something else 
         String svcName = "as4";
-        if (pmode.getMepBinding().startsWith("http://holodeck-b2b.org/pmode/mepBinding/"))  
-        	svcName = pmode.getMepBinding().substring(pmode.getMepBinding().lastIndexOf('/') + 1);
+        final String mepBinding = pmode.getMepBinding();
+        if (mepBinding.startsWith("http://holodeck-b2b.org/pmode/mepBinding/")) {
+        	int segmentEnd = mepBinding.indexOf('/', 41);
+        	if (segmentEnd < 0)
+        		svcName = mepBinding.substring(41);
+        	else
+        		svcName = mepBinding.substring(41, segmentEnd);        	
+        }
         
         ConfigurationContext configContext = ((InternalConfiguration) HolodeckB2BCoreInterface.getConfiguration())
         																				.getAxisConfigurationContext();
