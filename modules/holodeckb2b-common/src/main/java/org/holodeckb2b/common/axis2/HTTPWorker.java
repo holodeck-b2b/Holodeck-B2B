@@ -163,9 +163,17 @@ public class HTTPWorker implements Worker {
 				if (msgBuilder != null) {
 					log.debug("Using " + msgBuilder.getClass().getSimpleName() 
 																		+ " Builder to prepare messaging processing");					
+					InputStream is;
+					try {
+						log.trace("Handle possible HTTP GZip transfer-encoding");
+						is = HTTPTransportUtils.handleGZip(msgContext, request.getInputStream());
+					} catch (IOException httpDecompressionError) {
+						log.error("An error occured while processing the GZIP encoded HTTP entity body: " 
+									+ httpDecompressionError.getMessage());
+						throw new AxisFault("Error processing the GZIP encoded HTTP entity body");
+					}
 					// The builder SHOULD return a SOAP info-set, but for safety we do an extra check
-					msgContext.setEnvelope(TransportUtils.createSOAPEnvelope(msgBuilder.processDocument(
-																							request.getInputStream(), 
+					msgContext.setEnvelope(TransportUtils.createSOAPEnvelope(msgBuilder.processDocument(is, 
 																							contentType, msgContext)));					
 					pi = AxisEngine.receive(msgContext);
 				} else {
@@ -238,15 +246,6 @@ public class HTTPWorker implements Worker {
 									   final AxisHttpRequest request, final AxisHttpResponse response) 
 			throws AxisFault {
 
-		try {
-			log.trace("Handle possible HTTP GZip transfer-encoding");
-			HTTPTransportUtils.handleGZip(msgContext, request.getInputStream());
-		} catch (IOException httpDecompressionError) {
-			log.error("An error occured while processing the GZIP encoded HTTP entity body: " 
-						+ httpDecompressionError.getMessage());
-			throw new AxisFault("Error processing the GZIP encoded HTTP entity body");
-		}
-		
         final String ip = (String)msgContext.getProperty(MessageContext.TRANSPORT_ADDR);
         final String requestURL = (!Utils.isNullOrEmpty(ip) ? ip : "") + uriPath; 		
         msgContext.setTo(new EndpointReference(requestURL));
