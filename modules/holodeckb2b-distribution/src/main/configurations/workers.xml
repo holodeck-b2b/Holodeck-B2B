@@ -96,4 +96,15 @@
         workerClass="org.holodeckb2b.common.workers.SubmitFromFile">
         <parameter name="watchPath">data/msg_out</parameter>
     </worker>
+    
+ 	<!-- ==============================================================
+    This worker start the RMI server that enables the API for locally
+    monitoring of the Holodeck B2B as implemented in the default  
+    User Interface. The worker has one optional parameter "port" that 
+    can be used to specify the port number that should be used by the
+    RMI Server. The default port is set to 1701.
+    =============================================================== -->
+    <worker name="monitorAPI" activate="true" delay="10"
+        workerClass="org.holodeckb2b.ui.api.RMIServer">
+    </worker>    
 </workers>

@@ -19,14 +19,26 @@ package org.holodeckb2b.ui.app.cli;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.security.MessageDigest;
+import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import java.util.Date;
 
+import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.util.Arrays;
+import org.holodeckb2b.common.messagemodel.MessageUnit;
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.IAgreement;
 import org.holodeckb2b.interfaces.general.IPartyId;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
+import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
+import org.holodeckb2b.ui.api.CertType;
 import org.holodeckb2b.ui.api.CoreInfo;
 
 /**
@@ -68,6 +80,18 @@ public class HB2BInfoTool {
 			listPModes(); break;
 		case PRINT_PMODE :
 			printPMode(clArgs.getParameter(CommandLineArguments.PRT_PMODE_ID)); break;
+		case LIST_TRUSTEDCERTS :
+			listTrustedCerts(clArgs.getParameter(CommandLineArguments.FORMAT)); break;
+		case PRINT_CERT :
+			printCert(clArgs.getParameter(CommandLineArguments.CERT_TYPE), 
+					  clArgs.getParameter(CommandLineArguments.CERT_ALIAS)); break;
+		case MSG_STATUS :
+			getMsgStatus(clArgs.getParameter(CommandLineArguments.MESSAGE_ID)); break;
+		case STATUS_LIST :
+			getMsgStatusList(clArgs.getParameter(CommandLineArguments.MESSAGE_ID)); break;
+		case HISTORY :
+			getHistory(clArgs.getParameter(CommandLineArguments.FROM),
+					   clArgs.getParameter(CommandLineArguments.MAX)); break;
 		}
 	}
 
@@ -158,7 +182,7 @@ public class HB2BInfoTool {
 			pmodes = coreAPI.getPModes();
 			
 		} catch (Exception e) {
-		System.err.println("Could not retrieve the P-Mode from Holodeck B2B instance. See error details below:");
+			System.err.println("Could not retrieve the P-Mode from Holodeck B2B instance. See error details below:");
 			e.printStackTrace(System.err);
 			System.exit(-3);
 		}		
@@ -186,4 +210,253 @@ public class HB2BInfoTool {
 								+ Utils.getExceptionTrace(e));
 		}		
 	}
+	
+	/**
+	 * Prints the list of certificates trusted by this Holodeck B2B instance.
+	 * 
+	 * @param format	Specifies how much detailed information should be provided:<ul>
+	 * 					<li><i>simple</i> : shows DN of both subject and issuer</li>
+	 * 					<li><i>detail</i> : in addition shows SKI and Serial Number</li></ul>
+	 */
+	private static void listTrustedCerts(final String format) {
+		X509Certificate[] certs = null;
+		try { 
+			certs = coreAPI.getTrustedCertificates();
+		} catch (Exception e) {
+			System.err.println(
+					"Could not retrieve the list of certificates from Holodeck B2B instance. See error details below:");
+			e.printStackTrace(System.err);
+			System.exit(-3);			
+		}
+		
+		boolean detailed = "detail".equalsIgnoreCase(format);
+		
+		System.out.printf("There are currently %d trusted certificates configured:%n%n", certs.length);
+		for(X509Certificate c : certs) {
+			System.out.println("=======================");
+			boolean isCA = c.getBasicConstraints() > 0;
+			boolean isRootCA = isCA && c.getSubjectDN().getName().equals(c.getIssuerDN().getName());
+			if (isRootCA) 
+				System.out.print("Trusted root CA : ");
+			else if (isCA)
+				System.out.print("Trusted intermediate CA : ");
+			else				
+				System.out.print("Directly trusted partner : ");
+			System.out.println(c.getSubjectDN().getName());
+			if (!isRootCA)
+				System.out.println("\tIssued by : " + c.getIssuerDN().getName());
+			if (detailed) {
+				System.out.println("\tSerial No : " + c.getSerialNumber().toString(16));
+				byte[] skiExtValue = c.getExtensionValue("2.5.29.14");
+				byte[] ski = null;
+				if (skiExtValue != null)
+					ski = Arrays.copyOfRange(skiExtValue, 4, skiExtValue.length);
+				System.out.println("\tSKI       : " + (ski != null ? Hex.encodeHexString(ski) : "N/A"));
+			}
+		}
+	}
+	
+	/**
+	 * Prints detailed information about the certificate registered in the Holodeck B2B instance under the given alias 
+	 * and of the specified type.
+	 * 
+	 * @param certType	The certificate's type, must be a name from {@link CertType}
+	 * @param alias		The alias under which certificate is registered
+	 */
+	private static void printCert(final String certType, final String alias) {
+		CertType type = null;
+		try {
+			type = CertType.valueOf(certType);
+		} catch (Exception invalidType) {
+			System.err.println("The specified certificate type [" + certType + "] is unknown!");
+			System.exit(-1);
+		}
+		
+		X509Certificate cert = null;
+		try {
+			cert = coreAPI.getCertificate(alias, type);
+		} catch (RemoteException e) {
+			System.err.println(
+			"An error occurred while getting the certificate from the Holodeck B2B instance. See error details below:");
+			e.printStackTrace(System.err);
+			System.exit(-3);						
+		}
+		if (cert == null) {
+			System.out.println("There is no " + type.toString() 
+							   + " certificate configured on this Holodeck B2B instance with alias= " + alias);
+			return;			
+		}
+		
+		System.out.println("Subject     : " + cert.getSubjectDN().getName());
+		System.out.println("Issuer      : " + cert.getIssuerDN().getName());
+		System.out.println("Serial no   : " + cert.getSerialNumber().toString(16));
+		byte[] skiExtValue = cert.getExtensionValue("2.5.29.14");
+		byte[] ski = null;
+		if (skiExtValue != null)
+			ski = Arrays.copyOfRange(skiExtValue, 4, skiExtValue.length);
+		System.out.println("SKI         : " + (ski != null ? Hex.encodeHexString(ski) : "N/A"));		
+		System.out.println("Valid from  : " + cert.getNotBefore().toString());
+		System.out.println("     until  : " + cert.getNotAfter().toString());
+		System.out.println("Fingerprints:");
+		System.out.println("     SHA256 : " + getCertFingerPrint("SHA-256", cert));
+		System.out.println("     SHA1   : " + getCertFingerPrint("SHA-1", cert));
+	}	
+
+	/**
+	 * Prints the current processing state of the message unit with the given MessageId. As it is possible that there 
+	 * exist multiple message units with the same id beside the status also the type of message unit and direction is
+	 * printed.
+	 * 
+	 * @param messageId 
+	 */
+	private static void getMsgStatus(String messageId) {
+		MessageUnit[] msgUnits = null;
+		try {
+			msgUnits = coreAPI.getMessageUnitInfo(messageId);
+		} catch (RemoteException e) {
+			System.err.println(
+			"An error occurred while getting the status from the Holodeck B2B instance. See error details below:");
+			e.printStackTrace(System.err);
+			System.exit(-3);						
+		}
+		if (msgUnits == null || msgUnits.length == 0) {
+			System.out.println("No message unit with messageId=" + messageId + " could be found!");
+			return;			
+		}
+		
+		if (msgUnits.length > 1) {
+			System.out.println("More than one message unit with MessageId [" + messageId 
+								+ "] were found. Listing all:");
+			System.out.println();
+		}
+		
+		for(MessageUnit m : msgUnits) {
+			System.out.print("Current processing status (since " + m.getTimestamp() + ") of ");
+			System.out.print(m.getDirection() == Direction.IN ? "received " : "outgoing ");
+			System.out.print(MessageUnitUtils.getMessageUnitName(m) 
+								+ " is " + m.getCurrentProcessingState().getState().name());
+			final String desc =  m.getCurrentProcessingState().getDescription();
+			System.out.println(!Utils.isNullOrEmpty(desc) ? (" (" + desc + ")") : ""); 				
+		}		
+	}
+	
+	/**
+	 * Prints the list of processing states of the message unit with the given MessageId. As it is possible that there 
+	 * exist multiple message units with the same id beside the status also the type of message unit and direction is
+	 * printed.
+	 * 
+	 * @param messageId 
+	 */
+	private static void getMsgStatusList(String messageId) {
+		MessageUnit[] msgUnits = null;
+		try {
+			msgUnits = coreAPI.getMessageUnitInfo(messageId);
+		} catch (RemoteException e) {
+			System.err.println(
+			"An error occurred while getting the status from the Holodeck B2B instance. See error details below:");
+			e.printStackTrace(System.err);
+			System.exit(-3);						
+		}
+		if (msgUnits == null || msgUnits.length == 0) {
+			System.out.println("No message unit with messageId=" + messageId + " could be found!");
+			return;			
+		}
+		
+		if (msgUnits.length > 1) {
+			System.out.println("More than one message unit with MessageId [" + messageId 
+								+ "] were found. Listing all:");
+			System.out.println();
+		}
+		
+		for(MessageUnit m : msgUnits) {
+			System.out.print("Processing states of "); 
+			System.out.print(m.getDirection() == Direction.IN ? "received " : "outgoing ");
+			System.out.println(MessageUnitUtils.getMessageUnitName(m) + ":");
+			
+			for(int i = m.getProcessingStates().size() - 1; i >= 0; i--) {
+				IMessageUnitProcessingState s = m.getProcessingStates().get(i);			
+				System.out.print(s.getStartTime() + " : " + s.getState().name());			
+				final String desc =  s.getDescription();				
+				System.out.println(!Utils.isNullOrEmpty(desc) ? (" (" + desc + ")") : "");
+			}
+		}		
+	}	
+	
+	private static void getHistory(final String from, final String max) {
+		Date upto = new Date();
+		try {
+			if (!Utils.isNullOrEmpty(from))
+				upto = Date.from(LocalDateTime.parse(from).atZone(ZoneId.systemDefault()).toInstant());
+		} catch (DateTimeParseException invaliddate) {
+			System.err.println("Invalid time stamp specified as start of overview : " + from);
+			System.exit(-1);
+		}
+		int maxMsgs = 10;
+		try {
+			if (!Utils.isNullOrEmpty(max))
+				maxMsgs = Integer.parseInt(max);
+		} catch (NumberFormatException invalidMax) {
+			System.err.println("Invalid maximum specified : " + max);
+			System.exit(-1);
+		}
+		
+		MessageUnit[] msgUnits = null;
+		try {
+			msgUnits = coreAPI.getMessageUnitLog(upto, maxMsgs);
+		} catch (RemoteException e) {
+			System.err.println(
+			"An error occurred while getting the message meta-data from the Holodeck B2B instance. See error details below:");
+			e.printStackTrace(System.err);
+			System.exit(-3);						
+		}
+		if (msgUnits == null || msgUnits.length == 0) {
+			System.out.print("No message units found");
+			if (!Utils.isNullOrEmpty(from))
+				System.out.print(" before " + from);
+			System.out.println("!");
+			return;			
+		}
+		
+		int mxMsgId = 9, mxRefTo = 12, mxPMode = 8;
+		for(MessageUnit m : msgUnits) {
+			mxMsgId = Math.max(mxMsgId, m.getMessageId().length());
+			mxRefTo = Math.max(mxRefTo, Utils.isNullOrEmpty(m.getRefToMessageId()) ? 0 : m.getRefToMessageId().length());
+			mxPMode = Math.max(mxPMode, Utils.isNullOrEmpty(m.getPModeId()) ? 0 : m.getPModeId().length());
+		}
+		
+		final String template = "| %-24s | %1s | %1s | %-" + mxMsgId + "s | %-" + mxRefTo + "s | %-" + mxPMode + "s |";		
+		final String line = String.format(template, "", "", "", "", "", "").replace(" ", "-").replace("|", "+");
+		
+		System.out.println(line);
+		System.out.println(String.format(template, "Timestamp", "T", "D", "MessageId", "RefMessageId", "PMode.id"));
+		System.out.println(line);
+		for(MessageUnit m : msgUnits) 
+			System.out.println(String.format(template, Utils.toXMLDateTime(m.getTimestamp()), 
+										     MessageUnitUtils.getMessageUnitName(m).charAt(0),
+										     m.getDirection() == Direction.IN ? "R" : "S",
+										     m.getMessageId(), 
+										     !Utils.isNullOrEmpty(m.getRefToMessageId()) ? m.getRefToMessageId() : "", 
+								    		 !Utils.isNullOrEmpty(m.getPModeId()) ? m.getPModeId() : ""));
+		System.out.println(line);
+	}	
+	
+    /**
+     * Gets the finger print of the certificate using the specified hash algorithm.
+     * 
+     * @param hashAlg The hash algorithm to calculate the finger print
+     * @param cert	  The certificate
+     * @return  	  Hex encoded finger print
+     */
+    private static String getCertFingerPrint(final String hashAlg, final X509Certificate cert) 
+    {
+    	try {
+	        byte[] encCertInfo = cert.getEncoded();
+	        MessageDigest md = MessageDigest.getInstance(hashAlg);
+	        byte[] digest = md.digest(encCertInfo);
+	        return Hex.encodeHexString(digest);	
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		return "N/A";
+    	}
+    }	
 }

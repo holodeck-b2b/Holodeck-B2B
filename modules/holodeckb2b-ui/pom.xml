@@ -27,6 +27,14 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-persistency</artifactId>
+        </dependency>
         
 		<dependency>
 			<groupId>junit</groupId>

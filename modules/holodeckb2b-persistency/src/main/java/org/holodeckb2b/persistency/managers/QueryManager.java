@@ -270,4 +270,44 @@ public class QueryManager implements IQueryManager {
         }
         return result;
     }
+    
+    /**
+     * Gets the meta-data of message units with a time stamp older then the given date to the indicated maximum of 
+     * message units. The result set is ordered descendingly on time stamp.
+     * <p>NOTE: This query is not part of {@link IQueryManager} and is added for use by the default UI API. If you use
+     * this method in other extensions note that the normal GPLv3 applies and your extension MUST also use GPLv3.
+     * 
+     * @param start		Most recent time stamp to include
+     * @param max		Maximum number of results
+     * @return			List of message units with a time stamp older then the given date with, limited to the given
+     * 					maximum number of entries 
+     * @throws PersistenceException When an error occurs in retrieving the message unit meta-data
+     */
+    public List<IMessageUnitEntity> getMessageUnitHistory(final Date start, final int max) throws PersistenceException {
+        if (max <= 0)
+        	throw new IllegalArgumentException("Maximum number of result entries must at least be 1");
+        
+    	List<MessageUnit> jpaResult = null;
+        final EntityManager em = EntityManagerUtil.getEntityManager();
+
+        final String queryString = "SELECT mu "
+                                 + "FROM MessageUnit mu "
+                                 + "WHERE mu.MU_TIMESTAMP <= :start "
+                                 + "ORDER BY mu.MU_TIMESTAMP DESC";
+        try {
+            em.getTransaction().begin();
+            jpaResult = em.createQuery(queryString, MessageUnit.class)
+            						  .setParameter("start", start)
+            						  .setMaxResults(max)
+                                      .getResultList();
+        } catch (final Exception e) {
+            // Something went wrong during query execution
+            throw new PersistenceException("Could not execute query \"getMessageUnitHistory\"", e);
+        } finally {
+            em.getTransaction().commit();
+            em.close();
+        }
+
+        return JPAEntityHelper.wrapInEntity(jpaResult);
+    }    
 }

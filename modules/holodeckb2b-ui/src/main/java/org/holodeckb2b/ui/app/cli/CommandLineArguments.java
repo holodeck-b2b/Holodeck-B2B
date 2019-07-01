@@ -19,7 +19,7 @@ package org.holodeckb2b.ui.app.cli;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.holodeckb2b.common.constants.ProductId;
+import org.holodeckb2b.common.VersionInfo;
 
 /**
  * Utility class for parsing the command line arguments.
@@ -47,7 +47,16 @@ public class CommandLineArguments {
 	final static Option PORT_OPTION = new Option("-p", false, "The RMI port used by the Holodeck B2B instance");
 	
 	final static Option PRT_PMODE_ID = new Option("-id", true , "The identifier of the P-Mode to print");
+
+	final static Option FORMAT = new Option("-format", false , "The level of details that should be included (simple [default] or detailed)");
+
+	final static Option CERT_ALIAS = new Option("-alias", true , "The alias of the certificate to print");
+	final static Option CERT_TYPE = new Option("-type", true , "The type of the certificate to print (private, encryption or trusted)");
 	
+	final static Option MESSAGE_ID = new Option("-messageId", true , "The MessageId of the message unit");
+	
+	final static Option FROM = new Option("-from", false, "The time stamp from which to start listing the message units. Default current time");
+	final static Option MAX = new Option("-max", false, "Max number of message units to list. Default 10");
 	
 	/**
 	 * Enumeration of all actions that can be used as argument when invoking the app. Each command contains the name
@@ -55,7 +64,12 @@ public class CommandLineArguments {
 	 */
 	enum Action {
 		LIST_PMODES("listPModes", new Option[] { PORT_OPTION }, "Lists all loaded P-Modes"),
-		PRINT_PMODE("printPMode", new Option[] { PORT_OPTION, PRT_PMODE_ID } , "Print details of P-Mode with specified id");
+		PRINT_PMODE("printPMode", new Option[] { PORT_OPTION, PRT_PMODE_ID } , "Print details of P-Mode with specified id"),
+		LIST_TRUSTEDCERTS("listTrustCerts", new Option[] { PORT_OPTION, FORMAT }, "Lists all trusted certificates"),
+		PRINT_CERT("printCert", new Option[] { PORT_OPTION, CERT_ALIAS, CERT_TYPE } , "Print the certificate of and with the specified type and alias"),
+		MSG_STATUS("msgStatus", new Option[] { PORT_OPTION, MESSAGE_ID } , "Get the current processing state of a message unit"),
+		STATUS_LIST("statusList", new Option[] { PORT_OPTION, MESSAGE_ID } , "Get the list of processing states a message unit was and is in"),
+		HISTORY("history", new Option[] { PORT_OPTION, FROM, MAX } , "Provides overview of message units order descendingly on time stamp");
 		
 		String   name;
 		Option[] options;
@@ -134,7 +148,7 @@ public class CommandLineArguments {
 	 * Prints a simple "usage" message to the console.
 	 */
 	public static void printUsage() {
-		System.out.println(ProductId.FULL_NAME + " - Monitoring Tool");
+		System.out.println("Holodeck B2B " + VersionInfo.fullVersion + " - Monitoring Tool");
 		System.out.println();
 		System.out.println("Usage: nc1701a <action> [options...]");
 		System.out.println();
@@ -145,9 +159,9 @@ public class CommandLineArguments {
 		System.out.println("Available options for actions:");
 		for (Action a : Action.values()) {
 			System.out.println();
-			System.out.println("Action:" + a.name);
-			for (Option o : a.options)
-				System.out.printf("\t%-20s %s%n", o.flag, o.description);			
+			System.out.println(a.name);
+			for (Option o : a.options) 
+				System.out.printf("\t%-20s %s%n", !o.isRequired ? "[" + o.flag + "]" : o.flag, o.description);			
 		}
 	}
 
