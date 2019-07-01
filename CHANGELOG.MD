@@ -8,7 +8,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * A default user interface that supports basic monitoring of a running Holodeck B2B instance. The UI is available both
   using a command line as well as a desktop GUI application.
-* Custom implementation of the Axis2 `TransportListener` interface which can use a _Service_ specified _Message Builder_  
+* Custom implementation of the Axis2 `TransportListener` interface which can use a _Service_ specified _Message Builder_
+* `org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface.getVersion()` method and 
+  `org.holodeckb2b.interfaces.general.IVersionInfo` interface to provide information about the version of the 
+   Holodeck B2B instance.    
+* `org.holodeckb2b.common.messagemodel.MessageUnit.copyOf(IMessageUnit)` to create a copy of the message unit data in
+  an object of the common message model implementation. 
 
 ### Changed
 * Refactored the default P-Mode implementation so it also supports setting of parameters and serialization to XML. The
@@ -23,6 +28,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   functionality to `org.holodeckb2b.common.workers` package.
 * Constructor of `org.holodeckb2b.interfaces.submit.MessageSubmitException` now accepts `Throwable` instead of 
   `Exception`
+* The classes of the common message model implementation are now Serializable 
 
 
 ### Fixed
