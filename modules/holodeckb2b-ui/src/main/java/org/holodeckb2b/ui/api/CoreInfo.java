@@ -94,13 +94,13 @@ public interface CoreInfo extends Remote {
 	MessageUnit[] getMessageUnitInfo(final String messageId) throws RemoteException;
 	
 	/**
-     * Gets the meta-data of message units with a time stamp older then the given date to the indicated maximum of 
-     * message units. The result is ordered descendingly on time stamp.
+     * Gets the meta-data of message units which processing started before and up to the given time stamp and limited to 
+     * the indicated maximum of message units. The result is ordered descendingly on the start of processing time stamp.
      * 
      * @param upto		Most recent time stamp to include
      * @param max		Maximum number of results
-     * @return			Array of message units with a time stamp older then the given date with, limited to the given
-     * 					maximum number of entries 
+     * @return			Array of message units which processing started before the given time stamp, limited to the 
+     * 					given maximum number of entries 
 	 * @throws RemoteException When an error occurs in retrieving the meta-data of the message units
 	 */
 	MessageUnit[] getMessageUnitLog(final Date upto, final int max) throws RemoteException;

@@ -331,7 +331,7 @@ public class HB2BInfoTool {
 		}
 		
 		for(MessageUnit m : msgUnits) {
-			System.out.print("Current processing status (since " + m.getTimestamp() + ") of ");
+			System.out.print("Current processing status (since " + m.getCurrentProcessingState().getStartTime() + ") of ");
 			System.out.print(m.getDirection() == Direction.IN ? "received " : "outgoing ");
 			System.out.print(MessageUnitUtils.getMessageUnitName(m) 
 								+ " is " + m.getCurrentProcessingState().getState().name());
@@ -382,6 +382,14 @@ public class HB2BInfoTool {
 		}		
 	}	
 	
+	/**
+	 * Shows an summary overview of message units processed by the Holodeck B2B instance. The overview can be limited
+	 * to show only message units which processing started before a certain time stamp and to a maximum number of 
+	 * message units to include. When no parameters are provided the 10 most recent message units are shown.
+	 * 
+	 * @param from	Time stamp up to which processing of the message unit should have been started to include it	 * 				
+	 * @param max	Maximum number of message units to show 
+	 */
 	private static void getHistory(final String from, final String max) {
 		Date upto = new Date();
 		try {

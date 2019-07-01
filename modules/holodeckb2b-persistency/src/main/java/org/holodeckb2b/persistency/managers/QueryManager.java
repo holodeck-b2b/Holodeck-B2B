@@ -272,8 +272,8 @@ public class QueryManager implements IQueryManager {
     }
     
     /**
-     * Gets the meta-data of message units with a time stamp older then the given date to the indicated maximum of 
-     * message units. The result set is ordered descendingly on time stamp.
+     * Gets the meta-data of message units which processing started before the given time stamp to the indicated maximum 
+     * of message units. The result set is ordered descendingly on time stamp.
      * <p>NOTE: This query is not part of {@link IQueryManager} and is added for use by the default UI API. If you use
      * this method in other extensions note that the normal GPLv3 applies and your extension MUST also use GPLv3.
      * 
@@ -282,6 +282,7 @@ public class QueryManager implements IQueryManager {
      * @return			List of message units with a time stamp older then the given date with, limited to the given
      * 					maximum number of entries 
      * @throws PersistenceException When an error occurs in retrieving the message unit meta-data
+     * @since HB2B_NEXT_VERSION
      */
     public List<IMessageUnitEntity> getMessageUnitHistory(final Date start, final int max) throws PersistenceException {
         if (max <= 0)
@@ -291,9 +292,11 @@ public class QueryManager implements IQueryManager {
         final EntityManager em = EntityManagerUtil.getEntityManager();
 
         final String queryString = "SELECT mu "
-                                 + "FROM MessageUnit mu "
-                                 + "WHERE mu.MU_TIMESTAMP <= :start "
-                                 + "ORDER BY mu.MU_TIMESTAMP DESC";
+							     + "FROM MessageUnit mu JOIN mu.states s "
+							     + "WHERE s.PROC_STATE_NUM = 0 "         
+							     + "AND s.START <= :start "
+							     + "ORDER BY s.START DESC";
+        
         try {
             em.getTransaction().begin();
             jpaResult = em.createQuery(queryString, MessageUnit.class)
