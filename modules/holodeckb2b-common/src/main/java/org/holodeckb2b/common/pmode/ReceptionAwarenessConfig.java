@@ -25,6 +25,7 @@ import org.holodeckb2b.interfaces.general.Interval;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.ElementException;
+import org.simpleframework.xml.core.Persist;
 import org.simpleframework.xml.core.TextException;
 import org.simpleframework.xml.core.Validate;
 import org.simpleframework.xml.core.ValueRequiredException;
@@ -40,19 +41,19 @@ public class ReceptionAwarenessConfig implements IReceptionAwareness, Serializab
 	private static final long serialVersionUID = -3921059933083375333L;
 
 	@Element(name = "MaxRetries", required = false)
-	private int maxRetries = -1;
+	private Integer maxRetries;
 
 	@Element(name = "RetryInterval", required = false)
-	private long fixedInterval = -1;
+	private Long fixedInterval;
 
 	@Element(name = "WaitIntervals", required = false)
 	private String flexibleIntervalsText = null;
 
 	@Element(name = "UseDuplicateElimination", required = false)
-	private boolean useDupElimination = true;
+	private Boolean useDupElimination;
 
 	@Transient
-	private Interval[] waitIntervals = null;
+	private Interval[] intervals = null;
 
 	/**
 	 * Default constructor creates a new and empty
@@ -68,20 +69,23 @@ public class ReceptionAwarenessConfig implements IReceptionAwareness, Serializab
 	 * @param source The source object to copy the parameters from
 	 */
 	public ReceptionAwarenessConfig(final IReceptionAwareness source) {
-		this.useDupElimination = source.useDuplicateDetection();
-		setWaitIntervals(source.getWaitIntervals());
+		this.intervals = source.getWaitIntervals();
+		if (intervals == null || intervals.length == 0)
+			this.useDupElimination = Boolean.valueOf(source.useDuplicateDetection());		
 	}
 
 	/**
-	 * Validates the data read from the XML document by checking that when <code>MaxRetries</code> is supplied 
-	 * <code>RetryInterval</code> contains positive non zero value.
+	 * Validates the data read from the XML document by checking that either a number of fixed intervals is specified 
+	 * using the <code>MaxRetries</code> and <code>RetryInterval</code> elements or that a custom series of intervals 
+	 * is specified in the <code>WaitIntervals</code> element.
+	 * <p>Also converts both to the array of actual intervals to use.
 	 *
 	 * @throws Exception When the read XML is not valid
 	 */
 	@Validate
 	public void validate() throws Exception {
-		if (maxRetries > -1)
-			if (fixedInterval <= 0)
+		if (maxRetries != null)
+			if (fixedInterval == null)
 				throw new ValueRequiredException(
 						"ReceptionAwareness/RetryInterval must have positive non zero value if MaxRetries is set");
 			else if (!Utils.isNullOrEmpty(flexibleIntervalsText))
@@ -89,37 +93,35 @@ public class ReceptionAwarenessConfig implements IReceptionAwareness, Serializab
 
 		// Create the array of intervals and check also that the specified intervals are
 		// valid
-		calculateIntervals();
+		calculateIntervals();		
 	}
 
-	@Override
-	public Interval[] getWaitIntervals() {
-		if (waitIntervals == null)
-			try {
-				calculateIntervals();
-			} catch (TextException e) {
-			}
-
-		return waitIntervals;
-	}
-
-	public void setWaitIntervals(Interval[] newIntervals) {
-		this.waitIntervals = newIntervals;
-		if (waitIntervals.length > 0) {
+	@Persist
+	public void createIntervalString() {
+		if (intervals != null && intervals.length > 0) {
 			StringBuilder csList = new StringBuilder(); 
-			for(int i = 0; i < waitIntervals.length; i++) {
-				csList.append(waitIntervals[i]);
-				if (i < waitIntervals.length - 1)
+			for(int i = 0; i < intervals.length; i++) {				
+				csList.append(TimeUnit.SECONDS.convert(intervals[i].getLength(), intervals[i].getUnit()));
+				if (i < intervals.length - 1)
 					csList.append(',');
 			}
 			flexibleIntervalsText = csList.toString();
 		} else
 			flexibleIntervalsText = null;
 	}
+	
+	@Override
+	public Interval[] getWaitIntervals() {
+		return intervals;
+	}
+
+	public void setWaitIntervals(Interval[] newIntervals) {
+		this.intervals = newIntervals;
+	}
 
 	@Override
 	public boolean useDuplicateDetection() {
-		return useDupElimination;
+		return useDupElimination == null ? true : useDupElimination;
 	}
 
 	public void setDuplicateDetection(final boolean useDupDetection) {
@@ -137,22 +139,22 @@ public class ReceptionAwarenessConfig implements IReceptionAwareness, Serializab
 				throw new TextException("WaitIntervals does not contain valid list of intervals!");
 			try {
 				final String[] sIntervals = flexibleIntervalsText.split(",");
-				this.waitIntervals = new Interval[sIntervals.length];
+				this.intervals = new Interval[sIntervals.length];
 				for (int i = 0; i < sIntervals.length; i++) {
 					int intervalLength = Integer.parseInt(sIntervals[i].trim());
 					if (intervalLength < 0)
 						throw new TextException("WaitIntervals must contain non-negative integers!");
-					this.waitIntervals[i] = new Interval(intervalLength, TimeUnit.SECONDS);
+					this.intervals[i] = new Interval(intervalLength, TimeUnit.SECONDS);
 				}
 			} catch (NumberFormatException nan) {
 				throw new TextException("WaitIntervals does not contain valid list of intervals!");
 			}
-		} else if (maxRetries >= 0) {
+		} else if (maxRetries != null && maxRetries >= 0) {
 			// Configuration with fixed intervals, convert to new structure so add an extra
 			// wait interval
-			waitIntervals = new Interval[maxRetries + 1];
+			intervals = new Interval[maxRetries + 1];
 			for (int i = 0; i < maxRetries + 1; i++)
-				waitIntervals[i] = new Interval(fixedInterval, TimeUnit.SECONDS);
+				intervals[i] = new Interval(fixedInterval.longValue(), TimeUnit.SECONDS);
 		}
 	}
 }

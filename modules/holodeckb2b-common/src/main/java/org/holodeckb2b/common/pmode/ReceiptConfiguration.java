@@ -57,20 +57,16 @@ public class ReceiptConfiguration implements IReceiptConfiguration, Serializable
      * @param source The source object to copy the parameters from
      */
     public ReceiptConfiguration(final IReceiptConfiguration source) {
-    	if (source.getPattern() != null) {
-	        this.replyPattern= source.getPattern().toString();
-	        this.replyTo = source.getTo();
-    	} else {
-	        this.notifyReceiptToBusinessApp = source.shouldNotifyReceiptToBusinessApplication();	        
-	        this.receiptDelivery = source.getReceiptDelivery() != null ?
+        this.replyPattern = source.getPattern() != null ? source.getPattern().name() : null;
+        this.replyTo = source.getTo();
+        this.notifyReceiptToBusinessApp = source.shouldNotifyReceiptToBusinessApplication() ? true : null;	        
+        this.receiptDelivery = source.getReceiptDelivery() != null ?
                                     					new DeliveryConfiguration(source.getReceiptDelivery()) : null;
-    	}
     }
 
     @Override
     public ReplyPattern getPattern() {
-        return Utils.isNullOrEmpty(replyPattern) ? ReplyPattern.RESPONSE 
-        										 : ReplyPattern.valueOf(replyPattern.toUpperCase());
+        return Utils.isNullOrEmpty(replyPattern) ? null : ReplyPattern.valueOf(replyPattern.toUpperCase());
     }
 
     public void setPattern(final ReplyPattern pattern) {
