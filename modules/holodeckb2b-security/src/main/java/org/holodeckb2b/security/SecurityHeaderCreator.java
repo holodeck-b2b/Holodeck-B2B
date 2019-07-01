@@ -50,7 +50,7 @@ import org.apache.wss4j.dom.handler.RequestData;
 import org.apache.wss4j.dom.handler.WSHandler;
 import org.apache.wss4j.dom.message.WSSecHeader;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
-import org.holodeckb2b.common.constants.ProductId;
+import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -444,9 +444,9 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
         final RequestData reqData = new RequestData();
         final WSSConfig wssConfig = WSSConfig.getNewInstance();
         wssConfig.setIdAllocator(new WsuIdAllocator() {
-        	private static final String HB2B_ID_PREFIX = "4b28" + ProductId.MAJOR_VERSION 
-		        												+ ProductId.MINOR_VERSION 
-		        												+ ProductId.PATCH_VERSION; 
+        	private static final String HB2B_ID_PREFIX = "4b28" + VersionInfo.majorVersion 
+		        												+ VersionInfo.minorVersion
+		        												+ VersionInfo.patchVersion; 
             @Override
 			public String createId(String prefix, Object o) {
                 return (!Utils.isNullOrEmpty(prefix) ? prefix : "") + HB2B_ID_PREFIX + UUID.randomUUID().toString();

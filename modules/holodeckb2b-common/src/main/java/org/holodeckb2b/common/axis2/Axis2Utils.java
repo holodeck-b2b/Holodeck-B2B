@@ -24,6 +24,7 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.axis2.wsdl.WSDLConstants;
+import org.holodeckb2b.common.VersionInfo;
 
 /**
  * This class contains helper functions related to the Axis2 framework
@@ -37,7 +38,12 @@ public final class Axis2Utils {
 	 * to prepare the message processing 
 	 */
 	public static final String SVC_BUILDER_PARAM = "hb2b:builder";
-	
+
+	/**
+	 * Value for the HTTP "Server" and "User-Agent" headers used to identify the product that created the HTTP message
+	 */
+	public static final String HTTP_PRODID_HEADER = "HolodeckB2B/" + VersionInfo.majorVersion 
+																   + "." + VersionInfo.minorVersion;
 	/**
 	 * Checks if the executed Service has specified its own <i>Message Builder</i> and if so returns an instance of that
 	 * builder.   

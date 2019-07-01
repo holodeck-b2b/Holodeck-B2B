@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
@@ -32,6 +33,7 @@ import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
+import org.holodeckb2b.interfaces.general.IVersionInfo;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.ICertificateManager;
@@ -233,5 +235,10 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
 	@Override
 	public List<IMessageProcessingEventConfiguration> getEventHandlerConfiguration() {
 		return eventConfig;
+	}
+	
+	@Override
+	public IVersionInfo getVersion() {
+		return VersionInfo.getInstance();
 	}
 }

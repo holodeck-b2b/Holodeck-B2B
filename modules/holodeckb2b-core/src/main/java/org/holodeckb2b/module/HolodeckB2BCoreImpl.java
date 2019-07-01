@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
+import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.config.Config;
 import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.common.util.Utils;
@@ -51,6 +52,7 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
+import org.holodeckb2b.interfaces.general.IVersionInfo;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
@@ -262,7 +264,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         }
 
 
-        log.info("Holodeck B2B Core module STARTED.");
+        log.info("Holodeck B2B Core " + VersionInfo.fullVersion + " STARTED.");
     }
 
     @Override
@@ -523,5 +525,16 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     @Override
 	public List<IMessageProcessingEventConfiguration> getEventHandlerConfiguration() {
     	return eventConfigurations;
+    }
+    
+    /**
+     * Gets information about the version of the Holodeck B2B Core of this instance. 
+     *   
+     * @return	The version info
+     * @since HB2B_NEXT_VERSION
+     */
+    @Override
+	public IVersionInfo getVersion() {
+    	return VersionInfo.getInstance();
     }
 }

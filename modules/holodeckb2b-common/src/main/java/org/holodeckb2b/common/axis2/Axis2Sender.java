@@ -39,7 +39,6 @@ import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.config.InternalConfiguration;
-import org.holodeckb2b.common.constants.ProductId;
 import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
@@ -126,7 +125,7 @@ public class Axis2Sender {
 	        final Options options = new Options();
 	        options.setTo(targetEPR);
 	        options.setExceptionToBeThrownOnSOAPFault(false);
-	        options.setProperty(HTTPConstants.USER_AGENT, ProductId.HTTP_HEADER);
+	        options.setProperty(HTTPConstants.USER_AGENT, Axis2Utils.HTTP_PRODID_HEADER);
 	        OutInAxisOperation sendOp = new OutOptInAxisOperation(ANON_OUT_IN_OP);
 	        sendOp.setParent(service);
 	        axisConfig.getPhasesInfo().setOperationPhases(sendOp);

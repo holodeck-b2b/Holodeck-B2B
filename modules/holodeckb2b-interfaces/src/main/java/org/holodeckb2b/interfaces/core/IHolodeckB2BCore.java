@@ -26,6 +26,7 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
+import org.holodeckb2b.interfaces.general.IVersionInfo;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
@@ -158,4 +159,12 @@ public interface IHolodeckB2BCore {
      * @since 4.1.0
      */
     List<IMessageProcessingEventConfiguration> getEventHandlerConfiguration();
+    
+    /**
+     * Gets information about the version of the Holodeck B2B Core of this instance. 
+     *   
+     * @return	The version info
+     * @since HB2B_NEXT_VERSION
+     */
+    IVersionInfo getVersion();
 }

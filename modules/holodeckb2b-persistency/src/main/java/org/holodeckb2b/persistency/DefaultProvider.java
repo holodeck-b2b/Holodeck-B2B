@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.persistency;
 
-import org.holodeckb2b.common.constants.ProductId;
+import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
@@ -38,8 +38,7 @@ public class DefaultProvider implements IPersistencyProvider {
 
     @Override
     public String getName() {
-        return  "HB2B Default Persistency/" + ProductId.MAJOR_VERSION + "." + ProductId.MINOR_VERSION
-                                            + "." + ProductId.PATCH_VERSION;
+        return  "HB2B Default Persistency/" + VersionInfo.fullVersion;
     }
 
 

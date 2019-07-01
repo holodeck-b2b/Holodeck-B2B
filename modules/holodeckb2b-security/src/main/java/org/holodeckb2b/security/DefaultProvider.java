@@ -29,8 +29,8 @@ import javax.xml.bind.Unmarshaller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.config.ConfigXmlFile;
-import org.holodeckb2b.common.constants.ProductId;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.security.ICertificateManager;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderCreator;
@@ -75,8 +75,7 @@ public class DefaultProvider implements ISecurityProvider {
      */
     @Override
     public String getName() {
-        return "HB2B Default Security/" + ProductId.MAJOR_VERSION + "." + ProductId.MINOR_VERSION
-                                            + "." + ProductId.PATCH_VERSION;
+        return "HB2B Default Security/" + VersionInfo.fullVersion;
     }
 
     /**
@@ -165,8 +164,7 @@ public class DefaultProvider implements ISecurityProvider {
 		Security.insertProviderAt(new BouncyCastleProvider(), 1);		        
         
         // Initialization done
-        log.info("Default Security Provider version {}.{}.{} is ready!", ProductId.MAJOR_VERSION,
-                  ProductId.MINOR_VERSION, ProductId.PATCH_VERSION);
+        log.info("Default Security Provider version {} is ready!", VersionInfo.fullVersion);
     }
 
     @Override

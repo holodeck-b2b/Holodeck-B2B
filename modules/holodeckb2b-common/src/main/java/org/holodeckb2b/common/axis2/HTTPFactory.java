@@ -22,7 +22,6 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.TransportInDescription;
-import org.holodeckb2b.common.constants.ProductId;
 
 /**
  * Is a customised {@link org.apache.axis2.transport.http.server.HttpFactory} that uses the actual {@link 
@@ -42,7 +41,7 @@ public class HTTPFactory extends org.apache.axis2.transport.http.server.HttpFact
         
         setPort(getIntParam(PARAMETER_PORT, 8080));
         setHostAddress(getStringParam(PARAMETER_HOST_ADDRESS, null));
-        setOriginServer(ProductId.HTTP_HEADER);
+        setOriginServer(Axis2Utils.HTTP_PRODID_HEADER);
         setRequestSocketTimeout(getIntParam(PARAMETER_REQUEST_SOCKET_TIMEOUT, 20000));
         setRequestTcpNoDelay(getBooleanParam(PARAMETER_REQUEST_TCP_NO_DELAY, true));
         setRequestCoreThreadPoolSize(getIntParam(PARAMETER_REQUEST_CORE_THREAD_POOL_SIZE, 100));
