@@ -72,10 +72,20 @@ public final class SecurityConstants {
     public static final QName SIGNATURE_ELEM = new QName(DSIG_NAMESPACE_URI, "Signature");
 
     /**
+     * QName of the WS-Security header <code>xenc:EncryptedKey</code> child element
+     */
+    public static final QName ENCRYPTED_KEY_ELEM = new QName(XENC_NAMESPACE_URI, "EncryptedKey");
+    
+    /**
      * QName of the WS-Security header <code>xenc:EncryptedData</code> child element
      */
     public static final QName ENCRYPTED_DATA_ELEM = new QName(XENC_NAMESPACE_URI, "EncryptedData");
 
+    /**
+     * QName of the WS-Security header <code>xenc:EncryptionMethod</code> child element
+     */
+    public static final QName ENCRYPTION_METHOD_ELEM = new QName(XENC_NAMESPACE_URI, "EncryptionMethod");
+   
     /**
      * QName of the WS-Security header <code>xenc:CipherReference</code> child element
      */
