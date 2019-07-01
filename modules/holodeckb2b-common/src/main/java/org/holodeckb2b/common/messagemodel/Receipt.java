@@ -16,9 +16,11 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import org.apache.axiom.om.OMElement;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
@@ -26,13 +28,15 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 /**
  * Is an in memory only implementation of {@link IReceipt} to temporarily store the meta-data information on a Receipt
  * Signal message unit.
- *
+ * <p><b>NOTE:</b> The content of the Receipt is marked as <i>transient</i> and therefore is not serialized,
+ * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public class Receipt extends MessageUnit implements IReceipt {
-
-    private ArrayList<OMElement>    content;
+public class Receipt extends MessageUnit implements IReceipt, Serializable {
+	private static final long serialVersionUID = 2638231745969207571L;
+	
+	private transient ArrayList<OMElement>    content;
 
     /**
      * Default constructor creates a new empty <code>Receipt</code> object

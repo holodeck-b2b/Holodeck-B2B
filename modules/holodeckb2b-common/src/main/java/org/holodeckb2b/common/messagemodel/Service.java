@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
+import java.io.Serializable;
+
 import org.holodeckb2b.interfaces.general.IService;
 
 /**
@@ -25,9 +27,10 @@ import org.holodeckb2b.interfaces.general.IService;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public class Service implements IService {
+public class Service implements IService, Serializable {
+	private static final long serialVersionUID = -4008024058397816930L;
 
-    private String      name;
+	private String      name;
     private String      type;
 
     /**

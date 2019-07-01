@@ -16,12 +16,17 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -33,18 +38,40 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public abstract class MessageUnit implements IMessageUnit {
+public abstract class MessageUnit implements IMessageUnit, Serializable {
+	private static final long serialVersionUID = -6487452438799675994L;
 
-    private Direction  direction;
+	private Direction  direction;
     private String  messageId;
     private Date    timestamp;
     private String  refToMessageId;
     private ArrayList<IMessageUnitProcessingState>  states;
     private String  pmodeId;
+    
+    /**
+     * Creates a new message unit instance of the correct type using the given message unit as source. 
+     * 
+     * @param 	m	The message unit to copy the data from
+     * @return	New message unit instance with copy of the data
+     * @since HB2B_NEXT_VERSION
+     */
+    public static MessageUnit copyOf(IMessageUnit m) {
+    	if (m instanceof IUserMessage)
+    		return new UserMessage((IUserMessage) m);    	
+    	else if (m instanceof IPullRequest)
+    		return new PullRequest((IPullRequest) m);
+    	else if (m instanceof IReceipt)
+    		return new Receipt((IReceipt) m);
+    	else if (m instanceof IErrorMessage)
+    		return new ErrorMessage((IErrorMessage) m);
+    	else
+    		throw new IllegalArgumentException("Unknown message unit type");
+    }
+    
     /**
      * Default constructor to initialize as empty meta-data object
      */
-    public MessageUnit() {}
+    protected MessageUnit() {}
 
    /**
      * Create a new <code>M</code> object for the user message unit described by the given
@@ -52,7 +79,7 @@ public abstract class MessageUnit implements IMessageUnit {
      *
      * @param sourceMessageUnit   The meta data of the message unit to copy to the new object
      */
-    public MessageUnit(final IMessageUnit sourceMessageUnit) {
+    protected MessageUnit(final IMessageUnit sourceMessageUnit) {
         if (sourceMessageUnit == null)
             return;
 
@@ -180,7 +207,8 @@ public abstract class MessageUnit implements IMessageUnit {
      *
      * @return  The {@link IMessageUnitProcessingState} the message unit is currently in
      */
-    public IMessageUnitProcessingState getCurrentProcessingState() {
+    @Override
+	public IMessageUnitProcessingState getCurrentProcessingState() {
         return states.get(states.size() - 1);
     }
 

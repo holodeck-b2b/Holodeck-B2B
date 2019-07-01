@@ -16,71 +16,77 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
+import java.io.Serializable;
 import java.util.Date;
+
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
- * Is an implementation of {@link IMessageUnitProcessingState} used in the parent class to hold the processing
- * states of the message unit.
+ * Is an implementation of {@link IMessageUnitProcessingState} used in the
+ * parent class to hold the processing states of the message unit.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since  3.0.0
+ * @since 3.0.0
  */
-public class MessageProcessingState implements IMessageUnitProcessingState {
+public class MessageProcessingState implements IMessageUnitProcessingState, Serializable {
 
-        private ProcessingState state;
-        private Date            startTime;
-        private String          description;
+	private static final long serialVersionUID = -3508733471289194518L;
 
-        /**
-         * Creates a new <code>MessageProcessingState</code> object with the given state and the current time as start
-         * 
-         * @param	state 			The processing state to set
-         */
-        public MessageProcessingState(final ProcessingState state) {
-            this(state, null);
-        }
-        
-        /**
-         * Creates a new <code>MessageProcessingState</code> object with the given state and description and sets the 
-         * current time as start
-         * 
-         * @param	state 			The processing state to set
-         * @param	description		Additional description of the processing state 
-         * @since 4.1.0
-         */
-        public MessageProcessingState(final ProcessingState state, final String description) {
-        	this.state = state;
-        	this.startTime = new Date();
-        	this.description = description;
-        }
+	private ProcessingState state;
+	private Date startTime;
+	private String description;
 
-        /**
-         * Creates a new <code>MessageProcessingState</code> object by copying the information from the given state
-         *
-         * @param sourceState  The source processing state to copy the information from
-         */
-        public MessageProcessingState(final IMessageUnitProcessingState sourceState) {
-            if (sourceState != null) {
-                this.state = sourceState.getState();
-                this.startTime = sourceState.getStartTime();
-                this.description = sourceState.getDescription();
-            }
-        }
+	/**
+	 * Creates a new <code>MessageProcessingState</code> object with the given state
+	 * and the current time as start
+	 * 
+	 * @param state The processing state to set
+	 */
+	public MessageProcessingState(final ProcessingState state) {
+		this(state, null);
+	}
 
-        @Override
-        public ProcessingState getState() {
-            return state;
-        }
+	/**
+	 * Creates a new <code>MessageProcessingState</code> object with the given state
+	 * and description and sets the current time as start
+	 * 
+	 * @param state       The processing state to set
+	 * @param description Additional description of the processing state
+	 * @since 4.1.0
+	 */
+	public MessageProcessingState(final ProcessingState state, final String description) {
+		this.state = state;
+		this.startTime = new Date();
+		this.description = description;
+	}
 
-        @Override
-        public Date getStartTime() {
-            return startTime;
-        }
+	/**
+	 * Creates a new <code>MessageProcessingState</code> object by copying the
+	 * information from the given state
+	 *
+	 * @param sourceState The source processing state to copy the information from
+	 */
+	public MessageProcessingState(final IMessageUnitProcessingState sourceState) {
+		if (sourceState != null) {
+			this.state = sourceState.getState();
+			this.startTime = sourceState.getStartTime();
+			this.description = sourceState.getDescription();
+		}
+	}
 
-        @Override
-        public String getDescription() {
-            return description;
-        }
-    }
+	@Override
+	public ProcessingState getState() {
+		return state;
+	}
+
+	@Override
+	public Date getStartTime() {
+		return startTime;
+	}
+
+	@Override
+	public String getDescription() {
+		return description;
+	}
+}

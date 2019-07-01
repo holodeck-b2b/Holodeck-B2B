@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
+import java.io.Serializable;
+
 import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 
 /**
@@ -25,9 +27,10 @@ import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public class AgreementReference implements IAgreementReference {
+public class AgreementReference implements IAgreementReference, Serializable {
+	private static final long serialVersionUID = -14269267765693011L;
 
-    private String      name;
+	private String      name;
     private String      type;
     private String      pmodeId;
 
