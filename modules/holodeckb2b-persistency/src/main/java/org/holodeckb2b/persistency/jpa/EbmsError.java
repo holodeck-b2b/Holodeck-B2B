@@ -169,8 +169,8 @@ public class EbmsError implements IEbmsError, Serializable {
 
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "LANG", column = @Column(name = "DESCRIPTION_LANG")),
-        @AttributeOverride(name = "DESCRIPTION_TEXT", column = @Column(name = "DESCRIPTION_TXT", length = 10000))
+        @AttributeOverride(name = "language", column = @Column(name = "DESCRIPTION_LANG")),
+        @AttributeOverride(name = "text", column = @Column(name = "DESCRIPTION_TXT", length = 10000))
     })
     private Description     longDescription;
 }
