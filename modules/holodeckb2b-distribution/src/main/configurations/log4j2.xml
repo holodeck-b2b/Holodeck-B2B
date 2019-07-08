@@ -67,6 +67,7 @@ recommended to raise log levels to at least INFO.
         <Logger name="org.holodeckb2b.common.workers" level="WARN"/>
         <Logger name="org.holodeckb2b.as4.workers" level="WARN"/>
         <Logger name="org.holodeckb2b.ebms3.pulling" level="WARN"/>
+        <Logger name="org.holodeckb2b.events.SyncEventProcessor" level="WARN"/>
         
         <!--
             SOAP Envelope logging
