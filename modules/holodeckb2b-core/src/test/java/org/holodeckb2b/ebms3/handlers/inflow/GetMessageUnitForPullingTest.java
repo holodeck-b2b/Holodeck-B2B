@@ -29,12 +29,16 @@ import org.apache.axis2.engine.Handler.InvocationResponse;
 import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
@@ -52,8 +56,6 @@ import org.junit.Test;
 public class GetMessageUnitForPullingTest {
 
     private static final String T_MPC_1 = "http://test.holodeck-b2b.org/mpc";
-    private static final String T_PMODE_ID_AVAILABLE = "pm-for-pulling";
-    private static final String T_PMODE_ID_EMPTY = "pm-empty-mpc";
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -68,11 +70,12 @@ public class GetMessageUnitForPullingTest {
     public void testAvailableOnMPC() throws Exception {
         StorageManager storeManager = HolodeckB2BCore.getStorageManager();
         
-        PMode pmode = new PMode();
-        pmode.setId(T_PMODE_ID_AVAILABLE);
+        PMode pmode = TestUtils.create1WayReceivePushPMode();
+        pmode.setMepBinding(EbMSConstants.ONE_WAY_PULL);
+        Leg leg = pmode.getLeg(Label.REQUEST);
         
         UserMessage userMessage = new UserMessage();
-        userMessage.setPModeId(T_PMODE_ID_AVAILABLE);
+        userMessage.setPModeId(pmode.getId());
         userMessage.setMPC(T_MPC_1);
         userMessage.setMessageId(MessageIdUtils.createMessageId());
         IUserMessageEntity umEntity = storeManager.storeOutGoingMessageUnit(userMessage);
@@ -112,11 +115,12 @@ public class GetMessageUnitForPullingTest {
     public void testEmptyMPC() throws Exception {
         StorageManager storeManager = HolodeckB2BCore.getStorageManager();
         
-        PMode pmode = new PMode();
-        pmode.setId(T_PMODE_ID_EMPTY);
+        PMode pmode = TestUtils.create1WaySendPushPMode();
+        pmode.setMepBinding(EbMSConstants.ONE_WAY_PULL);
+        Leg leg = pmode.getLeg(Label.REQUEST);
         
         UserMessage userMessage = new UserMessage();
-        userMessage.setPModeId(T_PMODE_ID_EMPTY);
+        userMessage.setPModeId(pmode.getId());
         userMessage.setMPC(T_MPC_1);
         userMessage.setMessageId(MessageIdUtils.createMessageId());
         IUserMessageEntity umEntity = storeManager.storeOutGoingMessageUnit(userMessage);

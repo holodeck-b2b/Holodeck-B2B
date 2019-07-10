@@ -31,7 +31,7 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandler
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the default implementation of {@link IMessageProcessingEventProcessor} for handling <i>message processing events
@@ -77,23 +77,17 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
         log.trace("A " + eventType + " event [" + event.getId() + "] was raised for " + msgUnitType 
         			+ " with msgId=" + messageId);
         final IMessageUnit subject = event.getSubject();
-        final String pmodeId = subject.getPModeId();
         boolean isEventHandled = false;
-        if (!Utils.isNullOrEmpty(pmodeId)) {
-	        // Get the event handler configuration from the correct leg of the P-Mode. Because the message unit may not
-	        // refer to a leg, we use the REQUEST leg as default
-	        final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(pmodeId);
-	        if (pmode == null) 
-	            // The P-Mode is not available anymore (should not happen as the message unit is current in process)
-	            log.error("The P-Mode for the message unit [" + pmodeId + "] is not available!");
-	        else {
-	        	final ILeg leg = pmode.getLeg(ILeg.Label.REQUEST);
-	        	final List<IMessageProcessingEventConfiguration> eventHandlers = leg == null ? null :
-	        															leg.getMessageProcessingEventConfiguration();
-	        	isEventHandled = handleEvent(eventHandlers, event);
-	        }
-        }
-        
+        // Get the event handler configuration from the correct leg of the P-Mode.         	
+        try {
+        	final ILeg leg = PModeUtils.getLeg(subject);
+        	final List<IMessageProcessingEventConfiguration> eventHandlers = leg == null ? null :
+        															leg.getMessageProcessingEventConfiguration();
+        	isEventHandled = handleEvent(eventHandlers, event);
+        } catch (IllegalStateException pmodeNotAvailable) {
+        	// The P-Mode is not available anymore (should not happen as the message unit is current in process)
+            log.error("The P-Mode for the message unit [" + subject.getMessageId() + "] is not available!");
+        }        
         if (!isEventHandled) {
         	log.trace(eventType + " not handled by P-Mode configured handlers => check global configuration");
         	if (!handleEvent(HolodeckB2BCoreInterface.getMessageProcessingEventConfiguration(), event))

@@ -26,10 +26,9 @@ import org.holodeckb2b.common.handler.AbstractBaseHandler;
 import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>OUT_FLOW</i> handler that creates an empty ebMS message, i.e. a SOAP Envelope containing only an <code>
@@ -57,11 +56,15 @@ public class CreateSOAPEnvelopeHandler extends AbstractBaseHandler {
                 if (primaryMU == null) {
                     log.debug("No message unit in this response, no envelope needed");
                     return InvocationResponse.CONTINUE;
+                }                
+                ILeg leg;
+                try {
+                	leg = PModeUtils.getLeg(primaryMU);
+                } catch (IllegalStateException pmodeNotAvailable) {
+                	log.error("P-Mode of primary message unit [" + primaryMU.getMessageId() + "] is not available");
+                	leg = null;
                 }
-                final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(primaryMU.getPModeId());
-                // Currently only One-Way MEPs are supported, so always on first leg
-                final ILeg leg = pmode.getLeg(primaryMU.getLeg());
-                version = leg.getProtocol() != null && "1.1".equals(leg.getProtocol().getSOAPVersion()) ?
+                version = leg != null && leg.getProtocol() != null && "1.1".equals(leg.getProtocol().getSOAPVersion()) ?
                                     SOAPEnv.SOAPVersion.SOAP_11 : SOAPEnv.SOAPVersion.SOAP_12;
             } else {
                 log.trace("Get version from request context");

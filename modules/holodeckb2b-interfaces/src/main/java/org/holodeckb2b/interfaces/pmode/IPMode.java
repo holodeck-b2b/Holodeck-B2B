@@ -19,6 +19,7 @@ package org.holodeckb2b.interfaces.pmode;
 
 
 import java.util.List;
+
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IAgreement;
@@ -146,7 +147,12 @@ public interface IPMode {
     public List<? extends ILeg> getLegs();
 
     /**
-     * Gets the configuration of the leg with the specified label within the P-Mode.
+     * Gets the configuration of the leg with the specified label within the P-Mode. 
+     * <p>Although the leg's label is only relevant for P-Modes that manage a Two-Way MEP this method is also used by 
+     * the Holodeck B2B Core to get the single leg of One-Way P-Modes. In that case either no specific label or the 
+     * <i>request</i> label may be requested depending on if the P-Mode implementation assigns a label to the leg of a
+     * One-Way P-Mode (i.e. only when the implementation does not assign a label Holodeck B2B will not provide one when 
+     * calling this method).        
      *
      * @param label     The label of the leg to get the configuration of
      * @return          A {@link ILeg} object containing the configuration of the leg

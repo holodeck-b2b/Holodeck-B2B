@@ -277,15 +277,14 @@ public class PMode implements IPMode, Serializable {
             if (l.getLabel() == label)
                 return l;
 
-        // If the Leg were not labelled, get the first leg when requested label is REQUEST, second when REPLY
+        // If the Leg were not labelled, get the first leg when requested label is REQUEST or null, second when REPLY
         switch (label) {
-            case REQUEST :
-                return legs.get(0);
             case REPLY :
                 return legs.get(1);
+            case REQUEST :
+            default :	
+                return legs.get(0);
         }
-
-        return null;
     }
 
     public void setLegs(final Collection<Leg> legs) {

@@ -28,11 +28,11 @@ import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for checking if receipt messages should be delivered to the business
@@ -136,7 +136,7 @@ public class DeliverReceipts extends AbstractBaseHandler {
     protected IDeliverySpecification getReceiptDelivery(final IReceiptEntity receipt) {
         IDeliverySpecification deliverySpec = null;
 
-        final ILeg leg = HolodeckB2BCore.getPModeSet().get(receipt.getPModeId()).getLeg(Label.REQUEST);
+        final ILeg leg = PModeUtils.getLeg(receipt);
         final IReceiptConfiguration rcptConfig = leg.getReceiptConfiguration();
 
         if (rcptConfig != null && rcptConfig.shouldNotifyReceiptToBusinessApplication()) {

@@ -24,14 +24,13 @@ import org.holodeckb2b.common.handler.AbstractUserMessageHandler;
 import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.errors.PolicyNoncompliance;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler that checks whether all payloads in the user message are signed. That all payloads
@@ -49,20 +48,18 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
     @Override
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
     										  final Log log) throws Exception {
-        // First check if this message needs a Receipt and is signed
-        final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
-        if (pmode == null) {
+
+    	// First check if this message needs a Receipt and is signed
+        try {
+	        if (PModeUtils.getLeg(um).getReceiptConfiguration() == null)
+	            // No receipt requested for this message
+	            return InvocationResponse.CONTINUE;	        
+        } catch (IllegalStateException pmodeNotAvailable) {
             // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
             // is needed
             log.error("P-Mode " + um.getPModeId() + " not found in current P-Mode set!"
                      + "Unable to determine if receipt is needed for message [msgId=" + um.getMessageId() + "]");
-            return InvocationResponse.CONTINUE;
-        }
-
-        // Currently we only support one-way MEPs so the leg is always the first one
-        if (pmode.getLegs().iterator().next().getReceiptConfiguration() == null) {
-            // No receipt requested for this message
-            return InvocationResponse.CONTINUE;
+            return InvocationResponse.CONTINUE;        	
         }
 
         // Check if received message was signed

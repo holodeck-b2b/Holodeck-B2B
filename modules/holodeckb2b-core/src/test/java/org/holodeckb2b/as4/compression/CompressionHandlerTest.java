@@ -49,6 +49,7 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.Before;
@@ -97,19 +98,15 @@ public class CompressionHandlerTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
 
-        PMode pmode = new PMode();
-
-        Leg leg = new Leg();
+        PMode pmode = TestUtils.create1WaySendPushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
 
         UserMessageFlow umFlow = new UserMessageFlow();
 
         PayloadProfile plProfile = new PayloadProfile();
         plProfile.setCompressionType(CompressionFeature.COMPRESSED_CONTENT_TYPE);
         umFlow.setPayloadProfile(plProfile);
-
         leg.setUserMessageFlow(umFlow);
-
-        pmode.addLeg(leg);
 
         UserMessage userMessage = UserMessageElement.readElement(umElement);
 
@@ -139,7 +136,7 @@ public class CompressionHandlerTest {
 
         // Setting input message property
         IUserMessageEntity userMessageEntity =
-                HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
+                HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage);
         
         MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);

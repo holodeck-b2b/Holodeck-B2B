@@ -31,10 +31,10 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received receipt signals.
@@ -112,8 +112,8 @@ public class ProcessReceipts extends AbstractBaseHandler {
             IMessageUnitEntity  ackedMessage = refdMsgs.iterator().next();
             if (ackedMessage instanceof IUserMessage) {
                 // Check if the found message unit expects a receipt
-                final IPMode pmode = HolodeckB2BCore.getPModeSet().get(ackedMessage.getPModeId());
-                if (pmode == null || pmode.getLeg(ackedMessage.getLeg()).getReceiptConfiguration() == null) {
+                final ILeg leg = PModeUtils.getLeg(ackedMessage);
+                if (leg.getReceiptConfiguration() == null) {
                     // The P-Mode is not configured for receipts, generate error
                     updateManager.setProcessingState(receipt, ProcessingState.FAILURE);
                     // Create error and add to context

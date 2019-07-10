@@ -26,10 +26,10 @@ import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for the delivery of the User message message unit to the business
@@ -57,9 +57,7 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
             MessageDeliveryException failure = null;
             try {
                 // Get the delivery specification from the P-Mode
-                final IPMode pmode = HolodeckB2BCore.getPModeSet().get(um.getPModeId());
-                // For now we just have one leg, so we get the delivery spec of the first leg
-                final IDeliverySpecification deliveryMethod = pmode.getLegs().iterator().next().getDefaultDelivery();
+                final IDeliverySpecification deliveryMethod = PModeUtils.getLeg(um).getDefaultDelivery();
                 final IMessageDeliverer deliverer = HolodeckB2BCore.getMessageDeliverer(deliveryMethod);
                 try {
                     log.debug("Delivering the message using delivery specification: " + deliveryMethod.getId());

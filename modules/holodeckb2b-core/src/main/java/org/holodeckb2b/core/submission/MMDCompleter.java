@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.ebms3.submit.core;
+package org.holodeckb2b.core.submission;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -38,6 +38,7 @@ import org.holodeckb2b.interfaces.pmode.IBusinessInfo;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.submit.MessageSubmitException;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is a helper class to create a complete set of configuration parameters that define how a submitted user message must
@@ -399,9 +400,7 @@ final class MMDCompleter {
      */
     private MMDCompleter(final IUserMessage submittedMMD, final IPMode pmode) {
         this.pmode = pmode;
-
-        // As we only support One-Way MEPs there is always just one leg
-        this.leg = pmode.getLegs().iterator().next();
+        this.leg = PModeUtils.getSendLeg(pmode); 
 
         // Start with a copy of the supplied MMD
         this.submission = new UserMessage(submittedMMD);

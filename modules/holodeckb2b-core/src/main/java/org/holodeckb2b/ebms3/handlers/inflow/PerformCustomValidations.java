@@ -30,9 +30,10 @@ import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecificati
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for the execution of the custom validation of the User Message message unit
@@ -54,14 +55,9 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
         log.trace("Validate user message if specified");
         try {
             // Get custom validation specifcation from P-Mode
-            IMessageValidationSpecification validationSpec = null;
-            try {
-                validationSpec = HolodeckB2BCore.getPModeSet().get(userMessage.getPModeId())
-                                                              .getLeg(ILeg.Label.REQUEST)
-                                                              .getUserMessageFlow().getCustomValidationConfiguration();
-            } catch (NullPointerException npe) {
-                // Some element in the path to the validation spec is not available, so there is nothing to do
-            }
+            final IUserMessageFlow userMessageFlow = PModeUtils.getLeg(userMessage).getUserMessageFlow();            	
+            IMessageValidationSpecification validationSpec = userMessageFlow == null ? null : 
+            														 userMessageFlow.getCustomValidationConfiguration();
 
             if (validationSpec == null) {
                 log.debug("No custom validation specified for user message, ready for delivery");

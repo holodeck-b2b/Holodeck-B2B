@@ -26,14 +26,12 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
-import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -57,8 +55,7 @@ import org.holodeckb2b.pmode.PModeUtils;
  */
 public class DeliverErrors extends AbstractBaseHandler {
 
-    @SuppressWarnings("unchecked")
-	@Override
+    @Override
     protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) throws PersistenceException {
         // Check if this message contains error signals
         final Collection<IErrorMessageEntity> errorSignals = procCtx.getReceivedErrors();
@@ -111,40 +108,37 @@ public class DeliverErrors extends AbstractBaseHandler {
     private boolean deliverError(final IErrorMessageEntity errorSignal, final IMessageUnitEntity msgInError,
     							 final Log log) throws PersistenceException {
         
-        log.trace("Get delivery specification for error from P-Mode of refd message [msgId=" 
-        			+ msgInError.getMessageId() + "]");
-        IDeliverySpecification deliverySpec = getErrorDelivery(msgInError);        
-        // If a delivery specification was found the error should be delivered, else no reporting is needed
-        if (deliverySpec != null) {
-        	IMessageDeliverer deliverer = null;
-            try {
-                log.debug("Error Signal should be delivered using delivery specification with id:" 
-                			+ deliverySpec.getId());
-                deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec);
-                log.trace("Delivering the error using deliverer");
-                // Because the reference to the message in error may be derived, set it explicitly on signal meta-data
-                // See also issue #12
-                ErrorMessage deliverySignal = new ErrorMessage(errorSignal);
-                deliverySignal.setRefToMessageId(msgInError.getMessageId());
-                deliverer.deliver(deliverySignal);
-                log.info("Error Signal [msgId= " + errorSignal.getMessageId() 
-                		+ "] successfully delivered for referenced message unit [msgId=" + msgInError.getMessageId() 
-                		+ "]!");
-            } catch (final Throwable t) {
-            	if (!(t instanceof MessageDeliveryException))
-                    log.error(deliverer.getClass().getSimpleName() + " threw " + t.getClass().getSimpleName()
-                            	+ " instead of MessageDeliveryException!");
-            	
-                log.warn("Could not deliver Error Signal (msgId=" + errorSignal.getMessageId()
-	                		+ "]) for referenced message [msgId=" + msgInError.getMessageId() 
-	                		+ "] to application! Error details: " + t.getMessage());
-                return false;
-            }
-        } else
-            log.debug("Error does not need to (or can not) be delivered");
-
-        return true;
+        try {
+	        log.trace("Get delivery specification for error from P-Mode of refd message [msgId=" 
+	        			+ msgInError.getMessageId() + "]");
+	        IDeliverySpecification deliverySpec = getErrorDelivery(msgInError);        
+	        // If a delivery specification was found the error should be delivered, else no reporting is needed
+	        if (deliverySpec != null) {
+	        	IMessageDeliverer deliverer = null;
+	                log.debug("Error Signal should be delivered using delivery specification with id:" 
+	                			+ deliverySpec.getId());
+	                deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec);
+	                log.trace("Delivering the error using deliverer");
+	                // Because the reference to the message in error may be derived, set it explicitly on signal meta-data
+	                // See also issue #12
+	                ErrorMessage deliverySignal = new ErrorMessage(errorSignal);
+	                deliverySignal.setRefToMessageId(msgInError.getMessageId());
+	                deliverer.deliver(deliverySignal);
+	                log.info("Error Signal [msgId= " + errorSignal.getMessageId() 
+	                		+ "] successfully delivered for referenced message unit [msgId=" + msgInError.getMessageId() 
+	                		+ "]!");
+	        } else
+	            log.debug("Error does not need to (or can not) be delivered");
+	
+	        return true;
+        } catch (final Throwable t) {
+            log.warn("Could not deliver Error Signal (msgId=" + errorSignal.getMessageId()
+                		+ "]) for referenced message [msgId=" + msgInError.getMessageId() 
+                		+ "] to application! Error details: " + t.getMessage());
+            return false;
+        }	        
     }
+        
 
     /**
      * Is a helper method to determine if and how an Error Signal should be delivered to the business application. The
@@ -169,22 +163,15 @@ public class DeliverErrors extends AbstractBaseHandler {
     private IDeliverySpecification getErrorDelivery(final IMessageUnitEntity refdMU) {
         IDeliverySpecification deliverySpec = null;
 
-        if (Utils.isNullOrEmpty(refdMU.getPModeId()))
-            return null; // Referenced message unit without P-Mode, can not determine delivery
-
-        final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(refdMU.getPModeId());
-        if (pmode == null) 
-            return null;
-        
         // First get the delivery specification for errors related to the user message as this will also be the fall
         // back for errors related to pull request if nothing is specified specifically for pull requests
-        final ILeg leg = pmode.getLeg(refdMU.getLeg());
+        final ILeg leg = PModeUtils.getLeg(refdMU);        
         final IUserMessageFlow umFlow = leg.getUserMessageFlow();
         IErrorHandling errHandling = umFlow != null ? umFlow.getErrorHandlingConfiguration() : null;
 
         if (refdMU instanceof IPullRequest) {
             // Check if the pull request have their own error handling
-            final IPullRequestFlow prFlow = PModeUtils.getOutPullRequestFlow(pmode);
+            final IPullRequestFlow prFlow = PModeUtils.getOutPullRequestFlow(leg);
             errHandling = prFlow != null && prFlow.getErrorHandlingConfiguration() != null ?
                                                                    prFlow.getErrorHandlingConfiguration() : errHandling;
         }

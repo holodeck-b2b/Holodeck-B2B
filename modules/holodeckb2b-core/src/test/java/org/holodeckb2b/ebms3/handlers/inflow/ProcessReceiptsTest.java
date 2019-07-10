@@ -30,10 +30,11 @@ import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.ReceiptConfiguration;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
@@ -67,15 +68,11 @@ public class ProcessReceiptsTest {
     @Test
     public void testDoProcessing() throws Exception {
     
-    	PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setId("pmode-test-id");
-
-        Leg leg = new Leg();
+    	PMode pmode = TestUtils.create1WaySendPushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
         ReceiptConfiguration receiptConfiguration = new ReceiptConfiguration();
         leg.setReceiptConfiguration(receiptConfiguration);
-        pmode.addLeg(leg);
-
+        
         HolodeckB2BCore.getPModeSet().add(pmode);
 
         MessageContext mc = new MessageContext();

@@ -34,7 +34,9 @@ import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.Protocol;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.After;
@@ -65,27 +67,21 @@ public class ConfigureHTTPTransportHandlerTest {
     public void testDefault() throws Exception {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
-
-        PMode pmode = new PMode();
-        pmode.setId("http-def-cfg");
-        Leg leg = new Leg();
-        // Setting all protocol configurations checked by the tested handler
-        Protocol protocolConfig = new Protocol();
-        String destUrl = "http://default.example.com";
-        protocolConfig.setAddress(destUrl);
-        leg.setProtocol(protocolConfig);
-        pmode.addLeg(leg);
-
+        mc.setServerSide(false);
+        
+        PMode pmode = TestUtils.create1WaySendPushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
+        
         HolodeckB2BCore.getPModeSet().add(pmode);
 
-        UserMessage userMessage = new UserMessage();
+        UserMessage userMessage = new UserMessage();        
         userMessage.setPModeId(pmode.getId());
         
         // Simulate a payload attachment
         mc.addAttachment("pl-1", new DataHandler("Some text", "application/text"));
         
         MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
-        procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
+        procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
 
         try {
             assertEquals(Handler.InvocationResponse.CONTINUE, new ConfigureHTTPTransportHandler().invoke(mc));
@@ -93,7 +89,7 @@ public class ConfigureHTTPTransportHandlerTest {
             fail(e.getMessage());
         }
 
-        assertEquals(destUrl, mc.getProperty(Constants.Configuration.TRANSPORT_URL));
+        assertEquals(leg.getProtocol().getAddress(), mc.getProperty(Constants.Configuration.TRANSPORT_URL));
 
         Options options = mc.getOptions();
         assertNotNull(options);
@@ -106,26 +102,23 @@ public class ConfigureHTTPTransportHandlerTest {
     public void testDoProcessing() throws Exception {
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.OUT_FLOW);
-    	
-    	PMode pmode = new PMode();
-    	pmode.setId("http-cfg");
-    	Leg leg = new Leg();
-    	// Setting all protocol configurations checked by the tested handler
-    	Protocol protocolConfig = new Protocol();
-    	String destUrl = "http://example.com";
-    	protocolConfig.setAddress(destUrl);
+    	mc.setServerSide(false);
+        
+    	PMode pmode = TestUtils.create1WaySendPushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
+        // Setting all protocol configurations checked by the tested handler
+    	Protocol protocolConfig = leg.getProtocol();
     	protocolConfig.setHTTPCompression(true);
     	protocolConfig.setChunking(true);
     	leg.setProtocol(protocolConfig);
-    	pmode.addLeg(leg);
     	
     	HolodeckB2BCore.getPModeSet().add(pmode);
     	
     	UserMessage userMessage = new UserMessage();
     	userMessage.setPModeId(pmode.getId());
-    	
+        
     	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
-    	procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
+    	procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
     	
     	try {
     		assertEquals(Handler.InvocationResponse.CONTINUE, new ConfigureHTTPTransportHandler().invoke(mc));
@@ -133,7 +126,7 @@ public class ConfigureHTTPTransportHandlerTest {
     		fail(e.getMessage());
     	}
     	
-    	assertEquals(destUrl, mc.getProperty(Constants.Configuration.TRANSPORT_URL));
+    	assertEquals(protocolConfig.getAddress(), mc.getProperty(Constants.Configuration.TRANSPORT_URL));
     	
     	Options options = mc.getOptions();
     	assertNotNull(options);

@@ -42,10 +42,10 @@ import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
@@ -87,19 +87,14 @@ public class FindPModesTest {
         UserMessage userMessage = new UserMessage(TestUtils.getMMD("handlers/full_mmd.xml", this));
         
         // Create matching P-Mode
-        PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-        pmode.setId("matching-pmode");
-
+        PMode pmode = TestUtils.create1WayReceivePushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
+        
         PartnerConfig initiator = new PartnerConfig();
         pmode.setInitiator(initiator);
 
         PartnerConfig responder = new PartnerConfig();
         pmode.setResponder(responder);
-
-        Leg leg = new Leg();
-        pmode.addLeg(leg);
 
         TradingPartner sender = userMessage.getSender();
         initiator.setRole(sender.getRole());
@@ -142,10 +137,7 @@ public class FindPModesTest {
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();
         
         // Create matching P-Mode
-        PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-        pmode.setId("t-error-pmode");
+        PMode pmode = TestUtils.create1WaySendPushPMode();        
         HolodeckB2BCore.getPModeSet().add(pmode);
         
         // Setting input message property
@@ -183,10 +175,7 @@ public class FindPModesTest {
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();
         
         // Create matching P-Mode
-        PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-        pmode.setId("t-receipt-pmode");
+        PMode pmode = TestUtils.create1WaySendPushPMode();        
         HolodeckB2BCore.getPModeSet().add(pmode);
                 
         // Setting input message property
@@ -230,19 +219,13 @@ public class FindPModesTest {
        userMessage.setPModeId(null);
        
        // Create matching P-Mode
-       PMode pmode = new PMode();
-       pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-       pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-       pmode.setId("not-matching-pmode");
-
+       PMode pmode = TestUtils.create1WayReceivePushPMode();        
+       
        PartnerConfig initiator = new PartnerConfig();
        pmode.setInitiator(initiator);
 
        PartnerConfig responder = new PartnerConfig();
        pmode.setResponder(responder);
-
-       Leg leg = new Leg();
-       pmode.addLeg(leg);
 
        TradingPartner sender = userMessage.getSender();
        initiator.setRole(sender.getRole());

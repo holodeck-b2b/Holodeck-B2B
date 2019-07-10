@@ -39,6 +39,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IProtocol;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for adding the necessary WS-Addressing headers to the message to sent it
@@ -76,8 +77,7 @@ public class ConfigureMultihop extends AbstractBaseHandler {
         if (primMU instanceof IUserMessage) {
             // Whether the user message is sent using multi-hop is defined by P-Mode parameter
             // PMode[1].Protocol.AddActorOrRoleAttribute
-            final IProtocol prot = HolodeckB2BCore.getPModeSet().get(primMU.getPModeId())
-                                                                .getLeg(primMU.getLeg()).getProtocol();
+        	final IProtocol prot = PModeUtils.getLeg(primMU).getProtocol();
             if (prot == null || !prot.shouldAddActorOrRoleAttribute())
                 log.trace("Primary message is a non multi-hop UserMessage");
             else {

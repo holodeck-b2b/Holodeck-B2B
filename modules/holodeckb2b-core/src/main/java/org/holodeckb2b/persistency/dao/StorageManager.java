@@ -109,10 +109,7 @@ public class StorageManager {
         if (mutableObject.getTimestamp() == null)
             mutableObject.setTimestamp(new Date());
 
-        V storedObject = parent.storeMessageUnit(mutableObject);
-        parent.setLeg(storedObject, ILeg.Label.REQUEST);
-
-        return storedObject;
+        return (V) parent.storeMessageUnit(mutableObject);
     }
 
     /**
@@ -215,7 +212,8 @@ public class StorageManager {
      * @parem legLabel      The label of the leg on which the message unit is exchanged
      * @throws PersistenceException When a database error occurs while updating the entity object
      */
-    public void setLeg(final IMessageUnit msgUnit, final ILeg.Label legLabel) throws PersistenceException {
+    @Deprecated
+    public void setLeg(final IMessageUnitEntity msgUnit, final ILeg.Label legLabel) throws PersistenceException {
         parent.setLeg(msgUnit, legLabel);
     }
 

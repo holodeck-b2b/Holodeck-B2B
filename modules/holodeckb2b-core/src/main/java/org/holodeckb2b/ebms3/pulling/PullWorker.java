@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.messagemodel.PullRequest;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.ILeg;
@@ -34,6 +35,7 @@ import org.holodeckb2b.interfaces.submit.MessageSubmitException;
 import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is responsible for starting the send process of Pull Request message units. The ebMS specific handlers in the Axis2
@@ -163,20 +165,20 @@ public class PullWorker implements IWorkerTask {
             // Get the MPC from the P-Mode
             log.trace("Get MPC to pull from");
             String mpc = null;
-            final ILeg leg = p.getLegs().iterator().next(); // currently only One-Way P-Modes, so only one leg
+            final ILeg leg = PModeUtils.getOutPullLeg(p);
             // First check PullRequest flow (sub-channel) and then UserMessage flow
             final Collection<IPullRequestFlow> flows = leg.getPullRequestFlows();
             if (flows != null && !flows.isEmpty()) {
                 final IPullRequestFlow prf = flows.iterator().next();
                 mpc = prf.getMPC() != null ? prf.getMPC() : null;
             }
-            if (mpc == null || mpc.isEmpty()) {
+            if (Utils.isNullOrEmpty(mpc)) {
                 log.trace("No MPC defined in PullRequest flow, check UserMessage flow");
                 final IUserMessageFlow flow = leg.getUserMessageFlow();
                 mpc = flow != null && flow.getBusinessInfo() != null ? flow.getBusinessInfo().getMpc() : null;
             }
 
-            if (mpc == null || mpc.isEmpty())
+            if (Utils.isNullOrEmpty(mpc))
                 // No MPC defined in P-Mode, use default MPC
                 mpc = EbMSConstants.DEFAULT_MPC;
             log.trace("Using [" + mpc + "] as MPC for pull request");
@@ -209,12 +211,8 @@ public class PullWorker implements IWorkerTask {
             final IPModeSet     curPModeSet = HolodeckB2BCoreInterface.getPModeSet();
             for(final String pid : pmodes) {
                 final IPMode p = curPModeSet.get(pid);
-                final ILeg leg = p.getLegs().iterator().next();
                 // The P-Mode should also be configured for pulling
-                if (EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(p.getMepBinding())
-                   && leg.getProtocol() != null
-                   && leg.getProtocol().getAddress() != null
-                   )
+                if (p != null && PModeUtils.doesHolodeckB2BPull(p))
                     pmodesToPull.add(p);
                 else
                     log.warn("A unknown P-Mode or one that does not need pulling was specified for pulling!"
@@ -223,18 +221,11 @@ public class PullWorker implements IWorkerTask {
         } else {
             log.trace("Should pull for all P-Modes except specified");
             for(final IPMode p : HolodeckB2BCoreInterface.getPModeSet().getAll()) {
-                // Check if P-Mode is included at all
-                if (pmodes.contains(p.getId()))
+            	final boolean isPulling = PModeUtils.doesHolodeckB2BPull(p);
+            	if (isPulling && pmodes.contains(p.getId()))
                     log.trace("P-Mode [id=" + p.getId() + "] is excluded from pulling by this pull worker");
-                else {
-                    // Check if this P-Mode uses pulling
-                    final ILeg leg = p.getLegs().iterator().next();
-                    if (EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(p.getMepBinding())
-                       && leg.getProtocol() != null
-                       && leg.getProtocol().getAddress() != null
-                       )
-                        pmodesToPull.add(p);
-                }
+                else if (isPulling)
+                    pmodesToPull.add(p);
             }
         }
         log.debug("Pulling for " + pmodesToPull.size() + " P-Modes");

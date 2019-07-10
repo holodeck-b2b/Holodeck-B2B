@@ -26,11 +26,15 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.UUID;
 
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMElement;
 import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.pmode.Leg;
+import org.holodeckb2b.common.pmode.PMode;
+import org.holodeckb2b.common.pmode.Protocol;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -83,6 +87,34 @@ public class TestUtils {
         return mmd;
     }
 
+    public static PMode create1WaySendPushPMode() {
+    	PMode pmode = new PMode();
+    	pmode.setId(UUID.randomUUID().toString());
+    	pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+    	pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
+    	
+        Leg leg = new Leg();
+        pmode.addLeg(leg);
+        
+        Protocol prot = new Protocol();
+        prot.setAddress("http://goes.no.where/msh");
+        leg.setProtocol(prot);
+        
+        return pmode;
+    }
+    
+    public static PMode create1WayReceivePushPMode() {
+    	PMode pmode = new PMode();
+    	pmode.setId(UUID.randomUUID().toString());
+    	pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+    	pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
+    	
+    	Leg leg = new Leg();
+    	pmode.addLeg(leg);
+    	
+    	return pmode;
+    }
+    
     /**
      *
      * @param elem

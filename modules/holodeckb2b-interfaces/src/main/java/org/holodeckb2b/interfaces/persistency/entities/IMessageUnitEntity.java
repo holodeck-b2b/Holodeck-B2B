@@ -17,6 +17,7 @@
 package org.holodeckb2b.interfaces.persistency.entities;
 
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 
 /**
@@ -55,6 +56,7 @@ public interface IMessageUnitEntity extends IMessageUnit {
      *
      * @return  The leg label
      */
+    @Deprecated
     ILeg.Label getLeg();
 
     /**

@@ -26,8 +26,10 @@ import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.ReceiptConfiguration;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
@@ -63,10 +65,7 @@ public class CheckSentResultTest {
     	mc.setFLOW(MessageContext.OUT_FLOW);
     	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         
-    	PMode pmode = new PMode();
-    	pmode.setId("no-receipt-needed");
-        Leg leg = new Leg();
-        pmode.addLeg(leg);
+    	PMode pmode = TestUtils.create1WaySendPushPMode();        
         HolodeckB2BCore.getPModeSet().add(pmode);
     	
     	StorageManager storageManager = HolodeckB2BCore.getStorageManager();
@@ -94,10 +93,8 @@ public class CheckSentResultTest {
     	mc.setFLOW(MessageContext.OUT_FLOW);
     	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         
-    	PMode pmode = new PMode();
-    	pmode.setId("no-receipt-needed");
-        Leg leg = new Leg();
-        pmode.addLeg(leg);
+    	PMode pmode = TestUtils.create1WaySendPushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
         HolodeckB2BCore.getPModeSet().add(pmode);
     	
     	StorageManager storageManager = HolodeckB2BCore.getStorageManager();
@@ -122,11 +119,9 @@ public class CheckSentResultTest {
     	mc.setFLOW(MessageContext.OUT_FLOW);
     	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	
-    	PMode pmode = new PMode();
-    	pmode.setId("receipt-needed");
-    	Leg leg = new Leg();
+    	PMode pmode = TestUtils.create1WaySendPushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
     	leg.setReceiptConfiguration(new ReceiptConfiguration());
-    	pmode.addLeg(leg);
     	HolodeckB2BCore.getPModeSet().add(pmode);
     	
     	StorageManager storageManager = HolodeckB2BCore.getStorageManager();

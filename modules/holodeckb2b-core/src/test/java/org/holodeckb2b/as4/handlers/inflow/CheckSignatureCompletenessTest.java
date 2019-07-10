@@ -37,10 +37,12 @@ import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.ReceiptConfiguration;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
@@ -70,13 +72,11 @@ public class CheckSignatureCompletenessTest {
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
 
         // Create the basic test data
-        PMode pmode = new PMode();
-        pmode.setId("pm-pmodeid-1");
-        Leg leg = new Leg();
+        PMode pmode = TestUtils.create1WayReceivePushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
         ReceiptConfiguration receiptConfig = new ReceiptConfiguration();
         receiptConfig.setPattern(ReplyPattern.RESPONSE);
         leg.setReceiptConfiguration(receiptConfig);
-        pmode.addLeg(leg);
         HolodeckB2BCore.getPModeSet().add(pmode);
 
         userMessage = new UserMessage();
@@ -99,6 +99,7 @@ public class CheckSignatureCompletenessTest {
     public void prepareContext() throws PersistenceException {
         mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
+        mc.setServerSide(true);
         
         procCtx = MessageProcessingContext.getFromMessageContext(mc);
         userMessage.setMessageId(MessageIdUtils.createMessageId());

@@ -31,8 +31,8 @@ import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.ReceptionAwarenessConfig;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
@@ -80,16 +80,13 @@ public class DetectDuplicateUserMessagesTest {
     public void testDoProcessing() throws Exception {
         MessageMetaData userMessage = TestUtils.getMMD("handlers/full_mmd.xml", this);
 
-        PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-        Leg leg = new Leg();
-
+        PMode pmode = TestUtils.create1WayReceivePushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
+        
         // Turning on duplicate detection
         ReceptionAwarenessConfig rac = new ReceptionAwarenessConfig();
         rac.setDuplicateDetection(true);
         leg.setReceptionAwareness(rac);
-        pmode.addLeg(leg);
         pmode.setId(userMessage.getCollaborationInfo().getAgreement().getPModeId());
         core.getPModeSet().add(pmode);
 

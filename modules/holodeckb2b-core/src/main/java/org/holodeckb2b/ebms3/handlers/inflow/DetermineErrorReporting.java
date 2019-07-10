@@ -23,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.holodeckb2b.common.handler.AbstractBaseHandler;
 import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
@@ -36,6 +35,7 @@ import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>in flow handler</i> responsible for determining if and how Error Signals generated during the processing of 
@@ -106,10 +106,7 @@ public class DetermineErrorReporting extends AbstractBaseHandler {
             	} else {
 	                log.debug("Get P-Mode information to determine if and how Error Signal must be reported");
 	                // Errorhandling config is contained in flow
-	                final IUserMessageFlow flow = HolodeckB2BCoreInterface.getPModeSet()
-	                													  .get(error.getPModeId())
-	                													  .getLeg(msgInError.getLeg())
-	                													  .getUserMessageFlow();
+	                final IUserMessageFlow flow = PModeUtils.getLeg(msgInError).getUserMessageFlow();
                     final IErrorHandling errorHandling = (flow != null ? flow.getErrorHandlingConfiguration()
                                                                        : null);
 

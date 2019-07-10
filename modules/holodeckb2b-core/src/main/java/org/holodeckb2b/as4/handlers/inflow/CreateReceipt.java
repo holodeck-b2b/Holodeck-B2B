@@ -34,17 +34,15 @@ import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for creating a <i>Receipt</i> signal for the received user message.
@@ -99,19 +97,17 @@ public class CreateReceipt extends AbstractUserMessageHandler {
         if (currentState == ProcessingState.DELIVERED || currentState == ProcessingState.DUPLICATE) {
             log.trace("User message was succesfully delivered, check if Receipt is needed");
 
-            final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
-            if (pmode == null) {
+            IReceiptConfiguration rcptConfig;
+            try {
+    	        rcptConfig = PModeUtils.getLeg(um).getReceiptConfiguration();
+            } catch (IllegalStateException pmodeNotAvailable) {
                 // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
                 // is needed
                 log.error("P-Mode " + um.getPModeId() + " not found in current P-Mode set!"
-                            + "Unable to determine if receipt is needed for message [msgId=" + um.getMessageId() + "]");
-                return InvocationResponse.CONTINUE;
+                         + "Unable to determine if receipt is needed for message [msgId=" + um.getMessageId() + "]");
+                return InvocationResponse.CONTINUE;        	
             }
-
-            // Currently we only support one-way MEPs so the leg is always the first one
-            final ILeg leg = pmode.getLeg(um.getLeg() != null ? um.getLeg() : ILeg.Label.REQUEST);
-            final IReceiptConfiguration rcptConfig = leg.getReceiptConfiguration();
-
+            
             if (rcptConfig == null) {
                 log.debug("No receipts requested for this message exchange");
                 return InvocationResponse.CONTINUE;
@@ -133,7 +129,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
                 rcptData.setContent(createRARContent(procCtx.getParentContext()));
             }
 
-            // Check reply patten to see if receipt should be sent as response
+            // Check reply pattern to see if receipt should be sent as response
             final boolean asResponse = rcptConfig.getPattern() == ReplyPattern.RESPONSE;
             log.trace("Store the receipt signal in database");
             try {

@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPayloadProfile;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
-import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>OUT_FLOW</i> handler part of the AS4 Compression Feature responsible for the compression of the payload
@@ -63,8 +63,7 @@ public class CompressionHandler extends AbstractUserMessageHandler {
             return InvocationResponse.CONTINUE;
 
         log.trace("Check P-Mode configuration if AS4 compression must be used");
-        final IUserMessageFlow flow = HolodeckB2BCore.getPModeSet().get(um.getPModeId())
-                                                                    .getLegs().iterator().next().getUserMessageFlow();
+        final IUserMessageFlow flow = PModeUtils.getLeg(um).getUserMessageFlow();
         final IPayloadProfile plProfile = (flow != null ? flow.getPayloadProfile() : null);
 
         if ((plProfile instanceof IAS4PayloadProfile) &&

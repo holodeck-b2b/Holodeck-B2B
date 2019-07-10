@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.ebms3.submit.core;
+package org.holodeckb2b.core.submission;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -118,16 +118,16 @@ public class MessageSubmitter implements IMessageSubmitter {
         }
         try {
             log.trace("Add message to database");
-            final IUserMessageEntity newUserMessage = (IUserMessageEntity)
-                                        HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(completedMetadata);
-            
+            final StorageManager storageManager = HolodeckB2BCore.getStorageManager();
+            final IUserMessageEntity newUserMessage = (IUserMessageEntity) storageManager.
+            																storeOutGoingMessageUnit(completedMetadata);
             //Use P-Mode to find out if this message is to be pulled or pushed to receiver
             if (EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(pmode.getMepBinding())) {
                 log.debug("Message is to be pulled by receiver, change ProcessingState to wait for pull");
-                HolodeckB2BCore.getStorageManager().setProcessingState(newUserMessage, ProcessingState.AWAITING_PULL);
+                storageManager.setProcessingState(newUserMessage, ProcessingState.AWAITING_PULL);
             } else {
                 log.debug("Message is to be pushed to receiver, change ProcessingState to trigger push");
-                HolodeckB2BCore.getStorageManager().setProcessingState(newUserMessage, ProcessingState.READY_TO_PUSH);
+                storageManager.setProcessingState(newUserMessage, ProcessingState.READY_TO_PUSH);
             }
 
             log.info("User Message succesfully submitted, messageId={}", newUserMessage.getMessageId());

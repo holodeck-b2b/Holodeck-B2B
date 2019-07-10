@@ -43,6 +43,7 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
@@ -61,10 +62,6 @@ import org.junit.Test;
 public class DeliverReceiptsTest {
     private static final QName RECEIPT_CHILD_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "ReceiptChild");
 
-    private static final String T_PMODE_ID = "t-pmode-rcpth";
-
-   	private static final String T_MSG_ID = "t-msg-id-1@test.holodeck-b2b.org";
-
    	@BeforeClass
        public static void setUpClass() throws Exception {
            HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
@@ -78,9 +75,8 @@ public class DeliverReceiptsTest {
 
        @Test
        public void testDoProcessing() throws Exception {
-           PMode pmode = new PMode();
-           pmode.setId(T_PMODE_ID);
-           Leg leg = new Leg();
+    	   PMode pmode = TestUtils.create1WaySendPushPMode();        
+           Leg leg = pmode.getLeg(Label.REQUEST);
            
            DeliveryConfiguration deliverySpecification = new DeliveryConfiguration();
            deliverySpecification.setFactory(NullDeliveryMethod.class.getName());
@@ -91,16 +87,13 @@ public class DeliverReceiptsTest {
            rcptCfg.setNotifyReceiptToBusinessApplication(true);
            leg.setReceiptConfiguration(rcptCfg);
            
-           pmode.addLeg(leg);
-
            HolodeckB2BCore.getPModeSet().add(pmode);
 
            UserMessage userMessage = new UserMessage();
            userMessage.setMessageId(MessageIdUtils.createMessageId());
-           userMessage.setPModeId(T_PMODE_ID);
+           userMessage.setPModeId(pmode.getId());
            
            MessageContext mc = new MessageContext();
-           mc.setServerSide(true);
            mc.setFLOW(MessageContext.IN_FLOW);
 
            Receipt receipt = new Receipt();
@@ -108,8 +101,8 @@ public class DeliverReceiptsTest {
            ArrayList<OMElement> content = new ArrayList<>();
            content.add(receiptChildElement);
            receipt.setContent(content);
-           receipt.setMessageId(T_MSG_ID);
-           receipt.setPModeId(T_PMODE_ID);
+           receipt.setMessageId(MessageIdUtils.createMessageId());
+           receipt.setPModeId(pmode.getId());
            receipt.setRefToMessageId(userMessage.getMessageId());
 
            StorageManager storageManager = HolodeckB2BCore.getStorageManager();
@@ -127,7 +120,8 @@ public class DeliverReceiptsTest {
                fail(e.getMessage());
            }
 
-           assertTrue(((NullDeliverer) HolodeckB2BCore.getMessageDeliverer(deliverySpecification)).wasDelivered(T_MSG_ID));
+           assertTrue(((NullDeliverer) HolodeckB2BCore.getMessageDeliverer(deliverySpecification))
+        		   														  .wasDelivered(receipt.getMessageId()));
            assertEquals(ProcessingState.DONE, rcptMessageEntity.getCurrentProcessingState().getState());
        }
 }

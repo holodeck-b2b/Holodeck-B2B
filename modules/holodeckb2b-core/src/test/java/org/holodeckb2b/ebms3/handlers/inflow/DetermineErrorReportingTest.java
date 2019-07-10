@@ -46,6 +46,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
@@ -98,24 +99,18 @@ public class DetermineErrorReportingTest {
      */
     @Test
     public void testDefaultConfig() throws Exception {
-    	final String pmodeId = "pmode_id_01";
-        
+
+        // Setup P-Mode
+        PMode pmode = TestUtils.create1WayReceivePushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
+        leg.setUserMessageFlow(new UserMessageFlow());        
+        HolodeckB2BCore.getPModeSet().add(pmode);
+
         // Prepare message in error
     	UserMessage userMessage = new UserMessage();
         userMessage.setMessageId(MessageIdUtils.createMessageId());
-        userMessage.setPModeId(pmodeId);
+        userMessage.setPModeId(pmode.getId());
         IUserMessageEntity userMessageEntity = storageManager.storeIncomingMessageUnit(userMessage);
-
-        // Setup P-Mode
-        PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setId(pmodeId);
-        
-        Leg leg = new Leg();
-        leg.setUserMessageFlow(new UserMessageFlow());
-        pmode.addLeg(leg);
-        
-        HolodeckB2BCore.getPModeSet().add(pmode);
 
         // Prepare msg ctx
         MessageContext mc = new MessageContext();
@@ -131,7 +126,7 @@ public class DetermineErrorReportingTest {
         error1.setErrorDetail("Some error for testing.");
         ErrorMessage errorMsg = new ErrorMessage(error1);
         errorMsg.setRefToMessageId(userMessage.getMessageId());
-        errorMsg.setPModeId(pmodeId);
+        errorMsg.setPModeId(pmode.getId());
         procCtx.addSendingError(storageManager.storeOutGoingMessageUnit(errorMsg));
         
         try {
@@ -149,8 +144,18 @@ public class DetermineErrorReportingTest {
      */
     @Test
     public void testErrorRefsPullRequest() throws Exception {
-    	final String pmodeId = "pmode_id_02";
-    	
+
+        // Setup P-Mode
+        PMode pmode = TestUtils.create1WaySendPushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
+        pmode.setMepBinding(EbMSConstants.ONE_WAY_PULL);
+        UserMessageFlow umFlow = new UserMessageFlow();
+        ErrorHandlingConfig errorHandlingConfig = new ErrorHandlingConfig();
+        errorHandlingConfig.setPattern(ReplyPattern.CALLBACK);        
+        umFlow.setErrorHandlingConfiguration(errorHandlingConfig);
+        leg.setUserMessageFlow(umFlow);        
+        HolodeckB2BCore.getPModeSet().add(pmode);
+
         // Prepare message in error
         PullRequest pullRequest = new PullRequest();
         pullRequest.setMPC("some_mpc");
@@ -164,28 +169,13 @@ public class DetermineErrorReportingTest {
         
         MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setPullRequest(pullRequestEntity);
-
-        // Setup P-Mode
-        PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setId(pmodeId);
-        
-        Leg leg = new Leg();
-        UserMessageFlow umFlow = new UserMessageFlow();
-        ErrorHandlingConfig errorHandlingConfig = new ErrorHandlingConfig();
-        errorHandlingConfig.setPattern(ReplyPattern.CALLBACK);        
-        umFlow.setErrorHandlingConfiguration(errorHandlingConfig);
-        leg.setUserMessageFlow(umFlow);
-        pmode.addLeg(leg);
-        
-        HolodeckB2BCore.getPModeSet().add(pmode);
         
         // Create the Error Signal referencing the message unit
         EbmsError error1 = new EbmsError();
         error1.setRefToMessageInError(pullRequestEntity.getMessageId());
         error1.setErrorDetail("Some error for testing.");
         ErrorMessage errorMsg = new ErrorMessage(error1);
-        errorMsg.setPModeId(pmodeId);
+        errorMsg.setPModeId(pmode.getId());
         errorMsg.setRefToMessageId(pullRequest.getMessageId());
         procCtx.addSendingError(storageManager.storeOutGoingMessageUnit(errorMsg));
         
@@ -205,26 +195,21 @@ public class DetermineErrorReportingTest {
      */
     @Test
     public void testAsyncReporting() throws Exception {
-    	final String pmodeId = "pmode_id_03";
-        
+        // Setup P-Mode
+        PMode pmode = TestUtils.create1WayReceivePushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
+
         // Prepare message in error
     	UserMessage userMessage = new UserMessage();
         userMessage.setMessageId(MessageIdUtils.createMessageId());
-        userMessage.setPModeId(pmodeId);
+        userMessage.setPModeId(pmode.getId());
         IUserMessageEntity userMessageEntity = storageManager.storeIncomingMessageUnit(userMessage);
-
-        // Setup P-Mode
-        PMode pmode = new PMode();
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setId(pmodeId);
         
-        Leg leg = new Leg();
         UserMessageFlow umFlow = new UserMessageFlow();
         ErrorHandlingConfig errorHandlingConfig = new ErrorHandlingConfig();
         errorHandlingConfig.setPattern(ReplyPattern.CALLBACK);        
         umFlow.setErrorHandlingConfiguration(errorHandlingConfig);
         leg.setUserMessageFlow(umFlow);
-        pmode.addLeg(leg);
         
         HolodeckB2BCore.getPModeSet().add(pmode);
          
@@ -241,7 +226,7 @@ public class DetermineErrorReportingTest {
         error1.setErrorDetail("Some error for testing.");
         ErrorMessage errorMsg = new ErrorMessage(error1);
         errorMsg.setRefToMessageId(userMessage.getMessageId());
-        errorMsg.setPModeId(pmodeId);
+        errorMsg.setPModeId(pmode.getId());
         IErrorMessageEntity errorSig = storageManager.storeOutGoingMessageUnit(errorMsg);
         procCtx.addSendingError(errorSig);
         

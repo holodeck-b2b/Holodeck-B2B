@@ -41,6 +41,7 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
@@ -57,9 +58,6 @@ import org.junit.Test;
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class DeliverErrorsTest {
-
-    private static final String T_PMODE_ID = "t-pmode-errh";
-
 	private static final String T_MSG_ID = "t-msg-id-1@test.holodeck-b2b.org";
 
 	@BeforeClass
@@ -75,9 +73,8 @@ public class DeliverErrorsTest {
 
     @Test
     public void testDoProcessing() throws Exception {
-        PMode pmode = new PMode();
-        pmode.setId(T_PMODE_ID);
-        Leg leg = new Leg();
+    	PMode pmode = TestUtils.create1WaySendPushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
         
         UserMessageFlow umFlow = new UserMessageFlow();
 
@@ -91,17 +88,16 @@ public class DeliverErrorsTest {
         umFlow.setErrorHandlingConfiguration(errorHandlingConfig);
 
         leg.setUserMessageFlow(umFlow);
-        pmode.addLeg(leg);
-
+       
         HolodeckB2BCore.getPModeSet().add(pmode);
 
         UserMessage userMessage = new UserMessage();
         userMessage.setMessageId(MessageIdUtils.createMessageId());
-        userMessage.setPModeId(T_PMODE_ID);
+        userMessage.setPModeId(pmode.getId());
         
         MessageContext mc = new MessageContext();
-        mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
+        mc.setServerSide(true);
 
         EbmsError ebmsError = new EbmsError();
         ebmsError.setSeverity(IEbmsError.Severity.failure);
@@ -110,7 +106,7 @@ public class DeliverErrorsTest {
         ebmsError.setMessage("some error message");
         ErrorMessage errorMessage = new ErrorMessage(ebmsError);
         errorMessage.setMessageId(T_MSG_ID);
-        errorMessage.setPModeId(T_PMODE_ID);
+        errorMessage.setPModeId(pmode.getId());
         errorMessage.setRefToMessageId(userMessage.getMessageId());
         
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();

@@ -90,14 +90,15 @@ public class PModeFinder {
     }
 
     /**
-     * Finds the P-Mode for a received user message message unit.
+     * Finds the P-Mode for a received <i>User Message</i> message unit.
      * <p>The ebMS specifications do not describe or recommend how the P-Mode for a user message should be determined,
      * see also <a href="https://issues.oasis-open.org/browse/EBXMLMSG-48">issue 48 in the OASIS TC issue tracker</a>.
-     * In the issue two suggestions for matching the P-Mode are given.
-     * <p>Based on these we compare the meta-data from the message with all P-Modes and return the best matching P-Mode.
-     * The following table shows the information that is used for matching and their importance (expressed as a weight).
-     * The match of a P-Mode is the sum of the weights for the elements that are equal to the corresponding P-Mode
-     * parameter.
+     * In the issue two suggestions for matching the P-Mode are given. Based on these we compare the meta-data from the 
+     * message with all P-Modes and return the best matching P-Mode.
+     * <p>The following table shows the information that is used for matching and their importance (expressed as a 
+     * weight). The match of a P-Mode is the sum of the weights for the elements that are equal to the corresponding 
+     * P-Mode parameter. If there is a mismatch on any of the elements the P-Mode is considered as a mismatch, but if
+     * no value if specified in the P-Mode the element is not considered and not scored.
      * <p><table border="1">
      * <tr><th>Element</th><th>Weight</th></tr>
      * <tr><td>PMode id</td><td>37</td></tr>
@@ -110,9 +111,10 @@ public class PModeFinder {
      * <tr><td>Agreement ref</td><td>1</td></tr>
      * <tr><td>MPC</td><td>1</td></tr>
      * </table> </p>
-     * <p>If there is a mismatch for one of the elements the P-Mode is considered as a mismatch.</p>
-     * <p>This method will only find one matching P-Mode. This means that when multiple P-Modes with the highest match
-     * score are found none is returned.
+     * <p>Because the 2-Way MEP can be governed by two 1-Way P-Modes this method will just check all P-Modes that govern
+     * message receiving. It is up to the handlers to decide whether the result is acceptable or not. This method will 
+     * only find one matching P-Mode. This means that when multiple P-Modes with the highest match score are found none 
+     * is returned. 
      *
      * @param mu        The user message message unit to find the P-Mode for
      * @return          The P-Mode for the message unit if the message unit can be matched to a <b>single</b> P-Mode,
@@ -120,21 +122,30 @@ public class PModeFinder {
      */
     public static IPMode forReceivedUserMessage(final IUserMessage mu) {
         final IPModeSet pmodes = HolodeckB2BCoreInterface.getPModeSet();
-        IPMode    hPMode = null;
-        int       hValue = 0;
-        boolean   multiple = false;
-
         if (pmodes == null)
             return null;
 
+        IPMode    hPMode = null;
+        int       hValue = 0;
+        boolean   multiple = false;
+        
+        
         for (final IPMode p : pmodes.getAll()) {
-            // Check if we should ignore this P-Mode because it is for sending of a User Message 
+        	/*
+        	 * First step is to determine if the P-Mode should be evaluated, i.e. if it governs message receiving. For
+        	 * a 2-Way P-Mode this is always true. But for 1-Way P-Modes this is only the case when it is not triggering
+        	 * a Push or responding to a Pull.  
+        	 */
         	final boolean initiator = PModeUtils.isHolodeckB2BInitiator(p);
         	final String  mepBinding = p.getMepBinding();
-    		if ((initiator && !mepBinding.equals(EbMSConstants.ONE_WAY_PULL)) // sending using Push
+        	if ((initiator && !mepBinding.equals(EbMSConstants.ONE_WAY_PULL)) // sending using Push
     		|| (!initiator && mepBinding.equals(EbMSConstants.ONE_WAY_PULL))) // sending using Pull
                 continue;            
 
+        	/*
+        	 * Now first check the generic meta-data elements like P-Mode identifier, agreement reference and trading
+        	 * partners.
+        	 */        	
             int cValue = 0;
             // P-Mode id and agreement info are contained in optional element
             final IAgreementReference agreementRef = mu.getCollaborationInfo().getAgreement();
@@ -175,11 +186,17 @@ public class PModeFinder {
             // Check trading partner info
             final ITradingPartner from = mu.getSender(), to = mu.getReceiver();
             ITradingPartner fromPMode = null, toPMode = null;
-            if (mepBinding.equals(EbMSConstants.ONE_WAY_PULL)) {
-                fromPMode = p.getResponder(); toPMode = p.getInitiator();
+            /*
+             * If HB2B is the initiator of the MEP it will either send the first User Message or Pull Request which 
+             * implies that it will receive the User Message from the Responder. If it isn't the initiator the first
+             * User Message is either pushed to HB2B by the other MSH or send by HB2B as a response to a Pull Request
+             * meaning that the sender is always the Initiator of the MEP.
+             */
+            if (initiator) {
+            	fromPMode = p.getResponder(); toPMode = p.getInitiator();
             } else {
-                fromPMode = p.getInitiator(); toPMode = p.getResponder();
-            }
+            	fromPMode = p.getInitiator(); toPMode = p.getResponder(); 
+            } 
 
             // Check To info
             if (toPMode != null) {
@@ -211,9 +228,12 @@ public class PModeFinder {
                         continue;  // mis-match on From party id('s)
             }
 
-            // Next info items are defined per Leg basis, for now we only have one-way MEP, so only one leg to check
-            // Within the leg all relevant information is contained in the user message flow.
-            final IUserMessageFlow  flow = p.getLeg(ILeg.Label.REQUEST).getUserMessageFlow();
+            /*
+             * Remaining meta-data to be matched are defined per Leg basis. All relevant information is contained in the 
+             * user message flow, except for the MPC which can also be specified in a pull request flow.
+             */ 
+            final ILeg leg = PModeUtils.getReceiveLeg(p);
+            final IUserMessageFlow  flow = leg.getUserMessageFlow();
             final IBusinessInfo     pmBI = flow != null ? flow.getBusinessInfo() : null;
             if (pmBI != null) {
                 // Check Service
@@ -237,27 +257,22 @@ public class PModeFinder {
                     continue; // mis-match on action
             }
 
-            // Check MPC, first check the MPC defined in the User Message flow, and if there is none there, check
-            // if there is maybe on in Pull Request flow
+            /*
+             * Check MPC, first check the MPC defined in the User Message flow, and if there is none there, check
+             * if there is maybe on in Pull Request flow. When no MPC is provided the default MPC is used (applies to
+             * both message and P-Mode)
+             */            
             String mpc = mu.getMPC();
             if (Utils.isNullOrEmpty(mpc))
                 mpc = EbMSConstants.DEFAULT_MPC;
             String mpcPMode = pmBI != null ? pmBI.getMpc() : null;
-            // If no MPC is provided in User Message flow, check if this P-Mode is for pulling messages and if it is
-            // use the MPC defined in PR flow
-            if (Utils.isNullOrEmpty(mpcPMode) && p.getMepBinding().equals(EbMSConstants.ONE_WAY_PULL)
-                && p.getLeg(ILeg.Label.REQUEST).getProtocol() != null
-                && !Utils.isNullOrEmpty(p.getLeg(ILeg.Label.REQUEST).getProtocol().getAddress()))
-            {
-                try {
-                    mpcPMode = p.getLeg(ILeg.Label.REQUEST).getPullRequestFlows().iterator().next().getMPC();
-                } catch (NullPointerException npe) {
-                    mpcPMode = null;
-                }
+            
+            if (Utils.isNullOrEmpty(mpcPMode) && !Utils.isNullOrEmpty(leg.getPullRequestFlows())) {
+            	mpcPMode = leg.getPullRequestFlows().iterator().next().getMPC();        
                 if (Utils.isNullOrEmpty(mpcPMode))
                     mpcPMode = EbMSConstants.DEFAULT_MPC;
-                // Now compare MPC, but take into account that MPC from P-Mode can be a sub MPC, so a message that
-                // contains parent MPC does match
+                // Now compare MPC, but take into account that MPC in a PullRequestFlow can be a sub MPC, so the one
+                // from the message can be a parent MPC
                 if (mpcPMode.startsWith(mpc))
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.MPC);
                 else
@@ -267,7 +282,7 @@ public class PModeFinder {
                 if (Utils.isNullOrEmpty(mpcPMode))
                     mpcPMode = EbMSConstants.DEFAULT_MPC;
                 // Now compare the MPC values
-                if (mpc.equalsIgnoreCase(mpcPMode))
+                if (mpc.equals(mpcPMode))
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.MPC);
                 else
                     continue; // mis-match on MPC

@@ -32,6 +32,7 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for changing the processing state of message units that are and have been
@@ -108,8 +109,7 @@ public class CheckSentResult extends AbstractBaseHandler {
                             updateManager.setProcessingState(mu, ProcessingState.DELIVERED);
                         } else {
                             log.trace("User Message is sent, check P-Mode if Receipt is expected");
-                            // Because we only support One-Way the first leg determines
-                            final ILeg leg = HolodeckB2BCore.getPModeSet().get(mu.getPModeId()).getLeg(mu.getLeg());
+                            final ILeg leg = PModeUtils.getLeg(mu);
                             if (leg.getReceiptConfiguration() != null)
                                 updateManager.setProcessingState(mu, ProcessingState.AWAITING_RECEIPT);
                             else

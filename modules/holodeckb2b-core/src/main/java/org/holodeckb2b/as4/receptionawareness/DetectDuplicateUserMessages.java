@@ -23,13 +23,12 @@ import org.holodeckb2b.common.handler.AbstractUserMessageHandler;
 import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for detecting and when requested eliminating duplicate <i>user messages</i>.
@@ -68,17 +67,17 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
         log.trace("Check if duplicate check must be executed");
 
         // Get P-Mode configuration
-        final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
-        if (pmode == null) {
+        ILeg leg;
+        try {
+	        leg = PModeUtils.getLeg(um);
+        } catch (IllegalStateException pmodeNotAvailable) {
             // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
             // is needed
             log.error("P-Mode " + um.getPModeId() + " not found in current P-Mode set!"
-                        + "Unable to determine if receipt is needed for message [msgId=" + um.getMessageId() + "]");
-            return InvocationResponse.CONTINUE;
-        }
-        // Currently we only support one-way MEPs so the leg is always the first one
-        final ILeg leg = pmode.getLeg(um.getLeg() != null ? um.getLeg() : ILeg.Label.REQUEST);
-
+                     + "Unable to determine if receipt is needed for message [msgId=" + um.getMessageId() + "]");
+            return InvocationResponse.CONTINUE;        	
+        }        
+        
         // Duplicate detection is part of the AS4 Reception Awareness feature which can only be configured on a leg
         // of type ILegAS4, so check type
         if (!(leg instanceof IAS4Leg))

@@ -119,6 +119,7 @@ public interface IUpdateManager {
      * @parem legLabel      The label of the leg on which the message unit is exchanged
      * @throws PersistenceException When a database error occurs while updating the entity object
      */
+    @Deprecated
     void setLeg(final IMessageUnit msgUnit, final ILeg.Label legLabel) throws PersistenceException;
 
     /**

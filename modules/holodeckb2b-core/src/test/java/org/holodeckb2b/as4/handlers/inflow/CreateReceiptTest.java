@@ -31,13 +31,14 @@ import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.ReceiptConfiguration;
 import org.holodeckb2b.common.testhelpers.TestEventProcessor;
-import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
@@ -79,9 +80,8 @@ public class CreateReceiptTest {
     	SOAPEnvelope soapEnvelope = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         UserMessageElement.createElement(Messaging.createElement(soapEnvelope), mmd);
         
-        PMode pmode = new PMode();
-        pmode.setId("pm-pmodeid-1");
-        Leg leg = new Leg();
+        PMode pmode = TestUtils.create1WayReceivePushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
         ReceiptConfiguration receiptConfig = new ReceiptConfiguration();
         receiptConfig.setPattern(ReplyPattern.RESPONSE);
         leg.setReceiptConfiguration(receiptConfig);
@@ -97,6 +97,7 @@ public class CreateReceiptTest {
         MessageContext mc = new MessageContext();
         mc.setEnvelope(soapEnvelope);
         mc.setFLOW(MessageContext.IN_FLOW);
+        mc.setServerSide(true);
         
         MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);

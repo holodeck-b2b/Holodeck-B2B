@@ -30,10 +30,12 @@ import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.testhelpers.NullDeliveryMethod;
 import org.holodeckb2b.common.testhelpers.NullDeliveryMethod.NullDeliverer;
 import org.holodeckb2b.common.testhelpers.TestEventProcessor;
+import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.events.IMessageDelivery;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
@@ -51,10 +53,6 @@ import org.junit.Test;
  */
 public class DeliverUserMessageTest {
 
-	private static final String T_PMODE_ID = "t-pmode-umdel";
-
-	private static final String T_MSG_ID = "t-msg-id-1@test.holodeck-b2b.org";
-
 	@BeforeClass
 	public static void setUpClass() throws Exception {
 		HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
@@ -68,17 +66,14 @@ public class DeliverUserMessageTest {
 
 	@Test
 	public void testDoProcessing() throws Exception {
-		PMode pmode = new PMode();
-		pmode.setId(T_PMODE_ID);
-		Leg leg = new Leg();
-
+		PMode pmode = TestUtils.create1WayReceivePushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
+        
 		DeliveryConfiguration deliverySpecification = new DeliveryConfiguration();
 		deliverySpecification.setFactory(NullDeliveryMethod.class.getName());
 		deliverySpecification.setId("delivery_spec_id");
 		leg.setDefaultDelivery(deliverySpecification);
-		
-		pmode.addLeg(leg);
-
+			
 		HolodeckB2BCore.getPModeSet().add(pmode);
 
 		MessageContext mc = new MessageContext();
@@ -86,8 +81,8 @@ public class DeliverUserMessageTest {
 		mc.setFLOW(MessageContext.IN_FLOW);
 
 		UserMessage userMessage = new UserMessage();
-		userMessage.setMessageId(T_MSG_ID);
-		userMessage.setPModeId(T_PMODE_ID);
+		userMessage.setMessageId(MessageIdUtils.createMessageId());
+		userMessage.setPModeId(pmode.getId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
 		IUserMessageEntity umEntity = storageManager.storeIncomingMessageUnit(userMessage);
 		storageManager.setProcessingState(umEntity, ProcessingState.READY_FOR_DELIVERY);
@@ -101,7 +96,8 @@ public class DeliverUserMessageTest {
 			fail(e.getMessage());
 		}
 
-		assertTrue(((NullDeliverer) HolodeckB2BCore.getMessageDeliverer(deliverySpecification)).wasDelivered(T_MSG_ID));
+		assertTrue(((NullDeliverer) HolodeckB2BCore.getMessageDeliverer(deliverySpecification))
+																			.wasDelivered(userMessage.getMessageId()));
 		assertEquals(ProcessingState.DELIVERED, umEntity.getCurrentProcessingState().getState());
 		TestEventProcessor eventProc = (TestEventProcessor) HolodeckB2BCoreInterface.getEventProcessor();
 		assertTrue(eventProc.events.size() == 1);

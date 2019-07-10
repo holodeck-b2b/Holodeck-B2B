@@ -31,11 +31,11 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IProtocol;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
+import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>OUT_FLOW</i> handler that configures the actual message transport over the HTTP protocol. When this 
@@ -74,9 +74,16 @@ public class ConfigureHTTPTransportHandler extends AbstractBaseHandler {
     	// Disable use of SOAP Action (=> will result in empty SOAPAction http header for SOAP 1.1)
     	axisMsgCtx.getOptions().setProperty(Constants.Configuration.DISABLE_SOAP_ACTION, "true");	
         log.trace("Get P-Mode configuration for primary MU");
-        final IPMode pmode = HolodeckB2BCore.getPModeSet().get(primaryMU.getPModeId());
+        
+        ILeg leg;
+        try {
+        	leg = PModeUtils.getLeg(primaryMU);
+        } catch (IllegalStateException pmodeNotAvailable) {
+        	log.error("P-Mode set for primary message unit [" + primaryMU.getMessageId() + "] is not available");
+        	leg = null;
+        }
         // For response error messages the P-Mode may be unknown, so no special HTTP configuration
-        if (pmode == null)
+        if (leg == null)
         	if (axisMsgCtx.isServerSide()) {
         		// When responding we don't need P-Mode for configuring HTTP and use default settings
         		log.debug("No P-Mode given for primary message unit, using default HTTP configuration");
@@ -90,8 +97,6 @@ public class ConfigureHTTPTransportHandler extends AbstractBaseHandler {
         	}            		
         // Get current set of options
         final Options options = axisMsgCtx.getOptions();
-        // Currently only One-Way MEPs are supported, so always on first leg
-        final ILeg leg = pmode.getLeg(primaryMU.getLeg());
         final IProtocol protocolCfg = leg.getProtocol();
 
         // If Holodeck B2B is initiator the destination URL must be set

@@ -30,8 +30,9 @@ import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
-import org.holodeckb2b.common.pmode.Protocol;
+import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.After;
@@ -64,14 +65,11 @@ public class CreateSOAPEnvelopeHandlerTest {
     public void testSOAP11Env() throws Exception {
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.OUT_FLOW);
+    	mc.setServerSide(false);
     	
-    	PMode pmode = new PMode();
-    	pmode.setId("soap-11");
-    	Leg leg = new Leg();
-    	Protocol protocolConfig = new Protocol();
-    	protocolConfig.setSOAPVersion("1.1");
-    	leg.setProtocol(protocolConfig);
-    	pmode.addLeg(leg);
+    	PMode pmode = TestUtils.create1WaySendPushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
+        leg.getProtocol().setSOAPVersion("1.1");
     	
     	HolodeckB2BCore.getPModeSet().add(pmode);
     	
@@ -95,15 +93,12 @@ public class CreateSOAPEnvelopeHandlerTest {
     public void testSOAP12Env() throws Exception {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
+        mc.setServerSide(false);
         
-        PMode pmode = new PMode();
-        pmode.setId("soap-12");
-        Leg leg = new Leg();
-        Protocol protocolConfig = new Protocol();
-        protocolConfig.setSOAPVersion("1.2");
-        leg.setProtocol(protocolConfig);
-        pmode.addLeg(leg);
-
+        PMode pmode = TestUtils.create1WaySendPushPMode();        
+        Leg leg = pmode.getLeg(Label.REQUEST);
+        leg.getProtocol().setSOAPVersion("1.2");
+        
         HolodeckB2BCore.getPModeSet().add(pmode);
 
         // Setting input message property
@@ -128,13 +123,7 @@ public class CreateSOAPEnvelopeHandlerTest {
     	mc.setFLOW(MessageContext.OUT_FLOW);
     	mc.setServerSide(true);
     	
-    	PMode pmode = new PMode();
-    	pmode.setId("soap-12");
-    	Leg leg = new Leg();
-    	Protocol protocolConfig = new Protocol();
-    	protocolConfig.setSOAPVersion("1.2");
-    	leg.setProtocol(protocolConfig);
-    	pmode.addLeg(leg);
+    	PMode pmode = TestUtils.create1WayReceivePushPMode();        
     	
     	HolodeckB2BCore.getPModeSet().add(pmode);
     	

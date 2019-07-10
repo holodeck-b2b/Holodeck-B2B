@@ -102,7 +102,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                     IAS4Leg leg = null;
                     IReceptionAwareness raConfig = null;
                     try {
-                        leg = (IAS4Leg) HolodeckB2BCore.getPModeSet().get(um.getPModeId()).getLeg(um.getLeg());
+                        leg = (IAS4Leg) PModeUtils.getLeg(um);
                         raConfig = leg.getReceptionAwareness();
                     } catch (final Exception e) {
                         // Could not get configuration for retries, maybe P-Mode configuration was deleted?
