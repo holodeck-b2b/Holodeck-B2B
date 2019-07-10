@@ -26,27 +26,27 @@ public class ProcessingModeMismatch extends org.holodeckb2b.common.messagemodel.
     /**
      * The error code as defined in the core specification
      */
-    private static final String ERROR_CODE = "EBMS:0010";
+    public static final String ERROR_CODE = "EBMS:0010";
 
     /**
      * The default severity of the error as defined in the core specification.
      */
-    private static final Severity ERROR_SEVERITY = Severity.failure;
+    public static final Severity ERROR_SEVERITY = Severity.failure;
 
     /**
      * The origin of this error is normally the ebms module
      */
-    private static final String ERROR_ORIGIN = "ebms";
+    public static final String ERROR_ORIGIN = "ebms";
 
     /**
      * The default category as specified in the core specification
      */
-    private static final String ERROR_CATEGORY = "Processing";
+    public static final String ERROR_CATEGORY = "Processing";
 
     /**
      * The default error message
      */
-    private static final String ERROR_SHORT_DESCRIPTION = "ProcessingModeMismatch";
+    public static final String ERROR_SHORT_DESCRIPTION = "ProcessingModeMismatch";
 
     /**
      * Constructs a new <i>ProcessingModeMismatch</i> error with the default values.

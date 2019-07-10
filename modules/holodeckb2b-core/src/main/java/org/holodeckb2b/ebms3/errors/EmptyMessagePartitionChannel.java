@@ -28,27 +28,27 @@ public class EmptyMessagePartitionChannel extends EbmsError {
     /**
      * The error code as defined in the core specification
      */
-    private static final String ERROR_CODE = "EBMS:0006";
+    public static final String ERROR_CODE = "EBMS:0006";
 
     /**
      * The default severity of the error as defined in the core specification.
      */
-    private static final Severity ERROR_SEVERITY = Severity.warning;
+    public static final Severity ERROR_SEVERITY = Severity.warning;
 
     /**
      * The origin of this error is normally the ebms module
      */
-    private static final String ERROR_ORIGIN = "ebms";
+    public static final String ERROR_ORIGIN = "ebms";
 
     /**
      * The default category as specified in the core specification
      */
-    private static final String ERROR_CATEGORY = "Communication";
+    public static final String ERROR_CATEGORY = "Communication";
 
     /**
      * The default error message
      */
-    private static final String ERROR_SHORT_DESCRIPTION = "EmptyMessagePartitionChannel";
+    public static final String ERROR_SHORT_DESCRIPTION = "EmptyMessagePartitionChannel";
 
     /**
      * Constructs a new <i>EmptyMessagePartitionChannel</i> error with the default values.

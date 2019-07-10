@@ -26,27 +26,27 @@ public class MimeInconsistency extends org.holodeckb2b.common.messagemodel.EbmsE
     /**
      * The error code as defined in the core specification
      */
-    private static final String ERROR_CODE = "EBMS:0007";
+    public static final String ERROR_CODE = "EBMS:0007";
 
     /**
      * The default severity of the error as defined in the core specification.
      */
-    private static final Severity ERROR_SEVERITY = Severity.failure;
+    public static final Severity ERROR_SEVERITY = Severity.failure;
 
     /**
      * The origin of this error is normally the ebms module
      */
-    private static final String ERROR_ORIGIN = "ebms";
+    public static final String ERROR_ORIGIN = "ebms";
 
     /**
      * The default category as specified in the core specification
      */
-    private static final String ERROR_CATEGORY = "Unpackaging";
+    public static final String ERROR_CATEGORY = "Unpackaging";
 
     /**
      * The default error message
      */
-    private static final String ERROR_SHORT_DESCRIPTION = "MimeInconsistency";
+    public static final String ERROR_SHORT_DESCRIPTION = "MimeInconsistency";
 
     /**
      * Constructs a new <i>MimeInconsistency</i> error with the default values.

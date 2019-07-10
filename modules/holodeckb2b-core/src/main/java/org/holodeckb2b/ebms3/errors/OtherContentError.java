@@ -26,27 +26,27 @@ public class OtherContentError extends org.holodeckb2b.common.messagemodel.EbmsE
     /**
      * The error code as defined in the core specification
      */
-    private static final String ERROR_CODE = "EBMS:0004";
+    public static final String ERROR_CODE = "EBMS:0004";
 
     /**
      * The default severity of the error as defined in the core specification.
      */
-    private static final Severity ERROR_SEVERITY = Severity.warning;
+    public static final Severity ERROR_SEVERITY = Severity.warning;
 
     /**
      * The origin of this error is normally the ebms module
      */
-    private static final String ERROR_ORIGIN = "ebms";
+    public static final String ERROR_ORIGIN = "ebms";
 
     /**
      * The default category as specified in the core specification
      */
-    private static final String ERROR_CATEGORY = "Content";
+    public static final String ERROR_CATEGORY = "Content";
 
     /**
      * The default error message
      */
-    private static final String ERROR_SHORT_DESCRIPTION = "Other";
+    public static final String ERROR_SHORT_DESCRIPTION = "Other";
 
     /**
      * Constructs a new <i>OtherContentError</i> error with the default values.

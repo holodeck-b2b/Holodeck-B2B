@@ -26,27 +26,27 @@ public class PolicyNoncompliance extends org.holodeckb2b.common.messagemodel.Ebm
     /**
      * The error code as defined in the core specification
      */
-    private static final String ERROR_CODE = "EBMS:0103";
+    public static final String ERROR_CODE = "EBMS:0103";
 
     /**
      * The default severity of the error as defined in the core specification.
      */
-    private static final Severity ERROR_SEVERITY = Severity.failure;
+    public static final Severity ERROR_SEVERITY = Severity.failure;
 
     /**
      * The origin of this error is normally the security module
      */
-    private static final String ERROR_ORIGIN = "security";
+    public static final String ERROR_ORIGIN = "security";
 
     /**
      * The default category as specified in the core specification
      */
-    private static final String ERROR_CATEGORY = "Processing";
+    public static final String ERROR_CATEGORY = "Processing";
 
     /**
      * The default error message
      */
-    private static final String ERROR_SHORT_DESCRIPTION = "PolicyNoncompliance";
+    public static final String ERROR_SHORT_DESCRIPTION = "PolicyNoncompliance";
 
     /**
      * Constructs a new <i>ConnectionFailure</i> error with the default values.

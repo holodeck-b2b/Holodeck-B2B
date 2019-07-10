@@ -26,27 +26,27 @@ public class ExternalPayloadError extends org.holodeckb2b.common.messagemodel.Eb
     /**
      * The error code as defined in the core specification
      */
-    private static final String ERROR_CODE = "EBMS:0011";
+    public static final String ERROR_CODE = "EBMS:0011";
 
     /**
      * The default severity of the error as defined in the core specification.
      */
-    private static final Severity ERROR_SEVERITY = Severity.failure;
+    public static final Severity ERROR_SEVERITY = Severity.failure;
 
     /**
      * The origin of this error is normally the ebms module
      */
-    private static final String ERROR_ORIGIN = "ebms";
+    public static final String ERROR_ORIGIN = "ebms";
 
     /**
      * The default category as specified in the core specification
      */
-    private static final String ERROR_CATEGORY = "Content";
+    public static final String ERROR_CATEGORY = "Content";
 
     /**
      * The default error message
      */
-    private static final String ERROR_SHORT_DESCRIPTION = "ExternalPayloadError";
+    public static final String ERROR_SHORT_DESCRIPTION = "ExternalPayloadError";
 
     /**
      * Constructs a new <i>ExternalPayloadError</i> error with the default values.
