@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.ILeg;
@@ -35,7 +36,6 @@ import org.holodeckb2b.interfaces.submit.MessageSubmitException;
 import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is responsible for starting the send process of Pull Request message units. The ebMS specific handlers in the Axis2

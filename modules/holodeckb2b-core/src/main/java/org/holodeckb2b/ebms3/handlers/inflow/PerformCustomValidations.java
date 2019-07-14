@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.holodeckb2b.common.handler.AbstractUserMessageHandler;
 import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.core.validation.CustomValidationFailureEvent;
 import org.holodeckb2b.core.validation.ValidationResult;
 import org.holodeckb2b.ebms3.errors.OtherContentError;
@@ -33,7 +34,6 @@ import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for the execution of the custom validation of the User Message message unit

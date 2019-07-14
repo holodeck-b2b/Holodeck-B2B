@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workers.PModeWatcher;
+import org.holodeckb2b.ebms3.pmode.PModeFinder;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;

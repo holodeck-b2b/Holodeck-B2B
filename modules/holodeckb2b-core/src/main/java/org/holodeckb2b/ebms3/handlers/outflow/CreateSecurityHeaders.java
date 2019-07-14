@@ -25,6 +25,7 @@ import org.holodeckb2b.common.handler.AbstractBaseHandler;
 import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.events.security.EncryptionFailure;
 import org.holodeckb2b.events.security.SignatureCreated;
 import org.holodeckb2b.events.security.SigningFailure;
@@ -54,7 +55,6 @@ import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the required WS-Security headers in the message. As described

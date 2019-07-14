@@ -26,6 +26,7 @@ import org.holodeckb2b.common.messagemodel.Service;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IAgreement;
 import org.holodeckb2b.interfaces.general.IPartyId;
@@ -38,7 +39,6 @@ import org.holodeckb2b.interfaces.pmode.IBusinessInfo;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.submit.MessageSubmitException;
-import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is a helper class to create a complete set of configuration parameters that define how a submitted user message must

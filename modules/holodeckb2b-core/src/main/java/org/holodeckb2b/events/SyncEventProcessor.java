@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.events.EventUtils;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
@@ -31,7 +32,6 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandler
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the default implementation of {@link IMessageProcessingEventProcessor} for handling <i>message processing events

@@ -32,6 +32,8 @@ import org.holodeckb2b.common.pmode.SigningConfig;
 import org.holodeckb2b.common.pmode.UserMessageFlow;
 import org.holodeckb2b.common.pmode.UsernameTokenConfig;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.ebms3.pmode.BasicPModeValidator;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;

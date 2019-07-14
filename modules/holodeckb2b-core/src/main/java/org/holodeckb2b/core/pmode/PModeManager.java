@@ -14,14 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.pmode;
+package org.holodeckb2b.core.pmode;
 
 import java.util.Collection;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.config.InternalConfiguration;
+import org.holodeckb2b.common.pmode.InMemoryPModeSet;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.ebms3.pmode.BasicPModeValidator;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;

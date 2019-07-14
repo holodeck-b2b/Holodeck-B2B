@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.core.validation.ValidationResult;
 import org.holodeckb2b.events.MessageSubmission;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -50,7 +51,6 @@ import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.submit.MessageSubmitException;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the default implementation of {@see IMessageSubmitter}.

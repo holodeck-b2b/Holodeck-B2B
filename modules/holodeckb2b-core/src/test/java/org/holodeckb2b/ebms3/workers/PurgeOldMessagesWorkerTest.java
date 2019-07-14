@@ -39,6 +39,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.common.testhelpers.TestEventProcessor;
 import org.holodeckb2b.core.testhelpers.TestUtils;
+import org.holodeckb2b.core.workers.PurgeOldMessagesWorker;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.events.IMessageUnitPurgedEvent;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;

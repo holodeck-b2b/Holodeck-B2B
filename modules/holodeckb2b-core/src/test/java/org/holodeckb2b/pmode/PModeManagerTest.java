@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 import org.holodeckb2b.common.config.InternalConfiguration;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
+import org.holodeckb2b.core.pmode.PModeManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;

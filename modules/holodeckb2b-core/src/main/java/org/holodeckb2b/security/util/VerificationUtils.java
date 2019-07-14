@@ -20,9 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.security.ICertificateManager.CertificateUsage;
@@ -30,6 +28,7 @@ import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
+import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
  * Is a container for general security related functions.
@@ -135,8 +134,8 @@ public class VerificationUtils {
             return true;
 
         final String expAlias = expected.getKeystoreAlias();
-        final String actAlias = actual != null ? HolodeckB2BCoreInterface.getCertificateManager()
-                                                                	.getCertificateAlias(CertificateUsage.Validation,
+        final String actAlias = actual != null ? HolodeckB2BCore.getCertificateManager()
+                                                                .getCertificateAlias(CertificateUsage.Validation,
                                                                                      actual.getSigningCertificate())
                                                : null;
         return expAlias.equals(actAlias);

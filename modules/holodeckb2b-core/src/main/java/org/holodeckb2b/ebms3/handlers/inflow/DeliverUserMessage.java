@@ -19,6 +19,7 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import org.apache.commons.logging.Log;
 import org.holodeckb2b.common.handler.AbstractUserMessageHandler;
 import org.holodeckb2b.common.handler.MessageProcessingContext;
+import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.ebms3.errors.OtherContentError;
 import org.holodeckb2b.events.MessageDelivery;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
@@ -29,7 +30,6 @@ import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
 import org.holodeckb2b.persistency.dao.StorageManager;
-import org.holodeckb2b.pmode.PModeUtils;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for the delivery of the User message message unit to the business

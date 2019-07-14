@@ -23,11 +23,11 @@ import org.holodeckb2b.common.handler.AbstractBaseHandler;
 import org.holodeckb2b.common.handler.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.errors.ProcessingModeMismatch;
+import org.holodeckb2b.ebms3.pmode.PModeFinder;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.module.HolodeckB2BCore;
-import org.holodeckb2b.pmode.PModeFinder;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for determining the P-Modes that may apply to the received Pull Request.
