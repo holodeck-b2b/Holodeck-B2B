@@ -20,9 +20,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-import org.holodeckb2b.common.handler.AbstractUserMessageHandler;
-import org.holodeckb2b.common.handler.MessageProcessingContext;
+import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.ebms3.errors.PolicyNoncompliance;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;

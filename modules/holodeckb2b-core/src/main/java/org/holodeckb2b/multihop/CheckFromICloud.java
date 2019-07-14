@@ -18,8 +18,8 @@ package org.holodeckb2b.multihop;
 
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.commons.logging.Log;
-import org.holodeckb2b.common.handler.AbstractBaseHandler;
-import org.holodeckb2b.common.handler.MessageProcessingContext;
+import org.holodeckb2b.common.handlers.AbstractBaseHandler;
+import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.module.HolodeckB2BCore;

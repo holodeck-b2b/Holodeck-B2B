@@ -21,10 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import org.holodeckb2b.common.handler.AbstractBaseHandler;
-import org.holodeckb2b.common.handler.MessageProcessingContext;
+import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.events.security.EncryptionFailure;
 import org.holodeckb2b.events.security.SignatureCreated;

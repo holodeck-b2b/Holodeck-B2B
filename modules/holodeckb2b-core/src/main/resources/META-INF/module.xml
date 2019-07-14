@@ -26,11 +26,11 @@
 
     <InFlow>
         <!-- Catch a raised Fault and translate it into an EbMS Error -->
-        <handler name="CatchFaults" class="org.holodeckb2b.ebms3.util.CatchAxisFault">
+        <handler name="CatchFaults" class="org.holodeckb2b.core.handlers.CatchAxisFault">
             <order phase="protocolInPhase" phaseFirst="true"/>            
         </handler>
         <!-- Log the SOAP envelope -->
-        <handler name="SOAPLog" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger">
+        <handler name="SOAPLog" class="org.holodeckb2b.common.handlers.SOAPEnvelopeLogger">
             <order phase="protocolInPhase" after="CatchFaults"/>
         </handler>
         <!--
@@ -139,7 +139,6 @@
         -->
         <handler name="ProcessGeneratedErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessGeneratedErrors">
             <order phase="protocolInPhase" after="DeliverErrors"/>
-        </handler>
         <handler name="DetermineErrorReporting" class="org.holodeckb2b.ebms3.handlers.inflow.DetermineErrorReporting">
             <order phase="protocolInPhase" after="ProcessGeneratedErrors"/>
         </handler>
@@ -147,11 +146,11 @@
     
     <InFaultFlow>
         <!-- Catch a raised Fault and translate it into an EbMS Error -->
-        <handler name="CatchFaults" class="org.holodeckb2b.ebms3.util.CatchAxisFault">
+        <handler name="CatchFaults" class="org.holodeckb2b.core.handlers.CatchAxisFault">
             <order phase="protocolInPhase" phaseFirst="true"/>            
         </handler>
         <!-- Log the SOAP envelope -->
-        <handler name="SOAPLog" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger">
+        <handler name="SOAPLog" class="org.holodeckb2b.common.handlers.SOAPEnvelopeLogger">
             <order phase="protocolInPhase" after="CatchFaults"/>
         </handler>
         <!--
@@ -318,7 +317,7 @@
             <order phase="protocolOutPhase" after="ConfigureHTTP" />
         </handler>
         <!-- Log the SOAP envelope -->
-        <handler name="SOAPLog" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger">
+        <handler name="SOAPLog" class="org.holodeckb2b.common.handlers.SOAPEnvelopeLogger">
             <order phase="protocolOutPhase" phaseLast="true"/>
         </handler>
     </OutFlow>
@@ -375,7 +374,7 @@
             <order phase="protocolOutPhase" after="ConfigureHTTP" />
         </handler>
         <!-- Log the SOAP envelope -->
-        <handler name="SOAPLog" class="org.holodeckb2b.ebms3.util.SOAPEnvelopeLogger">
+        <handler name="SOAPLog" class="org.holodeckb2b.common.handlers.SOAPEnvelopeLogger">
             <order phase="protocolOutPhase" phaseLast="true"/>
         </handler>
     </OutFaultFlow>
