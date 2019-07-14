@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.common.handlers.MessageProcessingContext;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.Leg;
@@ -36,7 +37,6 @@ import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.ReceiptConfiguration;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.ReplyPattern;

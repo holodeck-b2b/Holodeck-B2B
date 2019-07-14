@@ -21,8 +21,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
+import org.holodeckb2b.common.handlers.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.core.validation.CustomValidationFailureEvent;
 import org.holodeckb2b.core.validation.ValidationResult;

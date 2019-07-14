@@ -21,8 +21,8 @@ import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
+import org.holodeckb2b.common.handlers.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.ebms3.errors.FailedAuthentication;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;

@@ -49,8 +49,8 @@ import org.apache.http.MethodNotSupportedException;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EncodingUtils;
+import org.holodeckb2b.common.handlers.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 
 /**
  * Is an Axis2 {@link Worker} implementation to handle a single HTTP request. If the HTTP POST method is used it will 

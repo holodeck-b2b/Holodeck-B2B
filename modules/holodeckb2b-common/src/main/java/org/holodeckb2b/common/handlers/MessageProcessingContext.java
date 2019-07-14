@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.core.handlers;
+package org.holodeckb2b.common.handlers;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;

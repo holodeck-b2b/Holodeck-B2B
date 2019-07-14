@@ -20,7 +20,7 @@ import org.apache.axis2.description.HandlerDescription;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.common.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;

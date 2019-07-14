@@ -23,7 +23,7 @@ import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.common.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;

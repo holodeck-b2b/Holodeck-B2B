@@ -22,8 +22,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
+import org.holodeckb2b.common.handlers.MessageProcessingContext;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.ebms3.errors.EmptyMessagePartitionChannel;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;

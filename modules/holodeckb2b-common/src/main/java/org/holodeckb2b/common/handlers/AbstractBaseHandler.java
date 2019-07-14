@@ -25,7 +25,6 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 
 /**
  * Is an <i>abstract</i> implementation of an Axis2 handler that acts as the base class for the Holodeck B2B handlers.
