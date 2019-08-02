@@ -16,13 +16,8 @@
  */
 package org.holodeckb2b.common.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileAlreadyExistsException;
@@ -40,11 +35,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
+
 import org.apache.tika.Tika;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
-import org.holodeckb2b.common.exceptions.ObjectSerializationException;
 
 /**
  * Is a container for some generic helper methods.
@@ -172,55 +167,6 @@ public final class Utils {
         }
 
         return tikaMimeType.getExtension();
-    }
-
-    /**
-     * Serializes an object to an array of bytes.
-     *
-     * @param obj   The object to serialize
-     * @return      The serialized object as an array of bytes
-     * @throws ObjectSerializationException    When an error occurs during the
-     *                                          serialization process
-     */
-    public static byte[] serialize(final Object obj) throws ObjectSerializationException {
-        // No object results is no bytes
-        if (obj == null)
-            return null;
-
-        try (final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            final ObjectOutput out = new ObjectOutputStream(bos))
-        {
-            out.writeObject(obj);
-            out.close();
-            return bos.toByteArray();
-        } catch (final Exception ex) {
-            throw new ObjectSerializationException("Object [" + obj.getClass().getName() + "/" + obj.hashCode() + "] could not be serialized", ex);
-        }
-    }
-
-    /**
-     * Deserializes an object from an array of bytes.
-     *
-     * @param data      The array of bytes that represents the serialized object
-     * @return          The deserialized object when it could be read succesfully
-     * @throws ObjectSerializationException When an error occurs during the
-     *                                      deserialization process
-     */
-    public static Object deserialize(final byte[] data) throws ObjectSerializationException {
-        // If there are no bytes, there is no object
-        if (data == null || data.length <= 0)
-            return null;
-
-        Object result = null;
-        try (final ByteArrayInputStream stream = new ByteArrayInputStream(data);
-             final ObjectInputStream is = new ObjectInputStream(stream))
-        {
-            result = is.readObject();
-        } catch (final Exception ex) {
-            throw new ObjectSerializationException("Deserializing an object failed!", ex);
-        }
-
-        return result;
     }
 
     /**

@@ -62,8 +62,8 @@ recommended to raise log levels to at least INFO.
             reduced to prevent clutter         
         -->
         <Logger name="org.holodeckb2b.core.workers" level="WARN"/>
-        <Logger name="org.holodeckb2b.common.workers" level="WARN"/>
-        <Logger name="org.holodeckb2b.as4.receptionawareness.RetransmissionWorker" level="INFO"/>        
+        <Logger name="org.holodeckb2b.common.pmode.PModeWatcher" level="WARN"/>
+        <Logger name="org.holodeckb2b.as4.receptionawareness.RetransmissionWorker" level="WARN"/>        
         <Logger name="org.holodeckb2b.ebms3.pulling" level="WARN"/>
         <Logger name="org.holodeckb2b.events.SyncEventProcessor" level="WARN"/>
         

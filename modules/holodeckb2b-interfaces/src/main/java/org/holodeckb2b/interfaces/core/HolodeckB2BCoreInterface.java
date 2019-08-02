@@ -31,8 +31,6 @@ import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.ICertificateManager;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
-import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
-import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
  * Provides access to the Holodeck B2B Core of a running instance. Note that this is just a <i>facade</i> to the actual
@@ -118,26 +116,6 @@ public class HolodeckB2BCoreInterface {
     public static IMessageProcessingEventProcessor getEventProcessor() {
         assertInitialized();
         return coreImplementation.getEventProcessor();
-    }
-
-    /**
-     * Sets the configuration of the <i>pull worker pool</i> which contains the <i>Workers</i> that are responsible for
-     * sending the Pull Request signal messages.
-     * <p>If no new configuration is provided the worker pool will be stopped. NOTE that this will also stop Holodeck
-     * B2B from pulling for User Messages (unless some other worker(s) in the regular worker pool take over, which is
-     * <b>not recommended</b>).
-     *
-     * @param pullConfiguration             The new pool configuration to use. If <code>null</code> the worker pool
-     *                                      will be stopped.
-     * @throws TaskConfigurationException   When the provided configuration could not be activated. This is probably
-     *                                      caused by an issue in the configuration of the workers but it can also be
-     *                                      that the worker pool itself could not be started correctly.
-     * @since 2.1.0
-     */
-    public static void setPullWorkerPoolConfiguration(final IWorkerPoolConfiguration pullConfiguration)
-                                                                                    throws TaskConfigurationException {
-        assertInitialized();
-        coreImplementation.setPullWorkerPoolConfiguration(pullConfiguration);
     }
 
     /**

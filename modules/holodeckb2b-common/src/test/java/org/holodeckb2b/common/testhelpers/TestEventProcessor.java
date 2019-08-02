@@ -16,13 +16,13 @@
  */
 package org.holodeckb2b.common.testhelpers;
 
+import java.util.ArrayList;
+
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 
-import java.util.ArrayList;
-
 /**
- * Created at 18:13 12.11.16
+ * Is a {@link IMessageProcessingEventProcessor} implementation for testing that just collects all raised events.
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */

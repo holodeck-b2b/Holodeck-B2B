@@ -1,0 +1,53 @@
+package org.holodeckb2b.persistency.inmemory;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
+import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
+import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+
+/**
+ * Is a {@link IPersistencyProvider} implementation for testing that stores the message units in-memory. 
+ * 
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ */
+public class InMemoryProvider implements IPersistencyProvider {
+
+	private IDAOFactory	daoFactory = new DAOFactory();
+	
+	@Override
+	public String getName() {
+		return "In Memory Test Provider";
+	}
+
+	@Override
+	public void init(String hb2bHomeDir) throws PersistenceException {
+		daoFactory = new DAOFactory();
+	}
+
+	@Override
+	public IDAOFactory getDAOFactory() {
+		return daoFactory;
+	}
+
+	public class DAOFactory implements IDAOFactory {
+
+		private Set<IMessageUnitEntity>	 msgUnitStore = Collections.synchronizedSet(new HashSet<IMessageUnitEntity>());	
+		
+		@Override
+		public IUpdateManager getUpdateManager() {
+			return new UpdateManager(msgUnitStore);
+		}
+
+		@Override
+		public IQueryManager getQueryManager() {
+			return new QueryManager(msgUnitStore);
+		}
+		
+	}
+}

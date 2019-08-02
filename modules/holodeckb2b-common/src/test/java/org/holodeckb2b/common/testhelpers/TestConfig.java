@@ -17,7 +17,7 @@
 package org.holodeckb2b.common.testhelpers;
 
 import org.apache.axis2.context.ConfigurationContext;
-import org.holodeckb2b.common.config.InternalConfiguration;
+import org.holodeckb2b.core.config.InternalConfiguration;
 
 /**
  *
@@ -28,10 +28,17 @@ public class TestConfig implements InternalConfiguration {
     public String hb2b_home;
     public String pmodeValidatorClass = null;
     public String pmodeStorageClass = null;
+    public String persistencyProviderClass;
+    public String securityProviderClass;
     public boolean useStrictHeaderValidation = false;
 
-    public boolean allowSignalBundling = false;
+    public boolean allowSignalBundling  = false;
+    public boolean reportErrorOnError   = false;
+    public boolean reportErrorOnReceipt = false;
 
+    public TestConfig() {    	
+    }
+    
     public TestConfig(final String homeDir) {
         hb2b_home = homeDir;
     }
@@ -92,21 +99,22 @@ public class TestConfig implements InternalConfiguration {
 
     @Override
     public boolean allowSignalBundling() {
-        System.out.println("[Config.allowSignalBundling()]: " + this.toString());
         return allowSignalBundling;
     }
 
     @Override
     public boolean shouldReportErrorOnError() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return reportErrorOnError;
     }
+   
 
     @Override
     public boolean shouldReportErrorOnReceipt() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return reportErrorOnReceipt;
     }
 
     @Override
+    @Deprecated
     public boolean useStrictErrorRefCheck() {
         return false;
     }
@@ -152,7 +160,7 @@ public class TestConfig implements InternalConfiguration {
 
     @Override
     public String getPersistencyProviderClass() {
-        return "org.holodeckb2b.persistency.DefaultProvider";
+    	return persistencyProviderClass;
     }
 
     @Override
@@ -162,6 +170,6 @@ public class TestConfig implements InternalConfiguration {
 
     @Override
     public String getSecurityProviderClass() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return securityProviderClass;
     }
 }

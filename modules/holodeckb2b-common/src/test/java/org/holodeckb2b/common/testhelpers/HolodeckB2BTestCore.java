@@ -24,7 +24,9 @@ import java.util.Map;
 
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.config.IConfiguration;
+import org.holodeckb2b.core.HolodeckB2BCoreImpl;
+import org.holodeckb2b.core.StorageManager;
+import org.holodeckb2b.core.config.InternalConfiguration;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
@@ -34,38 +36,40 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfigu
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.general.IVersionInfo;
+import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.ICertificateManager;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
-import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
-import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
+import org.holodeckb2b.persistency.inmemory.InMemoryProvider;
 
 /**
  * Is utility class for testing that simulates the Holodeck B2B Core.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class HolodeckB2BTestCore implements IHolodeckB2BCore {
+public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodeckB2BCore {
 
-	private IConfiguration		configuration;
+	private InternalConfiguration		configuration;
 	private IMessageSubmitter	messageSubmitter;
 	private IPModeSet			pmodes;
 	private IMessageProcessingEventProcessor eventProcessor;
 	private ICertificateManager certManager;
-	private IQueryManager		queryManager;
+	private IPersistencyProvider persistencyProvider;
 	private List<IMessageProcessingEventConfiguration> eventConfig = new ArrayList<>();
 	private Map<String, IMessageDelivererFactory> msgDeliveryMethods = new HashMap<>();
 	
 	public HolodeckB2BTestCore() {
+		this.configuration = new TestConfig();
 	}
 
 	public HolodeckB2BTestCore(final String homeDir) {
 		this.configuration = new TestConfig(homeDir);
 	}
 	
-	public HolodeckB2BTestCore(final IConfiguration config) {
+	public HolodeckB2BTestCore(final InternalConfiguration config) {
 		this.configuration = config;
 	}	
 	
@@ -73,7 +77,7 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
 	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getConfiguration()
 	 */
 	@Override
-	public IConfiguration getConfiguration() {
+	public InternalConfiguration getConfiguration() {
 		return configuration;
 	}
 	
@@ -165,15 +169,9 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
 		return eventProcessor;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#setPullWorkerPoolConfiguration(org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration)
-	 */
-	@Override
-	public void setPullWorkerPoolConfiguration(IWorkerPoolConfiguration pullConfiguration) throws TaskConfigurationException {
-	}
-
-	public void setQueryManager(final IQueryManager queryManager) {
-		this.queryManager = queryManager;
+	public void setPersistencyProvider(IPersistencyProvider provider) throws PersistenceException {
+		persistencyProvider = provider;
+		persistencyProvider.init(configuration.getHolodeckB2BHome());
 	}
 	
 	/* (non-Javadoc)
@@ -181,9 +179,24 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
 	 */
 	@Override
 	public IQueryManager getQueryManager() {
-		return queryManager;
+		if (persistencyProvider == null)
+			persistencyProvider = new InMemoryProvider();
+		
+		return persistencyProvider.getDAOFactory().getQueryManager();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getQueryManager()
+	 */
+	@Override
+	public StorageManager getStorageManager() {
+		if (persistencyProvider == null)
+			persistencyProvider = new InMemoryProvider();
+		
+		return new StorageManager(persistencyProvider.getDAOFactory().getUpdateManager());
 	}
 
+	
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getCertificateManager()
 	 */
@@ -222,11 +235,11 @@ public class HolodeckB2BTestCore implements IHolodeckB2BCore {
 	 */
 	@Override
 	public void removeEventHandler(String id) {
-    	int i; boolean exists = false;
-    	for(i = 0; i < eventConfig.size() && !exists; i++)
-    		exists = eventConfig.get(i).getId().equals(id);
-    	if (exists)     		
-    		eventConfig.remove(i);
+    	int i; int exists = -1;
+    	for(i = 0; i < eventConfig.size() && exists < 0; i++)
+    		exists = eventConfig.get(i).getId().equals(id) ? i : -1;
+    	if (exists >= 0)     		
+    		eventConfig.remove(exists);
 	}
 
 	/* (non-Javadoc)

@@ -145,7 +145,7 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration,
 
     @Override
     public String getId() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return null;
     }
 
     public void setHandledEvents(final List<Class<? extends IMessageProcessingEvent>> events) {
@@ -185,6 +185,10 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration,
         return handlerFactoryClass;
     }
 
+    public void setFactoryClass(final String className) {
+    	this.handlerFactoryClass = className;
+    }
+    
     @Override
     public Map<String, ?> getHandlerSettings() {
         HashMap<String, String> settings = new HashMap<>(parameters.size());

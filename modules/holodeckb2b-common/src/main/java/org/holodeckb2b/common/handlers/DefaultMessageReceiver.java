@@ -21,6 +21,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.axis2.util.MessageContextBuilder;
+import org.holodeckb2b.core.handlers.MessageProcessingContext;
 
 /**
  * Is Holodeck B2B's default implementation of the Axis2 {@link MessageReceiver} interface. It checks whether a response

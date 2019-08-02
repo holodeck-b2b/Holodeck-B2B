@@ -17,7 +17,7 @@
     to process messages!
     =============================================================== -->
     <worker name="pmodeWatcher" interval="20" activate="true"
-        workerClass="org.holodeckb2b.common.workers.PModeWatcher">
+        workerClass="org.holodeckb2b.common.pmode.PModeWatcher">
         <parameter name="watchPath">conf/pmodes</parameter>
     </worker>
 

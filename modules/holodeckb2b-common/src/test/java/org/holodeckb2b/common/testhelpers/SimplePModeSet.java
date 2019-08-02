@@ -12,7 +12,8 @@ import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
 
 /**
- * A simple implementation of {@link IPModeSet} that uses a hash map to store the P-Modes.
+ * A simple implementation of {@link IPModeSet} that uses a hash map to store the P-Modes. There is no validation of
+ * the stored P-Modes like in the real Core.
  * 
  * @author Sander Fieten (sander at chasquis-consulting.com)
  */

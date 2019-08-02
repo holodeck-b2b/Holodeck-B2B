@@ -40,7 +40,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * Is a base class for testing the classes that process XML using the Simple framework. It provides a utility 
+ * Is a base class for testing the classes that process XML using the Simple framework. It provides a set of utility 
+ * functions to transform between XML and objects and check the XML documents. 
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION

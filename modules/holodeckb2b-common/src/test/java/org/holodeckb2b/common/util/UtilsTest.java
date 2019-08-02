@@ -16,17 +16,22 @@
  */
 package org.holodeckb2b.common.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.SortedSet;
+
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
-import org.holodeckb2b.common.exceptions.ObjectSerializationException;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -75,29 +80,6 @@ public class UtilsTest {
             String mimeTypeExtension = mimeType.getExtension();
 
             assertEquals(mimeTypeExtension, Utils.getExtension(mimeTypeName));
-        }
-    }
-
-    /**
-     * Test custom serialization
-     * @throws Exception
-     */
-    @Test
-    public void testSerialization() throws Exception {
-        String s = "some data";
-        byte[] serializedString = null;
-        try {
-            serializedString = Utils.serialize(s);
-        } catch (Exception e) {
-            fail();
-        }
-        assertNotNull(serializedString);
-        assertEquals(s, Utils.deserialize(serializedString));
-        Object o = new Object();
-        try {
-            Utils.serialize(o);
-        } catch (Exception ose) {
-            assertTrue(ose instanceof ObjectSerializationException);
         }
     }
 

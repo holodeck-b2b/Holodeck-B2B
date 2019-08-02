@@ -18,6 +18,7 @@ package org.holodeckb2b.common.workerpool.xml;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 import org.holodeckb2b.interfaces.general.Interval;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.simpleframework.xml.Attribute;

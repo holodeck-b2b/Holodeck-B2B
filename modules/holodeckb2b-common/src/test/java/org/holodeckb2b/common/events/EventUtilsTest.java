@@ -22,9 +22,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.holodeckb2b.common.events.impl.AbstractMessageProcessingEvent;
 import org.holodeckb2b.common.pmode.EventHandlerConfig;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandler;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.junit.Test;
 
@@ -53,14 +53,6 @@ public class EventUtilsTest {
 
         public EventForTest(IMessageUnit subject) {
             super(subject);
-        }
-    }
-
-    class EventForTestHandler implements IMessageProcessingEventHandler {
-
-        @Override
-        public void handleEvent(IMessageProcessingEvent event) throws IllegalArgumentException {
-
         }
     }
 
