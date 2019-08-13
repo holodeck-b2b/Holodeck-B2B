@@ -22,34 +22,37 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Date;
+import java.util.UUID;
+
 import javax.xml.namespace.QName;
 
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.holodeckb2b.common.messagemodel.AgreementReference;
+import org.holodeckb2b.common.messagemodel.CollaborationInfo;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.Receipt;
+import org.holodeckb2b.common.messagemodel.Service;
 import org.holodeckb2b.common.messagemodel.TradingPartner;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.pmode.Agreement;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.PartnerConfig;
 import org.holodeckb2b.common.pmode.PartyId;
+import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.handlers.MessageProcessingContext;
-import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -84,7 +87,21 @@ public class FindPModesTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        UserMessage userMessage = new UserMessage(TestUtils.getMMD("handlers/full_mmd.xml", this));
+        UserMessage userMessage = new UserMessage();
+        userMessage.setMessageId(UUID.randomUUID().toString());
+        userMessage.setTimestamp(new Date());
+        TradingPartner sender = new TradingPartner();
+        sender.addPartyId(new PartyId("TheSender", null));
+        sender.setRole("Sender");
+        userMessage.setSender(sender);
+        TradingPartner receiver = new TradingPartner();
+        receiver.addPartyId(new PartyId("TheRecipient", null));
+        receiver.setRole("Receiver");
+        userMessage.setReceiver(receiver);
+        CollaborationInfo collabInfo = new CollaborationInfo();
+        collabInfo.setService(new Service("FindPModeTest"));
+        collabInfo.setAction("Match");
+        userMessage.setCollaborationInfo(collabInfo);
         
         // Create matching P-Mode
         PMode pmode = TestUtils.create1WayReceivePushPMode();        
@@ -92,28 +109,14 @@ public class FindPModesTest {
         
         PartnerConfig initiator = new PartnerConfig();
         pmode.setInitiator(initiator);
-
-        PartnerConfig responder = new PartnerConfig();
-        pmode.setResponder(responder);
-
-        TradingPartner sender = userMessage.getSender();
         initiator.setRole(sender.getRole());
         sender.getPartyIds().forEach(pid -> initiator.addPartyId(new PartyId(pid)));
 
-        TradingPartner receiver = userMessage.getReceiver();
+        PartnerConfig responder = new PartnerConfig();
+        pmode.setResponder(responder);
         responder.setRole(receiver.getRole());
         receiver.getPartyIds().forEach(pid -> responder.addPartyId(new PartyId(pid)));
-
-        AgreementReference agreementReference =
-                userMessage.getCollaborationInfo().getAgreement();
-        String agreementRefName = agreementReference.getName();
-        String agreementRefType = agreementReference.getType();
         
-        Agreement agreement = new Agreement();
-        agreement.setName(agreementRefName);
-        agreement.setType(agreementRefType);
-        pmode.setAgreement(agreement);
-
         HolodeckB2BCore.getPModeSet().add(pmode);
 
         // Setting input message property
@@ -215,36 +218,36 @@ public class FindPModesTest {
        MessageContext mc = new MessageContext();
        mc.setFLOW(MessageContext.IN_FLOW);
 
-       UserMessage userMessage = new UserMessage(TestUtils.getMMD("handlers/full_mmd.xml", this));
-       userMessage.setPModeId(null);
+       UserMessage userMessage = new UserMessage();
+       userMessage.setMessageId(UUID.randomUUID().toString());
+       userMessage.setTimestamp(new Date());
+       TradingPartner sender = new TradingPartner();
+       sender.addPartyId(new PartyId("TheSender", null));
+       sender.setRole("Sender");
+       userMessage.setSender(sender);
+       TradingPartner receiver = new TradingPartner();
+       receiver.addPartyId(new PartyId("TheRecipient", null));
+       receiver.setRole("Receiver");
+       userMessage.setReceiver(receiver);
+       CollaborationInfo collabInfo = new CollaborationInfo();
+       collabInfo.setService(new Service("FindPModeTest"));
+       collabInfo.setAction("Match");
+       userMessage.setCollaborationInfo(collabInfo);
        
-       // Create matching P-Mode
+       // Create a non-matching P-Mode
        PMode pmode = TestUtils.create1WayReceivePushPMode();        
+       Leg leg = pmode.getLeg(Label.REQUEST);
        
        PartnerConfig initiator = new PartnerConfig();
        pmode.setInitiator(initiator);
-
-       PartnerConfig responder = new PartnerConfig();
-       pmode.setResponder(responder);
-
-       TradingPartner sender = userMessage.getSender();
        initiator.setRole(sender.getRole());
        sender.getPartyIds().forEach(pid -> initiator.addPartyId(new PartyId(pid)));
 
-       TradingPartner receiver = userMessage.getReceiver();
-       responder.setRole("no-match");
+       PartnerConfig responder = new PartnerConfig();
+       pmode.setResponder(responder);
+       responder.setRole("dont-match");
        receiver.getPartyIds().forEach(pid -> responder.addPartyId(new PartyId(pid)));
-
-       AgreementReference agreementReference =
-               userMessage.getCollaborationInfo().getAgreement();
-       String agreementRefName = agreementReference.getName();
-       String agreementRefType = agreementReference.getType();
        
-       Agreement agreement = new Agreement();
-       agreement.setName(agreementRefName);
-       agreement.setType(agreementRefType);
-       pmode.setAgreement(agreement);
-
        HolodeckB2BCore.getPModeSet().add(pmode);
 
        // Setting input message property

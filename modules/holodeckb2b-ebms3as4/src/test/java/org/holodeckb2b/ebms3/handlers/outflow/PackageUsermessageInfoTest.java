@@ -21,6 +21,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Date;
+import java.util.UUID;
+
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMElement;
@@ -29,17 +32,22 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.messagemodel.CollaborationInfo;
+import org.holodeckb2b.common.messagemodel.PartyId;
+import org.holodeckb2b.common.messagemodel.Payload;
+import org.holodeckb2b.common.messagemodel.Property;
+import org.holodeckb2b.common.messagemodel.Service;
+import org.holodeckb2b.common.messagemodel.TradingPartner;
+import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.handlers.MessageProcessingContext;
-import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -59,8 +67,28 @@ public class PackageUsermessageInfoTest {
 
     @Test
     public void testDoProcessing() throws Exception {
-        MessageMetaData userMessage = TestUtils.getMMD("handlers/full_mmd.xml", this);
-        // Creating SOAP envelope
+        UserMessage userMessage = new UserMessage();
+        userMessage.setMessageId(UUID.randomUUID().toString());
+        userMessage.setTimestamp(new Date());
+        TradingPartner sender = new TradingPartner();
+        sender.addPartyId(new PartyId("TheSender", null));
+        sender.setRole("Sender");
+        userMessage.setSender(sender);
+        TradingPartner receiver = new TradingPartner();
+        receiver.addPartyId(new PartyId("TheRecipient", null));
+        receiver.setRole("Receiver");
+        userMessage.setReceiver(receiver);
+        CollaborationInfo collabInfo = new CollaborationInfo();
+        collabInfo.setService(new Service("PackagingTest"));
+        collabInfo.setAction("Create");
+        userMessage.setCollaborationInfo(collabInfo);
+    	userMessage.addMessageProperty(new Property("some-meta-data", "description"));
+        Payload p = new Payload();
+    	p.setPayloadURI("cid:as_attachment");
+    	p.addProperty(new Property("p1", "v1"));
+    	userMessage.addPayload(p);
+    	
+    	// Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
         SOAPHeaderBlock messaging = Messaging.createElement(env);

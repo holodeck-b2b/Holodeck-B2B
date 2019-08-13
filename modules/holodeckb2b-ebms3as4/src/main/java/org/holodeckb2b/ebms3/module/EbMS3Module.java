@@ -43,7 +43,7 @@ public class EbMS3Module implements Module {
     /**
      * The name of the Axis2 Module that contains the Holodeck B2B ebMS3 implementation
      */
-    public static final String HOLODECKB2B_EBMS3_MODULE = "holodeckb2b-ebms3";
+    public static final String HOLODECKB2B_EBMS3_MODULE = "holodeckb2b-ebms3as4";
 
     /**
      * Logger

@@ -47,9 +47,17 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
-import org.holodeckb2b.persistency.entities.*;
-import org.holodeckb2b.persistency.jpa.*;
+import org.holodeckb2b.persistency.entities.ErrorMessageEntity;
+import org.holodeckb2b.persistency.entities.MessageUnitEntity;
+import org.holodeckb2b.persistency.entities.PullRequestEntity;
+import org.holodeckb2b.persistency.entities.ReceiptEntity;
+import org.holodeckb2b.persistency.entities.UserMessageEntity;
+import org.holodeckb2b.persistency.jpa.ErrorMessage;
+import org.holodeckb2b.persistency.jpa.MessageUnit;
+import org.holodeckb2b.persistency.jpa.Receipt;
+import org.holodeckb2b.persistency.jpa.UserMessage;
 import org.holodeckb2b.persistency.test.TestData;
+import org.holodeckb2b.persistency.test.TestProvider;
 import org.holodeckb2b.persistency.util.EntityManagerUtil;
 import org.holodeckb2b.persistency.util.JPAEntityHelper;
 import org.junit.After;
@@ -88,7 +96,7 @@ public class UpdateManagerTest {
         updManager = new UpdateManager();
         
         HolodeckB2BTestCore testCore = new HolodeckB2BTestCore();
-        testCore.setQueryManager(new QueryManager());
+        testCore.setPersistencyProvider(new TestProvider());
         HolodeckB2BCoreInterface.setImplementation(testCore);
     }
 

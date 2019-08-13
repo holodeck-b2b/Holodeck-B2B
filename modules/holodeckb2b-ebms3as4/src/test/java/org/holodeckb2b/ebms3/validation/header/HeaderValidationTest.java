@@ -22,43 +22,42 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.xml.namespace.QName;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.ParameterInclude;
 import org.apache.axis2.engine.Handler;
+import org.holodeckb2b.common.messagemodel.CollaborationInfo;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
+import org.holodeckb2b.common.messagemodel.Payload;
+import org.holodeckb2b.common.messagemodel.Property;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.Receipt;
+import org.holodeckb2b.common.messagemodel.Service;
+import org.holodeckb2b.common.messagemodel.TradingPartner;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
+import org.holodeckb2b.common.pmode.PartyId;
+import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.HolodeckB2BCoreImpl;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.handlers.MessageProcessingContext;
-import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.core.validation.header.HeaderValidationHandler;
-import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.PullRequestElement;
-import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessageElement;
-import org.holodeckb2b.ebms3.validation.header.Ebms3HeaderValidatorFactory;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -73,20 +72,13 @@ import org.junit.Test;
 public class HeaderValidationTest {
 
     static final QName RECEIPT_CHILD_ELEMENT_NAME = new QName("ReceiptChild");
-
-    private static String baseDir;
-
-    private static HolodeckB2BTestCore core;
-
     private HeaderValidationHandler handler;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = HeaderValidationTest.class.getClassLoader()
-                .getResource("handlers").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
     }
+    
     @Before
     public void setUp() throws Exception {
         handler = new HeaderValidationHandler();
@@ -103,23 +95,33 @@ public class HeaderValidationTest {
 
     @Test
     public void testDoProcessingOfUserMessage() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("handlers/full_mmd.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
+        UserMessage userMessage = new UserMessage();
+        userMessage.setMessageId(UUID.randomUUID().toString());
+        userMessage.setTimestamp(new Date());
+        TradingPartner sender = new TradingPartner();
+        sender.addPartyId(new PartyId("TheSender", null));
+        sender.setRole("Sender");
+        userMessage.setSender(sender);
+        TradingPartner receiver = new TradingPartner();
+        receiver.addPartyId(new PartyId("TheRecipient", null));
+        receiver.setRole("Receiver");
+        userMessage.setReceiver(receiver);
+        CollaborationInfo collabInfo = new CollaborationInfo();
+        collabInfo.setService(new Service("PackagingTest"));
+        collabInfo.setAction("Create");
+        userMessage.setCollaborationInfo(collabInfo);
+    	userMessage.addMessageProperty(new Property("some-meta-data", "description"));
+        Payload p = new Payload();
+    	p.setPayloadURI("cid:as_attachment");
+    	p.addProperty(new Property("p1", "v1"));
+    	userMessage.addPayload(p);
+    	
+    	// Setting input message property
+        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
+        IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(userMessage);
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-
-        UserMessage userMessage
-                = UserMessageElement.readElement(umElement);
-        // Setting input message property
-        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        IUserMessageEntity userMessageEntity =
-                updateManager.storeIncomingMessageUnit(userMessage);
         MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         
@@ -135,10 +137,6 @@ public class HeaderValidationTest {
 
     @Test
     public void testDoProcessingOfPullRequest() throws Exception {
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
         // Adding PullRequest
         PullRequest pullRequest = new PullRequest();
         pullRequest.setMPC("some_mpc");
@@ -146,7 +144,6 @@ public class HeaderValidationTest {
         // there should not be ref to message id
 //        pullRequest.setRefToMessageId("some_ref_to_message_id");
         pullRequest.setTimestamp(new Date());
-        PullRequestElement.createElement(headerBlock, pullRequest);
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
@@ -170,23 +167,16 @@ public class HeaderValidationTest {
 
     @Test
     public void testDoProcessingOfReciepts() throws Exception {
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding Receipts
+        // Adding Receipt
         Receipt receipt = new Receipt();
         receipt.setMessageId("some_message_id");
         receipt.setRefToMessageId("some_ref_to_message_id");
         receipt.setTimestamp(new Date());
         ArrayList<OMElement> receiptContent = new ArrayList<>();
 
-        OMElement receiptChildElement =
-                headerBlock.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
-        receiptChildElement.setText("eb3:UserMessage");
-        
+        OMElement receiptChildElement = OMAbstractFactory.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
+        receiptChildElement.setText("eb3:UserMessage");        
         receiptContent.add(receiptChildElement);
-
         receipt.setContent(receiptContent);
 
         MessageContext mc = new MessageContext();

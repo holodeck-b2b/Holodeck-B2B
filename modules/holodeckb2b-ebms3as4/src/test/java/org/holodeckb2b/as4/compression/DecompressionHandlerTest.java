@@ -33,6 +33,7 @@ import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.Property;
+import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.handlers.MessageProcessingContext;
@@ -40,8 +41,6 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -52,25 +51,10 @@ import org.junit.Test;
  */
 public class DecompressionHandlerTest {
 
-    private static String baseDir;
-
-    private static HolodeckB2BTestCore core;
-
-    private DecompressionHandler handler;
-
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = DecompressionHandlerTest.class.getClassLoader()
-                .getResource("compression").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
     }
-
-    @Before
-    public void setUp() throws Exception {
-        handler = new DecompressionHandler();
-    }
-
 
     @Test
     public void testDoProcessing() throws Exception {
@@ -78,10 +62,6 @@ public class DecompressionHandlerTest {
         mc.setFLOW(MessageContext.IN_FLOW);
 
         UserMessage userMessage = new UserMessage();
-
-        // We need to add payload with containment type "attachment" to user message,
-        // because PartInfoElement does not read the "containment" attribute
-        // value of the PartInfo tag from file now (23-Feb-2017 T.S.)
         Payload payload = new Payload();
         payload.setContainment(IPayload.Containment.ATTACHMENT);
         ArrayList<IProperty> props = new ArrayList<>();
@@ -109,7 +89,7 @@ public class DecompressionHandlerTest {
         procCtx.setUserMessage(userMessageEntity);
 
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            Handler.InvocationResponse invokeResp = new DecompressionHandler().invoke(mc);
             assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());

@@ -1,0 +1,126 @@
+<!--
+
+    Copyright (C) 2019 The Holodeck B2B Team, Sander Fieten
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<module name="holodeckb2b-core" class="org.holodeckb2b.core.HolodeckB2BCoreImpl">
+	<Description>This module contains the configuration of the Holodeck B2B Core handlers</Description>
+	<!-- Although the Core processing doesn't handle a specific protocol, we still
+	 	 specify a handled message protocol for nicer logging -->
+	<parameter name="HandledMessagingProtocol" locked="true">core</parameter>
+
+	<!--
+		In the in flow the Core processing consists of the processing of the received message units and
+		catching any unhandled exception (which will then be converted into an "Other" error). In the out
+		flow the Core processing is limited to catching unhandled exceptions as there is no generic 
+		processing to be done. 	 
+	-->	
+		
+    <InFlow>    
+        <!-- Catch a raised Fault and translate it into an EbMS Error -->
+        <handler name="CatchFaults" class="org.holodeckb2b.core.handlers.CatchAxisFault">
+            <order phase="Transport" phaseFirst="true"/>            
+        </handler>
+
+        <!--
+            Process the user message
+        -->
+        <handler name="StartProcessingUsrMsg" class="org.holodeckb2b.core.handlers.inflow.StartProcessingUsrMessage">
+            <order phase="CoreProcessing" phaseFirst="true"/>
+        </handler>
+        <handler name="DuplicateCheck" class="org.holodeckb2b.core.receptionawareness.DetectDuplicateUserMessages">
+            <order phase="CoreProcessing" after="StartProcessingUsrMsg"/>
+        </handler>
+        <handler name="CustomValidation" class="org.holodeckb2b.core.handlers.inflow.PerformCustomValidations">
+            <order phase="CoreProcessing" after="DuplicateCheck"/>
+        </handler>
+        <handler name="DeliverUserMessage" class="org.holodeckb2b.core.handlers.inflow.DeliverUserMessage">
+            <order phase="CoreProcessing" after="CustomValidation"/>
+        </handler>
+        <!--
+            Process the receipts
+        -->
+        <handler name="ProcessReceipts" class="org.holodeckb2b.core.handlers.inflow.ProcessReceipts">
+            <order phase="CoreProcessing" after="DeliverUserMessage"/>
+        </handler>
+        <handler name="DeliverReceipts" class="org.holodeckb2b.core.handlers.inflow.DeliverReceipts">
+            <order phase="CoreProcessing" after="ProcessReceipts"/>
+        </handler>
+        <!--
+            Process the errors
+        -->
+        <handler name="ProcessErrors" class="org.holodeckb2b.core.handlers.inflow.ProcessErrors">
+            <order phase="CoreProcessing" after="DeliverReceipts"/>
+        </handler>
+        <handler name="DeliverErrors" class="org.holodeckb2b.core.handlers.inflow.DeliverErrors">
+            <order phase="CoreProcessing" after="ProcessErrors"/>
+        </handler>
+    </InFlow>	   
+
+    <InFaultFlow>    
+        <!-- Catch a raised Fault and translate it into an EbMS Error -->
+        <handler name="CatchFaults" class="org.holodeckb2b.core.handlers.CatchAxisFault">
+            <order phase="Transport" phaseFirst="true"/>            
+        </handler>
+
+        <!--
+            Process the user message
+        -->
+        <handler name="StartProcessingUsrMsg" class="org.holodeckb2b.core.handlers.inflow.StartProcessingUsrMessage">
+            <order phase="CoreProcessing" phaseFirst="true"/>
+        </handler>
+        <handler name="DuplicateCheck" class="org.holodeckb2b.core.receptionawareness.DetectDuplicateUserMessages">
+            <order phase="CoreProcessing" after="StartProcessingUsrMsg"/>
+        </handler>
+        <handler name="CustomValidation" class="org.holodeckb2b.core.handlers.inflow.PerformCustomValidations">
+            <order phase="CoreProcessing" after="DuplicateCheck"/>
+        </handler>
+        <handler name="DeliverUserMessage" class="org.holodeckb2b.core.handlers.inflow.DeliverUserMessage">
+            <order phase="CoreProcessing" after="CustomValidation"/>
+        </handler>
+        <!--
+            Process the receipts
+        -->
+        <handler name="ProcessReceipts" class="org.holodeckb2b.core.handlers.inflow.ProcessReceipts">
+            <order phase="CoreProcessing" after="DeliverUserMessage"/>
+        </handler>
+        <handler name="DeliverReceipts" class="org.holodeckb2b.core.handlers.inflow.DeliverReceipts">
+            <order phase="CoreProcessing" after="ProcessReceipts"/>
+        </handler>
+        <!--
+            Process the errors
+        -->
+        <handler name="ProcessErrors" class="org.holodeckb2b.core.handlers.inflow.ProcessErrors">
+            <order phase="CoreProcessing" after="DeliverReceipts"/>
+        </handler>
+        <handler name="DeliverErrors" class="org.holodeckb2b.core.handlers.inflow.DeliverErrors">
+            <order phase="CoreProcessing" after="ProcessErrors"/>
+        </handler>
+    </InFaultFlow>	   
+    
+    <OutFlow>
+        <!-- Catch a raised Fault and translate it into an EbMS Error -->
+        <handler name="CatchFaults" class="org.holodeckb2b.core.handlers.CatchAxisFault">
+            <order phase="CoreProcessing" phaseFirst="true"/>            
+        </handler>    
+    </OutFlow>
+    <OutFaultFlow>
+        <!-- Catch a raised Fault and translate it into an EbMS Error -->
+        <handler name="CatchFaults" class="org.holodeckb2b.core.handlers.CatchAxisFault">
+            <order phase="CoreProcessing" phaseFirst="true"/>            
+        </handler>    
+    </OutFaultFlow>
+</module>

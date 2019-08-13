@@ -16,9 +16,16 @@
  */
 package org.holodeckb2b.test.integration;
 
-import java.io.*;
+import static org.junit.Assert.assertTrue;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -33,7 +40,6 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
 import org.holodeckb2b.testhelpers.FilesUtility;
-import static org.junit.Assert.assertTrue;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -58,7 +64,7 @@ public class ITHelper {
 
     static {
         projectVersion = getProjectVersion();
-        dFileName = "holodeckb2b-distribution-"+projectVersion+"-full.zip";
+        dFileName = "holodeckb2b-distribution-"+projectVersion+"-default.zip";
         dFilePath = ITHelper.class.getClassLoader().getResource("").getPath();
         dFilePath += "/../../../holodeckb2b-distribution/target/" + dFileName;
         System.out.println("version: " + projectVersion);

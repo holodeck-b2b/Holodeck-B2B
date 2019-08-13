@@ -18,108 +18,175 @@ package org.holodeckb2b.ebms3.packaging;
 
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.UUID;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.TestUtils;
+import org.holodeckb2b.common.errors.OtherContentError;
+import org.holodeckb2b.common.messagemodel.CollaborationInfo;
+import org.holodeckb2b.common.messagemodel.ErrorMessage;
+import org.holodeckb2b.common.messagemodel.Payload;
+import org.holodeckb2b.common.messagemodel.Property;
+import org.holodeckb2b.common.messagemodel.Receipt;
+import org.holodeckb2b.common.messagemodel.Service;
+import org.holodeckb2b.common.messagemodel.TradingPartner;
+import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.common.pmode.PartyId;
+import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.ebms3.packaging.SOAPEnv.SOAPVersion;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * Tests of packaging ebMS meta data in SOAP header
- *
- * @todo: Add more tests for variations in mmd completeness
+ * Tests schema validaty of created XML
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PackagingTest {
 
-    private final File    ebMSschemaFile;
-    private final File    SOAP11schemaFile;
-    private final File    SOAP12schemaFile;
-    private final File    xmlSchemaFile;
+	private static File ebMSschemaFile;
+	private static File SOAP11schemaFile;
+	private static File SOAP12schemaFile;
+	private static File xmlSchemaFile;
 
-    public PackagingTest() {
-        ebMSschemaFile = new File(this.getClass().getClassLoader()
-                                                 .getResource("xsd/ebms-header-3_0-200704_refactored.xsd").getPath());
-        SOAP11schemaFile = new File(this.getClass().getClassLoader().getResource("xsd/soap11-envelope.xsd").getPath());
-        SOAP12schemaFile = new File(this.getClass().getClassLoader().getResource("xsd/soap12-envelope.xsd").getPath());
-        xmlSchemaFile = new File(this.getClass().getClassLoader().getResource("xsd/xml.xsd").getPath());
-    }
+	@BeforeClass
+	public static void loadSchemaFiles() {
+		ebMSschemaFile = new File(TestUtils.getPath("xsd/ebms-header-3_0-200704_refactored.xsd"));
+		SOAP11schemaFile = new File(TestUtils.getPath("xsd/soap11-envelope.xsd"));
+		SOAP12schemaFile = new File(TestUtils.getPath("xsd/soap12-envelope.xsd"));
+		xmlSchemaFile = new File(TestUtils.getPath("xsd/xml.xsd"));
+	}
 
-    /**
-     * Test of creating the SOAP header for one user message only
-     */
-    @Test
-    public void testUserMessageOnly() {
+	@Test
+	public void testUserMessage() {
+		UserMessage userMessage = new UserMessage();
+		userMessage.setMessageId(UUID.randomUUID().toString());
+		userMessage.setTimestamp(new Date());
+		TradingPartner sender = new TradingPartner();
+		sender.addPartyId(new PartyId("TheSender", null));
+		sender.setRole("Sender");
+		userMessage.setSender(sender);
+		TradingPartner receiver = new TradingPartner();
+		receiver.addPartyId(new PartyId("TheRecipient", null));
+		receiver.setRole("Receiver");
+		userMessage.setReceiver(receiver);
+		CollaborationInfo collabInfo = new CollaborationInfo();
+		collabInfo.setService(new Service("PackagingTest"));
+		collabInfo.setAction("Create");
+		userMessage.setCollaborationInfo(collabInfo);
+		userMessage.addMessageProperty(new Property("some-meta-data", "description"));
+		Payload p = new Payload();
+		p.setPayloadURI("cid:as_attachment");
+		p.addProperty(new Property("p1", "v1"));
+		userMessage.addPayload(p);
 
-        final SOAPEnvelope    env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        final SOAPHeaderBlock messaging = Messaging.createElement(env);
+		SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPVersion.SOAP_12);
+		UserMessageElement.createElement(Messaging.createElement(env), userMessage);
 
-        MessageMetaData mmd = TestUtils.getMMD("packagetest/mmd_pcktest.xml", this);
+		assertValidXML(env);
+	}
+	
+	@Test
+	public void testReceipt() {
+        Receipt receipt = new Receipt();
+        receipt.setMessageId(UUID.randomUUID().toString());
+		receipt.setTimestamp(new Date());
+		receipt.setRefToMessageId(UUID.randomUUID().toString());
+        ArrayList<OMElement> content = new ArrayList<>();
+        content.add(OMAbstractFactory.getOMFactory().createOMElement(
+        														new QName("http://just.for.a.test", "ReceiptContent")));
+        receipt.setContent(content);
+        
+        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPVersion.SOAP_12);
+		ReceiptElement.createElement(Messaging.createElement(env), receipt);
+		
+		assertValidXML(env);
+	}
+	
+	@Test
+	public void testError() {
+		ErrorMessage errorMsg = new ErrorMessage();
+		errorMsg.setMessageId(UUID.randomUUID().toString());
+		errorMsg.setTimestamp(new Date());
+		errorMsg.setRefToMessageId(UUID.randomUUID().toString());		
+		errorMsg.addError(new OtherContentError("Just a test"));
+		
+		SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPVersion.SOAP_12);
+		ErrorSignalElement.createElement(Messaging.createElement(env), errorMsg);
+		
+		assertValidXML(env);
+	}
+	
 
-        final OMElement umElement = UserMessageElement.createElement(messaging, mmd);
+	/*
+	 * Helper to assert that the generated XML document is valid according to XML
+	 * Schema of the ebMS Spec
+	 */
+	private void assertValidXML(final SOAPEnvelope env) {
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			env.serialize(baos);
+			SAXParserFactory factory = SAXParserFactory.newInstance();
+			factory.setNamespaceAware(true);
+			factory.setValidating(true);
+			SAXParser parser = factory.newSAXParser();
+			parser.setProperty("http://java.sun.com/xml/jaxp/properties/schemaLanguage",
+					"http://www.w3.org/2001/XMLSchema");
+			parser.setProperty("http://java.sun.com/xml/jaxp/properties/schemaSource",
+					new File[] { xmlSchemaFile, SOAP11schemaFile, SOAP12schemaFile, ebMSschemaFile });
+			ErrorCollector errorCollector = new ErrorCollector();
+			parser.parse(new ByteArrayInputStream(baos.toByteArray()), errorCollector);
+			
+			if (!errorCollector.errors.isEmpty()) {
+				errorCollector.printErrors();
+				fail();
+			}
+		} catch (Exception ex) {
+			fail();
+		}
+	}
 
-        // The SOAP enveloppe should be valid according to the ebMS schema, write the
-        // xml to file and validate it using Xerces
-        final String xmlPath = TestUtils.getPath(this.getClass(), "packagetest") + "/xml_testUserMessageOnly.xml";
-        final File   xmlFile = new File(xmlPath);
-        try {
-            final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(new FileWriter(xmlFile));
-            env.serialize(writer);
-            writer.flush();
-        } catch (final XMLStreamException xse) {
-            Logger.getLogger(PackagingTest.class.getName()).log(Level.SEVERE, null, xse);
-            fail();
-        } catch (final IOException ex) {
-            Logger.getLogger(PackagingTest.class.getName()).log(Level.SEVERE, null, ex);
-            fail();
-        }
+	class ErrorCollector extends DefaultHandler {
+		private MessageFormat message = new MessageFormat("({0}: {1}, {2}): {3}");
 
-        assertValidXML(xmlPath);
-    }
+		ArrayList<SAXParseException> errors = new ArrayList<>();
+		
+		void printErrors() {
+			errors.forEach(e -> print(e));
+		}
+		
+		private void print(SAXParseException x) {
+			String msg = message.format(new Object[] { x.getSystemId(), new Integer(x.getLineNumber()),
+					new Integer(x.getColumnNumber()), x.getMessage() });
+			System.out.println(msg);
+		}
 
-    /*
-     * Helper to assert that the generated XML document is valid according to XML Schema of the ebMS Spec
-     */
-    private void assertValidXML(final String xmlFile) {
-        try {
-            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware( true );
-            dbf.setValidating(true);
-            dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage",
-                                "http://www.w3.org/2001/XMLSchema");
-            dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaSource",
-                                new File[] {ebMSschemaFile, SOAP11schemaFile, SOAP12schemaFile, xmlSchemaFile});
-            final Document xml = dbf.newDocumentBuilder().parse( new File( xmlFile)  );
-        } catch (final SAXException ex) {
-            Logger.getLogger(PackagingTest.class.getName()).log(Level.SEVERE, null, ex);
-            fail();
-        } catch (final FileNotFoundException ex) {
-            Logger.getLogger(PackagingTest.class.getName()).log(Level.SEVERE, null, ex);
-            fail();
-        } catch (final IOException ex) {
-            Logger.getLogger(PackagingTest.class.getName()).log(Level.SEVERE, null, ex);
-            fail();
-        } catch (final ParserConfigurationException ex) {
-            Logger.getLogger(PackagingTest.class.getName()).log(Level.SEVERE, null, ex);
-            fail();
-        }
+		@Override
+		public void warning(SAXParseException x) {
+			// ignore warnings
+		}
 
-    }
+		@Override
+		public void error(SAXParseException x) {
+			errors.add(x);			
+		}
+
+		@Override
+		public void fatalError(SAXParseException x) throws SAXParseException {
+			errors.add(x);			
+		}
+	}
 }

@@ -37,8 +37,10 @@ public interface IAgreement {
      */
     public String getType();
 
+    @Deprecated
     public void setName(String name);
 
+    @Deprecated
     public void setType(String type);
 
 }

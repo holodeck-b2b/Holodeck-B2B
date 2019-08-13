@@ -1,0 +1,128 @@
+<!--
+
+    Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<!--
+  This assembly builds the default Holodeck B2B all-in-one distribution package that includes support for the AS4
+  messaging protocol and the default persistency and security providers.
+-->
+<assembly>
+    <id>default</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+	<baseDirectory>holodeck-b2b-${project.version}</baseDirectory>
+    
+    <fileSets>
+        <!--
+	        Copy base directory structure Holodeck B2B adapted Axis2 base to target
+	
+	        This includes all relevant configuration files, example data, and key stores 
+	        needed for the default security provider.
+        -->
+        <fileSet>
+        	<outputDirectory>.</outputDirectory>
+            <directory>basedir</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>.*</exclude>
+            </excludes>
+        </fileSet>
+        <!--
+        	Copy the project documentation like README, CHNAGELOG and licenses from the parent
+        -->
+        <fileSet>
+        	<outputDirectory>.</outputDirectory>
+            <directory>../..</directory>            
+            <includes>
+                <include>*</include>
+            </includes>
+            <excludes>
+            	<exclude>modules</exclude>
+                <exclude>pom.xml</exclude>
+                <exclude>.*</exclude>
+            </excludes>
+        </fileSet>
+        <!--
+        	Copy the XML schemas that define the used XML documents from the
+        	project modules
+        -->
+        <!-- From Core module -->
+        <fileSet>
+            <directory>../holodeckb2b-core/src/main/resources/xsd</directory>
+            <outputDirectory>repository/xsd</outputDirectory>
+            <includes>
+                <include>*.xsd</include>
+            </includes>
+        </fileSet>
+        <!-- From ebms3/as4 module -->
+        <fileSet>
+            <directory>../holodeckb2b-ebms3as4/src/main/resources/xsd</directory>
+            <outputDirectory>repository/xsd</outputDirectory>
+            <includes>
+                <include>*.xsd</include>
+            </includes>
+        </fileSet>
+        <!-- From the default security provider module -->
+        <fileSet>
+            <directory>../holodeckb2b-security/src/main/resources/xsd</directory>
+            <outputDirectory>repository/xsd</outputDirectory>
+            <includes>
+                <include>*.xsd</include>
+            </includes>
+        </fileSet>
+        <!--
+        	Add the AS4 service to the distribution
+        -->
+        <fileSet>
+            <directory>../holodeckb2b-ebms3as4/target/</directory>
+            <outputDirectory>repository/services/</outputDirectory>
+            <includes>
+                <include>*.aar</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+
+    <dependencySets>
+    	<!-- Add the XML schema's from the default included file integration -->
+		<dependencySet>
+			<outputDirectory>repository/</outputDirectory>
+			<includes>
+				<include>org.holodeckb2b.extensions:file-backend</include>
+			</includes>
+			<unpack>true</unpack>
+			<unpackOptions>
+				<includes>
+					<include>**/*.xsd</include>
+				</includes>
+			</unpackOptions>
+		</dependencySet>
+	    <!--
+	    	Add all required libraries to the lib directory
+	    -->
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <excludes>
+                <exclude>*:pom:*</exclude>
+            </excludes>
+            <scope>runtime</scope>
+        </dependencySet>
+    </dependencySets>
+</assembly>

@@ -17,22 +17,22 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.TestUtils;
+import org.holodeckb2b.common.messagemodel.Payload;
+import org.holodeckb2b.common.messagemodel.Property;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -42,95 +42,68 @@ import org.junit.Test;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class PayloadInfoElementTest {
+public class PayloadInfoElementTest extends AbstractPackagingTest {
 
     private static final QName PAYLOAD_INFO_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "PayloadInfo");
     private static final QName PART_INFO_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "PartInfo");
 
-    private MessageMetaData mmd;
-    private OMElement umElement;
-
-    @Before
-    public void setUp() throws Exception {
-        mmd = TestUtils.getMMD("packagetest/mmd_pcktest.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope soapEnvelope = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(soapEnvelope);
-        // Adding UserMessage from mmd
-        umElement = UserMessageElement.createElement(headerBlock, mmd);
-    }
-
     @Test
     public void testCreateElement() throws Exception {
-        OMElement piElement =
-                PayloadInfoElement.createElement(umElement, mmd.getPayloads());
-        System.out.println("piElement: " + piElement);
-        checkContainsPayloads(piElement);
-    }
-
-    @Test
-    public void testGetElement() throws Exception {
-        OMElement piElement = PayloadInfoElement.getElement(umElement);
-        System.out.println("piElement: " + piElement);
-        checkContainsPayloads(piElement);
-    }
-
-    @Test
-    public void testReadElement() throws Exception {
-        OMElement piElement =
-                PayloadInfoElement.createElement(umElement, mmd.getPayloads());
-        System.out.println("piElement: " + piElement);
-        checkContainsPayloads(piElement);
-        Collection<IPayload> payloads = PayloadInfoElement.readElement(piElement);
-        checkPayloads(payloads);
-    }
-
-    /**
-     * Checks that PartInfo element contains expected data
-     * @param piElement
-     */
-    private void checkContainsPayloads(OMElement piElement) {
+    	Collection<IPayload> payloads = new ArrayList<>();
+    	Payload p = new Payload();
+    	p.setPayloadURI("cid:as_attachment");
+    	p.addProperty(new Property("p1", "v1"));
+    	payloads.add(p);
+    	
+    	OMElement piElement = PayloadInfoElement.createElement(createParent(), payloads);
+    	
         assertNotNull(piElement);
         assertEquals(PAYLOAD_INFO_ELEMENT_NAME, piElement.getQName());
         Iterator it = piElement.getChildrenWithName(PART_INFO_ELEMENT_NAME);
         assertTrue(it.hasNext());
-        OMElement partInfoElem1 = (OMElement)it.next();
-        assertNotNull(partInfoElem1);
-        OMElement partInfoElem2 = (OMElement)it.next();
-        assertNotNull(partInfoElem2);
-        OMElement schema = SchemaElement.getElement(partInfoElem2);
-        assertNotNull(schema);
-        OMElement descr = DescriptionElement.getElement(partInfoElem2);
-        assertNotNull(descr);
-        OMElement partProps = PartPropertiesElement.getElement(partInfoElem2);
-        assertNotNull(partProps);
+        it.next();
+        assertFalse(it.hasNext());        
     }
 
-    /**
-     * Checks the payloads data
-     * @param payloads
-     */
-    private void checkPayloads(Collection<IPayload> payloads) {
+    @Test
+    public void testGetElement() throws Exception {
+        OMElement piElement = PayloadInfoElement.getElement(createXML(        		
+        		"<parent>" +
+        		"<eb3:PayloadInfo " +
+        		"	xmlns:eb3=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\">" +
+        		"   <eb3:PartInfo href=\"cid:8fba80a5-2a4b-42c4-9c8f-f53207d21673-142514300@gecko.fritz.box\"/>" + 
+        		"</eb3:PayloadInfo>" +
+        		"</parent>"));
+        
+        assertNotNull(piElement);
+        assertEquals(PAYLOAD_INFO_ELEMENT_NAME, piElement.getQName());
+    }
+
+    @Test
+    public void testReadElement() throws Exception {
+    	Payload p1 = new Payload();
+    	p1.setPayloadURI("cid:first_attachment");
+    	Payload p2 = new Payload();
+    	p2.setPayloadURI("#second_attachment");
+    			
+        Collection<IPayload> payloads = PayloadInfoElement.readElement(createXML(
+        		"<eb3:PayloadInfo " +
+            	"	xmlns:eb3=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\">" +
+            	"   <eb3:PartInfo href=\"" + p1.getPayloadURI() + "\"/>" + 
+            	"   <eb3:PartInfo href=\"" + p2.getPayloadURI() + "\"/>" + 
+            	"</eb3:PayloadInfo>"
+                ));
+        
+        assertFalse(Utils.isNullOrEmpty(payloads));
         Iterator<IPayload> payloadsIt = payloads.iterator();
         assertTrue(payloadsIt.hasNext());
         IPayload p = payloadsIt.next();
-        assertEquals(IPayload.Containment.BODY, p.getContainment());
-        // createElement() method does not fully initialize
-        // the containment&mimeType&location payload attributes
-        // and it should not do this, because those attributes are used internally
-        // assertEquals(IPayload.Containment.ATTACHMENT, p.getContainment()); // should fail
-        // assertEquals("I8ZVs6G2P", p.getMimeType()); // should fail
-        // assertEquals("http://sxGTnZjm/", p.getContentLocation()); // should fail
+        assertEquals(IPayload.Containment.ATTACHMENT, p.getContainment());
         assertTrue(payloadsIt.hasNext());
         p = payloadsIt.next();
-        assertEquals(IPayload.Containment.EXTERNAL, p.getContainment());
-        // assertEquals("CoL9", p.getMimeType()); // should fail
-        // assertEquals("http://pcVJBuTT/", p.getPayloadURI()); // should fail
-        assertNotNull(p.getSchemaReference());
-        assertNotNull(p.getDescription());
-        assertNotNull(p.getProperties());
+        assertEquals(IPayload.Containment.BODY, p.getContainment());
+        assertFalse(payloadsIt.hasNext());
     }
 }

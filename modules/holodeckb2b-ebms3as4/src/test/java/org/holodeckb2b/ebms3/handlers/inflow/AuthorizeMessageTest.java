@@ -30,6 +30,8 @@ import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.PMode;
+import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
@@ -40,7 +42,6 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -65,8 +66,7 @@ public class AuthorizeMessageTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        String baseDir = AuthorizeMessageTest.class.getClassLoader()
-                    .getResource(AuthorizeMessageTest.class.getSimpleName()).getPath();
+        String baseDir = TestUtils.getPath(AuthorizeMessageTest.class.getSimpleName());
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
 
         // Create the basic test data

@@ -38,7 +38,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-common</artifactId>
+            <artifactId>holodeckb2b-core</artifactId>
         </dependency>
 
         <!-- Apache Axis2 kernel -->
@@ -69,17 +69,6 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Simple XML framework for easy processing of XML documents -->
-        <dependency>
-            <groupId>org.simpleframework</groupId>
-            <artifactId>simple-xml</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-        </dependency>
-
         <!-- Logging -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -93,16 +82,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-persistency</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-security</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <scope>test</scope>
@@ -113,50 +92,41 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Dependency from common test util classes -->
+        <!-- Test util classes from the Core -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-common</artifactId>
+            <artifactId>holodeckb2b-core</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-
-        <!--Used to parse pom.xml and get project properties, such as version-->
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-model</artifactId>
-            <version>3.0.4</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-utils</artifactId>
-            <version>2.0.6</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-core</artifactId>
-            <version>3.0.4</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-              <artifactId>maven-clean-plugin</artifactId>
-              <configuration>
-                <filesets>
-                  <fileset>
-                    <directory>db</directory>
-                    <followSymlinks>false</followSymlinks>
-                  </fileset>
-                </filesets>
-              </configuration>
-            </plugin>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-aar-maven-plugin</artifactId>
+                <version>${axis2-version}</version>
+                <configuration>
+                    <servicesXmlFile>src/main/resources/META-INF/services.xml</servicesXmlFile>
+                    <aarName>hb2b-as4-msh</aarName>
+                    <includeDependencies>false</includeDependencies>
+                    <!-- The classDirectory parameter is set to a non existing directory to prevent the
+                    	 plugin from adding the project classes to the aar
+                    -->
+                    <classesDirectory>no_classes</classesDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>create-hb2b-as4-service</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>aar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>            
         </plugins>
         <resources>
           <resource>
@@ -166,5 +136,40 @@
             </excludes>
           </resource>
         </resources>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.axis2
+										</groupId>
+										<artifactId>
+											axis2-aar-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.7.7,)
+										</versionRange>
+										<goals>
+											<goal>aar</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>        
     </build>
 </project>

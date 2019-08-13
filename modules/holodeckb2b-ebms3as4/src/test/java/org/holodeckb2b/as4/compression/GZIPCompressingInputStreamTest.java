@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -54,7 +55,7 @@ public class GZIPCompressingInputStreamTest {
     @Before
     public void setUp() {
         try {
-            final File out = new File(this.getClass().getClassLoader().getResource("compression/compressed.gz").getPath());
+            final File out = new File(TestUtils.getPath("compression/compressed.gz"));
             if (out.exists())
                 out.delete();
         } catch (final Exception e)
@@ -67,11 +68,11 @@ public class GZIPCompressingInputStreamTest {
 
     @Test
     public void testCompression() {
-        final File comF = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "compressed.gz");
-        final File decF = new File(this.getClass().getClassLoader().getResource("compression/").getPath() + "decompressed.jpg");
+        final File comF = new File(TestUtils.getPath("compression/") + "compressed.gz");
+        final File decF = new File(TestUtils.getPath("compression/") + "decompressed.jpg");
 
         try {
-            final File uncF = new File(this.getClass().getClassLoader().getResource("compression/uncompressed.jpg").getPath());
+            final File uncF = new File(TestUtils.getPath("compression/uncompressed.jpg"));
             final byte[] buffer = new byte[512];
 
             //Compress

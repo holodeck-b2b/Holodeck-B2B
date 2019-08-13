@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.general.Interval;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.junit.Test;
@@ -38,23 +39,12 @@ import org.junit.Test;
  */
 public class PullConfigurationTest {
 
-    public PullConfigurationTest() {
-    }
-
-//    @Test
-//    public void testGetName() {
-//    }
-//
-//    @Test
-//    public void testGetWorkers() {
-//    }
-
     /**
      *
      */
     @Test
     public void testLoad_DefaultOnly() {
-        final String path = this.getClass().getClassLoader().getResource("pulltest/pullcfg1.xml").getPath();
+        final String path = TestUtils.getPath(PullConfigurationTest.class.getSimpleName() + "/pullcfg1.xml");
 
         try {
             final PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);
@@ -77,7 +67,7 @@ public class PullConfigurationTest {
     @SuppressWarnings ("unchecked")
     @Test
     public void testLoad_CompleteConfig() {
-        final String path = this.getClass().getClassLoader().getResource("pulltest/pullcfg2.xml").getPath();
+    	final String path = TestUtils.getPath(PullConfigurationTest.class.getSimpleName() + "/pullcfg2.xml");
 
         try {
             final PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);
@@ -124,7 +114,7 @@ public class PullConfigurationTest {
      */
     @Test
     public void testLoad_ErrorConfig() {
-        final String path = this.getClass().getClassLoader().getResource("pulltest/pullcfg3.xml").getPath();
+    	final String path = TestUtils.getPath(PullConfigurationTest.class.getSimpleName() + "/pullcfg3.xml");
 
         try {
             final PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);

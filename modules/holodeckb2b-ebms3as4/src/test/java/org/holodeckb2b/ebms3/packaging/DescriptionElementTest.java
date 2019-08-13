@@ -18,21 +18,13 @@ package org.holodeckb2b.ebms3.packaging;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
-import java.util.ArrayList;
+import static org.junit.Assert.assertNull;
 
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.messagemodel.Description;
-import org.holodeckb2b.common.messagemodel.Payload;
-import org.holodeckb2b.common.messagemodel.Receipt;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -47,129 +39,79 @@ import org.junit.Test;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class DescriptionElementTest {
+public class DescriptionElementTest extends AbstractPackagingTest {
 
-    private static final QName DESCRIPTION_ELEMENT_NAME =
+    private static final QName Q_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "Description");
     private static final QName LANG_ATTR_NAME =
             new QName("http://www.w3.org/XML/1998/namespace", "lang");
-    private static final QName RECEIPT_CHILD_ELEMENT_NAME =
-            new QName(EbMSConstants.EBMS3_NS_URI, "ReceiptChild");
 
-    private SOAPEnvelope soapEnvelope;
-    private SOAPHeaderBlock headerBlock;
-    private OMElement plElement; // PayloadInfo
-
-    @Before
-    public void setUp() throws Exception {
-        // Creating SOAP envelope
-        soapEnvelope = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        headerBlock = Messaging.createElement(soapEnvelope);
+    @Test
+    public void testCreateElementWithLang() {
+    	Description description = new Description("Some descriptive text", "en-CA");
+    	OMElement dElement = DescriptionElement.createElement(createParent(), description);
+        
+    	assertNotNull(dElement);
+        assertEquals(Q_ELEMENT_NAME, dElement.getQName());
+        assertEquals(description.getLanguage(), dElement.getAttributeValue(LANG_ATTR_NAME));
+        assertEquals(description.getText(), dElement.getText());
+    }
+    
+    @Test
+    public void testCreateElementNoLang() {
+    	Description description = new Description("Some descriptive text");
+    	OMElement dElement = DescriptionElement.createElement(createParent(), description);
+    	
+    	assertNotNull(dElement);
+    	assertEquals(Q_ELEMENT_NAME, dElement.getQName());
+    	assertNull(description.getLanguage(), dElement.getAttributeValue(LANG_ATTR_NAME));
+    	assertEquals(description.getText(), dElement.getText());
     }
 
     @Test
-    public void testCreateElementAsPartInfoChild() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("packagetest/mmd_pcktest.xml", this);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-        // Creating PayloadInfo element from mmd
-        plElement = PayloadInfoElement.createElement(umElement, mmd.getPayloads());
+    public void testGetElement() throws Exception {
+        OMElement dElement = DescriptionElement.getElement(createXML(
+        		"<parent>" +
+        		" <eb3:Description xml:lang=\"en-US\"" +
+        		"   xmlns:eb3=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\">" +
+				"This is just a test" +
+				"</eb3:Description> " +        		
+				"</parent>"));
 
-        OMElement piElement = PartInfoElement.createElement(plElement, new Payload());
-        Description description = new Description("some_text", "en-CA");
-        OMElement dElement =
-                DescriptionElement.createElement(piElement, description);
         assertNotNull(dElement);
-        assertEquals(DESCRIPTION_ELEMENT_NAME, dElement.getQName());
-        assertEquals("en-CA", dElement.getAttributeValue(LANG_ATTR_NAME));
-        assertEquals("some_text", dElement.getText());
+        assertEquals(Q_ELEMENT_NAME, dElement.getQName());
     }
 
     @Test
-    public void testCreateElementAsSignalChild() throws Exception {
-        Receipt receipt = new Receipt();
-        OMElement receiptChildElement =
-                soapEnvelope.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
-        ArrayList<OMElement> content = new ArrayList<>();
-        content.add(receiptChildElement);
-        receipt.setContent(content);
-        OMElement rElement = ReceiptElement.createElement(headerBlock, receipt);
+    public void testReadElementWithLang() {
+    	String text = "This is just a test";
+    	String lang = "en-US";
+    	
+        Description descr = DescriptionElement.readElement(createXML(
+        		" <eb3:Description xml:lang=\"" + lang + "\"" +
+        		"   xmlns:eb3=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\">" +
+				text +
+				"</eb3:Description>"));        		
 
-        Description description = new Description("some_text", "en-CA");
-        OMElement dElement = DescriptionElement.createElement(rElement, description);
-        assertNotNull(dElement);
+        assertNotNull(descr);
+        assertEquals(text, descr.getText());
+        assertEquals(lang, descr.getLanguage());    	
     }
-
+    
     @Test
-    public void testGetElementAsPartInfoChild() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("packagetest/mmd_pcktest.xml", this);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-        // Creating PayloadInfo element from mmd
-        plElement = PayloadInfoElement.createElement(umElement, mmd.getPayloads());
-
-        OMElement piElement = PartInfoElement.createElement(plElement, new Payload());
-        Description description = new Description("some_text", "en-CA");
-        DescriptionElement.createElement(piElement, description);
-
-        OMElement dElement = DescriptionElement.getElement(piElement);
-        assertNotNull(dElement);
-        assertEquals(DESCRIPTION_ELEMENT_NAME, dElement.getQName());
-        assertEquals("en-CA", dElement.getAttributeValue(LANG_ATTR_NAME));
-        assertEquals("some_text", dElement.getText());
+    public void testReadElementNoLang() {
+    	String text = "This is just a test";
+    	
+    	Description descr = DescriptionElement.readElement(createXML(
+    			" <eb3:Description" +
+    					"   xmlns:eb3=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\">" +
+    					text +
+    			"</eb3:Description>"));        		
+    	
+    	assertNotNull(descr);
+    	assertEquals(text, descr.getText());
+    	assertNull(descr.getLanguage());    	
     }
 
-    @Test
-    public void testGetElementAsSignalChild() throws Exception {
-        Receipt receipt = new Receipt();
-        OMElement receiptChildElement =
-                soapEnvelope.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
-        ArrayList<OMElement> content = new ArrayList<>();
-        content.add(receiptChildElement);
-        receipt.setContent(content);
-        OMElement rElement = ReceiptElement.createElement(headerBlock, receipt);
-        Description description = new Description("some_text", "en-CA");
-        DescriptionElement.createElement(rElement, description);
 
-        OMElement dElement = DescriptionElement.getElement(rElement);
-        assertEquals(DESCRIPTION_ELEMENT_NAME, dElement.getQName());
-    }
-
-    @Test
-    public void testReadElementAsPartInfoChild() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("packagetest/mmd_pcktest.xml", this);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-        // Creating PayloadInfo element from mmd
-        plElement = PayloadInfoElement.createElement(umElement, mmd.getPayloads());
-
-        OMElement piElement = PartInfoElement.createElement(plElement, new Payload());
-        Description description = new Description("some_text", "en-CA");
-        OMElement dElement =
-                DescriptionElement.createElement(piElement, description);
-
-        description = DescriptionElement.readElement(dElement);
-        assertNotNull(description);
-        assertEquals("en-CA", description.getLanguage());
-        assertEquals("some_text", description.getText());
-    }
-
-    @Test
-    public void testReadElementAsSignalChild() throws Exception {
-        Receipt receipt = new Receipt();
-        OMElement receiptChildElement =
-                soapEnvelope.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
-        ArrayList<OMElement> content = new ArrayList<>();
-        content.add(receiptChildElement);
-        receipt.setContent(content);
-        OMElement rElement = ReceiptElement.createElement(headerBlock, receipt);
-        Description description = new Description("some_text", "en-CA");
-        OMElement dElement = DescriptionElement.createElement(rElement, description);
-
-        description = DescriptionElement.readElement(dElement);
-        assertNotNull(description);
-        assertEquals("en-CA", description.getLanguage());
-        assertEquals("some_text", description.getText());
-    }
 }

@@ -22,13 +22,8 @@ import static org.junit.Assert.assertNotNull;
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.messagemodel.AgreementReference;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -38,70 +33,48 @@ import org.junit.Test;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class AgreementRefElementTest {
+public class AgreementRefElementTest extends AbstractPackagingTest {
 
     private static final QName AGREEMENT_REF_INFO_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "AgreementRef");
-
-    private OMElement umElement;
-    private OMElement ciElement;
-
-    @Before
-    public void setUp() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("packagetest/mmd_pcktest.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope soapEnvelope =
-                SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(soapEnvelope);
-        // Adding UserMessage from mmd
-        umElement = UserMessageElement.createElement(headerBlock, mmd);
-
-        ciElement = CollaborationInfoElement.getElement(umElement);
-    }
 
     @Test
     public void testCreateElement() throws Exception {
         String name = "agreement_name";
         String type = "agreement_type";
         String pmodeId = "some pmode id string";
-        AgreementReference agreementReference =
-                new AgreementReference(name, type, pmodeId);
+        AgreementReference agreementReference = new AgreementReference(name, type, pmodeId);
 
-        OMElement agreementRefElement =
-                AgreementRefElement.createElement(ciElement, agreementReference);
-        checkContainsInnerElements(agreementRefElement);
+        OMElement agreementRefElement = AgreementRefElement.createElement(createParent(), agreementReference);
+        
+        assertEquals(AGREEMENT_REF_INFO_ELEMENT_NAME, agreementRefElement.getQName());
+        assertEquals(name, agreementRefElement.getText());
+        assertEquals(type, agreementRefElement.getAttributeValue(new QName("type")));
+        assertEquals(pmodeId, agreementRefElement.getAttributeValue(new QName("pmode")));
     }
 
     @Test
-    public void testGetElement() throws Exception {
-        OMElement agreementRefElement =
-                AgreementRefElement.getElement(ciElement);
-        checkContainsInnerElements(agreementRefElement);
+    public void testGetElement() throws Exception {    	
+	    OMElement agreementRefElement = AgreementRefElement.getElement(createXML(
+        		"<parent>"
+        		+ "<eb3:AgreementRef xmlns:eb3=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\">"
+        				+ "http://agreements.holodeckb2b.org/examples/agreement0</eb3:AgreementRef>"
+				+ "</parent>"));
+        assertNotNull(agreementRefElement);
+        assertEquals(AGREEMENT_REF_INFO_ELEMENT_NAME, agreementRefElement.getQName());
     }
 
     @Test
     public void testReadElement() throws Exception {
-        String name = "agreement_name";
+    	String name = "agreement_name";
         String type = "agreement_type";
         String pmodeId = "some pmode id string";
-        AgreementReference agreementReference =
-                new AgreementReference(name, type, pmodeId);
+        
+        AgreementReference agreementReference = AgreementRefElement.readElement(createXML(
+        		"<eb3:AgreementRef xmlns:eb3=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\""
+        		+ " type=\"" + type + "\" pmode=\"" + pmodeId + "\">"
+        		+ name + "</eb3:AgreementRef>"));
 
-        OMElement agreementRefElement =
-                AgreementRefElement.createElement(ciElement, agreementReference);
-
-        agreementReference =
-                AgreementRefElement.readElement(agreementRefElement);
-        checkContainsData(agreementReference, name, type, pmodeId);
-    }
-
-    private void checkContainsInnerElements(OMElement arElement) {
-        assertEquals(AGREEMENT_REF_INFO_ELEMENT_NAME, arElement.getQName());
-    }
-
-    private void checkContainsData(AgreementReference agreementReference,
-                                   String name, String type, String pmodeId) {
         assertNotNull(agreementReference);
         assertEquals(name, agreementReference.getName());
         assertEquals(type, agreementReference.getType());

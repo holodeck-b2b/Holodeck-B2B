@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-common</artifactId>
+            <artifactId>holodeckb2b-core</artifactId>
         </dependency>
 
         <!-- WSS4J Security libs -->
@@ -55,6 +55,20 @@
             <groupId>org.apache.wss4j</groupId>
             <artifactId>wss4j-ws-security-common</artifactId>
             <version>${wss4j.version}</version>
+            <exclusions>
+            	<exclusion>
+            		<groupId>org.opensaml</groupId>
+            		<artifactId>opensaml-saml-impl</artifactId>
+            	</exclusion>
+            	<exclusion>
+            		<groupId>org.opensaml</groupId>
+            		<artifactId>opensaml-xacml-impl</artifactId>
+            	</exclusion>
+            	<exclusion>
+            		<groupId>org.opensaml</groupId>
+            		<artifactId>opensaml-xacml-saml-impl</artifactId>
+            	</exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.wss4j</groupId>
@@ -107,7 +121,7 @@
                 </executions>
                 <configuration>
                     <sources>
-                        <source>src/main/resources/hb2b-security-cfg.xsd</source>
+                        <source>src/main/resources/xsd/hb2b-security-cfg.xsd</source>
                     </sources>
                     <packageName>org.holodeckb2b.security.config</packageName>
                 </configuration>

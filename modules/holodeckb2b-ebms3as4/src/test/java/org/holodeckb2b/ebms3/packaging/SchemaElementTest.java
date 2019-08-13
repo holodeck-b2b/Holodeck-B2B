@@ -22,14 +22,8 @@ import static org.junit.Assert.assertNotNull;
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.SchemaReference;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
-import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -39,80 +33,60 @@ import org.junit.Test;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class SchemaElementTest {
+public class SchemaElementTest extends AbstractPackagingTest {
 
     private static final QName SCHEMA_ELEMENT_NAME =
             new QName(EbMSConstants.EBMS3_NS_URI, "Schema");
 
-    private OMElement plElement; // PayloadInfo
-
-    @Before
-    public void setUp() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("packagetest/mmd_pcktest.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope soapEnvelope = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(soapEnvelope);
-
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-        // Creating PayloadInfo element from mmd
-        plElement = PayloadInfoElement.createElement(umElement, mmd.getPayloads());
-    }
-
     @Test
     public void testCreateElement() throws Exception {
-        OMElement piElement = PartInfoElement.createElement(plElement, new Payload());
         SchemaReference schema = new SchemaReference();
         schema.setLocation("somewhere");
         schema.setNamespace("namespace1");
         schema.setVersion("test");
 
-        OMElement schemaElement = SchemaElement.createElement(piElement, schema);
+        OMElement schemaElement = SchemaElement.createElement(createParent(), schema);
         assertNotNull(schemaElement);
         assertEquals(SCHEMA_ELEMENT_NAME, schemaElement.getQName());
-        assertEquals("somewhere",
+        assertEquals(schema.getLocation(),
                 schemaElement.getAttributeValue(new QName("location")));
-        assertEquals("namespace1",
+        assertEquals(schema.getNamespace(),
                 schemaElement.getAttributeValue(new QName("namespace")));
-        assertEquals("test",
+        assertEquals(schema.getVersion(),
                 schemaElement.getAttributeValue(new QName("version")));
     }
 
     @Test
     public void testGetElement() throws Exception {
-        Payload payload = new Payload();
-        SchemaReference schema = new SchemaReference();
-        schema.setLocation("somewhere");
-        schema.setNamespace("namespace1");
-        schema.setVersion("test");
-        payload.setSchemaReference(schema);
-        OMElement piElement = PartInfoElement.createElement(plElement, payload);
+        OMElement schemaElement = SchemaElement.getElement(createXML(
+        		"<parent>"
+        		+ "<eb3:Schema xmlns:eb3=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\""
+        		+ " location=\"http://dev.holodeck-b2b.com/notreal/schema\"" 
+        		+ " namespace=\"http://dev.holodeck-b2b.com/notreal/schema\"" 
+        		+ " version=\"2.0\""
+        		+ "/>"
+				+ "</parent>"));
 
-        OMElement schemaElement = SchemaElement.getElement(piElement);
         assertNotNull(schemaElement);
-        assertEquals("somewhere",
-                schemaElement.getAttributeValue(new QName("location")));
-        assertEquals("namespace1",
-                schemaElement.getAttributeValue(new QName("namespace")));
-        assertEquals("test",
-                schemaElement.getAttributeValue(new QName("version")));
+        assertEquals(SCHEMA_ELEMENT_NAME, schemaElement.getQName());
     }
 
     @Test
     public void testReadElement() throws Exception {
-        Payload payload = new Payload();
-        SchemaReference testSchema = new SchemaReference();
-        testSchema.setLocation("somewhere");
-        testSchema.setNamespace("namespace1");
-        testSchema.setVersion("test");
-        payload.setSchemaReference(testSchema);
-        OMElement piElement = PartInfoElement.createElement(plElement, payload);
-        OMElement schemaElement = SchemaElement.createElement(piElement, testSchema);
-
-        SchemaReference schema = SchemaElement.readElement(schemaElement);
+    	String location = "http://dev.holodeck-b2b.com/notreal/schemafile";
+    	String ns = "http://dev.holodeck-b2b.com/notreal/schema";
+    	String version = "2.0";
+    	
+        SchemaReference schema = SchemaElement.readElement(createXML(
+        		"<eb3:Schema xmlns:eb3=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\""
+        		+ " location=\"" + location + "\"" 
+        		+ " namespace=\"" + ns + "\"" 
+        		+ " version=\"" + version + "\""
+        		+ "/>"));
+        
         assertNotNull(schema);
-        assertEquals("somewhere", schema.getLocation());
-        assertEquals("namespace1", schema.getNamespace());
-        assertEquals("test", schema.getVersion());
+        assertEquals(location, schema.getLocation());
+        assertEquals(ns, schema.getNamespace());
+        assertEquals(version, schema.getVersion());
     }
 }

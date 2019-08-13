@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.ebms3.packaging;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -26,13 +28,9 @@ import java.util.Iterator;
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.common.messagemodel.Property;
-import org.holodeckb2b.core.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -42,87 +40,52 @@ import org.junit.Test;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class PartPropertiesElementTest {
+public class PartPropertiesElementTest extends AbstractPackagingTest {
 
-    private static final QName Q_ELEMENT_NAME =
-            new QName(EbMSConstants.EBMS3_NS_URI, "UserMessage");
-    private static final QName PROPERTY_ELEMENT_NAME = new QName("Property");
+	 private static final QName Q_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "PartProperties");
+	    private static final QName Q_PROP_EL_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "Property");
 
-    private OMElement umElement;
+	    @Test
+	    public void testCreateElement() throws Exception {
+	        ArrayList<IProperty> properties = new ArrayList<>();
+	        properties.add(new Property("some_property01", "some_value01", "some_type01"));
+	        properties.add(new Property("some_property02", "some_value02", "some_type02"));
+	        OMElement mpElement = PartPropertiesElement.createElement(createParent(), properties);
+	        
+	        assertNotNull(mpElement);
+	        assertEquals(Q_ELEMENT_NAME, mpElement.getQName());
+	        Iterator it = mpElement.getChildrenWithName(Q_PROP_EL_NAME);
+	        assertTrue(it.hasNext());
+	        it.next();
+	        assertTrue(it.hasNext());
+	        it.next();
+	        assertFalse(it.hasNext());        
+	    }
 
-    @Before
-    public void setUp() throws Exception {
-        // Creating SOAP envelope
-        SOAPEnvelope soapEnvelope =
-                SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(soapEnvelope);
-        // Create the element
-        umElement = headerBlock.getOMFactory()
-                .createOMElement(Q_ELEMENT_NAME, headerBlock);
-    }
+	    @Test
+	    public void testGetElement() throws Exception {
+	    	OMElement propElement = PartPropertiesElement.getElement(createXML(
+	        		"<parent>" +
+	        		" <eb3:PartProperties " +
+	        		"   xmlns:eb3=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\">" +
+					"   <eb3:Property name=\"original-file-name\">simple_document.xml</eb3:Property>" +
+					" </eb3:PartProperties> " +        		
+					"</parent>"));
+	    	
+	        assertNotNull(propElement);
+	        assertEquals(Q_ELEMENT_NAME, propElement.getQName());
+	    }
 
-    @Test
-    public void testCreateElement() throws Exception {
-        ArrayList<IProperty> properties = new ArrayList<>();
-        properties.add(new Property("some_property01", "some_value01",
-                "some_type01"));
-        properties.add(new Property("some_property02", "some_value02",
-                "some_type02"));
-        OMElement ppElement =
-                PartPropertiesElement.createElement(umElement, properties);
-        assertNotNull(ppElement);
-        Iterator it =
-                ppElement.getChildrenWithName(PROPERTY_ELEMENT_NAME);
-        assertTrue(it.hasNext());
-        OMElement pElem = (OMElement)it.next();
-        TestUtils.checkPropertyElementContent(pElem, "some_property01",
-                "some_value01", "some_type01");
-        pElem = (OMElement)it.next();
-        TestUtils.checkPropertyElementContent(pElem, "some_property02",
-                "some_value02", "some_type02");
-    }
-
-    @Test
-    public void testGetElement() throws Exception {
-        ArrayList<IProperty> properties = new ArrayList<>();
-        properties.add(new Property("some_property01", "some_value01",
-                "some_type01"));
-        properties.add(new Property("some_property02", "some_value02",
-                "some_type02"));
-        PartPropertiesElement.createElement(umElement, properties);
-
-        OMElement ppElement = PartPropertiesElement.getElement(umElement);
-        assertNotNull(ppElement);
-        Iterator it =
-                ppElement.getChildrenWithName(PROPERTY_ELEMENT_NAME);
-        assertTrue(it.hasNext());
-        OMElement pElem = (OMElement)it.next();
-        TestUtils.checkPropertyElementContent(pElem, "some_property01",
-                "some_value01", "some_type01");
-        pElem = (OMElement)it.next();
-        TestUtils.checkPropertyElementContent(pElem, "some_property02",
-                "some_value02", "some_type02");
-    }
-
-    @Test
-    public void testReadElement() throws Exception {
-        ArrayList<IProperty> properties = new ArrayList<>();
-        properties.add(new Property("some_property01", "some_value01",
-                "some_type01"));
-        properties.add(new Property("some_property02", "some_value02",
-                "some_type02"));
-        OMElement ppElement =
-                PartPropertiesElement.createElement(umElement, properties);
-
-        Collection<IProperty> readProperties =
-                PartPropertiesElement.readElement(ppElement);
-        Iterator<IProperty> it = readProperties.iterator();
-        IProperty p = it.next();
-        TestUtils.checkPropertyContent(p, "some_property01", "some_value01",
-                "some_type01");
-        p = it.next();
-        TestUtils.checkPropertyContent(p, "some_property02", "some_value02",
-                "some_type02");
-    }
+	    @Test
+	    public void testReadElement() throws Exception {
+	        Collection<IProperty> readProperties = PartPropertiesElement.readElement(createXML(
+	        		" <eb3:PartProperties " +
+	        		"   xmlns:eb3=\"http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/\">" +
+					"   <eb3:Property name=\"original-file-name\">simple_document.xml</eb3:Property>" +
+					"   <eb3:Property name=\"reference_number\">XREF_4828</eb3:Property>" +
+					" </eb3:PartProperties>"));
+	        
+	        assertNotNull(readProperties);
+	        assertEquals(2, readProperties.size());    
+	    }
 }

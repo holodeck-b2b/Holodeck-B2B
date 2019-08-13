@@ -10,7 +10,7 @@
 	</parent>
 	<artifactId>holodeckb2b-ui</artifactId>
     <packaging>jar</packaging>
-    <name>Holodeck B2B User Interface</name>
+    <name>Holodeck B2B - User Interface</name>
     <inceptionYear>2019</inceptionYear>
     <description>
         This project contains the default User Interface of Holodeck B2B that allows one to monitor the local gateway.

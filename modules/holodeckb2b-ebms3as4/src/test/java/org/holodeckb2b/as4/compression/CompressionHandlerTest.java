@@ -28,31 +28,23 @@ import java.util.Iterator;
 import javax.activation.DataHandler;
 
 import org.apache.axiom.attachments.Attachments;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.mmd.xml.MessageMetaData;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.PayloadProfile;
 import org.holodeckb2b.common.pmode.UserMessageFlow;
+import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.handlers.MessageProcessingContext;
-import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.packaging.Messaging;
-import org.holodeckb2b.ebms3.packaging.SOAPEnv;
-import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
-import org.holodeckb2b.module.HolodeckB2BTestCore;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,82 +58,45 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class CompressionHandlerTest {
 
-    private static String baseDir;
-
-    private static HolodeckB2BTestCore core;
-
-    private CompressionHandler handler;
-
     @BeforeClass
-    public static void setUpClass() throws Exception {
-        baseDir = CompressionHandlerTest.class.getClassLoader()
-                .getResource("compression").getPath();
-        core = new HolodeckB2BTestCore(baseDir);
-        HolodeckB2BCoreInterface.setImplementation(core);
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        handler = new CompressionHandler();
+    public static void setUpClass() throws Exception {        
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
     }
 
     @Test
     public void testDoProcessing() throws Exception {
-        MessageMetaData mmd = TestUtils.getMMD("compression/full_mmd.xml", this);
-        // Creating SOAP envelope
-        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
-        // Adding header
-        SOAPHeaderBlock headerBlock = Messaging.createElement(env);
-        // Adding UserMessage from mmd
-        OMElement umElement = UserMessageElement.createElement(headerBlock, mmd);
-
-        MessageContext mc = new MessageContext();
-        mc.setFLOW(MessageContext.OUT_FLOW);
 
         PMode pmode = TestUtils.create1WaySendPushPMode();        
         Leg leg = pmode.getLeg(Label.REQUEST);
-
         UserMessageFlow umFlow = new UserMessageFlow();
-
         PayloadProfile plProfile = new PayloadProfile();
         plProfile.setCompressionType(CompressionFeature.COMPRESSED_CONTENT_TYPE);
         umFlow.setPayloadProfile(plProfile);
         leg.setUserMessageFlow(umFlow);
+        HolodeckB2BCoreInterface.getPModeSet().add(pmode);
 
-        UserMessage userMessage = UserMessageElement.readElement(umElement);
-
-        // We need to add payload with containment type "attachment" to user message,
-        // because PartInfoElement does not read the "containment" attribute
-        // value of the PartInfo tag from file now (23-Feb-2017 T.S.)
+        UserMessage userMessage = new UserMessage();
+        userMessage.setPModeId(pmode.getId());
         Payload payload = new Payload();
         payload.setContainment(IPayload.Containment.ATTACHMENT);
         String payloadPath = "file://./uncompressed.jpg";
         payload.setPayloadURI(payloadPath);
         userMessage.addPayload(payload);
 
+        MessageContext mc = new MessageContext();
+        mc.setFLOW(MessageContext.OUT_FLOW);
         Attachments attachments = new Attachments();
-
         DataHandler attDataHandler = new DataHandler(new URL(payload.getPayloadURI()));
-
         attachments.addDataHandler(payloadPath, attDataHandler);
         mc.setAttachmentMap(attachments);
 
-        String pmodeId =
-                userMessage.getCollaborationInfo().getAgreement().getPModeId();
-        // Copy pmodeId of the agreement to the user message
-        userMessage.setPModeId(pmodeId);
-        pmode.setId(pmodeId);
-
-        core.getPModeSet().add(pmode);
-
-        // Setting input message property
         IUserMessageEntity userMessageEntity =
                 HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage);
         
         MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         try {
-            Handler.InvocationResponse invokeResp = handler.invoke(mc);
+            Handler.InvocationResponse invokeResp = new CompressionHandler().invoke(mc);
             assertEquals(Handler.InvocationResponse.CONTINUE, invokeResp);
         } catch (Exception e) {
             fail(e.getMessage());

@@ -1,3 +1,19 @@
+<!-- Schema defined in the SOAP Version 1.2 Part 1 specification
+     Recommendation:
+     http://www.w3.org/TR/2003/REC-soap12-part1-20030624/
+     $Id: soap-envelope.xsd,v 1.2 2006/12/20 20:43:36 ylafon Exp $
+
+     Copyright (C)2003 W3C(R) (MIT, ERCIM, Keio), All Rights Reserved.
+     W3C viability, trademark, document use and software licensing rules
+     apply.
+     http://www.w3.org/Consortium/Legal/
+
+     This document is governed by the W3C Software License [1] as
+     described in the FAQ [2].
+
+     [1] http://www.w3.org/Consortium/Legal/copyright-software-19980720
+     [2] http://www.w3.org/Consortium/Legal/IPR-FAQ-20000620.html#DTD
+-->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.w3.org/2003/05/soap-envelope" targetNamespace="http://www.w3.org/2003/05/soap-envelope" elementFormDefault="qualified">
 
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd"/>
@@ -24,7 +40,7 @@
     </xs:sequence>
     <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
-
+  
   <xs:element name="Body" type="tns:Body"/>
   <xs:complexType name="Body">
     <xs:sequence>
@@ -76,7 +92,7 @@
 	  </xs:extension>
 	</xs:simpleContent>
   </xs:complexType>
-
+  
   <xs:complexType name="faultcode">
     <xs:sequence>
       <xs:element name="Value" type="tns:faultcodeEnum"/>
@@ -105,7 +121,7 @@
     <xs:sequence>
       <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
-    <xs:anyAttribute namespace="##other" processContents="lax"/>
+    <xs:anyAttribute namespace="##other" processContents="lax"/> 
   </xs:complexType>
 
   <!-- Global element declaration and complex type definition for header entry returned due to a mustUnderstand fault -->
