@@ -47,7 +47,6 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -358,9 +357,7 @@ public class MessageSubmitter implements IMessageSubmitter {
         // Get custom validation specifcation from P-Mode
         IMessageValidationSpecification validationSpec = null;
         try {
-            validationSpec = HolodeckB2BCore.getPModeSet().get(submittedMsg.getPModeId())
-                    .getLeg(ILeg.Label.REQUEST)
-                    .getUserMessageFlow().getCustomValidationConfiguration();
+            validationSpec = PModeUtils.getLeg(submittedMsg).getUserMessageFlow().getCustomValidationConfiguration();
         } catch (NullPointerException npe) {
             // Some element in the path to the validation spec is not available, so there is nothing to do
             log.error("The was a problem retrieving the validation specifcation from P-Mode [{}]!",
