@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.events.impl.MessageSubmission;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
@@ -40,6 +41,7 @@ import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 import org.holodeckb2b.interfaces.events.IMessageSubmission;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -229,11 +231,14 @@ public class MessageSubmitter implements IMessageSubmitter {
                     throw new MessageSubmitException("Specified location of payload [uri=" + p.getPayloadURI()
                                 + "] content [" + p.getContentLocation()
                                 + "] is invalid (non existing or not a regular file!");
-                // Check references
-                if (!checkPayloadRefs(p, payloads))
-                    throw new MessageSubmitException("Specified location of payload [uri=" + p.getPayloadURI()
-                                + "] content [" + p.getContentLocation()
-                                + "] is invalid (non existing or not a regular file!");
+                // Check references                
+                if (p.getContainment() == Containment.ATTACHMENT && !Utils.isNullOrEmpty(p.getPayloadURI()) 
+                		&& !MessageIdUtils.isAllowed(p.getPayloadURI()))
+                	throw new MessageSubmitException("Specified payload reference [uri=" + p.getPayloadURI()
+                    			+ "] contains invalid characters!");
+                if (!checkPayloadRefIsUnique(p, payloads))
+                    throw new MessageSubmitException("Specified payload reference [uri=" + p.getPayloadURI()
+                                + "] is not unique!");
             }
     }
 
@@ -264,7 +269,7 @@ public class MessageSubmitter implements IMessageSubmitter {
     }
 
     /**
-     * Helper method to check the URI reference for the payloads to include in the message.
+     * Helper method to check the uniqueness of the payload's URI reference. 
      * <p>The references must be unique within the set of simularly included payloads, so there must be no other payload
      * with the same containment and reference.
      * <p>Payloads that should be included as attachment however don't need to have a reference assigned by the
@@ -275,7 +280,7 @@ public class MessageSubmitter implements IMessageSubmitter {
      * @return          <code>true</code> if the references are unique for each payload,<br>
      *                  <code>false</code> if duplicates exists
      */
-    private boolean checkPayloadRefs(final IPayload p, final Collection<? extends IPayload> payloads) {
+    private boolean checkPayloadRefIsUnique(final IPayload p, final Collection<? extends IPayload> payloads) {
         boolean c = true;
         final Iterator<? extends IPayload> it = payloads.iterator();
         do {

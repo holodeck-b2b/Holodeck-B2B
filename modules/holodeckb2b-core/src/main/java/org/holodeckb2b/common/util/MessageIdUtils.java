@@ -72,24 +72,26 @@ public class MessageIdUtils {
                 leftPart = msgId;
                 rightPart = "";
             }
-
             // Add random number to left part
             leftPart += "-" + String.valueOf(ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
 
-            // And return with rightPart added again
-            return leftPart + rightPart;
+            // And return with rightPart added again, but ensure that the contentId does not contain any special chars
+            // as this can cause issues in security processing
+            
+            return (leftPart + rightPart).replaceAll("[^" + VALID_CHARS + "]", "_");
         }
     }
-
+    
     /**
      * Contains the regular expression to use for checking on conformance to RFC2822. The regular expression is based
      * on the ABNF definition of messageId given in the RFC.
      */
-    private static final String   RFC2822_MESSAGE_ID;
+    private static final String	RFC2822_MESSAGE_ID;
+    private static final String	VALID_CHARS;    
     static {
-        String  ALPHA = "[a-zA-Z]";
-        String  DIGIT = "\\d";
-        String  atext = "[" + ALPHA + DIGIT + "\\Q" +
+        String  ALPHA  = "\\p{Alpha}";
+        String  DIGIT  = "\\d";
+        String  achars = ALPHA + DIGIT + "\\Q" +
                             "!" + "#" +
                             "$" + "%" +
                             "&" + "'" +
@@ -99,16 +101,34 @@ public class MessageIdUtils {
                             "^" + "_" +
                             "`" + "{" +
                             "|" + "}" +
-                            "~" + "\\E" + "]";
+                            "~" + "\\E";
+        String 	atext  = "[" + achars + "]";
 
-        String   dot_atom_text   =   atext + "+" +  "(\\." + atext + "+)*";
+        String  dot_atom_text   =   atext + "+" +  "(\\." + atext + "+)*";
 
-        String   id_left         =   dot_atom_text;
-        String   id_right        =   dot_atom_text;
+        String  id_left         =   dot_atom_text;
+        String  id_right        =   dot_atom_text;
 
         RFC2822_MESSAGE_ID = id_left + "@" + id_right;
+        VALID_CHARS = achars + "\\.@";
     }
 
+    /**
+     * Checks whether the given messageId only contains characters that are allowed by the <a href=
+     * "https://tools.ietf.org/html/rfc2822">RFC2822</a>.
+     *
+     * @param messageId     The message id to check for valid characters
+     * @return              <code>true</code> if the given messageId does contain only valid characters,<br>
+     *                      <code>false></code> otherwise
+     * @since HB2B_NEXT_VERSION
+     */
+    public static boolean isAllowed(final String messageId) {
+        if (Utils.isNullOrEmpty(messageId))
+            return false;
+        else
+            return messageId.matches("[" + VALID_CHARS + "]*");    	
+    }
+    
     /**
      * Checks whether the given messageId is correctly formatted as specified in <a href=
      * "https://tools.ietf.org/html/rfc2822">RFC2822</a>.

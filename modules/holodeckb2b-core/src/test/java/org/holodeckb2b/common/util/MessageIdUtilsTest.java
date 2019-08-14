@@ -16,19 +16,22 @@
  */
 package org.holodeckb2b.common.util;
 
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 14:36 14.01.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-public class MessageIdGeneratorTest {
+public class MessageIdUtilsTest {
 
     private static String baseDir;
 
@@ -38,7 +41,7 @@ public class MessageIdGeneratorTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = MessageIdGeneratorTest.class
+        baseDir = MessageIdUtilsTest.class
                 .getClassLoader().getResource("utils").getPath();
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
@@ -70,4 +73,26 @@ public class MessageIdGeneratorTest {
         assertTrue(contentIdParts[0].length()>0);
         assertEquals(contentIdParts[1], hostname);
     }
+    
+    @Test
+    public void testCheckMessageId() {
+    	assertTrue(MessageIdUtils.isCorrectFormat("just.a.test@holodeck-b2b.org"));
+    	assertTrue(MessageIdUtils.isCorrectFormat("justatest@holodeck-b2b.org"));
+    	assertTrue(MessageIdUtils.isCorrectFormat("just_a.test@holodeck-b2b.org"));
+    	assertTrue(MessageIdUtils.isCorrectFormat("just.8.test@holodeck-b2b.org"));
+    	assertTrue(MessageIdUtils.isCorrectFormat("`a#very$spe.cial%id!@some-where+{%&'*/}?^~|"));
+    	assertFalse(MessageIdUtils.isCorrectFormat(""));
+    	assertFalse(MessageIdUtils.isCorrectFormat("just.a.test"));    	
+    	assertFalse(MessageIdUtils.isCorrectFormat("just[8]test@holodeck-b2b.org"));    	
+    }
+    
+    @Test
+    public void testIsAllowed() {
+    	assertTrue(MessageIdUtils.isAllowed("`a#very$special%id!@some-where+{%&'*/}?^~|"));
+    	assertFalse(MessageIdUtils.isAllowed(""));
+    	assertFalse(MessageIdUtils.isAllowed("just a test@holodeck-b2b.org"));    	
+    	assertFalse(MessageIdUtils.isAllowed("just[8]test@holodeck-b2b.org"));    	
+    }
+    
+    
 }
