@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Support for asynchronous Two-Way AS4 P-Modes.
 * Signature policy check in **Core Processing** that received _User Messages_ are signed when indicated in P-Mode that 
   they should. Violation of this rule will generate an _PolicyNonCompliance_ error.
+* On submission of _User Message_  a check that provided payload _Content-Id_ values do not contain invalid characters.  
 * Custom implementation of the Axis2 `TransportListener` interface which can use a _Service_ specified _Message Builder_
 * `org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface.getVersion()` method and 
   `org.holodeckb2b.interfaces.general.IVersionInfo` interface to provide information about the version of the 
@@ -36,7 +37,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * The classes of the common message model implementation are now Serializable 
 
 ### Fixed
-* NPE in case white space is contained between the `ds:Signature` and `ds:SignedInfo` elements of a received message. 
+* Generated Content-Id results in signature failure [#99](https://github.com/holodeck-b2b/Holodeck-B2B/issues/99)
+* NPE when white space is contained between the `ds:Signature` and `ds:SignedInfo` elements of a received message [#100]
+(https://github.com/holodeck-b2b/Holodeck-B2B/issues/100)
 
 
 ## 4.1.2
