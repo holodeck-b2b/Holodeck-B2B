@@ -62,6 +62,7 @@ recommended to raise log levels to at least INFO.
             reduced to prevent clutter         
         -->
         <Logger name="org.holodeckb2b.common.pmode.PModeWatcher" level="INFO"/>
+        <Logger name="org.holodeckb2b.backend.file.SubmitOperation" level="INFO"/>        
         <Logger name="org.holodeckb2b.core.receptionawareness.RetransmissionWorker" level="INFO"/>        
         <Logger name="org.holodeckb2b.core.workers" level="WARN"/>
         <Logger name="org.holodeckb2b.ebms3.pulling" level="WARN"/>

@@ -64,7 +64,7 @@ public class ITHelper {
 
     static {
         projectVersion = getProjectVersion();
-        dFileName = "holodeckb2b-distribution-"+projectVersion+"-default.zip";
+        dFileName = "holodeckb2b-distribution-"+projectVersion+".zip";
         dFilePath = ITHelper.class.getClassLoader().getResource("").getPath();
         dFilePath += "/../../../holodeckb2b-distribution/target/" + dFileName;
         System.out.println("version: " + projectVersion);

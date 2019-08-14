@@ -32,7 +32,7 @@ import org.simpleframework.xml.convert.Convert;
 public class SigningConfig implements ISigningConfiguration, Serializable {
 	private static final long serialVersionUID = -1791692568947001563L;
 	
-    @Element(name = "KeystoreAlias")
+    @Element(name = "KeystoreAlias", required = false)
     private KeystoreAlias keyStoreRef;
 
     // This element is not supported anymore, but to prevent old P-Mode files from breaking it is still read

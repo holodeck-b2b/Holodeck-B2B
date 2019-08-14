@@ -20,7 +20,7 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
     targetNamespace="http://holodeck-b2b.org/schemas/2014/10/pmode"
     attributeFormDefault="unqualified" xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
-    version="4.0.0">
+    version="HB2B_NEXT_VERSION">
     <xs:annotation>
         <xs:documentation><p>The ebMS specification only defines an abstract P-Mode model, the actual P-Mode definition is left up to implementations. This schema defines the XML structure for the representation of a P-Mode as used by the default implementation for maintaining the P-Mode set. In this implementation the P-Mode set consists of all XML documents in a directory. Each XML document represents one P-Mode and must conform to this schema. See the package <code>org.holodeckb2b.pmode.xml</code> for more info on the default implementation of P-Modes.</p></xs:documentation>
         <xs:documentation><p>In version 2.1.0 of the schema the <code>EventHandler</code> and <code>AddActorOrRoleAttribute</code> elements were added. As these are optional elements P-Mode documents constructed using the old version are still valid and result in unchanged processing. Therefore the same namespace is used and only the version has been increased</p></xs:documentation>
@@ -624,7 +624,7 @@ As this authorization is also based on WS-Security headers this type uses the ge
                             <xs:documentation><p>This element contains the configuration for the <code>UsernameToken</code> element to include in the WS-Security header targeted at the "ebms" role/actor.</p></xs:documentation>
                         </xs:annotation>
                     </xs:element>
-                    <xs:element minOccurs="0" name="Signing" type="tns:SignatureConfiguration">
+                    <xs:element minOccurs="0" name="Signing" type="tns:PullSignatureConfiguration">
                         <xs:annotation>
                             <xs:documentation><p>This element contains the configuration for the <code>Signature</code> element to include in the "default" WS-Security header.</p></xs:documentation>
                         </xs:annotation>
@@ -696,44 +696,42 @@ As this authorization is also based on WS-Security headers this type uses the ge
     </xs:complexType>
     <xs:complexType name="SignatureConfiguration">
         <xs:annotation>
-            <xs:documentation><p>This type specifies the configuration settings for the Signature in included in the WS-Security header. The settings in this element correspond with the P-Mode parameter group PMode[1].Security.X509.Sign.</p>
+            <xs:documentation><p>This type specifies the configuration settings for the Signature included in the WS-Security header. The settings in this element correspond with the P-Mode parameter group PMode[1].Security.X509.Sign.</p>
 
 <p>The configuration contained in this element is only required when creating the signature, i.e. when Holodeck B2B is the sender of the message. For incoming message Holodeck B2B validation of the signature is based on the information provided in the message itself.</p>
 </xs:documentation>
         </xs:annotation>
         <xs:sequence>
-            <xs:element name="KeystoreAlias" type="tns:KeystoreAliasType">
+            <xs:element minOccurs="0" name="KeystoreAlias" type="tns:KeystoreAliasType">
                 <xs:annotation>
-                    <xs:documentation><p>This REQUIRED element contains the reference to the certificate in the Java keystore. It MUST contain the alias name that is used to store the certificate in the keystore. The OPTIONAL password attribute is used for accessing the private key in a certificate. This is only required when Holodeck B2B has to create the signature.</p>
+                    <xs:documentation><p>This element contains the reference to the certificate in the Java keystore and MUST be used when Holodeck B2B is sending the message for this trading partner. It MUST contain the alias name that is used to store the certificate in the keystore. The OPTIONAL password attribute is used for accessing the private key in a certificate. This is only required when Holodeck B2B has to create the signature.</p>
 
 <p>NOTE: When the password contains special characters they may need to be encoded to get a well formed XML document!</p></xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:sequence>
-                <xs:element minOccurs="0" name="enableRevocationCheck" type="xs:boolean"
-                    maxOccurs="0">
-                    <xs:annotation>
-                        <xs:documentation>At the moment Holodeck B2B does not support certificate revocation checks! This element will be enabled when support is completed.
+            <xs:element minOccurs="0" name="enableRevocationCheck" type="xs:boolean" maxOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>At the moment Holodeck B2B does not support certificate revocation checks! This element will be enabled when support is completed.
 
 Indicate whether Holodeck B2B must check whether the certificate used for signing a message is revoked. Applies only to received messages.
 
 NOTE 1: When an error occurs during the revocation check the certificate will be treated as invalid resulting in rejection of the complete ebMS message and all message units contained in it. Therefor the revocation check should only be enabled if the PKI infrastructure works correctly.
 
 NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting will be used.</xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-                <xs:element default="IssuerSerial" minOccurs="0" name="KeyReferenceMethod"
-                    type="tns:KeyReferenceMethods">
-                    <xs:annotation>
-                        <xs:documentation><p>This OPTIONAL element indicates how the certificate must be referenced in the WS-Security header. The options are specified in section 3.2 of the WS-Security X.509 Certificate Token Profile Version 1.1.1 specification.</p>
+                </xs:annotation>
+            </xs:element>
+            <xs:element default="IssuerSerial" minOccurs="0" name="KeyReferenceMethod"
+                type="tns:KeyReferenceMethods">
+                <xs:annotation>
+                    <xs:documentation><p>This OPTIONAL element indicates how the certificate must be referenced in the WS-Security header. The options are specified in section 3.2 of the WS-Security X.509 Certificate Token Profile Version 1.1.1 specification.</p>
 
 <p>If not specified <i>Issuer and Serial number</i> method will be used.</p></xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-                <xs:element default="false" minOccurs="0" name="IncludeCertificatePath"
-                    type="xs:boolean">
-                    <xs:annotation>
-                        <xs:documentation><p>This OPTIONAL element indicates whether the complete certificate path must be included in the binary security token that contains the certificate used for signing the message. This setting only applies when Holodeck B2B creates the signature, i.e. is the sender of the signed message. See section 3.1 of the WS-Security X.509 Certificate Token Profile Version 1.1.1 specification for more information on the binary security token types.</p>
+                </xs:annotation>
+            </xs:element>
+            <xs:element default="false" minOccurs="0" name="IncludeCertificatePath"
+                type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation><p>This OPTIONAL element indicates whether the complete certificate path must be included in the binary security token that contains the certificate used for signing the message. This setting only applies when Holodeck B2B creates the signature, i.e. is the sender of the signed message. See section 3.1 of the WS-Security X.509 Certificate Token Profile Version 1.1.1 specification for more information on the binary security token types.</p>
 
 <p>By including the certificate path or chain in the binary security token the receiver of message does not need to know the end entity's certificate but can rely on the trust from a certificate authority. This makes certificate management much simpler as only the CA certificates need to be known on the receiving MSH.</p>
 
@@ -742,26 +740,93 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
 <p>Note that the receiving MSH must also be configured to accept <b>and use</b> a certificate path for validation of the signature. Therefore the default is to only include the end-entity certificate in the WS-Security header.</p>
 
 <p>NOTE: The certificate loaded in the keystore MUST and referenced in <code>KeystoreAlias</code> already contain the complete certificate path, Holodeck B2B will not try to construct the path based on the end-entity certificate!</p></xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-                <xs:element minOccurs="0" name="Algorithm" type="xs:anyURI"
-                    default="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256">
-                    <xs:annotation>
-                        <xs:documentation><p>This OPTIONAL element contains the identifier of the algorithm that should be used for creating the signature. The identifiers are specified in <a href="http://www.w3.org/TR/xmldsig-core1/#sec-AlgID">section 6.1</a> of the XML Signature Syntax and Processing specification version 1.1 (XML-dsig). To ensure interoperability is RECOMMENDED to use an algoritm for which support is required by the XML-dsig specification.</p>
+                </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" name="Algorithm" type="xs:anyURI"
+                default="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256">
+                <xs:annotation>
+                    <xs:documentation><p>This OPTIONAL element contains the identifier of the algorithm that should be used for creating the signature. The identifiers are specified in <a href="http://www.w3.org/TR/xmldsig-core1/#sec-AlgID">section 6.1</a> of the XML Signature Syntax and Processing specification version 1.1 (XML-dsig). To ensure interoperability is RECOMMENDED to use an algoritm for which support is required by the XML-dsig specification.</p>
 
 <p>If not specified the <i>RSAwithSHA256</i> algorithm will be used for creating the signature.</p></xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-                <xs:element default="http://www.w3.org/2001/04/xmlenc#sha256" minOccurs="0"
-                    name="HashFunction" type="xs:anyURI">
-                    <xs:annotation>
-                        <xs:documentation><p>This OPTIONAL element contains the identifier of the algorithm that should be used for creating the message digest. The identifiers are specified in <a href="http://www.w3.org/TR/xmldsig-core1/#sec-AlgID">section 6.1</a> of the XML Signature Syntax and Processing specification version 1.1 (XML-dsig). It is RECOMMENDED to use an algoritm for which support is required by the XML-dsig specification.</p>
+                </xs:annotation>
+            </xs:element>
+            <xs:element default="http://www.w3.org/2001/04/xmlenc#sha256" minOccurs="0"
+                name="HashFunction" type="xs:anyURI">
+                <xs:annotation>
+                    <xs:documentation><p>This OPTIONAL element contains the identifier of the algorithm that should be used for creating the message digest. The identifiers are specified in <a href="http://www.w3.org/TR/xmldsig-core1/#sec-AlgID">section 6.1</a> of the XML Signature Syntax and Processing specification version 1.1 (XML-dsig). It is RECOMMENDED to use an algoritm for which support is required by the XML-dsig specification.</p>
 
 <p>If not specified in the P-Mode the <i>SHA256</i> algorithm will be used for creating the message digest.</p></xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-            </xs:sequence>
+                </xs:annotation>
+            </xs:element>
         </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="PullSignatureConfiguration">
+        <xs:annotation>
+            <xs:documentation><p>This type specifies the configuration settings for the Signature included in the WS-Security header of a <i>Pull Request</i>. The settings in this element correspond with the P-Mode parameter group PMode[][p].Security.X509.Sign.</p></xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:restriction base="tns:SignatureConfiguration">
+                <xs:sequence>
+                    <xs:element minOccurs="1" name="KeystoreAlias" type="tns:KeystoreAliasType">
+                        <xs:annotation>
+                            <xs:documentation><p>This REQUIRED element contains the reference to the certificate in the Java keystore. It MUST contain the alias name that is used to store the certificate in the keystore. The OPTIONAL password attribute is used for accessing the private key in a certificate. This is only required when Holodeck B2B has to create the signature.</p>
+                        
+                        <p>NOTE: When the password contains special characters they may need to be encoded to get a well formed XML document!</p></xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="enableRevocationCheck" type="xs:boolean"
+                        maxOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>At the moment Holodeck B2B does not support certificate revocation checks! This element will be enabled when support is completed.
+                        
+                        Indicate whether Holodeck B2B must check whether the certificate used for signing a message is revoked. Applies only to received messages.
+                        
+                        NOTE 1: When an error occurs during the revocation check the certificate will be treated as invalid resulting in rejection of the complete ebMS message and all message units contained in it. Therefor the revocation check should only be enabled if the PKI infrastructure works correctly.
+                        
+                        NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting will be used.</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element default="IssuerSerial" minOccurs="0" name="KeyReferenceMethod"
+                        type="tns:KeyReferenceMethods">
+                        <xs:annotation>
+                            <xs:documentation><p>This OPTIONAL element indicates how the certificate must be referenced in the WS-Security header. The options are specified in section 3.2 of the WS-Security X.509 Certificate Token Profile Version 1.1.1 specification.</p>
+                        
+                        <p>If not specified <i>Issuer and Serial number</i> method will be used.</p></xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element default="false" minOccurs="0" name="IncludeCertificatePath"
+                        type="xs:boolean">
+                        <xs:annotation>
+                            <xs:documentation><p>This OPTIONAL element indicates whether the complete certificate path must be included in the binary security token that contains the certificate used for signing the message. This setting only applies when Holodeck B2B creates the signature, i.e. is the sender of the signed message. See section 3.1 of the WS-Security X.509 Certificate Token Profile Version 1.1.1 specification for more information on the binary security token types.</p>
+                        
+                        <p>By including the certificate path or chain in the binary security token the receiver of message does not need to know the end entity's certificate but can rely on the trust from a certificate authority. This makes certificate management much simpler as only the CA certificates need to be known on the receiving MSH.</p>
+                        
+                        <p>Because the certificate path can only be included in a binary security token, this option can only be used when the <code>KeyReferenceMethod</code> is set to <i>BSTReference</i>.</p>
+                        
+                        <p>Note that the receiving MSH must also be configured to accept <b>and use</b> a certificate path for validation of the signature. Therefore the default is to only include the end-entity certificate in the WS-Security header.</p>
+                        
+                        <p>NOTE: The certificate loaded in the keystore MUST and referenced in <code>KeystoreAlias</code> already contain the complete certificate path, Holodeck B2B will not try to construct the path based on the end-entity certificate!</p></xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="Algorithm" type="xs:anyURI"
+                        default="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256">
+                        <xs:annotation>
+                            <xs:documentation><p>This OPTIONAL element contains the identifier of the algorithm that should be used for creating the signature. The identifiers are specified in <a href="http://www.w3.org/TR/xmldsig-core1/#sec-AlgID">section 6.1</a> of the XML Signature Syntax and Processing specification version 1.1 (XML-dsig). To ensure interoperability is RECOMMENDED to use an algoritm for which support is required by the XML-dsig specification.</p>
+                        
+                        <p>If not specified the <i>RSAwithSHA256</i> algorithm will be used for creating the signature.</p></xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element default="http://www.w3.org/2001/04/xmlenc#sha256" minOccurs="0"
+                        name="HashFunction" type="xs:anyURI">
+                        <xs:annotation>
+                            <xs:documentation><p>This OPTIONAL element contains the identifier of the algorithm that should be used for creating the message digest. The identifiers are specified in <a href="http://www.w3.org/TR/xmldsig-core1/#sec-AlgID">section 6.1</a> of the XML Signature Syntax and Processing specification version 1.1 (XML-dsig). It is RECOMMENDED to use an algoritm for which support is required by the XML-dsig specification.</p>
+                        
+                        <p>If not specified in the P-Mode the <i>SHA256</i> algorithm will be used for creating the message digest.</p></xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+            </xs:restriction>
+        </xs:complexContent>
     </xs:complexType>
     <xs:complexType name="EncryptionConfiguration">
         <xs:annotation>

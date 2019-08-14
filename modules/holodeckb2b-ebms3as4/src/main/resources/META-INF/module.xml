@@ -66,19 +66,19 @@
         <handler name="ProcessSecurityHeaders" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessSecurityHeaders">
             <order phase="Security"/>
         </handler>
-
-        <!-- Authorize the message base on UsernameToken -->
-        <handler name="AuthorizeMessage" class="org.holodeckb2b.ebms3.handlers.inflow.AuthorizeMessage">
+        <!-- Check that all payload data is signed -->
+        <handler name="CheckSignatureCompleteness" class="org.holodeckb2b.as4.handlers.inflow.CheckSignatureCompleteness">
             <order phase="Security" after="ProcessSecurityHeaders"/>
         </handler>
 
-        <!-- Check that all payload data is signed -->
-        <handler name="CheckSignatureCompleteness" class="org.holodeckb2b.as4.handlers.inflow.CheckSignatureCompleteness">
-            <order phase="ProtocolProcessing"/>
+        <!-- Authorize the message base on UsernameToken -->
+        <handler name="AuthorizeMessage" class="org.holodeckb2b.ebms3.handlers.inflow.AuthorizeMessage">
+            <order phase="Security" after="CheckSignatureCompleteness"/>
         </handler>
+
         <!--  Decompress (if needed) and save payloads -->
         <handler name="AS4DeCompression" class="org.holodeckb2b.as4.compression.DecompressionHandler">
-            <order phase="ProtocolProcessing" after="CheckSignatureCompleteness"/>
+            <order phase="ProtocolProcessing" />
         </handler>
         <handler name="SavePayloads" class="org.holodeckb2b.ebms3.handlers.inflow.SaveUserMsgAttachments">
             <order phase="ProtocolProcessing" after="AS4DeCompression"/>
@@ -161,20 +161,20 @@
         <handler name="ProcessSecurityHeaders" class="org.holodeckb2b.ebms3.handlers.inflow.ProcessSecurityHeaders">
             <order phase="Security"/>
         </handler>
-
-        <!-- Authorize the message base on UsernameToken -->
-        <handler name="AuthorizeMessage" class="org.holodeckb2b.ebms3.handlers.inflow.AuthorizeMessage">
-            <order phase="Security" after="ProcessSecurityHeaders"/>
-        </handler>
-
         <!-- Check that all payload data is signed -->
         <handler name="CheckSignatureCompleteness" class="org.holodeckb2b.as4.handlers.inflow.CheckSignatureCompleteness">
-            <order phase="ProtocolProcessing"/>
+            <order phase="Security" after="ProcessSecurityHeaders"/>
+        </handler>        
+        <!-- Authorize the message base on UsernameToken -->
+        <handler name="AuthorizeMessage" class="org.holodeckb2b.ebms3.handlers.inflow.AuthorizeMessage">
+            <order phase="Security" after="CheckSignatureCompleteness"/>
         </handler>
+
         <!--  Decompress (if needed) and save payloads -->
         <handler name="AS4DeCompression" class="org.holodeckb2b.as4.compression.DecompressionHandler">
-            <order phase="ProtocolProcessing" after="CheckSignatureCompleteness"/>
+            <order phase="ProtocolProcessing" />
         </handler>
+        
         <handler name="SavePayloads" class="org.holodeckb2b.ebms3.handlers.inflow.SaveUserMsgAttachments">
             <order phase="ProtocolProcessing" after="AS4DeCompression"/>
         </handler>

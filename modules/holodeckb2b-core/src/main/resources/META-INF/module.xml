@@ -33,6 +33,14 @@
         <!-- Catch a raised Fault and translate it into an EbMS Error -->
         <handler name="CatchFaults" class="org.holodeckb2b.core.handlers.CatchAxisFault">
             <order phase="Transport" phaseFirst="true"/>            
+        </handler>        
+        <!--
+        	Check if a received User Message should be signed and make sure it is when specified so in the P-Mode.
+        	This handler is run as last one in the Security flow to ensure the protocol handlers have already processed
+        	the signature.     
+        -->
+        <handler name="EnsureSigning" class="org.holodeckb2b.core.handlers.inflow.CheckSignatureRequirement">
+            <order phase="Security" phaseLast="true"/>
         </handler>
 
         <!--
@@ -75,7 +83,14 @@
         <handler name="CatchFaults" class="org.holodeckb2b.core.handlers.CatchAxisFault">
             <order phase="Transport" phaseFirst="true"/>            
         </handler>
-
+        <!--
+        	Check if a received User Message should be signed and make sure it is when specified so in the P-Mode.
+        	This handler is run as last one in the Security flow to ensure the protocol handlers have already processed
+        	the signature.     
+        -->
+        <handler name="EnsureSigning" class="org.holodeckb2b.core.handlers.inflow.CheckSignatureRequirement">
+            <order phase="Security" phaseLast="true"/>
+        </handler>
         <!--
             Process the user message
         -->
