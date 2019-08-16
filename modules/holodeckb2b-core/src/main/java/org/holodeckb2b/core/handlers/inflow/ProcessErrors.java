@@ -19,9 +19,9 @@ package org.holodeckb2b.core.handlers.inflow;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.axis2.description.HandlerDescription;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.ValueInconsistent;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -40,22 +40,12 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * Is the <i>IN_FLOW</i> handler responsible for processing received error signals. For each error contained in one of
  * the {@link IErrorMessageEntity}s available in the message processing context it will check if there is a {@link 
  * IMessageUnitEntity} in the database and mark that message as failed.
+ * <p>Errors will always be logged to a special error log. Using the logging configuration users can decide if this
+ * logging should be enabled and how errors should be logged.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ProcessErrors extends AbstractBaseHandler {
-
-    /**
-     * Errors will always be logged to a special error log. Using the logging configuration users can decide if this
-     * logging should be enabled and how errors should be logged.
-     */
-    private Log     errorLog;
-    
-    @Override
-	public void init(HandlerDescription handlerdesc) {
-    	super.init(handlerdesc);
-    	errorLog = LogFactory.getLog("org.holodeckb2b.msgproc.errors.received." + handledMsgProtocol);
-    }
 
     @Override
     protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
@@ -101,6 +91,8 @@ public class ProcessErrors extends AbstractBaseHandler {
         }
 
         // Always log the error signal, even if its processing may fail later
+        final Logger errorLog = LogManager.getLogger("org.holodeckb2b.msgproc.errors.received." + 
+        										  procCtx.getParentContext().getAxisService().getName().toUpperCase());
         if (MessageUnitUtils.isWarning(errSignal))
             errorLog.warn(MessageUnitUtils.errorSignalToString(errSignal));
         else
