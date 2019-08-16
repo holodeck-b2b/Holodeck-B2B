@@ -17,7 +17,9 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import java.util.Iterator;
+
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.common.messagemodel.PartyId;
@@ -101,24 +103,24 @@ public class PartyInfoElement {
      * The <code>From</code> and <code>To</code> element are structurally equal, both represent a trading partner
      * involved in the exchange. We therefore use an inner class that represents a general trading partner.
      */
-    private static class TradingPartner {
+    public static class TradingPartner {
 
         public static enum ElementName { FROM, TO }
 
         /**
          * The fully qualified name of the From element as an {@link QName}
          */
-        private static final QName  Q_FROM_PARTY = new QName(EbMSConstants.EBMS3_NS_URI, "From");
+        protected static final QName  Q_FROM_PARTY = new QName(EbMSConstants.EBMS3_NS_URI, "From");
 
         /**
          * The fully qualified name of the To element as an {@link QName}
          */
-        private static final QName  Q_TO_PARTY = new QName(EbMSConstants.EBMS3_NS_URI, "To");
+        protected static final QName  Q_TO_PARTY = new QName(EbMSConstants.EBMS3_NS_URI, "To");
 
         /**
          * The fully qualified name of the PartyId element as an {@link QName}
          */
-        private static final QName  Q_PARTYID = new QName(EbMSConstants.EBMS3_NS_URI, "PartyId");
+        protected static final QName  Q_PARTYID = new QName(EbMSConstants.EBMS3_NS_URI, "PartyId");
 
         // The local name for the PartyId type attribute
         public static final String LN_PARTYID_TYPE = "type";
@@ -126,7 +128,7 @@ public class PartyInfoElement {
         /**
          * The fully qualified name of the Role element as an {@link QName}
          */
-        private static final QName  Q_ROLE = new QName(EbMSConstants.EBMS3_NS_URI, "Role");
+        protected static final QName  Q_ROLE = new QName(EbMSConstants.EBMS3_NS_URI, "Role");
 
         /**
          * Creates a <code>From</code> or <code>To</code> element and includes it in the given <code>PartyInfo</code>

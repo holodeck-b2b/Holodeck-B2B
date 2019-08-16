@@ -17,6 +17,7 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -38,12 +39,12 @@ public class CollaborationInfoElement {
     /**
      * The fully qualified name of the Action element as an {@link QName}
      */
-    static final QName  Q_ACTION = new QName(EbMSConstants.EBMS3_NS_URI, "Action");
+    protected static final QName  Q_ACTION = new QName(EbMSConstants.EBMS3_NS_URI, "Action");
 
     /**
      * The fully qualified name of the element ConversationId as an {@link QName}
      */
-    static final QName  Q_CONVERSATIONID = new QName(EbMSConstants.EBMS3_NS_URI, "ConversationId");
+    protected static final QName  Q_CONVERSATIONID = new QName(EbMSConstants.EBMS3_NS_URI, "ConversationId");
 
     /**
      * Creates a <code>CollaborationInfo</code> element and adds it to the given <code>UserMessage</code> element.
