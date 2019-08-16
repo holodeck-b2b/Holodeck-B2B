@@ -120,7 +120,10 @@ public class PModeUtils {
             	outLeg = !doesHolodeckB2BTrigger(pmode.getLeg(Label.REQUEST)) ? pmode.getLeg(Label.REQUEST): 
 																	EbMSConstants.TWO_WAY_MEP.equals(pmode.getMep()) ? 
 																			   pmode.getLeg(Label.REPLY) 
-																			 : null; 
+																			 : null;
+				break;
+            default:
+            	outLeg = pmode.getLeg(Label.REQUEST);																				   
         }        
         return outLeg;    	
     }
@@ -152,7 +155,10 @@ public class PModeUtils {
     		inLeg = doesHolodeckB2BTrigger(pmode.getLeg(Label.REQUEST)) ? pmode.getLeg(Label.REQUEST): 
 													    			EbMSConstants.TWO_WAY_MEP.equals(pmode.getMep()) ? 
 													    					pmode.getLeg(Label.REPLY) 
-													    					: null; 
+													    					: null;
+													    					break;
+        default:
+        	inLeg = pmode.getLeg(Label.REQUEST);													    					
     	}        
     	return inLeg;    	
     }
