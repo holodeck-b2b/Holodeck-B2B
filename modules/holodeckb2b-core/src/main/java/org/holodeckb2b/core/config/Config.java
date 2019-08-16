@@ -22,10 +22,9 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.logging.log4j.LogManager;
 import org.holodeckb2b.common.util.Utils;
 
 /**
@@ -181,6 +180,7 @@ public class Config implements InternalConfiguration {
         hostName = configFile.getParameter("ExternalHostName");
         if (Utils.isNullOrEmpty(hostName)) {
             try {
+            	//TODO: Getting the hostname this way can be slow, can we change?
                 hostName = InetAddress.getLocalHost().getCanonicalHostName();
             } catch (final UnknownHostException e) {}
 
@@ -283,8 +283,8 @@ public class Config implements InternalConfiguration {
     private String detectHomeDir(final ConfigurationContext configContext) {
         String hb2b_home_dir = System.getProperty("holodeckb2b.home");
         if (!Utils.isNullOrEmpty(hb2b_home_dir) && !Files.isDirectory(Paths.get(hb2b_home_dir))) {
-            Logger.getLogger(Config.class.getName())
-                        .log(Level.WARNING, "Specified Holodeck B2B HOME does not exists, reverting to default home");
+            LogManager.getLogger(Config.class)
+                        .error( "Specified Holodeck B2B HOME does not exists, reverting to default home");
             hb2b_home_dir = null;
         }
 
