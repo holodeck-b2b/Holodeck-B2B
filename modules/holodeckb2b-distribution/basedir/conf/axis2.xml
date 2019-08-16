@@ -145,7 +145,6 @@
     <!-- ================================================= -->
     <phaseOrder type="InFlow">
         <phase name="Transport"/>
-        <phase name="Logging"/>
         <phase name="Addressing"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
             <handler name="RequestURIBasedDispatcher"
@@ -163,6 +162,8 @@
             <handler name="MustUnderstandValidationDispatcher"
                 class="org.apache.axis2.jaxws.dispatchers.MustUnderstandValidationDispatcher"/>
         </phase>
+        <phase name="Logging"/>
+        <phase name="ProtocolParsing"/>        
         <phase name="Security"/>
         <phase name="ProtocolProcessing"/>        
         <phase name="CoreProcessing"/>
@@ -172,26 +173,29 @@
         <phase name="CoreProcessing"/>
         <phase name="ProtocolProcessing"/>        
         <phase name="Security"/>
-        <phase name="MessageOut"/>
+        <phase name="Transport"/>        
         <phase name="Logging"/>
+        <phase name="MessageOut"/>
     </phaseOrder>
     <phaseOrder type="InFaultFlow">
         <phase name="Transport"/>
-        <phase name="Logging"/>
         <phase name="Addressing"/>
         <phase name="PreDispatch"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase"/>   
+        <phase name="Logging"/>
+        <phase name="ProtocolParsing"/>        
         <phase name="Security"/>
         <phase name="ProtocolProcessing"/>        
         <phase name="CoreProcessing"/>
-        <phase name="ProtocolResponseHandling"/>        
+        <phase name="ProtocolResponseHandling"/>      
     </phaseOrder>
     <phaseOrder type="OutFaultFlow">
         <phase name="CoreProcessing"/>
         <phase name="ProtocolProcessing"/>        
         <phase name="Security"/>
-        <phase name="MessageOut"/>
+        <phase name="Transport"/>        
         <phase name="Logging"/>
+        <phase name="MessageOut"/>
     </phaseOrder>
 </axisconfig>
 

@@ -29,26 +29,26 @@
             Read the message units from the message
         -->
         <handler name="ReadUserMessage" class="org.holodeckb2b.ebms3.handlers.inflow.ReadUserMessage">
-            <order phase="Transport"/>
+            <order phase="ProtocolParsing"/>
         </handler>
         <handler name="ReadPullRequest" class="org.holodeckb2b.ebms3.handlers.inflow.ReadPullRequest">
-            <order phase="Transport" after="ReadUserMessage"/>
+            <order phase="ProtocolParsing" after="ReadUserMessage"/>
         </handler>
         <handler name="ReadReceipts" class="org.holodeckb2b.ebms3.handlers.inflow.ReadReceipt">
-            <order phase="Transport" after="ReadPullRequest"/>
+            <order phase="ProtocolParsing" after="ReadPullRequest"/>
         </handler>
         <handler name="ReadErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ReadError">
-            <order phase="Transport" after="ReadReceipts"/>
+            <order phase="ProtocolParsing" after="ReadReceipts"/>
         </handler>
         <!-- Check whether the message was received through I-Cloud, i.e. uses multi-hop feature -->
         <handler name="CheckForMultiHop" class="org.holodeckb2b.as4.multihop.CheckFromICloud">
-            <order phase="Transport" after="ReadErrors"/>
+            <order phase="ProtocolParsing" after="ReadErrors"/>
         </handler>
         <!--
             Perform validation of the header meta-data message units read from the message
         -->
         <handler name="HeaderValidation" class="org.holodeckb2b.core.validation.header.HeaderValidationHandler">
-            <order phase="Transport" after="CheckForMultiHop"/>
+            <order phase="ProtocolParsing" after="CheckForMultiHop"/>
             <parameter name="validatorFactoryClass">org.holodeckb2b.ebms3.validation.header.Ebms3HeaderValidatorFactory</parameter>
         </handler>        
         <!--
@@ -57,7 +57,7 @@
             in the WS-Security header
         -->
         <handler name="FindPModes" class="org.holodeckb2b.ebms3.handlers.inflow.FindPModes">
-            <order phase="Dispatch"/>
+            <order phase="ProtocolParsing"/>
         </handler>
 
         <!--
@@ -124,26 +124,26 @@
             Read the message units from the message
         -->
         <handler name="ReadUserMessage" class="org.holodeckb2b.ebms3.handlers.inflow.ReadUserMessage">
-            <order phase="Transport"/>
+            <order phase="ProtocolParsing"/>
         </handler>
         <handler name="ReadPullRequest" class="org.holodeckb2b.ebms3.handlers.inflow.ReadPullRequest">
-            <order phase="Transport" after="ReadUserMessage"/>
+            <order phase="ProtocolParsing" after="ReadUserMessage"/>
         </handler>
         <handler name="ReadReceipts" class="org.holodeckb2b.ebms3.handlers.inflow.ReadReceipt">
-            <order phase="Transport" after="ReadPullRequest"/>
+            <order phase="ProtocolParsing" after="ReadPullRequest"/>
         </handler>
         <handler name="ReadErrors" class="org.holodeckb2b.ebms3.handlers.inflow.ReadError">
-            <order phase="Transport" after="ReadReceipts"/>
+            <order phase="ProtocolParsing" after="ReadReceipts"/>
         </handler>
         <!-- Check whether the message was received through I-Cloud, i.e. uses multi-hop feature -->
         <handler name="CheckForMultiHop" class="org.holodeckb2b.as4.multihop.CheckFromICloud">
-            <order phase="Transport" after="ReadErrors"/>
+            <order phase="ProtocolParsing" after="ReadErrors"/>
         </handler>
         <!--
             Perform validation of the header meta-data message units read from the message
         -->
         <handler name="HeaderValidation" class="org.holodeckb2b.core.validation.header.HeaderValidationHandler">
-            <order phase="Transport" after="CheckForMultiHop"/>
+            <order phase="ProtocolParsing" after="CheckForMultiHop"/>
             <parameter name="validatorFactoryClass">org.holodeckb2b.ebms3.validation.header.Ebms3HeaderValidatorFactory</parameter>
         </handler>        
         <!--
@@ -152,7 +152,7 @@
             in the WS-Security header
         -->
         <handler name="FindPModes" class="org.holodeckb2b.ebms3.handlers.inflow.FindPModes">
-            <order phase="Dispatch"/>
+            <order phase="ProtocolParsing"/>
         </handler>
 
         <!--
@@ -164,7 +164,8 @@
         <!-- Check that all payload data is signed -->
         <handler name="CheckSignatureCompleteness" class="org.holodeckb2b.as4.handlers.inflow.CheckSignatureCompleteness">
             <order phase="Security" after="ProcessSecurityHeaders"/>
-        </handler>        
+        </handler>
+
         <!-- Authorize the message base on UsernameToken -->
         <handler name="AuthorizeMessage" class="org.holodeckb2b.ebms3.handlers.inflow.AuthorizeMessage">
             <order phase="Security" after="CheckSignatureCompleteness"/>
@@ -174,7 +175,6 @@
         <handler name="AS4DeCompression" class="org.holodeckb2b.as4.compression.DecompressionHandler">
             <order phase="ProtocolProcessing" />
         </handler>
-        
         <handler name="SavePayloads" class="org.holodeckb2b.ebms3.handlers.inflow.SaveUserMsgAttachments">
             <order phase="ProtocolProcessing" after="AS4DeCompression"/>
         </handler>
@@ -193,7 +193,7 @@
     	<handler name="ReportHeaderProcessed" class="org.holodeckb2b.common.handlers.ReportHeaderProcessed">
            	<order phase="ProtocolProcessing" phaseLast="true"/>
         </handler>
-           
+        
         <!-- Create Receipt -->    
 	    <handler name="CreateReceipt" class="org.holodeckb2b.as4.handlers.inflow.CreateReceipt">
             <order phase="ProtocolResponseHandling"/>
@@ -209,7 +209,7 @@
             <order phase="ProtocolResponseHandling" after="ProcessGeneratedErrors"/>
         </handler>
     </InFaultFlow>
-
+    
    	<OutFlow>
         <handler name="PrepareResponseMessage"
             class="org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage">
@@ -254,19 +254,19 @@
         </handler>
 		<!-- Handler to configure HTTP parameters -->
         <handler name="ConfigureHTTP" class="org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler">
-        	<order phase="MessageOut"/>
+        	<order phase="Transport"/>
         </handler>
         <!-- Handler responsible for checking result of the message transport -->
         <handler name="CheckSentResult"
             class="org.holodeckb2b.ebms3.handlers.outflow.CheckSentResult">
-            <order phase="MessageOut" after="ConfigureHTTP" />
+            <order phase="Transport" after="ConfigureHTTP" />
         </handler>
         <!-- Log the SOAP envelope -->
         <handler name="SOAPLog" class="org.holodeckb2b.common.handlers.SOAPEnvelopeLogger">
             <order phase="Logging" phaseLast="true"/>
         </handler>
     </OutFlow>
-
+ 
    	<OutFaultFlow>
         <handler name="PrepareResponseMessage"
             class="org.holodeckb2b.ebms3.handlers.outflow.PrepareResponseMessage">
@@ -311,17 +311,16 @@
         </handler>
 		<!-- Handler to configure HTTP parameters -->
         <handler name="ConfigureHTTP" class="org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler">
-        	<order phase="MessageOut"/>
+        	<order phase="Transport"/>
         </handler>
         <!-- Handler responsible for checking result of the message transport -->
         <handler name="CheckSentResult"
             class="org.holodeckb2b.ebms3.handlers.outflow.CheckSentResult">
-            <order phase="MessageOut" after="ConfigureHTTP" />
+            <order phase="Transport" after="ConfigureHTTP" />
         </handler>
         <!-- Log the SOAP envelope -->
         <handler name="SOAPLog" class="org.holodeckb2b.common.handlers.SOAPEnvelopeLogger">
             <order phase="Logging" phaseLast="true"/>
         </handler>
     </OutFaultFlow>
-
 </module>

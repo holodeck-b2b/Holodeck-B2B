@@ -35,22 +35,21 @@
             <order phase="Transport" phaseFirst="true"/>            
         </handler>        
         <!--
-        	Check if a received User Message should be signed and make sure it is when specified so in the P-Mode.
-        	This handler is run as last one in the Security flow to ensure the protocol handlers have already processed
-        	the signature.     
-        -->
-        <handler name="EnsureSigning" class="org.holodeckb2b.core.handlers.inflow.CheckSignatureRequirement">
-            <order phase="Security" phaseLast="true"/>
-        </handler>
-
-        <!--
             Process the user message
         -->
         <handler name="StartProcessingUsrMsg" class="org.holodeckb2b.core.handlers.inflow.StartProcessingUsrMessage">
             <order phase="CoreProcessing" phaseFirst="true"/>
         </handler>
-        <handler name="DuplicateCheck" class="org.holodeckb2b.core.receptionawareness.DetectDuplicateUserMessages">
+        <!--
+        	Check if a received User Message should be signed and make sure it is when specified so in the P-Mode.
+        	This handler is run as last one in the Security flow to ensure the protocol handlers have already processed
+        	the signature.     
+        -->
+        <handler name="EnsureSigning" class="org.holodeckb2b.core.handlers.inflow.CheckSignatureRequirement">
             <order phase="CoreProcessing" after="StartProcessingUsrMsg"/>
+        </handler>
+        <handler name="DuplicateCheck" class="org.holodeckb2b.core.receptionawareness.DetectDuplicateUserMessages">
+            <order phase="CoreProcessing" after="EnsureSigning"/>
         </handler>
         <handler name="CustomValidation" class="org.holodeckb2b.core.handlers.inflow.PerformCustomValidations">
             <order phase="CoreProcessing" after="DuplicateCheck"/>
