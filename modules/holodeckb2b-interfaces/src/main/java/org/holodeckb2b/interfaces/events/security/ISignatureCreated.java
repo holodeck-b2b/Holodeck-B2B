@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.1.0
  */
-public interface ISignatureCreated extends IMessageProcessingEvent, ISignatureCreatedEvent {
+public interface ISignatureCreated extends IMessageProcessingEvent {
 
     /**
      * Gets the information on the digests that were calculated for the payloads in the User Message that is the <i>
@@ -40,6 +40,5 @@ public interface ISignatureCreated extends IMessageProcessingEvent, ISignatureCr
      *
      * @return  A <code>Map</code> linking the digest meta-data to each payload from the user message
      */
-    @Override
 	public Map<IPayload, ISignedPartMetadata>   getPayloadDigests();
 }

@@ -31,14 +31,13 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.1.0
  */
-public interface ISecurityCreationFailure extends ISendMessageProcessingFailure, ISecurityHeaderCreationFailureEvent {
+public interface ISecurityCreationFailure extends ISendMessageProcessingFailure {
 
     /**
      * Gets the description as given by the <i>Security Provider</i> of what caused the creation of the WS-Security
      * header to fail.
      *
      * @return  The {@link SecurityProcessingException} that caused the failure.
-     */
-    @Override
+     */    
 	SecurityProcessingException getFailureReason();
 }

@@ -17,7 +17,7 @@
 package org.holodeckb2b.interfaces.security;
 
 /**
- * Is the generic interface to represent the results of processing a part of the WS-Security header of a received
+ * Is the generic interface to represent the results of processing a part of the message level security of a received
  * message, e.g. the signature or username token. For each security feature that should be processed, a separate sub
  * interface is defined that includes method to get details on the processing specific to that feature.
  *

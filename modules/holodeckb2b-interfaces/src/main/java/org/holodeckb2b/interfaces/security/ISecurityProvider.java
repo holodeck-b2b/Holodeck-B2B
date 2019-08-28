@@ -18,14 +18,11 @@ package org.holodeckb2b.interfaces.security;
 
 /**
  * Defines the interface of a Holodeck B2B <i>security provider</i> which is responsible for handling of the WS-Security
- * header in messages processed by Holodeck B2B.
- * <p>The security provider has three main components:<ol>
+ * header in ebMS3/AS4 messages processed by Holodeck B2B. The security provider has two main components:<ol>
  * <li>The <i>security header processor</i> which is responsible for processing of the WS-Security header in received
  * messages.</li>
  * <li>The <i>security header creator</i> which is responsible for creating the WS-Security header in messages send by
  * Holodeck B2B.</li>
- * <li>The <i>certificate manager</i> which is responsible for storing the keys and certificates needed in the
- * processing of the WS-Security headers.</li>
  * </ol>
  * <p>The security provider to use is configured per Holodeck B2B instance, so all messages processed by the instance
  * will use the same security provider. The security will be initialized on startup of the instance. Implementations
@@ -62,21 +59,16 @@ public interface ISecurityProvider {
      * messages.
      *
      * @return The security header processor of this security provider
+     * @throws SecurityProcessingException 	When the processor cannot be created/returned due to an internal error.  
      */
-    ISecurityHeaderProcessor    getSecurityHeaderProcessor();
+    ISecurityHeaderProcessor    getSecurityHeaderProcessor() throws SecurityProcessingException;
 
     /**
      * Gets the {@link ISecurityHeaderCreator} of this security provider to create the WS-Security header in message to
      * send.
      *
      * @return The security header creator of this security provider
+     * @throws SecurityProcessingException 	When the creator cannot be created/returned due to an internal error.  
      */
-    ISecurityHeaderCreator      getSecurityHeaderCreator();
-
-    /**
-     * Gets the {@link ICertificateManager} of this security provider which manages storage of keys and certificates.
-     *
-     * @return The certificate manager of this security provider
-     */
-    ICertificateManager         getCertificateManager();
+    ISecurityHeaderCreator      getSecurityHeaderCreator() throws SecurityProcessingException;
 }

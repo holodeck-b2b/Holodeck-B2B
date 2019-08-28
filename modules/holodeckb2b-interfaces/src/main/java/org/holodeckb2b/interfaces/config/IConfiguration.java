@@ -32,7 +32,8 @@ public interface IConfiguration {
      * @return The Axis2 configuration context.
      * @deprecated This method is intended for <b>internal use only</b>.
      */
-    ConfigurationContext getAxisConfigurationContext();
+    @Deprecated
+	ConfigurationContext getAxisConfigurationContext();
 
     /**
      * Gets the host name. During the message processing a host name may be needed,
@@ -100,89 +101,6 @@ public interface IConfiguration {
      *         <code>false</code> otherwise
      */
     boolean shouldReportErrorOnReceipt();
-
-    /**
-     * Indicates if the references in an Error signal message unit should be checked using the strict requirements
-     * defined in the Core Specification (all references equal) or if a bit more relaxed check can be used (signal level
-     * reference empty, but individual errors have the same reference).
-     * <p>Default the more relaxed check is used. To change this set the value of the <i>StrictErrorReferencesCheck</i>
-     * parameter to <i>"true"</i>.
-     *
-     * @return <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
-     *         <code>false</code> otherwise
-     * @deprecated To use strict validation of error reference use the strict validation mode of the ebMS header
-     *             (see {@link #useStrictHeaderValidation()}).
-     */
-    boolean useStrictErrorRefCheck();
-
-    /**
-     * Gets the path to the keystore containing the private keys and related certificates that are used for signing
-     * and decryption of messages.
-     *
-     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
-     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
-     * @return The path to the <i>"private"</i> keystore.
-     */
-    @Deprecated
-    String getPrivateKeyStorePath();
-
-    /**
-     * Gets the password for the keystore that holds the certificates with the private keys.
-     *
-     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
-     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
-     * @return  The password for accessing the keystore with the private keys
-     */
-    @Deprecated
-    String getPrivateKeyStorePassword();
-
-    /**
-     * Gets the path to the keystore containing the certificates (i.e. public keys) that are used for encrypting
-     * messages and verification of a signed messages.
-     *
-     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
-     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
-     * @return The path to the <i>"public"</i> keystore.
-     */
-    @Deprecated
-    String getPublicKeyStorePath();
-
-    /**
-     * Gets the password for the keystore that holds the certificates with the public keys.
-     *
-     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
-     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
-     * @return  The password for accessing the keystore with the public keys
-     */
-    @Deprecated
-    String getPublicKeyStorePassword();
-
-    /**
-     * Gets the path to the keystore containing the CA certificates that should be trusted when validating the
-     * certificate that was used for signing a received message.
-     * <p>This "trust" keystore should be used to store certificates that are not directly related to a specific trading
-     * partner but are needed to validate the trading partners certificate. By using the trust store the trading
-     * partners certificate doesn't need to be registered in Holodeck B2B but can be included in the message itself
-     * using a <code>BinarySecurityToken</code> element.
-     *
-     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
-     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
-     * @return The path to the <i>"trust"</i> keystore.
-     * @since 2.1.0
-     */
-    @Deprecated
-    String getTrustKeyStorePath();
-
-    /**
-     * Gets the password for the keystore that holds the trusted CA certificates.
-     *
-     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
-     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
-     * @return  The password for accessing the keystore with the trusted certificates.
-     * @since 2.1.0
-     */
-    @Deprecated
-    String getTrustKeyStorePassword();
 
     /**
      * Gets the global setting for whether Holodeck B2B should perform a strict validation of the ebMS header meta-data

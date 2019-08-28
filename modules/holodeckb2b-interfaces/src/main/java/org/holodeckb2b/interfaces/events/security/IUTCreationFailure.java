@@ -26,13 +26,12 @@ import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.1.0
  */
-public interface IUTCreationFailure extends ISecurityCreationFailure, IUTCreationFailedEvent {
+public interface IUTCreationFailure extends ISecurityCreationFailure {
 
     /**
      * Gets the target of Username token WS-Security header which could not be added to the message.
      *
      * @return The target of the Username token header
      */
-    @Override
-	SecurityHeaderTarget getTargetedRole();
+    SecurityHeaderTarget getTargetedRole();
 }

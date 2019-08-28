@@ -9,6 +9,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * A default user interface that supports basic monitoring of a running Holodeck B2B instance. The UI is available both
   using a command line.
 * Support for asynchronous Two-Way AS4 P-Modes.
+* New interfaces related to trust validation of certificates in `org.holodeckb2b.interfaces.security.trust`. Especially
+  the new specification of the Holodeck B2B _Certificate Manager_ which is now a separate component independent of the
+  _Security Provider_. Also new interfaces and methods are defined to communicate the results of trust validation checks
+  between components including the new `ISignatureVerifiedWithWarning` event to signal trust issues on signature
+  verification.
 * Signature policy check in **Core Processing** that received _User Messages_ are signed when indicated in P-Mode that 
   they should. Violation of this rule will generate an _PolicyNonCompliance_ error.
 * On submission of _User Message_  a check that provided payload _Content-Id_ values do not contain invalid characters.  
@@ -18,9 +23,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
    Holodeck B2B instance.    
 * `org.holodeckb2b.common.messagemodel.MessageUnit.copyOf(IMessageUnit)` to create a copy of the message unit data in
   an object of the common message model implementation. 
+* Default implementation of the new `ICertificateManager` and `IValidationResult` trust interface to the _security_ 
+  module.
 
 ### Changed
 * Restructured the project's modules to create a better separation of _Core_ and _protocol specific_ code.   
+* Adapted classes in _security_ module for changes in the interfaces related to trust validation. 
 * Split the file based back-end integration into a separate project (see []()). The back-end however is still included
   in the default distribution. 
 * Refactored the default P-Mode implementation so it also supports setting of parameters and serialization to XML.
@@ -41,6 +49,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * NPE when white space is contained between the `ds:Signature` and `ds:SignedInfo` elements of a received message [#100]
 (https://github.com/holodeck-b2b/Holodeck-B2B/issues/100)
 
+### Removed
+* Deprecated versions of the message processing events which names ended on _Event_
+* Setter methods in `org.holodeckb2b.interfaces.general.IAgreement`
 
 ## 4.1.2
 ##### 2019-04-10

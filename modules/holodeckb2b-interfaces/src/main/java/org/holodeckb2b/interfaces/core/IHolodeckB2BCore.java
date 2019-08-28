@@ -30,7 +30,7 @@ import org.holodeckb2b.interfaces.general.IVersionInfo;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
-import org.holodeckb2b.interfaces.security.ICertificateManager;
+import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 
 /**

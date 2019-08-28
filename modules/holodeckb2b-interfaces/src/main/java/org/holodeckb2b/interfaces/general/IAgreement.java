@@ -36,11 +36,4 @@ public interface IAgreement {
      * @return The agreement type
      */
     public String getType();
-
-    @Deprecated
-    public void setName(String name);
-
-    @Deprecated
-    public void setType(String type);
-
 }
