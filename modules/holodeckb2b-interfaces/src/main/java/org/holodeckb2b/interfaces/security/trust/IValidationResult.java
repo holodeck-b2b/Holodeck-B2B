@@ -17,6 +17,7 @@
 package org.holodeckb2b.interfaces.security.trust;
 
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 
@@ -64,7 +65,7 @@ public interface IValidationResult {
 	 * 
 	 * @return 	The validated certificate path
 	 */
-	X509Certificate[] getValidatedCertPath();
+	List<X509Certificate> getValidatedCertPath();
 
 	/**
      * Indicates whether the provided certificate (path) for validation is trusted by the Certificate Manager based on

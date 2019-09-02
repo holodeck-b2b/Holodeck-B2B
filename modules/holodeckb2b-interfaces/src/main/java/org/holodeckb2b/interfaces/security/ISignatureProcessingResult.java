@@ -53,7 +53,7 @@ public interface ISignatureProcessingResult extends ISecurityProcessingResult {
      * @return	Information on the result of the trust validation of the certificate used to sign.
      * @since HB2B_NEXT_VERSION
      */
-    IValidationResult getTrust();
+    IValidationResult getTrustValidation();
     
     /**
      * Gets the type of security token reference used to point to the certificate that includes the public key that

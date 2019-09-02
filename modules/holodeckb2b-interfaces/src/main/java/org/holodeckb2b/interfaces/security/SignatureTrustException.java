@@ -36,7 +36,8 @@ public class SignatureTrustException extends SecurityProcessingException {
 	/**
 	 * Creates a new exception to indicate the signature verification failed due to problems with the trust validation.
 	 *  
-	 * @param result	The trust validation result as reported by the <i>Certificate Manager</i>
+	 * @param result	The trust validation result as reported by the <i>Certificate Manager</i>. 
+	 * 					SHALL NOT be <code>null</code>
 	 */
 	public SignatureTrustException(final IValidationResult result) {
 		this(result, false);
@@ -46,6 +47,7 @@ public class SignatureTrustException extends SecurityProcessingException {
 	 * Creates a new exception to indicate the signature verification failed due to problems with the trust validation.
 	 *  
 	 * @param result				The trust validation result as reported by the <i>Certificate Manager</i>
+	 * 								SHALL NOT be <code>null</code>
 	 * @param isPolicyViolation		Indicates whether the failure should be treated as a policy violation.
 	 */
 	public SignatureTrustException(final IValidationResult result, final boolean isPolicyViolation) {
@@ -63,5 +65,25 @@ public class SignatureTrustException extends SecurityProcessingException {
 	 */
 	public IValidationResult getValidationResult() {
 		return validationResult;
+	}
+	
+    /**
+     * Gets a textual description why the trust validation failed.
+     * 
+     * @return	The description of the issue as reported by the <i>Certificate Manager</i>
+	 */
+	@Override
+	public String getMessage() {
+		return validationResult.getMessage();
+	}
+
+	/**
+	 * Gets the exception that caused the trust issue.
+	 * 
+	 * @return The details of the issue as reported by the <i>Certificate Manager</i>
+	 */
+	@Override
+	public Throwable getCause() {
+		return validationResult.getDetails();
 	}
 }
