@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.description.ModuleConfiguration;
 import org.apache.axis2.description.Parameter;
@@ -78,6 +79,7 @@ public class ProcessErrorsTest {
 		MessageContext mc = new MessageContext();
 		mc.setServerSide(true);
 		mc.setFLOW(MessageContext.IN_FLOW);
+		mc.setAxisService(new AxisService("TEST"));
 
 		EbmsError ebmsError = new EbmsError();
 		ebmsError.setSeverity(IEbmsError.Severity.failure);
@@ -127,6 +129,7 @@ public class ProcessErrorsTest {
 		procCtx.setUserMessage(storageManager.storeOutGoingMessageUnit(userMessage));
 				
 		mc.setFLOW(MessageContext.IN_FLOW);
+		mc.setAxisService(new AxisService("TEST"));
 
 		EbmsError ebmsError = new EbmsError();
 		ebmsError.setSeverity(IEbmsError.Severity.warning);
