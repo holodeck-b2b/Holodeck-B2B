@@ -16,11 +16,16 @@
  */
 package org.holodeckb2b.test.integration;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.junit.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 /**
@@ -52,16 +57,18 @@ public class OneWayMEPWorkflows {
         itHelper.deleteDistDir(dBDirName);
         System.out.print("\tUnzipping HolodeckB2B instance ... ");
         itHelper.unzipHolodeckDistribution(dADirName);
+        itHelper.copyKeystores(dADirName);
         System.out.println("done.");
         System.out.print("\tUnzipping HolodeckB2B instance ... ");
         itHelper.unzipHolodeckDistribution(dBDirName);
+        itHelper.copyKeystores(dBDirName);
         System.out.println("done.");
         System.out.print("\tConfiguring HolodeckB2B instances ... ");
         itHelper.copyPModeDescriptor(dADirName, "ex-pm-push-init.xml");
         itHelper.copyPModeDescriptor(dBDirName, "ex-pm-push-resp.xml");
         itHelper.copyPModeDescriptor(dADirName, "ex-pm-pull-ut-init.xml");
         itHelper.copyPModeDescriptor(dBDirName, "ex-pm-pull-ut-resp.xml");
-        itHelper.modifyAxisServerPort(dBDirName, "9090");
+        itHelper.modifyServerPorts(dBDirName, "9090", "1702");
         itHelper.setPullingInterval(dADirName, 10);
         System.out.println("done.");
         System.out.print("\tStarting HolodeckB2B instances ... ");
@@ -84,9 +91,6 @@ public class OneWayMEPWorkflows {
         // copy messages to be sent
         itHelper.copyExampleDataToMsgOutDir(dADirName);
         itHelper.copyExampleDataToMsgOutDir(dBDirName);
-        // for onewaypull without encription we don't need keystores
-//        itHelper.copyKeystores(dADirName);
-//        itHelper.copyKeystores(dBDirName);
     }
 
     @After

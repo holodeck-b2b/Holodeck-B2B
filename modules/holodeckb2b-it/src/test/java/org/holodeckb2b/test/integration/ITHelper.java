@@ -41,6 +41,7 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
 import org.holodeckb2b.testhelpers.FilesUtility;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -136,13 +137,17 @@ public class ITHelper {
      * @param distrDirName HolodeckB2B instance folder name
      * @param port
      */
-    void modifyAxisServerPort(String distrDirName, String port) {
+    void modifyServerPorts(String distrDirName, String msgPort, String rmiPort) {
         File axisXml = new File(workingDirPath + File.separator + distrDirName + File.separator
                 + "conf" + File.separator + "axis2.xml");
         assertTrue(axisXml.exists());
         if(axisXml.exists()) {
-            changePortInAxis2Xml(axisXml.getPath(), port);
+            changePortInAxis2Xml(axisXml.getPath(), msgPort);
         }
+        File workersXml = new File(workingDirPath + File.separator + distrDirName + File.separator
+        		+ "conf" + File.separator + "workers.xml");
+        assertTrue(workersXml.exists());
+    	addRMIPortWorkersXml(workersXml.getPath(), rmiPort);        
     }
 
     /**
@@ -381,6 +386,41 @@ public class ITHelper {
         } catch (SAXException sae) {
             sae.printStackTrace();
         }
+    }
+    
+    /**
+     * Adds port parameter to UI RMI Server in workers.xml
+     * @param filePath
+     * @param port
+     */
+    private void addRMIPortWorkersXml(String filePath, String port) {
+    	try {
+    		DocumentBuilderFactory docFactory =
+    				DocumentBuilderFactory.newInstance();
+    		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+    		Document doc = docBuilder.parse(filePath);
+    		NodeList workers = doc.getElementsByTagName("worker");
+    		Node rmiWorker = workers.item(workers.getLength() - 1);
+
+    		Element portParam = rmiWorker.getOwnerDocument().createElement("parameter");
+    		portParam.setAttribute("name", "port");
+    		portParam.setTextContent(port);
+    		rmiWorker.appendChild(portParam);
+    		
+    		TransformerFactory transformerFactory = TransformerFactory.newInstance();
+    		Transformer transformer = transformerFactory.newTransformer();
+    		DOMSource source = new DOMSource(doc);
+    		StreamResult result = new StreamResult(new File(filePath));
+    		transformer.transform(source, result);
+    	} catch (ParserConfigurationException pce) {
+    		pce.printStackTrace();
+    	} catch (TransformerException tfe) {
+    		tfe.printStackTrace();
+    	} catch (IOException ioe) {
+    		ioe.printStackTrace();
+    	} catch (SAXException sae) {
+    		sae.printStackTrace();
+    	}
     }
 
     /**
