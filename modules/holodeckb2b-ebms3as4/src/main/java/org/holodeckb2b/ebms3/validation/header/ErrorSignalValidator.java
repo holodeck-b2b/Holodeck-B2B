@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
@@ -73,8 +72,7 @@ public class ErrorSignalValidator extends GeneralMessageUnitValidator<IErrorMess
 
         // Then check that the signal reference at most one other message unit
         // @todo: Remove use of specific config parameter on reference check
-        if (!checkReferences(messageUnit, useStrictValidation
-                                          || HolodeckB2BCoreInterface.getConfiguration().useStrictErrorRefCheck()))
+        if (!checkReferences(messageUnit, useStrictValidation))
             validationErrors.add(new MessageValidationError("Error Signal contains inconsistent references"));
 
         // Return validation results
