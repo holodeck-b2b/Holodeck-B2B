@@ -30,6 +30,7 @@ public class TestConfig implements InternalConfiguration {
     public String pmodeStorageClass = null;
     public String persistencyProviderClass;
     public String securityProviderClass;
+    public String certManagerClass;
     public boolean useStrictHeaderValidation = false;
 
     public boolean allowSignalBundling  = false;
@@ -63,18 +64,6 @@ public class TestConfig implements InternalConfiguration {
     @Override
     public String getHolodeckB2BHome() {
         return hb2b_home;
-    }
-
-    @Override
-    @Deprecated
-    public String getPublicKeyStorePath() {
-        return getHolodeckB2BHome() + "/publickeys.jks";
-    }
-
-    @Override
-    @Deprecated
-    public String getPublicKeyStorePassword() {
-        return "nosecrets";
     }
 
     @Override
@@ -114,36 +103,6 @@ public class TestConfig implements InternalConfiguration {
     }
 
     @Override
-    @Deprecated
-    public boolean useStrictErrorRefCheck() {
-        return false;
-    }
-
-    @Override
-    @Deprecated
-    public String getPrivateKeyStorePath() {
-        return getHolodeckB2BHome() + "/privatekeys.jks";
-    }
-
-    @Override
-    @Deprecated
-    public String getPrivateKeyStorePassword() {
-        return "secrets";
-    }
-
-    @Override
-    @Deprecated
-    public String getTrustKeyStorePath() {
-        return getHolodeckB2BHome() + "/trustedcerts.jks";
-    }
-
-    @Override
-    @Deprecated
-    public String getTrustKeyStorePassword() {
-        return "trusted";
-    }
-
-    @Override
     public String getMessageProcessingEventProcessor() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -171,5 +130,10 @@ public class TestConfig implements InternalConfiguration {
     @Override
     public String getSecurityProviderClass() {
         return securityProviderClass;
+    }
+
+    @Override
+    public String getCertManagerClass() {
+    	return certManagerClass;
     }
 }

@@ -28,7 +28,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
+import java.util.List;
 
 import org.holodeckb2b.common.pmode.BusinessInfo;
 import org.holodeckb2b.common.pmode.EncryptionConfig;
@@ -45,9 +45,10 @@ import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.security.ICertificateManager;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
+import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
+import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -307,20 +308,6 @@ public class BasicPModeValidatorTest {
     	}
     	
 		@Override
-		public String registerKeyPair(PrivateKeyEntry keypair, String alias, String password)
-				throws SecurityProcessingException {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public void registerCertificate(X509Certificate cert, String alias, CertificateUsage... use)
-				throws SecurityProcessingException {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
 		public PrivateKeyEntry getKeyPair(String alias, String password) throws SecurityProcessingException {
 			try {
 				return (KeyStore.PrivateKeyEntry) keystore.getEntry(alias,		
@@ -331,7 +318,7 @@ public class BasicPModeValidatorTest {
 		}
 
 		@Override
-		public X509Certificate getCertificate(CertificateUsage use, String alias) throws SecurityProcessingException {
+		public X509Certificate getCertificate(String alias) throws SecurityProcessingException {
 			try {
 				return (X509Certificate) keystore.getCertificate(alias);
 			} catch (Exception e) {
@@ -340,26 +327,26 @@ public class BasicPModeValidatorTest {
 		}
 
 		@Override
-		public Collection<X509Certificate> getValidationCertificates() throws SecurityProcessingException {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public String getCertificateAlias(CertificateUsage use, X509Certificate cert)
+		public String findCertificate(X509Certificate cert)
 				throws SecurityProcessingException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
-		public void removeKeyPair(String alias) throws SecurityProcessingException {
+		public IValidationResult validateTrust(List<X509Certificate> certs) throws SecurityProcessingException {
 			// TODO Auto-generated method stub
-			
+			return null;
 		}
 
 		@Override
-		public void removeCertificate(String alias, CertificateUsage... use) throws SecurityProcessingException {
+		public String getName() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void init(String hb2bHome) throws SecurityProcessingException {
 			// TODO Auto-generated method stub
 			
 		}
