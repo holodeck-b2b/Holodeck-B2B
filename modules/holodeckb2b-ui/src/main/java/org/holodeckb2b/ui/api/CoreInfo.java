@@ -20,6 +20,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.Map;
 
 import org.holodeckb2b.common.messagemodel.MessageUnit;
 import org.holodeckb2b.common.pmode.PMode;
@@ -62,23 +63,14 @@ public interface CoreInfo extends Remote {
 	PMode[] getPModes() throws RemoteException;
 
 	/**
-	 * Get the certificate registered under the specified alias and of the given type.
+	 * Gets all the certificates of the given type together with the alias they are registered under. 
 	 * 
-	 * @param alias		The alias under which the certificate is registered
 	 * @param type		The type of certificate
-	 * @return			The certificate if one is found in the Holodeck B2B instance, or<br>
-	 * 					<code>null</code> if none is found
+	 * @return			The certificates of the specified type registered in the Holodeck B2B instance, or<br>
+	 * 					<code>null</code> if none are registered
 	 * @throws RemoteException When an error occurs while retrieving the certificate from the Holodeck B2B instance
 	 */
-	X509Certificate getCertificate(final String alias, final CertType type) throws RemoteException;
-	
-	/**
-	 * Get all certificates that are registered as trusted in this Holodeck B2B instance.
-	 * 
-	 * @return	Array of X509 Certificates, <code>null</code> if no trusted certificates are registered
-	 * @throws RemoteException When an error occurs while retrieving the certificates from the Holodeck B2B instance
-	 */
-	X509Certificate[] getTrustedCertificates() throws RemoteException;
+	Map<String, X509Certificate> getCertificates(final CertType type) throws RemoteException;
 	
 	/**
      * Gets the meta-data of the message unit with the given <i>MessageId</i>. Although the ebMS Specification requires 

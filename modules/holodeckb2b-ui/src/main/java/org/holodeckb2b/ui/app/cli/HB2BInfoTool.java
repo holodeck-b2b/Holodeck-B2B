@@ -26,6 +26,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.util.Arrays;
@@ -42,7 +44,7 @@ import org.holodeckb2b.ui.api.CertType;
 import org.holodeckb2b.ui.api.CoreInfo;
 
 /**
- * 
+ * Is the CLI application for monitoring a Holodeck B2B instance. 
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION
@@ -80,8 +82,9 @@ public class HB2BInfoTool {
 			listPModes(); break;
 		case PRINT_PMODE :
 			printPMode(clArgs.getParameter(CommandLineArguments.PRT_PMODE_ID)); break;
-		case LIST_TRUSTEDCERTS :
-			listTrustedCerts(clArgs.getParameter(CommandLineArguments.FORMAT)); break;
+		case LIST_CERTS :
+			listCerts(clArgs.getParameter(CommandLineArguments.CERT_TYPE),
+					  clArgs.getParameter(CommandLineArguments.FORMAT)); break;
 		case PRINT_CERT :
 			printCert(clArgs.getParameter(CommandLineArguments.CERT_TYPE), 
 					  clArgs.getParameter(CommandLineArguments.CERT_ALIAS)); break;
@@ -214,14 +217,23 @@ public class HB2BInfoTool {
 	/**
 	 * Prints the list of certificates trusted by this Holodeck B2B instance.
 	 * 
+	 * @param certType	The certificates' type, must be a name from {@link CertType}
 	 * @param format	Specifies how much detailed information should be provided:<ul>
 	 * 					<li><i>simple</i> : shows DN of both subject and issuer</li>
 	 * 					<li><i>detail</i> : in addition shows SKI and Serial Number</li></ul>
 	 */
-	private static void listTrustedCerts(final String format) {
-		X509Certificate[] certs = null;
+	private static void listCerts(final String certType, final String format) {
+		CertType type = null;
+		try {
+			type = CertType.valueOf(certType);
+		} catch (Exception invalidType) {
+			System.err.println("The specified certificate type [" + certType + "] is unknown!");
+			System.exit(-1);
+		}
+		
+		Map<String, X509Certificate> certs = null;
 		try { 
-			certs = coreAPI.getTrustedCertificates();
+			certs = coreAPI.getCertificates(type);
 		} catch (Exception e) {
 			System.err.println(
 					"Could not retrieve the list of certificates from Holodeck B2B instance. See error details below:");
@@ -231,9 +243,11 @@ public class HB2BInfoTool {
 		
 		boolean detailed = "detail".equalsIgnoreCase(format);
 		
-		System.out.printf("There are currently %d trusted certificates configured:%n%n", certs.length);
-		for(X509Certificate c : certs) {
+		System.out.printf("There are currently %d %s certificates configured:%n%n", certs.size(), type.name());
+		for(Entry<String, X509Certificate> e : certs.entrySet()) {
 			System.out.println("=======================");
+			System.out.println("Alias: " + e.getKey());
+			X509Certificate c = e.getValue();
 			boolean isCA = c.getBasicConstraints() > 0;
 			boolean isRootCA = isCA && c.getSubjectDN().getName().equals(c.getIssuerDN().getName());
 			if (isRootCA) 
@@ -241,7 +255,7 @@ public class HB2BInfoTool {
 			else if (isCA)
 				System.out.print("Trusted intermediate CA : ");
 			else				
-				System.out.print("Directly trusted partner : ");
+				System.out.print("Subject : ");
 			System.out.println(c.getSubjectDN().getName());
 			if (!isRootCA)
 				System.out.println("\tIssued by : " + c.getIssuerDN().getName());
@@ -272,21 +286,22 @@ public class HB2BInfoTool {
 			System.exit(-1);
 		}
 		
-		X509Certificate cert = null;
-		try {
-			cert = coreAPI.getCertificate(alias, type);
+		Map<String, X509Certificate> certs = null;
+		try { 
+			certs = coreAPI.getCertificates(type);
 		} catch (RemoteException e) {
 			System.err.println(
 			"An error occurred while getting the certificate from the Holodeck B2B instance. See error details below:");
 			e.printStackTrace(System.err);
 			System.exit(-3);						
 		}
-		if (cert == null) {
+		if (Utils.isNullOrEmpty(certs) || !certs.containsKey(alias)) {
 			System.out.println("There is no " + type.toString() 
 							   + " certificate configured on this Holodeck B2B instance with alias= " + alias);
 			return;			
 		}
 		
+		X509Certificate cert = certs.get(alias);	
 		System.out.println("Subject     : " + cert.getSubjectDN().getName());
 		System.out.println("Issuer      : " + cert.getIssuerDN().getName());
 		System.out.println("Serial no   : " + cert.getSerialNumber().toString(16));
@@ -425,21 +440,23 @@ public class HB2BInfoTool {
 			return;			
 		}
 		
-		int mxMsgId = 9, mxRefTo = 12, mxPMode = 8;
+		int mxMsgId = 9, mxRefTo = 12, mxPMode = 8, mxStatus = 13;
 		for(MessageUnit m : msgUnits) {
-			mxMsgId = Math.max(mxMsgId, m.getMessageId().length());
-			mxRefTo = Math.max(mxRefTo, Utils.isNullOrEmpty(m.getRefToMessageId()) ? 0 : m.getRefToMessageId().length());
-			mxPMode = Math.max(mxPMode, Utils.isNullOrEmpty(m.getPModeId()) ? 0 : m.getPModeId().length());
+			mxMsgId  = Math.max(mxMsgId , m.getMessageId().length());
+			mxRefTo  = Math.max(mxRefTo , Utils.isNullOrEmpty(m.getRefToMessageId()) ? 0 : m.getRefToMessageId().length());
+			mxPMode  = Math.max(mxPMode , Utils.isNullOrEmpty(m.getPModeId()) ? 0 : m.getPModeId().length());
+			mxStatus = Math.max(mxStatus, m.getCurrentProcessingState().getState().name().length());
 		}
 		
-		final String template = "| %-24s | %1s | %1s | %-" + mxMsgId + "s | %-" + mxRefTo + "s | %-" + mxPMode + "s |";		
-		final String line = String.format(template, "", "", "", "", "", "").replace(" ", "-").replace("|", "+");
+		final String template = "| %-24s | %-" + mxStatus + "s | %1s | %1s | %-" + mxMsgId + "s | %-" + mxRefTo + "s | %-" + mxPMode + "s |";		
+		final String line = String.format(template, "", "", "", "", "", "", "").replace(" ", "-").replace("|", "+");
 		
 		System.out.println(line);
-		System.out.println(String.format(template, "Timestamp", "T", "D", "MessageId", "RefMessageId", "PMode.id"));
+		System.out.println(String.format(template, "Timestamp", "Current state", "T", "D", "MessageId", "RefMessageId", "PMode.id"));
 		System.out.println(line);
 		for(MessageUnit m : msgUnits) 
 			System.out.println(String.format(template, Utils.toXMLDateTime(m.getTimestamp()), 
+											 m.getCurrentProcessingState().getState().name(),
 										     MessageUnitUtils.getMessageUnitName(m).charAt(0),
 										     m.getDirection() == Direction.IN ? "R" : "S",
 										     m.getMessageId(), 

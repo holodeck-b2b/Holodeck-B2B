@@ -7,7 +7,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 * A default user interface that supports basic monitoring of a running Holodeck B2B instance. The UI is available both
-  using a command line.
+  using a command line and GUI application.
 * Support for asynchronous Two-Way AS4 P-Modes.
 * New interfaces related to trust validation of certificates in `org.holodeckb2b.interfaces.security.trust`. Especially
   the new specification of the Holodeck B2B _Certificate Manager_ which is now a separate component independent of the

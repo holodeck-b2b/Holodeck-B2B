@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.holodeckb2b</groupId>
 		<artifactId>holodeckb2b</artifactId>
-		<version>4.2.0-SNAPSHOT</version>
+		<version>5.0.0-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<artifactId>holodeckb2b-ui</artifactId>
@@ -34,6 +34,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-persistency</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.lgooddatepicker</groupId>
+            <artifactId>LGoodDatePicker</artifactId>
+            <version>10.3.1</version>
         </dependency>
         
 		<dependency>

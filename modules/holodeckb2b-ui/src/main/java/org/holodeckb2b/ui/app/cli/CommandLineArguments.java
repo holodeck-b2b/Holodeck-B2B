@@ -51,7 +51,7 @@ public class CommandLineArguments {
 	final static Option FORMAT = new Option("-format", false , "The level of details that should be included (simple [default] or detailed)");
 
 	final static Option CERT_ALIAS = new Option("-alias", true , "The alias of the certificate to print");
-	final static Option CERT_TYPE = new Option("-type", true , "The type of the certificate to print (private, encryption or trusted)");
+	final static Option CERT_TYPE = new Option("-type", true , "The type of the certificate to print (private, partner or trusted)");
 	
 	final static Option MESSAGE_ID = new Option("-messageId", true , "The MessageId of the message unit");
 	
@@ -64,12 +64,12 @@ public class CommandLineArguments {
 	 */
 	enum Action {
 		LIST_PMODES("listPModes", new Option[] { PORT_OPTION }, "Lists all loaded P-Modes"),
-		PRINT_PMODE("printPMode", new Option[] { PORT_OPTION, PRT_PMODE_ID } , "Print details of P-Mode with specified id"),
-		LIST_TRUSTEDCERTS("listTrustCerts", new Option[] { PORT_OPTION, FORMAT }, "Lists all trusted certificates"),
-		PRINT_CERT("printCert", new Option[] { PORT_OPTION, CERT_ALIAS, CERT_TYPE } , "Print the certificate of and with the specified type and alias"),
-		MSG_STATUS("msgStatus", new Option[] { PORT_OPTION, MESSAGE_ID } , "Get the current processing state of a message unit"),
-		STATUS_LIST("statusList", new Option[] { PORT_OPTION, MESSAGE_ID } , "Get the list of processing states a message unit was and is in"),
-		HISTORY("history", new Option[] { PORT_OPTION, FROM, MAX } , "Provides overview of message units order descendingly on time stamp");
+		PRINT_PMODE("printPMode", new Option[] { PORT_OPTION, PRT_PMODE_ID } , "Prints the details of P-Mode with specified id"),
+		LIST_CERTS("listCerts", new Option[] { PORT_OPTION, CERT_TYPE, FORMAT }, "Lists all certificates of a specific type"),
+		PRINT_CERT("printCert", new Option[] { PORT_OPTION, CERT_ALIAS, CERT_TYPE } , "Prints the details of  a certificate"),
+		MSG_STATUS("msgStatus", new Option[] { PORT_OPTION, MESSAGE_ID } , "Gets the current processing state of a message unit"),
+		STATUS_LIST("statusList", new Option[] { PORT_OPTION, MESSAGE_ID } , "Lists of processing states a message unit was and is in"),
+		HISTORY("history", new Option[] { PORT_OPTION, FROM, MAX } , "Provides overview of message units ordered descendingly on time stamp");
 		
 		String   name;
 		Option[] options;
