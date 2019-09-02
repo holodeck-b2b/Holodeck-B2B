@@ -95,7 +95,6 @@ public class Agreement implements IAgreement, Serializable {
      * Set the name of the agreement.
      * @param name The agreement name to set
      */
-    @Override
     public void setName(final String name) {
         this.name = name;
     }
@@ -104,7 +103,6 @@ public class Agreement implements IAgreement, Serializable {
      * Set the type of the agreement.
      * @param type The agreement type to set
      */
-    @Override
     public void setType(final String type) {
         this.type = type;
     }
