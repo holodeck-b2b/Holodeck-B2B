@@ -78,41 +78,6 @@ public class Config implements InternalConfiguration {
     private boolean defaultReportErrorOnReceipt = false;
 
     /*
-     * Indication whether the strict error reference check from the spec should be used
-     */
-    private boolean useStrictErrorReferencesCheck = false;
-
-    /*
-     * The path to the keystore holding the private keys and certificates
-    */
-    private String privKeyStorePath = null;
-
-    /*
-     * The password of the keystore that holds the certificates with the private keys
-     */
-    private String  privKeyStorePassword = null;
-
-    /*
-     * The path to the keystore holding the public keys and certificates
-    */
-    private String pubKeyStorePath = null;
-
-    /*
-     * The password of the keystore that holds the certificates with the public keys
-     */
-    private String  pubKeyStorePassword = null;
-
-    /*
-     * The path to the keystore holding the trusted certificates
-    */
-    private String trustKeyStorePath = null;
-
-    /*
-     * The password of the keystore that holds the trusted certificates
-     */
-    private String  trustKeyStorePassword = null;
-
-    /*
      * The Axis2 configuration context that is used to process the messages
      */
     private ConfigurationContext    axisCfgCtx = null;
@@ -147,6 +112,12 @@ public class Config implements InternalConfiguration {
      */
     private String securityProviderClass = null;
 
+    /*
+     * The class name of the certificate manager that should be used for managing and checking certificates
+     * @since HB2B_NEXT_VERSION
+     */
+    private String certManagerClass = null;
+    
     /*
      * Indicator whether strict header validation should be applied to all messages
      * @since 4.0.0
@@ -222,38 +193,7 @@ public class Config implements InternalConfiguration {
         // Default setting for reporting Errors on Receipts
         defErrReporting = configFile.getParameter("ReportErrorOnReceipt");
         defaultReportErrorOnReceipt = isTrue(defErrReporting);
-
-        // Option to use strict error references check
-        final String strictErrorRefCheck = configFile.getParameter("StrictErrorReferencesCheck");
-        useStrictErrorReferencesCheck = isTrue(strictErrorRefCheck);
-
-        // The location of the keystore holding the private keys, if not provided the default location «HB2B_HOME»/
-        // repository/certs/privatekeys.jks is used
-        privKeyStorePath = configFile.getParameter("PrivateKeyStorePath");
-        if (Utils.isNullOrEmpty(privKeyStorePath))
-            privKeyStorePath = holodeckHome + "/repository/certs/privatekeys.jks";
-
-        // The password for the keystore holding the private keys
-        privKeyStorePassword = configFile.getParameter("PrivateKeyStorePassword");
-
-        // The location of the keystore holding the certificate (public keys), if not provided the default location
-        // «HB2B_HOME»/repository/certs/publickeys.jks is used
-        pubKeyStorePath = configFile.getParameter("PublicKeyStorePath");
-        if (Utils.isNullOrEmpty(pubKeyStorePath))
-            pubKeyStorePath = holodeckHome + "/repository/certs/publickeys.jks";
-
-        // The password for the keystore holding the public keys
-        pubKeyStorePassword = configFile.getParameter("PublicKeyStorePassword");
-
-        // The location of the keystore holding the trusted certificate, if not provided the default location
-        // «HB2B_HOME»/repository/certs/trustedcerts.jks is used
-        trustKeyStorePath = configFile.getParameter("TrustKeyStorePath");
-        if (Utils.isNullOrEmpty(trustKeyStorePath))
-            trustKeyStorePath = holodeckHome + "/repository/certs/trustedcerts.jks";
-
-        // The password for the keystore holding the public keys
-        trustKeyStorePassword = configFile.getParameter("TrustKeyStorePassword");
-
+     
         // The class name of the event processor
         messageProcessingEventProcessorClass = configFile.getParameter("MessageProcessingEventProcessor");
 
@@ -269,6 +209,9 @@ public class Config implements InternalConfiguration {
         // The class name of the security provider
         securityProviderClass = configFile.getParameter("SecurityProvider");
 
+        // The class name of the certificate manager
+        certManagerClass = configFile.getParameter("CertificateManager");
+        
         // Indicator whether strict header validation should be performed
         final String strictHeaderValidation = configFile.getParameter("StrictHeaderValidation");
         useStrictHeaderValidation = isTrue(strictHeaderValidation);
@@ -359,85 +302,6 @@ public class Config implements InternalConfiguration {
 
     /**
      * {@inheritDoc}
-     * @deprecated To use strict validation of error reference use the strict validation mode of the ebMS header
-     *             (see {@link #useStrictHeaderValidation()}).
-     */
-    @Override
-    @Deprecated
-    public boolean useStrictErrorRefCheck() {
-        return useStrictErrorReferencesCheck;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
-     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
-     */
-    @Override
-    @Deprecated
-    public String getPrivateKeyStorePath() {
-        return privKeyStorePath;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
-     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
-     */
-    @Override
-    @Deprecated
-    public String getPrivateKeyStorePassword() {
-        return privKeyStorePassword;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
-     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
-     */
-    @Override
-    @Deprecated
-    public String getPublicKeyStorePath() {
-        return pubKeyStorePath;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
-     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
-     */
-    @Override
-    @Deprecated
-    public String getPublicKeyStorePassword() {
-        return pubKeyStorePassword;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
-     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
-     * @since 2.1.0
-     */
-    @Override
-    @Deprecated
-    public String getTrustKeyStorePath() {
-        return trustKeyStorePath;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @deprecated Replaced by security provider configuration. This setting however is still supported by the <b>
-     * default Security Provider</b> when it is running in <b>compatibility mode</b>.
-     * @since 2.1.0
-     */
-    @Override
-    @Deprecated
-    public String getTrustKeyStorePassword() {
-        return trustKeyStorePassword;
-    }
-
-    /**
-     * {@inheritDoc}
      * @since 2.1.0
      */
     @Override
@@ -488,5 +352,14 @@ public class Config implements InternalConfiguration {
     @Override
     public String getSecurityProviderClass() {
         return securityProviderClass;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @since HB2B_NEXT_VERSION
+     */
+    @Override
+    public String getCertManagerClass() {
+    	return certManagerClass;
     }
 }

@@ -56,9 +56,9 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
-import org.holodeckb2b.interfaces.security.ICertificateManager;
 import org.holodeckb2b.interfaces.security.ISecurityProvider;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
+import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 
@@ -127,6 +127,12 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * @since 4.0.0
      */
     private ISecurityProvider securityProvider = null;
+    
+    /**
+     * The installed certificate manager that manages and checks certificates used in the message processing
+     * @since HB2B_NEXT_VERSION
+     */
+    private ICertificateManager certManager = null;
     
     /**
      * The list of globally configured event handlers 
@@ -223,7 +229,27 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
             throw new AxisFault("Unable to initialize required security provider!");
         }
         log.info("Succesfully loaded " + securityProvider.getName() + " as security provider");
-
+        
+        log.trace("Load the certificate manager");
+        String certManagerClassname = instanceConfiguration.getCertManagerClass();
+        if (Utils.isNullOrEmpty(certManagerClassname))
+        	certManagerClassname = "org.holodeckb2b.security.trust.DefaultCertManager";
+        try {
+        	certManager = (ICertificateManager) Class.forName(certManagerClassname).newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
+        	log.fatal("Could not load the certificate manager: " + securityProviderClassname);
+        	throw new AxisFault("Unable to load required certificate manager!");
+        }
+        log.debug("Using certificate manager: " + certManager.getName());
+        try {
+        	certManager.init(instanceConfiguration.getHolodeckB2BHome());
+        } catch (SecurityProcessingException initializationFailure) {
+        	log.fatal("Could not initialize the certificate manager " + certManager.getName()
+        	+ "! Unable to start Holodeck B2B. \n\tError details: " + initializationFailure.getMessage());
+        	throw new AxisFault("Unable to initialize required certificate manager!");
+        }
+        log.info("Succesfully loaded " + certManager.getName() + " as certificate manager");
+        
         log.trace("Create list of available message delivery methods");
         msgDeliveryFactories = new HashMap<>();
         log.trace("Create list of globally configured event handlers");
@@ -411,7 +437,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      */
     @Override
     public ICertificateManager getCertificateManager() {
-        return securityProvider.getCertificateManager();
+        return certManager;
     }
 
     /**
