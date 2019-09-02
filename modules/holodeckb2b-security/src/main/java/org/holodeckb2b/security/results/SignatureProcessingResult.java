@@ -19,9 +19,15 @@ package org.holodeckb2b.security.results;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Map;
+
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.security.*;
+import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
+import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
+import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
+import org.holodeckb2b.interfaces.security.SecurityProcessingException;
+import org.holodeckb2b.interfaces.security.X509ReferenceType;
+import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 
 /**
  * Is the security provider's implementation of {@link ISignatureProcessingResult} containing the result of processing
@@ -33,6 +39,7 @@ import org.holodeckb2b.interfaces.security.*;
 public class SignatureProcessingResult extends AbstractSecurityProcessingResult implements ISignatureProcessingResult {
 
     private final X509Certificate   certificate;
+    private final IValidationResult trustCheck;
     private final X509ReferenceType refMethod;
     private final String            algorithm;
     private final ISignedPartMetadata                headerDigest;
@@ -47,12 +54,13 @@ public class SignatureProcessingResult extends AbstractSecurityProcessingResult 
     public SignatureProcessingResult(final SecurityProcessingException failure) {
         super(SecurityHeaderTarget.DEFAULT, failure);
         this.certificate = null;
+        this.trustCheck = null;
         this.refMethod = null;
         this.algorithm = null;
         this.headerDigest = null;
         this.payloadDigests = null;
     }
-
+    
     /**
      * Creates a new <code>SignatureProcessingResult</code> instance to indicate that processing of the signature part
      * completed successfully.
@@ -64,16 +72,34 @@ public class SignatureProcessingResult extends AbstractSecurityProcessingResult 
      * @param payloadDigests        The payloads' digest meta-data
      */
     public SignatureProcessingResult(final X509Certificate signingCert, final X509ReferenceType certReferenceMethod,
+							    	 final String algorithm, final ISignedPartMetadata headerDigest,
+							    	 final Map<IPayload, ISignedPartMetadata> payloadDigests) {
+    	this(signingCert, null, certReferenceMethod, algorithm, headerDigest, payloadDigests);
+    }
+    /**
+     * Creates a new <code>SignatureProcessingResult</code> instance to indicate that processing of the signature part
+     * completed successfully including a trust validation check.
+     *
+     * @param signingCert           Certificate used to create the signature
+     * @param trustCheckResult		Results of the trust validation as reported by the <i>Certificate Manager</i>
+     * @param certReferenceMethod   Method used to include/reference the certificate
+     * @param algorithm             The signing algorithm
+     * @param headerDigest          The digest meta-data for the ebMS header
+     * @param payloadDigests        The payloads' digest meta-data
+     * @since HB2B_NEXT_VERSION
+     */
+    public SignatureProcessingResult(final X509Certificate signingCert, final IValidationResult trustCheckResult, 
+    								 final X509ReferenceType certReferenceMethod,
                                      final String algorithm, final ISignedPartMetadata headerDigest,
                                      final Map<IPayload, ISignedPartMetadata> payloadDigests) {
         super(SecurityHeaderTarget.DEFAULT);
         this.certificate = signingCert;
+        this.trustCheck = trustCheckResult;
         this.refMethod = certReferenceMethod;
         this.algorithm = algorithm;
         this.headerDigest = headerDigest;
         this.payloadDigests = !Utils.isNullOrEmpty(payloadDigests) ? Collections.unmodifiableMap(payloadDigests) : null;
     }
-
 
     /**
      * {@inheritDoc}
@@ -114,4 +140,9 @@ public class SignatureProcessingResult extends AbstractSecurityProcessingResult 
     public Map<IPayload, ISignedPartMetadata> getPayloadDigests() {
         return payloadDigests;
     }
+
+	@Override
+	public IValidationResult getTrustValidation() {		
+		return trustCheck;
+	}
 }

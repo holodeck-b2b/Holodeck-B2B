@@ -60,7 +60,6 @@ import org.holodeckb2b.interfaces.pmode.IKeyTransport;
 import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
-import org.holodeckb2b.interfaces.security.ICertificateManager.CertificateUsage;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderCreator;
 import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
@@ -73,6 +72,7 @@ import org.holodeckb2b.security.results.EncryptionProcessingResult;
 import org.holodeckb2b.security.results.HeaderProcessingFailure;
 import org.holodeckb2b.security.results.SignatureProcessingResult;
 import org.holodeckb2b.security.results.UsernameTokenProcessingResult;
+import org.holodeckb2b.security.trust.DefaultCertManager;
 import org.holodeckb2b.security.util.Axis2XMLUtils;
 import org.holodeckb2b.security.util.EncryptionConfigWithDefaults;
 import org.holodeckb2b.security.util.SecurityUtils;
@@ -99,7 +99,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
     /**
      * The Certificate manager of the security provider
      */
-    private CertificateManager certManager;
+    private DefaultCertManager certManager;
 
     /**
      * Map for holding the WSS4J parameters for creating the header
@@ -141,7 +141,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
      *
      * @param certManager The certificate manager of the provider
      */
-    SecurityHeaderCreator(final CertificateManager certManager) {
+    SecurityHeaderCreator(final DefaultCertManager certManager) {
         this.certManager = certManager;
     }
 
@@ -563,8 +563,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
                                                    .forEach(p -> encryptedPayloads.add(p)));
 
         // Get the Certificate used for encryption
-        final X509Certificate cert = certManager.getCertificate(CertificateUsage.Encryption,
-                                                                                encryptionConfig.getKeystoreAlias());
+        final X509Certificate cert = certManager.getCertificate(encryptionConfig.getKeystoreAlias());
         final IKeyTransport ktInfo = encryptionConfig.getKeyTransport();
         return new EncryptionProcessingResult(cert, ktInfo.getKeyReferenceMethod(), ktInfo.getAlgorithm(),
                                               ktInfo.getDigestAlgorithm(), ktInfo.getMGFAlgorithm(),

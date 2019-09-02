@@ -34,6 +34,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.ext.WSSecurityException.ErrorCode;
 import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.WSDataRef;
 import org.apache.wss4j.dom.WSDocInfo;
@@ -55,13 +56,16 @@ import org.holodeckb2b.interfaces.security.ISecurityHeaderProcessor;
 import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
+import org.holodeckb2b.interfaces.security.SignatureTrustException;
 import org.holodeckb2b.interfaces.security.X509ReferenceType;
+import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 import org.holodeckb2b.security.callbackhandlers.AttachmentCallbackHandler;
 import org.holodeckb2b.security.callbackhandlers.PasswordCallbackHandler;
 import org.holodeckb2b.security.results.EncryptionProcessingResult;
 import org.holodeckb2b.security.results.HeaderProcessingFailure;
 import org.holodeckb2b.security.results.SignatureProcessingResult;
 import org.holodeckb2b.security.results.UsernameTokenProcessingResult;
+import org.holodeckb2b.security.trust.DefaultCertManager;
 import org.holodeckb2b.security.util.Axis2XMLUtils;
 import org.holodeckb2b.security.util.SecurityUtils;
 import org.holodeckb2b.security.util.SignedMessagePartsInfo;
@@ -84,7 +88,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
     /**
      * The Certificate manager of the security provider
      */
-    private CertificateManager certManager;
+    private DefaultCertManager certManager;
 
     /**
      * Reference to the current message context
@@ -137,7 +141,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
      *
      * @param certManager The certificate manager of the provider
      */
-    SecurityHeaderProcessor(final CertificateManager certManager) {
+    SecurityHeaderProcessor(final DefaultCertManager certManager) {
         this.certManager = certManager;
     }
 
@@ -180,6 +184,10 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
             log.debug("Process the default WS-Security header");
             results.addAll(processSecurityHeader(SecurityHeaderTarget.DEFAULT, reqData));
             log.debug("Succesfully processed the default WS-Security header");
+        } catch (SignatureTrustException untrusted) {
+        	log.error("The signature could not be verified because the signature's certificate was not trusted!" +
+        			"\n\tDetails: {}", untrusted.getMessage());
+        	results.add(new SignatureProcessingResult(untrusted));
         } catch (HeaderProcessingFailure hpf) {
             log.error("A problem occurred in the {} action when processing the default WS-Security header!" +
                       "\n\tDetails: {}", hpf.getFailedAction().name(), hpf.getMessage());
@@ -193,7 +201,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                 case USERNAME_TOKEN :
                     results.add(new UsernameTokenProcessingResult(SecurityHeaderTarget.DEFAULT, hpf));
             }
-        }
+        }        
         //
         // Then process the ebms targeted header
         //
@@ -243,7 +251,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
 
         final WSSConfig wssConfig = WSSConfig.getNewInstance();
         // Disable validator of the Usernametoken so no validation is done by the security provider
-        wssConfig.setValidator(WSConstants.USERNAME_TOKEN, (Validator) null);
+        wssConfig.setValidator(WSConstants.USERNAME_TOKEN, (Validator) null);        
         reqData.setWssConfig(wssConfig);
 
         // Disable BSP conformance check. Although AS4 requires conformance with BSP1.1 the check is disable to allow
@@ -262,6 +270,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
 
         // Configure signature verification action
         reqData.setSigVerCrypto(certManager.getWSS4JCrypto(org.holodeckb2b.security.Action.VERIFY));
+        wssConfig.setValidator(WSConstants.SIGNATURE, new SignatureTrustValidator());
         reqData.setEnableRevocation(false);
         reqData.setEnableSignatureConfirmation(false);
         // Configure decryption action
@@ -344,6 +353,17 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                     } catch (final WSSecurityException ex) {
                         log.error("Execution of the {} action in the {} WS-Security header failed!"
                                   + "\n\tDetails: {};{}", getAction(el), target, ex.getMsgID(), ex.getMessage());
+                        // Check if action was to verify the signature and if it failed due to a trust failure
+                        if (getAction(el) == Action.VERIFY && ex.getErrorCode() == ErrorCode.FAILED_AUTHENTICATION) {
+                        	log.trace("Processing of signature failed due to trust problem, raise specific exception");
+                        	try {
+                        		IValidationResult validationResult = ((SignatureTrustValidator) wssConfig.
+                        									getValidator(WSConstants.SIGNATURE)).getValidationResult();
+                        		throw new SignatureTrustException(validationResult);
+                        	} catch (WSSecurityException | ClassCastException e) {
+                        		log.error("Could not retrieve trust validator from context!");
+                        	}  
+                        }
                         // Decorate the exception with the action before throwing it again
                         throw new HeaderProcessingFailure(getAction(el), ex);
                     }
