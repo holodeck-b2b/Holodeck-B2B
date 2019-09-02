@@ -25,7 +25,6 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
-import org.holodeckb2b.interfaces.security.ICertificateManager.CertificateUsage;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
@@ -136,8 +135,7 @@ public class VerificationUtils {
 
         final String expAlias = expected.getKeystoreAlias();
         final String actAlias = actual != null ? HolodeckB2BCore.getCertificateManager()
-                                                                .getCertificateAlias(CertificateUsage.Validation,
-                                                                                     actual.getSigningCertificate())
+                                                                .findCertificate(actual.getSigningCertificate())
                                                : null;
         return expAlias.equals(actAlias);
     }

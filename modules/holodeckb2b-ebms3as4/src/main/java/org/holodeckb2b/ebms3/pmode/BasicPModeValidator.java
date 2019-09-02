@@ -37,7 +37,6 @@ import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
 import org.holodeckb2b.interfaces.pmode.validation.PModeValidationError;
-import org.holodeckb2b.interfaces.security.ICertificateManager.CertificateUsage;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 
@@ -204,8 +203,7 @@ public class BasicPModeValidator implements IPModeValidator {
                                                               encConfig.getCertificatePassword()))
                     errors.add(new PModeValidationError(parentParameterName + ".Encryption",
                                                           "The private key specified for decryption is not available"));
-                else if (!privateKey && !isCertificateAvailable(encConfig.getKeystoreAlias(),
-                                                                CertificateUsage.Encryption))
+                else if (!privateKey && !isCertificateAvailable(encConfig.getKeystoreAlias()))
                     errors.add(new PModeValidationError(parentParameterName + ".Encryption",
                                                           "The specified certificate for encryption is not available"));
             }
@@ -270,16 +268,15 @@ public class BasicPModeValidator implements IPModeValidator {
     }
 
     /**
-     * Checks whether a certificate is available for the given usage in the installed <i>Certificate Manager</i>.
+     * Checks whether a partner certificate with the given alias is available the installed <i>Certificate Manager</i>.
      *
      * @param keystoreAlias         The alias the certificate should be registered under
-     * @param certificateUsage      The intended use of the certificate
      * @return  <code>true</code> if a certificate for the given usage and with the given alias exists,<br>
      *          <code>false</code> otherwise
      */
-    protected boolean isCertificateAvailable(String keystoreAlias, CertificateUsage certificateUsage) {
+    protected boolean isCertificateAvailable(String keystoreAlias) {
         try {
-            return HolodeckB2BCore.getCertificateManager().getCertificate(certificateUsage, keystoreAlias) != null;
+            return HolodeckB2BCore.getCertificateManager().getCertificate(keystoreAlias) != null;
         } catch (SecurityProcessingException ex) {
             return false;
         }

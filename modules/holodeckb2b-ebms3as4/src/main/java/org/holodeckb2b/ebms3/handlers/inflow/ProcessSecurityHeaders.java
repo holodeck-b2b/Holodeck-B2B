@@ -26,6 +26,7 @@ import org.holodeckb2b.common.errors.PolicyNoncompliance;
 import org.holodeckb2b.common.events.impl.DecryptionFailure;
 import org.holodeckb2b.common.events.impl.SignatureVerificationFailure;
 import org.holodeckb2b.common.events.impl.SignatureVerified;
+import org.holodeckb2b.common.events.impl.SignatureVerifiedWithWarning;
 import org.holodeckb2b.common.events.impl.UTProcessingFailure;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.EbmsError;
@@ -54,6 +55,7 @@ import org.holodeckb2b.interfaces.security.ISecurityProvider;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
+import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing the relevant WS-Security headers contained in the message.
@@ -153,11 +155,23 @@ public class ProcessSecurityHeaders extends AbstractBaseHandler {
             ISignatureProcessingResult sigResult = (ISignatureProcessingResult) result;
             for (final IMessageUnitEntity mu : rcvdMsgUnits) {
                 ISignatureVerified event;
-                if (mu instanceof IUserMessage)
-                    event = new SignatureVerified((IUserMessage) mu, sigResult.getHeaderDigest(),
-                                                       sigResult.getPayloadDigests());
+                boolean trustWarnings = sigResult.getTrustValidation().getTrust() == Trust.WITH_WARNINGS;                
+                if (mu instanceof IUserMessage)                    
+                	event = trustWarnings ? new SignatureVerifiedWithWarning((IUserMessage) mu, 
+                															 sigResult.getHeaderDigest(),
+                															 sigResult.getPayloadDigests(),
+                															 sigResult.getTrustValidation())
+                						  :  new SignatureVerified((IUserMessage) mu, 
+																	sigResult.getHeaderDigest(),
+																	sigResult.getPayloadDigests(),
+																	sigResult.getTrustValidation());
                 else
-                    event = new SignatureVerified((ISignalMessage) mu, sigResult.getHeaderDigest());
+                	event = trustWarnings ? new SignatureVerifiedWithWarning((ISignalMessage) mu, 
+																			 sigResult.getHeaderDigest(),
+																			 sigResult.getTrustValidation())
+									      :  new SignatureVerified((ISignalMessage) mu, 
+									      					sigResult.getHeaderDigest(),
+									      					sigResult.getTrustValidation());
                 eventProcessor.raiseEvent(event);                
             } 
         } else if (!result.isSuccessful()) {
