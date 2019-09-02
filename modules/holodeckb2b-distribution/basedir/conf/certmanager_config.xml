@@ -32,7 +32,7 @@ could not be executed.
 ===================================================================================== -->
 <CertManagerConfiguration xmlns="http://holodeck-b2b.org/schemas/2019/09/config/certmanager"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://holodeck-b2b.org/schemas/2019/09/config/certmanager ../repository/xsd/hb2b-security-cfg.xsd">
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2019/09/config/certmanager ../repository/xsd/hb2b-certmanager-cfg.xsd">
     <!--
     <PerformRevocationCheck>false</PerformRevocationCheck>
     <DirectTrustPartnerCertificates>false</DirectTrustPartnerCertificates>        
