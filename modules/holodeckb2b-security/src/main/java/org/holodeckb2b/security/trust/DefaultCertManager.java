@@ -152,7 +152,7 @@ public class DefaultCertManager implements ICertificateManager {
         try {
             log.debug("Reading configuration file at {}", cfgFilePath);
             File file = new File(cfgFilePath);
-            JAXBContext jaxbContext = JAXBContext.newInstance("org.holodeckb2b.security.config");
+            JAXBContext jaxbContext = JAXBContext.newInstance("org.holodeckb2b.security.trust.config");
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             JAXBElement<CertManagerConfigurationType> rootConfigElement =
                                         (JAXBElement<CertManagerConfigurationType>) jaxbUnmarshaller.unmarshal(file);
