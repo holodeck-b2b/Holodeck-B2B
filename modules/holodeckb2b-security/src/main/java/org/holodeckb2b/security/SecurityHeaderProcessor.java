@@ -356,13 +356,9 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                         // Check if action was to verify the signature and if it failed due to a trust failure
                         if (getAction(el) == Action.VERIFY && ex.getErrorCode() == ErrorCode.FAILED_AUTHENTICATION) {
                         	log.trace("Processing of signature failed due to trust problem, raise specific exception");
-                        	try {
-                        		IValidationResult validationResult = ((SignatureTrustValidator) wssConfig.
-                        									getValidator(WSConstants.SIGNATURE)).getValidationResult();
-                        		throw new SignatureTrustException(validationResult);
-                        	} catch (WSSecurityException | ClassCastException e) {
-                        		log.error("Could not retrieve trust validator from context!");
-                        	}  
+                        	IValidationResult trustCheck = getValidationResult(requestData);
+                        	if (trustCheck != null)
+                        		throw new SignatureTrustException(trustCheck);
                         }
                         // Decorate the exception with the action before throwing it again
                         throw new HeaderProcessingFailure(getAction(el), ex);
@@ -380,7 +376,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                 node = node.getNextSibling();
         }
 
-        return convertResults(target, results, requestData.getWsDocInfo());
+        return convertResults(target, results, requestData);
     }
 
     /**
@@ -389,13 +385,13 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
      *
      * @param target        The target of the processed security header
      * @param wss4jResults  The processing results in WSS4J representation
-     * @param wss4jDocInfo  WSS4J object containing some additional info about the processed header
+     * @param requestData   WSS4J context that contains additional info about the processed header
      * @return The processing results expressed as a Collection of {@link ISecurityProcessingResult} objects
      * @throws SecurityProcessingException When the ebMS header isn't available anymore.
      */
     private Collection<ISecurityProcessingResult> convertResults(final SecurityHeaderTarget target,
                                                                  final List<WSSecurityEngineResult> wss4jResults,
-                                                                 final WSDocInfo wss4jDocInfo)
+                                                                 final RequestData requestData)
                                                                                     throws SecurityProcessingException {
         log.debug("Converting WSS4J results of processing the {} header to Holodeck B2B format", target);
         Collection<ISecurityProcessingResult> results = new ArrayList<>();
@@ -417,9 +413,10 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                                           (X509Certificate) signResult.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
                 final X509ReferenceType refType = SecurityUtils.getKeyReferenceType(
                              (STRParser.REFERENCE_TYPE) signResult.get(WSSecurityEngineResult.TAG_X509_REFERENCE_TYPE));
-                final SignedMessagePartsInfo signedPartsInfo = SecurityUtils.getSignedPartsInfo(domEnvelope, userMsgs);
+                final IValidationResult trustCheck = getValidationResult(requestData);
+                final SignedMessagePartsInfo signedPartsInfo = SecurityUtils.getSignedPartsInfo(domEnvelope, userMsgs);                
                 // And create result object
-                results.add(new SignatureProcessingResult(signCert, refType, signAlgorithm,
+                results.add(new SignatureProcessingResult(signCert, trustCheck, refType, signAlgorithm,
                                                           signedPartsInfo.getEbmsHeaderInfo(),
                                                           signedPartsInfo.getPayloadInfo()));
             }
@@ -496,4 +493,19 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         
         return result;
     }
+    
+    /**
+     * Gets the trust validation result from the WSS4J context.
+     * 
+     * @param reqData	The current WSS4J context
+     * @return			The trust validation result if it was available in the context, <code>null</code> otherwise
+     */
+	private IValidationResult getValidationResult(final RequestData reqData)  {
+		try {
+			return ((SignatureTrustValidator) reqData.getValidator(WSConstants.SIGNATURE)).getValidationResult();			
+		} catch (WSSecurityException | ClassCastException e) {
+			log.error("Could not retrieve trust validator result from context!");
+			return null;
+		}
+	}    
 }

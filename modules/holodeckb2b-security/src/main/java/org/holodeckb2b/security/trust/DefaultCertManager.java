@@ -31,6 +31,7 @@ import java.security.cert.CertPathValidatorException.BasicReason;
 import java.security.cert.CertPathValidatorException.Reason;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
@@ -72,7 +73,9 @@ import org.holodeckb2b.security.util.KeystoreUtils;
  * here we also uses JKS key stores for managing the different keys and certificates:
  * <li>Holding the key pairs used for signing and decrypting messages. Note that a key pair may need to contain more 
  * than one certificate if a certificate chain needs to be included in a signature.</li>
- * <li>Holding the trading partner certificates with public keys used for encryption of messages and identification.</li>
+ * <li>Holding the trading partner certificates with public keys used for encryption of messages and identification. 
+ * This means that the certificates in this key store are also used to find the signing certificate when a received 
+ * message only includes a reference to the certificate, e.g. a Serial Number or SKI.</li>
  * <li>Holding "trust anchors" used for trust validation of certificates used to sign messages. Normally these are the 
  * certificates of trusted Certificate Authorities. Certificates on a certificate path are checked up to the first trust 
  * anchor found, i.e. for path [<i>c<sub>0</sub></i>, <i>c<sub>1</sub></i>] with <i>c<sub>1</sub></i> registered as 
@@ -315,7 +318,7 @@ public class DefaultCertManager implements ICertificateManager {
 		boolean foundAnchor = false;		
 		for(int i = 0; !foundAnchor && i < certs.size(); i++) {
 			X509Certificate c = certs.get(i);
-			if (!(foundAnchor = trustAnchors.parallelStream().noneMatch(a -> a.getTrustedCert().equals(c))))
+			if (!(foundAnchor = trustAnchors.parallelStream().anyMatch(a -> a.getTrustedCert().equals(c))))
 				cpToCheck.add(c);
 		}
 
@@ -434,7 +437,8 @@ public class DefaultCertManager implements ICertificateManager {
                 cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.type", "jks");
                 cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.password", privateKeystorePwd);
                 break;
-            case ENCRYPT :
+            case VERIFY :
+            case ENCRYPT :            	
                 cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.file", partnerKeystorePath);
                 cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.type", "jks");
                 cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.password", partnerKeystorePwd);
