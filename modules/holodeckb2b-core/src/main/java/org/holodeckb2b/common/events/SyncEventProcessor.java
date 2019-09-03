@@ -90,7 +90,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
         if (!isEventHandled) {
         	log.trace(eventType + " not handled by P-Mode configured handlers => check global configuration");
         	if (!handleEvent(HolodeckB2BCoreInterface.getMessageProcessingEventConfiguration(), event))
-        		log.info("No handler defined for " + eventType + ", event [" + event.getId() + "] ignored!");
+        		log.debug("No handler defined for " + eventType + ", event [" + event.getId() + "] ignored!");
         }            
     }
 
@@ -130,7 +130,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
 					factory.init(c.getHandlerSettings());
 					log.trace("Pass event to handler for further processing");
 					factory.createHandler().handleEvent(event);
-					log.info(eventType + "[id= " + event.getId() + "] for " + msgUnitType + "] handled by " 
+					log.debug(eventType + "[id= " + event.getId() + "] for " + msgUnitType + "] handled by " 
 								+ handlerClassname);
 				} catch (final Throwable t) {
 					log.warn("An exception occurred when " + eventType + " [id= " + event.getId() + " was processed by "
