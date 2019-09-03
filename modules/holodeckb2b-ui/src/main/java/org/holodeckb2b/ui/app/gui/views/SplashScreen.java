@@ -69,6 +69,19 @@ public class SplashScreen extends JFrame {
         lblStatus = new JLabel("Connecting to local instance on port " + port + "...");
         panel.add(lblStatus);
         
+        new Thread(new Runnable() { 
+			@Override
+			public void run() {
+        		try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+				} finally {
+					synchronized(this) { 
+						this.notify();
+					}
+				}        		
+			} 
+        }).start();
         setVisible(true);
 	}
 	
@@ -85,6 +98,12 @@ public class SplashScreen extends JFrame {
 	 * Closes the splash screen and releases all attached resources.
 	 */
 	public void close() {
+		try {
+			synchronized(this) { 
+				this.wait(2000);
+			}
+		} catch (InterruptedException e) {
+		}
 		this.setVisible(false);
 	}
 }
