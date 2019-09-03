@@ -37,6 +37,7 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,7 +58,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.crypto.CryptoFactory;
 import org.apache.wss4j.common.ext.WSSecurityException;
-import org.bouncycastle.util.Arrays;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.events.security.ISignatureVerifiedWithWarning;
@@ -322,7 +322,7 @@ public class DefaultCertManager implements ICertificateManager {
     			byte[] skiExtValue = c.getExtensionValue("2.5.29.14");
 				if (skiExtValue != null) {
 					byte[] ski = Arrays.copyOfRange(skiExtValue, 4, skiExtValue.length);    			
-					if (Arrays.areEqual(ski, skiBytes))
+					if (Arrays.equals(ski, skiBytes))
 						cert = c;
 				}
     		}    		     		
