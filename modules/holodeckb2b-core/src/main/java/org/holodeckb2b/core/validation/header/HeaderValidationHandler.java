@@ -25,6 +25,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.InvalidHeader;
 import org.holodeckb2b.common.errors.ValueInconsistent;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
@@ -136,7 +137,7 @@ public class HeaderValidationHandler extends AbstractBaseHandler {
 	}
 	
     @Override
-    protected InvocationResponse doProcessing(MessageProcessingContext procCtx, final Log log) throws Exception {
+    protected InvocationResponse doProcessing(MessageProcessingContext procCtx, final Logger log) throws Exception {
     	if (laxValidatorSpecs == null || strictValidatorSpecs == null) {
     		log.fatal("Handler not correctly initialized, header validators not available!");
     		throw new AxisFault("Configuration error!");

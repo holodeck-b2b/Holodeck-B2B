@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.events.impl.EncryptionFailure;
 import org.holodeckb2b.common.events.impl.SignatureCreated;
 import org.holodeckb2b.common.events.impl.SigningFailure;
@@ -80,7 +81,7 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 public class CreateSecurityHeaders extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(MessageProcessingContext procCtx, final Log log) throws Exception {
+    protected InvocationResponse doProcessing(MessageProcessingContext procCtx, final Logger log) throws Exception {
         log.trace("Get the primary message unit for this message");
         final IMessageUnit primaryMU = procCtx.getPrimaryMessageUnit();
         if (primaryMU == null)

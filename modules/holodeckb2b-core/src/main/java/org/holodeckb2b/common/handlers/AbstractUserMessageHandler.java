@@ -18,6 +18,7 @@ package org.holodeckb2b.common.handlers;
 
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -40,7 +41,7 @@ public abstract class AbstractUserMessageHandler extends AbstractBaseHandler {
      * {@inheritDoc}
      */
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) throws Exception {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) throws Exception {
         log.trace("Check if MessageContext contains a MessageUnit");
         final int currentFlow = procCtx.getParentContext().getFLOW();
         IUserMessageEntity userMessage = currentFlow == MessageContext.IN_FLOW 

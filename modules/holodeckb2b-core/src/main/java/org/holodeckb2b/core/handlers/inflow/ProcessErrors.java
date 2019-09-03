@@ -48,7 +48,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class ProcessErrors extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
     																					throws PersistenceException {
         log.debug("Check for received errors in message.");
         final Collection<IErrorMessageEntity> errorSignals = procCtx.getReceivedErrors();

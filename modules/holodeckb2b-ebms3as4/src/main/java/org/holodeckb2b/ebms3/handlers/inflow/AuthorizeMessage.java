@@ -19,7 +19,7 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.FailedAuthentication;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -58,7 +58,7 @@ import org.holodeckb2b.security.util.VerificationUtils;
 public class AuthorizeMessage extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) throws Exception {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) throws Exception {
 
         Collection<IMessageUnitEntity> msgUnits = procCtx.getReceivedMessageUnits();
         if (Utils.isNullOrEmpty(msgUnits)) {

@@ -30,7 +30,7 @@ import org.apache.axiom.soap.SOAPFaultReason;
 import org.apache.axiom.soap.SOAPFaultText;
 import org.apache.axiom.soap.SOAPFaultValue;
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
@@ -71,7 +71,7 @@ import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 public class PackageErrorSignals extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 	
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 	
     																					throws PersistenceException {
         // First check if there are any errors to include
         final Collection<IErrorMessageEntity> errors = procCtx.getSendingErrors();

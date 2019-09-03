@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -62,7 +63,7 @@ public class ProcessGeneratedErrors extends AbstractBaseHandler {
     }
     
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
     																					throws PersistenceException {
         log.debug("Check if errors were generated");
         final Map<String, Collection<IEbmsError>> errors = procCtx.getGeneratedErrors();

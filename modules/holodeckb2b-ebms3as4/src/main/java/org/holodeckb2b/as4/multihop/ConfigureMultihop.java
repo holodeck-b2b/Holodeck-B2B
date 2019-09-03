@@ -22,7 +22,7 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.MessageContext;
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -66,7 +66,7 @@ public class ConfigureMultihop extends AbstractBaseHandler {
      * that the signal is a response to. See section 4.4 of the AS4 profile how the WS-A headers are constructed.
      */
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) throws Exception {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) throws Exception {
         // For routing signals through the I-Cloud WS-A headers are used. We use the Axis2 addressing module to create
         // the headers. But we don't need these headers normally, so disable the module by default
         procCtx.getParentContext().setProperty(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES, Boolean.TRUE);

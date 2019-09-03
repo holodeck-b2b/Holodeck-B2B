@@ -18,7 +18,7 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.events.impl.MessageTransfer;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -38,7 +38,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * Is the <i>OUT_FLOW</i> handler responsible for changing the processing state of message units that are and have been
  * sent out in the current SOAP message.
  * <p>When the handler is executed in the flow the processing state of all message units contained in the message is
- * set to {@link ProcessingState#SENDING}. When {@link #doFlowComplete(MessageProcessingContext, Log)} is
+ * set to {@link ProcessingState#SENDING}. When {@link #doFlowComplete(MessageProcessingContext, Logger)} is
  * executed the handler checks if the sent operation was successful and changes the processing state accordingly to
  * either {@link ProcessingState#TRANSPORT_FAILURE} or {@link ProcessingState#DELIVERED} /
  * {@link ProcessingState#AWAITING_RECEIPT} (for User Message that should be acknowledged through a Receipt).
@@ -57,7 +57,7 @@ public class CheckSentResult extends AbstractBaseHandler {
      * @throws PersistenceException    When the processing state can not be changed
      */
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
     																					throws PersistenceException {
     	final StorageManager updateManager = HolodeckB2BCore.getStorageManager();        
     	// Get all message units in this message
@@ -85,7 +85,7 @@ public class CheckSentResult extends AbstractBaseHandler {
      * @param mc    The current message that was sent out
      */
     @Override
-    public void doFlowComplete(final MessageProcessingContext procCtx, final Log log) {
+    public void doFlowComplete(final MessageProcessingContext procCtx, final Logger log) {
         // First check if there were messaging units sent
         final Collection<IMessageUnitEntity> msgUnits = procCtx.getSendingMessageUnits();
 

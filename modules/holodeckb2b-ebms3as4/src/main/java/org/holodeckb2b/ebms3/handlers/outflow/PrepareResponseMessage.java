@@ -19,7 +19,7 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
@@ -44,7 +44,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class PrepareResponseMessage extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
     																					throws PersistenceException {
         // Check if there are error signal messages to be included
         log.trace("Check for error signals generated during in flow to be included");

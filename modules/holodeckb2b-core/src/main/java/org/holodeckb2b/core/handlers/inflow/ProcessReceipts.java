@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.ValueInconsistent;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -55,7 +56,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class ProcessReceipts extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log)
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log)
     																					throws PersistenceException {
         log.debug("Check for received receipts in message.");
         final Collection<IReceiptEntity>  receipts = procCtx.getReceivedReceipts();

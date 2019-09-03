@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.FailedAuthentication;
 import org.holodeckb2b.common.errors.FailedDecryption;
 import org.holodeckb2b.common.errors.PolicyNoncompliance;
@@ -81,7 +82,7 @@ import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
 public class ProcessSecurityHeaders extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(MessageProcessingContext procCtx, final Log log) throws Exception {
+    protected InvocationResponse doProcessing(MessageProcessingContext procCtx, final Logger log) throws Exception {
 
         IMessageUnit primaryMU = procCtx.getPrimaryMessageUnit();
         if (primaryMU == null)

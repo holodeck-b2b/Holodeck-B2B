@@ -19,6 +19,7 @@ package org.holodeckb2b.core.handlers.inflow;
 import java.util.Collection;
 
 import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.util.Utils;
@@ -56,7 +57,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class DeliverErrors extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) throws PersistenceException {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) throws PersistenceException {
         // Check if this message contains error signals
         final Collection<IErrorMessageEntity> errorSignals = procCtx.getReceivedErrors();
 

@@ -21,7 +21,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.wsdl.WSDLConstants;
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
@@ -40,7 +40,7 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
 public class CreateSOAPEnvelopeHandler extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) throws AxisFault {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) throws AxisFault {
         final MessageContext mc = procCtx.getParentContext();
     	SOAPEnvelope    env = mc.getEnvelope();
         

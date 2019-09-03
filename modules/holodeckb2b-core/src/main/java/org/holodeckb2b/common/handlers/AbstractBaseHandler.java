@@ -24,6 +24,8 @@ import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.handlers.MessageProcessingContext;
 
@@ -73,7 +75,7 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
      * @param mc            The Axis2 {@link MessageContext}. Will be passed onto the implementation for the actual
      *                      processing
      * @return              The result of the message processing, i.e. the result of
-     *                      {@link #doProcessing(MessageProcessingContext, Log)} of the implementation
+     *                      {@link #doProcessing(MessageProcessingContext, Logger)} of the implementation
      * @throws AxisFault    If an error occurs during the processing of the message that should prevent further
      *                      processing. Note that this will stop processing of the complete flow and may leave message
      *                      units in an undefined state!
@@ -85,7 +87,7 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
     	if (runOnlyAsResponder && !mc.isServerSide())
     		return InvocationResponse.CONTINUE;
     		
-    	Log log = prepareLog(mc);
+    	Logger log = prepareLog(mc);
     	
         // Do actual processing in implementation
         try {
@@ -118,7 +120,7 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
      * @param mc	The message context
      * @return		The log to be used during this execution of the handler
      */
-    private Log prepareLog(final MessageContext mc) {
+    private Logger prepareLog(final MessageContext mc) {
         // Determine which flow the handler currently runs is
         String 	currentFlowName = mc.isServerSide() ? "RESPONSE_" : "REQUEST_";
         
@@ -134,7 +136,7 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
         }
         
         // Running in correct flow, create a logger
-        return LogFactory.getLog("org.holodeckb2b.msgproc." + (!Utils.isNullOrEmpty(handledMsgProtocol) ?
+        return LogManager.getLogger("org.holodeckb2b.msgproc." + (!Utils.isNullOrEmpty(handledMsgProtocol) ?
                                                                 handledMsgProtocol + "." : "")
         													+ currentFlowName + "." + getHandlerDesc().getName());
     }
@@ -152,7 +154,7 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
      *                      units in an undefined state! Also ensure that all information needed for a response is set
      *                      in the message context to make it available for handlers in the fault flow!
      */
-    protected abstract InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    protected abstract InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
     																								throws Exception;
 
     /**
@@ -166,5 +168,5 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
      * @param procCtx       The current Holodeck B2B {@link MessageProcessingContext}
      * @param log 			Log to use 
      */
-    protected void doFlowComplete(final MessageProcessingContext procCtx, final Log log) {}
+    protected void doFlowComplete(final MessageProcessingContext procCtx, final Logger log) {}
 }

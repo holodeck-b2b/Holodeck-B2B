@@ -19,7 +19,7 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
@@ -49,7 +49,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class DetermineErrorReporting extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
     																					throws PersistenceException {
 
     	log.debug("Check if error signals were generated");

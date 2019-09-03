@@ -21,6 +21,7 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.events.impl.MessageTransfer;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
@@ -63,7 +64,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class ConfigureHTTPTransportHandler extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
     																					throws PersistenceException {
         final IMessageUnitEntity primaryMU = procCtx.getPrimaryMessageUnit();
         // Only when message contains a message unit there is something to do

@@ -19,7 +19,7 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import java.util.Collection;
 
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
@@ -42,7 +42,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 public class PackageReceiptSignal extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
     																					throws PersistenceException {
         // First check if there is a receipt to include
         Collection<IReceiptEntity> receipts = procCtx.getSendingReceipts(); 

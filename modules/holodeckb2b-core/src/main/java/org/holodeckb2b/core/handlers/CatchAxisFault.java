@@ -21,6 +21,7 @@ import java.util.Collection;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.OtherContentError;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
@@ -49,12 +50,12 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class CatchAxisFault extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext mc, final Log log) throws AxisFault {
+    protected InvocationResponse doProcessing(final MessageProcessingContext mc, final Logger log) throws AxisFault {
         return InvocationResponse.CONTINUE;
     }
 
     @Override
-    public void doFlowComplete(final MessageProcessingContext procCtx, final Log log) {
+    public void doFlowComplete(final MessageProcessingContext procCtx, final Logger log) {
     	final MessageContext msgContext = procCtx.getParentContext();
         // This handler only needs to act when there was an unexpected failure
         if (msgContext.getFailureReason() != null) {

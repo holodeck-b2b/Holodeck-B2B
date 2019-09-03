@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.EmptyMessagePartitionChannel;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -44,7 +45,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class GetMessageUnitForPulling extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) 
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
     																					throws PersistenceException {
         final IPullRequestEntity pullRequest = procCtx.getReceivedPullRequest();        
         if (pullRequest == null || pullRequest.getCurrentProcessingState().getState() == ProcessingState.FAILURE)

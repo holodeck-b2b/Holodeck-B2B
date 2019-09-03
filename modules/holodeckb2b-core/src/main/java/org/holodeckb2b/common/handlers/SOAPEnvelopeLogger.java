@@ -19,6 +19,7 @@ package org.holodeckb2b.common.handlers;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.handlers.MessageProcessingContext;
 
@@ -33,7 +34,7 @@ import org.holodeckb2b.core.handlers.MessageProcessingContext;
 public class SOAPEnvelopeLogger extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Log log) throws Exception {
+    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) throws Exception {
         // We use a specific log for the SOAP headers so it can easily be enabled or disabled
     	final int currentFlow = procCtx.getParentContext().getFLOW();
         final boolean incoming = currentFlow == MessageContext.IN_FLOW || currentFlow == MessageContext.IN_FAULT_FLOW;
