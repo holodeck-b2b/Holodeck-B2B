@@ -76,7 +76,7 @@ public class MainWindow extends JFrame {
 		content.add(new MessageHistoryPanel(controller), MSG_HISTORY_PANEL);
 		content.add(new MessageStatusPanel(controller), MSG_STATUS_PANEL);
 		content.add(new PModesPanel(controller), PMODES_PANEL);
-//		content.add(new CertificatesPanel(controller), CERTS_PANEL);		
+		content.add(new CertificatesPanel(controller), CERTS_PANEL);		
 
 		JPanel menuPanel = new JPanel();
 		menuPanel.setBorder(new EmptyBorder(5, 5, 5, 19));
@@ -126,7 +126,7 @@ public class MainWindow extends JFrame {
 			}
 		});
 		
-		JLabel lblTrustedCertificates = new JLabel("Trusted Certificates");
+		JLabel lblTrustedCertificates = new JLabel("Certificates");
 		lblTrustedCertificates.setFont(new Font("Lucida Grande", Font.PLAIN, 16));
 		menuOptionsPanel.add(lblTrustedCertificates);
 		lblTrustedCertificates.addMouseListener(new MouseAdapter() {

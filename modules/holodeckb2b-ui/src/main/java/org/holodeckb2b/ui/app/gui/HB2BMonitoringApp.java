@@ -103,7 +103,7 @@ public class HB2BMonitoringApp {
 		SplashScreen splash = new SplashScreen(port);		
 		try {			
 			String hb2bHostName;
-	      try {
+			try {
 				coreAPI = (CoreInfo) LocateRegistry.getRegistry(port).lookup(CoreInfo.RMI_SVC_NAME);
 				hb2bHostName = coreAPI.getHostName();
 			} catch (RemoteException | NotBoundException e) {
@@ -128,17 +128,17 @@ public class HB2BMonitoringApp {
 				throw new Exception("Could not retrieve the P-Modes from Holodeck B2B", e);
 			}
 	
-//			splash.updateStatus("Retrieving certificates...");		
-//			try {		
-//				controller.certificates.put(CertType.Private, 
-//													new CertificatesData(coreAPI.getCertificates(CertType.Private)));
-//				controller.certificates.put(CertType.Partner, 
-//													new CertificatesData(coreAPI.getCertificates(CertType.Partner)));
-//				controller.certificates.put(CertType.Trusted, 
-//													new CertificatesData(coreAPI.getCertificates(CertType.Trusted)));
-//			} catch (RemoteException e) {
-//				throw new Exception("Could not retrieve the certificates from Holodeck B2B", e);
-//			}		
+			splash.updateStatus("Retrieving certificates...");		
+			try {		
+				controller.certificates.put(CertType.Private, 
+													new CertificatesData(coreAPI.getCertificates(CertType.Private)));
+				controller.certificates.put(CertType.Partner, 
+													new CertificatesData(coreAPI.getCertificates(CertType.Partner)));
+				controller.certificates.put(CertType.Trusted, 
+													new CertificatesData(coreAPI.getCertificates(CertType.Trusted)));
+			} catch (RemoteException e) {
+				throw new Exception("Could not retrieve the certificates from Holodeck B2B", e);
+			}		
 
 			// Done with initialisation, close splash, show main window
 			splash.close();		
