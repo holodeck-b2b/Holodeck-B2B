@@ -76,6 +76,7 @@ public class SignatureProcessingResult extends AbstractSecurityProcessingResult 
 							    	 final Map<IPayload, ISignedPartMetadata> payloadDigests) {
     	this(signingCert, null, certReferenceMethod, algorithm, headerDigest, payloadDigests);
     }
+    
     /**
      * Creates a new <code>SignatureProcessingResult</code> instance to indicate that processing of the signature part
      * completed successfully including a trust validation check.

@@ -326,11 +326,11 @@ public class DefaultCertManager implements ICertificateManager {
 		
 		if (log.isTraceEnabled()) {
 			StringBuilder sb = new StringBuilder("Cert path to check: [");
-				sb.append(cpToCheck.get(0).getSubjectDN().getName());
-				for (int i = 1; i < certs.size(); i++)
-					sb.append(" << ").append(certs.get(i).getSubjectDN().getName());
-				sb.append(']');
-				log.trace(sb.toString());
+			sb.append(cpToCheck.get(0).getSubjectDN().getName());
+			for (int i = 1; i < certs.size(); i++)
+				sb.append(" << ").append(certs.get(i).getSubjectDN().getName());
+			sb.append(']');
+			log.trace(sb.toString());
 		}		
 		
 		if (enableDirectTrust) {
@@ -345,8 +345,19 @@ public class DefaultCertManager implements ICertificateManager {
 			Security.setProperty("ocsp.enable", "true");
 			final CertPathValidator validator = CertPathValidator.getInstance("PKIX");			
 			try {
-				validator.validate(cp, params);
-				log.info("Certficate path is trusted!");
+				final PKIXCertPathValidatorResult validation = (PKIXCertPathValidatorResult) 
+																						validator.validate(cp, params);
+				if (log.isDebugEnabled()) {
+					StringBuilder sb = new StringBuilder("Cert path is valid! Validated path = [");
+					sb.append(cpToCheck.get(0).getSubjectDN().getName());
+					for (int i = 1; i < certs.size(); i++)
+						sb.append(" << ").append(certs.get(i).getSubjectDN().getName());
+					sb.append(" <{trustanchor}< ")
+					  .append(validation.getTrustAnchor().getTrustedCert().getSubjectDN().getName())
+					  .append(']');
+					log.debug(sb.toString());										
+				} else
+					log.info("Certficate path is trusted!");
 				return new ValidationResult(Trust.OK, cpToCheck);
 			} catch (CertPathValidatorException validationException) {
 				// If reason is "unspecified" or "undetermined" this could be caused by a problem in the OCSP check, so
