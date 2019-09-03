@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStoreException;
@@ -29,6 +30,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+
+import javax.security.auth.x500.X500Principal;
 
 import org.holodeckb2b.common.pmode.BusinessInfo;
 import org.holodeckb2b.common.pmode.EncryptionConfig;
@@ -349,6 +352,19 @@ public class BasicPModeValidatorTest {
 		public void init(String hb2bHome) throws SecurityProcessingException {
 			// TODO Auto-generated method stub
 			
+		}
+
+		@Override
+		public X509Certificate findCertificate(X500Principal issuer, BigInteger serial)
+				throws SecurityProcessingException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public X509Certificate findCertificate(byte[] skiBytes) throws SecurityProcessingException {
+			// TODO Auto-generated method stub
+			return null;
 		}
     	
     }

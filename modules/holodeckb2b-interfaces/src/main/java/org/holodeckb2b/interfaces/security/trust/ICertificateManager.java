@@ -16,9 +16,12 @@
  */
 package org.holodeckb2b.interfaces.security.trust;
 
+import java.math.BigInteger;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.List;
+
+import javax.security.auth.x500.X500Principal;
 
 import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
@@ -101,6 +104,30 @@ public interface ICertificateManager {
      * @since HB2B_NEXT_VERSION This was the alternative <code>getCertificate</code> method from version 4.x   
      */
     String findCertificate(final X509Certificate cert) throws SecurityProcessingException;
+    
+    /**
+     * Searches for the trading partner certificate registered with Certificate Manager that has the provided serial 
+     * number and is issued by the given issuer.
+     *
+     * @param issuer	Issuer of the certificate 
+     * @param serial	Serial number of the certificate
+     * @return      The partner certificate if it was found, or<br><code>null</code> if no certificate is registered 
+     * 				issued by the given issuer and with given serial number
+     * @throws SecurityProcessingException When there is a problem in searching for the certificate.
+     */
+    X509Certificate findCertificate(final X500Principal issuer, final BigInteger serial) 
+    																				throws SecurityProcessingException;
+    
+    /**
+     * Searches for the trading partner certificate registered with Certificate Manager that has the provided <i>Subject
+     * Key Identifier</i>.
+     *
+     * @param issuer	The byte array with the SKI of the certificate 
+     * @return      The partner certificate if it was found, or<br><code>null</code> if no certificate is registered 
+     * 				issued by the given SKI
+     * @throws SecurityProcessingException When there is a problem in searching for the certificate.
+     */
+    X509Certificate findCertificate(final byte[] skiBytes) throws SecurityProcessingException;
 
     /**
      * Checks if the given certificate path is trusted for the validation of signatures. The Certificate Manager may

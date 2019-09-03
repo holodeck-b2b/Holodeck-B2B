@@ -17,6 +17,7 @@
 package org.holodeckb2b.security.trust;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
@@ -44,16 +45,19 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.security.auth.x500.X500Principal;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.crypto.CryptoFactory;
 import org.apache.wss4j.common.ext.WSSecurityException;
+import org.bouncycastle.util.Arrays;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.events.security.ISignatureVerifiedWithWarning;
@@ -286,6 +290,49 @@ public class DefaultCertManager implements ICertificateManager {
             throw new SecurityProcessingException("Error retrieving the certificate", ex);
         }
     }
+    
+    @Override
+    public X509Certificate findCertificate(final X500Principal issuer, final BigInteger serial)
+    																				throws SecurityProcessingException {
+    	KeyStore ks = KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd);
+    	try {
+	        Enumeration<String> aliases = ks.aliases();
+	        X509Certificate cert = null;
+	        while (aliases.hasMoreElements() && cert == null) {
+	        	final X509Certificate c = (X509Certificate) ks.getCertificate(aliases.nextElement());
+	        	if (c.getIssuerX500Principal().equals(issuer) && c.getSerialNumber().equals(serial))
+	        		cert = c;	        			
+	        }    		     		
+    		return cert;
+    	} catch (KeyStoreException ex) {
+    		log.error("Problem finding the trading partner certificate [Issuer/SerialNo={}/{}] in keystore!"
+    				+ "\n\tError details: {}", issuer.getName(),serial.toString(), ex.getMessage());
+    		throw new SecurityProcessingException("Error retrieving the certificate", ex);
+    	}
+    }
+
+    @Override
+    public X509Certificate findCertificate(final byte[] skiBytes) throws SecurityProcessingException {
+    	KeyStore ks = KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd);
+    	try {
+    		Enumeration<String> aliases = ks.aliases();
+    		X509Certificate cert = null;
+    		while (aliases.hasMoreElements() && cert == null) {
+    			final X509Certificate c = (X509Certificate) ks.getCertificate(aliases.nextElement());
+    			byte[] skiExtValue = c.getExtensionValue("2.5.29.14");
+				if (skiExtValue != null) {
+					byte[] ski = Arrays.copyOfRange(skiExtValue, 4, skiExtValue.length);    			
+					if (Arrays.areEqual(ski, skiBytes))
+						cert = c;
+				}
+    		}    		     		
+    		return cert;
+    	} catch (KeyStoreException ex) {
+    		log.error("Problem finding the trading partner certificate [SKI={}] in keystore!"
+    				+ "\n\tError details: {}", Hex.encodeHexString(skiBytes), ex.getMessage());
+    		throw new SecurityProcessingException("Error retrieving the certificate", ex);
+    	}
+    }    
 
 	@Override
 	public IValidationResult validateTrust(List<X509Certificate> certs) throws SecurityProcessingException {
