@@ -18,7 +18,6 @@ package org.holodeckb2b.core.handlers.inflow;
 
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -97,7 +96,7 @@ public class DeliverReceipts extends AbstractBaseHandler {
      * @throws MessageDeliveryException When the receipt should be delivered to the business application but an error
      *                                  prevented successful delivery
      */
-    private void deliverReceipt(final IReceiptEntity receipt, final Log log) throws MessageDeliveryException {
+    private void deliverReceipt(final IReceiptEntity receipt, final Logger log) throws MessageDeliveryException {
         IDeliverySpecification deliverySpec = null;
 
         // Get delivery specification from P-Mode

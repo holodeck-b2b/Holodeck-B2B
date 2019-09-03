@@ -20,7 +20,6 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.commons.logging.Log;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.events.impl.MessageTransfer;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
@@ -168,7 +167,7 @@ public class ConfigureHTTPTransportHandler extends AbstractBaseHandler {
      * @param log	The Log to be used
      * @throws PersistenceException  When the processing state cannot be saved in the database
      */
-    private void setMessagesToFailed(final MessageProcessingContext procCtx, final Log log) throws PersistenceException {
+    private void setMessagesToFailed(final MessageProcessingContext procCtx, final Logger log) throws PersistenceException {
     	final StorageManager updManager = HolodeckB2BCore.getStorageManager();
     	final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
     	for(IMessageUnitEntity mu : procCtx.getSendingMessageUnits()) {

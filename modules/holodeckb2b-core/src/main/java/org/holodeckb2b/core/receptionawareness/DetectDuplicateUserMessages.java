@@ -19,6 +19,7 @@ package org.holodeckb2b.core.receptionawareness;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.handlers.MessageProcessingContext;
@@ -60,7 +61,7 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
     
     @Override
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx,
-    										  final Log log) throws PersistenceException {
+    										  final Logger log) throws PersistenceException {
         // First determine if duplicate check must be executed for this UserMessage
         //
         boolean detectDups = false;

@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.core.handlers.inflow;
 
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.OtherContentError;
 import org.holodeckb2b.common.events.impl.MessageDelivery;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
@@ -46,7 +46,7 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
-    										  final Log log) throws PersistenceException {
+    										  final Logger log) throws PersistenceException {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Prepare message for delivery by checking it is still ready for delivery and then
         // change its processing state to "out for delivery"

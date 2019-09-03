@@ -23,7 +23,7 @@ import javax.activation.DataHandler;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.common.messagemodel.Property;
 import org.holodeckb2b.common.util.Utils;
@@ -57,7 +57,7 @@ public class CompressionHandler extends AbstractUserMessageHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
-    										  final Log log) throws AxisFault {
+    										  final Logger log) throws AxisFault {
         // First check if this message contains payloads at all
         if (Utils.isNullOrEmpty(um.getPayloads()))
             return InvocationResponse.CONTINUE;

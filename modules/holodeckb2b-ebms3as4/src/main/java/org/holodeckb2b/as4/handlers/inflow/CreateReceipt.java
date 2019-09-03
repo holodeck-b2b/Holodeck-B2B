@@ -26,7 +26,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.context.MessageContext;
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.util.Utils;
@@ -90,7 +90,7 @@ public class CreateReceipt extends AbstractUserMessageHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx,
-    										  final Log log) {
+    										  final Logger log) {
         // Only when user message was successfully delivered to business application the Receipt should be created,
     	// this can also be the case when the message is a duplicate and delivered earlier
     	final ProcessingState currentState = um.getCurrentProcessingState().getState();

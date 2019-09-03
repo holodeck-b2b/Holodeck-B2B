@@ -19,7 +19,6 @@ package org.holodeckb2b.ebms3.handlers.inflow;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.commons.logging.Log;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.FailedAuthentication;
 import org.holodeckb2b.common.errors.FailedDecryption;
@@ -148,7 +147,7 @@ public class ProcessSecurityHeaders extends AbstractBaseHandler {
      * @param log		Log to be used
      */
     private void handleProcessingResult(final ISecurityProcessingResult result, final MessageProcessingContext procCtx,
-    									final Log log) throws PersistenceException {
+    									final Logger log) throws PersistenceException {
         final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
         final Collection<IMessageUnitEntity> rcvdMsgUnits = procCtx.getReceivedMessageUnits();
         procCtx.addSecurityProcessingResult(result);

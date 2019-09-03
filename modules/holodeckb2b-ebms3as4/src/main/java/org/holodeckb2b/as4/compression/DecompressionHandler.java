@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.axis2.context.MessageContext;
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
@@ -50,7 +50,7 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx,
-    										  final Log log) throws PersistenceException {
+    										  final Logger log) throws PersistenceException {
         // Decompression is only needed if the message contains payloads at all
         if (Utils.isNullOrEmpty(um.getPayloads()))
             return InvocationResponse.CONTINUE;

@@ -18,7 +18,6 @@ package org.holodeckb2b.core.handlers.inflow;
 
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
@@ -107,7 +106,7 @@ public class DeliverErrors extends AbstractBaseHandler {
      * @throws PersistenceException    When an error occurs retrieving the message unit referenced by the Error Signal
      */
     private boolean deliverError(final IErrorMessageEntity errorSignal, final IMessageUnitEntity msgInError,
-    							 final Log log) throws PersistenceException {
+    							 final Logger log) throws PersistenceException {
         
         try {
 	        log.trace("Get delivery specification for error from P-Mode of refd message [msgId=" 

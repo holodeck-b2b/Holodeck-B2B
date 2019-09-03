@@ -33,7 +33,7 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axis2.context.MessageContext;
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.util.MessageIdUtils;
@@ -62,7 +62,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
-    										  final Log log) throws PersistenceException {
+    										  final Logger log) throws PersistenceException {
 
         log.trace("Check that all meta-data of the User Message is available for processing");
         if (!um.isLoadedCompletely()) {
@@ -137,7 +137,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
      * @throws Exception    When a problem occurs while adding the payload contents to
      *                      the message
      */
-    protected void addContent(final IPayload p, final MessageContext mc, Log log) throws Exception {
+    protected void addContent(final IPayload p, final MessageContext mc, Logger log) throws Exception {
         File f = null;
 
         switch (p.getContainment()) {

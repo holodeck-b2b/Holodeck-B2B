@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.core.handlers.inflow;
 
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.handlers.MessageProcessingContext;
@@ -34,7 +34,7 @@ public class StartProcessingUsrMessage extends AbstractUserMessageHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx,
-    										  final Log log) throws PersistenceException {
+    										  final Logger log) throws PersistenceException {
         final String msgId = um.getMessageId();
         log.trace("Change processing state to indicate start of processing of message [" + msgId + "]" );
         if (!HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.RECEIVED,

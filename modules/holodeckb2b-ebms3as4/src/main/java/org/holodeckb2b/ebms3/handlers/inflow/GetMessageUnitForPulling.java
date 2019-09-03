@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.EmptyMessagePartitionChannel;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
@@ -93,7 +92,7 @@ public class GetMessageUnitForPulling extends AbstractBaseHandler {
      *                      <code>null</code> if no User Message message unit is available for processing
      * @throws PersistenceException When a database error occurs while retrieving the message units waiting to be pulled.
      */
-    private IUserMessageEntity getForPulling(final List<IPMode> authPModes, final String reqMPC, final Log log)
+    private IUserMessageEntity getForPulling(final List<IPMode> authPModes, final String reqMPC, final Logger log)
                                                                                         throws PersistenceException {
         log.trace("Get list of messages waiting to be pulled");
         // Query is based on the P-Mode ids so convert given set of P-Modes to id only collection

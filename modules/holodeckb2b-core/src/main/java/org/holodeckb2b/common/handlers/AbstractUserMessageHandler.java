@@ -17,7 +17,6 @@
 package org.holodeckb2b.common.handlers;
 
 import org.apache.axis2.context.MessageContext;
-import org.apache.commons.logging.Log;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
@@ -73,6 +72,6 @@ public abstract class AbstractUserMessageHandler extends AbstractBaseHandler {
      *                      in the message context to make it available for handlers in the fault flow!
      */
     protected abstract InvocationResponse doProcessing(final IUserMessageEntity userMessage,
-                                                       final MessageProcessingContext procCtx, Log log) 
+                                                       final MessageProcessingContext procCtx, Logger log) 
                                                     		   										throws Exception;
 }

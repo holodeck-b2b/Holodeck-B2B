@@ -19,7 +19,6 @@ package org.holodeckb2b.core.handlers.inflow;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.commons.logging.Log;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.ValueInconsistent;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
@@ -81,7 +80,7 @@ public class ProcessReceipts extends AbstractBaseHandler {
      * @throws PersistenceException When a database error occurs while processing the Receipt Signal
      */
     protected void processReceipt(final IReceiptEntity receipt, final MessageProcessingContext procCtx,
-    							  final Log log) throws PersistenceException {
+    							  final Logger log) throws PersistenceException {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Change processing state to indicate we start processing the receipt. Also checks that the receipt is not
         // already being processed

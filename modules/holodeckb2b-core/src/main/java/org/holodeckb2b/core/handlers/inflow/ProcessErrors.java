@@ -19,7 +19,6 @@ package org.holodeckb2b.core.handlers.inflow;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.commons.logging.Log;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.ValueInconsistent;
@@ -80,7 +79,7 @@ public class ProcessErrors extends AbstractBaseHandler {
      * @throws PersistenceException When a database error occurs while processing the Error Signal
      */
     protected void processErrorSignal(final IErrorMessageEntity errSignal, final MessageProcessingContext procCtx, 
-    								  final Log log) throws PersistenceException {
+    								  final Logger log) throws PersistenceException {
         log.debug("Start processing Error Signal [msgId=" + errSignal.getMessageId() + "]");
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();
         // Change processing state to indicate we start processing the error. Also checks that the error is not

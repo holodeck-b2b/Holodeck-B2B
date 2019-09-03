@@ -20,7 +20,6 @@ import java.util.Collection;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.apache.commons.logging.Log;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.OtherContentError;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
@@ -107,7 +106,7 @@ public class CatchAxisFault extends AbstractBaseHandler {
      *
      * @param mc    The current message context to which the error is added
      */
-    private IErrorMessageEntity createOtherError(final Log log) {
+    private IErrorMessageEntity createOtherError(final Logger log) {
         final OtherContentError   otherError = new OtherContentError();
         otherError.setErrorDetail("An internal error occurred while processing the message.");
         otherError.setSeverity(IEbmsError.Severity.warning);

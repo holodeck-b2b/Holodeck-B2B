@@ -34,7 +34,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.as4.compression.DeCompressionFailure;
 import org.holodeckb2b.common.errors.FailedDecryption;
 import org.holodeckb2b.common.errors.MimeInconsistency;
@@ -76,7 +76,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      */
     @Override
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
-    										  final Log log) throws PersistenceException {
+    										  final Logger log) throws PersistenceException {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
 
         final Collection<IPayload> payloads = um.getPayloads();
@@ -248,7 +248,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      * @throws PersistenceException When updating the processing state fails.
      */
     private void createInconsistentError(final MessageProcessingContext procCtx, final IUserMessageEntity um, 
-    									 final String invalidRef, final Log log) throws PersistenceException {
+    									 final String invalidRef, final Logger log) throws PersistenceException {
         log.info("UserMessage with id " + um.getMessageId() + " can not be processed because payload"
                  + (invalidRef != null ? " with href=" + invalidRef  : "") + " is not included in message");
         EbmsError error = null;

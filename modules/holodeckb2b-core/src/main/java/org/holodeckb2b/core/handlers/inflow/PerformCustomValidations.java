@@ -19,7 +19,7 @@ package org.holodeckb2b.core.handlers.inflow;
 import java.util.Collection;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.OtherContentError;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -50,7 +50,7 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
 
     @Override
     protected InvocationResponse doProcessing(IUserMessageEntity userMessage, MessageProcessingContext procCtx,
-    										  final Log log) throws Exception {
+    										  final Logger log) throws Exception {
         // For the execution of the validation a separate component is used. This component will also raise the event
         log.trace("Validate user message if specified");
         try {

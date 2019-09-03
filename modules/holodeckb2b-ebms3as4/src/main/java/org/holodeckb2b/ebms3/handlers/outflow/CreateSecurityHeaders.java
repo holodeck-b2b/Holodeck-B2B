@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.events.impl.EncryptionFailure;
 import org.holodeckb2b.common.events.impl.SignatureCreated;
@@ -165,7 +164,7 @@ public class CreateSecurityHeaders extends AbstractBaseHandler {
      * @param log		The log to be used
      */
     private void handleResult(final ISecurityProcessingResult result, final MessageProcessingContext procCtx,
-    						  final Log log) throws PersistenceException {
+    						  final Logger log) throws PersistenceException {
         final Collection<IMessageUnitEntity> sentMsgUnits = procCtx.getSendingMessageUnits();
         final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
         if (result.isSuccessful()) {

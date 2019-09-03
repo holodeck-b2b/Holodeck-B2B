@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.core.handlers.inflow;
 
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.PolicyNoncompliance;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -44,7 +44,7 @@ public class CheckSignatureRequirement extends AbstractUserMessageHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
-    										  final Log log) throws Exception {
+    										  final Logger log) throws Exception {
 
     	final IPMode pmode = HolodeckB2BCore.getPModeSet().get(um.getPModeId());    	
     	final ITradingPartnerConfiguration senderCfg = PModeUtils.isHolodeckB2BInitiator(pmode) ? pmode.getResponder() 

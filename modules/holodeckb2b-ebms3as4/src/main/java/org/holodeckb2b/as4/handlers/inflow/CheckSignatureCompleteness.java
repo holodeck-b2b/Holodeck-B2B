@@ -19,7 +19,7 @@ package org.holodeckb2b.as4.handlers.inflow;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.PolicyNoncompliance;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.common.util.Utils;
@@ -47,7 +47,7 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
-    										  final Log log) throws Exception {
+    										  final Logger log) throws Exception {
 
     	// First check if this message needs a Receipt and is signed
         try {
