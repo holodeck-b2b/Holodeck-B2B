@@ -42,7 +42,7 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * only defined methods are to validate the trust. Two versions of the validation method are defined, one for generic 
  * validation of trust according to the Certificate Manager's trust policy and one that uses additional configuration
  * that applies to the signature for which the certificate (path) was used. The implementation of the latter is optional
- * and can be checked using the {@link #supportsConfigBasedValidation()} method.
+ * and whether it is supported can be checked using the {@link #supportsConfigBasedValidation()} method.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since HB2B_NEXT_VERSION A <i>Certificate Manager</i> already existed in version 4.x as part of the <i>Security 

@@ -397,16 +397,11 @@ public class DefaultCertManager implements ICertificateManager {
 			try {
 				final PKIXCertPathValidatorResult validation = (PKIXCertPathValidatorResult) 
 																						validator.validate(cp, params);
-				if (log.isDebugEnabled()) {
-					StringBuilder sb = new StringBuilder("Cert path is valid! Validated path = [");
-					sb.append(cpToCheck.get(0).getSubjectDN().getName());
-					for (int i = 1; i < certs.size(); i++)
-						sb.append(" << ").append(certs.get(i).getSubjectDN().getName());
-					sb.append(" <{trustanchor}< ")
-					  .append(validation.getTrustAnchor().getTrustedCert().getSubjectDN().getName())
-					  .append(']');
-					log.debug(sb.toString());										
-				} else
+				// Add the found trust anchor to cert path to include in result
+				cpToCheck.add(validation.getTrustAnchor().getTrustedCert());
+				if (log.isDebugEnabled()) 
+					log.debug("Certificate path is trusted! {}", getValidatedPath(cpToCheck));
+				else
 					log.info("Certficate path is trusted!");
 				return new ValidationResult(Trust.OK, cpToCheck);
 			} catch (CertPathValidatorException validationException) {
@@ -418,8 +413,12 @@ public class DefaultCertManager implements ICertificateManager {
 					try {
 						log.debug("Validation with revocation check failed, retry without");
 						params.setRevocationEnabled(false);					
-						validator.validate(cp, params);
-						log.warn("Certificate path could only be validated without revocation check!");
+						final PKIXCertPathValidatorResult validation = (PKIXCertPathValidatorResult) 
+								validator.validate(cp, params);
+						// Add the found trust anchor to cert path to include in result
+						cpToCheck.add(validation.getTrustAnchor().getTrustedCert());						
+						log.warn("Certificate path could only be validated without revocation check! {}", 
+						getValidatedPath(cpToCheck));					
 						return new ValidationResult(Trust.WITH_WARNINGS, cpToCheck, "Revocation could not be checked",
 													new SecurityProcessingException("Revocaction check failed", 
 																					validationException));
@@ -460,6 +459,23 @@ public class DefaultCertManager implements ICertificateManager {
 			throw new SecurityProcessingException("Could not retrieve trust anchors");
 		}
 		return trustanchors;
+	}
+	
+	/**
+	 * Helper method to create log message with the certificate path that was validated.
+	 * 
+	 * @param cp	List of certificate representing the validated cert path with the last one the found trust anchor
+	 * @return		The log message with the validated path 
+	 */
+	private String getValidatedPath(final List<X509Certificate> cp) {
+		StringBuilder sb = new StringBuilder("Validated path = [");
+		sb.append(cp.get(0).getSubjectDN().getName());
+		for (int i = 1; i < cp.size() - 1; i++)
+			sb.append(" << ").append(cp.get(i).getSubjectDN().getName());
+		sb.append(" <{trustanchor}< ")
+		  .append(cp.get(cp.size() -1).getSubjectDN().getName())
+		  .append(']');
+		return sb.toString();												
 	}
 	
     /**
