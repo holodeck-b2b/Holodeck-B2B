@@ -29,14 +29,13 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
  * @since 4.1.0
  * @see IReceptionAwareness
  */
-public interface IDuplicateReceived extends IMessageProcessingEvent, IDuplicateReceivedEvent {
+public interface IDuplicateReceived extends IMessageProcessingEvent {
 
     /**
      * Indicates whether this duplicate instance was eliminated, i.e. not delivered to the <i>Consumer</i> business
      * application.
      *
      * @return <code>true</code> when the duplicate is eliminated,<br><code>false</code> otherwise
-     */
-    @Override
+     */    
 	boolean isEliminated();
 }

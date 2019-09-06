@@ -29,7 +29,7 @@ import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.interfaces.events.IMessageUnitPurgedEvent;
+import org.holodeckb2b.interfaces.events.IMessageUnitPurged;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -41,7 +41,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
  * the meta-data information from the database and delete associated payloads from the file system.
  * <p>Currently only the number of days after which the message information should be removed can be configured. This is
  * done through the optional <i>purgeAfterDays</i> parameter. If not specified 30 days is used as the default setting.
- * <p>This implementation will trigger {@link IMessageUnitPurgedEvent}s only for <i>User Message</i> message units and
+ * <p>This implementation will trigger {@link IMessageUnitPurged} events only for <i>User Message</i> message units and
  * it will only provide the meta-data to the event handler. The payload data associated with the User Message message
  * unit will already be deleted by the worker.
  *

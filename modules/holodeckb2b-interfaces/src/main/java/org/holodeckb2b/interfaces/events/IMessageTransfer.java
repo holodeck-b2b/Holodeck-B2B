@@ -29,7 +29,7 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.1.0
  */
-public interface IMessageTransfer extends IMessageProcessingEvent, ISendMessageProcessingFailure, IMessageTransferEvent {
+public interface IMessageTransfer extends IMessageProcessingEvent, ISendMessageProcessingFailure {
 
     /**
      * Indicates whether the transfer of the message unit was successful.
@@ -39,7 +39,6 @@ public interface IMessageTransfer extends IMessageProcessingEvent, ISendMessageP
      * @return  <code>true</code> if the transfer was successful,<br>
      *          <code>false</code> if an exception occurred in the exchange.
      */
-    @Override
 	boolean isTransferSuccessful();
 
     /**
@@ -48,6 +47,5 @@ public interface IMessageTransfer extends IMessageProcessingEvent, ISendMessageP
      *
      * @return  The exception that caused the transfer to fail
      */
-    @Override
 	Exception getFailureReason();
 }

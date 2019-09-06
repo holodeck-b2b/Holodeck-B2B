@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.1.0
  */
-public interface IMessageDelivery extends IMessageProcessingEvent, IMessageDeliveryEvent {
+public interface IMessageDelivery extends IMessageProcessingEvent {
 
     /**
      * Indicates whether the delivery attempt was successful or not, i.e. if no {@link MessageDeliveryException}s
@@ -36,7 +36,6 @@ public interface IMessageDelivery extends IMessageProcessingEvent, IMessageDeliv
      *
      * @return  <code>true</code> if the delivery attempt was successful, or<br><code>false</code> otherwise
      */
-    @Override
 	boolean isDeliverySuccessful();
 
     /**
@@ -45,7 +44,6 @@ public interface IMessageDelivery extends IMessageProcessingEvent, IMessageDeliv
      *
      * @return  The exception that caused the message delivery failure
      */
-    @Override
 	MessageDeliveryException getFailureReason();
 }
 
