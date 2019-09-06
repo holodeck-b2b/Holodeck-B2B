@@ -26,8 +26,8 @@ import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
@@ -63,7 +63,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class ConfigureHTTPTransportHandler extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
     																					throws PersistenceException {
         final IMessageUnitEntity primaryMU = procCtx.getPrimaryMessageUnit();
         // Only when message contains a message unit there is something to do
@@ -167,7 +167,7 @@ public class ConfigureHTTPTransportHandler extends AbstractBaseHandler {
      * @param log	The Log to be used
      * @throws PersistenceException  When the processing state cannot be saved in the database
      */
-    private void setMessagesToFailed(final MessageProcessingContext procCtx, final Logger log) throws PersistenceException {
+    private void setMessagesToFailed(final IMessageProcessingContext procCtx, final Logger log) throws PersistenceException {
     	final StorageManager updManager = HolodeckB2BCore.getStorageManager();
     	final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
     	for(IMessageUnitEntity mu : procCtx.getSendingMessageUnits()) {

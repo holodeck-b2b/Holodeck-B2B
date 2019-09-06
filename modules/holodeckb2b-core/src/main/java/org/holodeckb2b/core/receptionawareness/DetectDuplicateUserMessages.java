@@ -22,10 +22,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
 import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
@@ -60,7 +60,7 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
     }
     
     @Override
-    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx,
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final IMessageProcessingContext procCtx,
     										  final Logger log) throws PersistenceException {
         // First determine if duplicate check must be executed for this UserMessage
         //

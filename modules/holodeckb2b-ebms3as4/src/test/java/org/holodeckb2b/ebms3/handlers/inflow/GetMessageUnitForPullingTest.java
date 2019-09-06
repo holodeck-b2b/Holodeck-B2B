@@ -35,9 +35,10 @@ import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
@@ -88,7 +89,7 @@ public class GetMessageUnitForPullingTest {
         pullRequest.setMPC(T_MPC_1);
         IPullRequestEntity pullRequestEntity = storeManager.storeIncomingMessageUnit(pullRequest);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setPullRequest(pullRequestEntity);
 
         procCtx.setProperty(FindPModesForPullRequest.FOUND_PULL_PMODES, Collections.singletonList(pmode));
@@ -134,7 +135,7 @@ public class GetMessageUnitForPullingTest {
         pullRequest.setMessageId(MessageIdUtils.createMessageId());
         IPullRequestEntity pullRequestEntity = storeManager.storeIncomingMessageUnit(pullRequest);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setPullRequest(pullRequestEntity);
 
         procCtx.setProperty(FindPModesForPullRequest.FOUND_PULL_PMODES, Collections.singletonList(pmode));

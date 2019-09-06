@@ -52,6 +52,7 @@ import org.apache.wss4j.dom.message.WSSecHeader;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
@@ -149,14 +150,13 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
      * {@inheritDoc}
      */
     @Override
-    public Collection<ISecurityProcessingResult> createHeaders(MessageContext mc,
-                                                               Collection<? extends IMessageUnit> msgUnits,
+    public Collection<ISecurityProcessingResult> createHeaders(IMessageProcessingContext procCtx,
                                                                ISecurityConfiguration senderConfig,
                                                                ISecurityConfiguration receiverConfig)
                                                                                     throws SecurityProcessingException {
         // Copy reference to message context
-        this.msgContext = mc;
-        this.msgUnits = msgUnits;
+        this.msgContext = procCtx.getParentContext();
+        this.msgUnits = procCtx.getSendingMessageUnits();
 
         // Convert the SOAP Envelope to standard DOM representation as this is required by the security processing
         // libraries

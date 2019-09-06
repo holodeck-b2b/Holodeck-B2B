@@ -24,10 +24,10 @@ import org.holodeckb2b.common.errors.OtherContentError;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.core.validation.CustomValidationFailureEvent;
 import org.holodeckb2b.core.validation.ValidationResult;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
@@ -49,7 +49,7 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
 
 
     @Override
-    protected InvocationResponse doProcessing(IUserMessageEntity userMessage, MessageProcessingContext procCtx,
+    protected InvocationResponse doProcessing(IUserMessageEntity userMessage, IMessageProcessingContext procCtx,
     										  final Logger log) throws Exception {
         // For the execution of the validation a separate component is used. This component will also raise the event
         log.trace("Validate user message if specified");

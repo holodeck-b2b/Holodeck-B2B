@@ -28,8 +28,9 @@ import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -63,7 +64,7 @@ public class ProcessGeneratedErrors extends AbstractBaseHandler {
     }
     
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
     																					throws PersistenceException {
         log.debug("Check if errors were generated");
         final Map<String, Collection<IEbmsError>> errors = procCtx.getGeneratedErrors();

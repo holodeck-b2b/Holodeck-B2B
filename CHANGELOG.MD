@@ -17,6 +17,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Signature policy check in **Core Processing** that received _User Messages_ are signed when indicated in P-Mode that 
   they should. Violation of this rule will generate an _PolicyNonCompliance_ error.
 * On submission of _User Message_  a check that provided payload _Content-Id_ values do not contain invalid characters.  
+* `org.holodeckb2b.interfaces.core.IMessageProcessingContext` interface which can be used in extension APIs to provide
+  access to the HB2B _message processing context_ 
 * Custom implementation of the Axis2 `TransportListener` interface which can use a _Service_ specified _Message Builder_
 * `org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface.getVersion()` method and 
   `org.holodeckb2b.interfaces.general.IVersionInfo` interface to provide information about the version of the 
@@ -28,6 +30,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 * Restructured the project's modules to create a better separation of _Core_ and _protocol specific_ code.   
+* The security provider interface now use the new `org.holodeckb2b.interfaces.core.IMessageProcessingContext` interface
+  to provide access to the processing context.
 * Adapted classes in _security_ module for changes in the interfaces related to trust validation. 
 * Split the file based back-end integration into a separate project (see []()). The back-end however is still included
   in the default distribution. 
@@ -42,7 +46,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   implementation contained in this package.
 * Constructor of `org.holodeckb2b.interfaces.submit.MessageSubmitException` now accepts `Throwable` instead of 
   `Exception`
-* The classes of the common message model implementation are now Serializable 
+* The classes of the common message model implementation are now `Serializable` 
 
 ### Fixed
 * Generated Content-Id results in signature failure [#99](https://github.com/holodeck-b2b/Holodeck-B2B/issues/99)

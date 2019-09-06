@@ -38,9 +38,10 @@ import org.holodeckb2b.common.testhelpers.NullDeliveryMethod.NullDeliverer;
 import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -115,7 +116,7 @@ public class DeliverErrorsTest {
         IErrorMessageEntity errorMessageEntity = storageManager.storeIncomingMessageUnit(errorMessage);        
         storageManager.setProcessingState(errorMessageEntity, ProcessingState.READY_FOR_DELIVERY);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addReceivedError(errorMessageEntity);        
         procCtx.addRefdMsgUnitByError(errorMessageEntity, Collections.singletonList(umEntity));
         

@@ -33,9 +33,10 @@ import org.holodeckb2b.common.pmode.ReceptionAwarenessConfig;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -96,7 +97,7 @@ public class DetectDuplicateUserMessagesTest {
         
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
 
         // Do as if message is already delivered

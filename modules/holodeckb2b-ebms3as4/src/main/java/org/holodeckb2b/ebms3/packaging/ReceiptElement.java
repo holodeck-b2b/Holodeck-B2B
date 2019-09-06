@@ -18,12 +18,14 @@ package org.holodeckb2b.ebms3.packaging;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
-import org.holodeckb2b.common.messagemodel.Receipt;
 
 /**
  * Is a helper class for handling the ebMS Receipt Signal message units in the ebMS SOAP header, i.e the

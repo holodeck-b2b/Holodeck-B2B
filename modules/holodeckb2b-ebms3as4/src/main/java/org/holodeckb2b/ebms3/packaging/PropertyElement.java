@@ -17,7 +17,9 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import java.util.Iterator;
+
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.holodeckb2b.common.messagemodel.Property;

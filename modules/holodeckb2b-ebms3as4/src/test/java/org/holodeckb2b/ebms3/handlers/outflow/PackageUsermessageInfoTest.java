@@ -41,11 +41,12 @@ import org.holodeckb2b.common.messagemodel.TradingPartner;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.HolodeckB2BCore;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.junit.BeforeClass;
@@ -105,7 +106,7 @@ public class PackageUsermessageInfoTest {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(userMessage);
 
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         
         try {

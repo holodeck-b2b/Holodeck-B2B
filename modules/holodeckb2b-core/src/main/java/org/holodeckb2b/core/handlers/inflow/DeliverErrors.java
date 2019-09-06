@@ -24,9 +24,9 @@ import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
@@ -56,7 +56,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class DeliverErrors extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) throws PersistenceException {
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) throws PersistenceException {
         // Check if this message contains error signals
         final Collection<IErrorMessageEntity> errorSignals = procCtx.getReceivedErrors();
 

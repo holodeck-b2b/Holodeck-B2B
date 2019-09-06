@@ -35,8 +35,9 @@ import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.junit.AfterClass;
@@ -82,7 +83,7 @@ public class SaveUserMsgAttachmentsTest {
         payload.setPayloadURI("some-att-cid");
         userMessage.addPayload(payload);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         IUserMessageEntity userMsgEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
         procCtx.setUserMessage(userMsgEntity);
         

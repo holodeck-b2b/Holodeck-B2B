@@ -17,12 +17,13 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.holodeckb2b.common.messagemodel.Description;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IDescription;
-import org.holodeckb2b.common.messagemodel.Description;
 
 /**
  * Is a helper class for handling the <code>Description</code> element in the ebMS SOAP header.

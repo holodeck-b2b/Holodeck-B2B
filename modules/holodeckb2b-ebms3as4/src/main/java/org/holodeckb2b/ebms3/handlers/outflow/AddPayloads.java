@@ -39,7 +39,7 @@ import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -61,7 +61,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 public class AddPayloads extends AbstractUserMessageHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final IMessageProcessingContext procCtx, 
     										  final Logger log) throws PersistenceException {
 
         log.trace("Check that all meta-data of the User Message is available for processing");

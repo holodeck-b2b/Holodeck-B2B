@@ -24,8 +24,8 @@ import org.holodeckb2b.common.errors.PolicyNoncompliance;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -46,7 +46,7 @@ import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final IMessageProcessingContext procCtx, 
     										  final Logger log) throws Exception {
 
     	// First check if this message needs a Receipt and is signed

@@ -20,9 +20,9 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PullRequestElement;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 
 /**
@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 public class PackagePullRequestSignal extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) throws AxisFault {
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) throws AxisFault {
         // First check if there is a pull request to include
         IPullRequestEntity pullReq = procCtx.getSendingPullRequest();
         		

@@ -19,9 +19,9 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 
 /**
@@ -33,7 +33,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 public class PackageUsermessageInfo extends AbstractUserMessageHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final IMessageProcessingContext procCtx, 
     										  final Logger log) {
 
         log.trace("Get the eb:Messaging header from the message");

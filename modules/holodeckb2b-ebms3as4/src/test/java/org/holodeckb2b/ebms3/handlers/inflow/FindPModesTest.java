@@ -45,9 +45,10 @@ import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
@@ -123,7 +124,7 @@ public class FindPModesTest {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(userMessage);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         
         try {
@@ -161,7 +162,7 @@ public class FindPModesTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addReceivedError(errorMessageEntity);
         
         try {
@@ -198,7 +199,7 @@ public class FindPModesTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addReceivedReceipt(rcptEntity);
         
         try {
@@ -254,7 +255,7 @@ public class FindPModesTest {
        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
        IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(userMessage);
        
-       MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+       IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
        procCtx.setUserMessage(userMessageEntity);
        
        try {

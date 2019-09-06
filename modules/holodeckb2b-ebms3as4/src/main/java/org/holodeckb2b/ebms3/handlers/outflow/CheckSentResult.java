@@ -25,8 +25,8 @@ import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.events.IMessageTransfer;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -38,7 +38,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * Is the <i>OUT_FLOW</i> handler responsible for changing the processing state of message units that are and have been
  * sent out in the current SOAP message.
  * <p>When the handler is executed in the flow the processing state of all message units contained in the message is
- * set to {@link ProcessingState#SENDING}. When {@link #doFlowComplete(MessageProcessingContext, Logger)} is
+ * set to {@link ProcessingState#SENDING}. When {@link #doFlowComplete(IMessageProcessingContext, Logger)} is
  * executed the handler checks if the sent operation was successful and changes the processing state accordingly to
  * either {@link ProcessingState#TRANSPORT_FAILURE} or {@link ProcessingState#DELIVERED} /
  * {@link ProcessingState#AWAITING_RECEIPT} (for User Message that should be acknowledged through a Receipt).
@@ -57,7 +57,7 @@ public class CheckSentResult extends AbstractBaseHandler {
      * @throws PersistenceException    When the processing state can not be changed
      */
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
     																					throws PersistenceException {
     	final StorageManager updateManager = HolodeckB2BCore.getStorageManager();        
     	// Get all message units in this message
@@ -85,7 +85,7 @@ public class CheckSentResult extends AbstractBaseHandler {
      * @param mc    The current message that was sent out
      */
     @Override
-    public void doFlowComplete(final MessageProcessingContext procCtx, final Logger log) {
+    public void doFlowComplete(final IMessageProcessingContext procCtx, final Logger log) {
         // First check if there were messaging units sent
         final Collection<IMessageUnitEntity> msgUnits = procCtx.getSendingMessageUnits();
 
@@ -139,7 +139,7 @@ public class CheckSentResult extends AbstractBaseHandler {
      * @return	<code>true</code> if no exceptions were raised during the message exchange,<br>
      * 			<code>false</code> if there was an exception during the message processing.
      */
-    protected boolean isSuccessful(final MessageProcessingContext procCtx) {
+    protected boolean isSuccessful(final IMessageProcessingContext procCtx) {
     	return procCtx.getParentContext().getFailureReason() == null;
     }
 }

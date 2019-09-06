@@ -39,8 +39,9 @@ import org.holodeckb2b.common.pmode.UserMessageFlow;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
@@ -93,7 +94,7 @@ public class CompressionHandlerTest {
         IUserMessageEntity userMessageEntity =
                 HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         try {
             Handler.InvocationResponse invokeResp = new CompressionHandler().invoke(mc);

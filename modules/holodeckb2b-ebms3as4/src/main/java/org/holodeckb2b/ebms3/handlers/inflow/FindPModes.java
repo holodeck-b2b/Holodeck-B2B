@@ -25,9 +25,9 @@ import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.ebms3.pmode.PModeFinder;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -64,7 +64,7 @@ public class FindPModes extends AbstractBaseHandler {
 
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
     																					throws PersistenceException {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         final IUserMessageEntity userMsg = procCtx.getReceivedUserMessage();
@@ -148,7 +148,7 @@ public class FindPModes extends AbstractBaseHandler {
      *              message unit,<br><code>null</code> otherwise.
      * @throws PersistenceException When an error occurs retrieving the referenced message unit
      */
-    private IPMode findForReceivedErrorSignal(final IErrorMessageEntity e, final MessageProcessingContext procCtx) throws PersistenceException {
+    private IPMode findForReceivedErrorSignal(final IErrorMessageEntity e, final IMessageProcessingContext procCtx) throws PersistenceException {
         IPMode pmode = null;
         // First get the referenced message id, starting with information from the header
         final String refToMessageId = MessageUnitUtils.getRefToMessageId(e);

@@ -23,8 +23,8 @@ import org.holodeckb2b.common.errors.ProcessingModeMismatch;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.ebms3.pmode.PModeFinder;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -46,7 +46,7 @@ public class FindPModesForPullRequest extends AbstractBaseHandler {
 	static final String FOUND_PULL_PMODES = "found-pull-pmodes";
 	
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) throws Exception {
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) throws Exception {
         final IPullRequestEntity pullRequest = procCtx.getReceivedPullRequest();
         if (pullRequest != null) {
             /* A PullRequest can at this point be handled by multiple P-Modes because P-Modes can "share" an MPC.

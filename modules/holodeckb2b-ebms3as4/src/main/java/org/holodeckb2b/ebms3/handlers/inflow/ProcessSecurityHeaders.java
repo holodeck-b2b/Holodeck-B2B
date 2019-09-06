@@ -17,7 +17,6 @@
 package org.holodeckb2b.ebms3.handlers.inflow;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.FailedAuthentication;
@@ -33,8 +32,8 @@ import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.events.security.ISignatureVerified;
@@ -81,7 +80,7 @@ import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
 public class ProcessSecurityHeaders extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(MessageProcessingContext procCtx, final Logger log) throws Exception {
+    protected InvocationResponse doProcessing(IMessageProcessingContext procCtx, final Logger log) throws Exception {
 
         IMessageUnit primaryMU = procCtx.getPrimaryMessageUnit();
         if (primaryMU == null)
@@ -117,9 +116,8 @@ public class ProcessSecurityHeaders extends AbstractBaseHandler {
         log.trace("Get security header processor from security provider");
         ISecurityHeaderProcessor hdrProcessor = HolodeckB2BCore.getSecurityProvider().getSecurityHeaderProcessor();
         log.trace("Process the available security headers in the message");
-        Collection<ISecurityProcessingResult> results = hdrProcessor.processHeaders(procCtx.getParentContext(), 
-        																		Collections.singletonList(userMessage),
-                                                                                senderConfig, receiverConfig);
+        Collection<ISecurityProcessingResult> results = hdrProcessor.processHeaders(procCtx,
+        																			senderConfig, receiverConfig);
         if (!Utils.isNullOrEmpty(results)) {
         	log.trace("Security header processing finished, handle results");
             for(ISecurityProcessingResult r : results)
@@ -146,7 +144,7 @@ public class ProcessSecurityHeaders extends AbstractBaseHandler {
      * @param mc        The current message context
      * @param log		Log to be used
      */
-    private void handleProcessingResult(final ISecurityProcessingResult result, final MessageProcessingContext procCtx,
+    private void handleProcessingResult(final ISecurityProcessingResult result, final IMessageProcessingContext procCtx,
     									final Logger log) throws PersistenceException {
         final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
         final Collection<IMessageUnitEntity> rcvdMsgUnits = procCtx.getReceivedMessageUnits();

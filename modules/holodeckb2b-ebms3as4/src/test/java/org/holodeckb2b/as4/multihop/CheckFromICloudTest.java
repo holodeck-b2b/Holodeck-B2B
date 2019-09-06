@@ -28,10 +28,11 @@ import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.junit.BeforeClass;
@@ -66,7 +67,7 @@ public class CheckFromICloudTest {
             fail(axisFault.getMessage());
         }
 
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);        
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);        
         IUserMessageEntity userMessageEntity = HolodeckB2BCore.getStorageManager()
         													  .storeIncomingMessageUnit(new UserMessage());
         procCtx.setUserMessage(userMessageEntity);

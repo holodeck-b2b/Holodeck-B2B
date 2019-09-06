@@ -40,9 +40,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.config.InternalConfiguration;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
@@ -142,8 +143,8 @@ public class Axis2Sender {
 	        httpClient.getParams().setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT, 5000);
 	        msgCtx.setProperty(HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
 
-	        log.trace("Create an empty MessageProcessingContext for message with current configuration");
-            final MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(msgCtx);
+	        log.trace("Create an empty IMessageProcessingContext for message with current configuration");
+            final IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(msgCtx);
             if (messageUnit instanceof IUserMessage)
                 procCtx.setUserMessage((IUserMessageEntity) messageUnit);
             else if (messageUnit instanceof IPullRequest)

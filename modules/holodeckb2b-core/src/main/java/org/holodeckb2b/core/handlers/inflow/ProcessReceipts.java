@@ -26,8 +26,8 @@ import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -55,7 +55,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class ProcessReceipts extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log)
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log)
     																					throws PersistenceException {
         log.debug("Check for received receipts in message.");
         final Collection<IReceiptEntity>  receipts = procCtx.getReceivedReceipts();
@@ -79,7 +79,7 @@ public class ProcessReceipts extends AbstractBaseHandler {
      * @param log		Log to be used
      * @throws PersistenceException When a database error occurs while processing the Receipt Signal
      */
-    protected void processReceipt(final IReceiptEntity receipt, final MessageProcessingContext procCtx,
+    protected void processReceipt(final IReceiptEntity receipt, final IMessageProcessingContext procCtx,
     							  final Logger log) throws PersistenceException {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Change processing state to indicate we start processing the receipt. Also checks that the receipt is not

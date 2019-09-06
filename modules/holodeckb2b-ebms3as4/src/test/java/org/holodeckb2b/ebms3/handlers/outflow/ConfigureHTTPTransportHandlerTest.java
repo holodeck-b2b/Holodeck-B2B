@@ -36,8 +36,9 @@ import org.holodeckb2b.common.pmode.Protocol;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -80,7 +81,7 @@ public class ConfigureHTTPTransportHandlerTest {
         // Simulate a payload attachment
         mc.addAttachment("pl-1", new DataHandler("Some text", "application/text"));
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
 
         try {
@@ -117,7 +118,7 @@ public class ConfigureHTTPTransportHandlerTest {
     	UserMessage userMessage = new UserMessage();
     	userMessage.setPModeId(pmode.getId());
         
-    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
     	
     	try {

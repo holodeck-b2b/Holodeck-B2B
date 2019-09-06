@@ -25,8 +25,6 @@ import java.util.Map;
 
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workers.AbstractDirWatcher;
-import org.holodeckb2b.common.workers.AbstractPathWatcher;
-import org.holodeckb2b.common.workers.AbstractPathWatcher.Event;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;

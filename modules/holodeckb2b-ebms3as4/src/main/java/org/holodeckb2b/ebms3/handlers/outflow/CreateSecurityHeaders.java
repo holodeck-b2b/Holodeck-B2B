@@ -30,8 +30,8 @@ import org.holodeckb2b.common.messagemodel.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.events.security.ISignatureCreated;
@@ -80,7 +80,7 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 public class CreateSecurityHeaders extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(MessageProcessingContext procCtx, final Logger log) throws Exception {
+    protected InvocationResponse doProcessing(IMessageProcessingContext procCtx, final Logger log) throws Exception {
         log.trace("Get the primary message unit for this message");
         final IMessageUnit primaryMU = procCtx.getPrimaryMessageUnit();
         if (primaryMU == null)
@@ -135,9 +135,8 @@ public class CreateSecurityHeaders extends AbstractBaseHandler {
         ISecurityHeaderCreator hdrCreator = HolodeckB2BCore.getSecurityProvider().getSecurityHeaderCreator();
         log.debug("Create the security headers in the message");
         try {
-            Collection<ISecurityProcessingResult> results = hdrCreator.createHeaders(procCtx.getParentContext(),
-                                                                    procCtx.getSendingMessageUnits(),
-                                                                    senderConfig, receiverConfig);
+            Collection<ISecurityProcessingResult> results = hdrCreator.createHeaders(procCtx, 
+            																		 senderConfig, receiverConfig);
             log.trace("Security header creation finished, handle results");
             if (!Utils.isNullOrEmpty(results))
                 for(ISecurityProcessingResult r : results)
@@ -163,7 +162,7 @@ public class CreateSecurityHeaders extends AbstractBaseHandler {
      * @param procCtx   The current message processing context
      * @param log		The log to be used
      */
-    private void handleResult(final ISecurityProcessingResult result, final MessageProcessingContext procCtx,
+    private void handleResult(final ISecurityProcessingResult result, final IMessageProcessingContext procCtx,
     						  final Logger log) throws PersistenceException {
         final Collection<IMessageUnitEntity> sentMsgUnits = procCtx.getSendingMessageUnits();
         final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();

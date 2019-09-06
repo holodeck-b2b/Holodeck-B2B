@@ -24,10 +24,10 @@ import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.validation.header.HeaderValidationHandler;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
@@ -49,7 +49,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class ReadUserMessage extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procContext, final Logger log) 
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procContext, final Logger log) 
     																					throws PersistenceException {
         // First get the ebMS header block, that is the eb:Messaging element
         final SOAPHeaderBlock messaging = Messaging.getElement(procContext.getParentContext().getEnvelope());

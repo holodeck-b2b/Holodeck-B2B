@@ -50,12 +50,13 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EncodingUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.core.MessageProcessingContext;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 
 /**
  * Is an Axis2 {@link Worker} implementation to handle a single HTTP request. If the HTTP POST method is used it will 
  * first search the Service that handles request for the given URL. If a Service is found and has a "hb2b:builder"
- * parameter that class will be used to prepare the {@link MessageContext} and/or {@link MessageProcessingContext}. If 
+ * parameter that class will be used to prepare the {@link MessageContext} and/or {@link IMessageProcessingContext}. If 
  * no builder is specified the default Axis2 process is followed and the message content is processed by the Builder 
  * applicable to the Content-Type of the request is used.   
  * <p>This class is based on the default Axis2 implementation but removes all functionality not needed by Holodeck B2B,

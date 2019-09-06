@@ -35,10 +35,11 @@ import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.validation.IValidationExecutor;
 import org.holodeckb2b.core.validation.ValidationResult;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError.Severity;
@@ -106,7 +107,7 @@ public class PerformCustomValidationsTest {
         
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(umEntity);
         
         try {
@@ -140,7 +141,7 @@ public class PerformCustomValidationsTest {
         
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(umEntity);
         
         try {
@@ -177,7 +178,7 @@ public class PerformCustomValidationsTest {
     	
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.IN_FLOW);
-    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	procCtx.setUserMessage(umEntity);
     	
     	try {

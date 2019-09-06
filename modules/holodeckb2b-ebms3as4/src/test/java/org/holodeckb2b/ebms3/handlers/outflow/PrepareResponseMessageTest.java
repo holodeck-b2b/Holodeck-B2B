@@ -28,9 +28,10 @@ import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.junit.BeforeClass;
@@ -63,7 +64,7 @@ public class PrepareResponseMessageTest {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IErrorMessageEntity errorMessageEntity = updateManager.storeOutGoingMessageUnit(errorMessage);
 
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addSendingError(errorMessageEntity);
         
         try {
@@ -84,7 +85,7 @@ public class PrepareResponseMessageTest {
     	mc.setServerSide(true);
     	mc.setFLOW(MessageContext.IN_FLOW);
     	
-    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	
     	UserMessage usrMessage = new UserMessage();
     	usrMessage.setMessageId(MessageIdUtils.createMessageId());
@@ -118,7 +119,7 @@ public class PrepareResponseMessageTest {
     	mc.setServerSide(true);
     	mc.setFLOW(MessageContext.IN_FLOW);
     	
-    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	
     	UserMessage usrMessage = new UserMessage();
     	usrMessage.setMessageId(MessageIdUtils.createMessageId());

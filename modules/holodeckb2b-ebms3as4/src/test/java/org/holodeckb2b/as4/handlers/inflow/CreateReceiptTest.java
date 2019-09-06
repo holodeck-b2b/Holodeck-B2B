@@ -36,11 +36,12 @@ import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestEventProcessor;
 import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.receptionawareness.ReceiptCreatedEvent;
 import org.holodeckb2b.ebms3.handlers.inflow.ReadUserMessage;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
@@ -207,7 +208,7 @@ public class CreateReceiptTest {
         mc.setServerSide(true);
         mc.setEnvelope(soapModelBuilder.getSOAPEnvelope());
 
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         new ReadUserMessage().invoke(mc);
 
         IUserMessageEntity userMessage = procCtx.getReceivedUserMessage();
@@ -250,7 +251,7 @@ public class CreateReceiptTest {
     	mc.setServerSide(true);
     	mc.setEnvelope(soapModelBuilder.getSOAPEnvelope());
     	
-    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	new ReadUserMessage().invoke(mc);
     	
     	IUserMessageEntity userMessage = procCtx.getReceivedUserMessage();

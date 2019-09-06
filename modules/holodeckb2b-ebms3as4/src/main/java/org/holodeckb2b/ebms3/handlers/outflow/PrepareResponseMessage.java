@@ -24,7 +24,7 @@ import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -44,7 +44,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class PrepareResponseMessage extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
     																					throws PersistenceException {
         // Check if there are error signal messages to be included
         log.trace("Check for error signals generated during in flow to be included");
@@ -92,7 +92,7 @@ public class PrepareResponseMessage extends AbstractBaseHandler {
      * @return          The error signal message to include in the response
      */
     protected IErrorMessageEntity selectError(final Collection<IErrorMessageEntity> errors, 
-    										final MessageProcessingContext procCtx) {
+    										final IMessageProcessingContext procCtx) {
         IErrorMessageEntity    r = null;
         int             cp = -1; // The prio of the currently selected err, 0=Error or Receipt, 1=PullReq, 2=UsrMsg
 

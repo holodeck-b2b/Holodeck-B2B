@@ -33,9 +33,10 @@ import org.holodeckb2b.common.testhelpers.TestEventProcessor;
 import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.events.IMessageDelivery;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
@@ -87,7 +88,7 @@ public class DeliverUserMessageTest {
 		IUserMessageEntity umEntity = storageManager.storeIncomingMessageUnit(userMessage);
 		storageManager.setProcessingState(umEntity, ProcessingState.READY_FOR_DELIVERY);
 		
-		MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+		IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
 		procCtx.setUserMessage(umEntity);
 
 		try {

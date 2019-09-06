@@ -16,16 +16,17 @@
  */
 package org.holodeckb2b.common.workers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.io.File;
+import java.util.HashMap;
+
 import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.util.HashMap;
-
-import static org.junit.Assert.*;
 
 /**
  * Created at 23:08 16.09.16

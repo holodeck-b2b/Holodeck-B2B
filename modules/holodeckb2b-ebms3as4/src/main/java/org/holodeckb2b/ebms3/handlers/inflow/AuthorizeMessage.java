@@ -24,9 +24,9 @@ import org.holodeckb2b.common.errors.FailedAuthentication;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
@@ -58,7 +58,7 @@ import org.holodeckb2b.security.util.VerificationUtils;
 public class AuthorizeMessage extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) throws Exception {
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) throws Exception {
 
         Collection<IMessageUnitEntity> msgUnits = procCtx.getReceivedMessageUnits();
         if (Utils.isNullOrEmpty(msgUnits)) {

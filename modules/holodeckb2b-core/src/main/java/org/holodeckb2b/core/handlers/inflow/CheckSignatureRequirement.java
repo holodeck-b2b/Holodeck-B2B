@@ -21,8 +21,8 @@ import org.holodeckb2b.common.errors.PolicyNoncompliance;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
@@ -43,7 +43,7 @@ import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 public class CheckSignatureRequirement extends AbstractUserMessageHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final IMessageProcessingContext procCtx, 
     										  final Logger log) throws Exception {
 
     	final IPMode pmode = HolodeckB2BCore.getPModeSet().get(um.getPModeId());    	

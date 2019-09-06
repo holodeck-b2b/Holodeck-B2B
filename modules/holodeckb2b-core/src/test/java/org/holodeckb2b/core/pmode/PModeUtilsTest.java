@@ -23,7 +23,6 @@ import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.PartnerConfig;
 import org.holodeckb2b.common.pmode.Protocol;
 import org.holodeckb2b.common.pmode.PullRequestFlow;
-import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.junit.Test;

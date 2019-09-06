@@ -27,6 +27,7 @@ import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -49,12 +50,12 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class CatchAxisFault extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext mc, final Logger log) throws AxisFault {
+    protected InvocationResponse doProcessing(final IMessageProcessingContext mc, final Logger log) throws AxisFault {
         return InvocationResponse.CONTINUE;
     }
 
     @Override
-    public void doFlowComplete(final MessageProcessingContext procCtx, final Logger log) {
+    public void doFlowComplete(final IMessageProcessingContext procCtx, final Logger log) {
     	final MessageContext msgContext = procCtx.getParentContext();
         // This handler only needs to act when there was an unexpected failure
         if (msgContext.getFailureReason() != null) {

@@ -17,9 +17,9 @@
 package org.holodeckb2b.interfaces.security;
 
 import java.util.Collection;
+
 import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 
 /**
@@ -45,9 +45,7 @@ public interface ISecurityHeaderProcessor {
      * <p>When the processor has successfully processed the WS-Security headers they MUST be marked as such by calling
      * the {@link SOAPHeaderBlock#setProcessed()}.
      *
-     * @param msgContext        The Axis2 message context which should be used to get the SOAP Envelope and access to the
-     *                          attachments
-     * @param userMsgs          The collection of meta-data on the User Message message units contained in the message
+     * @param procContext       The Holodeck B2B message processing context. 
      * @param senderConfig      The security configuration for the <i>Sender</i> of the message as copied from the
      *                          P-Mode of the primary message unit. Contains the settings for signing and username
      *                          tokens. May be <code>null</code> if no security features related to the sender are
@@ -61,8 +59,7 @@ public interface ISecurityHeaderProcessor {
      *                                      contained in the message.
      *
      */
-    Collection<ISecurityProcessingResult> processHeaders(MessageContext msgContext,
-                                                         Collection<IUserMessage> userMsgs,
+    Collection<ISecurityProcessingResult> processHeaders(IMessageProcessingContext procContext,                                                         
                                                          ISecurityConfiguration senderConfig,
                                                          ISecurityConfiguration receiverConfig)
                                                                                     throws SecurityProcessingException;

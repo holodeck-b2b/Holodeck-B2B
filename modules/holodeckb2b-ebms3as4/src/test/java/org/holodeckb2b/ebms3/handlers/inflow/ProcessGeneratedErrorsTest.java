@@ -38,8 +38,9 @@ import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
@@ -82,7 +83,7 @@ public class ProcessGeneratedErrorsTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         
         // Create the Error Signal 
         EbmsError error1 = new EbmsError();
@@ -123,7 +124,7 @@ public class ProcessGeneratedErrorsTest {
     	// Prepare msg ctx
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.IN_FLOW);    	
-    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
        
     	procCtx.setUserMessage(usrMsgEntity);
     	
@@ -173,7 +174,7 @@ public class ProcessGeneratedErrorsTest {
     	// Prepare msg ctx
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.IN_FLOW);
-    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	procCtx.setUserMessage(usrMsgEntity);
     	procCtx.setPullRequest(pullReqEntity);
     	

@@ -27,7 +27,7 @@ import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -47,7 +47,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class ProcessErrors extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
     																					throws PersistenceException {
         log.debug("Check for received errors in message.");
         final Collection<IErrorMessageEntity> errorSignals = procCtx.getReceivedErrors();
@@ -78,7 +78,7 @@ public class ProcessErrors extends AbstractBaseHandler {
      * @param procCtx      The current message processing context
      * @throws PersistenceException When a database error occurs while processing the Error Signal
      */
-    protected void processErrorSignal(final IErrorMessageEntity errSignal, final MessageProcessingContext procCtx, 
+    protected void processErrorSignal(final IErrorMessageEntity errSignal, final IMessageProcessingContext procCtx, 
     								  final Logger log) throws PersistenceException {
         log.debug("Start processing Error Signal [msgId=" + errSignal.getMessageId() + "]");
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();

@@ -28,9 +28,9 @@ import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
@@ -66,7 +66,7 @@ public class ConfigureMultihop extends AbstractBaseHandler {
      * that the signal is a response to. See section 4.4 of the AS4 profile how the WS-A headers are constructed.
      */
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) throws Exception {
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) throws Exception {
         // For routing signals through the I-Cloud WS-A headers are used. We use the Axis2 addressing module to create
         // the headers. But we don't need these headers normally, so disable the module by default
         procCtx.getParentContext().setProperty(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES, Boolean.TRUE);
@@ -118,7 +118,7 @@ public class ConfigureMultihop extends AbstractBaseHandler {
      * @return          The referenced {@link UserMessage} or <code>null</code> if no unique referenced user message
      *                  can be found
      */
-    private IUserMessageEntity getReferencedUserMsg(final MessageProcessingContext procCtx, final ISignalMessage signal)
+    private IUserMessageEntity getReferencedUserMsg(final IMessageProcessingContext procCtx, final ISignalMessage signal)
                                                                                         throws PersistenceException {
         String refToMsgId = MessageUnitUtils.getRefToMessageId(signal);
         // If the signal does not contain a reference to another message unit there is nothing to do here

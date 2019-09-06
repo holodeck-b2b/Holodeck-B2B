@@ -16,12 +16,13 @@
  */
 package org.holodeckb2b.core.config;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
 import java.net.URL;
+
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.holodeckb2b.core.config.Config;
-
-import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

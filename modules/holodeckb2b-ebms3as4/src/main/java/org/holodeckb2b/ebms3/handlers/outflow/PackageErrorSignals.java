@@ -34,9 +34,9 @@ import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -71,7 +71,7 @@ import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 public class PackageErrorSignals extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 	
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 	
     																					throws PersistenceException {
         // First check if there are any errors to include
         final Collection<IErrorMessageEntity> errors = procCtx.getSendingErrors();

@@ -19,6 +19,7 @@ package org.holodeckb2b.security;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,6 +49,7 @@ import org.apache.wss4j.dom.processor.Processor;
 import org.apache.wss4j.dom.str.STRParser;
 import org.apache.wss4j.dom.validate.Validator;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
@@ -150,13 +152,15 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
      */
     @SuppressWarnings("incomplete-switch")
 	@Override
-    public Collection<ISecurityProcessingResult> processHeaders(MessageContext mc, Collection<IUserMessage> userMsgs,
+    public Collection<ISecurityProcessingResult> processHeaders(IMessageProcessingContext procCtx,
                                                                 ISecurityConfiguration senderConfig,
                                                                 ISecurityConfiguration receiverConfig)
                                                                                     throws SecurityProcessingException {
         // Copy reference to message context
-        this.msgContext = mc;
-        this.userMsgs = userMsgs;
+        this.msgContext = procCtx.getParentContext();
+        // Currently HB2B can only handle one User Message message unit per message, but this processor is already
+        // capable of handling more, so convert the single one to a list
+        this.userMsgs = Collections.singletonList(procCtx.getReceivedUserMessage());
 
         // Convert the SOAP Envelope to standard DOM representation as this is required by the security processing
         // libraries

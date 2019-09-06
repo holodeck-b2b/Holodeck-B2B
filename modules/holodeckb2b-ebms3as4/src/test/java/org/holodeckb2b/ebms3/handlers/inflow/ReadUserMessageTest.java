@@ -27,8 +27,9 @@ import org.apache.axiom.soap.SOAPModelBuilder;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -105,7 +106,7 @@ public class ReadUserMessageTest {
         mc.setFLOW(MessageContext.IN_FLOW);
         mc.setEnvelope(soapModelBuilder.getSOAPEnvelope());
 
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         
         try {
             assertEquals(Handler.InvocationResponse.CONTINUE, new ReadUserMessage().invoke(mc));

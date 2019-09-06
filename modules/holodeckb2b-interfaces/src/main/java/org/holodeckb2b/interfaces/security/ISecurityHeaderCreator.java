@@ -17,8 +17,8 @@
 package org.holodeckb2b.interfaces.security;
 
 import java.util.Collection;
-import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 
 /**
@@ -40,9 +40,7 @@ public interface ISecurityHeaderCreator {
      * <i>"default"</i> and <i>"ebms"</i> security headers. If payload data is not immediately encrypted, the method
      * must ensure that encryption will take place when the message is sent.
      *
-     * @param msgContext        The Axis2 message context which should be used to get the SOAP Envelope and access to the
-     *                          attachments
-     * @param msgUnits          The collection of meta-data on the message units contained in the message
+     * @param procContext       The Holodeck B2B message processing context. 
      * @param senderConfig      The security configuration for the <i>Sender</i> of the message as copied from the
      *                          P-Mode of the primary message unit. Contains the settings for signing and username
      *                          tokens. May be <code>null</code> if no security features related to the sender are
@@ -55,8 +53,7 @@ public interface ISecurityHeaderCreator {
      *                                      the error is not directly related to problems in the security headers to be
      *                                      created in the message.
      */
-    Collection<ISecurityProcessingResult> createHeaders(MessageContext msgContext,
-                                                        Collection<? extends IMessageUnit> msgUnits,
+    Collection<ISecurityProcessingResult> createHeaders(IMessageProcessingContext procContext,
                                                         ISecurityConfiguration senderConfig,
                                                         ISecurityConfiguration receiverConfig)
                                                                                      throws SecurityProcessingException;

@@ -46,8 +46,8 @@ import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -75,7 +75,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      * @throws PersistenceException When a database problem occurs changing the processing state of the message unit
      */
     @Override
-    protected InvocationResponse doProcessing(final IUserMessageEntity um, final MessageProcessingContext procCtx, 
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final IMessageProcessingContext procCtx, 
     										  final Logger log) throws PersistenceException {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
 
@@ -247,7 +247,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
      * @param log			The Log to be used
      * @throws PersistenceException When updating the processing state fails.
      */
-    private void createInconsistentError(final MessageProcessingContext procCtx, final IUserMessageEntity um, 
+    private void createInconsistentError(final IMessageProcessingContext procCtx, final IUserMessageEntity um, 
     									 final String invalidRef, final Logger log) throws PersistenceException {
         log.info("UserMessage with id " + um.getMessageId() + " can not be processed because payload"
                  + (invalidRef != null ? " with href=" + invalidRef  : "") + " is not included in message");

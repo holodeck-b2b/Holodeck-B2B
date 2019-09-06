@@ -38,8 +38,9 @@ import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.junit.Before;
@@ -80,7 +81,7 @@ public class CheckSignatureRequirementTest {
         mc.setFLOW(MessageContext.IN_FLOW);
         mc.setServerSide(true);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
     }
     
@@ -100,7 +101,7 @@ public class CheckSignatureRequirementTest {
     	
     	pmode.getInitiator().getSecurityConfiguration().setSignatureConfiguration(new SigningConfig());    	 
     	
-    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);    	
+    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);    	
         ISignatureProcessingResult  signatureResult = mock(ISignatureProcessingResult.class);
         procCtx.addSecurityProcessingResult(signatureResult);
 

@@ -32,9 +32,9 @@ import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.core.validation.ValidationResult;
 import org.holodeckb2b.interfaces.config.IConfiguration;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
@@ -137,7 +137,7 @@ public class HeaderValidationHandler extends AbstractBaseHandler {
 	}
 	
     @Override
-    protected InvocationResponse doProcessing(MessageProcessingContext procCtx, final Logger log) throws Exception {
+    protected InvocationResponse doProcessing(IMessageProcessingContext procCtx, final Logger log) throws Exception {
     	if (laxValidatorSpecs == null || strictValidatorSpecs == null) {
     		log.fatal("Handler not correctly initialized, header validators not available!");
     		throw new AxisFault("Configuration error!");

@@ -39,9 +39,10 @@ import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError.Severity;
@@ -117,7 +118,7 @@ public class DetermineErrorReportingTest {
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         
         // Create the Error Signal referencing the message unit
@@ -167,7 +168,7 @@ public class DetermineErrorReportingTest {
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setPullRequest(pullRequestEntity);
         
         // Create the Error Signal referencing the message unit
@@ -217,7 +218,7 @@ public class DetermineErrorReportingTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         
         // Create the Error Signal referencing the message unit
@@ -257,7 +258,7 @@ public class DetermineErrorReportingTest {
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         
         // Create the Error Signal referencing the message unit
@@ -299,7 +300,7 @@ public class DetermineErrorReportingTest {
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         procCtx.addReceivedReceipt(rcptEntity);
         
@@ -341,7 +342,7 @@ public class DetermineErrorReportingTest {
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         procCtx.addReceivedReceipt(rcptEntity);
         
@@ -381,7 +382,7 @@ public class DetermineErrorReportingTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
         
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         
         // Create the Error Signal referencing the message unit

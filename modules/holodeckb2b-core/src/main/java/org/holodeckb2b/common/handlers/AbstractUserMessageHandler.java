@@ -18,7 +18,7 @@ package org.holodeckb2b.common.handlers;
 
 import org.apache.axis2.context.MessageContext;
 import org.apache.logging.log4j.Logger;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
@@ -40,7 +40,8 @@ public abstract class AbstractUserMessageHandler extends AbstractBaseHandler {
      * {@inheritDoc}
      */
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) throws Exception {
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
+    																								throws Exception {
         log.trace("Check if MessageContext contains a MessageUnit");
         final int currentFlow = procCtx.getParentContext().getFLOW();
         IUserMessageEntity userMessage = currentFlow == MessageContext.IN_FLOW 
@@ -61,7 +62,7 @@ public abstract class AbstractUserMessageHandler extends AbstractBaseHandler {
      * Abstract method that implementations must use to do the actual user message processing.
      * 
      * @param userMessage   The currently processed User Messsge as a {@link IUserMessageEntity}
-     * @param procCtx       The Holodeck B2B {@link MessageProcessingContext}
+     * @param procCtx       The Holodeck B2B {@link IMessageProcessingContext}
      * @param log			Log to use
      * @return              How to continue processing of the message. If message processing should not continue, it is
      *                      RECOMMENDED to throw an AxisFault instead of returning <code>InvocationResponse.ABORT</code>
@@ -72,6 +73,6 @@ public abstract class AbstractUserMessageHandler extends AbstractBaseHandler {
      *                      in the message context to make it available for handlers in the fault flow!
      */
     protected abstract InvocationResponse doProcessing(final IUserMessageEntity userMessage,
-                                                       final MessageProcessingContext procCtx, Logger log) 
+                                                       final IMessageProcessingContext procCtx, Logger log) 
                                                     		   										throws Exception;
 }

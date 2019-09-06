@@ -25,7 +25,7 @@ import org.holodeckb2b.common.errors.EmptyMessagePartitionChannel;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
@@ -44,7 +44,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class GetMessageUnitForPulling extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
     																					throws PersistenceException {
         final IPullRequestEntity pullRequest = procCtx.getReceivedPullRequest();        
         if (pullRequest == null || pullRequest.getCurrentProcessingState().getState() == ProcessingState.FAILURE)

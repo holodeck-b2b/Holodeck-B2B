@@ -27,7 +27,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.core.MessageProcessingContext;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 
 /**
  * Is an <i>abstract</i> implementation of an Axis2 handler that acts as the base class for the Holodeck B2B handlers.
@@ -75,7 +76,7 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
      * @param mc            The Axis2 {@link MessageContext}. Will be passed onto the implementation for the actual
      *                      processing
      * @return              The result of the message processing, i.e. the result of
-     *                      {@link #doProcessing(MessageProcessingContext, Logger)} of the implementation
+     *                      {@link #doProcessing(IMessageProcessingContext, Logger)} of the implementation
      * @throws AxisFault    If an error occurs during the processing of the message that should prevent further
      *                      processing. Note that this will stop processing of the complete flow and may leave message
      *                      units in an undefined state!
@@ -144,7 +145,7 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
     /**
      * Abstract method that implementations must use to do the actual message processing.
      *
-     * @param procCtx       The current Holodeck B2B {@link MessageProcessingContext}
+     * @param procCtx       The current Holodeck B2B {@link IMessageProcessingContext}
      * @param log 			Log to use 
      * @return              How to continue processing of the message. If message processing should not continue, it is
      *                      RECOMMENDED to throw an AxisFault instead of returning <code>InvocationResponse.ABORT</code>
@@ -154,7 +155,7 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
      *                      units in an undefined state! Also ensure that all information needed for a response is set
      *                      in the message context to make it available for handlers in the fault flow!
      */
-    protected abstract InvocationResponse doProcessing(final MessageProcessingContext procCtx, final Logger log) 
+    protected abstract InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
     																								throws Exception;
 
     /**
@@ -165,8 +166,8 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
      * method should not depend on execution of handlers later in the flow.
      * <p>NOTE: A default no-op implementation is provided so sub classes only need to override if action is required.
      *
-     * @param procCtx       The current Holodeck B2B {@link MessageProcessingContext}
+     * @param procCtx       The current Holodeck B2B {@link IMessageProcessingContext}
      * @param log 			Log to use 
      */
-    protected void doFlowComplete(final MessageProcessingContext procCtx, final Logger log) {}
+    protected void doFlowComplete(final IMessageProcessingContext procCtx, final Logger log) {}
 }

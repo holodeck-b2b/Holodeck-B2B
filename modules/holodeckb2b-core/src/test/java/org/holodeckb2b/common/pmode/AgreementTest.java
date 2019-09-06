@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.holodeckb2b.common.pmode.Agreement;
 import org.holodeckb2b.common.util.Utils;
 import org.junit.Test;
 

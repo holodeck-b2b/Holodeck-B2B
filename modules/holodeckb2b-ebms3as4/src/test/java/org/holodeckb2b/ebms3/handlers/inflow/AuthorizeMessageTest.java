@@ -35,8 +35,9 @@ import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.handlers.MessageProcessingContext;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
@@ -62,7 +63,7 @@ public class AuthorizeMessageTest {
     private static PMode    pmodeNoAuth;
 
     private MessageContext mc;
-    private MessageProcessingContext  procCtx;
+    private IMessageProcessingContext  procCtx;
 
     @BeforeClass
     public static void setUpClass() throws Exception {

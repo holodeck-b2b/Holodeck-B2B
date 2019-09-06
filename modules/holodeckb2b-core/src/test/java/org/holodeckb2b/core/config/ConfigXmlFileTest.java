@@ -23,7 +23,6 @@ import static org.junit.Assert.fail;
 
 import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.core.config.ConfigXmlFile;
 import org.junit.Test;
 
 /**

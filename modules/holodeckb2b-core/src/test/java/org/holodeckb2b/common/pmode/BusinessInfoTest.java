@@ -22,9 +22,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.holodeckb2b.common.pmode.BusinessInfo;
-import org.holodeckb2b.common.pmode.Property;
-import org.holodeckb2b.common.pmode.Service;
 import org.holodeckb2b.common.util.Utils;
 import org.junit.Test;
 
