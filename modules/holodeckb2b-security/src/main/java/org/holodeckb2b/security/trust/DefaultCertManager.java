@@ -411,7 +411,8 @@ public class DefaultCertManager implements ICertificateManager {
 				if (performRevocationCheck 
 					&& (reason == BasicReason.UNSPECIFIED || reason == BasicReason.UNDETERMINED_REVOCATION_STATUS)) {
 					try {
-						log.debug("Validation with revocation check failed, retry without");
+						log.debug("Validation with revocation check failed ({}), retry without", 
+									validationException.getMessage());
 						params.setRevocationEnabled(false);					
 						final PKIXCertPathValidatorResult validation = (PKIXCertPathValidatorResult) 
 								validator.validate(cp, params);

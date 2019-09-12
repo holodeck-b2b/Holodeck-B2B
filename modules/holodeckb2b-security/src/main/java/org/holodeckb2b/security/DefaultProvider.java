@@ -62,12 +62,12 @@ public class DefaultProvider implements ISecurityProvider {
      */
     @Override
     public void init(final String hb2bHome) throws SecurityProcessingException {
-		// Make sure that BouncyCastle is the preferred security provider
+		// Make sure that BouncyCastle is the preferred JCE security provider
 		final Provider[] providers = Security.getProviders();
 		if (providers != null && providers.length > 0)
 			Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);		
 		log.debug("Registering BouncyCastle as preferred Java security provider");
-		Security.insertProviderAt(new BouncyCastleProvider(), 1);		        
+		Security.insertProviderAt(new BouncyCastleProvider(), 2);		        
         
         // Initialization done
         log.info("Default Security Provider version {} is ready!", VersionInfo.fullVersion);
