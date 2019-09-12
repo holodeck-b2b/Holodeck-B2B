@@ -19,7 +19,6 @@ package org.holodeckb2b.security;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,7 +30,6 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.MessageContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.ext.WSSecurityException;
@@ -50,6 +48,7 @@ import org.apache.wss4j.dom.str.STRParser;
 import org.apache.wss4j.dom.validate.Validator;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
@@ -76,9 +75,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
- * Is the default security provider's implementation of the {@link ISecurityHeaderProcessor} which is responsible for
- * the processing of the WS-Security headers in a received message. It uses the WSS4J framework for the actual
- * processing of the headers.
+ * Is the default security provider's implementation of the
+ * {@link ISecurityHeaderProcessor} which is responsible for the processing of
+ * the WS-Security headers in a received message. It uses the WSS4J framework
+ * for the actual processing of the headers.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
@@ -93,14 +93,14 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
     private DefaultCertManager certManager;
 
     /**
-     * Reference to the current message context
+     * Reference to the current message processing context
      */
-    private MessageContext       msgContext;
+    private IMessageProcessingContext procContext;
 
     /**
-     * Collection of all User Message units in the processed message
+     * Collection of all message units in the processed message
      */
-    private Collection<IUserMessage> userMsgs;
+    private Collection<? extends IMessageUnit> msgUnits;
 
     /**
      * DOM version of the SOAP envelope as this is needed for WSS4J processing
@@ -157,15 +157,13 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                                                                 ISecurityConfiguration receiverConfig)
                                                                                     throws SecurityProcessingException {
         // Copy reference to message context
-        this.msgContext = procCtx.getParentContext();
-        // Currently HB2B can only handle one User Message message unit per message, but this processor is already
-        // capable of handling more, so convert the single one to a list
-        this.userMsgs = Collections.singletonList(procCtx.getReceivedUserMessage());
+        this.procContext = procCtx;
+        this.msgUnits = procCtx.getReceivedMessageUnits();
 
         // Convert the SOAP Envelope to standard DOM representation as this is required by the security processing
         // libraries
         log.debug("Converting envelope to DOM structure for processing");
-        domEnvelope = Axis2XMLUtils.convertAxiomSOAPEnvToDOM(msgContext);
+        domEnvelope = Axis2XMLUtils.convertAxiomSOAPEnvToDOM(procContext.getParentContext());
 
         if (domEnvelope == null) {
             log.error("Converting the SOAP envelope to DOM representation failed");
@@ -222,7 +220,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         // Convert the processed SOAP envelope back to the Axiom representation for further processing
         SOAPEnvelope SOAPenv = Axis2XMLUtils.convertDOMSOAPEnvToAxiom(domEnvelope);
         try {
-            msgContext.setEnvelope(SOAPenv);
+            procContext.getParentContext().setEnvelope(SOAPenv);
             log.debug("Mark security headers as processed");
             final SOAPHeader header = SOAPenv.getHeader();
             if (header != null) {
@@ -263,7 +261,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         reqData.setDisableBSPEnforcement(true);
 
         // Register callback handler for attachments
-        reqData.setAttachmentCallbackHandler(new AttachmentCallbackHandler(msgContext));
+        reqData.setAttachmentCallbackHandler(new AttachmentCallbackHandler(procContext.getParentContext()));
 
         // Usernametokens are checked for replay attacks in 5 minute window and their created timestamp may only be
         // one minute ahead
@@ -273,12 +271,12 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         reqData.setAllowUsernameTokenNoPassword(true);
 
         // Configure signature verification action
-        reqData.setSigVerCrypto(certManager.getWSS4JCrypto(org.holodeckb2b.security.Action.VERIFY));
+        reqData.setSigVerCrypto(certManager.getWSS4JCrypto(Action.VERIFY));
         wssConfig.setValidator(WSConstants.SIGNATURE, new SignatureTrustValidator());
         reqData.setEnableRevocation(false);
         reqData.setEnableSignatureConfirmation(false);
         // Configure decryption action
-        reqData.setDecCrypto(certManager.getWSS4JCrypto(org.holodeckb2b.security.Action.DECRYPT));
+        reqData.setDecCrypto(certManager.getWSS4JCrypto(Action.DECRYPT));
         reqData.setCallbackHandler(new PasswordCallbackHandler());
         reqData.setAllowRSA15KeyTransportAlgorithm(false);
         reqData.setRequireSignedEncryptedDataElements(false);
@@ -288,7 +286,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         wsDocInfo.setCrypto(reqData.getSigVerCrypto());
         wsDocInfo.setCallbackLookup(new DOMCallbackLookup(domEnvelope));
         reqData.setWsDocInfo(wsDocInfo);
-        reqData.setMsgContext(msgContext);
+        reqData.setMsgContext(procContext.getParentContext());
         
         return reqData;
     }
@@ -418,7 +416,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                 final X509ReferenceType refType = SecurityUtils.getKeyReferenceType(
                              (STRParser.REFERENCE_TYPE) signResult.get(WSSecurityEngineResult.TAG_X509_REFERENCE_TYPE));
                 final IValidationResult trustCheck = getValidationResult(requestData);
-                final SignedMessagePartsInfo signedPartsInfo = SecurityUtils.getSignedPartsInfo(domEnvelope, userMsgs);                
+                final SignedMessagePartsInfo signedPartsInfo = SecurityUtils.getSignedPartsInfo(domEnvelope, msgUnits);                
                 // And create result object
                 results.add(new SignatureProcessingResult(signCert, trustCheck, refType, signAlgorithm,
                                                           signedPartsInfo.getEbmsHeaderInfo(),
@@ -443,14 +441,13 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                 // elements.
                 if (!Utils.isNullOrEmpty(refs)) {
                     encAlgorithm = refs.get(0).getAlgorithm();
-                    userMsgs.stream().map(userMsg -> userMsg.getPayloads())
+                    msgUnits.stream().filter(m -> m instanceof IUserMessage)
+                    				 .map(userMsg -> ((IUserMessage) userMsg).getPayloads())
                                      .filter(umPayloads -> !Utils.isNullOrEmpty(umPayloads))
                                      .forEachOrdered(umPayloads ->
                                        umPayloads.forEach((p) ->
                                                  refs.stream()
-                                                 .filter(ref -> SecurityUtils.isPayloadReferenced(p,
-                                                                                                  ref.getWsuId(),
-                                                                                                  domEnvelope))
+                                                 .filter(ref -> SecurityUtils.isPayloadEncrypted(p, ref))
                                                  .forEach(match -> payloads.add(p))));
                 }
                 // As WSS4J does not report the key transport detail, we need to collect them directly from the

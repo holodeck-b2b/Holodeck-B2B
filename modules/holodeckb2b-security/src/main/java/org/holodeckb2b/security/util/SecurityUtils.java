@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.dom.WSDataRef;
 import org.apache.wss4j.dom.str.STRParser;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.holodeckb2b.common.util.Utils;
@@ -126,12 +127,69 @@ public final class SecurityUtils {
                              .forEachOrdered(umPayloads ->
                                 umPayloads.forEach((p) ->
                                           sigRefs.stream()
-                                          .filter(ref -> isPayloadReferenced(p, ref.getAttribute("URI"), domEnvelope))
+                                          .filter(ref -> isPayloadSigned(p, ref.getAttribute("URI"), domEnvelope))
                                           .forEach(match -> payloadDigests.put(p, new SignedPartMetadata(match)))));
 
         return new SignedMessagePartsInfo(ebMSHeaderDigest, payloadDigests);
     }
 
+    /**
+     * Checks whether the given signature reference applies to the given payload.
+     *
+     * @param pl            The payload to check
+     * @param ref	        The reference to check
+     * @param domEnvelope   The DOM representation of the SOAP envelope
+     * @return              <code>true</code> if this reference applies to a payload of the message,<br>
+     *                      <code>false</code> otherwise
+     * @since HB2B_NEXT_VERSION
+     */
+    private static boolean isPayloadSigned(final IPayload pl, final String ref, final Document domEnvelope) {
+    	final String plURI = pl.getPayloadURI();
+    	/* For attached payloads we can simple compare the id from the reference with the Content-id of the payload
+    	 * although we need to use endsWidth since the URI in the payload object does not contain prefix.
+    	 * For payloads contained in the SOAP Body it may work if the payload includes a reference to the SOAP Body 
+    	 * element. However such payloads commonly don't have a reference at all and otherwise may have one that refers
+    	 * to a child element in the SOAP Body which is the actual root of the payload. Therefore a body payload is
+    	 * considered referenced if the WSS4J reference is to the SOAP Body 
+    	 */
+    	if (plURI != null && ref.endsWith(plURI))
+    		return true;
+    	else if (pl.getContainment() == IPayload.Containment.BODY) {
+    		final Element bodyElement = WSSecurityUtil.findBodyElement(domEnvelope);
+    		return bodyElement != null && ref.endsWith(getId(bodyElement));
+    	} else
+    		return false;
+    }
+    
+    /**
+     * Checks whether the given encrypted data reference applies to the given payload.
+     *
+     * @param pl            The payload to check
+     * @param ref	        The reference to check
+     * @return              <code>true</code> if this reference applies to a payload of the message,<br>
+     *                      <code>false</code> otherwise
+     * @since HB2B_NEXT_VERSION
+     */
+    public static boolean isPayloadEncrypted(final IPayload pl, final WSDataRef ref) {
+    	final String plURI = pl.getPayloadURI();
+    	/* For attached payloads we can simple compare the id from the reference with the Content-id of the payload
+    	 * although we need to use endsWidth since the URI in the payload object does not contain prefix.
+    	 * For payloads contained in the SOAP Body this will not work because the reference is to the EncryptedData
+    	 * element and not the original element itself. Besides that the payloads commonly don't have a reference at 
+    	 * all and otherwise may have one that refers to a child element in the SOAP Body which is the actual root of 
+    	 * the payload. Therefore a body payload is considered referenced if the referenced EncryptedData element 
+    	 * applies to the SOAP Body 
+    	 */
+    	if (plURI != null && ref.getWsuId().endsWith(plURI))
+    		return true;
+    	else if (pl.getContainment() == IPayload.Containment.BODY) {
+    		final Element protectedElement = ref.getProtectedElement();
+    		return protectedElement != null && protectedElement.getLocalName().equals("Body")
+    		   && (  protectedElement.getNamespaceURI().equals("http://schemas.xmlsoap.org/soap/envelope/")
+    			  || protectedElement.getNamespaceURI().equals("http://www.w3.org/2003/05/soap-envelope"));
+    	} else
+    		return false;
+    }    
     /**
      * Gets the DOM representation of <code>wsse:Security</code> element that is the WS-Security header target to the
      * specified role/actor.
@@ -199,29 +257,6 @@ public final class SecurityUtils {
             }
         }
         return Utils.isNullOrEmpty(id) ? null : id;
-    }
-
-    /**
-     * Checks whether the given reference applies to the given payload.
-     *
-     * @param pl            The payload to check
-     * @param refURI        The reference to check
-     * @param domEnvelope   The DOM representation of the SOAP envelope
-     * @return              <code>true</code> if this reference applies to a payload of the message,<br>
-     *                      <code>false</code> otherwise
-     */
-    public static boolean isPayloadReferenced(final IPayload pl, final String refURI, final Document domEnvelope) {
-        final String plURI = pl.getPayloadURI();
-        // Because the reference in payload object does not contain prefix, use endsWith instead of equals
-        if (plURI != null && refURI.endsWith(plURI))
-            return true;
-        else if (pl.getContainment() == IPayload.Containment.BODY) {
-            // If not it can still refer to the payload in the SOAP body. The reference's URI should then be equal
-            // to the Id of the SOAP Body element (again ref URI has '#' prefix, so again endsWith is used)
-            Element bodyElement = WSSecurityUtil.findBodyElement(domEnvelope);
-            return bodyElement != null && refURI.endsWith(getId(bodyElement));
-        } else
-            return false;
     }
 
     /**
