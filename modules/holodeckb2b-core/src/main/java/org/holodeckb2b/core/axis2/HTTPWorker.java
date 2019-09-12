@@ -86,7 +86,7 @@ public class HTTPWorker implements Worker {
     public void service(
             final AxisHttpRequest request,
             final AxisHttpResponse response,
-            final MessageContext msgContext) throws HttpException {
+            final MessageContext msgContext) throws HttpException, IOException {
         
 		ConfigurationContext configurationContext = msgContext.getConfigurationContext();
         final String servicePath = configurationContext.getServiceContextPath();
@@ -203,7 +203,7 @@ public class HTTPWorker implements Worker {
 	        }
         } catch (AxisFault f) {
         	log.error("An error occurred while processing the request. Error message: " + f.getMessage());
-        	throw new HttpException("An error occurred while processing the request");
+        	throw f;
 		}
 		               
         Boolean holdResponse = (Boolean) msgContext.getProperty(RequestResponseTransport.HOLD_RESPONSE);

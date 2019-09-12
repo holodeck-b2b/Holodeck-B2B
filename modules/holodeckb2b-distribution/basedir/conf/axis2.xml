@@ -46,9 +46,6 @@
                                class="org.apache.axis2.jaxws.addressing.migrator.EndpointContextMapMigrator"/>
     </threadContextMigrators>
 
-	<!-- Ensure the Holodeck B2B Core is enabled -->
-	<module ref="holodeckb2b-core"/>
-	
     <!-- ================================================= -->
     <!-- Message Receivers -->
     <!-- ================================================= -->
@@ -162,6 +159,7 @@
             <handler name="MustUnderstandValidationDispatcher"
                 class="org.apache.axis2.jaxws.dispatchers.MustUnderstandValidationDispatcher"/>
         </phase>
+        <phase name="ExceptionHandling"/>
         <phase name="Logging"/>
         <phase name="ProtocolParsing"/>        
         <phase name="Security"/>
@@ -182,6 +180,7 @@
         <phase name="Addressing"/>
         <phase name="PreDispatch"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase"/>   
+        <phase name="ExceptionHandling"/>
         <phase name="Logging"/>
         <phase name="ProtocolParsing"/>        
         <phase name="Security"/>

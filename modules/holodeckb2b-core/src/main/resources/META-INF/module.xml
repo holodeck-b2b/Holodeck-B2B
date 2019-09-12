@@ -32,7 +32,7 @@
     <InFlow>    
         <!-- Catch a raised Fault and translate it into an EbMS Error -->
         <handler name="CatchFaults" class="org.holodeckb2b.core.handlers.CatchAxisFault">
-            <order phase="Transport" phaseFirst="true"/>            
+            <order phase="ExceptionHandling" phaseFirst="true"/>            
         </handler>        
         <!--
             Process the user message
@@ -80,7 +80,7 @@
     <InFaultFlow>    
         <!-- Catch a raised Fault and translate it into an EbMS Error -->
         <handler name="CatchFaults" class="org.holodeckb2b.core.handlers.CatchAxisFault">
-            <order phase="Transport" phaseFirst="true"/>            
+            <order phase="ExceptionHandling" phaseFirst="true"/>            
         </handler>
         <!--
         	Check if a received User Message should be signed and make sure it is when specified so in the P-Mode.
