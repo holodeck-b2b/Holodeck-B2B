@@ -44,4 +44,4 @@ For this purpose, the interfaces module is licensed under the Lesser General Pub
 To implement the cryptographic algorithms Holodeck B2B uses the Bouncy Castle library provided by [The Legion of the Bouncy Castle Inc.](http://www.bouncycastle.org), see the bc_license.txt file.
 
 ## Support
-Commercial Holodeck B2B support is provided by Chasquis Consulting. Visit [Chasquis-Consulting.com](http://chasquis-consulting.com/holodeck-b2b-support/) for more information.
+Commercial Holodeck B2B support is provided by Chasquis. Visit [Chasquis-consulting.com](http://chasquis-consulting.com/holodeck-b2b-support/) for more information.
