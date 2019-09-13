@@ -29,7 +29,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   module.
 
 ### Changed
-* Restructured the project's modules to create a better separation of _Core_ and _protocol specific_ code.   
+* Restructured the project's modules to create a better separation of _Core_ and _protocol specific_ code. This includes renaming of Axis2 phases to reflect the difference between _Core_ and _protocol specific_ processing. 
 * The security provider interface now use the new `org.holodeckb2b.interfaces.core.IMessageProcessingContext` interface
   to provide access to the processing context.
 * Adapted classes in _security_ module for changes in the interfaces related to trust validation. 
