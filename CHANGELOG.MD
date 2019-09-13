@@ -33,8 +33,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * The security provider interface now use the new `org.holodeckb2b.interfaces.core.IMessageProcessingContext` interface
   to provide access to the processing context.
 * Adapted classes in _security_ module for changes in the interfaces related to trust validation. 
-* Split the file based back-end integration into a separate project (see []()). The back-end however is still included
-  in the default distribution. 
+* Split the file based back-end integration into a separate project (see [File-backend](https://github.com/holodeck-b2b/file-backend)). This back-end is still included in the default distribution. 
 * Refactored the default P-Mode implementation so it also supports setting of parameters and serialization to XML.
 * Refactored send process to make it more flexible and use *PMode.MEPBinding* to select the Axis2 _Service_ to use for
   sending. This removes the need for coded _Services_ and specialised senders or sender worker when implementing an
