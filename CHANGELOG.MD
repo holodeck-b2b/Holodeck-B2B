@@ -58,6 +58,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Setter methods in `org.holodeckb2b.interfaces.general.IAgreement`
 * The configuration parameter (`IConfiguation.useStrictErrorRefCheck()`) to apply a strict validation on the
   references in the Error signal.
+* The configuration parameters (as defined in IConfiguration) related to the keystores used in WS-Security processing. 
+* The _msh_ URL path for receiving messages.
 
 ## 4.1.2
 ##### 2019-04-10
