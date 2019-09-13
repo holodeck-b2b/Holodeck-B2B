@@ -47,6 +47,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Constructor of `org.holodeckb2b.interfaces.submit.MessageSubmitException` now accepts `Throwable` instead of 
   `Exception`
 * The classes of the common message model implementation are now `Serializable` 
+* Switched to Log4J logging in handlers. 
 
 ### Fixed
 * Generated Content-Id results in signature failure [#99](https://github.com/holodeck-b2b/Holodeck-B2B/issues/99)
