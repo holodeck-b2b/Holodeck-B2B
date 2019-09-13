@@ -54,8 +54,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Error descriptions longer than 255 characters are not saved.
 
 ### Removed
-* Deprecated versions of the message processing events which names ended on _Event_
+* Message processing events which names ended on _Event_
 * Setter methods in `org.holodeckb2b.interfaces.general.IAgreement`
+* The configuration parameter (`IConfiguation.useStrictErrorRefCheck()`) to apply a strict validation on the
+  references in the Error signal.
 
 ## 4.1.2
 ##### 2019-04-10
