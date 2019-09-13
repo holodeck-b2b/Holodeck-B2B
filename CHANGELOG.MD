@@ -208,6 +208,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   level provides enough information to see all messages which are processed. Going to _DEBUG_ add information
   of process steps and _TRACE_ provides most detailed logging.    
 * In case of exception when logging an invalid SOAP message, a error message is written to SOAP log
+* Use 'exec' to start the Java program, instead of forking the process to simplify management of
+  the Java process.
+* Updated the example certificates and key stores to extend validity of certificates
+
+### Fixed
+* Checking of references in Error Signal has been corrected so Error with the reference contained
+  only in the Errors is not rejected.
+* Exception when processing an invalid SOAP message [#15](https://github.com/holodeck-b2b/Holodeck-B2B/issues/15)
+* Updated README regarding certificate management in `repository/certs` folder to include also
+  the keystore with the certificates of trusted certificate authorities.
+* Severity attributes should be "warning" or "failure" not "WARNING" or "FAILURE" [#89](https://github.com/holodeck-b2b/Holodeck-B2B/issues/89)
 
 ### Deprecated
 * The configuration parameter (`IConfiguation.allowSignalBundling()`) which was used to indicate that it was allowed to
@@ -227,20 +238,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 * Method `IMessageSubmitter.submitMessage(IUserMessage)` and corresponding implementation.
 * Method `IPModeSet.listPModeIds()` and corresponding implementation.
-
-## Unreleased
-### Changed
-* Use 'exec' to start the Java program, instead of forking the process to simplify management of
-  the Java process.
-* Updated the example certificates and key stores to extend validity of certificates
-
-### Fixed
-* Checking of references in Error Signal has been corrected so Error with the reference contained
-  only in the Errors is not rejected.
-* Exception when processing an invalid SOAP message [#15](https://github.com/holodeck-b2b/Holodeck-B2B/issues/15)
-* Updated README regarding certificate management in `repository/certs` folder to include also
-  the keystore with the certificates of trusted certificate authorities.
-* Severity attributes should be "warning" or "failure" not "WARNING" or "FAILURE" [#89](https://github.com/holodeck-b2b/Holodeck-B2B/issues/89)
 
 ## 3.1.2
 ##### 2018-05-28
