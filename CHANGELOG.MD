@@ -51,6 +51,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 * Generated Content-Id results in signature failure [#99](https://github.com/holodeck-b2b/Holodeck-B2B/issues/99)
 * NPE when white space is containd between the `ds:Signature` and `ds:SignedInfo` elements of a received message [#100](https://github.com/holodeck-b2b/Holodeck-B2B/issues/100)
+* Error descriptions longer than 255 characters are not saved.
 
 ### Removed
 * Deprecated versions of the message processing events which names ended on _Event_
