@@ -19,12 +19,10 @@ package org.holodeckb2b.core.config;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Random;
 
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.logging.log4j.LogManager;
 import org.holodeckb2b.common.util.Utils;
 
 /**
@@ -130,8 +128,7 @@ public class Config implements InternalConfiguration {
 
     /**
      * Initializes the configuration object using the Holodeck B2B configuration file located in <code>
-     * «HB2B_HOME»/conf/holodeckb2b.xml</code> where <b>HB2B_HOME</b> is the directory where Holodeck B2B is installed
-     * or the system property <i>"holodeckb2b.home"</i>.
+     * «HB2B_HOME»/conf/holodeckb2b.xml</code> where <b>HB2B_HOME</b> is the directory where Holodeck B2B is installed.
      *
      * @param configCtx     The Axis2 configuration context containing the Axis2 settings
      * @throws Exception    When the configuration can not be initialized
@@ -140,8 +137,8 @@ public class Config implements InternalConfiguration {
         // The Axis2 configuration context
         axisCfgCtx = configCtx;
 
-        // Detect the Holodeck B2B home directory
-        this.holodeckHome = detectHomeDir(configCtx);
+        // Set the Holodeck B2B home directory
+        this.holodeckHome = axisCfgCtx.getRealPath("").getParent(); 
 
         // Read the configuration file
         final ConfigXmlFile configFile = ConfigXmlFile.loadFromFile(
@@ -216,24 +213,6 @@ public class Config implements InternalConfiguration {
         final String strictHeaderValidation = configFile.getParameter("StrictHeaderValidation");
         useStrictHeaderValidation = isTrue(strictHeaderValidation);
     }
-
-    /**
-     * Helper method to detect what the Holodeck B2B home directory is.
-     *
-     * @param configContext     The Axis2 <code>ConfigurationContext</code> in which Holodeck B2B operates
-     * @return                  The Holodeck B2B home directory
-     */
-    private String detectHomeDir(final ConfigurationContext configContext) {
-        String hb2b_home_dir = System.getProperty("holodeckb2b.home");
-        if (!Utils.isNullOrEmpty(hb2b_home_dir) && !Files.isDirectory(Paths.get(hb2b_home_dir))) {
-            LogManager.getLogger(Config.class)
-                        .error( "Specified Holodeck B2B HOME does not exists, reverting to default home");
-            hb2b_home_dir = null;
-        }
-
-        return Utils.isNullOrEmpty(hb2b_home_dir) ? configContext.getRealPath("").getParent() : hb2b_home_dir;
-    }
-
 
     /**
      * {@inheritDoc}
