@@ -128,7 +128,8 @@ public class HB2BMonitoringApp {
 				throw new Exception("Could not retrieve the P-Modes from Holodeck B2B", e);
 			}
 	
-			splash.updateStatus("Retrieving certificates...");		
+			splash.updateStatus("Retrieving certificates...");	
+			boolean certsAvailable = true;
 			try {		
 				controller.certificates.put(CertType.Private, 
 													new CertificatesData(coreAPI.getCertificates(CertType.Private)));
@@ -137,12 +138,13 @@ public class HB2BMonitoringApp {
 				controller.certificates.put(CertType.Trusted, 
 													new CertificatesData(coreAPI.getCertificates(CertType.Trusted)));
 			} catch (RemoteException e) {
-				throw new Exception("Could not retrieve the certificates from Holodeck B2B", e);
+				// Probably another Certificate Manager implementation is used, therefore disable Certficates tab
+				certsAvailable = false;
 			}		
 
 			// Done with initialisation, close splash, show main window
 			splash.close();		
-			mainWindow = new MainWindow(controller);
+			mainWindow = new MainWindow(controller, certsAvailable);
 			mainWindow.setVisible(true);
 		} catch (Throwable t) {
 			// Something went wrong, just show error message and exit

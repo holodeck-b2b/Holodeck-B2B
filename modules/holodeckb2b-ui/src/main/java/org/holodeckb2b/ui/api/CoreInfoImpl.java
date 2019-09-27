@@ -56,6 +56,9 @@ public class CoreInfoImpl implements CoreInfo {
 			case Trusted :
 				return certMgr.getTrustedCertificates();			
 			}
+		} catch (ClassCastException cce) {
+			log.warn("The default Certificate Manager is not installed. Cannot get certificate information!");			
+			throw new RemoteException("Error while retrieving certificate", cce);
 		} catch (SecurityProcessingException re) {
 			log.error("Could not retrieve {} certificates from Core! Error: {}", type.name(), re.getMessage());			
 			throw new RemoteException("Error while retrieving certificate", re);
@@ -74,14 +77,14 @@ public class CoreInfoImpl implements CoreInfo {
 	}	
 	
 	interface QueryExecutor {
-		Collection<IMessageUnitEntity> getMessageUnits(QueryManager qm) throws PersistenceException;
+		Collection<IMessageUnitEntity> executeQuery(QueryManager qm) throws PersistenceException;
 	}
 	
 	private MessageUnit[] getMessageUnits(QueryExecutor q) throws RemoteException
 	{
 		IQueryManager qManager = HolodeckB2BCoreInterface.getQueryManager();		
 		try {
-			Collection<IMessageUnitEntity> msgUnits = q.getMessageUnits((QueryManager) qManager);
+			Collection<IMessageUnitEntity> msgUnits = q.executeQuery((QueryManager) qManager);
 			if (!Utils.isNullOrEmpty(msgUnits)) {
 				MessageUnit[] result = new MessageUnit[msgUnits.size()];
 				int i = 0;

@@ -63,7 +63,7 @@ public class MainWindow extends JFrame {
 	/**
 	 * Initialize the contents of the main window.
 	 */
-	public MainWindow(final HB2BMonitoringApp controller) {
+	public MainWindow(final HB2BMonitoringApp controller, final boolean certsAvailable) {
 		
 		setTitle("Holodeck B2B Gateway Monitoring");
 		setBounds(100, 100, 879, 593);
@@ -76,7 +76,8 @@ public class MainWindow extends JFrame {
 		content.add(new MessageHistoryPanel(controller), MSG_HISTORY_PANEL);
 		content.add(new MessageStatusPanel(controller), MSG_STATUS_PANEL);
 		content.add(new PModesPanel(controller), PMODES_PANEL);
-		content.add(new CertificatesPanel(controller), CERTS_PANEL);		
+		if (certsAvailable)
+			content.add(new CertificatesPanel(controller), CERTS_PANEL);		
 
 		JPanel menuPanel = new JPanel();
 		menuPanel.setBorder(new EmptyBorder(5, 5, 5, 19));
@@ -128,13 +129,14 @@ public class MainWindow extends JFrame {
 		
 		JLabel lblTrustedCertificates = new JLabel("Certificates");
 		lblTrustedCertificates.setFont(new Font("Lucida Grande", Font.PLAIN, 16));
-		menuOptionsPanel.add(lblTrustedCertificates);
 		lblTrustedCertificates.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				((CardLayout) content.getLayout()).show(content, CERTS_PANEL);
 			}
 		});
+		if (certsAvailable) 
+			menuOptionsPanel.add(lblTrustedCertificates);
 		
 		JPanel spacer = new JPanel();
 		spacer.setAlignmentY(Component.BOTTOM_ALIGNMENT);
