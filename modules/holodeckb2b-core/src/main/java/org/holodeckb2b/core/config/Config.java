@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.core.config;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.FileSystems;
@@ -138,7 +139,7 @@ public class Config implements InternalConfiguration {
         axisCfgCtx = configCtx;
 
         // Set the Holodeck B2B home directory
-        this.holodeckHome = axisCfgCtx.getRealPath("").getParent(); 
+        this.holodeckHome = axisCfgCtx.getRealPath("").getParent() + File.separatorChar; 
 
         // Read the configuration file
         final ConfigXmlFile configFile = ConfigXmlFile.loadFromFile(
