@@ -237,7 +237,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         try {
         	certManager = (ICertificateManager) Class.forName(certManagerClassname).newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
-        	log.fatal("Could not load the certificate manager: " + securityProviderClassname);
+        	log.fatal("Could not load the certificate manager: " + certManagerClassname);
         	throw new AxisFault("Unable to load required certificate manager!");
         }
         log.debug("Using certificate manager: " + certManager.getName());
