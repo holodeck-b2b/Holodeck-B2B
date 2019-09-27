@@ -19,6 +19,7 @@ package org.holodeckb2b.security.results;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Collections;
+
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.security.IEncryptionProcessingResult;
@@ -130,7 +131,7 @@ public class EncryptionProcessingResult extends AbstractSecurityProcessingResult
 
         @Override
         public String getKeyTransportAlgorithm() {
-            return algorithm;
+            return transportAlgorithm;
         }
 
         @Override
