@@ -144,7 +144,7 @@ public class ProcessErrors extends BaseHandler {
                                                                     + mu.entity.getMessageId() + "] to warning");
                     MessageUnitDAO.setWarning(mu);
                 } else {
-                    log.debug("Error level is warning, set processing state of referenced message ["
+                    log.debug("Error level is failure, set processing state of referenced message ["
                                                                     + mu.entity.getMessageId() + "] to failure");
                     MessageUnitDAO.setFailed(mu);
                 }
