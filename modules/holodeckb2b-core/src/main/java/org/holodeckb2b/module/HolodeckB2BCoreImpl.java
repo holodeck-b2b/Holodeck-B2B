@@ -188,8 +188,17 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
  		if (providers != null && providers.length > 0)
  			Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);		
  		log.debug("Registering BouncyCastle as preferred Java security provider");
- 		Security.insertProviderAt(new BouncyCastleProvider(), 1);        
-        
+ 		Security.insertProviderAt(new BouncyCastleProvider(), 2);
+
+        log.debug("Create the pull worker pool");
+        // The pull worker pool is only created here, initialization is done by the worker part of the normal
+        //  worker pool
+        pullWorkers = new WorkerPool(PullConfiguration.PULL_WORKER_POOL_NAME);
+        log.debug("Pull worker pool created");
+
+        log.debug("Create list of available message delivery methods");
+        msgDeliveryFactories = new HashMap<>();
+
         log.debug("Initialize worker pool");
         final IWorkerPoolConfiguration poolCfg =
                                         XMLWorkerPoolConfig.loadFromFile(instanceConfiguration.getWorkerPoolCfgFile());
@@ -203,15 +212,6 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
             throw new AxisFault("Unable to start Holodeck B2B. Could not load workers from file "
                                 + instanceConfiguration.getWorkerPoolCfgFile());
         }
-
-        log.debug("Create the pull worker pool");
-        // The pull worker pool is only created here, initialization is done by the worker part of the normal
-        //  worker pool
-        pullWorkers = new WorkerPool(PullConfiguration.PULL_WORKER_POOL_NAME);
-        log.debug("Pull worker pool created");
-
-        log.debug("Create list of available message delivery methods");
-        msgDeliveryFactories = new HashMap<>();
 
         log.info("Holodeck B2B Core module STARTED.");
     }
