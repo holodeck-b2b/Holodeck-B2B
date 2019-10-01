@@ -16,11 +16,7 @@
  */
 package org.holodeckb2b.ebms3.persistency.entities;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.Lob;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 
@@ -33,6 +29,14 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 @Entity
 @Table(name="PULLREQUEST")
 @DiscriminatorValue("PULLREQ")
+@NamedQueries({
+    @NamedQuery(name="PullRequest.findWithLastStateChangeBefore",
+            query = "SELECT mu " +
+                    "FROM PullRequest mu JOIN FETCH mu.states s1 " +
+                    "WHERE s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) " +
+                    "AND   s1.START <= :beforeDate"
+    )}
+)
 public class PullRequest extends SignalMessage implements IPullRequest {
 
     /*

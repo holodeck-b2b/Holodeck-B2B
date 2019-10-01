@@ -39,8 +39,11 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
 /**
  * Is the default <i>purge worker</i> responsible for cleaning up information on old and processed messages, i.e. remove
  * the meta-data information from the database and delete associated payloads from the file system.
- * <p>Currently only the number of days after which the message information should be removed can be configured. This is
- * done through the optional <i>purgeAfterDays</i> parameter. If not specified 30 days is used as the default setting.
+ * <p>Currently the worker has two optional parameters that set the number of days after which the message information
+ * should be removed. The first parameter, <i>purgeAfterDays</i> sets the default purge time for all message units. If
+ * not specified 30 days is used as the default setting. Using the second parameter, <i>purgePullDataAfter</i> a
+ * different period can be set for <i>Pull Request</i> and related "EmptyMPC" <i>Error Message</i> message units. If not
+ * set the same period as for the other message units will be used.
  * <p>This implementation will trigger {@link IMessageUnitPurgedEvent}s only for <i>User Message</i> message units and
  * it will only provide the meta-data to the event handler. The payload data associated with the User Message message
  * unit will already be deleted by the worker.
@@ -54,29 +57,51 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
      * should be purged.
      */
     public static final String P_PURGE_AFTER_DAYS = "purgeAfterDays";
+    /**
+     * Name of the configuration parameter that must be used to set the number of days after which message information
+     * related to pull requests should be purged.
+     */
+    public static final String P_PURGE_PULL_AFTER_DAYS = "purgePullDataAfter";
 
     /**
-     * The number of days after which message information will be purged
+     * The number of days after which message information will be purged by default
      */
     private int purgeAfterDays;
+    /**
+     * The number of days after which message information related to pulling will be purged
+     */
+    private int purgePullAfterDays;
 
     @Override
     public void doProcessing() throws InterruptedException {
         List<EntityProxy<MessageUnit>> experidMsgUnits = null;
 
         final Calendar expirationDate = Calendar.getInstance();
+        final Calendar pullExpirationDate = Calendar.getInstance();
         expirationDate.add(Calendar.DAY_OF_YEAR, -purgeAfterDays);
-        final String expDateString = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:SS.sss").format(expirationDate.getTime());
-
+        String expDateString = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:SS.sss").format(expirationDate.getTime());
         try {
             log.debug("Get all message units that changed state before " + expDateString);
-             experidMsgUnits = MessageUnitDAO.getMessageUnitsLastChangedBefore(expirationDate.getTime());
+            experidMsgUnits = MessageUnitDAO.getMessageUnitsLastChangedBefore(expirationDate.getTime());
+
         } catch (final DatabaseException dbe) {
             log.error("Could not get the list of expired message units from database! Error details: "
                      + dbe.getMessage());
         }
+        if (purgePullAfterDays != purgeAfterDays) {
+            pullExpirationDate.add(Calendar.DAY_OF_YEAR, -purgePullAfterDays);
+            expDateString = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:SS.sss").format(expirationDate.getTime());
+            try {
+                log.debug("Get all pull message units that changed state before " + expDateString);
+                experidMsgUnits.addAll(MessageUnitDAO.getPullingMessageUnitsLastChangedBefore(
+                                                                                    pullExpirationDate.getTime()));
+            } catch (final DatabaseException dbe) {
+                log.error("Could not get the list of expired pull message units from database! Error details: "
+                        + dbe.getMessage());
+            }
+        }
         if (Utils.isNullOrEmpty(experidMsgUnits)) {
-            log.debug("No expired message unist found, nothing to do");
+            log.debug("No expired message units found, nothing to do");
             return;
         }
 
@@ -130,11 +155,12 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
      */
     @Override
     public void setParameters(final Map<String, ?> parameters) {
-        if (Utils.isNullOrEmpty(parameters))
+        if (Utils.isNullOrEmpty(parameters)) {
             // No parameters given, use default
             purgeAfterDays = 30;
-        else {
-            final Object pPurgeDays = parameters.get(P_PURGE_AFTER_DAYS);
+            purgePullAfterDays = 30;
+        } else {
+            Object pPurgeDays = parameters.get(P_PURGE_AFTER_DAYS);
             if (pPurgeDays == null)
                 // No "purgeAfterDays" parameter given, use default
                 purgeAfterDays = 30;
@@ -148,8 +174,26 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
                     purgeAfterDays = 30;
                 }
             }
+            pPurgeDays = parameters.get(P_PURGE_PULL_AFTER_DAYS);
+            if (pPurgeDays == null)
+                // No "purgePullDataAfter" parameter given, use default
+                purgePullAfterDays = purgeAfterDays;
+            else {
+                try {
+                    purgePullAfterDays = Math.min(Integer.parseInt(pPurgeDays.toString()), purgeAfterDays);
+                } catch (final NumberFormatException NaN) {
+                    // Could not convert the given value for "purgePullDataAfter" parameter to a int, used default
+                    log.warn("Illegal value [" + pPurgeDays.toString() + "] used for \""
+                                + P_PURGE_PULL_AFTER_DAYS + "\" parameter! Using default.");
+                    purgePullAfterDays = purgeAfterDays;
+                }
+            }
         }
-        log.info("Message information will be deleted after " + purgeAfterDays + " days.");
+        if (purgePullAfterDays != purgeAfterDays)
+            log.info("Pull related message will de deleted after " + purgePullAfterDays
+                     + "days. Other message units after " + purgeAfterDays + " days.");
+        else
+            log.info("Message information will be deleted after " + purgeAfterDays + " days.");
     }
 
 }

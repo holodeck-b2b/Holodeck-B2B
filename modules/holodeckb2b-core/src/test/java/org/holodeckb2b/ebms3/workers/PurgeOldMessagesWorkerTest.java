@@ -21,10 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
@@ -34,23 +31,21 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.exceptions.DatabaseException;
 import org.holodeckb2b.core.testhelpers.TestUtils;
-import org.holodeckb2b.ebms3.persistency.entities.ErrorMessage;
-import org.holodeckb2b.ebms3.persistency.entities.MessageUnit;
-import org.holodeckb2b.ebms3.persistency.entities.Payload;
-import org.holodeckb2b.ebms3.persistency.entities.ProcessingState;
-import org.holodeckb2b.ebms3.persistency.entities.Receipt;
-import org.holodeckb2b.ebms3.persistency.entities.UserMessage;
+import org.holodeckb2b.ebms3.persistency.entities.*;
 import org.holodeckb2b.ebms3.persistent.dao.JPAUtil;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.events.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.events.types.IMessageUnitPurgedEvent;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.testhelpers.HolodeckCore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -75,6 +70,8 @@ public class PurgeOldMessagesWorkerTest {
     private static final String MSGID_4 = "r1-msg-id@test";
     private static final String MSGID_5 = "e1-msg-id@test";
     private static final String MSGID_6 = "um6-msg-id@test";
+    private static final String MSGID_7 = "pr7-msg-id@test";
+    private static final String MSGID_8 = "empty8-msg-id@test";
 
     private static String basePath =
             TestUtils.getPath(PurgeOldMessagesWorkerTest.class, "purgetest");
@@ -174,10 +171,32 @@ public class PurgeOldMessagesWorkerTest {
             um.setProcessingState(state);
             em.persist(um);
 
+            PullRequest pr = new PullRequest();
+            pr.setMessageId(MSGID_7);
+            state = new ProcessingState("DONE");
+            stateTime = Calendar.getInstance();
+            stateTime.add(Calendar.DAY_OF_YEAR, -2);
+            state.setStartTime(stateTime.getTime());
+            pr.setProcessingState(state);
+            em.persist(pr);
+
+            final ErrorMessage emptyMPC = new ErrorMessage();
+            emptyMPC.setMessageId(MSGID_8);
+            EbmsError mpcError = new EbmsError();
+            mpcError.setErrorCode("EBMS:0006");
+            mpcError.setSeverity(IEbmsError.Severity.WARNING);
+            emptyMPC.addError(mpcError);
+            state = new ProcessingState("DELIVERED");
+            stateTime = Calendar.getInstance();
+            stateTime.add(Calendar.DAY_OF_YEAR, -2);
+            state.setStartTime(stateTime.getTime());
+            emptyMPC.setProcessingState(state);
+            em.persist(emptyMPC);
+
             em.getTransaction().commit();
 
             final List<MessageUnit> muInDB = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
-            assertEquals(6, muInDB.size());
+            assertEquals(8, muInDB.size());
 
             em.close();
         } catch (final Exception ex) {
@@ -186,12 +205,38 @@ public class PurgeOldMessagesWorkerTest {
         }
     }
 
+    @AfterClass
+    public static void cleanup() throws DatabaseException {
+        final EntityManager em = JPAUtil.getEntityManager();
+
+        em.getTransaction().begin();
+        final Collection<MessageUnit> tps = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
+
+        for(final MessageUnit mu : tps)
+            em.remove(mu);
+
+        em.getTransaction().commit();
+    }
+
     @Test
     public void test0_NaNPurgeDelay() {
         final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
         final HashMap<String, Object> parameters = new HashMap<>();
         parameters.put(PurgeOldMessagesWorker.P_PURGE_AFTER_DAYS, "NaN");
+        try {
+            worker.setParameters(parameters);
+        } catch (final Exception e) {
+            fail("Worker did not accept wrong delay value");
+        }
+    }
+
+    @Test
+    public void test0_NaNPullPurgeDelay() {
+        final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
+
+        final HashMap<String, Object> parameters = new HashMap<>();
+        parameters.put(PurgeOldMessagesWorker.P_PURGE_PULL_AFTER_DAYS, "NaN");
         try {
             worker.setParameters(parameters);
         } catch (final Exception e) {
@@ -214,7 +259,7 @@ public class PurgeOldMessagesWorkerTest {
         final EntityManager em = JPAUtil.getEntityManager();
         final List<MessageUnit> muInDB = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
 
-        assertEquals(6, muInDB.size());
+        assertEquals(8, muInDB.size());
     }
 
     @Test
@@ -245,7 +290,7 @@ public class PurgeOldMessagesWorkerTest {
         final EntityManager em = JPAUtil.getEntityManager();
         final List<MessageUnit> muInDB = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
 
-        assertEquals(5, muInDB.size());
+        assertEquals(7, muInDB.size());
 
         boolean m1Deleted = true;
         for (final MessageUnit mu : muInDB)
@@ -284,7 +329,7 @@ public class PurgeOldMessagesWorkerTest {
         final EntityManager em = JPAUtil.getEntityManager();
         final List<MessageUnit> muInDB = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
 
-        assertEquals(4, muInDB.size());
+        assertEquals(6, muInDB.size());
 
         boolean m2Deleted = true;
         for (final MessageUnit mu : muInDB)
@@ -321,7 +366,7 @@ public class PurgeOldMessagesWorkerTest {
         final EntityManager em = JPAUtil.getEntityManager();
         final List<MessageUnit> muInDB = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
 
-        assertEquals(2, muInDB.size());
+        assertEquals(4, muInDB.size());
 
         boolean m3Deleted = true;
         boolean m4Deleted = true;
@@ -333,6 +378,44 @@ public class PurgeOldMessagesWorkerTest {
         assertTrue(m4Deleted);
 
         assertFalse(Paths.get(basePath, "tmp", "3-" + PAYLOAD_1_FILE).toFile().exists());
+    }
+
+    @Test
+    public void test4_removePullRelatedOnly() throws DatabaseException {
+        final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
+
+        final HashMap<String, Object> parameters = new HashMap<>();
+        parameters.put(PurgeOldMessagesWorker.P_PURGE_AFTER_DAYS, 5);
+        parameters.put(PurgeOldMessagesWorker.P_PURGE_PULL_AFTER_DAYS, 1);
+        worker.setParameters(parameters);
+
+        try {
+            // Enable event processing
+            final HolodeckCore hb2bTestCore = new HolodeckCore("");
+            final TestEventProcessor eventProcessor = new TestEventProcessor();
+            hb2bTestCore.setEventProcessor(eventProcessor);
+            HolodeckB2BCoreInterface.setImplementation(hb2bTestCore);
+
+            worker.doProcessing();
+            assertEquals(0, eventProcessor.msgIdsPurged.size());
+        } catch (final Exception ex) {
+            Logger.getLogger(PurgeOldMessagesWorkerTest.class.getName()).log(Level.SEVERE, null, ex);
+            fail("Exception during processing");
+        }
+
+        final EntityManager em = JPAUtil.getEntityManager();
+        final List<MessageUnit> muInDB = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
+
+        assertEquals(2, muInDB.size());
+
+        boolean m7Deleted = true;
+        boolean m8Deleted = true;
+        for (final MessageUnit mu : muInDB) {
+            m7Deleted &= !MSGID_7.equals(mu.getMessageId());
+            m8Deleted &= !MSGID_8.equals(mu.getMessageId());
+        }
+        assertTrue(m7Deleted);
+        assertTrue(m8Deleted);
     }
 
     class TestEventProcessor implements IMessageProcessingEventProcessor {

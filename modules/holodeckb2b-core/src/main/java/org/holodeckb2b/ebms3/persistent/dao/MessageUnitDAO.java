@@ -31,6 +31,7 @@ import org.holodeckb2b.common.exceptions.DuplicateMessageIdError;
 import org.holodeckb2b.common.util.MessageIdGenerator;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.ebms3.constants.ProcessingStates;
+import org.holodeckb2b.ebms3.errors.EmptyMessagePartitionChannel;
 import org.holodeckb2b.ebms3.errors.OtherContentError;
 import org.holodeckb2b.ebms3.persistency.entities.AgreementReference;
 import org.holodeckb2b.ebms3.persistency.entities.CollaborationInfo;
@@ -55,12 +56,8 @@ import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.ISchemaReference;
 import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
-import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
-import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.*;
 import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
-import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
-import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
@@ -905,6 +902,63 @@ public class MessageUnitDAO {
                     .getResultList();
         } catch (final NoResultException nothingFound) {
             result = null;
+        } catch (final Exception e) {
+            // Something went wrong during query execution
+            throw new DatabaseException("Could not execute query", e);
+        } finally {
+            em.getTransaction().commit();
+            em.close();
+        }
+        return createProxyResultList(result);
+    }
+
+    /**
+     * Retrieves all <i>Pull Rquest</i> and "EmptyMPC" <i>Error Message</i> message Units of which the last processing
+     * state change occurred before the given date.
+     * <p><b>NOTE:</b> The entity objects in the resulting list are not completely loaded! Before a message unit is
+     * going to be processed it must be loaded completely.
+     *
+     * @param   maxLastChangeDate   The latest date of a processing state change that is to be included in the result
+     * @return          List of {@link EntityProxy} objects to the {@link MessageUnit} objects that had their last
+     *                  processing state change at latest at the given date
+     * @throws DatabaseException If an error occurs while executing the query
+     * @since 2.1.6
+     */
+    public static List<EntityProxy<MessageUnit>> getPullingMessageUnitsLastChangedBefore(final Date maxLastChangeDate)
+                                                                            throws DatabaseException {
+        final List<MessageUnit> result = new ArrayList<>();
+        final EntityManager em = JPAUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            List<MessageUnit> qResult;
+            try {
+                qResult = em.createNamedQuery("PullRequest.findWithLastStateChangeBefore", MessageUnit.class)
+                                                .setParameter("beforeDate", maxLastChangeDate)
+                                                .getResultList();
+            } catch (final NoResultException nothingFound) {
+                qResult = null;
+            }
+            if (!Utils.isNullOrEmpty(qResult))
+                result.addAll(qResult);
+            try {
+                qResult = em.createNamedQuery("ErrorMessage.findWithLastStateChangeBefore", MessageUnit.class)
+                                                .setParameter("beforeDate", maxLastChangeDate)
+                                                .getResultList();
+            } catch (final NoResultException nothingFound) {
+                qResult = null;
+            }
+            if (!Utils.isNullOrEmpty(qResult))
+                for (MessageUnit mu : qResult) {
+                    IErrorMessage err = (IErrorMessage) mu;
+                    if (!Utils.isNullOrEmpty(err.getErrors())) {
+                        boolean isEmptyMPCError = false;
+                        for (IEbmsError e : err.getErrors())
+                            isEmptyMPCError = "EBMS:0006".equals(e.getErrorCode());
+                        if (isEmptyMPCError)
+                            result.add(mu);
+                    }
+                }
+
         } catch (final Exception e) {
             // Something went wrong during query execution
             throw new DatabaseException("Could not execute query", e);

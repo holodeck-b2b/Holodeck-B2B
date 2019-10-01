@@ -51,13 +51,19 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 @Table(name="ERROR_MESSAGE")
 @DiscriminatorValue("ERRORMSG")
 @NamedQueries({
-        @NamedQuery(name="ErrorMessage.findResponsesTo",
-            query = "SELECT err " +
-                    "FROM ErrorMessage err " +
-                    "WHERE err.REF_TO_MSG_ID = :refToMsgId " +
-                    "OR (err.REF_TO_MSG_ID IS NULL AND :refToMsgId IN (SELECT e.REF_TO_MSG_IN_ERROR FROM err.errors e))"
-            )
-        }
+    @NamedQuery(name="ErrorMessage.findResponsesTo",
+        query = "SELECT err " +
+                "FROM ErrorMessage err " +
+                "WHERE err.REF_TO_MSG_ID = :refToMsgId " +
+                "OR (err.REF_TO_MSG_ID IS NULL AND :refToMsgId IN (SELECT e.REF_TO_MSG_IN_ERROR FROM err.errors e))"
+        ),
+    @NamedQuery(name="ErrorMessage.findWithLastStateChangeBefore",
+            query = "SELECT mu " +
+                    "FROM ErrorMessage mu JOIN FETCH mu.states s1 " +
+                    "WHERE s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) " +
+                    "AND   s1.START <= :beforeDate"
+    )
+    }
 )
 public class ErrorMessage extends SignalMessage implements IErrorMessage {
 
