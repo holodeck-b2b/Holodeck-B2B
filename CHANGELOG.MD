@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.1.6
+###### 2019-10-01
+### Added
+* Additional parameter to the "clean up" worker `org.holodeckb2b.ebms3.workers.PurgeOldMessagesWorker` to specify 
+  period after which _Pull Requests_ and "Empty MPC" _Error_ message units should be removed.
+
+### Fixed
+* NPE when the worker reading the pull configuration is started before the Core has initialised the pull worker pool.
+
 ## 2.1.5
 ###### 2019-03-25
 ### Fixed
