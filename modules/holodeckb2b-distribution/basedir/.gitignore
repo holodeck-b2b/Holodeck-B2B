@@ -1,0 +1,7 @@
+# For the distribution package everything should be included in the repo
+# so ignore almost all rules from higher levels and just add all visible
+# files
+!**
+.*
+# But we do need to keep the hidden gitignore file :-)
+!.gitignore
