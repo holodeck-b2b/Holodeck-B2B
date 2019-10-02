@@ -56,7 +56,6 @@ public class SigningConfig implements ISigningConfiguration, Serializable {
      * Default constructor creates a new and empty <code>SigningConfig</code> instance.
      */
     public SigningConfig() {
-    	this.keyStoreRef = new KeystoreAlias();        
     }
 
     /**
@@ -66,9 +65,12 @@ public class SigningConfig implements ISigningConfiguration, Serializable {
      * @param source The source object to copy the parameters from
      */
     public SigningConfig(final ISigningConfiguration source) {
-        this.keyStoreRef = new KeystoreAlias();
-        this.keyStoreRef.name = source.getKeystoreAlias();
-        this.keyStoreRef.password = source.getCertificatePassword();
+    	if (source.getKeystoreAlias() != null) {
+	        this.keyStoreRef = new KeystoreAlias();
+	        this.keyStoreRef.name = source.getKeystoreAlias();
+	        this.keyStoreRef.password = source.getCertificatePassword();
+    	} else 
+    		this.keyStoreRef = null;
         this.keyReferenceMethod = source.getKeyReferenceMethod();
         this.includeCertPath = source.includeCertificatePath();
         this.signatureAlgorithm = source.getSignatureAlgorithm();
@@ -77,19 +79,23 @@ public class SigningConfig implements ISigningConfiguration, Serializable {
 
     @Override
     public String getKeystoreAlias() {
-        return keyStoreRef.name;
+        return keyStoreRef != null ? keyStoreRef.name : null;
     }
 
     public void setKeystoreAlias(final String alias) {
+    	if (this.keyStoreRef == null)
+    		this.keyStoreRef = new KeystoreAlias();
         this.keyStoreRef.name = alias;
     }
 
     @Override
     public String getCertificatePassword() {
-        return keyStoreRef.password;
+        return keyStoreRef != null ? keyStoreRef.password : null;
     }
 
     public void setCertificatePassword(final String password) {
+    	if (this.keyStoreRef == null)
+    		this.keyStoreRef = new KeystoreAlias();    	
         this.keyStoreRef.password = password;
     }
 

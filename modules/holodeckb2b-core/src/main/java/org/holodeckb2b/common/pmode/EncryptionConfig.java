@@ -44,7 +44,6 @@ public class EncryptionConfig implements IEncryptionConfiguration, Serializable 
      * Default constructor creates a new and empty <code>EncryptionConfig</code> instance.
      */
     public EncryptionConfig() {
-    	this.keyStoreRef = new KeystoreAlias();        
     }
 
     /**
@@ -54,7 +53,12 @@ public class EncryptionConfig implements IEncryptionConfiguration, Serializable 
      * @param source The source object to copy the parameters from
      */
     public EncryptionConfig(final IEncryptionConfiguration source) {
-        this.keyStoreRef = new KeystoreAlias();
+    	if (source.getKeystoreAlias() != null) {
+	        this.keyStoreRef = new KeystoreAlias();
+	        this.keyStoreRef.name = source.getKeystoreAlias();
+	        this.keyStoreRef.password = source.getCertificatePassword();
+    	} else 
+    		this.keyStoreRef = null;
         this.keyStoreRef.name = source.getKeystoreAlias();
         this.keyStoreRef.password = source.getCertificatePassword();
         this.algorithm = source.getAlgorithm();
@@ -64,7 +68,7 @@ public class EncryptionConfig implements IEncryptionConfiguration, Serializable 
 
     @Override
     public String getKeystoreAlias() {
-        return keyStoreRef.name;
+        return keyStoreRef != null ? keyStoreRef.name : null;
     }
 
     public void setKeystoreAlias(final String alias) {
@@ -75,7 +79,7 @@ public class EncryptionConfig implements IEncryptionConfiguration, Serializable 
 
     @Override
     public String getCertificatePassword() {
-        return keyStoreRef.password;
+        return keyStoreRef != null ? keyStoreRef.password : null;
     }
 
     public void setCertificatePassword(final String password) {
