@@ -35,7 +35,7 @@ import org.simpleframework.xml.core.ValueRequiredException;
  * Awareness feature.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class ReceptionAwarenessConfig implements IReceptionAwareness, Serializable {
 	private static final long serialVersionUID = -3921059933083375333L;

@@ -141,7 +141,7 @@ public final class SecurityUtils {
      * @param domEnvelope   The DOM representation of the SOAP envelope
      * @return              <code>true</code> if this reference applies to a payload of the message,<br>
      *                      <code>false</code> otherwise
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     private static boolean isPayloadSigned(final IPayload pl, final String ref, final Document domEnvelope) {
     	final String plURI = pl.getPayloadURI();
@@ -168,7 +168,7 @@ public final class SecurityUtils {
      * @param ref	        The reference to check
      * @return              <code>true</code> if this reference applies to a payload of the message,<br>
      *                      <code>false</code> otherwise
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     public static boolean isPayloadEncrypted(final IPayload pl, final WSDataRef ref) {
     	final String plURI = pl.getPayloadURI();

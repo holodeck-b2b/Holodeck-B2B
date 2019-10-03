@@ -22,7 +22,7 @@ import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
  * for the <i>Pull Request</i> which can always occur just once.
  *  
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since  HB2B_NEXT_VERSION
+ * @since  5.0.0
  */
 public interface IMessageProcessingContext {
 	/**

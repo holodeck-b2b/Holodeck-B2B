@@ -36,7 +36,7 @@ import org.simpleframework.xml.core.Commit;
  * Contains the parameters related to a specific leg of the P-Mode.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class Leg implements IAS4Leg, Serializable {
 	private static final long serialVersionUID = 322239336695896781L;

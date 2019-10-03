@@ -113,7 +113,7 @@ public class Config implements InternalConfiguration {
 
     /*
      * The class name of the certificate manager that should be used for managing and checking certificates
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     private String certManagerClass = null;
     
@@ -336,7 +336,7 @@ public class Config implements InternalConfiguration {
     
     /**
      * {@inheritDoc}
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     @Override
     public String getCertManagerClass() {

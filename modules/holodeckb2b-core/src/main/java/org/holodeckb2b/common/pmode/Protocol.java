@@ -25,7 +25,7 @@ import org.simpleframework.xml.Element;
  * Contains the parameters related to the transport of the message.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class Protocol implements IProtocol, Serializable {
 	private static final long serialVersionUID = 3204165089495319565L;

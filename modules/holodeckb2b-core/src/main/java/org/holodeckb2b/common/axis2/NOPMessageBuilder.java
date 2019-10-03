@@ -30,7 +30,7 @@ import org.apache.axis2.transport.TransportUtils;
  * receiver is responsible for processing of the message content.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class NOPMessageBuilder implements Builder {
 

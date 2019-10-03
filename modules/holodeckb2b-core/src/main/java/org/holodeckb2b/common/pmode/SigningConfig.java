@@ -27,7 +27,7 @@ import org.simpleframework.xml.convert.Convert;
  * Contains the parameters related to the message level signature.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class SigningConfig implements ISigningConfiguration, Serializable {
 	private static final long serialVersionUID = -1791692568947001563L;

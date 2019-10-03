@@ -45,7 +45,7 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * and whether it is supported can be checked using the {@link #supportsConfigBasedValidation()} method.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION A <i>Certificate Manager</i> already existed in version 4.x as part of the <i>Security 
+ * @since 5.0.0 A <i>Certificate Manager</i> already existed in version 4.x as part of the <i>Security 
  * 		Provider</i>. Its functionality however is more generic and therefore it has been decoupled and split off into 
  * 		a stand alone component. As trust validation and management have been left to the implementation the related 
  * 		methods from the 4.x version have been removed.
@@ -101,7 +101,7 @@ public interface ICertificateManager {
      * @return      The alias under which the certificate is registered if it was found, or<br><code>null</code> if the
      *              certificate is not registered
      * @throws SecurityProcessingException When there is a problem in searching for the certificate.
-     * @since HB2B_NEXT_VERSION This was the alternative <code>getCertificate</code> method from version 4.x   
+     * @since 5.0.0 This was the alternative <code>getCertificate</code> method from version 4.x   
      */
     String findCertificate(final X509Certificate cert) throws SecurityProcessingException;
     
@@ -139,7 +139,7 @@ public interface ICertificateManager {
      * 										MUST only be used to indicate errors that prevent checking the trust. When
      * 										thrown it indicates only that the trust could not be checked, i.e. the trust
      * 										in the certificate is undetermined. 
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     IValidationResult validateTrust(final List<X509Certificate> certs) throws SecurityProcessingException;
     
@@ -158,7 +158,7 @@ public interface ICertificateManager {
      * 										MUST only be used to indicate errors that prevent checking the trust. When
      * 										thrown it indicates only that the trust could not be checked, i.e. the trust
      * 										in the certificate is undetermined. 
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     default IValidationResult validateTrust(final List<X509Certificate> certs, final ISigningConfiguration sigCfg) 
     																				throws SecurityProcessingException {
@@ -170,7 +170,7 @@ public interface ICertificateManager {
      * 
      * @return	<code>true</code> if supported, <code>false</code> if not. 
      * 			Since this is an optional feature <code>false</code> is default.
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     default boolean supportsConfigBasedValidation() {
     	return false;

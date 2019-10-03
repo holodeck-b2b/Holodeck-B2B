@@ -38,7 +38,7 @@ import org.holodeckb2b.security.trust.DefaultCertManager;
  * which provide some utility function for easy access to the required keys and certificates.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION A security provider already existed in HB2B version 4.x but in this version the certificate
+ * @since 5.0.0 A security provider already existed in HB2B version 4.x but in this version the certificate
  * 			manager has been split off.
  */
 public class DefaultProvider implements ISecurityProvider {

@@ -29,7 +29,7 @@ import org.simpleframework.xml.Element;
  * targeted to the "ebms" role and / or signature configuration.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class PullRequestSecurityConfig implements ISecurityConfiguration, Serializable {
 	private static final long serialVersionUID = -1540128458046710579L;

@@ -27,7 +27,7 @@ import org.simpleframework.xml.Text;
  * P-Mode implementation that can be initialized using another P-Mode.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class PartyId implements IPartyId, Serializable {
 	private static final long serialVersionUID = 7490054765182562610L;

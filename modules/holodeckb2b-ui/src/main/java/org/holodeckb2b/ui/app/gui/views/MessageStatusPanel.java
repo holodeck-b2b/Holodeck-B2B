@@ -52,7 +52,7 @@ import org.holodeckb2b.ui.app.gui.models.MessageUnitStatesData;
  * Is the JPanel for querying and displaying the processing states of a message unit.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class MessageStatusPanel extends JPanel implements TableModelListener, DocumentListener {
 	private HB2BMonitoringApp controller;

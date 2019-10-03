@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * certificate manager for the validation of trust.  
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public interface IValidationResult {
 

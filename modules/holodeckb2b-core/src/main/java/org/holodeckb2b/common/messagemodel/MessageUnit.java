@@ -53,7 +53,7 @@ public abstract class MessageUnit implements IMessageUnit, Serializable {
      * 
      * @param 	m	The message unit to copy the data from
      * @return	New message unit instance with copy of the data
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     public static MessageUnit copyOf(IMessageUnit m) {
     	if (m instanceof IUserMessage)

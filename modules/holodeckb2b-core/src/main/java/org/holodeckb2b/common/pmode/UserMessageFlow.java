@@ -29,7 +29,7 @@ import org.simpleframework.xml.Element;
  * Contains the parameters related to the processing of <i>User Message</i> message units.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class UserMessageFlow implements IUserMessageFlow, Serializable {
 	private static final long serialVersionUID = 8319891949364207250L;

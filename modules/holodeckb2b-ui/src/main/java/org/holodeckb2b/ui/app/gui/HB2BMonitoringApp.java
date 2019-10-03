@@ -41,7 +41,7 @@ import org.holodeckb2b.ui.app.gui.views.SplashScreen;
  * getting all the data from the instance and creating the windows.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class HB2BMonitoringApp {
 	/**

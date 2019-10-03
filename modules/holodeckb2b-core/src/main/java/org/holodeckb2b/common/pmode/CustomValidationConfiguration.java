@@ -33,7 +33,7 @@ import org.simpleframework.xml.convert.Convert;
  * applied to <i>User Message</i> message units exchanged using this P-Mode.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class CustomValidationConfiguration implements IMessageValidationSpecification, Serializable {
 	private static final long serialVersionUID = -4301408795922706403L;

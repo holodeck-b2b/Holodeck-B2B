@@ -25,7 +25,7 @@ import org.simpleframework.xml.Element;
  * Contains the parameters related to a agreement meta-data. 
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class Agreement implements IAgreement, Serializable {
 	private static final long serialVersionUID = 1057302083084053298L;

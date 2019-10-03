@@ -41,7 +41,7 @@ import org.apache.axis2.transport.http.server.SimpleHttpServer;
  * is used. 
  *
  * @author Sander Fieten (sander at chasquis-consulting.com)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class HTTPListener implements TransportListener {
 	/**

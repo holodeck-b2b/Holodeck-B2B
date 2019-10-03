@@ -28,7 +28,7 @@ import org.simpleframework.xml.Element;
  * Contains the parameters related to the configuration of Receipt handling.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class ReceiptConfiguration implements IReceiptConfiguration, Serializable {
 	private static final long serialVersionUID = -7063330308596279624L;

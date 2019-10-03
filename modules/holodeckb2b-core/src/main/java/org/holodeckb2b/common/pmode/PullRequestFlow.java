@@ -29,7 +29,7 @@ import org.simpleframework.xml.Element;
  * Contains the parameters related to the processing of <i>Pull Request</i> message units.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class PullRequestFlow implements IPullRequestFlow, Serializable {
 	private static final long serialVersionUID = -7110752845931161722L;

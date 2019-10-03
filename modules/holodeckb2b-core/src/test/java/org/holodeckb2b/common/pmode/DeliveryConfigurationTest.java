@@ -28,7 +28,7 @@ import org.junit.Test;
 /**
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class DeliveryConfigurationTest extends AbstractBaseTest<DeliveryConfiguration> {
 

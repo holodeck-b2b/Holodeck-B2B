@@ -25,7 +25,7 @@ import org.simpleframework.xml.Element;
  * Contains the parameters related to the message level encryption.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class EncryptionConfig implements IEncryptionConfiguration, Serializable {
 	private static final long serialVersionUID = -3364424899897499432L;

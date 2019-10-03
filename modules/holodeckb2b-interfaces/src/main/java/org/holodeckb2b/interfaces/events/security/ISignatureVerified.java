@@ -43,7 +43,7 @@ public interface ISignatureVerified extends IMessageProcessingEvent {
 	 *   
 	 * @return	A {@link IValidationResult} object with the results of the trust validation. <code>null</code> if no 
 	 * 			validation has been performed.
-	 * @since HB2B_NEXT_VERSION
+	 * @since 5.0.0
 	 */
 	IValidationResult	getTrustValidationResult();
 	

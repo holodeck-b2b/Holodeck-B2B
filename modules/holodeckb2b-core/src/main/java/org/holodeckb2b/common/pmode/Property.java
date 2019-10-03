@@ -25,7 +25,7 @@ import org.simpleframework.xml.Element;
  * Contains the parameters related to the message or part properties.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class Property implements IProperty, Serializable {
 	private static final long serialVersionUID = 3344694075984021000L;

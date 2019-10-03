@@ -190,7 +190,7 @@ public class HolodeckB2BCoreInterface {
      * Gets information about the version of the Holodeck B2B Core of this instance. 
      *   
      * @return	The version info
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     public static IVersionInfo getVersion() {
     	assertInitialized();

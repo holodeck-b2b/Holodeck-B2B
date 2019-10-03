@@ -51,7 +51,7 @@ public interface ISignatureProcessingResult extends ISecurityProcessingResult {
      * {@link SignatureTrustException} as result of {@link #getFailureReason()}.  
      *   
      * @return	Information on the result of the trust validation of the certificate used to sign.
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     IValidationResult getTrustValidation();
     

@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
  * exception it provides the results of the trust validation as reported by the <i>Certificate Manager</i>.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class SignatureTrustException extends SecurityProcessingException {
 	/**

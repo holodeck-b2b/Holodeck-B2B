@@ -29,7 +29,7 @@ import org.simpleframework.xml.Text;
  * Contains the parameters related to the username tokens included in the security header.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class UsernameTokenConfig implements IUsernameTokenConfiguration, Serializable {
 	private static final long serialVersionUID = 4569870208430404059L;

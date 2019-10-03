@@ -25,7 +25,7 @@ import org.simpleframework.xml.Element;
  * handlers.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class Parameter implements Serializable {
 	private static final long serialVersionUID = 7787023057300928752L;

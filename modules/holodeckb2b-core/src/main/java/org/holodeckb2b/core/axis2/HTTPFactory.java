@@ -29,7 +29,7 @@ import org.apache.axis2.description.TransportInDescription;
  * of Service specified messsge processing.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class HTTPFactory extends org.apache.axis2.transport.http.server.HttpFactory {
 	

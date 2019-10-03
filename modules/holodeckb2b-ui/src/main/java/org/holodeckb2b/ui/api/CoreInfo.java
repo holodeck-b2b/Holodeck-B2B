@@ -33,7 +33,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * custom functionality that may have been added to an instance using extensions.  
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public interface CoreInfo extends Remote {
 

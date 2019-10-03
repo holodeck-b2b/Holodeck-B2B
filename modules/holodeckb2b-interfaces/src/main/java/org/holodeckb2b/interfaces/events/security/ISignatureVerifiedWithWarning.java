@@ -24,7 +24,7 @@ package org.holodeckb2b.interfaces.events.security;
  * be for example be used to create specific evidences.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public interface ISignatureVerifiedWithWarning extends ISignatureVerified {
 	

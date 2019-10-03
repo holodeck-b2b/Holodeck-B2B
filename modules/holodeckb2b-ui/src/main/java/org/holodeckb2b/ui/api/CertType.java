@@ -20,7 +20,7 @@ package org.holodeckb2b.ui.api;
  * Enumerates the purposes for which a certificate can be used.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public enum CertType {
 	/**

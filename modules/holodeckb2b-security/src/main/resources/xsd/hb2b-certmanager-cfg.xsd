@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
     targetNamespace="http://holodeck-b2b.org/schemas/2019/09/config/certmanager"
-    version="HB2B_NEXT_VERSION" xmlns="http://holodeck-b2b.org/schemas/2019/09/config/certmanager">
+    version="5.0.0" xmlns="http://holodeck-b2b.org/schemas/2019/09/config/certmanager">
     <xs:annotation>
         <xs:documentation>This XML schema defines the structure of the configuration file of the default <i>Certificate Manager</i> of Holodeck B2B.
         It configures the access to the three key stores of the Certificate Manager and includes two optional elements to configure OCSP revocation

@@ -27,7 +27,7 @@ import org.holodeckb2b.common.util.Utils;
  * The {@link TableModel} for the table listing the meta-data of the message units in the current history.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class MessageHistoryData extends AbstractTableModel {
 

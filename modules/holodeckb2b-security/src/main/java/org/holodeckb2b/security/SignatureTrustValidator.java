@@ -37,7 +37,7 @@ import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
  * security header processor to create a complete result. 
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class SignatureTrustValidator implements Validator {
 	

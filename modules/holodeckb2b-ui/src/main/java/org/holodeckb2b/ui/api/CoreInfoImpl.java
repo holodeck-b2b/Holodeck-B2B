@@ -24,7 +24,7 @@ import org.holodeckb2b.security.trust.DefaultCertManager;
  * Implements the {@link CoreInfo} interface to supply the UI app with information from the Holodeck B2B instance. 
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class CoreInfoImpl implements CoreInfo {
 	private static final Logger	log = LogManager.getLogger(CoreInfoImpl.class);

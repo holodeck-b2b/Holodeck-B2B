@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.0.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -69,7 +69,7 @@
         <dependency>
             <groupId>org.holodeckb2b.extensions</groupId>
 			<artifactId>file-backend</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>1.0.0</version>
         </dependency>
         
         <!--===============================================================

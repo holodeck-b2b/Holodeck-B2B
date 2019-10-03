@@ -33,7 +33,7 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  * number that should be used by the RMI server. The default port is set to 1701.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class RMIServer extends AbstractWorkerTask {
 	private static final Logger	log = LogManager.getLogger(RMIServer.class);

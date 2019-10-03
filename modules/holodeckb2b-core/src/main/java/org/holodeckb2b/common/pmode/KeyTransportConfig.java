@@ -27,7 +27,7 @@ import org.simpleframework.xml.convert.Convert;
  * Contains the parameters related to the key transport for message level encryption.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class KeyTransportConfig implements IKeyTransport, Serializable {
 	private static final long serialVersionUID = 2740107193474230438L;

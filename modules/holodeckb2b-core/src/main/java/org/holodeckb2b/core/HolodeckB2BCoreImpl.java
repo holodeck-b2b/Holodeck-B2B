@@ -130,7 +130,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     
     /**
      * The installed certificate manager that manages and checks certificates used in the message processing
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     private ICertificateManager certManager = null;
     
@@ -519,7 +519,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * Gets information about the version of the Holodeck B2B Core of this instance. 
      *   
      * @return	The version info
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     @Override
 	public IVersionInfo getVersion() {

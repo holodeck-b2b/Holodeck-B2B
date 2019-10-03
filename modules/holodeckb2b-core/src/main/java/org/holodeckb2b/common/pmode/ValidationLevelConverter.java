@@ -11,7 +11,7 @@ import org.simpleframework.xml.stream.OutputNode;
  * the XML document.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class ValidationLevelConverter implements Converter<MessageValidationError.Severity> {
 

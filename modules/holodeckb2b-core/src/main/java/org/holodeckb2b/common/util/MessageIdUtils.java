@@ -120,7 +120,7 @@ public class MessageIdUtils {
      * @param messageId     The message id to check for valid characters
      * @return              <code>true</code> if the given messageId does contain only valid characters,<br>
      *                      <code>false></code> otherwise
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     public static boolean isAllowed(final String messageId) {
         if (Utils.isNullOrEmpty(messageId))

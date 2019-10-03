@@ -25,7 +25,7 @@ import org.simpleframework.xml.Element;
  * Contains the Service meta-data parameters.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class Service implements IService, Serializable {
 	private static final long serialVersionUID = 4235073900459514445L;

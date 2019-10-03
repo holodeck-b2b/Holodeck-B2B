@@ -27,7 +27,7 @@ import org.simpleframework.xml.Element;
  * specific for the AS4 Compression Feature as defined in {@link IAS4PayloadProfile}.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class PayloadProfile implements IAS4PayloadProfile, Serializable {
 	private static final long serialVersionUID = -5886242178733861876L;

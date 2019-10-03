@@ -104,7 +104,7 @@ public interface InternalConfiguration extends IConfiguration {
      * when not set the Holodeck B2B Core will use the default implementation.
      *
      * @return The class name of the {@link ICertificateManager} implementation to use for handling certificates
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     String getCertManagerClass();
 }

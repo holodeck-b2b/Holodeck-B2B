@@ -96,7 +96,7 @@ import org.holodeckb2b.security.util.KeystoreUtils;
  * result in a lot of {@link ISignatureVerifiedWithWarning} events as the revocation check could not be executed.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION	This class replaces the certificate manager implementation part of the <i>default Security
+ * @since 5.0.0	This class replaces the certificate manager implementation part of the <i>default Security
  * 			Provider</i> in version 4.x (<code>org.holodeckb2b.security.CertificateManager</code>)
  */
 public class DefaultCertManager implements ICertificateManager {

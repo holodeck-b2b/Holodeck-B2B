@@ -70,7 +70,7 @@ public class PModeUtils {
      * 				<code>null</code> if the message unit is not assigned to a P-Mode 
      * @throws IllegalStateException	When the current P-Mode set does not contain the P-Mode that is registered in 
      * 									the meta-data of the message unit 
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     public static ILeg getLeg(final IMessageUnit m) {
     	final String pmodeId = m.getPModeId();
@@ -100,7 +100,7 @@ public class PModeUtils {
      * @param pmode		The P-Mode
      * @return			Configuration of the Leg that manages sending of User Messages by HB2B,<br>
      * 					<code>null</code> if this P-Mode has no such Leg
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     public static ILeg getSendLeg(final IPMode pmode) {
         ILeg   outLeg = null;
@@ -135,7 +135,7 @@ public class PModeUtils {
      * @param pmode		The P-Mode
      * @return			Configuration of the Leg that manages receiving of User Messages by HB2B,<br>
      * 					<code>null</code> if this P-Mode has no such Leg
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     public static ILeg getReceiveLeg(final IPMode pmode) {
     	ILeg   inLeg = null;
@@ -245,7 +245,7 @@ public class PModeUtils {
      * @return          The {@link ILeg} that uses pulling to receive the message, or<br>
      *                  <code>null</code> if there is no such leg
      * @since 4.1.0
-     * @since HB2B_NEXT_VERSION Changed visibility to public 
+     * @since 5.0.0 Changed visibility to public 
      */
     public static ILeg getOutPullLeg(final IPMode pmode) {
 	    // First we need to get the leg that configures the sending of the Pull Request

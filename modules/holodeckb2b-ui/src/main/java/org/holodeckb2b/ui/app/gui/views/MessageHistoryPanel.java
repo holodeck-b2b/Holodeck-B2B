@@ -54,7 +54,7 @@ import com.github.lgooddatepicker.components.TimePickerSettings;
  * Is the JPanel for displaying the message history. 
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class MessageHistoryPanel extends JPanel implements TableModelListener {
 

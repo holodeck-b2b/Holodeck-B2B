@@ -30,7 +30,7 @@ import org.simpleframework.xml.ElementList;
  * Contains the parameters related to the message level security.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class SecurityConfig implements ISecurityConfiguration, Serializable {
 	private static final long serialVersionUID = -5685657921442392001L;

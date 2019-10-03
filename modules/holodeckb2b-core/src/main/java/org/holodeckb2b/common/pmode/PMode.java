@@ -55,7 +55,7 @@ import org.simpleframework.xml.core.Persister;
  * @author Bram Bakx (bram at holodeck-b2b.org)
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IPMode
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 @Root(name = "PMode", strict = false)
 @Namespace(reference="http://holodeck-b2b.org/schemas/2014/10/pmode")

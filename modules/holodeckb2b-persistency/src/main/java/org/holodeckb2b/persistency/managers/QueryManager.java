@@ -282,7 +282,7 @@ public class QueryManager implements IQueryManager {
      * @return			List of message units with a time stamp older then the given date with, limited to the given
      * 					maximum number of entries 
      * @throws PersistenceException When an error occurs in retrieving the message unit meta-data
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     public List<IMessageUnitEntity> getMessageUnitHistory(final Date start, final int max) throws PersistenceException {
         if (max <= 0)

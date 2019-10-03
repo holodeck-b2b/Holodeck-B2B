@@ -42,7 +42,7 @@ import javax.swing.text.ViewFactory;
  * start and end of the XML components and then sets the colours for these text segments. 
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class PModeXMLView extends PlainView {
 

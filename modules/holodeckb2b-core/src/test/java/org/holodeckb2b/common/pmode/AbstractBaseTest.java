@@ -44,7 +44,7 @@ import org.xml.sax.SAXException;
  * functions to transform between XML and objects and check the XML documents. 
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  * @param T	The class being tested
  */
 public abstract class AbstractBaseTest<T> {

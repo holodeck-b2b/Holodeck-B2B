@@ -32,7 +32,7 @@ import org.simpleframework.xml.Transient;
  * Contains the parameters related to a delivery method. 
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class DeliveryConfiguration implements IDeliverySpecification, Serializable {
 	private static final long serialVersionUID = -4375532353411434169L;

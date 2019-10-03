@@ -43,7 +43,7 @@ import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
  *  
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  4.1.0
- * @since  HB2B_NEXT_VERSION Now implements interface extracted from earlier version
+ * @since  5.0.0 Now implements interface extracted from earlier version
  * @see AbstractBaseHandler
  */
 public class MessageProcessingContext implements IMessageProcessingContext {

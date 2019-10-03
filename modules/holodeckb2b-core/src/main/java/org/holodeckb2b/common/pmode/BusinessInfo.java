@@ -31,7 +31,7 @@ import org.simpleframework.xml.ElementList;
  * Contains the parameters related to a business information meta-data like Service and Action.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class BusinessInfo implements IBusinessInfo, Serializable {
 	private static final long serialVersionUID = 1656766261293059907L;

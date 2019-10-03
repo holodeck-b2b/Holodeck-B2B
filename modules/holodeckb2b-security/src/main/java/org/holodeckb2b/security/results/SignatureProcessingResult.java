@@ -87,7 +87,7 @@ public class SignatureProcessingResult extends AbstractSecurityProcessingResult 
      * @param algorithm             The signing algorithm
      * @param headerDigest          The digest meta-data for the ebMS header
      * @param payloadDigests        The payloads' digest meta-data
-     * @since HB2B_NEXT_VERSION
+     * @since 5.0.0
      */
     public SignatureProcessingResult(final X509Certificate signingCert, final IValidationResult trustCheckResult, 
     								 final X509ReferenceType certReferenceMethod,

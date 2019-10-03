@@ -63,7 +63,7 @@ import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
  * so as WSDL or XSD retrieval. It also only supports the GET and POST methods. 
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class HTTPWorker implements Worker {
 	private static final Log log = LogFactory.getLog(HTTPWorker.class);

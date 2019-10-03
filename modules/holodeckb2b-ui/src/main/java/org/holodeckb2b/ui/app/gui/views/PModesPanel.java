@@ -42,7 +42,7 @@ import org.holodeckb2b.ui.app.gui.HB2BMonitoringApp;
  * Is the JPanel for displaying the information about the P-Modes installed on the Holodeck B2B instance.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since HB2B_NEXT_VERSION
+ * @since 5.0.0
  */
 public class PModesPanel extends JPanel implements TableModelListener {
 	private HB2BMonitoringApp controller;
