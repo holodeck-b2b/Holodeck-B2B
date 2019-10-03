@@ -11,7 +11,7 @@ The message contains a JPEG image as payload
         <AgreementRef pmode="ex-pm-pull-x509"/>
         <ConversationId>org:holodeckb2b:example:conversation</ConversationId>
     </CollaborationInfo>
-    <PayloadInfo>
+    <PayloadInfo deleteFilesAfterSubmit="false">
         <PartInfo containment="attachment" mimeType="image/jpeg" location="payloads/Nelumno.jpg"/>
     </PayloadInfo>
 </MessageMetaData>
