@@ -11,7 +11,7 @@ The message contains two payloads, one XML document in the SOAP body and one JPE
         <AgreementRef pmode="ex-pm-push-auth"/>
         <ConversationId>org:holodeckb2b:test:conversation</ConversationId>
     </CollaborationInfo>
-    <PayloadInfo>
+    <PayloadInfo deleteAfterSubmit="false">
         <PartInfo containment="body" location="payloads/simple_document.xml">
             <PartProperties>
                 <Property name="original-file-name">simple_document.xml</Property>
