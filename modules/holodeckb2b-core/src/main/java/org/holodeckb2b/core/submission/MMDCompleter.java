@@ -250,6 +250,8 @@ final class MMDCompleter {
      *                                P-Mode conflicts
      */
     private void completeCollaborationInfo() throws MessageSubmitException {
+    	if (this.submission.getCollaborationInfo() == null)
+        	this.submission.setCollaborationInfo(new CollaborationInfo());
         final CollaborationInfo sci = submission.getCollaborationInfo();
         final IBusinessInfo pbi = (leg.getUserMessageFlow() != null ? leg.getUserMessageFlow().getBusinessInfo() : null);
 
@@ -268,8 +270,8 @@ final class MMDCompleter {
         completeAgreement();
 
         // Check that correct Service is specified when test Action URI is used
-        if (sci.getAction().equals(EbMSConstants.TEST_ACTION_URI)
-            && !sci.getService().getName().equals(EbMSConstants.TEST_SERVICE_URI))
+        if (submission.getCollaborationInfo().getAction().equals(EbMSConstants.TEST_ACTION_URI)
+            && !submission.getCollaborationInfo().getService().getName().equals(EbMSConstants.TEST_SERVICE_URI))
             throw new MessageSubmitException("Service must be " + EbMSConstants.TEST_SERVICE_URI
                                              + "if Action is set to " + EbMSConstants.TEST_ACTION_URI);
     }
@@ -403,6 +405,6 @@ final class MMDCompleter {
         this.leg = PModeUtils.getSendLeg(pmode); 
 
         // Start with a copy of the supplied MMD
-        this.submission = new UserMessage(submittedMMD);
+        this.submission = new UserMessage(submittedMMD);        
     }
 }
