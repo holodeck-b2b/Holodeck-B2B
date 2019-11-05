@@ -17,6 +17,7 @@
 package org.holodeckb2b.interfaces.workerpool;
 
 import java.util.Map;
+
 import org.holodeckb2b.interfaces.general.Interval;
 
 /**
@@ -45,7 +46,8 @@ public interface IWorkerConfiguration {
      * configuration of the functionality the task should provide. They are not used for the scheduling configuration
      * by the worker pool.
      *
-     * @return      The task parameters as a list of name value pairs
+     * @return      The task parameters as a list of name value pairs. Implementation MUST return an empty Map when no
+     * 				parameters are provided.
      */
     public Map<String, ?> getTaskParameters();
 

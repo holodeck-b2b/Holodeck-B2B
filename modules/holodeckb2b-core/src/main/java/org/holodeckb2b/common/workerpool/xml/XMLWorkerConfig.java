@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.common.workerpool.xml;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -71,7 +72,7 @@ public class XMLWorkerConfig implements IWorkerConfiguration {
     private Interval    interval;
 
     @ElementMap(entry="parameter", key="name", attribute=true, inline=true, required=false)
-    private Map<String, String> parameters;
+    private Map<String, String> parameters = new HashMap<>();
 
     @Override
     public String getName() {

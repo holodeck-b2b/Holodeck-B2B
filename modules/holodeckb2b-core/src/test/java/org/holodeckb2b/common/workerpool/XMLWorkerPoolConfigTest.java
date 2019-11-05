@@ -26,7 +26,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -66,33 +66,14 @@ public class XMLWorkerPoolConfigTest {
     public void tearDown() {
     }
 
-
-    /**
-     * Test of loadFromFile method, of class XMLWorkerPoolConfig.
-     *
-     * <p>Loads <i>wp_config1.xml</i> which contains the following correct pool configuration:
-     * <pre>
-          <?xml version="1.0" encoding="UTF-8"?>
-          <workers xmlns="http://www.holodeck-b2b.org/2012/12/workers"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:schemaLocation="http://www.holodeck-b2b.org/2012/12/workers file:/Users/safi/Development/holodeck-b2b-1.1-b/config/workers.xsd" poolName="correctpool">
-              <worker name="worker1" activate="false" workerClass="workerClass1">
-              </worker>
-              <worker name="worker2" activate="true" workerClass="workerClass2" concurrent="5" interval="30">
-              </worker>
-          </workers>
-     * </pre>
-     *
-     */
     @Test
-    public void testLoadCorrectFile() {
-        System.out.println("loadFromFile");
+    public void testCompleteConfig() {
         final String path = TestUtils.getPath(this.getClass(), "workerpoolcfg/wp_config1.xml");
 
         final IWorkerPoolConfiguration result = XMLWorkerPoolConfig.loadFromFile(path);
 
         assertNotNull(result);
-        assertEquals("correctpool", result.getName());
+        assertEquals("complete", result.getName());
 
         final List<IWorkerConfiguration> workers = result.getWorkers();
         assertEquals(2, workers.size());
@@ -103,58 +84,22 @@ public class XMLWorkerPoolConfigTest {
         final Map<String, ?> params = workers.get(0).getTaskParameters();
 
         assertEquals(4, params.size());
-        final HashSet<String> keys = new HashSet<String>() {{ add("p1"); add("p2"); add("p3"); add("p4"); }};
-        final HashSet<String> values = new HashSet<String>() {{ add("value1"); add("value2"); add("value3"); add("value4"); }};
-        for (final String k : params.keySet()) {
-            assertTrue(keys.contains(k));
-            assertTrue(((String) params.get(k)).endsWith(k.substring(1)));
-        }
-
+        final HashMap<String, String> expected = new HashMap<String, String>() {{ put("p1", "value1"); 
+        																	  	  put("p2", "value2"); 
+        																	  	  put("p3", "value3"); 
+        																	  	  put("p4", "value4"); }};
+        params.entrySet().parallelStream().allMatch(e -> expected.containsKey(e.getKey()) && 
+        													expected.get(e.getKey()).equals(e.getValue()));
     }
 
-    /**
-     * Test of loadFromFile method, of class XMLWorkerPoolConfig.
-     *
-     * <p>Loads <i>wp_config1.xml</i> which contains the following invalid pool configuration:
-     * <pre>
-<?xml version="1.0" encoding="UTF-8"?>
-<workers xmlns="http://www.holodeck-b2b.org/2012/12/workers"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://www.holodeck-b2b.org/2012/12/workers file:/Users/safi/Development/holodeck-b2b-1.1-b/config/workers.xsd" poolName="invalidcfg">
-    <worker name="name1" activate="false">
-    </worker>
-    <worker activate="false" workerClass="workerClass3">
-    </worker>
-</workers>
-     * </pre>
-     *
-     */
     @Test
-    public void testLoadInvalidFile() {
-        System.out.println("loadFromFile");
+    public void testInvalidFile() {
         final String path = TestUtils.getPath(this.getClass(), "workerpoolcfg/wp_config2.xml");
 
         final IWorkerPoolConfiguration result = XMLWorkerPoolConfig.loadFromFile(path);
-
         assertNull(result);
     }
 
-    /**
-     * Test of loadFromFile method, of class XMLWorkerPoolConfig.
-     *
-     * <p>Loads <i>wp_config1.xml</i> which contains the following correct pool configuration:
-     * <pre>
-<?xml version="1.0" encoding="UTF-8"?>
-<workers xmlns="http://www.holodeck-b2b.org/2012/12/workers"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://www.holodeck-b2b.org/2012/12/workers file:/Users/safi/Development/holodeck-b2b-1.1-b/config/workers.xsd">
-    <worker name="name1" activate="false" workerClass="workerClass1">
-    </worker>
-
-</workers>
-     * </pre>
-     *
-     */
     @Test
     public void testLoadUnnamedFile() {
         System.out.println("loadFromFile");
@@ -174,7 +119,8 @@ public class XMLWorkerPoolConfigTest {
 
         final Map<String, ?> params = workers.get(0).getTaskParameters();
 
-        assertNull(params);
+        assertNotNull(params);
+        assertTrue(params.isEmpty());
 
     }
 
