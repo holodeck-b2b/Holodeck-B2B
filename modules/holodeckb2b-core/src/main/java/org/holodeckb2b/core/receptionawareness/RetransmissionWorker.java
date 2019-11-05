@@ -94,8 +94,8 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                     // We need the current interval duration, the number of attempts already executed and the maximum
                     // number of attempts allowed
                     long intervalInMillis = 0;
-                    int  attempts = 0;
-                    int  maxAttempts = 1; // there is always the initial one
+                    int  attempts = 1; // there is always the initial one
+                    int  maxAttempts = 1; 
                     // Retry information is contained in Leg, and as we only have One-way it is always the first
                     // and because retries is part of AS4 reception awareness feature leg should be instance of
                     // ILegAS4, if it is not we can not retransmit
@@ -109,11 +109,12 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         log.error("Message [" + um.getMessageId() + "] can not be resent due to missing P-Mode ["
                                     + um.getPModeId() + "]");
                     }
-                    final Interval[] intervals = raConfig != null ? raConfig.getWaitIntervals() : new Interval[0]; 
-                    if (intervals.length > 0) {
+                    final Interval[] intervals = raConfig != null ? raConfig.getWaitIntervals() : null; 
+                    if (intervals != null && intervals.length > 0) {
+                    	maxAttempts = intervals.length;
                     	// Check the current interval
                     	attempts = Integer.max(1, HolodeckB2BCore.getQueryManager().getNumberOfTransmissions(um));
-                    	if (attempts <= intervals.length)
+                    	if (attempts <= maxAttempts)
                     		// Get the current applicable interval in milliseconds
                     		intervalInMillis = TimeUnit.MILLISECONDS.convert(intervals[attempts-1].getLength(),
                     														 intervals[attempts-1].getUnit());
@@ -127,7 +128,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                          >= intervalInMillis) {
                         // The interval expired, check if message can be resend or if a MissingReceipt error
                         // has to be generated
-                        if (attempts >= intervals.length) {
+                        if (attempts >= maxAttempts) {
                             // No retries left, generate MissingReceipt error
                         	log.info("Retry attempts exhausted for User Message [msgId=" + um.getMessageId() + "]!");
                             missingReceiptsLog.error("No Receipt received for UserMessage with messageId="
