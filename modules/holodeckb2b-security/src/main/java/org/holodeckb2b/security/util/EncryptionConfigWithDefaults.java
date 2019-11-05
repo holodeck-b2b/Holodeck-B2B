@@ -95,7 +95,8 @@ public class EncryptionConfigWithDefaults implements IEncryptionConfiguration {
 
         @Override
         public String getMGFAlgorithm() {
-            return original != null ? original.getMGFAlgorithm() : null;
+            return original != null && !Utils.isNullOrEmpty(original.getMGFAlgorithm()) ?
+            								  original.getMGFAlgorithm() : DefaultSecurityAlgorithms.KEY_TRANSPORT_MGF;
         }
 
         @Override

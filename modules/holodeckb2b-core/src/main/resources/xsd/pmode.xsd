@@ -26,7 +26,8 @@
         <xs:documentation><p>In version 2.1.0 of the schema the <code>EventHandler</code> and <code>AddActorOrRoleAttribute</code> elements were added. As these are optional elements P-Mode documents constructed using the old version are still valid and result in unchanged processing. Therefore the same namespace is used and only the version has been increased</p></xs:documentation>
         <xs:documentation><p>In version 4.0.0 of the schema the optional <code>PMode/useStrictHeaderValidation</code> attribute was added. It can be use to enable strict validation of the ebMS header</p></xs:documentation>
         <xs:documentation><p>In version 4.0.0 of the schema the structure of the <code>ReceptionAwareness</code> element was changed to enable more flexible configuration of retries. For back-ward compatibility the old fixed intervals can also be used although there use
-                             is NOT RECOMMENDED.</p></xs:documentation>
+            is NOT RECOMMENDED.</p></xs:documentation>
+        <xs:documentation><p>In version 5.0.0 of the schema the default values for the key transport algorithms were updated to RSA-OAEP and MGF1 with SHA256</p></xs:documentation>
     </xs:annotation>
     <xs:element name="PMode" type="tns:PMode">
         <xs:annotation>
@@ -888,20 +889,21 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
     <xs:complexType name="KeyTransport">
         <xs:sequence maxOccurs="1">
             <xs:element name="Algorithm" type="xs:anyURI" minOccurs="0"
-                default="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
+                default="http://www.w3.org/2009/xmlenc#rsa-oaep">
                 <xs:annotation>
                     <xs:documentation><p>This OPTIONAL element contains the identifier of the algorithm that should be used for key transport. The identifiers are specified in <a href="http://www.w3.org/TR/xmlenc-core1/#sec-AlgID">section 5.1</a> of the XML Encryption Syntax and Processing Version 1.1 (XML-enc). It is RECOMMENDED to use an algoritm for which support is required by the XML-enc specification.</p>
 
 <p>When the <i>RSA-OAEP (including MGF1 with SHA1)</i> algorithm is specified the <code>MGFAlgorithm</code> element MUST NOT be used (as the MGF function is already specified by the transport algorithm).</p>
 
-<p>If not specified (because the parent <code>KeyTransport</code> element is ommitted) the <i>RSA-OAEP (including MGF1 with SHA1)</i> algorithm is used for key transport.</p></xs:documentation>
+<p>If not specified (because the parent <code>KeyTransport</code> element is ommitted) the <i>RSA-OAEP</i> algorithm is used for key transport.</p></xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="MGFAlgorithm" type="xs:anyURI" minOccurs="0">
+            <xs:element name="MGFAlgorithm" type="xs:anyURI" minOccurs="0"
+                default="http://www.w3.org/2009/xmlenc11#mgf1sha256">
                 <xs:annotation>
                     <xs:documentation><p>This OPTIONAL element contains the identifier of the mask generaton function algorithm that should be used for key transport. The identifiers are specified in <a href="http://www.w3.org/TR/xmlenc-core1/#sec-AlgID">section 5.1</a> of the XML Encryption Syntax and Processing Version 1.1 (XML-enc). It is RECOMMENDED to use an algoritm for which support is required by the XML-enc specification.</p>
 
-<p>This element is REQUIRED when the key transport algorithm is set to <i>RSA-OAEP</i> algorithm is used for key transport.</p></xs:documentation>
+                        <p>When this element is not provided the <i>MGF1 with SHA256</i> algorithm is used as default.</p></xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element name="DigestAlgorithm" type="xs:anyURI"

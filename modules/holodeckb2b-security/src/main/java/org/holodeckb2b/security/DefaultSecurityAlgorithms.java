@@ -49,9 +49,14 @@ public final class DefaultSecurityAlgorithms {
     public static final X509ReferenceType   KEY_REFERENCE = X509ReferenceType.IssuerAndSerial;
 
     /**
-     * The default algorithm for key transport when using encryption is RSA-OAEP-MGF1P
+     * The default algorithm for key transport when using encryption is RSA-OAEP
      */
-    public static final String KEY_TRANSPORT = "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p";
+    public static final String KEY_TRANSPORT = "http://www.w3.org/2009/xmlenc11#rsa-oaep";
+
+    /**
+     * The default MGF algorithm for key transport is MGF1 with SHA256
+     */
+    public static final String KEY_TRANSPORT_MGF = "http://www.w3.org/2009/xmlenc11#mgf1sha256";
 
     /*
      * This class should not be instantiated
