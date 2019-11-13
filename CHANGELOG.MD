@@ -53,6 +53,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Generated Content-Id results in signature failure [#99](https://github.com/holodeck-b2b/Holodeck-B2B/issues/99)
 * NPE when white space is containd between the `ds:Signature` and `ds:SignedInfo` elements of a received message [#100](https://github.com/holodeck-b2b/Holodeck-B2B/issues/100)
 * Error descriptions longer than 255 characters are not saved.
+* NPE occurs on event handlers with no parameters [#102](https://github.com/holodeck-b2b/Holodeck-B2B/issues/102)
+* Invalid SOAPFault included with ebMS Error using SOAP 1.2 [#103](https://github.com/holodeck-b2b/Holodeck-B2B/issues/103)
 
 ### Removed
 * Message processing events which names ended on _Event_
