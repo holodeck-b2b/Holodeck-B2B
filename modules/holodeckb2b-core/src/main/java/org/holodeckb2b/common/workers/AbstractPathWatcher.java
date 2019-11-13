@@ -191,7 +191,7 @@ public abstract class AbstractPathWatcher extends AbstractWorkerTask {
             }
         }
 
-        log.debug("Scanned " + watchPath + ", " + (r+c+n) + " changes: " + r + " files removed, "
+        log.debug("Processed " + watchPath + ", " + (r+c+n) + " changes: " + r + " files removed, "
                     + n + " files added and " + c + " files modified.");
         lastListing = C;
 
