@@ -151,9 +151,10 @@ public class PullRequestElement {
         final OMFactory f = messaging.getOMFactory();
         final OMElement prElement = f.createOMElement(Q_ELEMENT_NAME, signalmessage);
 
-        // The only information specific to the PullRequest is the MPC on which the pull takes place
+        // The only information specific to the PullRequest is the MPC on which the pull takes place, but it should
+        // only be included if different from the default
         final String mpc = pullRequest.getMPC();
-        if (!EbMSConstants.DEFAULT_MPC.equals(mpc))
+        if (!Utils.isNullOrEmpty(mpc) && !EbMSConstants.DEFAULT_MPC.equals(mpc))
         	prElement.addAttribute(MPC_ATTR, mpc, null);
 
         // Add child elements if this is a selective Pull Request

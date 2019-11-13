@@ -188,10 +188,11 @@ public class MessageSubmitter implements IMessageSubmitter {
         // Check that when a MPC to pull from is available in both request and P-Mode they match or the one in the 
         // request is a sub-channel MPC of the one in the P-Mode
         final IPullRequestFlow pullRequestFlow = PModeUtils.getOutPullRequestFlow(pmode);
-        final String pmodeMPC = pullRequestFlow != null ? pullRequestFlow.getMPC() : null;
-        final String pullMPC = pullRequest.getMPC();
+        final String pmodeMPC = pullRequestFlow != null ? pullRequestFlow.getMPC() : EbMSConstants.DEFAULT_MPC;
+        final String pullMPC = !Utils.isNullOrEmpty(pullRequest.getMPC()) ? pullRequest.getMPC() 
+        																  : EbMSConstants.DEFAULT_MPC;
         
-        if (   (!Utils.isNullOrEmpty(pmodeMPC)) && (Utils.isNullOrEmpty(pullMPC) || !pullMPC.startsWith(pmodeMPC)))
+        if (!pullMPC.startsWith(pmodeMPC))
         	throw new MessageSubmitException("MPC in submission [" + pullMPC + "] conflicts with P-Mode defined MPC ]"
         										+ pmodeMPC + "]");
         

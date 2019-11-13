@@ -109,6 +109,8 @@ final class MMDCompleter {
             case -2 :
                 throw new MessageSubmitException("Different MPC values (submitted: " + submission.getMPC()
                                                 + ",P-Mode: " + pmMPC + ") specified!");
+            case -1 :
+            	submission.setMPC(EbMSConstants.DEFAULT_MPC);
             case 2 :
                 submission.setMPC(pmMPC);
         }

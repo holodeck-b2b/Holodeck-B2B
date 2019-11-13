@@ -26,6 +26,7 @@ import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
+import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
@@ -115,8 +116,12 @@ public class GetMessageUnitForPulling extends AbstractBaseHandler {
             do {
                 userMsgToPull = waitingUserMessages.get(i);
                 log.trace("Check if User Message [" + userMsgToPull.getMessageId() + "] can be pulled.");
-                // The usermessage should be on assigned to the requested MPC or a parent MPC
-                if (reqMPC.startsWith(userMsgToPull.getMPC())) {
+                // The usermessage should be on assigned to the requested MPC or a parent MPC. But take care of possible
+                // empty MPC values                
+                final String rMPC = Utils.isNullOrEmpty(reqMPC) ? EbMSConstants.DEFAULT_MPC : reqMPC;
+                final String uMPC = Utils.isNullOrEmpty(userMsgToPull.getMPC()) ? EbMSConstants.DEFAULT_MPC : 
+                																  userMsgToPull.getMPC();                
+                if (rMPC.startsWith(uMPC)) {
                     log.trace("User Message can be pulled, set processing state to Processing");
                     r = HolodeckB2BCore.getStorageManager().setProcessingState(userMsgToPull,
                                                                               ProcessingState.AWAITING_PULL,
