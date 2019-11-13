@@ -28,7 +28,6 @@ import org.apache.axiom.soap.SOAPFault;
 import org.apache.axiom.soap.SOAPFaultCode;
 import org.apache.axiom.soap.SOAPFaultReason;
 import org.apache.axiom.soap.SOAPFaultText;
-import org.apache.axiom.soap.SOAPFaultValue;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
@@ -134,14 +133,11 @@ public class PackageErrorSignals extends AbstractBaseHandler {
         final boolean isSoap11 = env.getVersion() instanceof SOAP11Version;
 
         final SOAPFaultCode  fCode = factory.createSOAPFaultCode(fault);
-        final QName   faultValue = new QName(env.getNamespaceURI(), "Client");
-        if (isSoap11) {
-            fCode.setText(faultValue);
-        } else {
-            final SOAPFaultValue fValue = factory.createSOAPFaultValue(fCode);
-            fValue.setText(faultValue);
-        }
-
+        if (isSoap11) 
+            fCode.setText(new QName(env.getNamespaceURI(), "Client"));
+        else 
+            factory.createSOAPFaultValue(fCode).setText(new QName(env.getNamespaceURI(), "Sender"));
+        
         final SOAPFaultReason fReason = factory.createSOAPFaultReason(fault);
         final String          reason =
                         "An error occurred while processing the received ebMS message. Check ebMS errors for details.";
