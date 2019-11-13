@@ -889,7 +889,7 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
     <xs:complexType name="KeyTransport">
         <xs:sequence maxOccurs="1">
             <xs:element name="Algorithm" type="xs:anyURI" minOccurs="0"
-                default="http://www.w3.org/2009/xmlenc#rsa-oaep">
+                default="http://www.w3.org/2009/xmlenc11#rsa-oaep">
                 <xs:annotation>
                     <xs:documentation><p>This OPTIONAL element contains the identifier of the algorithm that should be used for key transport. The identifiers are specified in <a href="http://www.w3.org/TR/xmlenc-core1/#sec-AlgID">section 5.1</a> of the XML Encryption Syntax and Processing Version 1.1 (XML-enc). It is RECOMMENDED to use an algoritm for which support is required by the XML-enc specification.</p>
 
