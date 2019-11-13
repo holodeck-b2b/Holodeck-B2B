@@ -78,6 +78,9 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration,
 
     @Transient
     private List<Class<? extends IMessageUnit>> forMessageUnits = null;
+    
+    @Transient
+    private Map<String, String>		settings;
 
     /**
      * Validates and converts the strings provided in the <code>HandlerClass</code>, <code>HandledEvent</code> and
@@ -191,8 +194,13 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration,
     
     @Override
     public Map<String, ?> getHandlerSettings() {
-        HashMap<String, String> settings = new HashMap<>(parameters.size());
-        parameters.forEach(p -> settings.put(p.getName(), p.getValue()));
+    	if (settings != null)
+    		return settings;
+    	
+        settings = new HashMap<>(parameters != null ? parameters.size() : 0);
+        if (parameters != null)
+        	parameters.forEach(p -> settings.put(p.getName(), p.getValue()));
+        
         return settings;
     }
     
