@@ -19,6 +19,7 @@ package org.holodeckb2b.core.axis2;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
@@ -230,6 +231,14 @@ public class HTTPWorker implements Worker {
                 RequestResponseTransport.RequestResponseTransportStatus.SIGNALLED))) {
             // The response is written or signalled.  The current status is used (probably SC_OK).
         } else {
+        	/* Although there was no response entity body there may be specific HTTP headers to set on the response.
+        	 * These should be set as MessageContext property named HTTPConstants.RESPONSE_HEADERS with a 
+        	 * Map<String, String> as value. 
+        	 */
+        	Object responseHdrs = msgContext.getProperty(HTTPConstants.RESPONSE_HEADERS);
+        	if (responseHdrs != null && (responseHdrs instanceof Map)) 
+        		((Map<String, String>) responseHdrs).forEach((n, v) -> response.addHeader(n, v));        		
+        	
             // The response may be ack'd, mark the status as accepted.
             response.setStatus(HttpStatus.SC_ACCEPTED);
         }
