@@ -16,8 +16,8 @@
  */
 package org.holodeckb2b.common.workerpool;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
 
 /**
@@ -37,14 +37,14 @@ public abstract class AbstractWorkerTask implements IWorkerTask {
     /**
      * Logging facility, will create a log named like the class name
      */
-    protected   Log     log;
+    protected   Logger  log;
 
     /**
      * Default constructor. Initializes the log.
      */
     public AbstractWorkerTask() {
         name = this.getClass().getName();
-        log = LogFactory.getLog(this.getClass().getName());
+        log = LogManager.getLogger(this.getClass().getName());
     }
 
     /**

@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
 import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.common.workerpool.WorkerPool;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -113,7 +113,7 @@ public abstract class AbstractPathWatcher extends AbstractWorkerTask {
     @Override
     public void setParameters(final Map<String, ?> parameters) throws TaskConfigurationException {
         if (log == null) {
-            log = LogFactory.getLog(this.getClass());
+            log = LogManager.getLogger(this.getClass());
         }
         if (parameters == null || parameters.isEmpty()) {
             log.error("Unable to configure task: Missing required parameter \"watchPath\"");
