@@ -34,6 +34,7 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
+import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
@@ -106,7 +107,8 @@ public class DetermineErrorReporting extends AbstractBaseHandler {
             	} else {
 	                log.debug("Get P-Mode information to determine if and how Error Signal must be reported");
 	                // Errorhandling config is contained in flow
-	                final IUserMessageFlow flow = PModeUtils.getLeg(msgInError).getUserMessageFlow();
+	                final ILeg leg = PModeUtils.getLeg(msgInError);
+	                final IUserMessageFlow flow = leg != null ? leg.getUserMessageFlow() : null;
                     final IErrorHandling errorHandling = (flow != null ? flow.getErrorHandlingConfiguration()
                                                                        : null);
 
