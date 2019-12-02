@@ -16,14 +16,20 @@
  */
 package org.holodeckb2b.core.pmode;
 
+import java.util.Collection;
 import java.util.List;
 
+import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.pmode.IPMode;
@@ -86,7 +92,36 @@ public class PModeUtils {
     			return getSendLeg(pmode);
     		else
     			return getReceiveLeg(pmode);
-    	else // m instanceof ISignalMessage
+    	else if (m instanceof IErrorMessage) {
+    		/* When the P-Mode is Two-Way the Error can be on both legs and we need to use the referenced message unit
+    		 * to find the correct leg. As no message processing context is available at this point we can only use the 
+    		 * reference included in the Error Message. This implies that for Error Messages without a reference we
+    		 * won't be able to determine their leg. 
+    		 */
+    		if (EbMSConstants.TWO_WAY_MEP.equals(pmode.getMep())) {
+    			final String refToMsgInError = MessageUnitUtils.getRefToMessageId(m);
+    			if (Utils.isNullOrEmpty(refToMsgInError))
+    				return null; // no reference available, nothing we can do
+    			else {
+    				try {
+						final Collection<IMessageUnitEntity> rfdMsgs = HolodeckB2BCore.getQueryManager()
+																			.getMessageUnitsWithId(refToMsgInError, 
+																					m.getDirection() == Direction.IN ?
+																						 Direction.OUT : Direction.IN);					
+						if (rfdMsgs == null || rfdMsgs.size() != 1) 
+							return null; // No or multiple message units found, so unclear to which the error applies
+						
+						// Use the leg of the referenced message unit
+						return getLeg(rfdMsgs.iterator().next());						
+    				} catch (PersistenceException e) {
+						// If we cannot get the information about the referenced message unit, just return null
+    					return null;
+					}
+    			}
+    		} else 
+    			// For one way it's easy, as it must be the single leg :-)
+    			return pmode.getLeg(Label.REQUEST);    		
+    	} else // m instanceof IReceipt | IPullRequest
     		if (m.getDirection() == Direction.OUT)
     			return getReceiveLeg(pmode);
     		else
