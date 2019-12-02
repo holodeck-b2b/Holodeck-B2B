@@ -45,20 +45,20 @@
             <order phase="ProtocolParsing" after="ReadErrors"/>
         </handler>
         <!--
-            Perform validation of the header meta-data message units read from the message
-        -->
-        <handler name="HeaderValidation" class="org.holodeckb2b.core.validation.header.HeaderValidationHandler">
-            <order phase="ProtocolParsing" after="CheckForMultiHop"/>
-            <parameter name="validatorFactoryClass">org.holodeckb2b.ebms3.validation.header.Ebms3HeaderValidatorFactory</parameter>
-        </handler>        
-        <!--
             Find the P-Modes for the read message units except the PullRequests because
             their P-Mode can only be determined based on the provided authentication info
             in the WS-Security header
         -->
         <handler name="FindPModes" class="org.holodeckb2b.ebms3.handlers.inflow.FindPModes">
-            <order phase="ProtocolParsing"/>
+            <order phase="ProtocolParsing" after="CheckForMultiHop"/>
         </handler>
+        <!--
+            Perform validation of the header meta-data message units read from the message
+        -->
+        <handler name="HeaderValidation" class="org.holodeckb2b.core.validation.header.HeaderValidationHandler">
+            <order phase="ProtocolParsing" after="FindPModes"/>
+            <parameter name="validatorFactoryClass">org.holodeckb2b.ebms3.validation.header.Ebms3HeaderValidatorFactory</parameter>
+        </handler>        
 
         <!--
             Process and validate the WS-Security
