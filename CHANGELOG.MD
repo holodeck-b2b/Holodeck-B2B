@@ -17,9 +17,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Signature policy check in **Core Processing** that received _User Messages_ are signed when indicated in P-Mode that 
   they should. Violation of this rule will generate an _PolicyNonCompliance_ error.
 * On submission of _User Message_  a check that provided payload _Content-Id_ values do not contain invalid characters.  
-* `org.holodeckb2b.interfaces.core.IMessageProcessingContext` interface which can be used in extension APIs to provide
+* `org.holodeckb2b.interfaces.core.IMessageProcessingContext` interface which can be used in extension APIs to provide 
   access to the HB2B _message processing context_ 
 * Custom implementation of the Axis2 `TransportListener` interface which can use a _Service_ specified _Message Builder_
+* Option to add HTTP response headers to an empty response by setting a property named `HTTPConstants.RESPONSE_HEADERS` 
+  on the request MessageContext containing Map of name and value of headers to set.    
 * `org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface.getVersion()` method and 
   `org.holodeckb2b.interfaces.general.IVersionInfo` interface to provide information about the version of the 
    Holodeck B2B instance.    
