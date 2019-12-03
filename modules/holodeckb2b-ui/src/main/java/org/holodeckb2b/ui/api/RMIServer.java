@@ -61,7 +61,7 @@ public class RMIServer extends AbstractWorkerTask {
 		try {
 			port = Integer.parseInt((String) parameters.get(P_PORT));
 		} catch (NumberFormatException invalidPort) { 
-			log.error("Invalid value provided for the \"port\" parameter ({}). Using default port {}", 
+			log.warn("Invalid value provided for the \"port\" parameter ({}). Using default port {}", 
 					parameters.get(P_PORT), CoreInfo.DEFAULT_PORT);
 		} catch (Exception noPort) {};
 	}
