@@ -42,14 +42,14 @@ import org.apache.axis2.transport.http.server.HttpUtils;
 import org.apache.axis2.transport.http.server.Worker;
 import org.apache.axis2.transport.http.util.RESTUtil;
 import org.apache.commons.fileupload.util.Streams;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
 import org.apache.http.HttpStatus;
 import org.apache.http.MethodNotSupportedException;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EncodingUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
@@ -67,7 +67,7 @@ import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
  * @since 5.0.0
  */
 public class HTTPWorker implements Worker {
-	private static final Log log = LogFactory.getLog(HTTPWorker.class);
+	private static final Logger log = LogManager.getLogger(HTTPWorker.class);
 	
 	private static final String STATIC_HTML = 
 			"<html>\n" + 
@@ -101,9 +101,10 @@ public class HTTPWorker implements Worker {
 
         InvocationResponse pi = InvocationResponse.CONTINUE;
         
+        log.trace("Handling request for URL: {}", url);
         // First handle non service URLs to display a HB2B landing page
         if (method.equals(HTTPConstants.HEADER_GET)) {
-        	log.trace("Handling non Service related GET request");
+        	log.trace("Handling GET request");
             if (url.equals("/logo.png")) {
                 response.setStatus(HttpStatus.SC_OK);
                 response.setContentType("image/png");                
