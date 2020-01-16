@@ -18,7 +18,7 @@
     =============================================================== -->
     <worker name="pmodeWatcher" interval="20" activate="true"
         workerClass="org.holodeckb2b.common.pmode.PModeWatcher">
-        <parameter name="watchPath">conf/pmodes</parameter>
+        <parameter name="watchPath">repository/pmodes</parameter>
     </worker>
 
     <!-- ==============================================================
