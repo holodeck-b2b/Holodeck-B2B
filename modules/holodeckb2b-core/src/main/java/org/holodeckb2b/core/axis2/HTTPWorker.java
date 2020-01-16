@@ -45,7 +45,6 @@ import org.apache.commons.fileupload.util.Streams;
 import org.apache.http.HttpException;
 import org.apache.http.HttpStatus;
 import org.apache.http.MethodNotSupportedException;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EncodingUtils;
 import org.apache.logging.log4j.LogManager;
@@ -104,9 +103,9 @@ public class HTTPWorker implements Worker {
         log.trace("Handling request for URL: {}", url);
         // First handle non service URLs to display a HB2B landing page
         if (method.equals(HTTPConstants.HEADER_GET)) {
-        	log.trace("Handling GET request");
-            if (url.equals("/logo.png")) {
-                response.setStatus(HttpStatus.SC_OK);
+        	if (url.equals("/logo.png")) {
+        		log.trace("Handling GET request for logo");
+                    response.setStatus(HttpStatus.SC_OK);
                 response.setContentType("image/png");                
                 try (InputStream is = this.getClass().getClassLoader().getResourceAsStream("logo.png")) {
                 	Streams.copy(is, response.getOutputStream(), false);
@@ -117,11 +116,12 @@ public class HTTPWorker implements Worker {
                 return;
             }
             if (!url.startsWith(contextPath)) {
-                response.setStatus(HttpStatus.SC_MOVED_PERMANENTLY);
-                response.addHeader(new BasicHeader("Location", contextPath));
+            	log.trace("Request for unknown URL");
+                response.setStatus(HttpStatus.SC_NOT_FOUND);                
                 return;
             }
             if (url.endsWith(contextPath)) {
+            	log.trace("Handling GET request for gateway home page");
                 response.setStatus(HttpStatus.SC_OK);
                 response.setContentType("text/html");
                 OutputStream out = response.getOutputStream();
@@ -146,11 +146,11 @@ public class HTTPWorker implements Worker {
 			log.warn("No service configured for Request");
 			response.setStatus(HttpStatus.SC_NOT_FOUND);
 			return;
-		} else 		
-			log.trace(axisService.getName() + " handles request");
+		} 
 		
 		try {			
 			if (method.equals(HTTPConstants.HEADER_GET)) {
+				log.debug("GET request for service {}", axisService.getName());
 	            int index = contentType.indexOf(';');
 	            if (index > 0)
 	                contentType = contentType.substring(0, index);	        
@@ -159,7 +159,8 @@ public class HTTPWorker implements Worker {
 	                    msgContext, 
 	                    response.getOutputStream(), 
 	                    contentType);
-			} else if (method.equals(HTTPConstants.HEADER_POST)) {	
+			} else if (method.equals(HTTPConstants.HEADER_POST)) {
+				log.debug("POST request for service {}", axisService.getName());				
 				prepareMessageContext(msgContext, url, contentType, request, response);
 				
 				final Builder msgBuilder = Axis2Utils.getBuilderFromService(axisService);				
@@ -180,15 +181,17 @@ public class HTTPWorker implements Worker {
 																							contentType, msgContext)));					
 					pi = AxisEngine.receive(msgContext);
 				} else {
-					log.debug("No specific Builder specified, use default Axis2 process");
+					log.trace("No specific Builder specified, use default Axis2 process");
 	        		// deal with POST request		            	            
 		            if (HTTPTransportUtils.isRESTRequest(contentType)) {
+		            	log.debug("Using REST message builder");
 		                pi = RESTUtil.processXMLRequest(
 		                        msgContext, 
 		                        request.getInputStream(),
 		                        response.getOutputStream(), 
 		                        contentType);
 		            } else {
+		            	log.debug("Using SOAP message builder");
 		            	final String ip = (String)msgContext.getProperty(MessageContext.TRANSPORT_ADDR);
 		                final String requestURL = (!Utils.isNullOrEmpty(ip) ? ip : "") + url;
 		                pi = HTTPTransportUtils.processHTTPPostRequest(
