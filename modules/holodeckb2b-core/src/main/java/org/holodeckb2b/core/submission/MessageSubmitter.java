@@ -123,12 +123,12 @@ public class MessageSubmitter implements IMessageSubmitter {
             final IUserMessageEntity newUserMessage = (IUserMessageEntity) storageManager.
             																storeOutGoingMessageUnit(completedMetadata);
             //Use P-Mode to find out if this message is to be pulled or pushed to receiver
-            if (EbMSConstants.ONE_WAY_PULL.equalsIgnoreCase(pmode.getMepBinding())) {
-                log.debug("Message is to be pulled by receiver, change ProcessingState to wait for pull");
-                storageManager.setProcessingState(newUserMessage, ProcessingState.AWAITING_PULL);
+            if (PModeUtils.doesHolodeckB2BTrigger(PModeUtils.getLeg(newUserMessage))) {
+            	log.debug("Message is to be pushed to receiver, change ProcessingState to trigger push");
+            	storageManager.setProcessingState(newUserMessage, ProcessingState.READY_TO_PUSH);
             } else {
-                log.debug("Message is to be pushed to receiver, change ProcessingState to trigger push");
-                storageManager.setProcessingState(newUserMessage, ProcessingState.READY_TO_PUSH);
+            	log.debug("Message is to be pulled by receiver, change ProcessingState to wait for pull");
+            	storageManager.setProcessingState(newUserMessage, ProcessingState.AWAITING_PULL);
             }
 
             log.info("User Message succesfully submitted, messageId={}", newUserMessage.getMessageId());
