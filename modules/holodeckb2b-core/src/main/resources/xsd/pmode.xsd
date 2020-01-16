@@ -27,7 +27,7 @@
         <xs:documentation><p>In version 4.0.0 of the schema the optional <code>PMode/useStrictHeaderValidation</code> attribute was added. It can be use to enable strict validation of the ebMS header</p></xs:documentation>
         <xs:documentation><p>In version 4.0.0 of the schema the structure of the <code>ReceptionAwareness</code> element was changed to enable more flexible configuration of retries. For back-ward compatibility the old fixed intervals can also be used although there use
             is NOT RECOMMENDED.</p></xs:documentation>
-        <xs:documentation><p>In version 5.0.0 of the schema the default values for the key transport algorithms were updated to RSA-OAEP and MGF1 with SHA256</p></xs:documentation>
+        <xs:documentation><p>In version 5.0.0 of the schema the cardina;ity for Leg has been changed to 1..2 to support Two-Way P-Modes. Also the default values for the key transport algorithms were updated to RSA-OAEP and MGF1 with SHA256</p></xs:documentation>
     </xs:annotation>
     <xs:element name="PMode" type="tns:PMode">
         <xs:annotation>
@@ -63,7 +63,9 @@
                 <xs:simpleType>
                     <xs:restriction base="tns:non-empty-string">
                         <xs:enumeration
-                            value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"
+                            value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
+                        <xs:enumeration
+                            value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay"
                         />
                     </xs:restriction>
                 </xs:simpleType>
@@ -75,11 +77,12 @@
                 </xs:annotation>
                 <xs:simpleType>
                     <xs:restriction base="tns:non-empty-string">
-                        <xs:enumeration
-                            value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
-                        <xs:enumeration
-                            value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pull"
-                        />
+                        <xs:enumeration value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
+                        <xs:enumeration value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pull"/>
+                        <xs:enumeration value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pushAndPush"/>
+                        <xs:enumeration value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pushAndPull"/>
+                        <xs:enumeration value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pullAndPush"/>
+                        <xs:enumeration value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pullAndPull"/>
                     </xs:restriction>
                 </xs:simpleType>
             </xs:element>
@@ -103,7 +106,7 @@
 It is therefor RECOMMENDED to include the agreement info when the include attribute has value "true". If not included in the P-Mode the submission of a user message must contain the agreement info.</p></xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element maxOccurs="1" name="Leg" type="tns:Leg">
+            <xs:element maxOccurs="2" name="Leg" type="tns:Leg">
                 <xs:annotation>
                     <xs:documentation><p>The <code>Leg</code> element contains the configuration settings for one leg of the P-Mode, i.e. the exchange of one user message. See section 2 of the ebMS Core Specification for more information on the messaging model and concept of legs.<br/>
 In the P-Mode model described in the ebMS specification a leg can be identified by number (1 or 2) or label (<i>request</i> or <i>reply</i>). In this implementation the label primarily defines the order of the legs, but if no labels are specified the order of the elements also defines the order of the legs.</p>.
