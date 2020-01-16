@@ -33,6 +33,7 @@ import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IBusinessInfo;
@@ -407,6 +408,7 @@ final class MMDCompleter {
         this.leg = PModeUtils.getSendLeg(pmode); 
 
         // Start with a copy of the supplied MMD
-        this.submission = new UserMessage(submittedMMD);        
+        this.submission = new UserMessage(submittedMMD);  
+        this.submission.setDirection(Direction.OUT);
     }
 }
