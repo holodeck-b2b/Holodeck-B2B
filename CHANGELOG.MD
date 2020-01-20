@@ -31,6 +31,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   module.
 
 ### Changed
+* P-Modes are now by default stored in the `repository/pmodes` directory  
 * The default key transport algorithms have been upgraded to RSA-OAEP and MGF1 with SHA256.
 * Restructured the project's modules to create a better separation of _Core_ and _protocol specific_ code. This includes renaming of Axis2 phases to reflect the difference between _Core_ and _protocol specific_ processing. 
 * The security provider interface now use the new `org.holodeckb2b.interfaces.core.IMessageProcessingContext` interface
@@ -49,7 +50,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Constructor of `org.holodeckb2b.interfaces.submit.MessageSubmitException` now accepts `Throwable` instead of 
   `Exception`
 * The classes of the common message model implementation are now `Serializable` 
-* Switched to Log4J logging in handlers. 
+* Switched to Log4J2 logging in handlers. 
 
 ### Fixed
 * Generated Content-Id results in signature failure [#99](https://github.com/holodeck-b2b/Holodeck-B2B/issues/99)
