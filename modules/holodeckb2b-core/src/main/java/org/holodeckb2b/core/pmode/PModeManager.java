@@ -16,7 +16,11 @@
  */
 package org.holodeckb2b.core.pmode;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.ServiceLoader;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,10 +38,14 @@ import org.holodeckb2b.interfaces.pmode.validation.PModeValidationError;
  * Manages the set of deployed P-Mode of a Holodeck B2B installation. It acts as a <i>facade</i> to the actual storage
  * of deployed P-Mode to ensure that a new P-Mode that is being deployed is validated before deployment. For this P-Mode
  * validation another component is used. This ensures that external and internal storage and validation of P-Modes are
- * more loosely coupled and customisable to specific requirements. The actual storage and validation components to be
- * used can be set in the configuration. By default the P-Modes are stored in memory and there no validation executed 
- * before deployment. It is however STRONGLY RECOMMENDED to configure validation to ensure that deployed  P-Modes are 
- * usable.
+ * more loosely coupled and customisable to specific requirements. 
+ * <p>The actual storage component to be used can be set in the configuration. The default implementation {@link 
+ * InMemoryPModeSet} stores the P-Modes in memory.<br>
+ * Which validator should be used for a P-Mode is determined by the P-Mode's type, which is defined by the <b>
+ * PMode.MEPBinding</p> parameter. For loading the correct P-Mode validator the Java SPI mechanism is used. This allows
+ * to use different validators for different protocols and/or deployments.<br>
+ * Whether a P-Mode for which non validator is available should still be loaded or be rejected depends on the 
+ * configuration setting {@link InternalConfiguration#acceptNonValidablePMode()}.  
  * <p><b>NOTE: </b>Although in this architecture the internal and external storage is more loosely coupled they still
  * influence each other and changing either implementation may affect the other.
  *
@@ -45,7 +53,7 @@ import org.holodeckb2b.interfaces.pmode.validation.PModeValidationError;
  * @since  3.0.0
  * @see InternalConfiguration#getPModeStorageImplClass()
  * @see InMemoryPModeSet
- * @see InternalConfiguration#getPModeValidatorImplClass()
+ * @see org.holodeckb2b.interfaces.pmode.validation
  */
 public class PModeManager implements IPModeSet {
 
@@ -57,9 +65,14 @@ public class PModeManager implements IPModeSet {
     private IPModeSet   deployedPModes;
 
     /**
-     * The P-Mode validator in use to check P-Modes before being deployed
+     * The P-Mode validators in use to check P-Modes before being deployed
      */
-    private IPModeValidator validator;
+    private List<IPModeValidator> validators;
+    
+    /**
+     * Indicator whether P-Modes for which no validator is available should still be accepted.
+     */
+    private boolean acceptNonValidable = true;
 
     /**
      * Creates a new <code>PModeManager</code> which will use the {@link IPModeSet} and {@link IPModeValidator}
@@ -68,23 +81,11 @@ public class PModeManager implements IPModeSet {
      * used.
      *
      * @param config   The configuration of this instance 
+     * @throws PModeSetException When no P-Mode validators are available (maybe due to Java SPI issue) but validation of
+     * 							 P-Modes is required (i.e. non validable P-Modes are configured to be rejected)
      */
-    public PModeManager(final InternalConfiguration config) {
+    public PModeManager(final InternalConfiguration config) throws PModeSetException {
         log.trace("Start configuration");
-        final String pmodeValidatorClass = config.getPModeValidatorImplClass();        
-        if (!Utils.isNullOrEmpty(pmodeValidatorClass)) {
-            // A specific P-Mode validator is specified in the configuration, try to load it
-            try {
-                log.debug("Loading P-Mode validator specified in configuration: {}", pmodeValidatorClass);
-                validator = (IPModeValidator) Class.forName(pmodeValidatorClass).newInstance();
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
-               // Could not create the specified validator, fall back to default implementation
-               log.error("Could not load the specified P-Mode validator: {}", pmodeValidatorClass);
-            }
-        } else
-            // No validator specified, not recommended!
-        	log.warn("No P-Mode validator has been configured!");
-
         final String pmodeStorageClass = config.getPModeStorageImplClass();
         if (!Utils.isNullOrEmpty(pmodeStorageClass)) {
             // A specific P-Mode storage implementation is specified in the configuration, try to load it
@@ -104,16 +105,38 @@ public class PModeManager implements IPModeSet {
             // No specific validator, use default one
             deployedPModes = new InMemoryPModeSet();
 
+        try {
+        	log.debug("Load installed P-Mode validators");
+        	validators = new ArrayList<>();       
+        	ServiceLoader.load(IPModeValidator.class).forEach(v -> validators.add(v));
+        } catch (Throwable svcLoaderException) {
+        	log.error("An error occurred while loading the list of available P-Mode validators! Error details: {}",
+        				svcLoaderException.getMessage());
+        	validators = null;
+        }
+        acceptNonValidable = config.acceptNonValidablePMode();
+        // If no validators were loaded and validation is required we have a problem, otherwise we just log the loaded 
+        // validators
+        if (!acceptNonValidable && Utils.isNullOrEmpty(validators)) {
+        	log.fatal("No P-Mode validators are available, but validation is required!");
+        	throw new PModeSetException("Missing P-Mode validators for required validation");
+        } else if (acceptNonValidable)
+        	log.warn("To reduce risk of issues during exchanges it's NOT RECOMMENDED to accept non validable P-Modes!");        
+        
         // Log configuration
-        StringBuilder   logMsg = new StringBuilder("Initialized P-Mode manager:\n");
-        logMsg.append("\tP-Mode validator    : ");
-        if (validator != null)
-        	logMsg.append(validator.getClass().getName());
-    	else
-    		logMsg.append("None");        		
-        logMsg.append('\n')
-              .append("\tP-Mode storage impl.: ").append(deployedPModes.getClass().getName()).append('\n');
-        log.info(logMsg.toString());
+        if (log.isInfoEnabled()) {
+	        StringBuilder   logMsg = new StringBuilder("Initialized P-Mode manager:\n");
+	        logMsg.append('\n')
+	              .append("\tP-Mode storage implentation : ").append(deployedPModes.getClass().getName()).append('\n')
+	              .append("\tAccept/reject non validable : ").append(acceptNonValidable ? "Accept" : "Reject")
+	        	  .append("\tRegistered validators:\n");
+	        if (validators != null)
+	        	for(IPModeValidator v : validators) 
+	        		logMsg.append("\t\t").append(v.getName()).append('\n');
+    		else
+    			logMsg.append("none\n");	        
+	        log.info(logMsg.toString());
+        }
     }
 
     @Override
@@ -134,22 +157,12 @@ public class PModeManager implements IPModeSet {
     @Override
     public String add(IPMode pmode) throws PModeSetException {
         log.trace("Request to add P-Mode");
-
-        if (validator != null) {
-	        // Validate the new P-Mode
-	        Collection<PModeValidationError> validationErrors = validator.validatePMode(pmode);
-	        if (!Utils.isNullOrEmpty(validationErrors)) {
-	            log.warn("The new P-Mode is not valid, validator found {} errors!", validationErrors.size());
-	            throw new InvalidPModeException(validationErrors);
-	        } else 
-	            log.trace("No errors found in new P-Mode");
-	         
-        }
-        log.debug("Adding to deployed set of P-Modes");
+        validatePMode(pmode);
         try {
-           String pmodeId = deployedPModes.add(pmode);
-           log.info("Successfully deployed P-Mode [{}]", pmodeId);
-           return pmodeId;
+        	log.trace("Adding to deployed set of P-Modes");
+        	String pmodeId = deployedPModes.add(pmode);
+           	log.info("Successfully deployed P-Mode [{}]", pmodeId);
+           	return pmodeId;
         } catch (PModeSetException deploymentException) {
             log.error("Could not deploy new P-Mode due to exception in storage implementation! Error message: {}",
                        deploymentException.getMessage());
@@ -160,29 +173,52 @@ public class PModeManager implements IPModeSet {
     @Override
     public void replace(IPMode pmode) throws PModeSetException {
         log.trace("Request to replace P-Mode [{}]", pmode.getId());
-
-        if (validator != null) {
-	        // Validate the new P-Mode
-	        Collection<PModeValidationError> validationErrors = validator.validatePMode(pmode);
-	        if (!Utils.isNullOrEmpty(validationErrors)) {
-	            log.warn("The new version of the P-Mode is not valid, validator found {} errors!", 
-	            			validationErrors.size());
-	            throw new InvalidPModeException(validationErrors);
-	        } else 
-	        	log.debug("No errors found in new version of P-Mode");
-        }
-	     
-        log.debug("Replacing current version in the deployed set of P-Modes");
+        validatePMode(pmode);
         try {
-    	   deployedPModes.replace(pmode);
-    	   log.info("Successfully deployed change version of P-Mode [{}]", pmode.getId());
+        	log.trace("Replacing current version in the deployed set of P-Modes");
+        	deployedPModes.replace(pmode);
+        	log.info("Successfully deployed change version of P-Mode [{}]", pmode.getId());
         } catch (PModeSetException deploymentException) {
-           log.error("Could not replace P-Mode due to exception in storage implementation! Error message: {}",
+        	log.error("Could not replace P-Mode due to exception in storage implementation! Error message: {}",
                        deploymentException.getMessage());
-           throw deploymentException;
+        	throw deploymentException;
         }
     }
 
+    /**
+     * Validates the given using the first available {@link IPModeValidator} that can handle the P-Mode, i.e. does 
+     * support the <b>PMode.MEPBinding</b>. If no validator is available it depends on the configuration whether the
+     * P-Mode is accepted or rejected.   
+     * 
+     * @param pmode		P-Mode to validate
+     * @throws InvalidPModeException When the P-Mode is invalid
+     * @throws PModeSetException  	 When no validator can handle the P-Mode but validation is required
+     */
+    private void validatePMode(final IPMode pmode) throws PModeSetException {
+        final String mepBinding = pmode.getMepBinding();
+        log.trace("Getting validator for P-Mode based on MEPBinding: {}", mepBinding);
+        Optional<IPModeValidator> findFirst = validators.parallelStream()
+        												.filter(v -> v.doesValidate(mepBinding)).findFirst();
+        final IPModeValidator validator = findFirst.isPresent() ? findFirst.get() : null;        
+        if (validator != null ) {
+	        log.debug("Using validator {} for validation of P-Mode (id={})", validator.getName(), pmode.getId());
+	        Collection<PModeValidationError> validationErrors = validator.validatePMode(pmode);
+	        if (!Utils.isNullOrEmpty(validationErrors)) {
+	            log.warn("The new P-Mode is not valid, validator found {} errors!", validationErrors.size());
+	            throw new InvalidPModeException(validationErrors);
+	        } else 
+	            log.trace("No errors found in new P-Mode");	         
+        } else {
+        	// depending on configuration either reject or accept 
+        	if (acceptNonValidable) {
+        		log.warn("No validator available for P-Mode ({})", pmode.getId());        		
+        	} else {
+        		log.error("No validator available for P-Mode ({})", pmode.getId());
+        		throw new PModeSetException("No validator available for P-Mode");
+        	}
+        }	    	
+    }
+    
     @Override
     public void remove(String id) throws PModeSetException {
     	log.trace("Request to remove P-Mode [{}]", id);

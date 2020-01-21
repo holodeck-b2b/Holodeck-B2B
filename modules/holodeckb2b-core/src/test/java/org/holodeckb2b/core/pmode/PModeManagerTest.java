@@ -18,11 +18,14 @@ package org.holodeckb2b.core.pmode;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Field;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.List;
 
 import org.holodeckb2b.common.pmode.Agreement;
 import org.holodeckb2b.common.pmode.InMemoryPModeSet;
@@ -34,6 +37,8 @@ import org.holodeckb2b.common.testhelpers.TestConfig;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
+import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -52,11 +57,16 @@ public class PModeManagerTest {
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
     }
     
+    @Before
+    public void setupTest() {
+    	config.pmodeStorageClass = SimplePModeSet.class.getName();
+    	config.acceptNonValidablePMode = true;
+    }
+    
     @Test
     public void testDefaultConfig() {
     	try {
     		config.pmodeStorageClass = null;
-    		config.pmodeValidatorClass = null;
     		
     		PModeManager manager = new PModeManager(config);
     		
@@ -64,9 +74,6 @@ public class PModeManagerTest {
     		pmodeStorage.setAccessible(true);
     		assertTrue(pmodeStorage.get(manager) instanceof InMemoryPModeSet);
 
-    		Field pmodeValidator = PModeManager.class.getDeclaredField("validator");
-    		pmodeValidator.setAccessible(true);
-    		assertNull(pmodeValidator.get(manager));
     	} catch (Throwable t) {
     		t.printStackTrace();
     		fail();
@@ -74,29 +81,66 @@ public class PModeManagerTest {
     }
     
     @Test
-    public void testCustomConfig() {
+    public void testValidatorLoading() {
+    	
+    	ClassLoader ccl = this.getClass().getClassLoader();
+    	URLClassLoader ecl = new URLClassLoader(new URL[] { ccl.getResource("pmodeManager/") }, ccl);    	
+    	Thread.currentThread().setContextClassLoader(ecl);
+    	
+    	PModeManager manager = null; 
     	try {
-    		config.pmodeStorageClass = SimplePModeSet.class.getName();
-    		config.pmodeValidatorClass = TestValidator.class.getName();
+    		manager = new PModeManager(config);
+    	} catch (PModeSetException pse) {
+    		fail();
+    	}
+    	
+    	try {
+			Field pmodeValidators = PModeManager.class.getDeclaredField("validators");
+			pmodeValidators.setAccessible(true);
+			List<IPModeValidator> validators = (List<IPModeValidator>) pmodeValidators.get(manager);
+			
+			assertNotNull(validators);
+			assertEquals(2, validators.size());
+			assertTrue(  validators.parallelStream().anyMatch(v -> v.getName().equals(new TestValidator().getName()))
+					  && validators.parallelStream().anyMatch(v -> v.getName().equals(new TestValidator2().getName())));
+    	} catch (Throwable t) {
+    		t.printStackTrace();
+    		fail();
+    	}
+
+    	Thread.currentThread().setContextClassLoader(ccl);
+    }
+    
+    
+    @Test
+    public void testCustomConfig() {
+    	try {    		
     		PModeManager manager = new PModeManager(config);
     		
     		Field pmodeStorage = PModeManager.class.getDeclaredField("deployedPModes");
     		pmodeStorage.setAccessible(true);
     		assertTrue(pmodeStorage.get(manager) instanceof SimplePModeSet);
     		
-    		Field pmodeValidator = PModeManager.class.getDeclaredField("validator");
-    		pmodeValidator.setAccessible(true);
-    		assertTrue(pmodeValidator.get(manager) instanceof TestValidator);
     	} catch (Throwable t) {
     		t.printStackTrace();
     		fail();
     	}
     }
+    
+    
+    @Test
+    public void testInvalidConfig() {
+    	try {
+    		config.acceptNonValidablePMode = false;
+    		PModeManager manager = new PModeManager(config);
+    		fail();
+    	} catch (PModeSetException correct) {
+    	}
+    }    
 
     @Test
-    public void testPModeAddReplace() {
-		config.pmodeValidatorClass = TestValidator.class.getName();
-		PModeManager manager = new PModeManager(config);
+    public void testPModeAddReplace() throws PModeSetException {
+    	PModeManager manager = new PModeManager(config);
     	
     	PMode pmode = new PMode();
         pmode.setId("valid-pmode-1");
@@ -124,10 +168,17 @@ public class PModeManagerTest {
     }
     
     @Test
-    public void testPModeRejectInvalid() {
-		config.pmodeValidatorClass = TestValidator.class.getName();
+    public void testPModeRejectInvalid() throws PModeSetException {
 		PModeManager manager = new PModeManager(config);
-    	
+
+		try {
+			Field pmodeValidators = PModeManager.class.getDeclaredField("validators");
+			pmodeValidators.setAccessible(true);
+			List<IPModeValidator> validators = (List<IPModeValidator>) pmodeValidators.get(manager);
+			validators.add(new TestValidator());
+		} catch (Throwable t) {
+			fail();
+		}
     	PMode pmode = new PMode();
         pmode.setId("invalid-pmode");
         pmode.setMep(EbMSConstants.ONE_WAY_MEP);
@@ -159,8 +210,7 @@ public class PModeManagerTest {
     }
     
     @Test
-    public void testPModeRemove() {
-		config.pmodeValidatorClass = TestValidator.class.getName();
+    public void testPModeRemove() throws PModeSetException {
 		PModeManager manager = new PModeManager(config);
     	
     	PMode pmode = new PMode();

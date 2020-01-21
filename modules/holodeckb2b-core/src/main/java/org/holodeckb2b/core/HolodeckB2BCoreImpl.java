@@ -26,8 +26,8 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisDescription;
 import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.modules.Module;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.holodeckb2b.common.VersionInfo;
@@ -56,6 +56,7 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
 import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.pmode.PModeSetException;
 import org.holodeckb2b.interfaces.security.ISecurityProvider;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
@@ -82,7 +83,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     /**
      * Logger
      */
-    private static final Log log = LogFactory.getLog(HolodeckB2BCoreImpl.class);
+    private static final Logger log = LogManager.getLogger(HolodeckB2BCoreImpl.class);
 
     /**
      * The configuration of this Holodeck B2B instance
@@ -170,8 +171,13 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
             throw new AxisFault("Could not initialize Holodeck B2B module!", ex);
         }
 
-        log.trace("Initialize the P-Mode manager");
-        pmodeManager = new PModeManager(instanceConfiguration);
+        try {
+        	log.trace("Initialize the P-Mode manager");
+			pmodeManager = new PModeManager(instanceConfiguration);
+		} catch (PModeSetException e) {
+			log.fatal("Could not intialize the P-Mode manager! ABORTING startup!\n\tError details: {}", e.getMessage());
+			throw new AxisFault("Could not initialize Holodeck B2B module!", e);
+		}
 
         final String eventProcessorClassname = instanceConfiguration.getMessageProcessingEventProcessor();
         if (!Utils.isNullOrEmpty(eventProcessorClassname)) {

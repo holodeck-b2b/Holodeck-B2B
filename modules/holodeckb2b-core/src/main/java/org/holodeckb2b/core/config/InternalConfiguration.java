@@ -58,15 +58,15 @@ public interface InternalConfiguration extends IConfiguration {
      * @return String containing the class name of the {@link IMessageProcessingEventProcessor} implementation to use
      */
     String getMessageProcessingEventProcessor();
-
+    
     /**
-     * Gets the class name of the {@link IPModeValidator} implementation that the Holodeck B2B Core's <code>PModeManager
-     * </code> must use to validate P-Modes before they are deployed.
-     *
-     * @return  The class name of the {@link IPModeValidator} implementation
-     * @since  3.0.0
+     * Indicates whether a P-Mode for which no {@link IPModeValidator} implementation is available to check it before
+     * loading it should be rejected or still be loaded.   
+     * 
+     * @return <code>true</code> if the P-Mode should still be loaded,<br><code>false</code> if it should be rejected
+     * @since 5.0.0
      */
-    String getPModeValidatorImplClass();
+    boolean acceptNonValidablePMode();
 
     /**
      * Gets the class name of the {@link IPModeSet} implementation that the Holodeck B2B Core's <code>PModeManager

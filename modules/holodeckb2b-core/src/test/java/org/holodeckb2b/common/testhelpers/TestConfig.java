@@ -26,8 +26,8 @@ import org.holodeckb2b.core.config.InternalConfiguration;
 public class TestConfig implements InternalConfiguration {
 
     public String hb2b_home;
-    public String pmodeValidatorClass = null;
     public String pmodeStorageClass = null;
+    public boolean acceptNonValidablePMode = true;
     public String persistencyProviderClass;
     public String securityProviderClass;
     public String certManagerClass;
@@ -44,15 +44,8 @@ public class TestConfig implements InternalConfiguration {
         hb2b_home = homeDir;
     }
 
-    public TestConfig(final String homeDir, final String pmodeValidatorClass) {
+    public TestConfig(final String homeDir, final String pmodeStorageClass) {
         hb2b_home = homeDir;
-        this.pmodeValidatorClass = pmodeValidatorClass;
-    }
-
-    public TestConfig(final String homeDir, final String pmodeValidatorClass,
-           final String pmodeStorageClass) {
-        hb2b_home = homeDir;
-        this.pmodeValidatorClass = pmodeValidatorClass;
         this.pmodeStorageClass = pmodeStorageClass;
     }
 
@@ -108,13 +101,13 @@ public class TestConfig implements InternalConfiguration {
     }
 
     @Override
-    public String getPModeValidatorImplClass() {
-        return pmodeValidatorClass;
-    }
-
-    @Override
     public String getPModeStorageImplClass() {
         return pmodeStorageClass;
+    }
+    
+    @Override
+    public boolean acceptNonValidablePMode() {
+    	return acceptNonValidablePMode;
     }
 
     @Override

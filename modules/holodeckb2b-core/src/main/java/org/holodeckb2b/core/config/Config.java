@@ -25,6 +25,7 @@ import java.util.Random;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
 
 /**
  * Contains the configuration of the Holodeck B2B Core.
@@ -88,17 +89,18 @@ public class Config implements InternalConfiguration {
     private String messageProcessingEventProcessorClass = null;
 
     /*
-     * The class name of the component that should be used to validate P-Modes before deploying them
-     * @since  3.0.0
-     */
-    private String pmodeValidatorClass = null;
-
-    /*
      * The class name of the component that should be used to store deployed P-Modes
      * @since  3.0.0
      */
     private String pmodeStorageClass = null;
 
+    /**
+     * The indicator whether P-Modes for which no {@link IPModeValidator} implementation is available should be rejected 
+     * or still be loaded. 
+     * @since 5.0.0
+     */
+    private boolean acceptNonValidablePModes = false;
+    
     /*
      * The class name of the persistency provider that should be used to store the meta-data on processed message units
      * @since  3.0.0
@@ -195,8 +197,9 @@ public class Config implements InternalConfiguration {
         // The class name of the event processor
         messageProcessingEventProcessorClass = configFile.getParameter("MessageProcessingEventProcessor");
 
-        // The class name of the P-Mode validator
-        pmodeValidatorClass = configFile.getParameter("PModeValidator");
+        // Indicator whether to accept non validable P-Modes, default false
+        final String acceptNVPMode = configFile.getParameter("AcceptNonValidablePModes");
+        acceptNonValidablePModes = isTrue(acceptNVPMode); 
 
         // The class name of the component to store P-Modes
         pmodeStorageClass = configFile.getParameter("PModeStorageImplementation");
@@ -294,19 +297,19 @@ public class Config implements InternalConfiguration {
      * @since 3.0.0
      */
     @Override
-    public String getPModeValidatorImplClass() {
-        return pmodeValidatorClass;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @since 3.0.0
-     */
-    @Override
     public String getPModeStorageImplClass() {
         return pmodeStorageClass;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     * @since 5.0.0
+     */
+    @Override
+    public boolean acceptNonValidablePMode() {
+    	return acceptNonValidablePModes;
+    }
+    
     /**
      * {@inheritDoc}
      * @since 3.0.0
