@@ -19,8 +19,8 @@ package org.holodeckb2b.core.pmode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,10 +75,9 @@ public class PModeManager implements IPModeSet {
     private boolean acceptNonValidable = true;
 
     /**
-     * Creates a new <code>PModeManager</code> which will use the {@link IPModeSet} and {@link IPModeValidator}
-     * implementations as specified in the configuration for storing the deployed respectively checking the P-Modes. 
-     * If not specified the default implementation ({@link InMemoryPModeSet} and {@link BasicPModeValidator}) will be 
-     * used.
+     * Creates a new <code>PModeManager</code> which will use the {@link IPModeSet} implementation as specified in the 
+     * configuration for storing the deployed the P-Modes. If not specified the default {@link InMemoryPModeSet} 
+     * implementation will be used.
      *
      * @param config   The configuration of this instance 
      * @throws PModeSetException When no P-Mode validators are available (maybe due to Java SPI issue) but validation of
@@ -125,11 +124,10 @@ public class PModeManager implements IPModeSet {
         
         // Log configuration
         if (log.isInfoEnabled()) {
-	        StringBuilder   logMsg = new StringBuilder("Initialized P-Mode manager:\n");
-	        logMsg.append('\n')
-	              .append("\tP-Mode storage implentation : ").append(deployedPModes.getClass().getName()).append('\n')
-	              .append("\tAccept/reject non validable : ").append(acceptNonValidable ? "Accept" : "Reject")
-	        	  .append("\tRegistered validators:\n");
+	        StringBuilder   logMsg = new StringBuilder("Initialized P-Mode manager:\n")
+	           .append("\tP-Mode storage implentation : ").append(deployedPModes.getClass().getName()).append('\n')
+	           .append("\tAccept/reject non validable : ").append(acceptNonValidable ? "Accept" : "Reject").append('\n')
+	           .append("\tRegistered validators:\n");
 	        if (validators != null)
 	        	for(IPModeValidator v : validators) 
 	        		logMsg.append("\t\t").append(v.getName()).append('\n');
@@ -186,7 +184,7 @@ public class PModeManager implements IPModeSet {
     }
 
     /**
-     * Validates the given using the first available {@link IPModeValidator} that can handle the P-Mode, i.e. does 
+     * Validates the given using <b>all</b> available {@link IPModeValidator}s that can handle the P-Mode, i.e. does 
      * support the <b>PMode.MEPBinding</b>. If no validator is available it depends on the configuration whether the
      * P-Mode is accepted or rejected.   
      * 
@@ -196,18 +194,25 @@ public class PModeManager implements IPModeSet {
      */
     private void validatePMode(final IPMode pmode) throws PModeSetException {
         final String mepBinding = pmode.getMepBinding();
-        log.trace("Getting validator for P-Mode based on MEPBinding: {}", mepBinding);
-        Optional<IPModeValidator> findFirst = validators.parallelStream()
-        												.filter(v -> v.doesValidate(mepBinding)).findFirst();
-        final IPModeValidator validator = findFirst.isPresent() ? findFirst.get() : null;        
-        if (validator != null ) {
-	        log.debug("Using validator {} for validation of P-Mode (id={})", validator.getName(), pmode.getId());
-	        Collection<PModeValidationError> validationErrors = validator.validatePMode(pmode);
-	        if (!Utils.isNullOrEmpty(validationErrors)) {
-	            log.warn("The new P-Mode is not valid, validator found {} errors!", validationErrors.size());
-	            throw new InvalidPModeException(validationErrors);
-	        } else 
-	            log.trace("No errors found in new P-Mode");	         
+        log.trace("Getting validator for P-Mode ({}) based on MEPBinding: {}", pmode.getId(), mepBinding);
+        List<IPModeValidator> applicableV = validators.parallelStream()
+        											  .filter(v -> v.doesValidate(mepBinding))
+        											  .collect(Collectors.toList());                
+        if (!applicableV.isEmpty()) {
+        	Collection<PModeValidationError> validationErrors = new ArrayList<>();
+        	for(IPModeValidator v : applicableV) {
+        		log.trace("Using validator ({}) for validation of P-Mode (id={})", v.getName(), pmode.getId());
+        		Collection<PModeValidationError> errors = v.validatePMode(pmode);
+        		if (!Utils.isNullOrEmpty(errors)) {
+        			log.debug("Validator ({}) found {} errors in the new P-Mode", v.getName(), errors.size());
+        			validationErrors.addAll(errors);        		
+        		}        		        		
+	        } 
+        	if (!validationErrors.isEmpty()) {
+        		log.warn("Found {} errors in new P-Mode ({})!", validationErrors.size(), pmode.getId());
+        		throw new InvalidPModeException(validationErrors);
+        	} else 
+	            log.debug("No errors found in new P-Mode ({})", pmode.getId());	         
         } else {
         	// depending on configuration either reject or accept 
         	if (acceptNonValidable) {

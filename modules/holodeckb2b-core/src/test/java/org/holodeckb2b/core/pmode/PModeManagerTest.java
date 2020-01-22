@@ -101,8 +101,8 @@ public class PModeManagerTest {
 			
 			assertNotNull(validators);
 			assertEquals(2, validators.size());
-			assertTrue(  validators.parallelStream().anyMatch(v -> v.getName().equals(new TestValidator().getName()))
-					  && validators.parallelStream().anyMatch(v -> v.getName().equals(new TestValidator2().getName())));
+			assertTrue(  validators.parallelStream().anyMatch(v -> v.getName().equals(new TestValidatorAllWrong().getName()))
+					  && validators.parallelStream().anyMatch(v -> v.getName().equals(new TestValidatorAllGood().getName())));
     	} catch (Throwable t) {
     		t.printStackTrace();
     		fail();
@@ -167,6 +167,32 @@ public class PModeManagerTest {
         assertEquals(EbMSConstants.ONE_WAY_PULL, pmode.getMepBinding());
     }
     
+    
+    @Test
+    public void testPModeValidation() throws PModeSetException {
+    	PModeManager manager = new PModeManager(config);
+    	final TestValidatorAllWrong vAllWrong = new TestValidatorAllWrong();
+    	final TestValidatorAllGood vAllGood = new TestValidatorAllGood();
+    	try {
+    		Field pmodeValidators = PModeManager.class.getDeclaredField("validators");
+    		pmodeValidators.setAccessible(true);
+    		List<IPModeValidator> validators = (List<IPModeValidator>) pmodeValidators.get(manager);
+    		validators.add(vAllWrong);
+    		validators.add(vAllGood);
+    	} catch (Throwable t) {
+    		fail();
+    	}
+    	PMode pmode = new PMode();
+    	pmode.setId("invalid-pmode");    	
+    	try {
+    		manager.add(pmode);
+    	} catch (PModeSetException ex) {
+    	}
+    	
+    	assertTrue(vAllGood.isExecuted());
+    	assertTrue(vAllWrong.isExecuted());
+    }
+    
     @Test
     public void testPModeRejectInvalid() throws PModeSetException {
 		PModeManager manager = new PModeManager(config);
@@ -175,7 +201,7 @@ public class PModeManagerTest {
 			Field pmodeValidators = PModeManager.class.getDeclaredField("validators");
 			pmodeValidators.setAccessible(true);
 			List<IPModeValidator> validators = (List<IPModeValidator>) pmodeValidators.get(manager);
-			validators.add(new TestValidator());
+			validators.add(new TestValidatorAllWrong());
 		} catch (Throwable t) {
 			fail();
 		}
@@ -192,21 +218,6 @@ public class PModeManagerTest {
         } catch (PModeSetException ex) {
         }
         assertFalse(manager.containsId(pmode.getId()));
-        
-        pmode.setAgreement(null);
-        try {
-            manager.add(pmode);
-        } catch (PModeSetException ex) {
-        	fail();
-        }
-        assertTrue(manager.containsId(pmode.getId()));
-        
-        pmode.setAgreement(new Agreement());
-        try {
-            manager.replace(pmode);
-            fail();
-        } catch (PModeSetException ex) {
-        }
     }
     
     @Test

@@ -4,22 +4,26 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.holodeckb2b.interfaces.pmode.IPMode;
-import org.holodeckb2b.interfaces.pmode.PModeSetException;
 import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
 import org.holodeckb2b.interfaces.pmode.validation.PModeValidationError;
 
-public class TestValidator implements IPModeValidator {
+public abstract class AbstractTestValidator implements IPModeValidator {
 
+	private boolean isExecuted = false;
+	
+	protected abstract boolean shouldReject();
+	
+	public boolean isExecuted() {
+		return isExecuted;
+	}
+	
 	@Override
 	public Collection<PModeValidationError> validatePMode(IPMode pmode) {
-		if (pmode.getAgreement() != null)
-			return Collections.singletonList(new PModeValidationError("Agreement", "not allowed"));
+		isExecuted = true;
+		if (shouldReject())
+			return Collections.singletonList(new PModeValidationError("Agreement", "Nothing allowed"));
 		else
 			return null;
-	}
-
-	@Override
-	public void init(String hb2bHomeDir) throws PModeSetException {
 	}
 
 	@Override
