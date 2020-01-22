@@ -41,10 +41,10 @@ import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 
 /**
- * Is the default implementation of {@link IPModeValidator} that will check if a P-Mode is correct. Since Holodeck B2B
- * accepts any value as long as processing permits and also allows very generic P-Modes, this implementation only checks
- * basic settings like the values for MEP, MEP binding, MPC for pulling and security settings. If needed because of
- * specific requirements in a certain domain a custom validator can be used.
+ * Is the default implementation of {@link IPModeValidator} for ebMS3 / AS4 P-Modes. Since Holodeck B2B for most 
+ * parameters accepts any  value as long as processing permits and also allows very generic P-Modes, this implementation 
+ * only checks basic settings like the values for MEP, MEP binding, MPC for pulling and security settings. If needed 
+ * because of specific requirements in a certain domain a custom validator could be added.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
@@ -66,6 +66,16 @@ public class BasicPModeValidator implements IPModeValidator {
         VALID_MEP_BINDINGS.add(EbMSConstants.TWO_WAY_PUSH_PULL);
     }
 
+    @Override
+    public String getName() {
+    	return "HB2B Default ebMS3/AS4";
+    }
+    
+	@Override
+	public boolean doesValidate(String pmodeType) {
+		return pmodeType.startsWith("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704");
+	}
+	
     @Override
     public Collection<PModeValidationError> validatePMode(final IPMode pmode) {
         Collection<PModeValidationError>    errors = new ArrayList<>();
