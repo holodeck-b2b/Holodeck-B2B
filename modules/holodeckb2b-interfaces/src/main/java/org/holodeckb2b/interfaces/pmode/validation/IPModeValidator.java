@@ -19,7 +19,6 @@ package org.holodeckb2b.interfaces.pmode.validation;
 import java.util.Collection;
 
 import org.holodeckb2b.interfaces.pmode.IPMode;
-import org.holodeckb2b.interfaces.pmode.PModeSetException;
 
 /**
  * Defines the interface of the component responsible for the validation of P-Modes before they can be added to the set
@@ -41,16 +40,6 @@ public interface IPModeValidator {
      * @since 5.0.0
      */
     default String getName() { return this.getClass().getName(); }
-
-    /**
-     * Initialises the validator. 
-     *
-     * @param hb2bHomeDir           Path to the Holodeck B2B home directory
-     * @throws PModeSetException	When the initialization of the validator cannot be completed. The exception message 
-     * 								SHOULD include a clear indication of what caused the init failure.
-     * @since 5.0.0
-     */
-    void init(final String hb2bHomeDir) throws PModeSetException;
 	
     /**
      * Indicates whether this validator can be used to validate P-Mode of the given type. The <b>PMode.MEPbinding</b> 
