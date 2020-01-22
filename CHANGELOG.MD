@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * A default user interface that supports basic monitoring of a running Holodeck B2B instance. The UI is available both
   using a command line and GUI application.
 * Support for asynchronous Two-Way AS4 P-Modes.
+* Support for additional P-Mode validators for same type of P-Mode. _P-Mode validators_ are now loaded using the Java 
+  SPI mechanism and all applicable validators are used to check a P-Mode before loading it.
 * New interfaces related to trust validation of certificates in `org.holodeckb2b.interfaces.security.trust`. Especially
   the new specification of the Holodeck B2B _Certificate Manager_ which is now a separate component independent of the
   _Security Provider_. Also new interfaces and methods are defined to communicate the results of trust validation checks
@@ -32,6 +34,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 * P-Modes are now by default stored in the `repository/pmodes` directory  
+* Added methods to `org.holodeckb2b.interfaces.pmode.validation.IPModeValidator` to enable new P-Mode validation.   
 * The default key transport algorithms have been upgraded to RSA-OAEP and MGF1 with SHA256.
 * Restructured the project's modules to create a better separation of _Core_ and _protocol specific_ code. This includes renaming of Axis2 phases to reflect the difference between _Core_ and _protocol specific_ processing. 
 * The security provider interface now use the new `org.holodeckb2b.interfaces.core.IMessageProcessingContext` interface
