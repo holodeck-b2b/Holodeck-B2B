@@ -43,86 +43,14 @@
 Test file containing complete Holodeck B2B configuration
 -->
 <holodeckb2b-config xmlns="http://holodeck-b2b.org/schemas/2015/10/config">
-    <!--                                                                 -->             
-    <!--                   Holodeck B2B parameters                       -->             
-    <!--                                                                 -->             
-    
-    <!-- ====================================================================
-    - The name of the JPA persistency unit that should be used to access the
-    - database
-    ===================================================================== -->
     <parameter name="PersistencyUnit">hb2b-core-derby</parameter>
-    
-    <!-- ====================================================================
-    - During the message processing a host name may be needed, for example 
-    - for generating a message id. Because the host name of the machine 
-    - Holodeck B2B runs on may be for internal use only it is possible to set
-    - an external host name using this parameter.
-    ===================================================================== -->
     <parameter name="ExternalHostName"/>
-    
-    <!-- ====================================================================
-    
-    ===================================================================== -->
     <parameter name="WorkerConfig">conf/workers.xml</parameter>
-    
-    <!-- ====================================================================
-    - This parameter sets the directory that should be used for temporarily 
-    - storing data. If it is not set here a "temp" directory is created
-    - in the "repository" directory of the Holodeck B2B install
-    ===================================================================== -->
     <!-- <parameter name="TempDir"/> -->
-    
-    <!-- ====================================================================
-    - This parameter enables bundling of multiple signal message units in of
-    - the same type in a response message. When enabled Holodeck B2B can add 
-    - multiple signal message units generated during the processing of the 
-    - request message to the response preventing loss of information. 
-    - NOTE: This will create ebMS messages that DO NOT conform to the ebMS 
-    - v3 Core Spec and AS4 profile!
-    - The default setting is not to allow this bundling to ensure Core Spec 
-    - and AS4 compliant ebMS messages. To enable the feature set the value
-    - of this parameter to "on" or "true".
-    ===================================================================== -->
     <parameter name="AllowSignalBundling">off</parameter>
-    
-    <!-- ====================================================================
-    - This parameter conatains the default setting whether Errors on Errors 
-    - should be reported to the sender of the faulty error. This setting can 
-    - be overriden in the P-Mode configuration. However the problem that 
-    - causes an error to be in error is often an invalid message reference. 
-    - In such cases the error can not be assigned a P-Mode, so the P-Mode can
-    - not configure the behaviour and this default setting is used.
-    ===================================================================== -->
-    <parameter name="ReportErrorOnError">false</parameter>
-    
-    <!-- ====================================================================
-    - This parameter contains the default setting whether Errors on Receipts 
-    - should be reported to the sender of the receipt in error. This setting 
-    - can be overriden in the P-Mode configuration. 
-    ===================================================================== -->
-    <parameter name="ReportErrorOnReceipt">false</parameter>
-    
-    <!-- ====================================================================
-    - The password for the Java keystore holding the certificates with the
-    - private keys used for signing and decrypting a messsage.
-    ===================================================================== -->
+    <parameter name="Validator.1">validator1</parameter>
+    <parameter name="Validator.2">validator2</parameter>
     <parameter name="PrivateKeyStorePassword">keypwd2$%'s;:@#$:!</parameter>
-    
-    <!-- ====================================================================
-    - The password for the Java keystore holding the certificates with the
-    - public keys used for verification of signatures and encryption of 
-    - a messsage.
-    ===================================================================== -->
-    <parameter name="PublicKeyStorePassword">&#x003E;pwd#$%!091</parameter>
-    
-    <!-- ====================================================================
-    - This parameter contains the default setting whether the revocation of 
-    - certifcates should be checked. 
-    - NOTE: As an error that occurs during the revocation check will result 
-    - in rejection of the complete ebMS message the revocation check should
-    - only be enable if the PKI is correctly and fully implemented.
-    - If required the revocation check can be enable in the P-Mode.
-    ===================================================================== -->
+    <parameter name="PublicKeyStorePassword">&#x003E;pwd#$%!091</parameter>   
     <parameter name="CertificateRevocationCheck">false</parameter>
 </holodeckb2b-config>

@@ -17,6 +17,7 @@
 package org.holodeckb2b.core.config;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.holodeckb2b.common.util.Utils;
@@ -94,6 +95,21 @@ public class ConfigXmlFile {
         return parameters;
     }
 
+    /**
+     * Gets all configuration parameters read from the configuration file which names start with the given string.
+     *
+     * @param  prefix	prefix the parameters should start with		
+     * @return A <code>Map&lt;String, String&gt;</code> containing all configuration parameters with a matching name
+     * @since 5.0.0
+     */
+    public Map<String, String> getParameters(final String prefix) {
+    	HashMap<String, String> results = new HashMap<>();
+    	if (parameters != null) 
+    		parameters.entrySet().parallelStream().filter(e -> e.getKey().startsWith(prefix))
+    											  .forEach(e -> results.put(e.getKey(), e.getValue()));    		
+        return results;
+    }
+    
     /**
      * Get the value for the configuration parameter with the specified name.
      *

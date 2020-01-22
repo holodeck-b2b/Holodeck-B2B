@@ -18,8 +18,11 @@ package org.holodeckb2b.core.config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.util.Map;
 
 import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.Utils;
@@ -98,6 +101,9 @@ public class ConfigXmlFileTest {
             // Test an empty parameter
             assertTrue(Utils.isNullOrEmpty(config.getParameter("ExternalHostName")));
 
+            // Test ignored parameter
+            assertNull(config.getParameter("TempDir"));
+            
             // Test some parameters with special characters
             assertEquals("conf/workers.xml", config.getParameter("WorkerConfig"));
             assertEquals("keypwd2$%'s;:@#$:!", config.getParameter("PrivateKeyStorePassword"));
@@ -106,4 +112,21 @@ public class ConfigXmlFileTest {
             fail("The full config file should not trigger exception!");
         }
     }
+    
+    @Test
+    public void testParameterPrefix() {
+        try {
+            final ConfigXmlFile config = readConfigFile("fullconfig.xml");
+            
+            final String prefix = "Validator";
+            Map<String, String> parameters = config.getParameters(prefix);
+            
+            assertFalse(Utils.isNullOrEmpty(parameters));
+            assertEquals(2, parameters.size());
+            assertTrue(parameters.entrySet().parallelStream().allMatch(e -> e.getKey().startsWith(prefix)));
+            
+        } catch (final Exception e) {
+            fail("The full config file should not trigger exception!");
+        }
+    }    
 }
