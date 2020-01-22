@@ -27,7 +27,8 @@
  * extension mechanism is used for implementation. When a P-Mode is loaded the Core will check if a P-Mode validator is
  * registered that can validate it. This determination is based on the value of <b>PMode.MEPbinding</b> parameter. If no
  * applicable validator is found it depends on the configuration whether the P-Mode will be rejected or still be 
- * accepted.  
+ * accepted. Note also that it is possible to use multiple validators for one P-Mode type as all available validators
+ * will be used.
  *     
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  5.0.0
