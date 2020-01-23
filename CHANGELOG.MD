@@ -10,7 +10,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   using a command line and GUI application.
 * Support for asynchronous Two-Way AS4 P-Modes.
 * Support for additional P-Mode validators for same type of P-Mode. _P-Mode validators_ are now loaded using the Java 
-  SPI mechanism and all applicable validators are used to check a P-Mode before loading it.
+  SPI mechanism and all applicable validators are used to check a P-Mode before loading it. Two new methods were added
+  in `org.holodeckb2b.interfaces.pmode.validation.IPModeValidator` to support the new mechanism  
 * New interfaces related to trust validation of certificates in `org.holodeckb2b.interfaces.security.trust`. Especially
   the new specification of the Holodeck B2B _Certificate Manager_ which is now a separate component independent of the
   _Security Provider_. Also new interfaces and methods are defined to communicate the results of trust validation checks
@@ -26,7 +27,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   on the request MessageContext containing Map of name and value of headers to set.    
 * `org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface.getVersion()` method and 
   `org.holodeckb2b.interfaces.general.IVersionInfo` interface to provide information about the version of the 
-   Holodeck B2B instance.    
+   Holodeck B2B instance.
+* `org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface.getModule(String)` method to acces an active Axis2 Module
+  on the Holodeck B2B instance. This can be used  by extension to get access to "their" module. 
 * `org.holodeckb2b.common.messagemodel.MessageUnit.copyOf(IMessageUnit)` to create a copy of the message unit data in
   an object of the common message model implementation. 
 * Default implementation of the new `ICertificateManager` and `IValidationResult` trust interface to the _security_ 
@@ -34,13 +37,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 * P-Modes are now by default stored in the `repository/pmodes` directory  
-* Added methods to `org.holodeckb2b.interfaces.pmode.validation.IPModeValidator` to enable new P-Mode validation.   
 * The default key transport algorithms have been upgraded to RSA-OAEP and MGF1 with SHA256.
-* Restructured the project's modules to create a better separation of _Core_ and _protocol specific_ code. This includes renaming of Axis2 phases to reflect the difference between _Core_ and _protocol specific_ processing. 
+* The security provider is now loaded using the Java _Servive Provider Interface_ mechanism.   
 * The security provider interface now use the new `org.holodeckb2b.interfaces.core.IMessageProcessingContext` interface
   to provide access to the processing context.
-* Adapted classes in _security_ module for changes in the interfaces related to trust validation. 
-* Split the file based back-end integration into a separate project (see [File-backend](https://github.com/holodeck-b2b/file-backend)). This back-end is still included in the default distribution. 
+* Restructured the project's modules to create a better separation of _Core_ and _protocol specific_ code. This includes 
+  renaming of Axis2 phases to reflect the difference between _Core_ and _protocol specific_ processing.
+* Split the _security_ module into two sub module; one to implement the new default _Certificate Manager_ and one to 
+  implement the _Security Provider_. Both implementations are refactored version of the old _Security Provider_ classes.
 * Refactored the default P-Mode implementation so it also supports setting of parameters and serialization to XML.
 * Refactored send process to make it more flexible and use *PMode.MEPBinding* to select the Axis2 _Service_ to use for
   sending. This removes the need for coded _Services_ and specialised senders or sender worker when implementing an
@@ -67,8 +71,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Setter methods in `org.holodeckb2b.interfaces.general.IAgreement`
 * The configuration parameter (`IConfiguation.useStrictErrorRefCheck()`) to apply a strict validation on the
   references in the Error signal.
-* The configuration parameters (as defined in IConfiguration) related to the keystores used in WS-Security processing. 
+* The following configuration parameters (as defined in `IConfiguration`) have been removed:
+    * Related to the keystores used in WS-Security processing and certificate management.
+    * P-Mode validator class (now loaded through SPI mechanism)
+    * Security Provider class (now loaded through SPI mechanism)
 * The _msh_ URL path for receiving messages.
+* Split the file based back-end integration into a separate project (see [File-backend](https://github.com/holodeck-b2b/file-backend)).
+  However this back-end is still included in the default distribution. 
+* `org.holodeckb2b.interfaces.config.IConfiguration.getAxisConfigurationContext()` method as extension should not need 
+  access to internal Axis configuration.
 
 ## 4.1.2
 ##### 2019-04-10
