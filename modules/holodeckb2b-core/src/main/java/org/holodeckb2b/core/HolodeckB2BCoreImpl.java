@@ -531,4 +531,20 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
 	public IVersionInfo getVersion() {
     	return VersionInfo.getInstance();
     }
+    
+    /**
+     * Gets the active Axis2 Module with the given name. This can for example be used by protocol extension to get 
+     * access to "their" module for protocol specific settings.  
+     * 
+     * @param name	the requested module's name
+     * @return 		the active Axis2 module if it exists in this Holodeck B2B instance,<br><code>null</code> otherwise
+     * @since 5.0.0
+     */
+    @Override
+    public Module getModule(final String name) {
+		final AxisModule module = instanceConfiguration.getAxisConfigurationContext().getAxisConfiguration()
+																					 .getModule(name);
+		// The AxisModule is only meta-data on the module, we need to get the actual implementing class from it		
+		return module != null ? module.getModule() : null;
+    }
 }

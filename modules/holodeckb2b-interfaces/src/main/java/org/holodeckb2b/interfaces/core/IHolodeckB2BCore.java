@@ -18,6 +18,7 @@ package org.holodeckb2b.interfaces.core;
 
 import java.util.List;
 
+import org.apache.axis2.modules.Module;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
@@ -49,6 +50,16 @@ public interface IHolodeckB2BCore {
      */
     IConfiguration getConfiguration();
 
+    /**
+     * Gets the active Axis2 Module with the given name. This can for example be used by protocol extension to get 
+     * access to "their" module for protocol specific settings.  
+     * 
+     * @param name	the requested module's name
+     * @return 		the active Axis2 module if it exists in this Holodeck B2B instance,<br><code>null</code> otherwise
+     * @since 5.0.0
+     */
+    Module getModule(final String name);
+    
     /**
      * Gets a {@link IMessageDeliverer} object configured as specified by the {@link IDeliverySpecification} that can be
      * used to deliver message units to the <i>Consumer</i> business application.
