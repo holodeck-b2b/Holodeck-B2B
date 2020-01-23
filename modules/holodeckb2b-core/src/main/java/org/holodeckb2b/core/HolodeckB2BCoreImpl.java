@@ -215,26 +215,6 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
             throw new AxisFault("Unable to initialize required persistency provider!");
         }
         log.info("Succesfully loaded " + persistencyProvider.getName() + " as persistency provider");
-
-        log.trace("Load the security provider for processing of the message level security");
-        String securityProviderClassname = instanceConfiguration.getSecurityProviderClass();
-        if (Utils.isNullOrEmpty(securityProviderClassname))
-            securityProviderClassname = "org.holodeckb2b.security.DefaultProvider";
-        try {
-           securityProvider = (ISecurityProvider) Class.forName(securityProviderClassname).newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
-           log.fatal("Could not load the security provider: " + securityProviderClassname);
-           throw new AxisFault("Unable to load required security provider!");
-        }
-        log.debug("Using security provider: " + securityProvider.getName());
-        try {
-             securityProvider.init(instanceConfiguration.getHolodeckB2BHome());
-        } catch (SecurityProcessingException initializationFailure) {
-            log.fatal("Could not initialize the security provider " + securityProvider.getName()
-                      + "! Unable to start Holodeck B2B. \n\tError details: " + initializationFailure.getMessage());
-            throw new AxisFault("Unable to initialize required security provider!");
-        }
-        log.info("Succesfully loaded " + securityProvider.getName() + " as security provider");
         
         log.trace("Load the certificate manager");
         String certManagerClassname = instanceConfiguration.getCertManagerClass();
@@ -444,17 +424,6 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     @Override
     public ICertificateManager getCertificateManager() {
         return certManager;
-    }
-
-    /**
-     * Gets the active <i>security provider</i> of this Holodeck B2B instance.
-     *
-     * @return The active security provider
-     * @since 4.0.0
-     * @see ISecurityProvider
-     */
-    public ISecurityProvider getSecurityProvider() {
-        return securityProvider;
     }
 
     /**

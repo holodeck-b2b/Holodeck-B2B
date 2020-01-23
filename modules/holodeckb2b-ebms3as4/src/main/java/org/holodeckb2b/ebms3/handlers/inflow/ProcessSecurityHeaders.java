@@ -33,6 +33,8 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.ebms3.module.EbMS3Module;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
@@ -114,7 +116,15 @@ public class ProcessSecurityHeaders extends AbstractBaseHandler {
 
         // Process the available security headers using the installed security provider
         log.trace("Get security header processor from security provider");
-        ISecurityHeaderProcessor hdrProcessor = HolodeckB2BCore.getSecurityProvider().getSecurityHeaderProcessor();
+        ISecurityProvider secProvider;
+        try {
+        	secProvider = ((EbMS3Module) HolodeckB2BCoreInterface.getModule(EbMS3Module.HOLODECKB2B_EBMS3_MODULE))
+        														  			.getSecurityProvider();
+        } catch (Exception noSecProvider) {
+        	log.fatal("Could not get the required Security Provider! Error: {}", noSecProvider.getMessage());
+        	throw new SecurityProcessingException("Security provider not available!");
+        }        
+        ISecurityHeaderProcessor hdrProcessor = secProvider.getSecurityHeaderProcessor();
         log.trace("Process the available security headers in the message");
         Collection<ISecurityProcessingResult> results = hdrProcessor.processHeaders(procCtx,
         																			senderConfig, receiverConfig);

@@ -28,8 +28,7 @@ public class TestConfig implements InternalConfiguration {
     public String hb2b_home;
     public String pmodeStorageClass = null;
     public boolean acceptNonValidablePMode = true;
-    public String persistencyProviderClass;
-    public String securityProviderClass;
+    public String persistencyProviderClass;    
     public String certManagerClass;
     public boolean useStrictHeaderValidation = false;
 
@@ -118,11 +117,6 @@ public class TestConfig implements InternalConfiguration {
     @Override
     public boolean useStrictHeaderValidation() {
         return useStrictHeaderValidation;
-    }
-
-    @Override
-    public String getSecurityProviderClass() {
-        return securityProviderClass;
     }
 
     @Override

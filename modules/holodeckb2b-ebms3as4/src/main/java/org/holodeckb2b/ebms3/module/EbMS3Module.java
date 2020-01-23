@@ -16,13 +16,16 @@
  */
 package org.holodeckb2b.ebms3.module;
 
+import java.util.Iterator;
+import java.util.ServiceLoader;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisDescription;
 import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.modules.Module;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.holodeckb2b.common.VersionInfo;
@@ -30,6 +33,8 @@ import org.holodeckb2b.common.workerpool.WorkerPool;
 import org.holodeckb2b.ebms3.pulling.PullConfiguration;
 import org.holodeckb2b.ebms3.pulling.PullConfigurationWatcher;
 import org.holodeckb2b.ebms3.pulling.PullWorker;
+import org.holodeckb2b.interfaces.security.ISecurityProvider;
+import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
@@ -48,15 +53,20 @@ public class EbMS3Module implements Module {
     /**
      * Logger
      */
-    private static final Log log = LogFactory.getLog(EbMS3Module.class);
+    private static final Logger log = LogManager.getLogger(EbMS3Module.class);
 
     /**
      * Pool of worker threads that handle the sending of <i>pull request</i>. The workers in this pool are {@link PullWorker}
      * objects. The pool is configured by the {@link PullConfigurationWatcher} that runs in the normal worker pool and
      * checks the pull configuration for changes and applies them to this pull worker pool.
      */
-    private WorkerPool      pullWorkers = null;
+    private WorkerPool pullWorkers = null;
 
+    /**
+     * The installed {@link ISecurityProvider} that will handle the WS-Security header in the ebMS3/AS4 messages. 
+     */
+    private ISecurityProvider secProvider; 
+    
     /**
      * Initializes the Holodeck B2B Core module.
      *
@@ -75,13 +85,34 @@ public class EbMS3Module implements Module {
                         + am.getName() + ", expected was: " + HOLODECKB2B_EBMS3_MODULE);
             throw new AxisFault("Invalid configuration found for module: " + am.getName());
         }
-
+        
+        log.trace("Load the ebMS3 Security Provider");
+        try {
+        	Iterator<ISecurityProvider> providers = ServiceLoader.load(ISecurityProvider.class).iterator();
+        	secProvider = providers.hasNext() ? providers.next() : null;
+        	if (providers.hasNext()) 
+        		log.warn("Multiple Security Providers are available, using first one found");
+        } catch (Throwable svcLoaderException) {
+        	log.error("An error occurred while loading the list of available P-Mode validators! Error details: {}",
+        				svcLoaderException.getMessage());
+        	secProvider = null;
+        }
+        log.debug("Using security provider: " + secProvider.getName());
+        try {
+             secProvider.init();
+        } catch (SecurityProcessingException initializationFailure) {
+            log.fatal("Initialisation of required ebMS3 security provider ({}) failed!\n\tError details: {}",
+            		  secProvider.getName(), initializationFailure.getMessage());
+            throw new AxisFault("Unable to initialize required security provider!");
+        }
+        log.info("Succesfully loaded " + secProvider.getName() + " as security provider");
+        
         log.trace("Create the pull worker pool");
         // The pull worker pool is only created here, initialization is done by the worker part of the normal
         //  worker pool
         pullWorkers = new WorkerPool(PullConfiguration.PULL_WORKER_POOL_NAME);
         
-        log.info("Holodeck B2B ebMS3/AS4 modoule " + VersionInfo.fullVersion + " STARTED.");
+        log.info("Holodeck B2B ebMS3/AS4 module " + VersionInfo.fullVersion + " STARTED.");
     }
     
     /**
@@ -111,6 +142,16 @@ public class EbMS3Module implements Module {
         }
     }
     
+    /**
+     * Gets the active <i>Security Provider</i> of this Holodeck B2B instance that will create/process the WS-Security
+     * header of the ebMS3/AS4 messages. 
+     *
+     * @return 	The active security provider
+     * @since 	5.0.0
+     */
+    public ISecurityProvider getSecurityProvider() {
+        return secProvider;
+    }    
 
     @Override
     public void engageNotify(final AxisDescription ad) throws AxisFault {

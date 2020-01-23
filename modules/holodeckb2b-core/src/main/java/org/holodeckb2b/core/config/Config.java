@@ -108,12 +108,6 @@ public class Config implements InternalConfiguration {
     private String persistencyProviderClass = null;
 
     /*
-     * The class name of the security provider that should be used to process the WS-Security header of messages
-     * @since 4.0.0
-     */
-    private String securityProviderClass = null;
-
-    /*
      * The class name of the certificate manager that should be used for managing and checking certificates
      * @since 5.0.0
      */
@@ -206,9 +200,6 @@ public class Config implements InternalConfiguration {
 
         // The class name of the persistency provider
         persistencyProviderClass = configFile.getParameter("PersistencyProvider");
-
-        // The class name of the security provider
-        securityProviderClass = configFile.getParameter("SecurityProvider");
 
         // The class name of the certificate manager
         certManagerClass = configFile.getParameter("CertificateManager");
@@ -326,15 +317,6 @@ public class Config implements InternalConfiguration {
     @Override
     public boolean useStrictHeaderValidation() {
         return useStrictHeaderValidation;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @since 4.0.0
-     */
-    @Override
-    public String getSecurityProviderClass() {
-        return securityProviderClass;
     }
     
     /**

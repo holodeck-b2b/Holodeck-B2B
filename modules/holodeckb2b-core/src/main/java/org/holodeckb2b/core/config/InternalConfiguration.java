@@ -22,7 +22,6 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcess
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
-import org.holodeckb2b.interfaces.security.ISecurityProvider;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 
 /**
@@ -35,11 +34,10 @@ import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 public interface InternalConfiguration extends IConfiguration {
 
     /**
-     * Gets the Axis2 configuration context. This context is used for processing messages.
+     * Gets the Axis2 configuration context.
      *
      * @return The Axis2 configuration context.
      */
-    @Override
 	ConfigurationContext getAxisConfigurationContext();
 
     /**
@@ -86,17 +84,6 @@ public interface InternalConfiguration extends IConfiguration {
      * @since  3.0.0
      */
     String getPersistencyProviderClass();
-
-    /**
-     * Gets the class name of the {@link ISecurityProvider} implementation that the Holodeck B2B Core should use to
-     * process the WS-Security headers in the messages. This is an optional configuration parameter and when not set the
-     * Holodeck B2B Core will use the default implementation.
-     *
-     * @return The class name of the {@link ISecurityProvider} implementation to use for handling the WS-Security
-     *         headers in messages
-     * @since 4.0.0
-     */
-    String getSecurityProviderClass();
     
     /**
      * Gets the class name of the {@link ICertificateManager} implementation that the Holodeck B2B Core should use to

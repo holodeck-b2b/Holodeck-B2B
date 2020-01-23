@@ -20,7 +20,6 @@ import org.holodeckb2b.core.config.InternalConfiguration;
 import org.holodeckb2b.core.validation.IValidationExecutor;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.security.ISecurityProvider;
 
 /**
  * Provides access to the Holodeck B2B Core of a running instance to the Holodeck B2B Core classes. It is an extension
@@ -63,16 +62,5 @@ public class HolodeckB2BCore extends HolodeckB2BCoreInterface {
      */
     public static IValidationExecutor getValidationExecutor() {
         return ((HolodeckB2BCoreImpl) coreImplementation).getValidationExecutor();
-    }
-
-    /**
-     * Gets the active <i>security provider</i> of this Holodeck B2B instance.
-     *
-     * @return The active security provider
-     * @since 4.0.0
-     * @see ISecurityProvider
-     */
-    public static ISecurityProvider getSecurityProvider() {
-        return ((HolodeckB2BCoreImpl) coreImplementation).getSecurityProvider();
     }
 }

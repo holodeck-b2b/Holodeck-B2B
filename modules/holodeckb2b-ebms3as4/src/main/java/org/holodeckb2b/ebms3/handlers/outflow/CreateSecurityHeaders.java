@@ -31,6 +31,8 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.ebms3.module.EbMS3Module;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
@@ -132,7 +134,15 @@ public class CreateSecurityHeaders extends AbstractBaseHandler {
 
         // Create security headers using the installed security provider
         log.trace("Get security header creator from security provider");
-        ISecurityHeaderCreator hdrCreator = HolodeckB2BCore.getSecurityProvider().getSecurityHeaderCreator();
+        ISecurityProvider secProvider;
+        try {
+        	secProvider = ((EbMS3Module) HolodeckB2BCoreInterface.getModule(EbMS3Module.HOLODECKB2B_EBMS3_MODULE))
+        														  			.getSecurityProvider();
+        } catch (Exception noSecProvider) {
+        	log.fatal("Could not get the required Security Provider! Error: {}", noSecProvider.getMessage());
+        	throw new SecurityProcessingException("Security provider not available!");
+        }
+        ISecurityHeaderCreator hdrCreator = secProvider.getSecurityHeaderCreator();
         log.debug("Create the security headers in the message");
         try {
             Collection<ISecurityProcessingResult> results = hdrCreator.createHeaders(procCtx, 
@@ -145,7 +155,7 @@ public class CreateSecurityHeaders extends AbstractBaseHandler {
             return InvocationResponse.CONTINUE;
         } catch (SecurityProcessingException spe) {
             log.error("An error occurred in the security provider when creating the WSS header(s). Details:"
-                     + "\n\tSecurity provider: " + HolodeckB2BCore.getSecurityProvider().getName()
+                     + "\n\tSecurity provider: " + secProvider.getName()
                      + "\n\tError details: " + spe.getMessage());
             throw spe;
         }
