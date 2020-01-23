@@ -81,13 +81,6 @@
     <!-- <parameter name="MessageProcessingEventProcessor"/>-->
 
     <!-- ====================================================================
-    - This parameter defines which security provider Holodeck B2B should
-    - use for processing of the WS-Security header in the ebMS3/AS4 messages. 
-    - If not specified the default implementation is used. 
-    ===================================================================== -->
-    <!-- <parameter name="SecurityProvider"/> -->
-
-    <!-- ====================================================================
     - This parameter defines the Certificate Manager implementation
     - Holodeck B2B should use for managing of key pairs and certificates and
     - to validate trust in certificates. If not specified the default 
@@ -98,6 +91,4 @@
     -       Manager.
     ===================================================================== -->
     <!-- <parameter name="CertificateManager"/> -->
-
-
 </holodeckb2b-config>

@@ -124,6 +124,11 @@
                 <artifactId>holodeckb2b-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
+	        <dependency>
+	            <groupId>${project.groupId}</groupId>
+	            <artifactId>holodeckb2b-certmanager</artifactId>
+	            <version>${project.version}</version>            
+	        </dependency>            
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
                 <artifactId>holodeckb2b-persistency</artifactId>
@@ -131,14 +136,9 @@
             </dependency>
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
-                <artifactId>holodeckb2b-security</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.holodeckb2b</groupId>
                 <artifactId>holodeckb2b-ebms3as4</artifactId>
                 <version>${project.version}</version>
-            </dependency>
+            </dependency>            
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
                 <artifactId>holodeckb2b-ui</artifactId>
