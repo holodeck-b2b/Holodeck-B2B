@@ -1,0 +1,117 @@
+<!--
+
+    Copyright (C) 2017 The Holodeck B2B Team, Sander Fieten
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.holodeckb2b</groupId>
+        <artifactId>holodeckb2b-security</artifactId>
+        <version>5.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>holodeckb2b-certmanager</artifactId>
+    <packaging>jar</packaging>
+    <name>Holodeck B2B - Default Certificate Manager</name>
+    <description>This module includes the default implementation of the Holodeck B2B Certificate Manager</description>
+    <inceptionYear>2020</inceptionYear>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <wss4j.version>2.2.2</wss4j.version>
+    </properties>
+
+    <dependencies>
+        <!-- The other Holodeck B2B libraries -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-interfaces</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-core</artifactId>
+        </dependency>
+
+        <!-- WSS4J Security libs are needed because of service supplied to the default security provider -->
+        <dependency>
+            <groupId>org.apache.wss4j</groupId>
+            <artifactId>wss4j-ws-security-common</artifactId>
+            <version>${wss4j.version}</version>
+            <exclusions>
+            	<exclusion>
+            		<groupId>org.opensaml</groupId>
+            		<artifactId>opensaml-saml-impl</artifactId>
+            	</exclusion>
+            	<exclusion>
+            		<groupId>org.opensaml</groupId>
+            		<artifactId>opensaml-xacml-impl</artifactId>
+            	</exclusion>
+            	<exclusion>
+            		<groupId>org.opensaml</groupId>
+            		<artifactId>opensaml-xacml-saml-impl</artifactId>
+            	</exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>2.3.1</version>
+                <executions>
+                    <execution>
+                        <id>xjc</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <sources>
+                        <source>src/main/resources/xsd/hb2b-certmanager-cfg.xsd</source>
+                    </sources>
+                    <packageName>org.holodeckb2b.security.trust.config</packageName>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
