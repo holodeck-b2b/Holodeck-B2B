@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -29,7 +30,6 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
 import org.apache.commons.codec.binary.Hex;
-import org.bouncycastle.util.Arrays;
 import org.holodeckb2b.common.util.Utils;
 
 /**
