@@ -16,8 +16,6 @@
  */
 package org.holodeckb2b.interfaces.config;
 
-import org.apache.axis2.context.ConfigurationContext;
-
 /**
  * Defines the interface to access the Holodeck B2B <i>public</i> configuration. This public configuration contains
  * settings that may be used by extensions.
@@ -25,15 +23,6 @@ import org.apache.axis2.context.ConfigurationContext;
  * @author Sander Fieten <sander at holodeck-b2b.org>
  */
 public interface IConfiguration {
-
-    /**
-     * Gets the Axis2 configuration context. This context is used for processing messages.
-     *
-     * @return The Axis2 configuration context.
-     * @deprecated This method is intended for <b>internal use only</b>.
-     */
-    @Deprecated
-	ConfigurationContext getAxisConfigurationContext();
 
     /**
      * Gets the host name. During the message processing a host name may be needed,
