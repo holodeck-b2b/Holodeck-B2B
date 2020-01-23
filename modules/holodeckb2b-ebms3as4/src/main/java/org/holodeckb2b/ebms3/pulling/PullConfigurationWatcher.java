@@ -19,6 +19,7 @@ package org.holodeckb2b.ebms3.pulling;
 import java.io.File;
 import java.util.Map;
 
+import org.apache.axis2.modules.Module;
 import org.holodeckb2b.common.workerpool.WorkerPool;
 import org.holodeckb2b.common.workers.AbstractFileWatcher;
 import org.holodeckb2b.ebms3.module.EbMS3Module;
@@ -47,15 +48,12 @@ public class PullConfigurationWatcher extends AbstractFileWatcher {
     	super.setParameters(parameters);
     	
     	// Make sure that the ebMS3/AS4 module is loaded
-    	try {
-    		ebms3Module = (EbMS3Module) HolodeckB2BCoreInterface.getConfiguration().getAxisConfigurationContext()
-	    											   			.getAxisConfiguration()
-	    											   			.getModule(EbMS3Module.HOLODECKB2B_EBMS3_MODULE)
-	    											   			.getModule();
-    	} catch (Exception noEbMS3Module) {
-    		log.fatal("The required ebMS3/AS4 module is not loaded!");
-    		throw new TaskConfigurationException("Missing required ebMS3/AS4 module");
-    	}    
+    	final Module axisModule = HolodeckB2BCoreInterface.getModule(EbMS3Module.HOLODECKB2B_EBMS3_MODULE);
+    	if (axisModule == null || !(axisModule instanceof EbMS3Module)) {
+			log.fatal("The required ebMS3/AS4 module is not loaded!");
+			throw new TaskConfigurationException("Missing required ebMS3/AS4 module");
+		}    
+		ebms3Module = (EbMS3Module) axisModule;     		
     }
 	
     /**
