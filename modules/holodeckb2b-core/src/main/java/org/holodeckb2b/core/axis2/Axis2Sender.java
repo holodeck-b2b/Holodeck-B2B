@@ -40,8 +40,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.config.InternalConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
@@ -97,8 +97,7 @@ public class Axis2Sender {
         		svcName = mepBinding.substring(41, segmentEnd);        	
         }
         
-        ConfigurationContext configContext = ((InternalConfiguration) HolodeckB2BCoreInterface.getConfiguration())
-        																				.getAxisConfigurationContext();
+        ConfigurationContext configContext = HolodeckB2BCore.getConfiguration().getAxisConfigurationContext();
         AxisConfiguration axisConfig = configContext.getAxisConfiguration();
         AxisService service;
         try {
