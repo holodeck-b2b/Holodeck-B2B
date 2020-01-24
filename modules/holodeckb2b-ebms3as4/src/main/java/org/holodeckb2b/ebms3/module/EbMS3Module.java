@@ -87,16 +87,10 @@ public class EbMS3Module implements Module {
         }
         
         log.trace("Load the ebMS3 Security Provider");
-        try {
-        	Iterator<ISecurityProvider> providers = ServiceLoader.load(ISecurityProvider.class).iterator();
-        	secProvider = providers.hasNext() ? providers.next() : null;
-        	if (providers.hasNext()) 
-        		log.warn("Multiple Security Providers are available, using first one found");
-        } catch (Throwable svcLoaderException) {
-        	log.error("An error occurred while loading the list of available P-Mode validators! Error details: {}",
-        				svcLoaderException.getMessage());
-        	secProvider = null;
-        }
+    	Iterator<ISecurityProvider> providers = ServiceLoader.load(ISecurityProvider.class).iterator();
+    	secProvider = providers.hasNext() ? providers.next() : null;
+    	if (providers.hasNext()) 
+    		log.warn("Multiple Security Providers are available, using first one found");
         log.debug("Using security provider: " + secProvider.getName());
         try {
              secProvider.init();
