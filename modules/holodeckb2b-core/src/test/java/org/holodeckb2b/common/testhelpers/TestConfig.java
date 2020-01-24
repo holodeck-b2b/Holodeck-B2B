@@ -119,7 +119,6 @@ public class TestConfig implements InternalConfiguration {
         return useStrictHeaderValidation;
     }
 
-    @Override
     public String getCertManagerClass() {
     	return certManagerClass;
     }

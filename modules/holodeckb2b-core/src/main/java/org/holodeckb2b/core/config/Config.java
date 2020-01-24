@@ -34,9 +34,6 @@ import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
  * <p>The structure of the config file is defined by the XML Schema Definition
  * <code>http://holodeck-b2b.org/schemas/2015/10/config</code> which can be found in <code>
  * src/main/resources/xsd/hb2b-config.xsd</code>.
- * <p>NOTE: Current implementation does not encrypt the keystore passwords! Therefore access to the config file
- * SHOULD be limited to the account that is used to run Holodeck B2B.
- * todo Encryption of keystore passwords
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
@@ -107,12 +104,6 @@ public class Config implements InternalConfiguration {
      */
     private String persistencyProviderClass = null;
 
-    /*
-     * The class name of the certificate manager that should be used for managing and checking certificates
-     * @since 5.0.0
-     */
-    private String certManagerClass = null;
-    
     /*
      * Indicator whether strict header validation should be applied to all messages
      * @since 4.0.0
@@ -200,9 +191,6 @@ public class Config implements InternalConfiguration {
 
         // The class name of the persistency provider
         persistencyProviderClass = configFile.getParameter("PersistencyProvider");
-
-        // The class name of the certificate manager
-        certManagerClass = configFile.getParameter("CertificateManager");
         
         // Indicator whether strict header validation should be performed
         final String strictHeaderValidation = configFile.getParameter("StrictHeaderValidation");
@@ -317,14 +305,5 @@ public class Config implements InternalConfiguration {
     @Override
     public boolean useStrictHeaderValidation() {
         return useStrictHeaderValidation;
-    }
-    
-    /**
-     * {@inheritDoc}
-     * @since 5.0.0
-     */
-    @Override
-    public String getCertManagerClass() {
-    	return certManagerClass;
     }
 }

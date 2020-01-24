@@ -79,16 +79,4 @@
     - If not specified the default implementation will be used.
     ===================================================================== -->
     <!-- <parameter name="MessageProcessingEventProcessor"/>-->
-
-    <!-- ====================================================================
-    - This parameter defines the Certificate Manager implementation
-    - Holodeck B2B should use for managing of key pairs and certificates and
-    - to validate trust in certificates. If not specified the default 
-    - implementation is used. 
-    - NOTE: When changing to another implementation you may also need to
-    -       change the Security Provider implementation as the default
-    -       implementation is tightly coupled to the default Certificate
-    -       Manager.
-    ===================================================================== -->
-    <!-- <parameter name="CertificateManager"/> -->
 </holodeckb2b-config>

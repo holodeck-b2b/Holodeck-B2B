@@ -22,7 +22,6 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcess
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
-import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 
 /**
  * Extends the public configuration interface with some settings only to be used by the Holodeck B2B Core itself.
@@ -84,14 +83,4 @@ public interface InternalConfiguration extends IConfiguration {
      * @since  3.0.0
      */
     String getPersistencyProviderClass();
-    
-    /**
-     * Gets the class name of the {@link ICertificateManager} implementation that the Holodeck B2B Core should use to
-     * manage and check the certificates used in the message processing. This is an optional configuration parameter and 
-     * when not set the Holodeck B2B Core will use the default implementation.
-     *
-     * @return The class name of the {@link ICertificateManager} implementation to use for handling certificates
-     * @since 5.0.0
-     */
-    String getCertManagerClass();
 }
