@@ -18,8 +18,10 @@ package org.holodeckb2b.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
@@ -217,22 +219,23 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         log.info("Succesfully loaded " + persistencyProvider.getName() + " as persistency provider");
         
         log.trace("Load the certificate manager");
-        String certManagerClassname = instanceConfiguration.getCertManagerClass();
-        if (Utils.isNullOrEmpty(certManagerClassname))
-        	certManagerClassname = "org.holodeckb2b.security.trust.DefaultCertManager";
-        try {
-        	certManager = (ICertificateManager) Class.forName(certManagerClassname).newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
-        	log.fatal("Could not load the certificate manager: " + certManagerClassname);
+    	Iterator<ICertificateManager> mgrs = ServiceLoader.load(ICertificateManager.class).iterator();
+    	certManager = mgrs.hasNext() ? mgrs.next() : null;
+    	if (mgrs.hasNext()) 
+    		log.warn("Multiple Certificate Managers are installed, only using first one found");
+    	if (certManager != null) {	        	
+	        log.debug("Using certificate manager: {}", certManager.getName());
+	        try {
+	        	certManager.init(instanceConfiguration.getHolodeckB2BHome());
+	        } catch (SecurityProcessingException initializationFailure) {
+	        	log.error("Could not initialize the certificate manager - {} : {}", certManager.getName(),
+	        				initializationFailure.getMessage());
+	        	certManager = null;
+	        }
+    	}
+    	if (certManager == null) {
+    		log.fatal("Cannot starrt Holodeck B2B because required Certificate Manager is not available!");
         	throw new AxisFault("Unable to load required certificate manager!");
-        }
-        log.debug("Using certificate manager: " + certManager.getName());
-        try {
-        	certManager.init(instanceConfiguration.getHolodeckB2BHome());
-        } catch (SecurityProcessingException initializationFailure) {
-        	log.fatal("Could not initialize the certificate manager " + certManager.getName()
-        	+ "! Unable to start Holodeck B2B. \n\tError details: " + initializationFailure.getMessage());
-        	throw new AxisFault("Unable to initialize required certificate manager!");
         }
         log.info("Succesfully loaded " + certManager.getName() + " as certificate manager");
         

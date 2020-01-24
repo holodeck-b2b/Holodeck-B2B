@@ -43,6 +43,8 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * validation of trust according to the Certificate Manager's trust policy and one that uses additional configuration
  * that applies to the signature for which the certificate (path) was used. The implementation of the latter is optional
  * and whether it is supported can be checked using the {@link #supportsConfigBasedValidation()} method.
+ * <p>There can always be just one <i>Certificate Manager</i> active in an Holodeck B2B instance. The implementation to
+ * use is loaded using the Java <i>Service Prover Interface</i> mechanism.  
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0 A <i>Certificate Manager</i> already existed in version 4.x as part of the <i>Security 
