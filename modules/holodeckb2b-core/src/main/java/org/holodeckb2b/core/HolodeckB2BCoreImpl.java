@@ -215,7 +215,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         	log.fatal("Cannot start Holodeck B2B because required Persistency Provider is not available!");
         	throw new AxisFault("Unable to load required persistency provider!");
         }
-        log.info("Succesfully loaded " + certManager.getName() + " as certificate manager");
+        log.info("Loaded Persistency Provider : {}", persistencyProvider.getName());
         
         log.trace("Load the certificate manager");
     	Iterator<ICertificateManager> mgrs = ServiceLoader.load(ICertificateManager.class).iterator();
@@ -236,7 +236,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     		log.fatal("Cannot starrt Holodeck B2B because required Certificate Manager is not available!");
         	throw new AxisFault("Unable to load required certificate manager!");
         }
-        log.info("Succesfully loaded " + certManager.getName() + " as certificate manager");
+        log.info("Loaded Certficate Manager : {}", certManager.getName());
         
         log.trace("Create list of available message delivery methods");
         msgDeliveryFactories = new HashMap<>();
