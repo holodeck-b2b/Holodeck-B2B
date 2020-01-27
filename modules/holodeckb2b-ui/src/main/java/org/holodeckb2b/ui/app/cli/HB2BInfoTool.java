@@ -24,13 +24,13 @@ import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.codec.binary.Hex;
-import org.bouncycastle.util.Arrays;
 import org.holodeckb2b.common.messagemodel.MessageUnit;
 import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.pmode.PMode;
