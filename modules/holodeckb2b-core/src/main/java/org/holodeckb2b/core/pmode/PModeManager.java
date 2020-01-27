@@ -18,6 +18,7 @@ package org.holodeckb2b.core.pmode;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
@@ -84,39 +85,33 @@ public class PModeManager implements IPModeSet {
      * 							 P-Modes is required (i.e. non validable P-Modes are configured to be rejected)
      */
     public PModeManager(final InternalConfiguration config) throws PModeSetException {
-        log.trace("Start configuration");
-        final String pmodeStorageClass = config.getPModeStorageImplClass();
-        if (!Utils.isNullOrEmpty(pmodeStorageClass)) {
-            // A specific P-Mode storage implementation is specified in the configuration, try to load it
+        log.trace("Load P-Mode storage component");        
+        final Iterator<IPModeSet> storageProv = ServiceLoader.load(IPModeSet.class).iterator();
+        if (storageProv.hasNext()) {
+            // A specific P-Mode storage implementation is available, try to initialise it
+        	deployedPModes = storageProv.next();
+        	if (storageProv.hasNext()) 
+        		log.warn("Multiple P-Mode storage implementations are installed, only using first one found");
             try {
-                log.debug("Loading P-Mode storage implementation specified in configuration: {}",
-                           pmodeStorageClass);
-                deployedPModes = (IPModeSet) Class.forName(pmodeStorageClass).newInstance();
-                // Initialize the P-Mode storage
+                log.debug("Initialising P-Mode storage implementation: {}", deployedPModes.getName());
                 deployedPModes.init(config.getHolodeckB2BHome());
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
-               // Could not create the specified storage implementation, fall back to default implementation
-               log.error("Could not load the specified P-Mode storage implementation: {}. Using default instead.",
-                          pmodeStorageClass);
-               deployedPModes = new InMemoryPModeSet();
+            } catch (PModeSetException initFailure) {
+               // Could not initialise the custom storage implementation
+               log.error("Could not initialise the P-Mode storage implementation: {}. Error details: {}",
+                          deployedPModes.getName(), initFailure.getMessage());
+               throw new PModeSetException("Could not load P-Mode storage implementation!", initFailure);
             }
         } else
-            // No specific validator, use default one
-            deployedPModes = new InMemoryPModeSet();
+            deployedPModes = new InMemoryPModeSet();              
 
-        try {
-        	log.debug("Load installed P-Mode validators");
-        	validators = new ArrayList<>();       
-        	ServiceLoader.load(IPModeValidator.class).forEach(v -> validators.add(v));
-        } catch (Throwable svcLoaderException) {
-        	log.error("An error occurred while loading the list of available P-Mode validators! Error details: {}",
-        				svcLoaderException.getMessage());
-        	validators = null;
-        }
-        acceptNonValidable = config.acceptNonValidablePMode();
+    	log.debug("Load installed P-Mode validators");
+    	validators = new ArrayList<>();       
+    	ServiceLoader.load(IPModeValidator.class).forEach(v -> validators.add(v));
+
+    	acceptNonValidable = config.acceptNonValidablePMode();
         // If no validators were loaded and validation is required we have a problem, otherwise we just log the loaded 
         // validators
-        if (!acceptNonValidable && Utils.isNullOrEmpty(validators)) {
+        if (!acceptNonValidable && validators.isEmpty()) {
         	log.fatal("No P-Mode validators are available, but validation is required!");
         	throw new PModeSetException("Missing P-Mode validators for required validation");
         } else if (acceptNonValidable)

@@ -78,12 +78,6 @@ public class Config implements InternalConfiguration {
      * The Axis2 configuration context that is used to process the messages
      */
     private ConfigurationContext    axisCfgCtx = null;
-
-    /*
-     * The class name of the component that should be used to store deployed P-Modes
-     * @since  3.0.0
-     */
-    private String pmodeStorageClass = null;
     
     /**
      * The indicator whether the Core should fall back to the default event processor implementation in case the 
@@ -181,9 +175,6 @@ public class Config implements InternalConfiguration {
         // Indicator whether to accept non validable P-Modes, default false
         final String acceptNVPMode = configFile.getParameter("AcceptNonValidablePModes");
         acceptNonValidablePModes = isTrue(acceptNVPMode); 
-
-        // The class name of the component to store P-Modes
-        pmodeStorageClass = configFile.getParameter("PModeStorageImplementation");
         
         // Indicator whether strict header validation should be performed
         final String strictHeaderValidation = configFile.getParameter("StrictHeaderValidation");
@@ -253,15 +244,6 @@ public class Config implements InternalConfiguration {
     @Override
     public boolean shouldReportErrorOnReceipt() {
         return defaultReportErrorOnReceipt;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @since 3.0.0
-     */
-    @Override
-    public String getPModeStorageImplClass() {
-        return pmodeStorageClass;
     }
 
     /**

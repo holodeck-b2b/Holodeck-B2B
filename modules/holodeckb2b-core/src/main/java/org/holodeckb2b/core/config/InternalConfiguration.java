@@ -18,7 +18,6 @@ package org.holodeckb2b.core.config;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
 
 /**
@@ -65,13 +64,4 @@ public interface InternalConfiguration extends IConfiguration {
      * @since 5.0.0
      */
     boolean acceptNonValidablePMode();
-
-    /**
-     * Gets the class name of the {@link IPModeSet} implementation that the Holodeck B2B Core's <code>PModeManager
-     * </code> must use to store the set of deployed P-Modes.
-     *
-     * @return  The class name of the {@link IPModeSet} implementation to use for storing deployed P-Modes
-     * @since  3.0.0
-     */
-    String getPModeStorageImplClass();
 }

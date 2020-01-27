@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.apache.axis2.modules.Module;
 import org.holodeckb2b.common.VersionInfo;
+import org.holodeckb2b.common.pmode.InMemoryPModeSet;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCoreImpl;
 import org.holodeckb2b.core.StorageManager;
@@ -144,7 +145,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	@Override
 	public IPModeSet getPModeSet() {
 		if (pmodes == null)
-			pmodes = new SimplePModeSet();
+			pmodes = new InMemoryPModeSet();
 		return pmodes;
 	}
 

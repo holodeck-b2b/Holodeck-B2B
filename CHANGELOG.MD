@@ -13,7 +13,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   SPI mechanism and all applicable validators are used to check a P-Mode before loading it. Two new methods were added
   in `org.holodeckb2b.interfaces.pmode.validation.IPModeValidator` to support the new mechanism  
 * Configuration parameter to indicate whether the Holodeck B2B Core should fall back to default _Event Processor_ 
- implementation inc case the custom implementation cannot be loaded/initialised. 
+  implementation inc case the custom implementation cannot be loaded/initialised. 
 * New interfaces related to trust validation of certificates in `org.holodeckb2b.interfaces.security.trust`. Especially
   the new specification of the Holodeck B2B _Certificate Manager_ which is now a separate component independent of the
   _Security Provider_. Also new interfaces and methods are defined to communicate the results of trust validation checks
@@ -29,7 +29,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   on the request MessageContext containing Map of name and value of headers to set.    
 * `org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface.getVersion()` method and 
   `org.holodeckb2b.interfaces.general.IVersionInfo` interface to provide information about the version of the 
-   Holodeck B2B instance.
+  Holodeck B2B instance.
 * `org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface.getModule(String)` method to acces an active Axis2 Module
   on the Holodeck B2B instance. This can be used  by extension to get access to "their" module. 
 * `org.holodeckb2b.common.messagemodel.MessageUnit.copyOf(IMessageUnit)` to create a copy of the message unit data in
@@ -40,8 +40,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * P-Modes are now by default stored in the `repository/pmodes` directory  
 * The default key transport algorithms have been upgraded to RSA-OAEP and MGF1 with SHA256.
-* The _Security Provider_,_Persistency Provider_ and _Event Processor_ are now loaded using the Java _Servive Provider
-  Interface_ mechanism.   
+* The _Security Provider_,_Persistency Provider_, _P-Mode storage_ and _Event Processor_ are now loaded using the Java 
+  _Servive Provider Interface_ mechanism.   
 * Refactored the interfaces of the _Persistency Provider_. The ` IDAOFactory` interface has been removed and its methods
   are now defined directly in the `PersistencyProvider` interface.
 * The security provider interface now use the new `org.holodeckb2b.interfaces.core.IMessageProcessingContext` interface
@@ -81,6 +81,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
     * P-Mode validator class (now loaded through SPI mechanism)
     * Security Provider class (now loaded through SPI mechanism)
     * Persistency Provider class (now loaded through SPI mechanism)
+    * P-Mode set storage class (now loaded through SPI mechanism)
 * The _msh_ URL path for receiving messages.
 * Split the file based back-end integration into a separate project (see [File-backend](https://github.com/holodeck-b2b/file-backend)).
   However this back-end is still included in the default distribution. 

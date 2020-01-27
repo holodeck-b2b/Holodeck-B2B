@@ -32,10 +32,10 @@ import org.holodeckb2b.common.pmode.InMemoryPModeSet;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.SimplePModeSet;
 import org.holodeckb2b.common.testhelpers.TestConfig;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
+import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
 import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
 import org.junit.Before;
@@ -59,15 +59,13 @@ public class PModeManagerTest {
     
     @Before
     public void setupTest() {
-    	config.pmodeStorageClass = SimplePModeSet.class.getName();
     	config.acceptNonValidablePMode = true;
+    	TestNOpPModeSet.failOnInit = false; 
     }
     
     @Test
     public void testDefaultConfig() {
     	try {
-    		config.pmodeStorageClass = null;
-    		
     		PModeManager manager = new PModeManager(config);
     		
     		Field pmodeStorage = PModeManager.class.getDeclaredField("deployedPModes");
@@ -78,6 +76,43 @@ public class PModeManagerTest {
     		t.printStackTrace();
     		fail();
     	}
+    }
+
+    @Test
+    public void testStorageLoading() {
+    	
+    	ClassLoader ccl = this.getClass().getClassLoader();
+    	URLClassLoader ecl = new URLClassLoader(new URL[] { ccl.getResource("pmodeManager/") }, ccl);    	
+    	Thread.currentThread().setContextClassLoader(ecl);
+    	
+    	PModeManager manager = null; 
+    	try {
+    		manager = new PModeManager(config);
+    	} catch (PModeSetException pse) {
+    		fail();
+    	}
+    	
+    	try {
+			Field pmodeStorage = PModeManager.class.getDeclaredField("deployedPModes");
+			pmodeStorage.setAccessible(true);
+			IPModeSet storageComp = (IPModeSet) pmodeStorage.get(manager);
+			
+			assertNotNull(storageComp);
+			assertEquals(TestNOpPModeSet.class, storageComp.getClass());			
+    	} catch (Throwable t) {
+    		t.printStackTrace();
+    		fail();
+    	}
+
+    	TestNOpPModeSet.failOnInit = true; 
+    	try {
+    		manager = new PModeManager(config);
+    		fail();
+    	} catch (PModeSetException pse) {
+    		// Correct
+    	}
+
+    	Thread.currentThread().setContextClassLoader(ccl);
     }
     
     @Test
@@ -110,23 +145,6 @@ public class PModeManagerTest {
 
     	Thread.currentThread().setContextClassLoader(ccl);
     }
-    
-    
-    @Test
-    public void testCustomConfig() {
-    	try {    		
-    		PModeManager manager = new PModeManager(config);
-    		
-    		Field pmodeStorage = PModeManager.class.getDeclaredField("deployedPModes");
-    		pmodeStorage.setAccessible(true);
-    		assertTrue(pmodeStorage.get(manager) instanceof SimplePModeSet);
-    		
-    	} catch (Throwable t) {
-    		t.printStackTrace();
-    		fail();
-    	}
-    }
-    
     
     @Test
     public void testInvalidConfig() {

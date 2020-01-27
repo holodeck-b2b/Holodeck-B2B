@@ -55,15 +55,4 @@
     - can be overriden in the P-Mode configuration.
     ===================================================================== -->
     <parameter name="ReportErrorOnReceipt">false</parameter>
-
-    <!-- ====================================================================
-    - This parameter specifies the custom P-Mode storage implementation that
-    - Holodeck B2B should use. By default the P-Modes are stored in-memory,
-    - but in certain environments it may be necessary to have a permanent
-    - storage.
-    - NOTE: When changing to another implementation you may also need to
-    -       change the management of the P-Modes, i.e. replace the default
-    -       worker that watches for P-Mode XML files.
-    ===================================================================== -->
-    <!-- <parameter name="PModeStorageImplementation"/> -->
 </holodeckb2b-config>
