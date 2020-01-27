@@ -14,17 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.persistency.dao;
+package org.holodeckb2b.interfaces.persistency;
 
 import java.util.Collection;
 
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
@@ -111,16 +109,6 @@ public interface IUpdateManager {
      * @throws PersistenceException When a database error occurs while updating the entity object
      */
     void setMultiHop(final IMessageUnitEntity msgUnit, final boolean isMultihop) throws PersistenceException;
-
-    /**
-     * Sets the leg on which the message unit is exchanged.
-     *
-     * @param msgUnit       The entity object representing the message unit which leg should be set
-     * @parem legLabel      The label of the leg on which the message unit is exchanged
-     * @throws PersistenceException When a database error occurs while updating the entity object
-     */
-    @Deprecated
-    void setLeg(final IMessageUnit msgUnit, final ILeg.Label legLabel) throws PersistenceException;
 
     /**
      * Sets the information on the payloads included in the given User Message.

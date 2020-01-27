@@ -38,8 +38,8 @@ import org.holodeckb2b.common.pmode.Protocol;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.persistency.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 
 /**

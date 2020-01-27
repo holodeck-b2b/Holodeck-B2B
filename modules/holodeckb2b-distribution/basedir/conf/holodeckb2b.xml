@@ -57,13 +57,6 @@
     <parameter name="ReportErrorOnReceipt">false</parameter>
 
     <!-- ====================================================================
-    - This parameter defines which persistency provider Holodeck B2B should
-    - use for storing the meta-data on processed messages. If not specified
-    - a default implementation using an internal database is used.
-    ===================================================================== -->
-    <!-- <parameter name="PersistencyProvider"/> -->
-
-    <!-- ====================================================================
     - This parameter specifies the custom P-Mode storage implementation that
     - Holodeck B2B should use. By default the P-Modes are stored in-memory,
     - but in certain environments it may be necessary to have a permanent

@@ -15,11 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * Contains the interfaces that define a Holodeck B2B "<i>persistency provider</i>" that provides storage services to
- * the Core for the meta-data on the processed message units.
- * <p>The persistency implementation is decoupled from the Core processing to allow it to be optimised for the target
- * environment.
+ * Contains the interfaces that define a Holodeck B2B <i>Persistency Provider</i> that provides storage services to
+ * the Core for the meta-data on the processed message units. The {@link IPersistencyProvider}  interface is the "entry 
+ * point" of the provider that follows the factory pattern. It used for initialisation of the provider and provides 
+ * access to {@link IQueryManager} and  {@link IUpdateManager} that provide the actual storage functionality. The
+ * package {@link org.holodeckb2b.interfaces.persistency.entities} contains definitions for the objects managed by the
+ * provider.
  *
- * @since  3.0.0
+ * @since 3.0.0
+ * @since 5.0.0  The manager interfaces are now also part of this package. 
  */
 package org.holodeckb2b.interfaces.persistency;

@@ -40,7 +40,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * P-Modes are now by default stored in the `repository/pmodes` directory  
 * The default key transport algorithms have been upgraded to RSA-OAEP and MGF1 with SHA256.
-* The _Security Provider_ and _Event Processor_ are now loaded using the Java _Servive Provider Interface_ mechanism.   
+* The _Security Provider_,_Persistency Provider_ and _Event Processor_ are now loaded using the Java _Servive Provider
+  Interface_ mechanism.   
+* Refactored the interfaces of the _Persistency Provider_. The ` IDAOFactory` interface has been removed and its methods
+  are now defined directly in the `PersistencyProvider` interface.
 * The security provider interface now use the new `org.holodeckb2b.interfaces.core.IMessageProcessingContext` interface
   to provide access to the processing context.
 * Restructured the project's modules to create a better separation of _Core_ and _protocol specific_ code. This includes 
@@ -77,11 +80,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
     * Related to the keystores used in WS-Security processing and certificate management.
     * P-Mode validator class (now loaded through SPI mechanism)
     * Security Provider class (now loaded through SPI mechanism)
+    * Persistency Provider class (now loaded through SPI mechanism)
 * The _msh_ URL path for receiving messages.
 * Split the file based back-end integration into a separate project (see [File-backend](https://github.com/holodeck-b2b/file-backend)).
   However this back-end is still included in the default distribution. 
 * `org.holodeckb2b.interfaces.config.IConfiguration.getAxisConfigurationContext()` method as extension should not need 
   access to internal Axis configuration.
+* `org.holodeckb2b.interfaces.entities.IMessageUnit.getLeg()` as the leg can be calculated based on the P-Mode.
 
 ## 4.1.2
 ##### 2019-04-10

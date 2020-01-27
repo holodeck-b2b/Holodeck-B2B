@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfigu
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.general.IVersionInfo;
-import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
+import org.holodeckb2b.interfaces.persistency.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;

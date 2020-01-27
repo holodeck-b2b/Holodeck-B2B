@@ -13,12 +13,11 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.persistency.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.inmemory.dto.ErrorMessageDTO;
 import org.holodeckb2b.persistency.inmemory.dto.PullRequestDTO;
@@ -101,10 +100,6 @@ public class UpdateManager implements IUpdateManager {
 			((ErrorMessageDTO) messageUnit).setIsMultiHop(isMultihop);
 		else
 			throw new IllegalArgumentException("Unknown message unit type");
-	}
-
-	@Override
-	public void setLeg(IMessageUnit msgUnit, Label legLabel) throws PersistenceException {		
 	}
 
 	@Override

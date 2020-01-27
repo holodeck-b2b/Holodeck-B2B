@@ -3,7 +3,6 @@ package org.holodeckb2b.persistency.inmemory.dto;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 
 /**
  * Is the {@link IPullRequestEntity} implementation of the in-memory persistency provider used for testing.
@@ -23,11 +22,6 @@ public class PullRequestDTO extends PullRequest implements IPullRequestEntity {
 		return true;
 	}
 
-	@Override
-	@Deprecated
-	public Label getLeg() {
-		return null;
-	}
 
 	@Override
 	public boolean usesMultiHop() {

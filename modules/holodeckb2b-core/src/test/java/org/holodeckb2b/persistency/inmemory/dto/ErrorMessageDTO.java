@@ -3,7 +3,6 @@ package org.holodeckb2b.persistency.inmemory.dto;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 
 public class ErrorMessageDTO extends ErrorMessage implements IErrorMessageEntity {
 
@@ -17,12 +16,6 @@ public class ErrorMessageDTO extends ErrorMessage implements IErrorMessageEntity
 	@Override
 	public boolean isLoadedCompletely() {
 		return true;
-	}
-
-	@Override
-	@Deprecated
-	public Label getLeg() {
-		return null;
 	}
 
 	@Override

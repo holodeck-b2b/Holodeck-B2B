@@ -28,7 +28,6 @@ public class TestConfig implements InternalConfiguration {
     public String hb2b_home;
     public String pmodeStorageClass = null;
     public boolean acceptNonValidablePMode = true;
-    public String persistencyProviderClass;    
     public String certManagerClass;
     public boolean useStrictHeaderValidation = false;
 
@@ -106,12 +105,7 @@ public class TestConfig implements InternalConfiguration {
     @Override
     public boolean eventProcessorFallback() {
     	return false;
-    }
-    
-    @Override
-    public String getPersistencyProviderClass() {
-    	return persistencyProviderClass;
-    }
+    }   
 
     @Override
     public boolean useStrictHeaderValidation() {

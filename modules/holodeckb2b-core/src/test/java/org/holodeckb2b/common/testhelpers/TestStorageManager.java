@@ -1,7 +1,7 @@
 package org.holodeckb2b.common.testhelpers;
 
 import org.holodeckb2b.core.StorageManager;
-import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
+import org.holodeckb2b.interfaces.persistency.IUpdateManager;
 
 /**
  * Is a facade to the normal {@link StorageManager} which adds a method to get direct access to the {@link 

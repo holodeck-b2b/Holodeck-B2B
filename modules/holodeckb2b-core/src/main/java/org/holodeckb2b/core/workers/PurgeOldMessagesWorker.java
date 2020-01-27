@@ -32,8 +32,8 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.events.IMessageUnitPurged;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.persistency.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 
 /**

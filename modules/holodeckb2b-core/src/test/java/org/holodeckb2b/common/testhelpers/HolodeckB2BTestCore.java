@@ -22,11 +22,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.axis2.modules.Module;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCoreImpl;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.config.InternalConfiguration;
+import org.holodeckb2b.core.validation.DefaultValidationExecutor;
 import org.holodeckb2b.core.validation.IValidationExecutor;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
@@ -38,8 +40,8 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcess
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.general.IVersionInfo;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
+import org.holodeckb2b.interfaces.persistency.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
@@ -57,11 +59,12 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	private IMessageSubmitter	messageSubmitter;
 	private IPModeSet			pmodes;
 	private IMessageProcessingEventProcessor eventProcessor;
+	private IValidationExecutor validationExec;
 	private ICertificateManager certManager;
 	private IPersistencyProvider persistencyProvider;
 	private List<IMessageProcessingEventConfiguration> eventConfig = new ArrayList<>();
 	private Map<String, IMessageDelivererFactory> msgDeliveryMethods = new HashMap<>();
-	private IValidationExecutor validationExec;
+	private Map<String, Module> modules = new HashMap<>();
 	
 	public HolodeckB2BTestCore() {
 		this.configuration = new TestConfig();
@@ -172,7 +175,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 		if (persistencyProvider == null)
 			persistencyProvider = new InMemoryProvider();
 		
-		return persistencyProvider.getDAOFactory().getQueryManager();
+		return persistencyProvider.getQueryManager();
 	}
 	
 	/* (non-Javadoc)
@@ -183,7 +186,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 		if (persistencyProvider == null)
 			persistencyProvider = new InMemoryProvider();
 		
-		return new TestStorageManager(persistencyProvider.getDAOFactory().getUpdateManager());
+		return new TestStorageManager(persistencyProvider.getUpdateManager());
 	}
 
 	
@@ -255,6 +258,20 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	
 	@Override
     public IValidationExecutor getValidationExecutor() {		
-        return validationExec != null ? validationExec : super.getValidationExecutor();
+        return validationExec != null ? validationExec : new DefaultValidationExecutor();
     }
+
+	@Override
+	public InternalConfiguration getConfiguration() {
+		return configuration;
+	}
+
+	@Override
+	public Module getModule(String name) {
+		return modules.get(name);
+	}
+	
+	public void setModule(String name, Module module) {
+		modules.put(name, module);
+	}
 }

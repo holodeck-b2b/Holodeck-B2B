@@ -55,9 +55,8 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcess
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.general.IVersionInfo;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
+import org.holodeckb2b.interfaces.persistency.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
-import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
 import org.holodeckb2b.interfaces.security.ISecurityProvider;
@@ -120,11 +119,10 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     private IMessageProcessingEventProcessor eventProcessor = null;
 
     /**
-     * The DAO factory object of the persistency provider that manages the storage of the meta-data on processed
-     * message units.
-     * @since  3.0.0
+     * The persistency provider that manages the storage of the meta-data on processed message units.
+     * @since  5.0.0 In previous versions the DAOFactory was referenced. 
      */
-    private IDAOFactory    daoFactory = null;
+    private IPersistencyProvider    persistencyProvider = null;
 
     /**
      * The installed security provider responsible for the processing of the WS-Security header of messages.
@@ -178,7 +176,8 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         	log.trace("Initialize the P-Mode manager");
 			pmodeManager = new PModeManager(instanceConfiguration);
 		} catch (PModeSetException e) {
-			log.fatal("Could not intialize the P-Mode manager! ABORTING startup!\n\tError details: {}", e.getMessage());
+			log.fatal("Cannot start Holodeck B2B because P-Mode manager couldn't be initialised!\n\tError details: {}", 
+						e.getMessage());
 			throw new AxisFault("Could not initialize Holodeck B2B module!", e);
 		}
 
@@ -205,27 +204,25 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         log.info("Loaded event processor : {}", eventProcessor.getName());
 
         log.debug("Load the persistency provider for storing meta-data on message units");
-        String persistencyProviderClassname = instanceConfiguration.getPersistencyProviderClass();
-        if (Utils.isNullOrEmpty(persistencyProviderClassname))
-            persistencyProviderClassname = "org.holodeckb2b.persistency.DefaultProvider";
-
-        IPersistencyProvider persistencyProvider = null;
-        try {
-           persistencyProvider = (IPersistencyProvider) Class.forName(persistencyProviderClassname).newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
-           log.fatal("Could not load the persistency provider: " + persistencyProviderClassname);
-           throw new AxisFault("Unable to load required persistency provider!");
+        Iterator<IPersistencyProvider> providers = ServiceLoader.load(IPersistencyProvider.class).iterator();
+        persistencyProvider = providers.hasNext() ? providers.next() : null;
+        if (providers.hasNext()) 
+        	log.warn("Multiple Persistency Providers are installed, only using first one found");
+        if (persistencyProvider != null) {	        	
+        	log.debug("Using Persistency Provider: {}", persistencyProvider.getName());
+        	try {
+        		persistencyProvider.init(instanceConfiguration.getHolodeckB2BHome());
+        	} catch (PersistenceException initializationFailure) {
+        		log.error("Could not initialize the persistency provider - {} : {}", certManager.getName(),
+        				initializationFailure.getMessage());
+        		persistencyProvider = null;
+        	}
         }
-        log.info("Using " + persistencyProvider.getName() + " as persistency provider");
-        try {
-             persistencyProvider.init(instanceConfiguration.getHolodeckB2BHome());
-             daoFactory = persistencyProvider.getDAOFactory();
-        } catch (PersistenceException initializationFailure) {
-            log.fatal("Could not initialize the persistency provider " + persistencyProvider.getName()
-                      + "! Unable to start Holodeck B2B. \n\tError details: " + initializationFailure.getMessage());
-            throw new AxisFault("Unable to initialize required persistency provider!");
+        if (persistencyProvider == null) {
+        	log.fatal("Cannot start Holodeck B2B because required Persistency Provider is not available!");
+        	throw new AxisFault("Unable to load required persistency provider!");
         }
-        log.info("Succesfully loaded " + persistencyProvider.getName() + " as persistency provider");
+        log.info("Succesfully loaded " + certManager.getName() + " as certificate manager");
         
         log.trace("Load the certificate manager");
     	Iterator<ICertificateManager> mgrs = ServiceLoader.load(ICertificateManager.class).iterator();
@@ -404,7 +401,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * @since  3.0.0
      */
     public StorageManager getStorageManager() {
-        return new StorageManager(daoFactory.getUpdateManager());
+        return new StorageManager(persistencyProvider.getUpdateManager());
     }
 
     /**
@@ -413,7 +410,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      */
     @Override
     public IQueryManager getQueryManager() {
-        return daoFactory.getQueryManager();
+        return persistencyProvider.getQueryManager();
     }
 
     /**

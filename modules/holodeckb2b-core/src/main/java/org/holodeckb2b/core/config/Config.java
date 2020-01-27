@@ -91,20 +91,13 @@ public class Config implements InternalConfiguration {
      * @since 5.0.0
      */
     private boolean eventProcessorFallback = true;
-    
-    
+        
     /**
      * The indicator whether P-Modes for which no {@link IPModeValidator} implementation is available should be rejected 
      * or still be loaded. 
      * @since 5.0.0
      */
     private boolean acceptNonValidablePModes = false;
-    
-    /*
-     * The class name of the persistency provider that should be used to store the meta-data on processed message units
-     * @since  3.0.0
-     */
-    private String persistencyProviderClass = null;
 
     /*
      * Indicator whether strict header validation should be applied to all messages
@@ -191,9 +184,6 @@ public class Config implements InternalConfiguration {
 
         // The class name of the component to store P-Modes
         pmodeStorageClass = configFile.getParameter("PModeStorageImplementation");
-
-        // The class name of the persistency provider
-        persistencyProviderClass = configFile.getParameter("PersistencyProvider");
         
         // Indicator whether strict header validation should be performed
         final String strictHeaderValidation = configFile.getParameter("StrictHeaderValidation");
@@ -296,15 +286,6 @@ public class Config implements InternalConfiguration {
     @Override
     public boolean acceptNonValidablePMode() {
     	return acceptNonValidablePModes;
-    }
-    
-    /**
-     * {@inheritDoc}
-     * @since 3.0.0
-     */
-    @Override
-    public String getPersistencyProviderClass() {
-        return persistencyProviderClass;
     }
 
     /**

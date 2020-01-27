@@ -3,7 +3,6 @@ package org.holodeckb2b.persistency.inmemory.dto;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 
 /**
  * Is the {@link IUserMessageEntity} implementation of the in-memory persistency provider used for testing.
@@ -21,12 +20,6 @@ public class UserMessageDTO extends UserMessage implements IUserMessageEntity {
 	@Override
 	public boolean isLoadedCompletely() {
 		return true;
-	}
-
-	@Override
-	@Deprecated
-	public Label getLeg() {
-		return null;
 	}
 
 	@Override

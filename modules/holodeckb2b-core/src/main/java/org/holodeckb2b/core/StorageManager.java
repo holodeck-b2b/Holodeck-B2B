@@ -35,12 +35,11 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.persistency.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
@@ -203,18 +202,6 @@ public class StorageManager {
      */
     public void setMultiHop(final IMessageUnitEntity msgUnit, final boolean isMultihop) throws PersistenceException {
         parent.setMultiHop(msgUnit, isMultihop);
-    }
-
-    /**
-     * Sets the leg on which the message unit is exchanged.
-     *
-     * @param msgUnit       The entity object representing the message unit which leg should be set
-     * @parem legLabel      The label of the leg on which the message unit is exchanged
-     * @throws PersistenceException When a database error occurs while updating the entity object
-     */
-    @Deprecated
-    public void setLeg(final IMessageUnitEntity msgUnit, final ILeg.Label legLabel) throws PersistenceException {
-        parent.setLeg(msgUnit, legLabel);
     }
 
     /**

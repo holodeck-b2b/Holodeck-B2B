@@ -18,7 +18,6 @@ package org.holodeckb2b.core.config;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
 
@@ -75,14 +74,4 @@ public interface InternalConfiguration extends IConfiguration {
      * @since  3.0.0
      */
     String getPModeStorageImplClass();
-
-    /**
-     * Gets the class name of the {@link IPersistencyProvider} implementation that the Holodeck B2B Core should use to
-     * store meta-data of processed message units. This is an optional configuration parameter and when not set the
-     * Holodeck B2B Core will use the default implementation.
-     *
-     * @return  The class name of the {@link IPersistencyProvider} implementation to use for storing meta-data
-     * @since  3.0.0
-     */
-    String getPersistencyProviderClass();
 }

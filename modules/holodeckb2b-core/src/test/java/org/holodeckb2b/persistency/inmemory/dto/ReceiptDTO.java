@@ -3,7 +3,6 @@ package org.holodeckb2b.persistency.inmemory.dto;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 
 /**
  * Is the {@link IReceiptEntity} implementation of the in-memory persistency provider used for testing.
@@ -23,11 +22,6 @@ public class ReceiptDTO extends Receipt implements IReceiptEntity {
 		return true;
 	}
 
-	@Override
-	@Deprecated
-	public Label getLeg() {
-		return null;
-	}
 
 	@Override
 	public boolean usesMultiHop() {

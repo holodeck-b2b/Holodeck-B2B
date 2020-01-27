@@ -18,10 +18,9 @@ package org.holodeckb2b.persistency.test;
 
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
+import org.holodeckb2b.interfaces.persistency.IQueryManager;
+import org.holodeckb2b.interfaces.persistency.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
-import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
-import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
 import org.holodeckb2b.persistency.managers.QueryManager;
 import org.holodeckb2b.persistency.managers.UpdateManager;
 
@@ -37,19 +36,12 @@ public class TestProvider implements IPersistencyProvider {
 	}
 
 	@Override
-	public IDAOFactory getDAOFactory() {
-		return new IDAOFactory() {
-			
-			@Override
-			public IUpdateManager getUpdateManager() {
-				return new UpdateManager();
-			}
-			
-			@Override
-			public IQueryManager getQueryManager() {
-				return new QueryManager();
-			}
-		};
+	public IUpdateManager getUpdateManager() {
+		return new UpdateManager();
 	}
-
+	
+	@Override
+	public IQueryManager getQueryManager() {
+		return new QueryManager();
+	}
 }

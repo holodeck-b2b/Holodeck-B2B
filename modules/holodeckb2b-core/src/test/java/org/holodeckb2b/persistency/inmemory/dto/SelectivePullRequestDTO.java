@@ -3,7 +3,6 @@ package org.holodeckb2b.persistency.inmemory.dto;
 import org.holodeckb2b.common.messagemodel.SelectivePullRequest;
 import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
 import org.holodeckb2b.interfaces.persistency.entities.ISelectivePullRequestEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 
 /**
  * Is the {@link ISelectivePullRequestEntity} implementation of the in-memory persistency provider used for testing.
@@ -21,12 +20,6 @@ public class SelectivePullRequestDTO extends SelectivePullRequest implements ISe
 	@Override
 	public boolean isLoadedCompletely() {
 		return true;
-	}
-
-	@Override
-	@Deprecated
-	public Label getLeg() {
-		return null;
 	}
 
 	@Override

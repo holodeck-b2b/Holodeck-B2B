@@ -5,10 +5,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
+import org.holodeckb2b.interfaces.persistency.IQueryManager;
+import org.holodeckb2b.interfaces.persistency.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
-import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
-import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 
 /**
@@ -18,7 +17,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
  */
 public class InMemoryProvider implements IPersistencyProvider {
 
-	private IDAOFactory	daoFactory = new DAOFactory();
+	private Set<IMessageUnitEntity>	 msgUnitStore = Collections.synchronizedSet(new HashSet<IMessageUnitEntity>());	
 	
 	@Override
 	public String getName() {
@@ -27,27 +26,15 @@ public class InMemoryProvider implements IPersistencyProvider {
 
 	@Override
 	public void init(String hb2bHomeDir) throws PersistenceException {
-		daoFactory = new DAOFactory();
+	}
+		
+	@Override
+	public IUpdateManager getUpdateManager() {
+		return new UpdateManager(msgUnitStore);
 	}
 
 	@Override
-	public IDAOFactory getDAOFactory() {
-		return daoFactory;
-	}
-
-	public class DAOFactory implements IDAOFactory {
-
-		private Set<IMessageUnitEntity>	 msgUnitStore = Collections.synchronizedSet(new HashSet<IMessageUnitEntity>());	
-		
-		@Override
-		public IUpdateManager getUpdateManager() {
-			return new UpdateManager(msgUnitStore);
-		}
-
-		@Override
-		public IQueryManager getQueryManager() {
-			return new QueryManager(msgUnitStore);
-		}
-		
-	}
+	public IQueryManager getQueryManager() {
+		return new QueryManager(msgUnitStore);
+	}		
 }

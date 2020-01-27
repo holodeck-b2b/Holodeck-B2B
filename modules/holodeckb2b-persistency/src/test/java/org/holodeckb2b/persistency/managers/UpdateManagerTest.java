@@ -43,8 +43,8 @@ import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
+import org.holodeckb2b.interfaces.persistency.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.entities.ErrorMessageEntity;
@@ -54,7 +54,6 @@ import org.holodeckb2b.persistency.entities.ReceiptEntity;
 import org.holodeckb2b.persistency.entities.UserMessageEntity;
 import org.holodeckb2b.persistency.jpa.ErrorMessage;
 import org.holodeckb2b.persistency.jpa.MessageUnit;
-import org.holodeckb2b.persistency.jpa.Receipt;
 import org.holodeckb2b.persistency.jpa.UserMessage;
 import org.holodeckb2b.persistency.test.TestData;
 import org.holodeckb2b.persistency.test.TestProvider;
@@ -383,25 +382,6 @@ public class UpdateManagerTest {
         // Check that database is updated
         em.refresh(errorMsgJPA);
         assertEquals(T_NEW_MULTI_HOP, errorMsgJPA.usesMultiHop());
-    }
-
-    @Test
-    public void setLeg() throws PersistenceException {
-        // Add a message unit to the database so we can change it
-        em.getTransaction().begin();
-        Receipt receiptJPA = new Receipt(TestData.receipt1);
-        em.persist(receiptJPA);
-        ReceiptEntity receiptMsg = new ReceiptEntity(receiptJPA);
-        em.getTransaction().commit();
-        // Check it accidentially has not already the new value
-        assertNotEquals(T_NEW_LEG_LABEL, receiptMsg.getLeg());
-        // Perform the update
-        updManager.setLeg(receiptMsg, T_NEW_LEG_LABEL);
-        // Check update in entity object
-        assertEquals(T_NEW_LEG_LABEL, receiptMsg.getLeg());
-        // Check that database is updated
-        em.refresh(receiptJPA);
-        assertEquals(T_NEW_LEG_LABEL, receiptJPA.getLeg());
     }
 
     @Test

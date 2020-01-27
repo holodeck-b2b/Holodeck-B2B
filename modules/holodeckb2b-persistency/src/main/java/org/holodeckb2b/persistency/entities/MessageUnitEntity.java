@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 import org.holodeckb2b.persistency.jpa.MessageUnit;
 import org.holodeckb2b.persistency.managers.QueryManager;
@@ -75,11 +74,6 @@ public abstract class MessageUnitEntity<T extends MessageUnit> implements IMessa
      */
     public void updateJPAObject(final T jpaObject) {
         this.jpaEntityObject = jpaObject;
-    }
-
-    @Override
-    public ILeg.Label getLeg() {
-        return jpaEntityObject.getLeg();
     }
 
     @Override
