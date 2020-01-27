@@ -55,14 +55,15 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 public interface ICertificateManager {
 	
     /**
-     * Gets the name of this Certificate Manager.
-     * <p>The name is only informational and mainly used for logging. However it is recommended to clearly identify the 
-     * certificate manager.
+     * Gets the name of this Certificate Manager to identify it in logging. This name is only used for logging purposes 
+     * and it is recommended to include a version number of the implementation. If no name is specified by the 
+     * implementation the class name will be used. 
      *
-     * @return The name of this Certificate Manager.
+     * @return  The name of the Certificate Manager to use in logging
+     * @since 5.0.0
      */
-    String getName();
-
+    default String getName() { return this.getClass().getName(); }
+    
     /**
      * Initializes the Certificate Manager. This method is called once at startup of the Holodeck B2B instance. Since
      * the message processing depends on the correct functioning of the Certificate Manager this method MUST ensure that
