@@ -123,7 +123,7 @@ public class ITHelper {
         File pmodeXml = new File(workingDirPath + File.separator + distrDirName + File.separator
                 + "examples" + File.separator + "pmodes" + File.separator + pmodeFileName);
         File newPmodeXml = new File(workingDirPath + File.separator + distrDirName + File.separator
-                + "conf" + File.separator + "pmodes" + File.separator + pmodeFileName);
+                + "repository" + File.separator + "pmodes" + File.separator + pmodeFileName);
         try {
             Files.copy(pmodeXml.toPath(), newPmodeXml.toPath(),
                     StandardCopyOption.REPLACE_EXISTING);
