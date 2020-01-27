@@ -32,9 +32,9 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
 public interface IPModeValidator {
 
     /**
-     * Gets the name of this validator to identify it in logging. This name is only used for logging purposes and SHOULD 
-     * include a version number of the implementation. If no name is specified by the implementation the class name will
-     * be used. 
+     * Gets the name of this validator to identify it in logging. This name is only used for logging purposes and it is 
+     * recommended to include a version number of the implementation. If no name is specified by the implementation the 
+     * class name will be used. 
      *
      * @return  The name of the validator to use in logging
      * @since 5.0.0
