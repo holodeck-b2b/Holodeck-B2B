@@ -59,7 +59,6 @@ import org.holodeckb2b.interfaces.persistency.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
-import org.holodeckb2b.interfaces.security.ISecurityProvider;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
@@ -123,12 +122,6 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * @since  5.0.0 In previous versions the DAOFactory was referenced. 
      */
     private IPersistencyProvider    persistencyProvider = null;
-
-    /**
-     * The installed security provider responsible for the processing of the WS-Security header of messages.
-     * @since 4.0.0
-     */
-    private ISecurityProvider securityProvider = null;
     
     /**
      * The installed certificate manager that manages and checks certificates used in the message processing
