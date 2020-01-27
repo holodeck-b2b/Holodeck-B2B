@@ -80,17 +80,19 @@ public class Config implements InternalConfiguration {
     private ConfigurationContext    axisCfgCtx = null;
 
     /*
-     * The class name of the event processor that is to be used for handling message processing events
-     * @since 2.1.0
-     */
-    private String messageProcessingEventProcessorClass = null;
-
-    /*
      * The class name of the component that should be used to store deployed P-Modes
      * @since  3.0.0
      */
     private String pmodeStorageClass = null;
-
+    
+    /**
+     * The indicator whether the Core should fall back to the default event processor implementation in case the 
+     * configured implementation cannot be loaded.
+     * @since 5.0.0
+     */
+    private boolean eventProcessorFallback = true;
+    
+    
     /**
      * The indicator whether P-Modes for which no {@link IPModeValidator} implementation is available should be rejected 
      * or still be loaded. 
@@ -180,7 +182,8 @@ public class Config implements InternalConfiguration {
         defaultReportErrorOnReceipt = isTrue(defErrReporting);
      
         // The class name of the event processor
-        messageProcessingEventProcessorClass = configFile.getParameter("MessageProcessingEventProcessor");
+        final String disableFallback = configFile.getParameter("DisableEventProcessorFallback");
+        eventProcessorFallback = !isTrue(disableFallback);
 
         // Indicator whether to accept non validable P-Modes, default false
         final String acceptNVPMode = configFile.getParameter("AcceptNonValidablePModes");
@@ -264,20 +267,26 @@ public class Config implements InternalConfiguration {
 
     /**
      * {@inheritDoc}
-     * @since 2.1.0
-     */
-    @Override
-    public String getMessageProcessingEventProcessor() {
-        return messageProcessingEventProcessorClass;
-    }
-
-    /**
-     * {@inheritDoc}
      * @since 3.0.0
      */
     @Override
     public String getPModeStorageImplClass() {
         return pmodeStorageClass;
+    }
+
+    /**
+     * Indicates whether Holodeck B2B Core should not fall back to the default event processor in case the configured
+     * event processor fails to load. The default behaviour is to fall back but in certain deployment it may be required
+     * to use the configured implementation.   
+     *  
+     * @return	<code>true</code> if Core should fall back to default implementation,<br>
+     * 			<code>false</code> if startup of the gateway should be aborted in case the configured event processor
+     * 							   cannot be loaded
+     * @since 5.0.0
+     */
+    @Override
+    public boolean eventProcessorFallback() {
+    	return eventProcessorFallback;
     }
     
     /**

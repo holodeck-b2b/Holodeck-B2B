@@ -18,7 +18,6 @@ package org.holodeckb2b.core.config;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
@@ -46,15 +45,18 @@ public interface InternalConfiguration extends IConfiguration {
      * @return The absolute path to the worker pool configuration file.
      */
     String getWorkerPoolCfgFile();
-
+    
     /**
-     * Gets the configured class name of the component that is responsible for the processing of event that are raised
-     * during the message processing. This is an optional configuration parameter and when not set the Holodeck B2B Core
-     * will use a default implementation.
-     *
-     * @return String containing the class name of the {@link IMessageProcessingEventProcessor} implementation to use
+     * Indicates whether Holodeck B2B Core should not fall back to the default event processor in case the configured
+     * event processor fails to load. The default behaviour is to fall back but in certain deployment it may be required
+     * to use the configured implementation.   
+     *  
+     * @return	<code>true</code> if Core should fall back to default implementation,<br>
+     * 			<code>false</code> if startup of the gateway should be aborted in case the configured event processor
+     * 							   cannot be loaded
+     * @since 5.0.0
      */
-    String getMessageProcessingEventProcessor();
+    boolean eventProcessorFallback();    
     
     /**
      * Indicates whether a P-Mode for which no {@link IPModeValidator} implementation is available to check it before

@@ -69,19 +69,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 
 	public HolodeckB2BTestCore(final String homeDir) {
 		this.configuration = new TestConfig(homeDir);
-	}
-	
-	public HolodeckB2BTestCore(final InternalConfiguration config) {
-		this.configuration = config;
 	}	
-	
-	/* (non-Javadoc)
-	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getConfiguration()
-	 */
-	@Override
-	public InternalConfiguration getConfiguration() {
-		return configuration;
-	}
 	
 	public void cleanTemp() {
 		String tmpDir = configuration != null ? configuration.getTempDirectory() : null;

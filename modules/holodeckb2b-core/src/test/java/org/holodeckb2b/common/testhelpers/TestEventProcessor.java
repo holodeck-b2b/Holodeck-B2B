@@ -20,6 +20,7 @@ import java.util.ArrayList;
 
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 
 /**
  * Is a {@link IMessageProcessingEventProcessor} implementation for testing that just collects all raised events.
@@ -42,4 +43,8 @@ public class TestEventProcessor implements IMessageProcessingEventProcessor {
     		events.clear();	
 		}   	
     }
+
+	@Override
+	public void init(String hb2bHome) throws MessageProccesingEventHandlingException {		
+	}
 }

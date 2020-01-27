@@ -27,6 +27,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisDescription;
 import org.apache.axis2.description.AxisModule;
+import org.apache.axis2.engine.AxisError;
 import org.apache.axis2.modules.Module;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -181,19 +182,27 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
 			throw new AxisFault("Could not initialize Holodeck B2B module!", e);
 		}
 
-        final String eventProcessorClassname = instanceConfiguration.getMessageProcessingEventProcessor();
-        if (!Utils.isNullOrEmpty(eventProcessorClassname)) {
-        	log.debug("Using " + eventProcessorClassname + " as event processor");
-            try {
-               eventProcessor = (IMessageProcessingEventProcessor) Class.forName(eventProcessorClassname).newInstance();
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
-               // Could not create the specified event processor, fall back to default implementation
-               log.error("Could not load the specified event processor: " + eventProcessorClassname
-                        + ". Using default implementation instead.");
-            }
-        } else
-            eventProcessor = new SyncEventProcessor();
-        log.info("Created " + eventProcessor.getClass().getSimpleName() + " event processor");
+        log.trace("Load the event processor");
+    	Iterator<IMessageProcessingEventProcessor> procs = ServiceLoader.load(IMessageProcessingEventProcessor.class)
+    																		.iterator();
+    	eventProcessor = procs.hasNext() ? procs.next() : new SyncEventProcessor();
+    	if (procs.hasNext()) 
+    		log.warn("Multiple Event Processors are installed, only using first one found");
+	    log.trace("Initialising event processor : {}", eventProcessor.getName());
+        try {
+        	eventProcessor.init(instanceConfiguration.getHolodeckB2BHome());
+        } catch (MessageProccesingEventHandlingException initializationFailure) {
+        	log.error("Could not initialize the event processor - {} : {}", certManager.getName(),
+        				initializationFailure.getMessage());
+        	if (instanceConfiguration.eventProcessorFallback()) {
+        		log.debug("Using the default event processor as fall back");
+        		eventProcessor = new SyncEventProcessor();
+        	} else {
+        		log.fatal("Fall back to default event processor disabled, cannot start Holodeck B2B!");
+        		throw new AxisError("Configured event processor is required but not available!");
+        	}
+        }
+        log.info("Loaded event processor : {}", eventProcessor.getName());
 
         log.debug("Load the persistency provider for storing meta-data on message units");
         String persistencyProviderClassname = instanceConfiguration.getPersistencyProviderClass();

@@ -73,10 +73,4 @@
     -       worker that watches for P-Mode XML files.
     ===================================================================== -->
     <!-- <parameter name="PModeStorageImplementation"/> -->
-
-    <!-- ====================================================================
-    - This parameter specifies the processor of message processing events.
-    - If not specified the default implementation will be used.
-    ===================================================================== -->
-    <!-- <parameter name="MessageProcessingEventProcessor"/>-->
 </holodeckb2b-config>

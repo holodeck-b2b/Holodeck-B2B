@@ -86,17 +86,11 @@ public class TestConfig implements InternalConfiguration {
     @Override
     public boolean shouldReportErrorOnError() {
         return reportErrorOnError;
-    }
-   
+    }   
 
     @Override
     public boolean shouldReportErrorOnReceipt() {
         return reportErrorOnReceipt;
-    }
-
-    @Override
-    public String getMessageProcessingEventProcessor() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -109,6 +103,11 @@ public class TestConfig implements InternalConfiguration {
     	return acceptNonValidablePMode;
     }
 
+    @Override
+    public boolean eventProcessorFallback() {
+    	return false;
+    }
+    
     @Override
     public String getPersistencyProviderClass() {
     	return persistencyProviderClass;

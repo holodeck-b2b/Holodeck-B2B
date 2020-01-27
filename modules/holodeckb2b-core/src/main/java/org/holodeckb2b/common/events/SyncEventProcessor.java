@@ -29,6 +29,7 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventHandlerFactory;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 
@@ -49,12 +50,16 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
  * @since 2.1.0
  */
 public class SyncEventProcessor implements IMessageProcessingEventProcessor {
-
     /**
      * Logging
      */
     private static final Log log = LogFactory.getLog(SyncEventProcessor.class);
 
+    @Override
+    public String getName() {
+    	return "HB2B Sync Event Processor";
+    }
+    
     /**
      * Raises an event for processing.
      * <p>The P-Mode of the referenced message unit is checked for configured event handlers and each handler that can
@@ -142,5 +147,9 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
 			}
 		}		
 		return false;
+	}
+
+	@Override
+	public void init(String hb2bHome) throws MessageProccesingEventHandlingException {
 	}
 }

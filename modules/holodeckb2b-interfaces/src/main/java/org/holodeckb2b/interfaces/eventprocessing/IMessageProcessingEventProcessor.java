@@ -36,7 +36,30 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
  * @see HolodeckB2BCoreInterface#getMessageProcessingEventConfiguration()
  */
 public interface IMessageProcessingEventProcessor {
-
+	
+    /**
+     * Gets the name of this event processor to identify it in logging. This name is only used for logging purposes 
+     * and it is recommended to include a version number of the implementation. If no name is specified by the 
+     * implementation the class name will be used. 
+     *
+     * @return  The name of the event processor to use in logging
+     * @since 5.0.0
+     */
+    default String getName() { return this.getClass().getName(); }
+	
+	/**
+     * Initializes the event processor. This method is called once at startup of the Holodeck B2B instance. 
+     * <p><b>NOTE:</b> When the event processor cannot be successfully initialised the Holodeck B2B Core uses the 
+     * default event processor as fall back. If running the configured event processor is required for correct 
+     * functioning of the gateway this fall back can be disabled in the configuration, in which case the startup will
+     * be aborted if loading the event processor fails.  
+     *
+     * @param hb2bHome  Path to the Holodeck B2B home directory.
+	 * @throws MessageProccesingEventHandlingException when the event processor cannot be initialised correctly.
+	 * @since 5.0.0
+	 */
+	void init(final String hb2bHome) throws MessageProccesingEventHandlingException;	
+	
     /**
      * Raises an event for processing by the configured event handler.
      * <p>Because the event is only to inform about the message processing but not part of it the implementation MUST
@@ -48,5 +71,5 @@ public interface IMessageProcessingEventProcessor {
      *
      * @param event         The event that occurred while processing the message unit and that should be processed
      */
-    public void raiseEvent(IMessageProcessingEvent event);
+    void raiseEvent(final IMessageProcessingEvent event);
 }
