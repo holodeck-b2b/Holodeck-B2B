@@ -17,6 +17,7 @@
 package org.holodeckb2b.interfaces.pmode;
 
 
+import java.nio.file.Path;
 import java.util.Collection;
 
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -52,7 +53,7 @@ public interface IPModeSet {
 	 * @throws PModeSetException When the P-Mode set implementation could not successfully be initialised
 	 * @since 4.0.0
 	 */
-	default void init(final String hb2bHomeDir) throws PModeSetException {};
+	default void init(final Path hb2bHomeDir) throws PModeSetException {};
 
     /**
      * Gets the P-Mode with the given <b>PMode.id</b>

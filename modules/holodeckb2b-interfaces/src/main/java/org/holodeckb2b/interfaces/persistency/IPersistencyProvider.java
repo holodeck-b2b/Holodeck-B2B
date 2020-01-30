@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.interfaces.persistency;
 
+import java.nio.file.Path;
+
 /**
  * Defines the interface of a Holodeck B2B <i>Persistency Provider</i> that allows the Holodeck B2B Core to persist the 
  * meta-data of processed message units. 
@@ -47,7 +49,7 @@ public interface IPersistencyProvider {
      * @throws PersistenceException     When the initialization of the provider can not be completed. The exception
      *                                  message SHOULD include a clear indication of what caused the init failure.
      */
-    void init(final String hb2bHomeDir) throws PersistenceException;
+    void init(Path hb2bHomeDir) throws PersistenceException;
 
     /**
      * Gets the <i>Update Manager</i> to perform write operations on message unit meta-data.

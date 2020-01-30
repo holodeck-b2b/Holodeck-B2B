@@ -1,38 +1,19 @@
 #!/bin/sh
 
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements. See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership. The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License. You may obtain a copy of the License at
+# ------------------------------------------------------------------------------
+# This will set HB2B_HOME and HB2B_CP environment variables properly so the
+# Holodeck B2B server or monitoring tools can be started. The HB2B_HOME variable
+# may already be set before running the script.
 # 
-# http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the License for the
-# specific language governing permissions and limitations
-# under the License.
-
-# ----------------------------------------------------------------------------
-#  Set Environment Shell Script
+# The JAVA_HOME environment variable MUST already be set and point at the 
+# Java Runtime Environment that should be used to start the server.
 #
-#  This will set AXIS2_HOME and JAVA_HOME environment variables properly.
-#
-#   AXIS2_HOME   Home of Axis2 installation. If not set I will  try
-#                   to figure it out.
-#
-#   JAVA_HOME       Must point at your Java Development Kit installation.
-#
-# NOTE: Borrowed generously from Apache Tomcat startup scripts.
+# NOTE: Borrowed generously from Apache Axis2 startup scripts.
 # -----------------------------------------------------------------------------
 
 # if JAVA_HOME is not set we're not happy
 if [ -z "$JAVA_HOME" ]; then
-  echo "You must set the JAVA_HOME variable before running Axis2 Script."
+  echo "You must set the JAVA_HOME variable before starting the Holodeck B2B Server."
   exit 1
 fi
 
@@ -60,13 +41,13 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
-# Only set AXIS2_HOME if not already set
-[ -z "$AXIS2_HOME" ] && AXIS2_HOME=`cd "$PRGDIR/.." ; pwd`
+# Only set HB2B_HOME if not already set
+[ -z "$HB2B_HOME" ] && HB2B_HOME=`cd "$PRGDIR/.." ; pwd`
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin; then
   [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
-  [ -n "$AXIS2_HOME" ] && AXIS2_HOME=`cygpath --unix "$AXIS2_HOME"`
+  [ -n "$HB2B_HOME" ] && HB2B_HOME=`cygpath --unix "$HB2B_HOME"`
   [ -n "$CLASSPATH" ] && CLASSPATH=`cygpath --path --unix "$CLASSPATH"`
 fi
 
@@ -84,29 +65,26 @@ if $os400; then
 fi
 
 # update classpath
-AXIS2_CLASSPATH=""
-for f in "$AXIS2_HOME"/lib/*.jar
+HB2B_CP=""
+for f in "$HB2B_HOME"/lib/*.jar
 do
-  AXIS2_CLASSPATH="$AXIS2_CLASSPATH":$f
+  HB2B_CP="$HB2B_CP":$f
 done
-AXIS2_CLASSPATH="$AXIS2_HOME":"$AXIS2_HOME/conf":"$JAVA_HOME/lib/tools.jar":"$AXIS2_CLASSPATH":"$CLASSPATH"
+HB2B_CP="$HB2B_HOME":"$HB2B_HOME/conf":"$JAVA_HOME/lib/tools.jar":"$HB2B_CP":"$CLASSPATH"
 
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then
   JAVA_HOME=`cygpath --absolute --windows "$JAVA_HOME"`
-  AXIS2_HOME=`cygpath --absolute --windows "$AXIS2_HOME"`
-  CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
-  AXIS2_CLASSPATH=`cygpath --path --windows "$AXIS2_CLASSPATH"`
-  JAVA_ENDORSED_DIRS=`cygpath --path --windows "$JAVA_ENDORSED_DIRS"`
+  HB2B_HOME=`cygpath --absolute --windows "$HB2B_HOME"`
+  HB2B_CP=`cygpath --path --windows "$HB2B_CP"`
 fi
 
-export AXIS2_HOME
+export HB2B_HOME
 export JAVA_HOME
-export AXIS2_CLASSPATH
+export HB2B_CP
 
-
-echo " Using AXIS2_HOME: $AXIS2_HOME"
-echo " Using JAVA_HOME:  $JAVA_HOME"
+echo " Using HB2B_HOME: $HB2B_HOME"
+echo " Using JAVA_HOME: $JAVA_HOME"
 
 
 

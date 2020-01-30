@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -57,22 +58,19 @@ public class TestUtils {
      * @param resourceName the name of the resource, which path we want to get
      * @return
      */
-    public static String getPath(Class clazz, String resourceName) {
-        String basePath = null;
+    public static Path getPath(Class clazz, String resourceName) {
         try {
             URL url = clazz.getClassLoader().getResource(resourceName);
-            basePath = Paths.get(url.toURI()).toString();
+            return Paths.get(url.toURI());
         } catch (URISyntaxException e) {
             e.printStackTrace();
+            return null;
         }
-        return basePath;
     }
     
-    public static String getPath(String resourceName) {
+    public static Path getPath(String resourceName) {
     	return getPath(TestUtils.class, resourceName);
     }
-
-
 
     public static boolean eventContainsMsg(List<LoggingEvent> events, Level logLevel, String msg) {
         boolean flag = false;

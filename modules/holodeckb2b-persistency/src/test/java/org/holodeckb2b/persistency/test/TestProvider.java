@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.persistency.test;
 
+import java.nio.file.Path;
+
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.persistency.IQueryManager;
@@ -32,7 +34,7 @@ public class TestProvider implements IPersistencyProvider {
 	}
 
 	@Override
-	public void init(String hb2bHomeDir) throws PersistenceException {
+	public void init(Path hb2bHomeDir) throws PersistenceException {
 	}
 
 	@Override

@@ -17,6 +17,8 @@
 package org.holodeckb2b.common.testhelpers;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,17 +70,19 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	private Map<String, Module> modules = new HashMap<>();
 	
 	public HolodeckB2BTestCore() {
-		this.configuration = new TestConfig();
+		this(".");
 	}
 
 	public HolodeckB2BTestCore(final String homeDir) {
-		this.configuration = new TestConfig(homeDir);
+		this.configuration = new InternalConfiguration(Paths.get(homeDir));
+		this.configuration.setHostName("local.test");
+		this.configuration.setTempDirectory(Paths.get(homeDir).resolve("temp_t"));
 	}	
 	
 	public void cleanTemp() {
-		String tmpDir = configuration != null ? configuration.getTempDirectory() : null;
+		Path tmpDir = configuration != null ? configuration.getTempDirectory() : null;
 		if (tmpDir != null) 
-			deleteDirectory(new File(tmpDir));
+			deleteDirectory(tmpDir.toFile());
 	}
 
 	private static boolean deleteDirectory(File directory) {

@@ -16,8 +16,8 @@
  */
 package org.holodeckb2b.security.trust;
 
-import java.io.File;
 import java.math.BigInteger;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
@@ -153,15 +153,15 @@ public class DefaultCertManager implements ICertificateManager {
      *                                      missing or incorrect references to keystores.
      */
     @Override
-    public void init(final String hb2bHome) throws SecurityProcessingException {
-        final String cfgFilePath = hb2bHome + "/conf/certmanager_config.xml";
+    public void init(final Path hb2bHome) throws SecurityProcessingException {
+        final Path cfgFilePath = hb2bHome.resolve("conf/certmanager_config.xml");
         try {
-            log.debug("Reading configuration file at {}", cfgFilePath);
-            File file = new File(cfgFilePath);
+            log.debug("Reading configuration file at {}", cfgFilePath.toString());
             JAXBContext jaxbContext = JAXBContext.newInstance("org.holodeckb2b.security.trust.config");
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             JAXBElement<CertManagerConfigurationType> rootConfigElement =
-                                        (JAXBElement<CertManagerConfigurationType>) jaxbUnmarshaller.unmarshal(file);
+                                        (JAXBElement<CertManagerConfigurationType>) jaxbUnmarshaller.unmarshal(
+                                        														cfgFilePath.toFile());
             CertManagerConfigurationType certMgrConfig = rootConfigElement.getValue();
             // Check revocation check and direct trust parameters                       
             performRevocationCheck = certMgrConfig.isPerformRevocationCheck() == null ? false :
@@ -213,14 +213,14 @@ public class DefaultCertManager implements ICertificateManager {
      * @param hb2bHome  The HB2B home directory
      * @return          The absolute path
      */
-    private String ensureAbsolutePath(String path, String hb2bHome) {
+    private String ensureAbsolutePath(String path, Path hb2bHome) {
         if (Utils.isNullOrEmpty(path))
             return null;
 
         if (Paths.get(path).isAbsolute())
             return path;
         else
-            return Paths.get(hb2bHome, path).toString();
+            return hb2bHome.resolve(path).toString();
     }    
 
     @Override

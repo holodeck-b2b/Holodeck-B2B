@@ -39,7 +39,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 * P-Modes are now by default stored in the `repository/pmodes` directory  
+* The Axis2 configuration has been merged into the `holodeckb2b.xml` configuration file. 
 * The default key transport algorithms have been upgraded to RSA-OAEP and MGF1 with SHA256.
+* Startup sequence now checks that the server is correctly started and aborts startup if not.
 * The _Security Provider_,_Persistency Provider_, _P-Mode storage_ and _Event Processor_ are now loaded using the Java 
   _Servive Provider Interface_ mechanism.   
 * Refactored the interfaces of the _Persistency Provider_. The ` IDAOFactory` interface has been removed and its methods

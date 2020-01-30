@@ -307,11 +307,10 @@ public class MessageSubmitter implements IMessageSubmitter {
      */
     private void moveOrCopyPayloads(final UserMessage um, final boolean move) throws IOException {
         // Path to the "temp" dir where to store submissionPayloadInfo during processing
-        final String internalPayloadDir = HolodeckB2BCore.getConfiguration().getTempDirectory() + "plcout";
+        final Path pathPlDir = HolodeckB2BCore.getConfiguration().getTempDirectory().resolve("plcout");
         // Create the directory if needed
-        final Path pathPlDir = Paths.get(internalPayloadDir);
         if (!Files.exists(pathPlDir)) {
-            log.debug("Create the directory [{}] for storing payload files", internalPayloadDir);
+            log.debug("Create the directory [{}] for storing payload files", pathPlDir.toString());
             Files.createDirectories(pathPlDir);
         }
 
@@ -320,7 +319,7 @@ public class MessageSubmitter implements IMessageSubmitter {
             for (final IPayload p : payloads) {
                 final Path srcPath = Paths.get(p.getContentLocation());
                 // Ensure that the filename in the temp directory is unique
-                final Path destPath = Utils.createFileWithUniqueName(internalPayloadDir + "/" + srcPath.getFileName());
+                final Path destPath = Utils.createFileWithUniqueName(pathPlDir.toString() + "/" + srcPath.getFileName());
                 try {
                 	log.trace("{} payload [{}] to internal directory", move ? "Moving" : "Copying", 
                 													   p.getContentLocation());
@@ -333,7 +332,7 @@ public class MessageSubmitter implements IMessageSubmitter {
                     ((Payload) p).setContentLocation(destPath.toString());
                 } catch (IOException io) {
                     log.error("Could not copy/move the payload [{}] to internal directory [{}].\n\tError details: {}",  
-                    			p.getContentLocation(), internalPayloadDir, io.getMessage());
+                    			p.getContentLocation(), pathPlDir.toString(), io.getMessage());
                     // Remove the already created file for storing the payload
                     try {
                         Files.deleteIfExists(destPath);

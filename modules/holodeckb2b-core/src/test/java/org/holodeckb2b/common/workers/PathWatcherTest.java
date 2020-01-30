@@ -38,7 +38,7 @@ public class PathWatcherTest {
 
     @Before
     public void setUp() {
-        baseDir = TestUtils.getPath(this.getClass(), "workers");
+        baseDir = TestUtils.getPath("workers").toString();
     }
 
     @After

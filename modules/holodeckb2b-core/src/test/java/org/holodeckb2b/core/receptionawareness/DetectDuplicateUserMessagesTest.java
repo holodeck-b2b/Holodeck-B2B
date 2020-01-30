@@ -54,15 +54,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DetectDuplicateUserMessagesTest {
 
-    private static String baseDir;
-
     private static HolodeckB2BTestCore core;
 
     private DetectDuplicateUserMessages handler;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        core = new HolodeckB2BTestCore(baseDir);
+        core = new HolodeckB2BTestCore();
         HolodeckB2BCoreInterface.setImplementation(core);
     }
 

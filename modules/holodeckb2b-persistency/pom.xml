@@ -66,6 +66,12 @@
             <artifactId>hibernate-entitymanager</artifactId>
             <version>${hibernate.version}</version>
         </dependency>
+		<!-- JAXB API is needed for Java 9 and up-->
+		<dependency>
+		    <groupId>javax.xml.bind</groupId>
+		    <artifactId>jaxb-api</artifactId>
+		    <version>2.2.11</version>
+		</dependency>        
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>

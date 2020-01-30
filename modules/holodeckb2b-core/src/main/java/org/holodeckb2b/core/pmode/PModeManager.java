@@ -52,7 +52,6 @@ import org.holodeckb2b.interfaces.pmode.validation.PModeValidationError;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
- * @see InternalConfiguration#getPModeStorageImplClass()
  * @see InMemoryPModeSet
  * @see org.holodeckb2b.interfaces.pmode.validation
  */

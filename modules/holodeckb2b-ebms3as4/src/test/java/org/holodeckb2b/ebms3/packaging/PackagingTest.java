@@ -64,10 +64,10 @@ public class PackagingTest {
 
 	@BeforeClass
 	public static void loadSchemaFiles() {
-		ebMSschemaFile = new File(TestUtils.getPath("xsd/ebms-header-3_0-200704_refactored.xsd"));
-		SOAP11schemaFile = new File(TestUtils.getPath("xsd/soap11-envelope.xsd"));
-		SOAP12schemaFile = new File(TestUtils.getPath("xsd/soap12-envelope.xsd"));
-		xmlSchemaFile = new File(TestUtils.getPath("xsd/xml.xsd"));
+		ebMSschemaFile = TestUtils.getPath("xsd/ebms-header-3_0-200704_refactored.xsd").toFile();
+		SOAP11schemaFile = TestUtils.getPath("xsd/soap11-envelope.xsd").toFile();
+		SOAP12schemaFile = TestUtils.getPath("xsd/soap12-envelope.xsd").toFile();
+		xmlSchemaFile = TestUtils.getPath("xsd/xml.xsd").toFile();
 	}
 
 	@Test

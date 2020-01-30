@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStoreException;
@@ -300,8 +301,8 @@ public class BasicPModeValidatorTest {
 
     	private KeyStore	keystore;
     	
-    	CertManagerMock(String ksPath) {
-            try (FileInputStream fis = new java.io.FileInputStream(ksPath + "/keystore.jks")) {
+    	CertManagerMock(Path ksPath) {
+            try (FileInputStream fis = new java.io.FileInputStream(ksPath.resolve("keystore.jks").toFile())) {
             	keystore = KeyStore.getInstance("JKS");
                 keystore.load(fis, "test123456".toCharArray());
             } catch (NullPointerException | IOException | KeyStoreException | NoSuchAlgorithmException
@@ -349,8 +350,7 @@ public class BasicPModeValidatorTest {
 		}
 
 		@Override
-		public void init(String hb2bHome) throws SecurityProcessingException {
-			// TODO Auto-generated method stub
+		public void init(Path hb2bHome) throws SecurityProcessingException {
 			
 		}
 

@@ -55,7 +55,7 @@ public class GZIPCompressingInputStreamTest {
     @Before
     public void setUp() {
         try {
-            final File out = new File(TestUtils.getPath("compression/compressed.gz"));
+            final File out = TestUtils.getPath("compression/compressed.gz").toFile();
             if (out.exists())
                 out.delete();
         } catch (final Exception e)
@@ -68,11 +68,11 @@ public class GZIPCompressingInputStreamTest {
 
     @Test
     public void testCompression() {
-        final File comF = new File(TestUtils.getPath("compression/") + "compressed.gz");
-        final File decF = new File(TestUtils.getPath("compression/") + "decompressed.jpg");
+        final File comF = TestUtils.getPath("compression").resolve("compressed.gz").toFile();
+        final File decF = TestUtils.getPath("compression").resolve("decompressed.jpg").toFile();
 
         try {
-            final File uncF = new File(TestUtils.getPath("compression/uncompressed.jpg"));
+            final File uncF = TestUtils.getPath("compression/uncompressed.jpg").toFile();
             final byte[] buffer = new byte[512];
 
             //Compress

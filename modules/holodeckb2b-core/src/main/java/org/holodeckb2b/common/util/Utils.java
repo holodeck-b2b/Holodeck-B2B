@@ -444,4 +444,15 @@ public final class Utils {
         }
         return isValid;
     }
+    
+    /**
+     * Tests if the given String represents the boolean "true" value. 
+     * 
+     * return <code>true</code> if the String is equal to "true", "1" or 'yes'.<br>
+     * 		  <code>false</code> otherwise
+     * @since 5.0.0
+     */
+    public static boolean isTrue(String value) {
+        return value != null && (value.equalsIgnoreCase("true") || value.equals("1") || value.equalsIgnoreCase("yes"));
+    }    
 }

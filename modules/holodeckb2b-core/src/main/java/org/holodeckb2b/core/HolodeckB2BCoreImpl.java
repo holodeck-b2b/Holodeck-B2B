@@ -38,7 +38,6 @@ import org.holodeckb2b.common.events.SyncEventProcessor;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.common.workerpool.WorkerPool;
 import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
-import org.holodeckb2b.core.config.Config;
 import org.holodeckb2b.core.config.InternalConfiguration;
 import org.holodeckb2b.core.pmode.PModeManager;
 import org.holodeckb2b.core.submission.MessageSubmitter;
@@ -156,13 +155,12 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
             throw new AxisFault("Invalid configuration found for module: " + am.getName());
         }
 
-        log.debug("Load configuration");
         try {
-            instanceConfiguration = new Config(cc);
-        } catch (final Exception ex) {
-            log.fatal("Could not intialize configuration! ABORTING startup!"
-                     + "\n\tError details: " + ex.getMessage());
-            throw new AxisFault("Could not initialize Holodeck B2B module!", ex);
+            instanceConfiguration = (InternalConfiguration) cc.getAxisConfiguration();
+        } catch (ClassCastException nonH2BConfig) {
+            log.fatal("Incorrect configuration found. Found {} instead of {}", 
+            			cc.getAxisConfiguration().getClass().getName(), InternalConfiguration.class.getName());
+            throw new AxisFault("Could not initialize Holodeck B2B module!", nonH2BConfig);
         }
 
         try {
@@ -263,6 +261,8 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
 
 
         log.info("Holodeck B2B Core " + VersionInfo.fullVersion + " STARTED.");
+        System.out.println("Holodeck B2B Core module started.");
+        
     }
 
     @Override
@@ -322,22 +322,10 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
             throw new MessageDeliveryException("No delivery specification given!");
         }
 
-        IMessageDeliverer   deliverer = null;
-
         log.trace("Check if there is a factory available for this specification [" + deliverySpec.getId() +"]");
         IMessageDelivererFactory mdf = msgDeliveryFactories.get(deliverySpec.getId());
 
-        if (mdf != null) {
-            log.trace("Factory available, get message deliverer");
-            try {
-                deliverer = mdf.createMessageDeliverer();
-            } catch (final MessageDeliveryException mde) {
-                log.error("Could not get a message delivered from factory [" + mdf.getClass().getSimpleName()
-                            + "] for delivery specification [" + deliverySpec.getId() + "]"
-                            + "\n\tError details: " + mde.getMessage());
-                throw mde;
-            }
-        } else {
+        if (mdf == null) {
             try {
                 log.trace("No factory available yet for this specification [" + deliverySpec.getId() + "]");
                 final String factoryClassName = deliverySpec.getFactory();
@@ -513,8 +501,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      */
     @Override
     public Module getModule(final String name) {
-		final AxisModule module = instanceConfiguration.getAxisConfigurationContext().getAxisConfiguration()
-																					 .getModule(name);
+		final AxisModule module = instanceConfiguration.getModule(name);
 		// The AxisModule is only meta-data on the module, we need to get the actual implementing class from it		
 		return module != null ? module.getModule() : null;
     }

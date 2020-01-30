@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.common.testhelpers;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
@@ -45,6 +46,6 @@ public class TestEventProcessor implements IMessageProcessingEventProcessor {
     }
 
 	@Override
-	public void init(String hb2bHome) throws MessageProccesingEventHandlingException {		
+	public void init(Path hb2bHome) throws MessageProccesingEventHandlingException {		
 	}
 }

@@ -48,7 +48,7 @@ public class FileWatcherTest {
     @Before
     public void setUp() {
         instance = new FileWatcherImpl();
-        final String basePath = TestUtils.getPath(this.getClass(), "filewatcher");
+        final String basePath = TestUtils.getPath("filewatcher").toString();
         testFile = basePath + "/testfile.tst";
 
         final Map<String, String> param = new HashMap<>();

@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.common.events;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import org.apache.axis2.context.MessageContext;
@@ -150,6 +151,6 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
 	}
 
 	@Override
-	public void init(String hb2bHome) throws MessageProccesingEventHandlingException {
+	public void init(Path hb2bHome) throws MessageProccesingEventHandlingException {
 	}
 }

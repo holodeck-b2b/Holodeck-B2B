@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.interfaces.eventprocessing;
 
+import java.nio.file.Path;
+
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.events.security.ISecurityCreationFailure;
 import org.holodeckb2b.interfaces.events.security.ISigningFailure;
@@ -58,7 +60,7 @@ public interface IMessageProcessingEventProcessor {
 	 * @throws MessageProccesingEventHandlingException when the event processor cannot be initialised correctly.
 	 * @since 5.0.0
 	 */
-	void init(final String hb2bHome) throws MessageProccesingEventHandlingException;	
+	void init(final Path hb2bHome) throws MessageProccesingEventHandlingException;	
 	
     /**
      * Raises an event for processing by the configured event handler.

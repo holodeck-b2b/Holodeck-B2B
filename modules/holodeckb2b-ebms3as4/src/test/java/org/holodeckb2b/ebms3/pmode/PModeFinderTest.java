@@ -56,7 +56,7 @@ public class PModeFinderTest {
 
         // Read the set of test P-Modes
         Map<String, Object> param = new HashMap<>();
-        param.put("watchPath", TestUtils.getPath(PModeFinderTest.class.getSimpleName()));
+        param.put("watchPath", TestUtils.getPath(PModeFinderTest.class.getSimpleName()).toString());
         PModeWatcher    pmodeReader = new PModeWatcher();
         pmodeReader.setParameters(param);
 

@@ -26,6 +26,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +69,7 @@ public class XMLWorkerPoolConfigTest {
 
     @Test
     public void testCompleteConfig() {
-        final String path = TestUtils.getPath(this.getClass(), "workerpoolcfg/wp_config1.xml");
+        final Path path = TestUtils.getPath("workerpoolcfg/wp_config1.xml");
 
         final IWorkerPoolConfiguration result = XMLWorkerPoolConfig.loadFromFile(path);
 
@@ -94,7 +95,7 @@ public class XMLWorkerPoolConfigTest {
 
     @Test
     public void testInvalidFile() {
-        final String path = TestUtils.getPath(this.getClass(), "workerpoolcfg/wp_config2.xml");
+        final Path path = TestUtils.getPath("workerpoolcfg/wp_config2.xml");
 
         final IWorkerPoolConfiguration result = XMLWorkerPoolConfig.loadFromFile(path);
         assertNull(result);
@@ -103,7 +104,7 @@ public class XMLWorkerPoolConfigTest {
     @Test
     public void testLoadUnnamedFile() {
         System.out.println("loadFromFile");
-        final String path = TestUtils.getPath(this.getClass(), "workerpoolcfg/wp_config3.xml");
+        final Path path = TestUtils.getPath("workerpoolcfg/wp_config3.xml");
 
         final IWorkerPoolConfiguration result = XMLWorkerPoolConfig.loadFromFile(path);
 

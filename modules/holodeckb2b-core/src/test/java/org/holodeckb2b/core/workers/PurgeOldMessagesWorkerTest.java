@@ -75,7 +75,7 @@ public class PurgeOldMessagesWorkerTest {
 	private static final String MSGID_5 = "e1-msg-id@test";
 	private static final String MSGID_6 = "um6-msg-id@test";
 
-	private static String basePath = TestUtils.getPath("purgetest");
+	private static String basePath = TestUtils.getPath("purgetest").toString();
 	
 	private static QueryManager	queryManager;
 	

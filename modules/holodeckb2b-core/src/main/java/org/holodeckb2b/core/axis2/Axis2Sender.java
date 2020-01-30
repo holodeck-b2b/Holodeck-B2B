@@ -97,7 +97,7 @@ public class Axis2Sender {
         		svcName = mepBinding.substring(41, segmentEnd);        	
         }
         
-        ConfigurationContext configContext = HolodeckB2BCore.getConfiguration().getAxisConfigurationContext();
+        ConfigurationContext configContext = new ConfigurationContext(HolodeckB2BCore.getConfiguration());
         AxisConfiguration axisConfig = configContext.getAxisConfiguration();
         AxisService service;
         try {

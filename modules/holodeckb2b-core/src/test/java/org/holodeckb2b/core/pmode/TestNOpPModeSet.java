@@ -3,6 +3,7 @@
  */
 package org.holodeckb2b.core.pmode;
 
+import java.nio.file.Path;
 import java.util.Collection;
 
 import org.holodeckb2b.interfaces.pmode.IPMode;
@@ -20,7 +21,7 @@ public class TestNOpPModeSet implements IPModeSet {
 	public static boolean failOnInit = false;
 	
 	@Override
-	public void init(String hb2bHomeDir) throws PModeSetException {		
+	public void init(Path hb2bHomeDir) throws PModeSetException {		
 		if (failOnInit)
 			throw new PModeSetException();
 	}

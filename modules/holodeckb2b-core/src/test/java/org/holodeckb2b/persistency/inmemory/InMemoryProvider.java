@@ -1,5 +1,6 @@
 package org.holodeckb2b.persistency.inmemory;
 
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,7 +26,7 @@ public class InMemoryProvider implements IPersistencyProvider {
 	}
 
 	@Override
-	public void init(String hb2bHomeDir) throws PersistenceException {
+	public void init(Path hb2bHomeDir) throws PersistenceException {
 	}
 		
 	@Override

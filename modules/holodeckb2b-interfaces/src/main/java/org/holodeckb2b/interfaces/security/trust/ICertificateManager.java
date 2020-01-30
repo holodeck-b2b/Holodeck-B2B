@@ -17,6 +17,7 @@
 package org.holodeckb2b.interfaces.security.trust;
 
 import java.math.BigInteger;
+import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -73,7 +74,7 @@ public interface ICertificateManager {
      * @param hb2bHome  Path to the Holodeck B2B home directory.
      * @throws SecurityProcessingException When the certificate manager can not be initialized correctly.
      */
-    void init(final String hb2bHome) throws SecurityProcessingException;
+    void init(final Path hb2bHome) throws SecurityProcessingException;
 
     /**
      * Gets the key pair registered under the given alias.

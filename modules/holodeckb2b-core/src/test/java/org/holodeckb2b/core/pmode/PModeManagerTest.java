@@ -32,7 +32,8 @@ import org.holodeckb2b.common.pmode.InMemoryPModeSet;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestConfig;
+import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.core.config.InternalConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
@@ -49,17 +50,17 @@ import org.junit.Test;
  */
 public class PModeManagerTest {
 	
-	private static TestConfig config;
+	private static InternalConfiguration config;
 	
     @BeforeClass
     public static void setUpClass() throws Exception {
-    	config = new TestConfig();
+    	config = new InternalConfiguration(TestUtils.getPath("."));
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
     }
     
     @Before
     public void setupTest() {
-    	config.acceptNonValidablePMode = true;
+    	config.setAcceptNonValidablePMode(true);
     	TestNOpPModeSet.failOnInit = false; 
     }
     
@@ -149,7 +150,7 @@ public class PModeManagerTest {
     @Test
     public void testInvalidConfig() {
     	try {
-    		config.acceptNonValidablePMode = false;
+    		config.setAcceptNonValidablePMode(false);
     		PModeManager manager = new PModeManager(config);
     		fail();
     	} catch (PModeSetException correct) {

@@ -20,6 +20,7 @@
  */
 package org.holodeckb2b.common.workerpool;
 
+import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,7 +66,7 @@ public class WorkerPoolTest {
      */
     @Test
     public void testReconfPool() {
-        String path = TestUtils.getPath(this.getClass(), "workerpool/wp_create.xml");
+        Path path = TestUtils.getPath("workerpool/wp_create.xml");
 
         final IWorkerPoolConfiguration cfg = XMLWorkerPoolConfig.loadFromFile(path);
         System.out.println("Create the pool");
@@ -77,7 +78,7 @@ public class WorkerPoolTest {
 
             System.out.println("Reconfigure the pool");
 
-            path = this.getClass().getClassLoader().getResource("workerpool/wp_reconf.xml").getPath();
+            path = TestUtils.getPath("workerpool/wp_reconf.xml");
             pool.setConfiguration(XMLWorkerPoolConfig.loadFromFile(path));
 
             Thread.sleep(5000);

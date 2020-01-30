@@ -49,7 +49,7 @@ public class DirWatcherTest {
     @Before
     public void setUp() {
         instance = new DirWatcherImpl();
-        basePath = TestUtils.getPath(this.getClass(), "dirwatcher");
+        basePath = TestUtils.getPath("dirwatcher").toString();
 
         testDir = new File(basePath + "/checkdir");
 

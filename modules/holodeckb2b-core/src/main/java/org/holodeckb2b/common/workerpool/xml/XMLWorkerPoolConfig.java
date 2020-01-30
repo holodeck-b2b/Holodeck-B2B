@@ -16,12 +16,14 @@
  */
 package org.holodeckb2b.common.workerpool.xml;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.simpleframework.xml.Attribute;
@@ -63,28 +65,27 @@ public class XMLWorkerPoolConfig implements IWorkerPoolConfiguration {
      * @param path      Path to the XML document containing the pool's configuration
      * @return          The worker pool configuration if succesfully loaded, null otherwise
      */
-    public static IWorkerPoolConfiguration  loadFromFile(final String  path) {
-        final Log log = LogFactory.getLog(XMLWorkerPoolConfig.class);
+    public static IWorkerPoolConfiguration  loadFromFile(final Path  path) {
+        final Logger log = LogManager.getLogger(XMLWorkerPoolConfig.class);
         XMLWorkerPoolConfig    poolCfg = null;
 
         log.debug("Loading worker pool configuration from XML document in " + path);
 
-        final File f = new File(path);
-
-        if (f.exists() && f.canRead()) {
+        if (Files.isReadable(path)) {
             final Serializer serializer = new Persister();
             try {
-                poolCfg = serializer.read(XMLWorkerPoolConfig.class, f);
+                poolCfg = serializer.read(XMLWorkerPoolConfig.class, path.toFile());
                 // If config file does not set pool name, set it here to file name
-                if (poolCfg.getName() == null || poolCfg.getName().isEmpty())
-                    poolCfg.name = f.getName().substring(0, f.getName().indexOf("."));
+                if (Utils.isNullOrEmpty(poolCfg.getName())) {
+                	final String fileName = path.getFileName().toString();
+                    poolCfg.name = fileName.substring(0, fileName.indexOf("."));
+                }
                 log.debug("Loaded configuration");
             } catch (final Exception ex) {
-                log.error("Error while reading configuration from " + path + "! Details: " + ex.getMessage());
+                log.error("Error while reading configuration from {}! Details: {}", path.toString(), ex.getMessage());
             }
          } else
-            log.error("Unable to access configuration file" + path + "!");
-
+            log.error("Unable to access configuration file ({})!", path.toString());
 
         return poolCfg;
     }
