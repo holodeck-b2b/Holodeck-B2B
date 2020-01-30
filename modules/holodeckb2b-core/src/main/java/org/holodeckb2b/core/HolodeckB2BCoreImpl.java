@@ -261,8 +261,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
 
 
         log.info("Holodeck B2B Core " + VersionInfo.fullVersion + " STARTED.");
-        System.out.println("Holodeck B2B Core module started.");
-        
+        System.out.println("Holodeck B2B Core module started.");      
     }
 
     @Override
