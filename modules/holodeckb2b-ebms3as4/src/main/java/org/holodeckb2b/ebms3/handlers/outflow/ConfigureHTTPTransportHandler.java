@@ -23,7 +23,7 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.events.impl.MessageTransfer;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
-import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
+import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;

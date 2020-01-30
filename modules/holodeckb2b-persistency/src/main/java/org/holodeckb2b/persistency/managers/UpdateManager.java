@@ -27,7 +27,7 @@ import javax.persistence.OptimisticLockException;
 import javax.persistence.RollbackException;
 
 import org.holodeckb2b.common.messagemodel.MessageProcessingState;
-import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
+import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.Direction;

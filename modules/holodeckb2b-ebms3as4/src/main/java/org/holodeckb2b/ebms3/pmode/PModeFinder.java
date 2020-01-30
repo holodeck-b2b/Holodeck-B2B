@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
-import org.holodeckb2b.common.messagemodel.util.CompareUtils;
+import org.holodeckb2b.common.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;

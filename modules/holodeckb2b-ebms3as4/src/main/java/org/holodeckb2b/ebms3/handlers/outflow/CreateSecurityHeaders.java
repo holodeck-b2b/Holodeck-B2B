@@ -26,7 +26,7 @@ import org.holodeckb2b.common.events.impl.SignatureCreated;
 import org.holodeckb2b.common.events.impl.SigningFailure;
 import org.holodeckb2b.common.events.impl.UTCreationFailure;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
-import org.holodeckb2b.common.messagemodel.util.CompareUtils;
+import org.holodeckb2b.common.util.CompareUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;

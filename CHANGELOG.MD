@@ -59,6 +59,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Refactored the `OutOptInAxisOperation` so it will also use the _Service_ specified _Message Builder_ for building the
   response message.  
 * Renamed abstract worker implementations to include _Abstract_ prefix.
+* Moved classes in `org.holodeckb2b.common.messagemodel.util` to generic utility package `org.holodeckb2b.common.util`
 * Moved _PModeWatcher_ worker to the `org.holodeckb2b.common.pmode` package as it's directly related to the XML P-Mode
   implementation contained in this package.
 * Constructor of `org.holodeckb2b.interfaces.submit.MessageSubmitException` now accepts `Throwable` instead of 

@@ -32,8 +32,8 @@ import java.util.Map.Entry;
 
 import org.apache.commons.codec.binary.Hex;
 import org.holodeckb2b.common.messagemodel.MessageUnit;
-import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
 import org.holodeckb2b.common.pmode.PMode;
+import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.general.IAgreement;
 import org.holodeckb2b.interfaces.general.IPartyId;
