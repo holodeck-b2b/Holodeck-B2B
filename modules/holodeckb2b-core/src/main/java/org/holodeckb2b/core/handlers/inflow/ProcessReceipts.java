@@ -153,10 +153,11 @@ public class ProcessReceipts extends AbstractBaseHandler {
 
     /**
      * Checks whether the message unit is waiting for receipt.
-     * <p>The message unit is waiting for a receipt when:<ol>
-     * <li>its current processing state is {@link ProcessingState#AWAITING_RECEIPT}</li>
-     * <li>its current processing state is either {@link ProcessingState#READY_TO_PUSH} or {@link
-     * ProcessingState#AWAITING_PULL} and the previous state was {@link ProcessingState#AWAITING_RECEIPT}</li></ol>
+     * <p>The message unit is waiting for a receipt when its current processing state is:<ol>
+     * <li>either {@link ProcessingState#AWAITING_RECEIPT} or {@link ProcessingState#TRANSPORT_FAILURE}</li>
+     * <li>either {@link ProcessingState#READY_TO_PUSH}, {@link ProcessingState#AWAITING_PULL} or 
+     * {@link ProcessingState#WARNING} <b>and</b> the previous state was {@link ProcessingState#AWAITING_RECEIPT}</li>
+     * </ol>
      * <p>The check must always include the current state as we do not want to change a processing state that is final.
      *
      * @param mu    The {@link IMessageUnitEntity} to check
@@ -166,15 +167,16 @@ public class ProcessReceipts extends AbstractBaseHandler {
      */
     protected boolean isWaitingForReceipt(final IMessageUnitEntity mu) throws PersistenceException {
         ProcessingState currentState = mu.getCurrentProcessingState().getState();
-        if (currentState == ProcessingState.AWAITING_RECEIPT)
+        if (currentState == ProcessingState.AWAITING_RECEIPT || currentState == ProcessingState.TRANSPORT_FAILURE)
             return true;
-        else if (currentState == ProcessingState.AWAITING_PULL || currentState == ProcessingState.READY_TO_PUSH) {
+        else if (currentState == ProcessingState.AWAITING_PULL || currentState == ProcessingState.READY_TO_PUSH
+        		|| currentState == ProcessingState.WARNING) {
             // Check if the previous state was AWAITING_RECEIPT and we are now wiating for resend
             if (!mu.isLoadedCompletely())
                 HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(mu);
             return mu.getProcessingStates().get(mu.getProcessingStates().size() - 2).getState()
                                                                                     == ProcessingState.AWAITING_RECEIPT;
-        } else
+        } else 
             return false;
     }
 }
