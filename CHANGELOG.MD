@@ -73,6 +73,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Error descriptions longer than 255 characters are not saved.
 * NPE occurs on event handlers with no parameters [#102](https://github.com/holodeck-b2b/Holodeck-B2B/issues/102)
 * Invalid SOAPFault included with ebMS Error using SOAP 1.2 [#103](https://github.com/holodeck-b2b/Holodeck-B2B/issues/103)
+* Inconsistency in reception awareness [#104](https://github.com/holodeck-b2b/Holodeck-B2B/issues/104)
+* NPE for submitted UserMessage without CollaborationInfo [#105](https://github.com/holodeck-b2b/Holodeck-B2B/issues/105)
 
 ### Removed
 * Message processing events which names ended on _Event_
