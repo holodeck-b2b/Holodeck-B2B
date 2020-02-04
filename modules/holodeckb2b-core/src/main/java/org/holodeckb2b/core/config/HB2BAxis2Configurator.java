@@ -86,10 +86,8 @@ public class HB2BAxis2Configurator extends DeploymentEngine implements AxisConfi
 	@Override
 	public AxisConfiguration getAxisConfiguration() throws AxisFault {
 		// If we have already built the configuration, just return it
-		synchronized(axisConfig) {
-			if (axisConfig != null && axisConfig.getConfigurator() == this)
-				return axisConfig;
-		}
+		if (axisConfig != null)
+			return axisConfig;
 		
         try (InputStream configStream = new FileInputStream(configFile.toFile())) {
         	axisConfig = new InternalConfiguration(hb2bHomeDirectory);
