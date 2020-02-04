@@ -43,7 +43,7 @@ public class MessageIdUtils {
         //  retrieved or randomly generated
         final String rightPart = HolodeckB2BCoreInterface.getConfiguration().getHostName();
 
-        return leftPart + '@' + rightPart;
+        return leftPart + '@' + rightPart.replaceAll("[^" + VALID_CHARS + "]", "_");
     }
 
     /**
@@ -57,7 +57,7 @@ public class MessageIdUtils {
     public static String createContentId(final String msgId) {
         String leftPart, rightPart;
 
-        if (msgId == null || msgId.isEmpty())
+        if (Utils.isNullOrEmpty(msgId))
             // Because there is no message id to base the cid on, just create
             // a completely new id which is equivalent to a msg id
             return createMessageId();
