@@ -83,7 +83,8 @@
     
     <!-- ========================================================-->
     <!-- Axis2 parameters, chnanging any of the parameters below -->
-    <!-- may cause Holodeck B2B to stop functioning correctly!   -->
+    <!-- may cause Holodeck B2B to stop functioning correctly,   -->
+    <!-- so handle with care!                                    -->
     <!-- ========================================================-->
     <parameter name="hotdeployment">false</parameter>
     <parameter name="hotupdate">false</parameter>
@@ -94,6 +95,8 @@
     <!--parameter name="cacheAttachments">true</parameter>
     <parameter name="attachmentDIR"></parameter>
     <parameter name="sizeThreshold">4000</parameter-->
+    
+    <module ref="holodeckb2b-core"/>
 
     <parameter name="EnableChildFirstClassLoading">false</parameter>
 
