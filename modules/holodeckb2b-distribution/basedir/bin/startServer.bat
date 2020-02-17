@@ -1,42 +1,24 @@
 @echo off
 
-REM  Licensed to the Apache Software Foundation (ASF) under one
-REM  or more contributor license agreements. See the NOTICE file
-REM  distributed with this work for additional information
-REM  regarding copyright ownership. The ASF licenses this file
-REM  to you under the Apache License, Version 2.0 (the
-REM  "License"); you may not use this file except in compliance
-REM  with the License. You may obtain a copy of the License at
-REM  
-REM  http://www.apache.org/licenses/LICENSE-2.0
-REM  
-REM  Unless required by applicable law or agreed to in writing,
-REM  software distributed under the License is distributed on an
-REM  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-REM  KIND, either express or implied. See the License for the
-REM  specific language governing permissions and limitations
-REM  under the License.
-
 rem ---------------------------------------------------------------------------
-rem Startup script for the Simple Axis Server (with default parameters)
+rem  Holodeck B2B Server start script
 rem
 rem Environment Variable Prequisites
 rem
-rem   AXIS2_HOME      Must point at your AXIS2 directory 
+rem   H2B_HOME   Home of the Holodeck B2B installation. If not set I will try
+rem              to figure it out.
 rem
-rem   JAVA_HOME       Must point at your Java Development Kit installation.
-rem
-rem   JAVA_OPTS       (Optional) Java runtime options 
+rem   JAVA_HOME  Must point at your Java Runtime Environment
 rem ---------------------------------------------------------------------------
 
 if "%OS%"=="Windows_NT" @setlocal
 if "%OS%"=="WINNT" @setlocal
 
 rem %~dp0 is expanded pathname of the current script under NT
-set DEFAULT_AXIS2_HOME=%~dp0..
+set DEFAULT_HB2B_HOME=%~dp0..
 
-if "%AXIS2_HOME%"=="" set AXIS2_HOME=%DEFAULT_AXIS2_HOME%
-set DEFAULT_AXIS2_HOME=
+if "%HB2B_HOME%"=="" set HB2B_HOME=%DEFAULT_HB2B_HOME%
+set DEFAULT_HB2B_HOME=
 
 :loop
 if ""%1""==""-xdebug"" goto xdebug
@@ -50,29 +32,29 @@ shift
 goto loop
 
 :security
-set JAVA_OPTS=%JAVA_OPTS% -Djava.security.manager -Djava.security.policy=%AXIS2_HOME%\conf\axis2.policy -Daxis2.home=%AXIS2_HOME%
+set JAVA_OPTS=%JAVA_OPTS% -Djava.security.manager -Djava.security.policy="%HB2B_HOME%\conf\axis2.policy" -Daxis2.home="%HB2B_HOME%"
 shift
 goto loop
 
 :help
-echo  Usage: axis2server.bat
+echo  Usage: startServer.bat
    
 echo  commands:    
-echo   -xdebug    Start Axis2 Server under JPDA debugger
+echo   -xdebug    Start Holodeck B2B Server under JPDA debugger
 echo   -security  Enable Java 2 security
 echo   -h         help
 goto end
 
 
 
-rem find AXIS2_HOME if it does not exist due to either an invalid value passed
+rem find HB2B_HOME if it does not exist due to either an invalid value passed
 rem by the user or the %0 problem on Windows 9x
 :checkConf
-if exist "%AXIS2_HOME%\conf\axis2.xml" goto checkJava
+if exist "%HB2B_HOME%\conf\holodeckb2b.xml" goto checkJava
 
-:noAxis2Home
-echo AXIS2_HOME environment variable is set incorrectly or AXIS2 could not be located. 
-echo Please set the AXIS2_HOME variable appropriately
+:noHB2BHome
+echo HB2B_HOME environment variable is set incorrectly or Holodeck B2B could not be located. 
+echo Please set the HB2B_HOME variable appropriately
 goto end
 
 :checkJava
@@ -81,13 +63,8 @@ set _JAVACMD=%JAVACMD%
 if "%JAVA_HOME%" == "" goto noJavaHome
 if not exist "%JAVA_HOME%\bin\java.exe" goto noJavaHome
 if "%_JAVACMD%" == "" set _JAVACMD=%JAVA_HOME%\bin\java.exe
-if  "%AXIS2_CMD_LINE_ARGS%" == "" goto defaultParams
 
-goto runAxis2
-
-:defaultParams
-set AXIS2_CMD_LINE_ARGS=-repo "%AXIS2_HOME%\repository" -conf "%AXIS2_HOME%\conf\axis2.xml"
-goto runAxis2
+goto runHB2B
 
 :noJavaHome
 if "%_JAVACMD%" == "" set _JAVACMD=java.exe
@@ -95,23 +72,23 @@ echo JAVA_HOME environment variable is set incorrectly or Java runtime could not
 echo Please set the JAVA_HOME variable appropriately
 goto end
 
-:runAxis2
+:runHB2B
 rem set the classes by looping through the libs
 setlocal EnableDelayedExpansion
-set AXIS2_CLASS_PATH=%AXIS2_HOME%;%AXIS2_HOME%\conf;%JAVA_HOME%\lib\tools.jar;%AXIS2_HOME%\lib\*
+set HB2B_CLASS_PATH=%HB2B_HOME%;%HB2B_HOME%\conf;%JAVA_HOME%\lib\tools.jar;%HB2B_HOME%\lib\*
 
 echo Using JAVA_HOME    %JAVA_HOME%
-echo Using AXIS2_HOME   %AXIS2_HOME%
+echo Using HB2B_HOME    %HB2B_HOME%
 
-cd "%AXIS2_HOME%"
-"%_JAVACMD%" %JAVA_OPTS% -cp "!AXIS2_CLASS_PATH!" -Djava.endorsed.dirs="%AXIS2_HOME%\lib\endorsed";"%JAVA_HOME%\jre\lib\endorsed";"%JAVA_HOME%\lib\endorsed" org.apache.axis2.transport.SimpleAxis2Server %AXIS2_CMD_LINE_ARGS%
+cd "%HB2B_HOME%"
+"%_JAVACMD%" %JAVA_OPTS% -cp "!HB2B_CLASS_PATH!" org.holodeckb2b.core.HolodeckB2BServer -home "%HB2B_HOME%"
 goto end
 
 :end
 set _JAVACMD=
-set AXIS2_CMD_LINE_ARGS=
 
 if "%OS%"=="Windows_NT" @endlocal
 if "%OS%"=="WINNT" @endlocal
 
 :mainEnd
+
