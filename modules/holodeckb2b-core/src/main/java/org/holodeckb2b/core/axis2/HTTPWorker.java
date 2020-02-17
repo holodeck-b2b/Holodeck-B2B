@@ -90,8 +90,7 @@ public class HTTPWorker implements Worker {
         
 		ConfigurationContext configurationContext = msgContext.getConfigurationContext();
         final String servicePath = configurationContext.getServiceContextPath();
-        final String contextPath =
-                (servicePath.startsWith("/") ? servicePath : "/" + servicePath) + "/";
+        final String contextPath = (servicePath.startsWith("/") ? servicePath : "/" + servicePath);
 
         String url = request.getRequestURI();
         String method = request.getMethod();
@@ -120,7 +119,7 @@ public class HTTPWorker implements Worker {
                 response.setStatus(HttpStatus.SC_NOT_FOUND);                
                 return;
             }
-            if (url.endsWith(contextPath)) {
+            if (url.endsWith(contextPath) || url.endsWith(contextPath + "/")) {
             	log.trace("Handling GET request for gateway home page");
                 response.setStatus(HttpStatus.SC_OK);
                 response.setContentType("text/html");
