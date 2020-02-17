@@ -79,8 +79,10 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	 * so the handlers responsible for processing and delivery of the errors do not need to both query the database. 
 	 */
 	private Map<IErrorMessage, Collection<IMessageUnitEntity>>	refdMessagesByError = new HashMap<>();
+		
+	private boolean	needsResponse = false;
 	
-	private boolean	needsResponse;
+	private boolean execDupElimination = false;
 	
 	/**
 	 * Stores the results of processing the security tokens available in the incoming message. These may be needed by
@@ -476,6 +478,22 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public boolean responseNeeded() {
     	return needsResponse;
     }
+    
+    /* (non-Javadoc)
+	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#setDuplicateElimination(boolean)
+	 */
+	@Override
+	public void setDuplicateElimination(boolean useDupElimination) {
+		execDupElimination = useDupElimination;		
+	}
+    
+    /* (non-Javadoc)
+	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#eliminateDuplicates()
+	 */
+	@Override
+	public boolean eliminateDuplicates() {
+		return execDupElimination;
+	}    
     
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#setProperty(java.lang.String, java.lang.Object)

@@ -20,8 +20,8 @@ import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.general.Interval;
+import org.holodeckb2b.interfaces.pmode.IReceptionAwareness;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Transient;
 import org.simpleframework.xml.core.ElementException;

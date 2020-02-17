@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.holodeckb2b.common.util.Utils;
-import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
@@ -38,7 +37,7 @@ import org.simpleframework.xml.core.Commit;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
  */
-public class Leg implements IAS4Leg, Serializable {
+public class Leg implements ILeg, Serializable {
 	private static final long serialVersionUID = 322239336695896781L;
 
     @Element (name = "Protocol", required = false)
@@ -80,8 +79,8 @@ public class Leg implements IAS4Leg, Serializable {
         this.protocolConfig = source.getProtocol() != null ? new Protocol(source.getProtocol()) : null;
         this.receiptConfig = source.getReceiptConfiguration() != null ?
                                     new ReceiptConfiguration(source.getReceiptConfiguration()) : null;
-        if (source instanceof IAS4Leg && ((IAS4Leg) source).getReceptionAwareness() != null)
-            this.rcptAwareness = new ReceptionAwarenessConfig(((IAS4Leg) source).getReceptionAwareness());
+        if (source.getReceptionAwareness() != null)
+            this.rcptAwareness = new ReceptionAwarenessConfig(source.getReceptionAwareness());
         this.defaultDelivery = source.getDefaultDelivery() != null ?
                                     new DeliveryConfiguration(source.getDefaultDelivery()) : null;
         this.userMessageFlow = source.getUserMessageFlow() != null ?

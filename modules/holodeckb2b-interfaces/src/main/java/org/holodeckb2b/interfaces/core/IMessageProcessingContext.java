@@ -273,6 +273,22 @@ public interface IMessageProcessingContext {
 	boolean responseNeeded();
 
 	/**
+	 * Sets the indicator whether the Core should check for and eliminate duplicates. Using this indicator messaging
+	 * protocol specific handlers can trigger the duplicate elimination function based on protocol specific conditions.
+	 * 
+	 * @param useDupElimination the indication whether the Core should check for and eliminate duplicates
+	 */
+	void setDuplicateElimination(boolean useDupElimination);
+	
+	/**
+	 * Gets the indicator whether the Core should check for and eliminate duplicates. Using this indicator messaging
+	 * protocol specific handlers can trigger the duplicate elimination function based on protocol specific conditions.
+	 * 
+	 * @return	indication whether the Core should check for and eliminate duplicates
+	 */
+	boolean eliminateDuplicates();	
+	
+	/**
 	 * Sets a property in this message processing context.
 	 *  
 	 * @param name		the propety's name

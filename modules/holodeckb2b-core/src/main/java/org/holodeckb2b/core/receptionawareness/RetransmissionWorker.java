@@ -29,8 +29,6 @@ import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
-import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
-import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
@@ -44,6 +42,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
+import org.holodeckb2b.interfaces.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
@@ -99,12 +98,9 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                     // Retry information is contained in Leg, and as we only have One-way it is always the first
                     // and because retries is part of AS4 reception awareness feature leg should be instance of
                     // ILegAS4, if it is not we can not retransmit
-                    IAS4Leg leg = null;
-                    IReceptionAwareness raConfig = null;
-                    try {
-                        leg = (IAS4Leg) PModeUtils.getLeg(um);
-                        raConfig = leg.getReceptionAwareness();
-                    } catch (final Exception e) {
+                    final ILeg leg = PModeUtils.getLeg(um);
+                    final IReceptionAwareness raConfig = leg != null ? leg.getReceptionAwareness() : null;
+                    if (raConfig == null) {
                         // Could not get configuration for retries, maybe P-Mode configuration was deleted?
                         log.error("Message [" + um.getMessageId() + "] can not be resent due to missing P-Mode ["
                                     + um.getPModeId() + "]");

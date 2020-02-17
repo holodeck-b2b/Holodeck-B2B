@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.as4.pmode;
+package org.holodeckb2b.interfaces.pmode;
 
-import java.util.concurrent.TimeUnit;
 import org.holodeckb2b.interfaces.general.Interval;
 
 
@@ -46,39 +45,14 @@ import org.holodeckb2b.interfaces.general.Interval;
  * object of this type on the leg, i.e. when {@link IAS4Leg#getReceptionAwareness()} returns a non-null value. Note that
  * we use a special type of leg ({@link IAS4Leg}) to indicate that the leg includes AS4 specific features.
  * <b>NOTE:</b> In version 4.0.0 the interface changed to allow a more flexible configuration of the
- * intervals between retries. To allow an easy migration path all methods related to the retry configuration have a
- * default implementation. New implementations of this interface <b>SHOULD only implement</b>{@link #getWaitIntervals()}
- * and {@link #useDuplicateDetection()}.
+ * intervals between retries. To allow an easy migration path all methods related to the retry configuration were 
+ * depracted and had a default implementation. Since version 5.0.0 the deprecated methods have been removed.
+ * <p><b>NOTE:</b> Although Reception Awareness is based on the AS4 specification it is implemented in Holodeck B2B
+ * generically for all messaging protocols.  
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IReceptionAwareness {
-
-    /**
-     * Gets the maximum number of times a message should be retransmitted when no receipt is received. If a message
-     * should not be retransmitted this method must return 0. In this case a <i>MissingReceipt</i> error will be
-     * generated directly after the first "retry" interval has elapsed.
-     *
-     * @return  The maximum number of retries to executed. 0 if a message should not be retransmitted.
-     * @deprecated Only included for back-ward compatibility, the Core only uses the {@link #getRetries()} method.
-     *             New implementations SHOULD NOT implement this method.
-     */
-    @Deprecated
-    public default int getMaxRetries() {
-        return getWaitIntervals().length;
-    }
-
-    /**
-     * Gets the period to wait for a receipt signal before a message should be retransmitted (if there are retries left)
-     *
-     * @return The period to wait for a receipt signal expressed as an {@link Interval}
-     * @deprecated Only included for back-ward compatibility, the Core only uses the {@link #getRetries()} method.
-     *             New implementations SHOULD NOT implement this method.
-     */
-    @Deprecated
-    public default Interval getRetryInterval() {
-        return getWaitIntervals()[0];
-    }
 
     /**
      * Gets an array of intervals to wait for a <i>Receipt</i> Signal before a <i>User Message</i> should be
@@ -87,14 +61,9 @@ public interface IReceptionAwareness {
      * Therefore the number of retries is one less then the number of intervals specified!.
      *
      * @return The periods to wait for a <i>Receipt</i> Signal expressed as an array of {@link Interval}
-     * @since 4.0.0     <b>New implementation MUST override this method</b>
+     * @since 4.0.0
      */
-    public default Interval[] getWaitIntervals() {
-        Interval[] intervals = new Interval[Integer.max(getMaxRetries(), 1)];
-        for(int i = 0; i < intervals.length; i++)
-            intervals[i] = getRetryInterval() != null ? getRetryInterval() : new Interval(0, TimeUnit.MILLISECONDS);
-        return intervals;
-    }
+    public Interval[] getWaitIntervals();
 
     /**
      * Indicates whether duplicate detection and elimination should be used.

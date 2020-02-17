@@ -23,24 +23,32 @@ import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.pmode.PModeUtils;
-import org.holodeckb2b.interfaces.as4.pmode.IAS4Leg;
-import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for detecting and when requested eliminating duplicate <i>user messages</i>.
- * This functionality is part of the <i>Reception Awareness</i> feature specified in the AS4 profile (see section 3.2).
+ * This functionality is based on the <i>Reception Awareness</i> feature specified in the AS4 profile (see section 3.2), 
+ * but since it is common in other messaging protocols too, it is applied generically as part of Holodeck B2B's Core
+ * functionality.
  * <p>The detection of duplicates is done by checking for an existing {@link IUserMessageEntity} with the same
- * <code>MessageId</code> and which is in {@link ProcessingState#DELIVERED} state. This means the detection window
- * is determined by the time messages stay in the message log.
- * <p>How a duplicate should be handled is configured by the P-Mode parameter <b>ReceptionAwareness.DuplicateDetection.Eliminate</b>.
- * When set to <code>true</code> the duplicate will not be processed and its processing state set to {@link ProcessingState#DUPLICATE}.
- * Because the duplicate may be a retry due to a missing Receipt signal a new Receipt will be sent as response. This is
- * done by marking in the message context this message unit as delivered.
+ * <code>MessageId</code> and which is in {@link ProcessingState#DELIVERED} or {@link ProcessingState#FAILURE} state. 
+ * This means the detection window is determined by the time messages stay in the message database.
+ * <p>How a duplicate should be handled is normally configured by the P-Mode parameter 
+ * <b>ReceptionAwareness.DuplicateDetection.Eliminate</b> which should be set to <i>true</i> for the function to be 
+ * executed. Duplicate elimination is also triggered when {@link IMessageProcessingContext#eliminateDuplicates()} 
+ * returns <code>true</code>. The second method allows messaging protocol specific handlers executed earlier in the 
+ * pipeline to trigger this function based on protocol specific conditions.<br>
+ * NOTE that this an <b>or</b>, which means that if either the P-Mode or the processing context indicate that duplicate
+ * elimination should be used the function is triggered. 
+ * <p>When duplicate elimination is used and a User Message is a duplicate its processing state set to {@link 
+ * ProcessingState#DUPLICATE}. This will prevent the User Message from being delivered to the back-end. But as the 
+ * duplicate may be a retry due to a missing Receipt signal a new Receipt will still be sent as response (depending on 
+ * configuration). 
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
@@ -64,35 +72,30 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
     										  final Logger log) throws PersistenceException {
         // First determine if duplicate check must be executed for this UserMessage
         //
-        boolean detectDups = false;
         log.trace("Check if duplicate check must be executed");
-
-        // Get P-Mode configuration
-        ILeg leg;
-        try {
-	        leg = PModeUtils.getLeg(um);
-        } catch (IllegalStateException pmodeNotAvailable) {
-            // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
-            // is needed
-            log.error("P-Mode " + um.getPModeId() + " not found in current P-Mode set!"
-                     + "Unable to determine if receipt is needed for message [msgId=" + um.getMessageId() + "]");
-            return InvocationResponse.CONTINUE;        	
-        }        
+        boolean detectDups = procCtx.eliminateDuplicates();
         
-        // Duplicate detection is part of the AS4 Reception Awareness feature which can only be configured on a leg
-        // of type ILegAS4, so check type
-        if (!(leg instanceof IAS4Leg))
-            // Not an AS4 leg, so no duplicate detection
-            detectDups = false;
-        else {
-            // Get configuration of Reception Awareness feature
-            final IReceptionAwareness raConfig = ((IAS4Leg) leg).getReceptionAwareness();
-            if (raConfig != null)
-                detectDups = raConfig.useDuplicateDetection();
-            else
-                detectDups = false;
-        }
-
+        if (!detectDups) {
+	        // Get P-Mode configuration
+	        ILeg leg = null;
+	        try {
+		        leg = PModeUtils.getLeg(um);
+	        } catch (IllegalStateException pmodeNotAvailable) {
+	            // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
+	            // is needed
+	            log.error("P-Mode " + um.getPModeId() + " not found in current P-Mode set!"
+	                     + "Unable to determine if receipt is needed for message [msgId=" + um.getMessageId() + "]");
+	        }        
+        
+	        // Duplicate detection is part of the AS4 Reception Awareness feature which can only be configured on a leg
+	        // of type ILegAS4, so check type
+	        if (leg != null) {
+	            // Get configuration of Reception Awareness feature
+	            final IReceptionAwareness raConfig = leg.getReceptionAwareness();
+	            detectDups =  raConfig != null ? raConfig.useDuplicateDetection() : false;
+	        }
+	    }
+	       
         if (!detectDups) {
             log.debug("Duplicate detection not enabled, skipping check.");
             return InvocationResponse.CONTINUE;

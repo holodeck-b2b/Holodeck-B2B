@@ -41,6 +41,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * P-Modes are now by default stored in the `repository/pmodes` directory.  
 * The Axis2 configuration has been merged into the `holodeckb2b.xml` configuration file. 
 * The default key transport algorithms have been upgraded to RSA-OAEP and MGF1 with SHA256.
+* Reception Awareness is now a generic feature not bound to AS4. As a result the `getReceptionAwareness()` method has
+  moved to `org.holodeckb2b.interfaces.pmode.ILeg` and class `IReceptionAwareness` has moved to the 
+  `org.holodeckb2b.interfaces.pmode` package. 
 * Startup sequence now checks that the server is correctly started and aborts startup if not.
 * The _Security Provider_,_Persistency Provider_, _P-Mode storage_ and _Event Processor_ are now loaded using the Java 
   _Service Provider Interface_ mechanism.   
@@ -93,6 +96,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * `org.holodeckb2b.interfaces.config.IConfiguration.getAxisConfigurationContext()` method, as extensions should not need 
   access to internal Axis configuration.
 * `org.holodeckb2b.interfaces.entities.IMessageUnit.getLeg()`, as the leg can be calculated based on the P-Mode.
+* Deprecated methods from `IReceptionAwarness`
 
 ## 4.1.2
 ##### 2019-04-10

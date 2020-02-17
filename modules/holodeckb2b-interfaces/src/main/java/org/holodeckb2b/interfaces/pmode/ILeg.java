@@ -123,4 +123,13 @@ public interface ILeg {
      * @since 2.1.0
      */
     public List<IMessageProcessingEventConfiguration> getMessageProcessingEventConfiguration();
+    
+    /**
+     * Gets the P-Mode parameters for the reception awareness feature.
+     *
+     * @return  An {@link IReceptionAwareness} object containing the reception awareness parameters, or<br>
+     *          <code>null</code> if reception awareness is not used on this leg.
+     * @since 5.0.0
+     */
+    public IReceptionAwareness getReceptionAwareness();
 }

@@ -16,8 +16,8 @@
  */
 package org.holodeckb2b.interfaces.events;
 
-import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.pmode.IReceptionAwareness;
 
 /**
  * Is the <i>message processing event</i> that indicates that Holodeck B2B determined that the received <i>User Message
