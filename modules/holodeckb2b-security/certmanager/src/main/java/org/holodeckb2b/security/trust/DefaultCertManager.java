@@ -356,6 +356,10 @@ public class DefaultCertManager implements ICertificateManager {
 		log.trace("Create the set of trust anchors");
 		final Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>();		
 		trustAnchors.addAll(getTrustAnchorsFromKeyStore(trustKeystorePath, trustKeystorePwd));
+		if (enableDirectTrust) {
+			log.debug("Direct trust in partner certificates is enabled, add as trust anchors");
+			trustAnchors.addAll(getTrustAnchorsFromKeyStore(partnerKeystorePath, partnerKeystorePwd));
+		}
 		
 		log.trace("Calculate cert path to validate (i.e. find first trust anchor)");
 		// We only validate the given certificate path up to the first certificate that is listed as a trust anchor,
@@ -381,11 +385,6 @@ public class DefaultCertManager implements ICertificateManager {
 			sb.append(']');
 			log.trace(sb.toString());
 		}		
-		
-		if (enableDirectTrust) {
-			log.debug("Direct trust in partner certificates is enabled, add as trust anchors");
-			trustAnchors.addAll(getTrustAnchorsFromKeyStore(partnerKeystorePath, partnerKeystorePwd));
-		}
 		
 		try {
 			final CertPath cp = CertificateFactory.getInstance("X.509").generateCertPath(cpToCheck);
