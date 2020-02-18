@@ -38,7 +38,7 @@
     </description>
 
     <properties>
-        <hibernate.version>5.0.9.Final</hibernate.version>
+        <hibernate.version>5.4.11.Final</hibernate.version>
     </properties>
 
     <dependencies>
