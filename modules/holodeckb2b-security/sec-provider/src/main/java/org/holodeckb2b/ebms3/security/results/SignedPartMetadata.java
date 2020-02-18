@@ -24,8 +24,8 @@ import java.util.List;
 
 import org.apache.axiom.om.OMElement;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.axis2.Axis2Utils;
 import org.holodeckb2b.ebms3.security.SecurityConstants;
-import org.holodeckb2b.ebms3.security.util.Axis2XMLUtils;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -129,7 +129,7 @@ public class SignedPartMetadata implements ISignedPartMetadata {
                 for (int i = 0; i < children.getLength(); i++) {
                     Node child = children.item(i);
                     if (child instanceof Element)
-                        paramElems.add(Axis2XMLUtils.convertDOMElementToAxiom((Element) child));
+                        paramElems.add(Axis2Utils.convertDOMElementToAxiom((Element) child));
                 }
             }
             if (!Utils.isNullOrEmpty(paramElems))

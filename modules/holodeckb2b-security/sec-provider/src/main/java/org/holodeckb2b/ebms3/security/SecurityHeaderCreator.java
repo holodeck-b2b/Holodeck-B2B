@@ -54,11 +54,11 @@ import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.security.results.EncryptionProcessingResult;
 import org.holodeckb2b.common.security.results.SignatureProcessingResult;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.axis2.Axis2Utils;
 import org.holodeckb2b.ebms3.security.callbackhandlers.AttachmentCallbackHandler;
 import org.holodeckb2b.ebms3.security.callbackhandlers.PasswordCallbackHandler;
 import org.holodeckb2b.ebms3.security.results.HeaderProcessingFailure;
 import org.holodeckb2b.ebms3.security.results.UsernameTokenProcessingResult;
-import org.holodeckb2b.ebms3.security.util.Axis2XMLUtils;
 import org.holodeckb2b.ebms3.security.util.EncryptionConfigWithDefaults;
 import org.holodeckb2b.ebms3.security.util.SecurityUtils;
 import org.holodeckb2b.ebms3.security.util.SignedMessagePartsInfo;
@@ -161,7 +161,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
         // Convert the SOAP Envelope to standard DOM representation as this is required by the security processing
         // libraries
         log.debug("Converting envelope to DOM structure for processing");
-        domEnvelope = Axis2XMLUtils.convertAxiomSOAPEnvToDOM(msgContext);
+        domEnvelope = Axis2Utils.convertAxiomSOAPEnvToDOM(msgContext);
 
         if (domEnvelope == null) {
             log.error("Converting the SOAP envelope to DOM representation failed");
@@ -281,7 +281,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
             }
         }
         // Convert the processed SOAP envelope back to the Axiom representation for further processing
-        SOAPEnvelope SOAPenv = Axis2XMLUtils.convertDOMSOAPEnvToAxiom(domEnvelope);
+        SOAPEnvelope SOAPenv = Axis2Utils.convertDOMSOAPEnvToAxiom(domEnvelope);
         try {
             msgContext.setEnvelope(SOAPenv);
         } catch (AxisFault ex) {
