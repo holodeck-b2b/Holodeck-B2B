@@ -16,6 +16,15 @@
  */
 package org.holodeckb2b.core.axis2;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.dom.DOMSource;
+
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.builder.Builder;
 import org.apache.axis2.context.MessageContext;
@@ -25,6 +34,8 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.holodeckb2b.common.VersionInfo;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * This class contains helper functions related to the Axis2 framework
@@ -96,4 +107,62 @@ public final class Axis2Utils {
             return null;
         }
     }
+
+	/**
+	 * Converts the SOAP Envelope element from the Axis2 representation to the standard DOM representation.
+	 *
+	 * @param mc The MessageContext representing the SOAP message
+	 * @return A {@link Document} object that represents to the SOAP envelope element contained in the message, or<br>
+	 * <code>null</code> when the SOAP envelope can not be converted to a standard DOM representation
+	 */
+	public static Document convertAxiomSOAPEnvToDOM(final MessageContext mc) {
+	    try {
+	    	final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	        mc.getEnvelope().serialize(baos);
+	        final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+	
+	        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	        factory.setNamespaceAware(true);
+	        return factory.newDocumentBuilder().parse(bais);
+	    } catch (final Exception e) {
+	        // If anything goes wrong converting the document, just return null
+	        return null;
+	    }
+	}
+
+	/**
+	 * Converts a {@link Document} representation of the SOAP Envelope into a Axiom representation.
+	 *
+	 * @param document The standard DOM representation of the SOAP Envelope
+	 * @return An {@link SOAPEnvelope} object containing the Axiom representation of the SOAP envelope, or <br>
+	 * <code>null</code> if the conversion fails
+	 */
+	public static SOAPEnvelope convertDOMSOAPEnvToAxiom(final Document document) {
+	    try {
+	        final SOAPEnvelope env = OMXMLBuilderFactory.createSOAPModelBuilder(new DOMSource(document))
+	        																						.getSOAPEnvelope();
+	        env.build();
+	        return env;
+	    } catch (final Exception e) {
+	        // If anything goes wrong converting the document, just return null
+	        return null;
+	    }
+	}
+
+	/**
+	 * Converts the DOM representation of an Element to the Axiom one.
+	 *
+	 * @param element   The DOM representation of the element
+	 * @return          The Axiom representation of the same element
+	 */
+	public static OMElement convertDOMElementToAxiom(final Element element) {
+		try {
+	        final OMElement omElement = OMXMLBuilderFactory.createOMBuilder(element, false).getDocumentElement();
+	        omElement.build();
+	        return omElement;
+	    } catch (final Exception e) {
+	        // If anything goes wrong converting the document, just return null
+	        return null;
+	    }
+	}
 }
