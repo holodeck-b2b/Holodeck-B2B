@@ -39,12 +39,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>hb2b-ebms3-secprovider</artifactId>
-            <version>${project.version}</version>            
-        </dependency>        
+        </dependency>    
 
         <!-- Apache Axis2 kernel -->
         <dependency>
