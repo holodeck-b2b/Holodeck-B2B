@@ -11,4 +11,4 @@
 # Get the context and from that find the location of setenv.sh
 . `dirname $0`/setenv.sh > /dev/null
 
-exec java $JAVA_OPTS -classpath "$HB2B_CP" org.holodeckb2b.ui.app.cli.HB2BInfoTool $*
+exec "$JAVA_HOME/bin/java" $JAVA_OPTS -classpath "$HB2B_CP" org.holodeckb2b.ui.app.cli.HB2BInfoTool $*
