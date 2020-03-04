@@ -31,6 +31,7 @@ import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,8 +86,8 @@ public class UtilsTest {
 
     @Test
     public void testPreventDuplicateFileName() {
-        String baseDir =
-                UtilsTest.class.getClassLoader().getResource("utils").getPath();
+        String baseDir = TestUtils.getPath("utils").toString();
+                
         try {
             File dir = new File(baseDir);
             assertTrue(dir.isDirectory());
@@ -107,8 +108,9 @@ public class UtilsTest {
             }
 
             new File(newFileName1).delete();
-            new File(newFileName2).delete();            
+            new File(newFileName2).delete();   
         } catch (IOException e) {
+        	e.printStackTrace();
             fail();
         }
     }

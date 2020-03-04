@@ -25,6 +25,7 @@ import java.io.File;
 import java.net.URL;
 
 import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
 
 import org.apache.axiom.attachments.Attachments;
 import org.apache.axis2.context.MessageContext;
@@ -58,8 +59,7 @@ public class SaveUserMsgAttachmentsTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        baseDir = SaveUserMsgAttachmentsTest.class.getClassLoader()
-        						.getResource(SaveUserMsgAttachmentsTest.class.getSimpleName()).getPath();        
+        baseDir = TestUtils.getPath(SaveUserMsgAttachmentsTest.class.getSimpleName()).toString();        
         holodeckB2BTestCore = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(holodeckB2BTestCore);
     }
@@ -89,7 +89,7 @@ public class SaveUserMsgAttachmentsTest {
         
         // Adding data handler for the payload described in mmd
         Attachments attachments = new Attachments();
-        DataHandler dh = new DataHandler(new URL("file://" + baseDir + "/dandelion.jpg"));
+        DataHandler dh = new DataHandler(new FileDataSource(baseDir + "/dandelion.jpg"));
         attachments.addDataHandler(payload.getPayloadURI(), dh);
 
         mc.setAttachmentMap(attachments);

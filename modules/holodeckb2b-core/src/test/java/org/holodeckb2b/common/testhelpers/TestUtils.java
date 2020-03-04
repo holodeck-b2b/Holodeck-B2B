@@ -71,6 +71,10 @@ public class TestUtils {
     public static Path getPath(String resourceName) {
     	return getPath(TestUtils.class, resourceName);
     }
+    
+    public static Path getTestBasePath() {
+    	return getPath(TestUtils.class, ".");
+    }    
 
     public static boolean eventContainsMsg(List<LoggingEvent> events, Level logLevel, String msg) {
         boolean flag = false;

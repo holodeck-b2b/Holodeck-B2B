@@ -25,6 +25,7 @@ import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
@@ -48,8 +49,7 @@ public class AddPayloadsTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		baseDir = AddPayloadsTest.class.getClassLoader()
-				.getResource(AddPayloadsTest.class.getSimpleName()).getPath();
+		baseDir = TestUtils.getPath(AddPayloadsTest.class.getSimpleName()).toString();
 		HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
 	}
 

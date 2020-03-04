@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -41,8 +42,7 @@ public class MessageIdUtilsTest {
 
     @BeforeClass
     public static void setUpClass() {
-        baseDir = MessageIdUtilsTest.class
-                .getClassLoader().getResource("utils").getPath();
+        baseDir = TestUtils.getPath("utils").toString();
         core = new HolodeckB2BTestCore(baseDir);
         HolodeckB2BCoreInterface.setImplementation(core);
         hostname =

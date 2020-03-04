@@ -29,6 +29,7 @@ import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
@@ -62,7 +63,7 @@ public class CatchAxisFaultTest {
     
     @BeforeClass
     public static void setUpClass() throws Exception {
-        core = new HolodeckB2BTestCore(CatchAxisFaultTest.class.getClassLoader().getResource(".").getPath());
+        core = new HolodeckB2BTestCore(TestUtils.getTestBasePath().toString());
         core.setPersistencyProvider(new InMemoryProvider());        
         HolodeckB2BCoreInterface.setImplementation(core);
     }
