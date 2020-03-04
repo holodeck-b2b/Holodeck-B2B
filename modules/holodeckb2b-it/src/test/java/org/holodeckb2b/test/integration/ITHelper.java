@@ -210,7 +210,7 @@ public class ITHelper {
                 }
                 p.waitFor();
             } else if (SystemUtils.IS_OS_WINDOWS) {
-                Process p = Runtime.getRuntime().exec("wmic process where \"CommandLine Like '%SimpleAxis2Server%'\" call terminate");
+                Process p = Runtime.getRuntime().exec("wmic process where \"CommandLine Like '%HolodeckB2BServer%'\" call terminate");
                 p.waitFor();
             }
         } catch (Exception e) {
