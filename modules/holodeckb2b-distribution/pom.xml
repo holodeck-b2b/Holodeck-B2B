@@ -57,6 +57,11 @@
             <artifactId>holodeckb2b-ebms3as4</artifactId>
         </dependency>
         <!-- The default security provider implementation -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>hb2b-ebms3-secprovider</artifactId>
+            <version>${project.version}</version>
+        </dependency>        
         <!-- The extension for API to provide info to the default UI -->
         <dependency>
             <groupId>${project.groupId}</groupId>
