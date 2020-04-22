@@ -37,7 +37,7 @@ import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.events.IMessageDelivery;
+import org.holodeckb2b.interfaces.events.IMessageDelivered;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -102,7 +102,6 @@ public class DeliverUserMessageTest {
 		assertEquals(ProcessingState.DELIVERED, umEntity.getCurrentProcessingState().getState());
 		TestEventProcessor eventProc = (TestEventProcessor) HolodeckB2BCoreInterface.getEventProcessor();
 		assertTrue(eventProc.events.size() == 1);
-		assertTrue(eventProc.events.get(0) instanceof IMessageDelivery);
-		assertTrue(((IMessageDelivery) eventProc.events.get(0)).isDeliverySuccessful());
+		assertTrue(eventProc.events.get(0) instanceof IMessageDelivered);
 	}
 }

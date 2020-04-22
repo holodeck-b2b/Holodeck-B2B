@@ -21,7 +21,7 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.logging.log4j.Logger;
-import org.holodeckb2b.common.events.impl.MessageTransfer;
+import org.holodeckb2b.common.events.impl.MessageTransferFailure;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
@@ -160,7 +160,7 @@ public class ConfigureHTTPTransportHandler extends AbstractBaseHandler {
     }
 
     /**
-     * Sets the processing state of all message units in the message to FAILURE and raises a {@link MessageTransfer} 
+     * Sets the processing state of all message units in the message to FAILURE and raises a {@link MessageTransferFailure} 
      * event.
      * 
      * @param mc	The message processing context
@@ -174,7 +174,7 @@ public class ConfigureHTTPTransportHandler extends AbstractBaseHandler {
 			log.debug("Updating processing state to FAILURE for message unit [msgId=" 
 						+ mu.getMessageId() + "]");
 			updManager.setProcessingState(mu, ProcessingState.FAILURE);
-			eventProcessor.raiseEvent(new MessageTransfer(mu, new Exception("Unable to configure HTTP Connection")));
+			eventProcessor.raiseEvent(new MessageTransferFailure(mu, new Exception("Unable to configure HTTP Connection")));
 		}    	
     }
 

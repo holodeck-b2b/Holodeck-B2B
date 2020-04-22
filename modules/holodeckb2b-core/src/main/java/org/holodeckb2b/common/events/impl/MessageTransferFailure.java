@@ -16,36 +16,21 @@
  */
 package org.holodeckb2b.common.events.impl;
 
-import org.holodeckb2b.interfaces.events.IMessageTransfer;
+import org.holodeckb2b.interfaces.events.IMessageTransferFailure;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
- * Is the implementation class of {@link IMessageTransfer} to indicate that indicates that there was an attempt to
- * transfer a message unit to the other MSH, either by sending it as a request or including it as a response.
+ * Is the implementation class of {@link IMessageTransferFailure} to indicate that an attempt to transfer a message unit 
+ * to the other MSH, either by sending it as a request or including it as a response failed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @@since 4.0.0
+ * @@since 5.0.0
  */
-public class MessageTransfer extends AbstractMessageProcessingEvent implements IMessageTransfer {
-    /**
-     * Indicator whether the transfer was successful or not
-     */
-    final private boolean   successful;
+public class MessageTransferFailure extends AbstractMessageProcessingEvent implements IMessageTransferFailure {
     /**
      * The exception that caused the transfer to fail
      */
     final private Exception failureReason;
-
-    /**
-     * Creates a new <code>MessageTransfer</code> indicating successful transfer of the given message unit.
-     *
-     * @param subject   The transferred message unit
-     */
-    public MessageTransfer(final IMessageUnit subject) {
-        super(subject);
-        this.successful = true;
-        this.failureReason = null;
-    }
 
     /**
      * Creates a new <code>MessageTransfer</code> for the unsuccessful transfer of the given message unit that was
@@ -54,15 +39,9 @@ public class MessageTransfer extends AbstractMessageProcessingEvent implements I
      * @param subject   The transferred message unit
      * @param failure   The reason why the transfer failed
      */
-    public MessageTransfer(final IMessageUnit subject, final Exception failure) {
+    public MessageTransferFailure(final IMessageUnit subject, final Exception failure) {
         super(subject);
-        this.successful = false;
         this.failureReason = failure;
-    }
-
-    @Override
-    public boolean isTransferSuccessful() {
-        return successful;
     }
 
     @Override

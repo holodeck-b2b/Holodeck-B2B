@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.holodeckb2b.common.events.impl.MessageDelivery;
+import org.holodeckb2b.common.events.impl.MessageDeliveryFailure;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.EventHandlerConfig;
 import org.holodeckb2b.common.pmode.Leg;
@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
-import org.holodeckb2b.interfaces.events.IMessageDelivery;
+import org.holodeckb2b.interfaces.events.IMessageDeliveryFailure;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
 import org.junit.After;
@@ -55,7 +55,7 @@ public class SyncEventProcessorTest {
 		Map settings = new HashMap();		
 		
 		TestEventConfig globalConfig = new TestEventConfig();
-		globalConfig.addEvent(IMessageDelivery.class);
+		globalConfig.addEvent(IMessageDeliveryFailure.class);
 		globalConfig.setFactoryClass(NullEventHandler.class.getName());
 		settings.put("1", globalEvents);
 		globalConfig.setHandlerSettings(settings);
@@ -67,7 +67,7 @@ public class SyncEventProcessorTest {
 		Leg leg = pmode.getLeg(Label.REQUEST);
 		EventHandlerConfig config = new EventHandlerConfig();
 		List<Class<? extends IMessageProcessingEvent>> list = new ArrayList<>();
-		list.add(IMessageDelivery.class);
+		list.add(IMessageDeliveryFailure.class);
 		config.setHandledEvents(list);
 		config.setFactoryClass(NullEventHandler.class.getName());
 		settings.put("1", pModeEvents);
@@ -80,14 +80,14 @@ public class SyncEventProcessorTest {
 		userMessage.setPModeId(pmode.getId());
 
 		try {
-			new SyncEventProcessor().raiseEvent(new MessageDelivery(userMessage, true, null));
+			new SyncEventProcessor().raiseEvent(new MessageDeliveryFailure(userMessage, null));
 		} catch (Throwable t) {
 			t.printStackTrace();
 			fail();			
 		}
 		
 		assertEquals(1, pModeEvents.size());
-		assertTrue(pModeEvents.get(0) instanceof IMessageDelivery);
+		assertTrue(pModeEvents.get(0) instanceof IMessageDeliveryFailure);
 		assertEquals(userMessage.getMessageId(), pModeEvents.get(0).getSubject().getMessageId());
 
 		assertEquals(0, globalEvents.size());			
@@ -102,7 +102,7 @@ public class SyncEventProcessorTest {
 		Map settings = new HashMap();		
 		
 		TestEventConfig globalConfig = new TestEventConfig();
-		globalConfig.addEvent(IMessageDelivery.class);
+		globalConfig.addEvent(IMessageDeliveryFailure.class);
 		globalConfig.setFactoryClass(NullEventHandler.class.getName());
 		settings.put("1", globalEvents);
 		globalConfig.setHandlerSettings(settings);
@@ -118,7 +118,7 @@ public class SyncEventProcessorTest {
 		userMessage.setPModeId(pmode.getId());
 		
 		try {
-			new SyncEventProcessor().raiseEvent(new MessageDelivery(userMessage, true, null));
+			new SyncEventProcessor().raiseEvent(new MessageDeliveryFailure(userMessage, null));
 		} catch (Throwable t) {
 			t.printStackTrace();
 			fail();			
@@ -127,7 +127,7 @@ public class SyncEventProcessorTest {
 		assertEquals(0, pModeEvents.size());
 		
 		assertEquals(1, globalEvents.size());
-		assertTrue(globalEvents.get(0) instanceof IMessageDelivery);
+		assertTrue(globalEvents.get(0) instanceof IMessageDeliveryFailure);
 		assertEquals(userMessage.getMessageId(), globalEvents.get(0).getSubject().getMessageId());
 	}
 
@@ -136,7 +136,7 @@ public class SyncEventProcessorTest {
 		
 		Map settings = new HashMap();		
 		TestEventConfig globalConfig = new TestEventConfig();
-		globalConfig.addEvent(IMessageDelivery.class);
+		globalConfig.addEvent(IMessageDeliveryFailure.class);
 		globalConfig.setFactoryClass(NullEventHandler.class.getName());
 		settings.put("1", new MessageDeliveryException());
 		globalConfig.setHandlerSettings(settings);
@@ -152,7 +152,7 @@ public class SyncEventProcessorTest {
 		userMessage.setPModeId(pmode.getId());
 		
 		try {
-			new SyncEventProcessor().raiseEvent(new MessageDelivery(userMessage, true, null));
+			new SyncEventProcessor().raiseEvent(new MessageDeliveryFailure(userMessage, null));
 		} catch (Throwable t) {
 			t.printStackTrace();
 			fail();			

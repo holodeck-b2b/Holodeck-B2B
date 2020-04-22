@@ -17,38 +17,25 @@
 package org.holodeckb2b.common.events.impl;
 
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
-import org.holodeckb2b.interfaces.events.IMessageDelivery;
+import org.holodeckb2b.interfaces.events.IMessageDeliveryFailure;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
- * Is the implementation class of {@link IMessageDelivery} to inform external components that an attempt to deliver
- * a message unit to the business application was executed.
+ * Is the implementation class of {@link IMessageDeliveryFailure} to inform external components that an attempt to 
+ * deliver a message unit to the business application failed.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 4.0.0
+ * @since 5.0.0
  */
-public class MessageDelivery extends AbstractMessageProcessingEvent implements IMessageDelivery {
-    /**
-     * Indicates whether the message unit was successful delivered
-     */
-    private final boolean successFulDelivery;
+public class MessageDeliveryFailure extends AbstractMessageProcessingEvent implements IMessageDeliveryFailure {
     /**
      * The exception that caused the delivery attempt to fail
      */
     private final MessageDeliveryException failureReason;
 
-    public MessageDelivery(final IMessageUnit subject, final boolean successFulDelivery,
-                                final MessageDeliveryException failureReason) {
+    public MessageDeliveryFailure(final IMessageUnit subject, final MessageDeliveryException failureReason) {
         super(subject);
-        this.successFulDelivery = successFulDelivery;
-        if (successFulDelivery && failureReason != null)
-            throw new IllegalArgumentException("Failure reason may only be specified in case of unsuccessful delivery");
         this.failureReason = failureReason;
-    }
-
-    @Override
-    public boolean isDeliverySuccessful() {
-        return successFulDelivery;
     }
 
     @Override

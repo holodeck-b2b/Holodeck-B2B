@@ -19,7 +19,8 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import java.util.Collection;
 
 import org.apache.logging.log4j.Logger;
-import org.holodeckb2b.common.events.impl.MessageTransfer;
+import org.holodeckb2b.common.events.impl.MessageTransferFailure;
+import org.holodeckb2b.common.events.impl.MessageTransfered;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
@@ -27,7 +28,7 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.events.IMessageTransfer;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -98,10 +99,10 @@ public class CheckSentResult extends AbstractBaseHandler {
             final StorageManager updateManager = HolodeckB2BCore.getStorageManager();
             for (final IMessageUnitEntity mu : msgUnits) {
                 try {
-                    IMessageTransfer transferEvent;
+                    IMessageProcessingEvent transferEvent;
                     if (!success) {
                         updateManager.setProcessingState(mu, ProcessingState.TRANSPORT_FAILURE);
-                        transferEvent = new MessageTransfer(mu, procCtx.getParentContext().getFailureReason());
+                        transferEvent = new MessageTransferFailure(mu, procCtx.getParentContext().getFailureReason());
                     } else {
                         // State to set depends on type of message unit
                         if (mu instanceof ISignalMessage) {
@@ -115,7 +116,7 @@ public class CheckSentResult extends AbstractBaseHandler {
                             else
                                 updateManager.setProcessingState(mu, ProcessingState.DELIVERED);
                         }
-                        transferEvent = new MessageTransfer(mu);
+                        transferEvent = new MessageTransfered(mu);
                     }
                     log.info("Processing state for message unit [" + mu.getMessageId() + "] changed to "
                                 + mu.getCurrentProcessingState().getState());

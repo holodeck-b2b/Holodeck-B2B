@@ -19,15 +19,14 @@ package org.holodeckb2b.interfaces.events;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 
 /**
- * Is a generic <i>message processing event</i> to indicate that a problem occurred during the processing of a received 
- * message unit. All events that indicate failures in processing of the incoming message extend this interface, so it
- * can be used as a generic filter when configuring event handling. This event however is also implemented by the Core 
- * to inform the back-end or extensions about errors that occur during processing of the message and for which no 
- * specific event is defined. 
+ * Is the <i>message processing event</i> that indicates that there a message unit was transfered to the other MSH, 
+ * either by sending it as a request or including it as a response. The event is raised for all message units.
+ * <p>NOTE: The indication that the transfer is successful is from the perspective of Holodeck B2B and does not 
+ * guarantee that the message is also received / processed correctly by the other MSH. To detect this the AS4 Reception
+ * Awareness feature should be used.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since  4.1.0
+ * @since 5.0.0
  */
-public interface IReceivedMessageProcessingFailure extends IMessageProcessingEvent {
-
+public interface IMessageTransfered extends IMessageProcessingEvent {
 }

@@ -21,7 +21,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   verification.
 * Signature policy check in **Core Processing** that received _User Messages_ are signed when indicated in P-Mode that 
   they should be. Violation of this rule will generate an _PolicyNonCompliance_ error.
-* On submission of _User Message_  a check that the provided payload _Content-Id_ values do not contain invalid characters.  
+* On submission of _User Message_  a check that the provided payload _Content-Id_ values do not contain invalid characters.
+* When an unexpected error occurs during the processing of a message unit a `ISendMessageProcessingFailure` or 
+  `IReceiveMessageFailure` is raised.  
 * `org.holodeckb2b.interfaces.core.IMessageProcessingContext` interface which can be used in extension APIs to provide 
   access to the HB2B _message processing context_.  
 * Custom implementation of the Axis2 `TransportListener` interface which can use a _Service_ specified _Message Builder_.  
@@ -43,7 +45,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * The default key transport algorithms have been upgraded to RSA-OAEP and MGF1 with SHA256.
 * Reception Awareness is now a generic feature not bound to AS4. As a result the `getReceptionAwareness()` method has
   moved to `org.holodeckb2b.interfaces.pmode.ILeg` and class `IReceptionAwareness` has moved to the 
-  `org.holodeckb2b.interfaces.pmode` package. 
+  `org.holodeckb2b.interfaces.pmode` package.
+* Split the `IMessageDelivery` and `IMessageTransfer` events into two separate events for success and failure.    
 * Startup sequence now checks that the server is correctly started and aborts startup if not.
 * The _Security Provider_,_Persistency Provider_, _P-Mode storage_ and _Event Processor_ are now loaded using the Java 
   _Service Provider Interface_ mechanism.   
@@ -72,7 +75,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 * Generated Content-Id results in signature failure [#99](https://github.com/holodeck-b2b/Holodeck-B2B/issues/99).
-* NPE when white space is containd between the `ds:Signature` and `ds:SignedInfo` elements of a received message [#100](https://github.com/holodeck-b2b/Holodeck-B2B/issues/100)
+* NPE when white space is contained between the `ds:Signature` and `ds:SignedInfo` elements of a received message 
+ [#100](https://github.com/holodeck-b2b/Holodeck-B2B/issues/100)
 * Error descriptions longer than 255 characters are not saved.
 * NPE occurs on event handlers with no parameters [#102](https://github.com/holodeck-b2b/Holodeck-B2B/issues/102)
 * Invalid SOAPFault included with ebMS Error using SOAP 1.2 [#103](https://github.com/holodeck-b2b/Holodeck-B2B/issues/103)

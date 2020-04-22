@@ -17,30 +17,18 @@
 package org.holodeckb2b.interfaces.events;
 
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
-import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 
 /**
  * Is the <i>message processing event</i> that indicates that an attempt to deliver a <i>User Message</i> message unit
- * to the business application was executed.
- * <p>When the delivery attempt failed, i.e. a {@link MessageDeliveryException} was thrown in the delivery process, the
- * cause of failure is included in the event.
+ * to the business application failed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 4.1.0
+ * @since 5.0.0
  */
-public interface IMessageDelivery extends IMessageProcessingEvent {
-
-    /**
-     * Indicates whether the delivery attempt was successful or not, i.e. if no {@link MessageDeliveryException}s
-     * were thrown.
-     *
-     * @return  <code>true</code> if the delivery attempt was successful, or<br><code>false</code> otherwise
-     */
-	boolean isDeliverySuccessful();
+public interface IMessageDeliveryFailure extends IReceivedMessageProcessingFailure {
 
     /**
      * Gets the {@link MessageDeliveryException} that was thrown during the message delivery attempt.
-     * <p>NOTE: This method should only be called when the {@link #isDeliverySuccessful()} return <code>false</code>.
      *
      * @return  The exception that caused the message delivery failure
      */

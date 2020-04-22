@@ -22,10 +22,13 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.OtherContentError;
+import org.holodeckb2b.common.events.impl.GenericReceiveMessageFailure;
+import org.holodeckb2b.common.events.impl.GenericSendMessageFailure;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.MessageUnitUtils;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
@@ -64,20 +67,27 @@ public class CatchAxisFault extends AbstractBaseHandler {
             // currently processed should be set to failed if there processing is not completed yet
             Collection<IMessageUnitEntity>  msgUnitsInProcess = null;
 
-            if (msgContext.getFLOW() == MessageContext.IN_FLOW)
+            final boolean receiving = msgContext.getFLOW() == MessageContext.IN_FLOW
+            							|| msgContext.getFLOW() == MessageContext.IN_FAULT_FLOW;
+            if (receiving)
                 msgUnitsInProcess = procCtx.getReceivedMessageUnits();
             else
                 msgUnitsInProcess = procCtx.getSendingMessageUnits();
 
+            final String failureDescription = Utils.getExceptionTrace(msgContext.getFailureReason());            
             for (final IMessageUnitEntity mu : msgUnitsInProcess) {
                 // Changing the processing state may fail if the problems are caused by the database.
                 try {
                     final ProcessingState curState = mu.getCurrentProcessingState().getState();
                     if (ProcessingState.DELIVERED != curState && ProcessingState.AWAITING_RECEIPT != curState
-                    	&& ProcessingState.DONE != curState) {
+                    	&& ProcessingState.DONE != curState && ProcessingState.TRANSPORT_FAILURE != curState) {
                         log.error(MessageUnitUtils.getMessageUnitName(mu) + " with msg-id [" + mu.getMessageId()
                                     + "] could not be processed due to an internal error.");
                         HolodeckB2BCore.getStorageManager().setProcessingState(mu, ProcessingState.FAILURE);
+                        // Raise event to signal the processing failure
+                        HolodeckB2BCore.getEventProcessor().raiseEvent(receiving ? 
+		                        								new GenericReceiveMessageFailure(mu, failureDescription)
+		                        							  : new GenericSendMessageFailure(mu, failureDescription));
                     }
                 } catch (final PersistenceException ex) {
                     // Unable to change the processing state, log the error.
@@ -90,8 +100,7 @@ public class CatchAxisFault extends AbstractBaseHandler {
             procCtx.removeAllMessages();
             
             // If we are in the in flow and responding to received messages 
-            if (msgContext.isServerSide() && (msgContext.getFLOW() == MessageContext.IN_FLOW 
-            							     || msgContext.getFLOW() == MessageContext.IN_FAULT_FLOW)) {                 
+            if (msgContext.isServerSide() && receiving) {                 
             	procCtx.addSendingError(createOtherError(log));
             }
         	// We have handled the error, so nothing to do for Axis

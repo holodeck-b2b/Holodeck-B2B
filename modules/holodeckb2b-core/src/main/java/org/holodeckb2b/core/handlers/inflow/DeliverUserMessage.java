@@ -18,7 +18,8 @@ package org.holodeckb2b.core.handlers.inflow;
 
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.OtherContentError;
-import org.holodeckb2b.common.events.impl.MessageDelivery;
+import org.holodeckb2b.common.events.impl.MessageDelivered;
+import org.holodeckb2b.common.events.impl.MessageDeliveryFailure;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
@@ -88,8 +89,9 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
                                                                                 um.getMessageId()));
                 }
             }
-            // Raise delivery event to inform external components
-            HolodeckB2BCore.getEventProcessor().raiseEvent(new MessageDelivery(um, failure == null, failure));
+            // Raise delivery event to inform external com ponents
+            HolodeckB2BCore.getEventProcessor().raiseEvent(failure == null ? new MessageDelivered(um)
+            											  				   : new MessageDeliveryFailure(um, failure));
         } else {
             // This message is not ready for delivery now which is caused by it already been delivered by another
             // thread. This however should not occur normaly.
