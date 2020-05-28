@@ -66,7 +66,7 @@ public class HB2BAxis2Configurator extends DeploymentEngine implements AxisConfi
 	 * @throws AxisFault	when either the configuration file or repository is not available at the given location 
 	 */
 	public HB2BAxis2Configurator(final String hb2bHome) throws AxisFault {
-		hb2bHomeDirectory = Paths.get(hb2bHome);
+		hb2bHomeDirectory = Paths.get(hb2bHome).normalize();
 		if (!Files.isDirectory(hb2bHomeDirectory) || !Files.isReadable(hb2bHomeDirectory))
 			throw new AxisFault("HB2B home directory (" + hb2bHome + ") does not exist or is not accessible");
 		
