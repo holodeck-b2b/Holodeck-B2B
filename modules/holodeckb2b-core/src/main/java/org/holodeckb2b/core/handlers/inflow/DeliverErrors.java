@@ -19,6 +19,7 @@ package org.holodeckb2b.core.handlers.inflow;
 import java.util.Collection;
 
 import org.apache.logging.log4j.Logger;
+import org.holodeckb2b.common.events.impl.MessageDeliveryFailure;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.util.Utils;
@@ -29,6 +30,7 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
+import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
@@ -108,35 +110,40 @@ public class DeliverErrors extends AbstractBaseHandler {
     private boolean deliverError(final IErrorMessageEntity errorSignal, final IMessageUnitEntity msgInError,
     							 final Logger log) throws PersistenceException {
         
-        try {
-	        log.trace("Get delivery specification for error from P-Mode of refd message [msgId=" 
-	        			+ msgInError.getMessageId() + "]");
-	        IDeliverySpecification deliverySpec = getErrorDelivery(msgInError);        
-	        // If a delivery specification was found the error should be delivered, else no reporting is needed
-	        if (deliverySpec != null) {
-	        	IMessageDeliverer deliverer = null;
-	                log.debug("Error Signal should be delivered using delivery specification with id:" 
-	                			+ deliverySpec.getId());
-	                deliverer = HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec);
-	                log.trace("Delivering the error using deliverer");
-	                // Because the reference to the message in error may be derived, set it explicitly on signal meta-data
-	                // See also issue #12
-	                ErrorMessage deliverySignal = new ErrorMessage(errorSignal);
-	                deliverySignal.setRefToMessageId(msgInError.getMessageId());
-	                deliverer.deliver(deliverySignal);
-	                log.info("Error Signal [msgId= " + errorSignal.getMessageId() 
+        log.trace("Get delivery specification for error from P-Mode of refd message [msgId=" 
+        			+ msgInError.getMessageId() + "]");
+        IDeliverySpecification deliverySpec = getErrorDelivery(msgInError);        
+        // If a delivery specification was found the error should be delivered, else no reporting is needed
+        if (deliverySpec != null) {
+        	log.debug("Error Signal should be delivered using delivery specification with id:" 
+            			+ deliverySpec.getId());
+            log.trace("Delivering the error using deliverer");
+            // Because the reference to the message in error may be derived, set it explicitly on signal meta-data
+            // See also issue #12
+            ErrorMessage deliverySignal = new ErrorMessage(errorSignal);
+            deliverySignal.setRefToMessageId(msgInError.getMessageId());
+            try {
+            	HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec).deliver(deliverySignal);
+                log.info("Error Signal [msgId= " + errorSignal.getMessageId() 
 	                		+ "] successfully delivered for referenced message unit [msgId=" + msgInError.getMessageId() 
-	                		+ "]!");
-	        } else
-	            log.debug("Error does not need to (or can not) be delivered");
+	                		+ "]!");                
+            } catch (final Throwable t) {
+            	// Catch of Throwable used for extra safety in case the DeliveryMethod implementation does not
+            	// handle all exceptions correctly
+            	log.warn("Could not deliver Error Signal (msgId=" + errorSignal.getMessageId()
+			            	+ "]) for referenced message [msgId=" + msgInError.getMessageId() 
+			            	+ "] to application! Error details: " + t.getMessage());
+            	HolodeckB2BCoreInterface.getEventProcessor()
+            							.raiseEvent(new MessageDeliveryFailure(deliverySignal, 
+        										  (t instanceof MessageDeliveryException) ? (MessageDeliveryException) t 
+            									  : new MessageDeliveryException("Unexpected error in delivery", t)
+            									   ));
+            	return false;            		       
+            } 	        
+        } else
+            log.debug("Error does not need to (or can not) be delivered");
 	
-	        return true;
-        } catch (final Throwable t) {
-            log.warn("Could not deliver Error Signal (msgId=" + errorSignal.getMessageId()
-                		+ "]) for referenced message [msgId=" + msgInError.getMessageId() 
-                		+ "] to application! Error details: " + t.getMessage());
-            return false;
-        }	        
+        return true;
     }
         
 

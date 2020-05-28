@@ -19,11 +19,13 @@ package org.holodeckb2b.core.handlers.inflow;
 import java.util.Collection;
 
 import org.apache.logging.log4j.Logger;
+import org.holodeckb2b.common.events.impl.MessageDeliveryFailure;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
@@ -77,7 +79,9 @@ public class DeliverReceipts extends AbstractBaseHandler {
                                     + "]) to application! Error details: " + ex.getMessage());
                     // Although the receipt could not be delivered it was processed completely on the ebMS level,
                     //  so processing state is set to warning instead of failure
-                    updateManager.setProcessingState(receipt, ProcessingState.WARNING);
+                    updateManager.setProcessingState(receipt, ProcessingState.DELIVERY_FAILED);
+                	HolodeckB2BCoreInterface.getEventProcessor()
+											.raiseEvent(new MessageDeliveryFailure(receipt, ex));                    
                 }
             } else {
                 log.warn("Receipt signal [" + receipt.getMessageId() + "] is already processed for delivery");

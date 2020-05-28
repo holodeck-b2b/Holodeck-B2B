@@ -19,8 +19,7 @@ package org.holodeckb2b.interfaces.events;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 
 /**
- * Is the <i>message processing event</i> that indicates that a <i>User Message</i> message unit was delivered to the 
- * business application.
+ * Is the <i>message processing event</i> that indicates that a message unit was delivered to the business application.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
