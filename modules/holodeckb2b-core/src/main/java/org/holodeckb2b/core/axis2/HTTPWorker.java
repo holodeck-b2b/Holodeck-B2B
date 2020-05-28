@@ -29,6 +29,7 @@ import org.apache.axis2.builder.BuilderUtil;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.dispatchers.RequestURIBasedDispatcher;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.engine.Handler.InvocationResponse;
@@ -76,12 +77,26 @@ public class HTTPWorker implements Worker {
 			"	<body>\n" + 
 			"		<center>\n" + 
 			"		<a href=\"http://www.holodeck-b2b.org\">" +	
-			"		<img style=\"padding: 20px\" src=\"/logo.png\">" +
+			"		<img style=\"padding: 20px\" src=\"logo.png\">" +
 			"		</a>\n" +
 			"		</center>\n" + 
 			"	</body>\n" + 
 			"</html>";
 	
+	/**
+	 * The configuration of the http transport as specified in the Holodeck B2B configuration file
+	 */
+	private TransportInDescription	httpConfiguration;
+	
+	/**
+	 * Creates a new worker that uses the given http transport configuration.
+	 * 
+	 * @param httpConfiguration		the http configuration
+	 */
+	public HTTPWorker(TransportInDescription httpConfiguration) {
+		this.httpConfiguration = httpConfiguration;
+	}
+
 	@Override
     public void service(
             final AxisHttpRequest request,
@@ -102,9 +117,9 @@ public class HTTPWorker implements Worker {
         log.trace("Handling request for URL: {}", url);
         // First handle non service URLs to display a HB2B landing page
         if (method.equals(HTTPConstants.HEADER_GET)) {
-        	if (url.equals("/logo.png")) {
+        	if (url.equals(servicePath + "/logo.png")) {
         		log.trace("Handling GET request for logo");
-                    response.setStatus(HttpStatus.SC_OK);
+                response.setStatus(HttpStatus.SC_OK);
                 response.setContentType("image/png");                
                 try (InputStream is = this.getClass().getClassLoader().getResourceAsStream("logo.png")) {
                 	Streams.copy(is, response.getOutputStream(), false);
@@ -148,9 +163,10 @@ public class HTTPWorker implements Worker {
 		} 
 		
 		try {			
+			prepareMessageContext(msgContext, url, contentType, request, response);
 			if (method.equals(HTTPConstants.HEADER_GET)) {
 				log.debug("GET request for service {}", axisService.getName());
-	            int index = contentType.indexOf(';');
+	            int index = !Utils.isNullOrEmpty(contentType) ? contentType.indexOf(';') : 0;
 	            if (index > 0)
 	                contentType = contentType.substring(0, index);	        
 	        	// deal with GET request
@@ -160,7 +176,6 @@ public class HTTPWorker implements Worker {
 	                    contentType);
 			} else if (method.equals(HTTPConstants.HEADER_POST)) {
 				log.debug("POST request for service {}", axisService.getName());				
-				prepareMessageContext(msgContext, url, contentType, request, response);
 				
 				final Builder msgBuilder = Axis2Utils.getBuilderFromService(axisService);				
 				if (msgBuilder != null) {
@@ -242,8 +257,12 @@ public class HTTPWorker implements Worker {
         	if (responseHdrs != null && (responseHdrs instanceof Map)) 
         		((Map<String, String>) responseHdrs).forEach((n, v) -> response.addHeader(n, v));        		
         	
-            // The response may be ack'd, mark the status as accepted.
-            response.setStatus(HttpStatus.SC_ACCEPTED);
+            // Mark the status as accepted, unless already set by service
+        	Object status = msgContext.getProperty(HTTPConstants.MC_HTTP_STATUS_CODE);
+        	if (status != null && status instanceof Integer) {
+        		response.setStatus(((Integer) status).intValue());
+        	} else
+        		response.setStatus(HttpStatus.SC_ACCEPTED);
         }
     }
 
@@ -258,7 +277,9 @@ public class HTTPWorker implements Worker {
 	private void prepareMessageContext(final MessageContext msgContext, final String uriPath, final String contentType,
 									   final AxisHttpRequest request, final AxisHttpResponse response) 
 			throws AxisFault {
-
+		
+		msgContext.setTransportIn(httpConfiguration);
+		msgContext.setIncomingTransportName(httpConfiguration.getName());
         final String ip = (String)msgContext.getProperty(MessageContext.TRANSPORT_ADDR);
         final String requestURL = (!Utils.isNullOrEmpty(ip) ? ip : "") + uriPath; 		
         msgContext.setTo(new EndpointReference(requestURL));

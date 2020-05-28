@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.core.axis2;
 
+import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.transport.http.server.Worker;
 import org.apache.axis2.transport.http.server.WorkerFactory;
 
@@ -27,10 +28,15 @@ import org.apache.axis2.transport.http.server.WorkerFactory;
  * @since 5.0.0
  */
 public class HTTPWorkerFactory implements WorkerFactory {
+	private TransportInDescription	httpConfiguration;
+	
+	public HTTPWorkerFactory(TransportInDescription transprtIn) {
+		this.httpConfiguration = transprtIn;			
+	}
 
 	@Override
 	public Worker newWorker() {
-		return new HTTPWorker();
+		return new HTTPWorker(httpConfiguration);
 	}
 
 }

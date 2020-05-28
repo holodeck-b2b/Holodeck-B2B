@@ -36,7 +36,7 @@ public class HTTPFactory extends org.apache.axis2.transport.http.server.HttpFact
 	private TransportInDescription	httpConfiguration;
 	
 	public HTTPFactory(ConfigurationContext axisConf, TransportInDescription transprtIn) throws AxisFault {
-        super(axisConf, 0, new HTTPWorkerFactory());
+        super(axisConf, 0, new HTTPWorkerFactory(transprtIn));
         this.httpConfiguration = transprtIn;
         
         setPort(getIntParam(PARAMETER_PORT, 8080));
