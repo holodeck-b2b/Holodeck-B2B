@@ -39,6 +39,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   an object of the common message model implementation. 
 * Default implementation of the new `ICertificateManager` and `IValidationResult` trust interface to the _security_ 
   module.
+* Option to configure the directory where the Holodeck B2B message database should be stored through the `HB2B_DB_DIR`
+  environment variable.
 
 ### Changed
 * P-Modes are now by default stored in the `repository/pmodes` directory.  
