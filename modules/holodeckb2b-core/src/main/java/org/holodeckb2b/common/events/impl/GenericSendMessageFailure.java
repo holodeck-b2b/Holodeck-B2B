@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * the processing of an outgoing message unit for which no other specific event is defined. 
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @@since 5.0.0
+ * @since 5.0.0
  */
 public class GenericSendMessageFailure extends AbstractMessageProcessingEvent implements ISendMessageProcessingFailure {
 

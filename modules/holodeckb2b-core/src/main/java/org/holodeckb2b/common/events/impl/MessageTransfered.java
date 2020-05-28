@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * transfered to the other MSH, either by sending it as a request or including it as a response failed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @@since 5.0.0
+ * @since 5.0.0
  */
 public class MessageTransfered extends AbstractMessageProcessingEvent implements IMessageTransfered {
 

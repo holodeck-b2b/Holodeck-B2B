@@ -24,7 +24,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * during the processing of an incoming message unit for which no other specific event is defined. 
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @@since 5.0.0
+ * @since 5.0.0
  */
 public class GenericReceiveMessageFailure extends AbstractMessageProcessingEvent 
 																		implements IReceivedMessageProcessingFailure {
