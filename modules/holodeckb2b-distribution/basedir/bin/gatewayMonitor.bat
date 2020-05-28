@@ -22,7 +22,7 @@ set DEFAULT_HB2B_HOME=
 rem find HB2B_HOME if it does not exist due to either an invalid value passed
 rem by the user or the %0 problem on Windows 9x
 :checkConf
-if exist "%HB2B_HOME%\conf\axis2.xml" goto checkJava
+if exist "%HB2B_HOME%\conf\holodeckb2b.xml" goto checkJava
 
 :noHB2BHome
 echo HB2B_HOME environment variable is set incorrectly or Holodeck B2B could not be located. 
