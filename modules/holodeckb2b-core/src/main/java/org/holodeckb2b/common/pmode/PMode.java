@@ -142,7 +142,7 @@ public class PMode implements IPMode, Serializable {
         // that will contain a PersistenceException exception that describes the actual error. Therefore we catch
         // InvocationTargetException and only throw the PersistenceException
         try {        	
-            return new Persister(new AnnotationStrategy()).read(PMode.class, is);
+            return new Persister(new AnnotationStrategy()).read(PMode.class, is, false);
         } catch (final InvocationTargetException ex) {
             // Only throw the target exception when it really is an exception
             final Throwable t = ex.getTargetException();
