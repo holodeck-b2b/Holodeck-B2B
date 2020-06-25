@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 5.0.1
+##### Unreleased
+
+### Fixed
+* Backward compatability for "relaxed" reading P-Mode XML documents.
+* P-Modes and certificates are now refreshed when switching tabs [#108](https://github.com/holodeck-b2b/Holodeck-B2B/issues/108) 
+
+
 ## 5.0.0
 ##### Unreleased
 
