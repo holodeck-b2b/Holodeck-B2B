@@ -71,6 +71,15 @@ public class CertificatesData extends AbstractTableModel {
 	 * @param certData	Certificates mapped to their aliases
 	 */
 	public CertificatesData(final Map<String, X509Certificate> certData) {
+		setCertificates(certData);
+	}
+	
+	/**
+	 * Updates the set of certificates that should be displayed in the table.
+	 * 
+	 * @param certData	Certificates mapped to their aliases	 
+	 */
+	public void setCertificates(final Map<String, X509Certificate> certData) {
 		if (Utils.isNullOrEmpty(certData)) {
 			aliases = null;
 			certs = null;

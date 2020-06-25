@@ -32,8 +32,10 @@ import org.holodeckb2b.ui.app.gui.models.CertificatesData;
 import org.holodeckb2b.ui.app.gui.models.MessageHistoryData;
 import org.holodeckb2b.ui.app.gui.models.MessageUnitStatesData;
 import org.holodeckb2b.ui.app.gui.models.PModesData;
+import org.holodeckb2b.ui.app.gui.views.CertificatesPanel;
 import org.holodeckb2b.ui.app.gui.views.MainWindow;
 import org.holodeckb2b.ui.app.gui.views.MessageStatusPanel;
+import org.holodeckb2b.ui.app.gui.views.PModesPanel;
 import org.holodeckb2b.ui.app.gui.views.SplashScreen;
 
 /**
@@ -122,11 +124,7 @@ public class HB2BMonitoringApp {
 			}
 		
 			splash.updateStatus("Retrieving P-Modes...");
-			try {
-				controller.pmodes.setPModes(coreAPI.getPModes());
-			} catch (RemoteException e) {
-				throw new Exception("Could not retrieve the P-Modes from Holodeck B2B", e);
-			}
+			controller.pmodes.setPModes(coreAPI.getPModes());
 	
 			splash.updateStatus("Retrieving certificates...");	
 			boolean certsAvailable = true;
@@ -160,7 +158,7 @@ public class HB2BMonitoringApp {
 			splash.dispose();
 		}
 	}
-	
+
 	/**
 	 * Gets the Holodeck B2B instance that the app is connected to.
 	 * 
@@ -243,4 +241,37 @@ public class HB2BMonitoringApp {
 			msgUnitStatus.setMessageUnits(null);
 		}
 	}	
+	
+	/**
+	 * Retrieves the current P-Mode set from the Holodeck B2B instance and updates the {@link #pmodes} data model so the
+	 * {@link PModesPanel} is updated.
+	 */
+	public void retrievePModes() {
+		try {
+			pmodes.setPModes(coreAPI.getPModes());
+		} catch (RemoteException e) {
+			e.printStackTrace(System.err);
+			JOptionPane.showMessageDialog(mainWindow, 
+										  "An error occurred while retrieving the P-Modes:\n" + e.getMessage(), 
+										  "Error", JOptionPane.ERROR_MESSAGE);				
+		}
+	}	
+	
+	/**
+	 * Retrieves the current set of installed certificates from the Holodeck B2B instance and updates the {@link 
+	 * #certificates} data model so the {@link CertificatesPanel} is updated.
+	 */
+	public void retrieveCertificates() {
+		try {					
+			certificates.get(CertType.Private).setCertificates(coreAPI.getCertificates(CertType.Private));
+			certificates.get(CertType.Partner).setCertificates(coreAPI.getCertificates(CertType.Partner));
+			certificates.get(CertType.Trusted).setCertificates(coreAPI.getCertificates(CertType.Trusted));
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+			JOptionPane.showMessageDialog(mainWindow, 
+										  "An error occurred while retrieving the certificates:\n" + e.getMessage(), 
+										  "Error", JOptionPane.ERROR_MESSAGE);							
+		}
+	}
+	
 }

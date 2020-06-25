@@ -21,6 +21,11 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
@@ -119,6 +124,13 @@ public class PModesPanel extends JPanel implements TableModelListener {
 		gbc_editorScrollPane.gridx = 0;
 		gbc_editorScrollPane.gridy = 2;
 		panel.add(editorScrollPane, gbc_editorScrollPane);
+				
+		addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentShown(ComponentEvent e) {
+				controller.retrievePModes();
+			}
+		});
 	}
 
 	@Override

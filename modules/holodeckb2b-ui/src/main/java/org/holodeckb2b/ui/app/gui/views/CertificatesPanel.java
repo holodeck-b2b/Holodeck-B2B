@@ -19,6 +19,8 @@ package org.holodeckb2b.ui.app.gui.views;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -62,6 +64,13 @@ public class CertificatesPanel extends JPanel {
 		tabbedPane.addTab("Private", new CertTabPanel(controller.getCertificates(CertType.Private)));
 		tabbedPane.addTab("Partner", new CertTabPanel(controller.getCertificates(CertType.Partner)));
 		tabbedPane.addTab("Trusted", new CertTabPanel(controller.getCertificates(CertType.Trusted)));
+		
+		addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentShown(ComponentEvent e) {
+				controller.retrieveCertificates();
+			}
+		});
 	}
 	
 	/**
