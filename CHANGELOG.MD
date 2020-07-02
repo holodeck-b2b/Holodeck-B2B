@@ -22,7 +22,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Signature policy check in **Core Processing** that received _User Messages_ are signed when indicated in P-Mode that 
   they should be. Violation of this rule will generate an _PolicyNonCompliance_ error.
 * On submission of _User Message_  a check that the provided payload _Content-Id_ values do not contain invalid characters.
-* Added new message processing events to indicate delivery or failure of a message unit to the back-end applciation.
+* Added new message processing events to indicate delivery or failure of a message unit to the back-end application.
 * When an (unexpected) error occurs during the processing of a message unit a `ISendMessageProcessingFailure` or 
   `IReceiveMessageFailure` is raised.  
 * `org.holodeckb2b.interfaces.core.IMessageProcessingContext` interface which can be used in extension APIs to provide 
