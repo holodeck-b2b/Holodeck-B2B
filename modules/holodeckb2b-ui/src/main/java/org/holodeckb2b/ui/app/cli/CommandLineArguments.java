@@ -69,7 +69,7 @@ public class CommandLineArguments {
 		PRINT_CERT("printCert", new Option[] { PORT_OPTION, CERT_ALIAS, CERT_TYPE } , "Prints the details of  a certificate"),
 		MSG_STATUS("msgStatus", new Option[] { PORT_OPTION, MESSAGE_ID } , "Gets the current processing state of a message unit"),
 		STATUS_LIST("statusList", new Option[] { PORT_OPTION, MESSAGE_ID } , "Lists of processing states a message unit was and is in"),
-		HISTORY("history", new Option[] { PORT_OPTION, FROM, MAX } , "Provides overview of message units ordered descendingly on time stamp");
+		HISTORY("history", new Option[] { PORT_OPTION, FROM, MAX } , "Provides overview of message units in descending order, sorted by time stamp");
 		
 		String   name;
 		Option[] options;
