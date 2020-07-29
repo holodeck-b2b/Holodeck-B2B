@@ -116,4 +116,4 @@ You can therefore just overwrite the default keystores with the example
 keystores.
 
 When using a key pair in a P-Mode the password is
-"Example" + 'A' | 'B' | 'C' | 'D'
+"Example" + 'A' | 'B' | 'C' | 'D' | 'E'
