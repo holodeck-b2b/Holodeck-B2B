@@ -41,10 +41,10 @@ install this P-Mode on instance A.
             <RetryInterval>30</RetryInterval>
         </ReceptionAwareness>
         <DefaultDelivery>
-            <DeliveryMethod>org.holodeckb2b.deliverymethod.file.FileDeliveryFactory</DeliveryMethod>
+            <DeliveryMethod>org.holodeckb2b.backend.file.NotifyAndDeliverOperation</DeliveryMethod>
             <Parameter>
                 <name>format</name>
-                <value>mmd</value>
+                <value>ebms</value>
             </Parameter>
             <Parameter>
                 <name>deliveryDirectory</name>

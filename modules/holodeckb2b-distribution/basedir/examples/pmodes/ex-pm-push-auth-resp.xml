@@ -33,7 +33,7 @@ install this P-Mode on instance B.
     </Agreement>
     <Leg>
         <DefaultDelivery>
-            <DeliveryMethod>org.holodeckb2b.deliverymethod.file.FileDeliveryFactory</DeliveryMethod>
+            <DeliveryMethod>org.holodeckb2b.backend.file.NotifyAndDeliverOperation</DeliveryMethod>
             <Parameter>
                 <name>format</name>
                 <value>mmd</value>

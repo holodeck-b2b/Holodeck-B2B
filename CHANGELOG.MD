@@ -5,8 +5,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 5.0.1
 ##### Unreleased
 
+### Changed
+* Renewed example certificates
+* Updates example P-Modes to use new file delivery method name
+
 ### Fixed
-* Backward compatability for "relaxed" reading P-Mode XML documents.
+* Backward compatibility for "relaxed" reading P-Mode XML documents.
 * P-Modes and certificates are now refreshed when switching tabs in the GUI [#108](https://github.com/holodeck-b2b/Holodeck-B2B/issues/108) 
 
 

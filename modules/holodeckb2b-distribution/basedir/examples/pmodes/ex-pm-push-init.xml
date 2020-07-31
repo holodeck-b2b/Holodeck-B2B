@@ -31,7 +31,7 @@ you should install this P-Mode on instance A.
             <NotifyReceiptToBusinessApplication>true</NotifyReceiptToBusinessApplication>
         </Receipt>
         <DefaultDelivery>
-            <DeliveryMethod>org.holodeckb2b.deliverymethod.file.FileDeliveryFactory</DeliveryMethod>
+            <DeliveryMethod>org.holodeckb2b.backend.file.NotifyAndDeliverOperation</DeliveryMethod>
             <Parameter>
                 <name>format</name>
                 <value>ebms</value>

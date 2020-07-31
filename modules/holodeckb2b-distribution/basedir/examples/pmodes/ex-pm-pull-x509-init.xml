@@ -35,7 +35,7 @@ environment based on the "Getting Started" page from the web site you should ins
             <ReplyPattern>CALLBACK</ReplyPattern>            
         </Receipt>
         <DefaultDelivery>
-            <DeliveryMethod>org.holodeckb2b.deliverymethod.file.FileDeliveryFactory</DeliveryMethod>
+            <DeliveryMethod>org.holodeckb2b.backend.file.NotifyAndDeliverOperation</DeliveryMethod>
             <Parameter>
                 <name>format</name>
                 <value>ebms</value>
