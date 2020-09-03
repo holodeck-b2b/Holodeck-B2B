@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 5.0.1
-##### Unreleased
+##### 2020-09-03
 
 ### Changed
 * Renewed example certificates
@@ -12,10 +12,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 * Backward compatibility for "relaxed" reading P-Mode XML documents.
 * P-Modes and certificates are now refreshed when switching tabs in the GUI [#108](https://github.com/holodeck-b2b/Holodeck-B2B/issues/108) 
+* Non AS4 P-Modes evaluated for AS4 messages [#111](https://github.com/holodeck-b2b/Holodeck-B2B/issues/111) 
 
 
 ## 5.0.0
-##### Unreleased
+##### 2020-07-03
 
 ### Added
 * A default user interface that supports basic monitoring of a running Holodeck B2B instance. The UI is available both

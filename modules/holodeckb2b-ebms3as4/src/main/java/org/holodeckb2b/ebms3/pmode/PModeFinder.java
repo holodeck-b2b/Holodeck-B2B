@@ -66,7 +66,7 @@ import org.holodeckb2b.security.util.VerificationUtils;
  */
 public class PModeFinder {
 
-    /**
+	/**
      * Identifiers for the meta-data that is being used in the matching
      */
     protected static enum PARAMETERS {ID, FROM, FROM_ROLE, TO, TO_ROLE, SERVICE, ACTION, MPC, AGREEMENT}
@@ -132,6 +132,11 @@ public class PModeFinder {
         
         
         for (final IPMode p : pmodes.getAll()) {
+        	// If the P-Mode MEP binding does not start with the ebMS3 namespace URI it does not apply to ebMS3/AS4 and
+        	// therefore should be ignored
+        	if (!p.getMepBinding().startsWith(EbMSConstants.EBMS3_NS_URI))
+        		continue;
+        	
         	/*
         	 * First step is to determine if the P-Mode should be evaluated, i.e. if it governs message receiving. For
         	 * a 2-Way P-Mode this is always true. But for 1-Way P-Modes this is only the case when it is not triggering
