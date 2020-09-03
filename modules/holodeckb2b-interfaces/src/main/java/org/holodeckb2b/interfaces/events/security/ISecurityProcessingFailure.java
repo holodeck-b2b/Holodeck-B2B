@@ -32,7 +32,7 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
  */
-public interface ISecurityProcessingFailure extends IReceivedMessageProcessingFailure, ISecurityProcessingFailureEvent {
+public interface ISecurityProcessingFailure extends IReceivedMessageProcessingFailure {
 
     /**
      * Gets the description as given by the <i>Security Provider</i> of what caused the processing of the WS-Security
@@ -40,6 +40,5 @@ public interface ISecurityProcessingFailure extends IReceivedMessageProcessingFa
      *
      * @return  The {@link SecurityProcessingException} that caused the failure.
      */
-    @Override
 	SecurityProcessingException getFailureReason();
 }

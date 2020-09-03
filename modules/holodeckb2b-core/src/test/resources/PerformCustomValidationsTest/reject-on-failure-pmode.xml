@@ -40,11 +40,5 @@
                 </Validator>
             </CustomValidation>
         </UserMessageFlow>
-        <EventHandlers>
-            <EventHandler>
-                <HandlerFactoryClass>org.holodeckb2b.common.testhelpers.events.TestEventHandlerFactory</HandlerFactoryClass>
-                <HandledEvent>org.holodeckb2b.interfaces.events.ICustomValidationFailedEvent</HandledEvent>
-            </EventHandler>
-        </EventHandlers>
     </Leg>
 </PMode>

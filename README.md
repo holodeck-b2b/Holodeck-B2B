@@ -1,5 +1,5 @@
 # Holodeck B2B
-Holodeck B2B is a standalone B2B messaging solution that implements the OASIS specifications for ebMS3 and the AS4 profile. Java based, it will run on most platforms.
+Holodeck B2B is a standalone B2B messaging solution. This project includes support for the OASIS specifications for ebMS3 and the AS4 profile. Java based, it will run on most platforms.
 
 It is designed with extensibility in mind providing an interface layer (API) which you can find in the Interfaces module, and lots of documentation inside the code.
 
@@ -44,4 +44,4 @@ For this purpose, the interfaces module is licensed under the Lesser General Pub
 To implement the cryptographic algorithms Holodeck B2B uses the Bouncy Castle library provided by [The Legion of the Bouncy Castle Inc.](http://www.bouncycastle.org), see the bc_license.txt file.
 
 ## Support
-Commercial Holodeck B2B support is provided by Chasquis Consulting. Visit [Chasquis-Consulting.com](http://chasquis-consulting.com/holodeck-b2b-support/) for more information.
+Commercial Holodeck B2B support is provided by Chasquis. Visit [Chasquis-consulting.com](http://chasquis-consulting.com/holodeck-b2b-support/) for more information.

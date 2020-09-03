@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+Example messsage meta-data document to send a message using P-Mode ex-pm-push
+
+The message contains a JPEG image as payload
+-->
+<MessageMetaData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2014/06/mmd ../repository/xsd/messagemetadata.xsd"
+ xmlns="http://holodeck-b2b.org/schemas/2014/06/mmd">
+    <CollaborationInfo>
+        <AgreementRef pmode="ex-pm-push"/>
+        <ConversationId>org:holodeckb2b:test:conversation</ConversationId>
+    </CollaborationInfo>
+    <PayloadInfo deleteFilesAfterSubmit="false">
+        <PartInfo containment="attachment" mimeType="image/jpeg" location="payloads/dandelion.jpg"/>
+    </PayloadInfo>
+</MessageMetaData>

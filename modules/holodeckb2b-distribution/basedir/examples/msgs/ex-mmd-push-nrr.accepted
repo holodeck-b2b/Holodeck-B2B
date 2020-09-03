@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+Example messsage meta-data document to send a message using P-Mode ex-pm-push
+
+The message contains two payloads, one XML document in the SOAP body and one JPEG image as attachment
+-->
+<MessageMetaData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2014/06/mmd ../repository/xsd/messagemetadata.xsd"
+ xmlns="http://holodeck-b2b.org/schemas/2014/06/mmd">
+    <CollaborationInfo>
+        <AgreementRef pmode="ex-pm-push-nrr"/>
+        <ConversationId>org:holodeckb2b:test:conversation</ConversationId>
+    </CollaborationInfo>
+    <PayloadInfo deleteFilesAfterSubmit="false">
+        <PartInfo containment="body" location="payloads/simple_document.xml">
+            <PartProperties>
+                <Property name="original-file-name">simple_document.xml</Property>
+            </PartProperties>
+        </PartInfo>
+        <PartInfo containment="attachment" mimeType="image/jpeg" location="payloads/summerflower.jpg"/>
+    </PayloadInfo>
+</MessageMetaData>

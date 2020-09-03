@@ -25,14 +25,16 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.handler.AbstractBaseHandler;
-import org.holodeckb2b.common.handler.MessageProcessingContext;
-import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
+import org.apache.logging.log4j.Logger;
+import org.holodeckb2b.common.errors.InvalidHeader;
+import org.holodeckb2b.common.errors.ValueInconsistent;
+import org.holodeckb2b.common.handlers.AbstractBaseHandler;
+import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.validation.ValidationResult;
-import org.holodeckb2b.ebms3.errors.InvalidHeader;
-import org.holodeckb2b.ebms3.errors.ValueInconsistent;
 import org.holodeckb2b.interfaces.config.IConfiguration;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
@@ -45,10 +47,9 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
-import org.holodeckb2b.module.HolodeckB2BCore;
 
 /**
- * Is an <i>IN FLOW</i> handler for checking conformance of messages to the specification. 
+ * Is the <i>IN FLOW</i> handler for checking conformance of messages to the messaging protocol specification.      
  * <p>The validation performed has two modes, <i>basic</i> and <i>strict</i> validation. The <i>basic
  * validation</i> is only ensure that the messages can be processed by the Holodeck B2B Core. These validations don't
  * include detailed checks on allowed combinations or format of values, like for example the requirement from the 
@@ -136,7 +137,7 @@ public class HeaderValidationHandler extends AbstractBaseHandler {
 	}
 	
     @Override
-    protected InvocationResponse doProcessing(MessageProcessingContext procCtx, final Log log) throws Exception {
+    protected InvocationResponse doProcessing(IMessageProcessingContext procCtx, final Logger log) throws Exception {
     	if (laxValidatorSpecs == null || strictValidatorSpecs == null) {
     		log.fatal("Handler not correctly initialized, header validators not available!");
     		throw new AxisFault("Configuration error!");

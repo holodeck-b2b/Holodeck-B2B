@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Example P-Mode configuration for a One-Way/Push scenario using Non Repudation of Receipt receipt signals. NRR requires that both the sender and the 
+receiver use signed messages.
+    
+This configuration reflects the sender of the message. If you set up a test environment based on the "Getting Started" page from the web site you should 
+install this P-Mode on instance A. 
+-->
+<PMode xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://holodeck-b2b.org/schemas/2014/10/pmode" xsi:schemaLocation="http://holodeck-b2b.org/schemas/2014/10/pmode ../../repository/xsd/pmode.xsd">
+    <id>ex-pm-push-nrr</id>
+    <mep>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay</mep>
+    <mepBinding>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push</mepBinding>
+    <Initiator>
+        <PartyId>org:holodeckb2b:example:company:A</PartyId>
+        <Role>Sender</Role>
+        <SecurityConfiguration>
+            <Signing>
+                <KeystoreAlias password="ExampleA">partya</KeystoreAlias>
+                <KeyReferenceMethod>KeyIdentifier</KeyReferenceMethod>
+            </Signing>
+        </SecurityConfiguration>
+    </Initiator>
+    <Responder>
+        <PartyId>org:holodeckb2b:example:company:B</PartyId>
+        <Role>Receiver</Role>
+    </Responder>
+    <Agreement>
+        <name>http://agreements.holodeckb2b.org/examples/agreement0</name>
+    </Agreement>
+    <Leg>
+        <Protocol>
+            <!-- Change the URL below to reflect the location where the receiving MSH is listening for messages -->
+            <Address>http://localhost:9090/holodeckb2b/as4</Address>
+        </Protocol>
+        <Receipt>
+            <NotifyReceiptToBusinessApplication>true</NotifyReceiptToBusinessApplication>
+        </Receipt>
+        <ReceptionAwareness>
+            <MaxRetries>4</MaxRetries>
+            <RetryInterval>30</RetryInterval>
+        </ReceptionAwareness>
+        <DefaultDelivery>
+            <DeliveryMethod>org.holodeckb2b.backend.file.NotifyAndDeliverOperation</DeliveryMethod>
+            <Parameter>
+                <name>format</name>
+                <value>ebms</value>
+            </Parameter>
+            <Parameter>
+                <name>deliveryDirectory</name>
+                <value>data/msg_in</value>
+            </Parameter>
+        </DefaultDelivery>
+        <UserMessageFlow>
+            <BusinessInfo>
+                <Action>StoreMessage</Action>
+                <Service>
+                    <name>Test</name>
+                    <type>org:holodeckb2b:services</type>
+                </Service>
+            </BusinessInfo>         
+        </UserMessageFlow>
+    </Leg>
+</PMode>

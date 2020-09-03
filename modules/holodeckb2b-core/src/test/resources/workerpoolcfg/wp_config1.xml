@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<workers xmlns="http://www.holodeck-b2b.org/2012/12/workers"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.holodeck-b2b.org/2012/12/workers file:/Users/safi/Development/holodeck-b2b-1.1-b/config/workers.xsd" poolName="complete">
+    <worker name="worker1" activate="false" workerClass="workerClass1">
+       <parameter name="p1">value1</parameter>
+       <parameter name="p2">value2</parameter>
+       <parameter name="p3">value3</parameter>
+       <parameter name="p4">value4</parameter>
+    </worker>
+    <worker name="worker2" activate="true" workerClass="workerClass2" concurrent="5" interval="30">
+       <parameter name="p5">value5</parameter>
+    </worker>
+</workers>

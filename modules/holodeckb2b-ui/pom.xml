@@ -1,0 +1,55 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.holodeckb2b</groupId>
+		<artifactId>holodeckb2b</artifactId>
+		<version>5.0.1</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+	<artifactId>holodeckb2b-ui</artifactId>
+    <packaging>jar</packaging>
+    <name>Holodeck B2B - User Interface</name>
+    <inceptionYear>2019</inceptionYear>
+    <description>
+        This project contains the default User Interface of Holodeck B2B that allows one to monitor the local gateway.
+        It consists of an Holodeck B2B extension that creates a RMI Server to provide information to the outside world
+        and a desktop application that shows the information to the user.   
+    </description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-certmanager</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-persistency</artifactId>
+        </dependency> 
+        <dependency>
+            <groupId>com.github.lgooddatepicker</groupId>
+            <artifactId>LGoodDatePicker</artifactId>
+            <version>10.3.1</version>
+        </dependency>
+        
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+	</dependencies>
+</project>

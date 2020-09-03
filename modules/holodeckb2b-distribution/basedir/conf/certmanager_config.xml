@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- =====================================================================================
+
+             Holodeck B2B Default Certificate Manager Configuration
+
+This file configures the access to the keystores used by the default implementation
+of the Certificate Manager to store the key pairs and certificates needed in the 
+processing of the messages. It uses three  JKS keystores which contain the keys and 
+certificates needed in specific actions:
+* The key pairs used for signing and decrypting messages. Note that a key pair may need to 
+  contain more than one certificate if a certificate chain needs to be included in a 
+  signature.
+* The trading partner certificates with public keys used for encryption of messages and 
+  identification.
+* Holding "trust anchors" used for trust validation of certificates used to sign messages. 
+  Normally these are the certificates of trusted Certificate Authorities. 
+
+The use of these three key stores is similar to earlier versions of Holodeck B2B, but as 
+in version 4 the trading partner certificates are by default not used during trust 
+validation like they were in earlier versions. In version 4.x a so-called "compatibility 
+mode" was offered so it could handle the configuration of earlier version. Since it can 
+be useful in a environment where the certificates of trading partner are trusted this mode 
+has now been replaced by a new <i>direct trust</i> configuration setting in which case the 
+trading partner certificates are handled like trust anchors, with the exception that they 
+are checked for validity. 
+<p>Another new feature of this Certificate Manager is the option to perform a revocation 
+check using OCSP on certificates. This check is disabled by default for back-ward 
+compatibility and can be enabled in the configuration. Note however that when enabled and 
+used in an environment where certificates don't provide OSCP information this will result 
+in a lot of <code>ISignatureVerifiedWithWarning</code> events as the revocation check 
+could not be executed.
+===================================================================================== -->
+<CertManagerConfiguration xmlns="http://holodeck-b2b.org/schemas/2019/09/config/certmanager"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2019/09/config/certmanager ../repository/xsd/hb2b-certmanager-cfg.xsd">
+    <!--
+    <PerformRevocationCheck>false</PerformRevocationCheck>
+    <DirectTrustPartnerCertificates>false</DirectTrustPartnerCertificates>        
+    -->
+    <Keystores>
+        <PrivateKeys>
+            <Path>repository/certs/privatekeys.jks</Path>
+            <Password>secrets</Password>
+        </PrivateKeys>
+        <TradingPartnerCertificates>
+            <Path>repository/certs/partnerkeys.jks</Path>
+            <Password>nosecrets</Password>
+        </TradingPartnerCertificates>
+        <TrustedCertificates>
+            <Path>repository/certs/trustedcerts.jks</Path>
+            <Password>trusted</Password>
+        </TrustedCertificates>
+    </Keystores>
+</CertManagerConfiguration>

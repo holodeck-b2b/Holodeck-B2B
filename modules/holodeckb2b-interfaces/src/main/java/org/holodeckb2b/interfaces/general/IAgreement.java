@@ -36,9 +36,4 @@ public interface IAgreement {
      * @return The agreement type
      */
     public String getType();
-
-    public void setName(String name);
-
-    public void setType(String type);
-
 }

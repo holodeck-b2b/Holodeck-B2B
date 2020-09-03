@@ -131,7 +131,7 @@ public class DefaultValidationExecutor implements IValidationExecutor {
             // A threshold has been defined, check if reached by any of the found errors
             boolean stop = false;
             for(MessageValidationError e : errors)
-                stop = e.getSeverityLevel().compareTo(threshold) <= 0;
+                stop = threshold.compareTo(e.getSeverityLevel()) <= 0;
             return stop;
         }
     }

@@ -1,0 +1,109 @@
+<workers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.holodeck-b2b.org/2012/12/workers ../../../../holodeck-common/src/main/resources/xsd/workers.xsd"
+ xmlns="http://holodeck-b2b.org/2012/12/workers"
+ poolName="holodeckb2b:workers">
+
+    <!-- ==============================================================
+    This worker is responsible for reading the P-Modes from file. It is
+    part of the default implementation for P-Mode configuration that
+    uses XML files to define the P-Modes with one file per P-Mode. For
+    more information about configuring a P-Mode see the XSD that defines
+    the P-Mode file (http://holodeck-b2b.org/schemas/2014/10/pmode).
+
+    If you want to have a fixed set of P-Modes remove the interval
+    attribute so the P-Modes are read only when Holodeck B2B is
+    started. DO NOT de-activate this worker as it will prevent
+    Holodeck B2B from starting correctly as P-Modes must be available
+    to process messages!
+    =============================================================== -->
+    <worker name="pmodeWatcher" interval="20" activate="true"
+        workerClass="org.holodeckb2b.common.pmode.PModeWatcher">
+        <parameter name="watchPath">repository/pmodes</parameter>
+    </worker>
+
+    <!-- ==============================================================
+    This worker is responsible for starting the message send process.
+    Because the P-Modes need to be loaded before messages can be sent
+    the start of the worker is delayed with 5 seconds to allow loading
+    the P-Modes.
+    NOTE that de-activating this worker will stop message sending!
+    =============================================================== -->
+    <worker name="senderWorker" interval="10" activate="true" delay="5"
+        workerClass="org.holodeckb2b.core.workers.SenderWorker"/>
+
+    <!-- ==============================================================
+    This worker is responsible for checking whether a user message
+    must be retransmitted because there was no timely Receipt.
+    Because the P-Modes need to be loaded before messages can be retried
+    the start of the worker is delayed with 10 seconds to allow loading
+    the P-Modes.
+
+    De-activating this worker will stop the retransmission function
+    and therefore kill the AS4 Reception Awareness feature.
+    =============================================================== -->
+    <worker name="retransmissionWorker" interval="30" activate="true" delay="10"
+        workerClass="org.holodeckb2b.core.receptionawareness.RetransmissionWorker"/>
+
+    <!-- ==============================================================
+    This worker is responsible for cleaning up information on old and
+    processed messages, i.e. remove the meta-data information from the
+    database and delete associated payloads from the file system.
+    Through the optional "purgeAfterDays" parameter the number of days
+    after which the message information should be removed can be set.
+    If not specified 30 days is used as the default setting.
+    =============================================================== -->
+    <worker name="cleanupWorker" interval="3600" activate="true" delay="60"
+        workerClass="org.holodeckb2b.core.workers.PurgeOldMessagesWorker"/>
+
+    <!-- ==============================================================
+    This worker checks the pulling configuration and configure a
+    separate pool of workers responsible for sending the pull requests.
+    See PullWorker, PullConfiguration and PullConfigurationWatcher
+    classes for more details.
+
+    The worker has one parameter that is the path to the file containing
+    the pulling configuration. It is RECOMMENDED to specify it as an
+    absolute path.
+
+    De-activating this worker will disable the pulling feature, i.e.
+    the ability to send out Pull Request signals!
+    =============================================================== -->
+    <worker name="pullConfigWatcher" interval="60" activate="true" delay="10"
+        workerClass="org.holodeckb2b.ebms3.pulling.PullConfigurationWatcher">
+        <parameter name="watchPath">conf/pulling_configuration.xml</parameter>
+    </worker>
+
+    <!-- ==============================================================
+    This worker is the default method for submitting messages to
+    Holodeck B2B. It reads all message meta data documents from the
+    specified directory and creates the messages for sending. The
+    actual send process is started by the sender worker defined above.
+
+    It is RECOMMENDED to specify an absolute path to the directory to
+    watch for meta data documents.
+
+    The worker will look for all files with ".mmd" extension. After
+    processing the extension will be changed to ".processed". If an
+    error occurs an new file with the same name but ".error" extension
+    will be written with information about the error.
+
+    Because the P-Modes need to be loaded before messages can be
+    submitted the start of the worker is delayed with 5 seconds to
+    allow loading the P-Modes.
+    =============================================================== -->
+    <worker name="submitFromFileWorker" interval="10" activate="true" delay="5"
+        workerClass="org.holodeckb2b.backend.file.SubmitOperation">
+        <parameter name="watchPath">data/msg_out</parameter>
+    </worker>
+    
+ 	<!-- ==============================================================
+    This worker start the RMI server that enables the API for locally
+    monitoring of the Holodeck B2B as implemented in the default  
+    User Interface. The worker has one optional parameter "port" that 
+    can be used to specify the port number that should be used by the
+    RMI Server. The default port is set to 1701.
+    =============================================================== -->
+   <worker name="monitorAPI" activate="true" delay="10"
+        workerClass="org.holodeckb2b.ui.api.RMIServer">
+    </worker>   
+</workers>

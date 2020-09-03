@@ -16,9 +16,17 @@
  */
 package org.holodeckb2b.test.integration;
 
-import java.io.*;
+import static org.junit.Assert.assertTrue;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -29,16 +37,19 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.lang.SystemUtils;
+import org.apache.logging.log4j.LogManager;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
+import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.testhelpers.FilesUtility;
-import static org.junit.Assert.assertTrue;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
 
 /**
  * Created at 9:56 29.11.16
@@ -47,79 +58,66 @@ import org.xml.sax.SAXException;
  */
 public class ITHelper {
 
+	private static final String HB2B_DISTRO_MODULE = "holodeckb2b-distribution";
+	
     private static String projectVersion;
-    private static String dFilePath;
-    private static String dFileName;
-    private static String dDirName;
-    private static String workingDirPath;
+    private static String distributionPath;
+
+    private static Path   workingDirPath;
 
     private static Process processA;
     private static Process processB;
 
     static {
-        projectVersion = getProjectVersion();
-        dFileName = "holodeckb2b-distribution-"+projectVersion+"-full.zip";
-        dFilePath = ITHelper.class.getClassLoader().getResource("").getPath();
-        dFilePath += "/../../../holodeckb2b-distribution/target/" + dFileName;
-        System.out.println("version: " + projectVersion);
-        // todo dir name should be taken from pom.xml
-        dDirName = "holodeck-b2b-"+projectVersion;
-        workingDirPath = ITHelper.class.getClassLoader().getResource("integ").getPath();
-        System.out.println("working dir: " + workingDirPath);
+    	final Path projectHome = TestUtils.getPath(".").resolve("../..");
+    	MavenProject project;
+    	
+    	final File pomFile = projectHome.resolve("pom.xml").toFile();
+    	try (FileReader reader = new FileReader(pomFile)) {
+    		final MavenXpp3Reader mavenReader = new MavenXpp3Reader();
+    		final Model model = mavenReader.read(reader);
+    		model.setPomFile(pomFile);
+    		project = new MavenProject(model);
+    	} catch(Exception ex) {
+    		LogManager.getLogger().fatal("Could not read project meta-data. ABORTING integration test!");
+    		throw new RuntimeException();
+    	}
+    	projectVersion = project.getVersion();
+    	    
+    	distributionPath =  projectHome.resolve("../" + HB2B_DISTRO_MODULE 
+    												+ "/target/holodeckb2b-distribution-" + projectVersion + ".zip")
+    										.toString();        
+
+    	workingDirPath = TestUtils.getPath("integ");
     }
 
     /**
-     *
-     * @return
+     * Unpacks HolodeckB2B distribution and renames the distribution directory to <code>instanceDir</code>
+     * 
+     * @param instanceDir HolodeckB2B instance folder name
      */
-    private static String getProjectVersion() {
-        File corePomfile = new File(
-                ITHelper.class.getClassLoader().getResource("").getPath()
-                        + "/../../pom.xml");
-        Model model = null;
-        FileReader reader;
-        MavenXpp3Reader mavenReader = new MavenXpp3Reader();
-        try {
-            reader = new FileReader(corePomfile);
-            model = mavenReader.read(reader);
-            model.setPomFile(corePomfile);
-        } catch(Exception ex){}
-        MavenProject project = new MavenProject(model);
-        return project.getVersion();
-    }
-
-    /**
-     * Unpacks HolodeckB2B distribution and renames the distribution directory
-     * to <code>distrDirName</code>
-     * @param distrDirName HolodeckB2B instance folder name
-     */
-    void unzipHolodeckDistribution(String distrDirName) {
+    void unzipHolodeckDistribution(String instanceDir) {
         FilesUtility fu = new FilesUtility();
         try {
-            fu.unzip(dFilePath, workingDirPath);
+            fu.unzip(distributionPath, workingDirPath.toString());
+            Files.move(workingDirPath.resolve("holodeckb2b-" + projectVersion), workingDirPath.resolve(instanceDir));
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        File distrDir = new File(workingDirPath +File.separator+ dDirName);
-        assertTrue(distrDir.exists());
-        if(distrDir.exists()) {
-            distrDir.renameTo(new File(workingDirPath +File.separator+ distrDirName));
         }
     }
 
     /**
      * Copies <code>pmodeFileName</code> to <code>distrDirName</code>/conf/pmodes directory
-     * @param distrDirName HolodeckB2B instance folder name
+     * 
+     * @param instanceDir HolodeckB2B instance folder name
      * @param pmodeFileName pmode configuration file name
      */
-    void copyPModeDescriptor(String distrDirName, String pmodeFileName) {
-        File pmodeXml = new File(workingDirPath + File.separator + distrDirName + File.separator
-                + "examples" + File.separator + "pmodes" + File.separator + pmodeFileName);
-        File newPmodeXml = new File(workingDirPath + File.separator + distrDirName + File.separator
-                + "conf" + File.separator + "pmodes" + File.separator + pmodeFileName);
+    void copyPModeDescriptor(String instanceDir, String pmodeFileName) {
+        Path srcPModeFile = workingDirPath.resolve(instanceDir + "/examples/pmodes/" + pmodeFileName);
+        Path destPmodeFile = workingDirPath.resolve(instanceDir + "/repository/pmodes/" + pmodeFileName);
+        
         try {
-            Files.copy(pmodeXml.toPath(), newPmodeXml.toPath(),
-                    StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(srcPModeFile, destPmodeFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -130,13 +128,14 @@ public class ITHelper {
      * @param distrDirName HolodeckB2B instance folder name
      * @param port
      */
-    void modifyAxisServerPort(String distrDirName, String port) {
-        File axisXml = new File(workingDirPath + File.separator + distrDirName + File.separator
-                + "conf" + File.separator + "axis2.xml");
-        assertTrue(axisXml.exists());
-        if(axisXml.exists()) {
-            changePortInAxis2Xml(axisXml.getPath(), port);
-        }
+    void modifyServerPorts(String distrDirName, String msgPort, String rmiPort) {
+        File hb2bXml =  workingDirPath.resolve(distrDirName + "/conf/holodeckb2b.xml").toFile();
+        assertTrue(hb2bXml.exists());
+        changeMainPort(hb2bXml.getPath(), msgPort);
+
+        File workersXml = workingDirPath.resolve(distrDirName + "/conf/workers.xml").toFile();
+        assertTrue(workersXml.exists());
+    	addRMIPortWorkersXml(workersXml.getPath(), rmiPort);        
     }
 
     /**
@@ -149,38 +148,37 @@ public class ITHelper {
         Process p;
         try {
             if (SystemUtils.IS_OS_LINUX || SystemUtils.IS_OS_MAC) {
-                command = "chmod +x " + workingDirPath + "/" + dADirName + "/"
-                        + "bin" + "/" + "startServer.sh";
+            	Path startScriptAPath = workingDirPath.resolve(dADirName + "/bin/startServer.sh");
+            	Path startScriptBPath = workingDirPath.resolve(dBDirName + "/bin/startServer.sh");
+            	
+                command = "chmod +x " + startScriptAPath.toString();
                 p = Runtime.getRuntime().exec(command);
                 p.waitFor();
-                command = "chmod +x " + workingDirPath + "/" + dBDirName + "/"
-                        + "bin" + "/" + "startServer.sh";
+                command = "chmod +x " + startScriptBPath.toString();
                 p = Runtime.getRuntime().exec(command);
                 p.waitFor();
 
-                ProcessBuilder pb =
-                        new ProcessBuilder("/bin/bash", "./startServer.sh");
+                ProcessBuilder pb = new ProcessBuilder("/bin/bash", startScriptAPath.getFileName().toString());
                 pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-                pb.redirectError(new File(workingDirPath + "/error.log"));
+                pb.redirectError(workingDirPath.resolve("error.log").toFile());
                 pb.environment().put("JAVA_HOME", System.getProperty("java.home"));
-                pb.directory(
-                        new File(workingDirPath + "/" + dADirName + "/" + "bin"));
+                pb.directory(startScriptAPath.getParent().toFile());
                 processA = pb.start();
-                pb.directory(
-                        new File(workingDirPath + "/" + dBDirName + "/" + "bin"));
+                pb.directory(startScriptBPath.getParent().toFile());
                 processB = pb.start();
             } else if (SystemUtils.IS_OS_WINDOWS) {
-                ProcessBuilder pbA = new ProcessBuilder(workingDirPath + File.separator + dADirName + File.separator
-                                + "bin" + File.separator + "startServer.bat");
+            	Path startScriptAPath = workingDirPath.resolve(dADirName + "/bin/startServer.bat");
+            	Path startScriptBPath = workingDirPath.resolve(dBDirName + "/bin/startServer.bat");
+            	
+            	ProcessBuilder pbA = new ProcessBuilder(startScriptAPath.toString());
                 pbA.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-                pbA.redirectError(new File(workingDirPath + File.separator + "error.log"));
+                pbA.redirectError(workingDirPath.resolve("error.log").toFile());
                 pbA.environment().put("JAVA_HOME", System.getProperty("java.home"));
                 processA = pbA.start();
 
-                ProcessBuilder pbB = new ProcessBuilder(workingDirPath + File.separator + dBDirName + File.separator
-                                + "bin" + File.separator + "startServer.bat");
+                ProcessBuilder pbB = new ProcessBuilder(startScriptBPath.toString());
                 pbB.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-                pbB.redirectError(new File(workingDirPath + File.separator + "error.log"));
+                pbA.redirectError(workingDirPath.resolve("error.log").toFile());
                 pbB.environment().put("JAVA_HOME", System.getProperty("java.home"));
                 processB = pbB.start();
             }
@@ -203,7 +201,7 @@ public class ITHelper {
                                 new InputStreamReader(p.getInputStream()));
                 String line;
                 while ((line = in.readLine()) != null) {
-                    if (line.contains("SimpleAxis2Server")) {
+                    if (line.contains("HolodeckB2BServer")) {
                         String pid = line.split(" ")[0];
                         String command = "kill -9 " + pid;
                         Process pr = Runtime.getRuntime().exec(command);
@@ -212,7 +210,7 @@ public class ITHelper {
                 }
                 p.waitFor();
             } else if (SystemUtils.IS_OS_WINDOWS) {
-                Process p = Runtime.getRuntime().exec("wmic process where \"CommandLine Like '%SimpleAxis2Server%'\" call terminate");
+                Process p = Runtime.getRuntime().exec("wmic process where \"CommandLine Like '%HolodeckB2BServer%'\" call terminate");
                 p.waitFor();
             }
         } catch (Exception e) {
@@ -224,34 +222,22 @@ public class ITHelper {
      * Copies the example data files to <code>distrDirName</code>/data/msg_out directory
      * @param distrDirName HolodeckB2B instance folder name
      */
-    void copyExampleDataToMsgOutDir(String distrDirName) {
-        File msgsDir = new File(workingDirPath + File.separator + distrDirName + File.separator
-                + "examples" + File.separator + "msgs");
-        File msgOutDir =
-                new File(workingDirPath + File.separator + distrDirName
-                        + File.separator + "data" + File.separator + "msg_out");
-        File[] msgsFiles = msgsDir.listFiles();
+    void copyExampleDataToMsgOutDir(String distrDirName) {    	
+        File msgsDir = workingDirPath.resolve(distrDirName + "/examples/msgs").toFile();
+        Path msgOutDir = workingDirPath.resolve(distrDirName + "/data/msg_out");
+        
         try {
-            for (int i = 0; i < msgsFiles.length; i++) {
-                File newMsgsFile =
-                        new File(msgOutDir.getPath() + File.separator
-                                + msgsFiles[i].getName());
-                Files.copy(msgsFiles[i].toPath(), newMsgsFile.toPath(),
-                        StandardCopyOption.REPLACE_EXISTING);
-                if(msgsFiles[i].isDirectory()) {
-                    File[] files = msgsFiles[i].listFiles();
-                    for(int j = 0; j < files.length;j ++) {
-                        newMsgsFile =
-                                new File(msgOutDir.getPath() + File.separator
-                                        + msgsFiles[i].getName()
-                                        + File.separator + files[j].getName());
-                        Files.copy(files[j].toPath(), newMsgsFile.toPath(),
-                                StandardCopyOption.REPLACE_EXISTING);
-                    }
-                }
+            for (File s : msgsDir.listFiles()) {
+                if(s.isDirectory()) {
+                	msgOutDir.resolve(s.getName()).toFile().mkdir();
+                	for(File c : s.listFiles())
+                    	Files.copy(c.toPath(), msgOutDir.resolve(s.getName() + "/" + c.getName()));
+                } else 
+                	Files.copy(s.toPath(), msgOutDir.resolve(s.getName()));
             }
         } catch (IOException e) {
             e.printStackTrace();
+            throw new IllegalStateException("Could not copy message data");
         }
     }
 
@@ -260,29 +246,14 @@ public class ITHelper {
      * @param distrDirName HolodeckB2B instance folder name
      */
     void copyKeystores(String distrDirName) {
-        File keysDir = new File(workingDirPath + File.separator + distrDirName + File.separator
-                + "examples" + File.separator + "certs");
-        File repoKeysDir =
-                new File(workingDirPath + File.separator + distrDirName
-                        + File.separator + "repository" + File.separator + "certs");
-        File[] keysFiles = keysDir.listFiles();
-//                keysDir.listFiles(new FilenameFilter() {
-//            @Override
-//            public boolean accept(File dir, String name) {
-//                if(name.endsWith("jks"))
-//                    return true;
-//                return false;
-//            }
-//        });
+        File msgsDir = workingDirPath.resolve(distrDirName + "/examples/certs").toFile();
+        Path msgOutDir = workingDirPath.resolve(distrDirName + "/repository/certs");
         try {
-            for (File f : keysFiles) {
-                File newF =
-                        new File(repoKeysDir.getPath() + File.separator + f.getName());
-                Files.copy(f.toPath(), newF.toPath(),
-                        StandardCopyOption.REPLACE_EXISTING);
-            }
+            for (File s : msgsDir.listFiles()) 
+                Files.copy(s.toPath(), msgOutDir.resolve(s.getName()), StandardCopyOption.REPLACE_EXISTING);                                                
         } catch (IOException e) {
             e.printStackTrace();
+            throw new IllegalStateException("Could not copy key stores");
         }
     }
 
@@ -291,16 +262,10 @@ public class ITHelper {
      * @param distrDirName HolodeckB2B instance folder name
      */
     void clearMsgOutAndMsgInDirs(String distrDirName) {
-        File msgOutDir =
-                new File(workingDirPath + File.separator + distrDirName
-                        + File.separator + "data" + File.separator + "msg_out");
-        File msgInDir =
-                new File(workingDirPath + File.separator + distrDirName
-                        + File.separator + "data" + File.separator + "msg_in");
         FilesUtility fu = new FilesUtility();
         try {
-            fu.deleteFolderContent(msgOutDir.toPath(), false);
-            fu.deleteFolderContent(msgInDir.toPath(), false);
+            fu.deleteFolderContent(workingDirPath.resolve(distrDirName + "/data/msg_out"), false);
+            fu.deleteFolderContent(workingDirPath.resolve(distrDirName + "/data/msg_in"), false);
         } catch (IOException e) {
 //            e.printStackTrace();
         }
@@ -311,15 +276,13 @@ public class ITHelper {
      * @param msgFileName message file name
      * @param distrDirName HolodeckB2B instance folder name
      */
-    boolean changeMsgExtensionToMMD(String msgFileName,
-                                                  String distrDirName) {
-        File file = new File(workingDirPath + File.separator + distrDirName
-                + File.separator + "data"+ File.separator + "msg_out" + File.separator + msgFileName);
+    boolean changeMsgExtensionToMMD(String msgFileName, String distrDirName) {
+        
+    	File file = workingDirPath.resolve(distrDirName + "/data/msg_out/" + msgFileName).toFile();
         int index = file.getName().lastIndexOf(".");
         String fileName = file.getName().substring(0, index);
         String newFileName = fileName + ".mmd";
-        File newFile = new File(file.getParentFile().getAbsolutePath()
-                + File.separator + newFileName);
+        File newFile = new File(file.getParentFile().getAbsolutePath() + File.separator + newFileName);
         return file.renameTo(newFile);
     }
 
@@ -329,10 +292,10 @@ public class ITHelper {
      */
     void deleteDistDir(String distrDirName) {
         FilesUtility fu = new FilesUtility();
-        File distrDir = new File(workingDirPath+File.separator+distrDirName);
-        if(distrDir.exists()) {
+        Path distrDir = workingDirPath.resolve(distrDirName);
+        if(Files.exists(distrDir)) {
             try {
-                fu.deleteFolderContent(distrDir.toPath(), true);
+                fu.deleteFolderContent(distrDir, true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -344,7 +307,7 @@ public class ITHelper {
      * @param filePath
      * @param port
      */
-    private void changePortInAxis2Xml(String filePath, String port) {
+    private void changeMainPort(String filePath, String port) {
         try {
             DocumentBuilderFactory docFactory =
                     DocumentBuilderFactory.newInstance();
@@ -375,6 +338,41 @@ public class ITHelper {
         } catch (SAXException sae) {
             sae.printStackTrace();
         }
+    }
+    
+    /**
+     * Adds port parameter to UI RMI Server in workers.xml
+     * @param filePath
+     * @param port
+     */
+    private void addRMIPortWorkersXml(String filePath, String port) {
+    	try {
+    		DocumentBuilderFactory docFactory =
+    				DocumentBuilderFactory.newInstance();
+    		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+    		Document doc = docBuilder.parse(filePath);
+    		NodeList workers = doc.getElementsByTagName("worker");
+    		Node rmiWorker = workers.item(workers.getLength() - 1);
+
+    		Element portParam = rmiWorker.getOwnerDocument().createElement("parameter");
+    		portParam.setAttribute("name", "port");
+    		portParam.setTextContent(port);
+    		rmiWorker.appendChild(portParam);
+    		
+    		TransformerFactory transformerFactory = TransformerFactory.newInstance();
+    		Transformer transformer = transformerFactory.newTransformer();
+    		DOMSource source = new DOMSource(doc);
+    		StreamResult result = new StreamResult(new File(filePath));
+    		transformer.transform(source, result);
+    	} catch (ParserConfigurationException pce) {
+    		pce.printStackTrace();
+    	} catch (TransformerException tfe) {
+    		tfe.printStackTrace();
+    	} catch (IOException ioe) {
+    		ioe.printStackTrace();
+    	} catch (SAXException sae) {
+    		sae.printStackTrace();
+    	}
     }
 
     /**
@@ -456,3 +454,4 @@ public class ITHelper {
         return res;
     }
 }
+

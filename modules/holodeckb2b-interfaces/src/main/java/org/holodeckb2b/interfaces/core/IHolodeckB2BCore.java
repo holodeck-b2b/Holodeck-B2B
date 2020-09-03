@@ -18,6 +18,7 @@ package org.holodeckb2b.interfaces.core;
 
 import java.util.List;
 
+import org.apache.axis2.modules.Module;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
@@ -26,13 +27,12 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
-import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
+import org.holodeckb2b.interfaces.general.IVersionInfo;
+import org.holodeckb2b.interfaces.persistency.IQueryManager;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
-import org.holodeckb2b.interfaces.security.ICertificateManager;
+import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
-import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
-import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
  * Defines the interface the Holodeck B2B Core implementation has to provide to the outside world, like submitters
@@ -50,6 +50,16 @@ public interface IHolodeckB2BCore {
      */
     IConfiguration getConfiguration();
 
+    /**
+     * Gets the active Axis2 Module with the given name. This can for example be used by protocol extension to get 
+     * access to "their" module for protocol specific settings.  
+     * 
+     * @param name	the requested module's name
+     * @return 		the active Axis2 module if it exists in this Holodeck B2B instance,<br><code>null</code> otherwise
+     * @since 5.0.0
+     */
+    Module getModule(final String name);
+    
     /**
      * Gets a {@link IMessageDeliverer} object configured as specified by the {@link IDeliverySpecification} that can be
      * used to deliver message units to the <i>Consumer</i> business application.
@@ -90,22 +100,6 @@ public interface IHolodeckB2BCore {
      * @since 2.1.0
      */
     IMessageProcessingEventProcessor getEventProcessor();
-
-    /**
-     * Sets the configuration of the <i>pull worker pool</i> which contains the <i>Workers</i> that are responsible for
-     * sending the Pull Request signal messages.
-     * <p>If no new configuration is provided the worker pool will be stopped. NOTE that this will also stop Holodeck
-     * B2B from pulling for User Messages (unless some other worker(s) in the regular worker pool take over, which is
-     * <b>not recommended</b>).
-     *
-     * @param pullConfiguration             The new pool configuration to use. If <code>null</code> the worker pool
-     *                                      will be stopped.
-     * @throws TaskConfigurationException   When the provided configuration could not be activated. This is probably
-     *                                      caused by an issue in the configuration of the workers but it can also be
-     *                                      that the worker pool itself could not be started correctly.
-     * @since 2.1.0
-     */
-    void setPullWorkerPoolConfiguration(IWorkerPoolConfiguration pullConfiguration) throws TaskConfigurationException;
 
     /**
      * Gets the data access object that should be used to query the meta-data on processed message units.
@@ -158,4 +152,12 @@ public interface IHolodeckB2BCore {
      * @since 4.1.0
      */
     List<IMessageProcessingEventConfiguration> getEventHandlerConfiguration();
+    
+    /**
+     * Gets information about the version of the Holodeck B2B Core of this instance. 
+     *   
+     * @return	The version info
+     * @since 5.0.0
+     */
+    IVersionInfo getVersion();
 }

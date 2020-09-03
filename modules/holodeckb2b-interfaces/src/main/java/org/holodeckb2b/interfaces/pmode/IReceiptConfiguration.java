@@ -18,7 +18,6 @@ package org.holodeckb2b.interfaces.pmode;
 
 
 
-import org.holodeckb2b.interfaces.as4.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 

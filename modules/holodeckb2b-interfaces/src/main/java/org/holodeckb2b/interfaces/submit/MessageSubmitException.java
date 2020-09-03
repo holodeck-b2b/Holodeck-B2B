@@ -31,7 +31,7 @@ public class MessageSubmitException extends Exception {
         super(message);
     }
 
-    public MessageSubmitException(final String message, final Exception cause) {
+    public MessageSubmitException(final String message, final Throwable cause) {
         super(message, cause);
     }
 

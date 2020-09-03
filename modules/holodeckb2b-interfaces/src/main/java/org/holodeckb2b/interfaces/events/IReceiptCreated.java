@@ -31,15 +31,14 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.1.0
  */
-public interface IReceiptCreated extends IMessageProcessingEvent, IReceiptCreatedEvent {
+public interface IReceiptCreated extends IMessageProcessingEvent {
 
     /**
      * Gets the <i>Receipt</i> that was created to acknowledge that the <i>User Message</i> that is the subject of this
      * event was received by Holodeck B2B.
      *
      * @return The {@link IReceipt} that was created
-     */
-    @Override
+     */ 
 	public IReceipt getReceipt();
 
     /**
@@ -50,6 +49,5 @@ public interface IReceiptCreated extends IMessageProcessingEvent, IReceiptCreate
      * @return  <code>true</code> if the Receipt was created for a duplicate,<br>
      *          <code>false</code> otherwise
      */
-    @Override
 	public boolean isForEliminatedDuplicate();
 }

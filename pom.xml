@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     Copyright (C) 2014-2017 The Holodeck B2B Team, Sander Fieten
@@ -15,15 +16,13 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+--><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.holodeckb2b</groupId>
     <artifactId>holodeckb2b</artifactId>
     <packaging>pom</packaging>
-    <version>4.1.2</version>
+    <version>5.0.1</version>
     <name>Holodeck B2B</name>
     <url>http://www.holodeck-b2b.org/</url>
     <inceptionYear>2015</inceptionYear>
@@ -81,7 +80,7 @@
     </contributors>
 
     <properties>
-        <!-- This version of Holodeck B2B requires at least JDK 1.7 -->
+        <!-- This version of Holodeck B2B requires at least JDK 1.8 -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
@@ -93,13 +92,14 @@
 
     <modules>
         <module>modules/holodeckb2b-interfaces</module>
-        <module>modules/holodeckb2b-common</module>
+        <module>modules/holodeckb2b-core</module>
         <module>modules/holodeckb2b-persistency</module>
         <module>modules/holodeckb2b-security</module>
-        <module>modules/holodeckb2b-core</module>
+        <module>modules/holodeckb2b-ebms3as4</module>
         <module>modules/holodeckb2b-distribution</module>
         <module>modules/holodeckb2b-it</module>
-    </modules>
+        <module>modules/holodeckb2b-ui</module>
+  </modules>
 
     <licenses>
         <license>
@@ -121,9 +121,14 @@
             </dependency>
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
-                <artifactId>holodeckb2b-common</artifactId>
+                <artifactId>holodeckb2b-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
+	        <dependency>
+	            <groupId>${project.groupId}</groupId>
+	            <artifactId>holodeckb2b-certmanager</artifactId>
+	            <version>${project.version}</version>            
+	        </dependency>            
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
                 <artifactId>holodeckb2b-persistency</artifactId>
@@ -131,12 +136,12 @@
             </dependency>
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
-                <artifactId>holodeckb2b-security</artifactId>
+                <artifactId>holodeckb2b-ebms3as4</artifactId>
                 <version>${project.version}</version>
-            </dependency>
+            </dependency>            
             <dependency>
                 <groupId>org.holodeckb2b</groupId>
-                <artifactId>holodeckb2b-core</artifactId>
+                <artifactId>holodeckb2b-ui</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

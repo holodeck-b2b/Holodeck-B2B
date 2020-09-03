@@ -59,6 +59,9 @@ public interface ISecurityConfiguration {
 
     /**
      * Gets the configuration for adding or validating a Signature in the WS-Security header.
+     * <p>NOTE: When the security configuration is associated with the trading partner sending messages to the Holodeck
+     * B2B gateway returning a non <code>null</code> value means that <i>User Messages</i> sent by this trading partner
+     * MUST be signed. If not signed Holodeck B2B will generate a <i>PolicyNonCompliance</i> error.
      *
      * @return  An {@link ISigningConfiguration} object containing the information to add/validate a Signature to the
      *          WS-Security header, or<br>

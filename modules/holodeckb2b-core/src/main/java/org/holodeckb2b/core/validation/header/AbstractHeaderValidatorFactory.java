@@ -23,8 +23,9 @@ import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
- * Is the factory class for creating <i>ebMS header validators</i> that check whether the ebMS message header of a
- * message unit conforms to the ebMS specifications.
+ * Is an abstract factory class for creating <i> message header validators</i> that check whether a received message 
+ * conforms to the protocol specifications. Protocol implementation should extend this class and initialise both maps
+ * that define the basic (lax) and strict validation of the different message unit types.
  *
  * @author Sander Fieten <sander at holodeck-b2b.org>
  * @since  4.1.0

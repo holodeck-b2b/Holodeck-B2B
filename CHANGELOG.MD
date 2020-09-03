@@ -2,6 +2,122 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 5.0.1
+##### 2020-09-03
+
+### Changed
+* Renewed example certificates
+* Updates example P-Modes to use new file delivery method name
+
+### Fixed
+* Backward compatibility for "relaxed" reading P-Mode XML documents.
+* P-Modes and certificates are now refreshed when switching tabs in the GUI [#108](https://github.com/holodeck-b2b/Holodeck-B2B/issues/108) 
+* Non AS4 P-Modes evaluated for AS4 messages [#111](https://github.com/holodeck-b2b/Holodeck-B2B/issues/111) 
+
+
+## 5.0.0
+##### 2020-07-03
+
+### Added
+* A default user interface that supports basic monitoring of a running Holodeck B2B instance. The UI is available both
+  using a command line and GUI application.
+* Support for asynchronous Two-Way AS4 P-Modes.
+* Support for additional P-Mode validators for the same type of P-Mode. _P-Mode validators_ are now loaded using the Java 
+  SPI mechanism and all applicable validators are used to check a P-Mode before loading it. Two new methods were added
+  in `org.holodeckb2b.interfaces.pmode.validation.IPModeValidator` to support the new mechanism.  
+* Configuration parameter to indicate whether the Holodeck B2B Core should fall back to default _Event Processor_ 
+  implementation in case the custom implementation cannot be loaded/initialised. 
+* New interfaces related to trust validation of certificates in `org.holodeckb2b.interfaces.security.trust`. Notably
+  the new specification of the Holodeck B2B _Certificate Manager_ which is now a separate component independent of the
+  _Security Provider_. Also new interfaces and methods are defined to communicate the results of trust validation checks
+  between components including the new `ISignatureVerifiedWithWarning` event to signal trust issues on signature
+  verification.
+* Signature policy check in **Core Processing** that received _User Messages_ are signed when indicated in P-Mode that 
+  they should be. Violation of this rule will generate an _PolicyNonCompliance_ error.
+* On submission of _User Message_  a check that the provided payload _Content-Id_ values do not contain invalid characters.
+* Added new message processing events to indicate delivery or failure of a message unit to the back-end application.
+* When an (unexpected) error occurs during the processing of a message unit a `ISendMessageProcessingFailure` or 
+  `IReceiveMessageFailure` is raised.  
+* `org.holodeckb2b.interfaces.core.IMessageProcessingContext` interface which can be used in extension APIs to provide 
+  access to the HB2B _message processing context_.  
+* Custom implementation of the Axis2 `TransportListener` interface which can use a _Service_ specified _Message Builder_.  
+* Option to add HTTP response headers to an empty response by setting a property named `HTTPConstants.RESPONSE_HEADERS` 
+  on the request MessageContext containing Map of name and value of headers to set.    
+* `org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface.getVersion()` method and 
+  `org.holodeckb2b.interfaces.general.IVersionInfo` interface to provide information about the version of the 
+  Holodeck B2B instance.
+* `org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface.getModule(String)` method to access an active Axis2 Module
+  on the Holodeck B2B instance. This can be used by extensions to get access to "their" module. 
+* `org.holodeckb2b.common.messagemodel.MessageUnit.copyOf(IMessageUnit)` to create a copy of the message unit data in
+  an object of the common message model implementation. 
+* Default implementation of the new `ICertificateManager` and `IValidationResult` trust interface to the _security_ 
+  module.
+* Option to configure the directory where the Holodeck B2B message database should be stored through the `HB2B_DB_DIR`
+  environment variable.
+
+### Changed
+* P-Modes are now by default stored in the `repository/pmodes` directory.  
+* The Axis2 configuration has been merged into the `holodeckb2b.xml` configuration file. 
+* The default key transport algorithms have been upgraded to RSA-OAEP and MGF1 with SHA256.
+* Reception Awareness is now a generic feature not bound to AS4. As a result the `getReceptionAwareness()` method has
+  moved to `org.holodeckb2b.interfaces.pmode.ILeg` and class `IReceptionAwareness` has moved to the 
+  `org.holodeckb2b.interfaces.pmode` package.
+* Split the `IMessageDelivery` and `IMessageTransfer` events into two separate events for success and failure.    
+* Startup sequence now checks that the server is correctly started and aborts startup if not.
+* The _Security Provider_,_Persistency Provider_, _P-Mode storage_ and _Event Processor_ are now loaded using the Java 
+  _Service Provider Interface_ mechanism.   
+* Refactored the interfaces of the _Persistency Provider_. The ` IDAOFactory` interface has been removed and its methods
+  are now defined directly in the `PersistencyProvider` interface.
+* The security provider interface now use the new `org.holodeckb2b.interfaces.core.IMessageProcessingContext` interface
+  to provide access to the processing context.
+* Restructured the project's modules to create a better separation of _Core_ and _protocol specific_ code. This includes 
+  renaming of Axis2 phases to reflect the difference between _Core_ and _protocol specific_ processing.
+* Split the _security_ module into two sub modules; one to implement the new default _Certificate Manager_ and one to 
+  implement the _Security Provider_. Both implementations are refactored version of the old _Security Provider_ classes.
+* Refactored the default P-Mode implementation so it also supports setting of parameters and serialization to XML.
+* Refactored send process to make it more flexible and use *PMode.MEPBinding* to select the Axis2 _Service_ to use for
+  sending. This removes the need for coded _Services_ and specialised senders or sender workers when implementing an
+  additional messaging protocol.
+* Refactored the `OutOptInAxisOperation` so it will also use the _Service_ specified _Message Builder_ for building the
+  response message.  
+* Renamed abstract worker implementations to include _Abstract_ prefix.
+* Moved classes in `org.holodeckb2b.common.messagemodel.util` to generic utility package `org.holodeckb2b.common.util`.  
+* Moved _PModeWatcher_ worker to the `org.holodeckb2b.common.pmode` package as it's directly related to the XML P-Mode
+  implementation contained in this package.
+* Constructor of `org.holodeckb2b.interfaces.submit.MessageSubmitException` now accepts `Throwable` instead of 
+  `Exception`. 
+* The classes of the common message model implementation are now `Serializable`.  
+* Switched to Log4J2 logging in handlers.
+
+### Fixed
+* Generated Content-Id results in signature failure [#99](https://github.com/holodeck-b2b/Holodeck-B2B/issues/99).
+* NPE when white space is contained between the `ds:Signature` and `ds:SignedInfo` elements of a received message 
+ [#100](https://github.com/holodeck-b2b/Holodeck-B2B/issues/100)
+* Error descriptions longer than 255 characters are not saved.
+* NPE occurs on event handlers with no parameters [#102](https://github.com/holodeck-b2b/Holodeck-B2B/issues/102)
+* Invalid SOAPFault included with ebMS Error using SOAP 1.2 [#103](https://github.com/holodeck-b2b/Holodeck-B2B/issues/103)
+* Inconsistency in reception awareness [#104](https://github.com/holodeck-b2b/Holodeck-B2B/issues/104)
+* NPE for submitted UserMessage without CollaborationInfo [#105](https://github.com/holodeck-b2b/Holodeck-B2B/issues/105)
+
+### Removed
+* Message processing events which names ended on _Event_.
+* Setter methods in `org.holodeckb2b.interfaces.general.IAgreement`.
+* The configuration parameter (`IConfiguation.useStrictErrorRefCheck()`) to apply a strict validation on the
+  references in the Error signal.
+* The following configuration parameters (as defined in `IConfiguration`) have been removed:
+    * Related to the keystores used in WS-Security processing and certificate management.
+    * P-Mode validator class (now loaded through SPI mechanism)
+    * Security Provider class (now loaded through SPI mechanism)
+    * Persistency Provider class (now loaded through SPI mechanism)
+    * P-Mode set storage class (now loaded through SPI mechanism)
+* The _msh_ URL path for receiving messages.
+* Split the file based back-end integration into a separate project (see [File-backend](https://github.com/holodeck-b2b/file-backend)).
+  However this back-end is still included in the default distribution. 
+* `org.holodeckb2b.interfaces.config.IConfiguration.getAxisConfigurationContext()` method, as extensions should not need 
+  access to internal Axis configuration.
+* `org.holodeckb2b.interfaces.entities.IMessageUnit.getLeg()`, as the leg can be calculated based on the P-Mode.
+* Deprecated methods from `IReceptionAwarness`
+
 ## 4.1.2
 ##### 2019-04-10
 ### Fixed
@@ -153,6 +269,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   level provides enough information to see all messages which are processed. Going to _DEBUG_ add information
   of process steps and _TRACE_ provides most detailed logging.    
 * In case of exception when logging an invalid SOAP message, a error message is written to SOAP log
+* Use 'exec' to start the Java program, instead of forking the process to simplify management of
+  the Java process.
+* Updated the example certificates and key stores to extend validity of certificates
+
+### Fixed
+* Checking of references in Error Signal has been corrected so Error with the reference contained
+  only in the Errors is not rejected.
+* Exception when processing an invalid SOAP message [#15](https://github.com/holodeck-b2b/Holodeck-B2B/issues/15)
+* Updated README regarding certificate management in `repository/certs` folder to include also
+  the keystore with the certificates of trusted certificate authorities.
+* Severity attributes should be "warning" or "failure" not "WARNING" or "FAILURE" [#89](https://github.com/holodeck-b2b/Holodeck-B2B/issues/89)
 
 ### Deprecated
 * The configuration parameter (`IConfiguation.allowSignalBundling()`) which was used to indicate that it was allowed to
@@ -172,20 +299,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 * Method `IMessageSubmitter.submitMessage(IUserMessage)` and corresponding implementation.
 * Method `IPModeSet.listPModeIds()` and corresponding implementation.
-
-## Unreleased
-### Changed
-* Use 'exec' to start the Java program, instead of forking the process to simplify management of
-  the Java process.
-* Updated the example certificates and key stores to extend validity of certificates
-
-### Fixed
-* Checking of references in Error Signal has been corrected so Error with the reference contained
-  only in the Errors is not rejected.
-* Exception when processing an invalid SOAP message [#15](https://github.com/holodeck-b2b/Holodeck-B2B/issues/15)
-* Updated README regarding certificate management in `repository/certs` folder to include also
-  the keystore with the certificates of trusted certificate authorities.
-* Severity attributes should be "warning" or "failure" not "WARNING" or "FAILURE" [#89](https://github.com/holodeck-b2b/Holodeck-B2B/issues/89)
 
 ## 3.1.2
 ##### 2018-05-28

@@ -16,12 +16,13 @@
  */
 package org.holodeckb2b.persistency;
 
-import org.holodeckb2b.common.constants.ProductId;
+import java.nio.file.Path;
+
+import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
+import org.holodeckb2b.interfaces.persistency.IQueryManager;
+import org.holodeckb2b.interfaces.persistency.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
-import org.holodeckb2b.interfaces.persistency.dao.IQueryManager;
-import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
 import org.holodeckb2b.persistency.managers.QueryManager;
 import org.holodeckb2b.persistency.managers.UpdateManager;
 import org.holodeckb2b.persistency.util.EntityManagerUtil;
@@ -38,47 +39,21 @@ public class DefaultProvider implements IPersistencyProvider {
 
     @Override
     public String getName() {
-        return  "HB2B Default Persistency/" + ProductId.MAJOR_VERSION + "." + ProductId.MINOR_VERSION
-                                            + "." + ProductId.PATCH_VERSION;
+        return  "HB2B Default Persistency/" + VersionInfo.fullVersion;
     }
 
-
     @Override
-    public void init(final String hb2bHomeDir) throws PersistenceException {
+    public void init(final Path hb2bHomeDir) throws PersistenceException {
         EntityManagerUtil.check();
     }
-
-    /**
-     *
-     * @return The DAO Factory of the default persistency implementation
-     */
+    
     @Override
-    public IDAOFactory getDAOFactory() {
-        return new DAOFactory();
+    public IUpdateManager getUpdateManager() {
+        return new UpdateManager();
     }
 
-    /**
-     * Is the factory class of the default persistency implementation that enables the Holodeck B2B Core to persist and
-     * access the meta-data of the processed message units.
-     */
-    class DAOFactory implements IDAOFactory {
-
-        /**
-         *
-         * @return The update manager of the default persistency implementation
-         */
-        @Override
-        public IUpdateManager getUpdateManager() {
-            return new UpdateManager();
-        }
-
-        /**
-         *
-         * @return The query manager of the default persistency implementation
-         */
-        @Override
-        public IQueryManager getQueryManager() {
-            return new QueryManager();
-        }
+    @Override
+    public IQueryManager getQueryManager() {
+        return new QueryManager();
     }
 }

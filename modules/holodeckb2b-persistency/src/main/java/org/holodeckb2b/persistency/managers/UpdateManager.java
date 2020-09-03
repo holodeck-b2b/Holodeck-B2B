@@ -27,18 +27,17 @@ import javax.persistence.OptimisticLockException;
 import javax.persistence.RollbackException;
 
 import org.holodeckb2b.common.messagemodel.MessageProcessingState;
-import org.holodeckb2b.common.messagemodel.util.MessageUnitUtils;
+import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.persistency.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.dao.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.entities.MessageUnitEntity;
 import org.holodeckb2b.persistency.jpa.ErrorMessage;
@@ -215,13 +214,6 @@ public class UpdateManager implements IUpdateManager {
     public void setMultiHop(final IMessageUnitEntity msgUnit, final boolean isMultihop) throws PersistenceException {
         performUpdate((MessageUnitEntity) msgUnit, (MessageUnit jpaObject) -> {
             jpaObject.setMultiHop(isMultihop);
-        });
-    }
-
-    @Override
-    public void setLeg(final IMessageUnit msgUnit, final ILeg.Label legLabel) throws PersistenceException {
-        performUpdate((MessageUnitEntity) msgUnit, (MessageUnit jpaObject) -> {
-            jpaObject.setLeg(legLabel);
         });
     }
 

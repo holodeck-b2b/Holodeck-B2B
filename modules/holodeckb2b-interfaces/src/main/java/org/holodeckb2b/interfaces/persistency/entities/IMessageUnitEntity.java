@@ -17,7 +17,7 @@
 package org.holodeckb2b.interfaces.persistency.entities;
 
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
 
 /**
  * Defines the interface of the persistent entity object that is used by the Holodeck B2B to store the general message
@@ -49,13 +49,6 @@ public interface IMessageUnitEntity extends IMessageUnit {
      *          <code>false</code> otherwise
      */
     boolean isLoadedCompletely();
-
-    /**
-     * Gets the label of the leg within the P-Mode on which this message unit is exchanged.
-     *
-     * @return  The leg label
-     */
-    ILeg.Label getLeg();
 
     /**
      * Gets the indication whether this message unit is send using a multi-hop exchange

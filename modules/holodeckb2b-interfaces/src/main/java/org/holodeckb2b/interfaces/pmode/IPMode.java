@@ -19,6 +19,7 @@ package org.holodeckb2b.interfaces.pmode;
 
 
 import java.util.List;
+
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IAgreement;
@@ -39,8 +40,10 @@ import org.holodeckb2b.interfaces.pmode.ILeg.Label;
  * in the P-Mode. This would require a P-Mode for each exchanged message while some message only differ on some
  * configuration parameters. Therefor Holodeck B2B allows the P-Mode to define only the common parameters and supply the
  * message specific ones when the message is submitted.
- * <p><b>NOTE 1: </b>Although the P-Mode model used here does support Two-Way MEP bindings, Holodeck B2B currently only
- * supports One-Way MEP bindings (support for One-Way bindings allows for full support of the AS4 profile).
+ * <p><b>NOTE 1: </b>Although the focus of Holodeck B2B is on implementation of ebMS V3/AS4 messaging protocol P-Modes 
+ * are also used to configure other messaging protocols like AS2 and ebMS2. However some parameters will need to be 
+ * mapped to protocol specific settings. Such mappings should be documented in the project providing the support for the
+ * specific messaging protocol.
  * <p><b>NOTE 2: </b>The current version does not contain all P-Mode parameters described by the Core Specification and
  * AS4 profile. When new functionality is implemented parameters will be added to this interface.
  *
@@ -98,9 +101,9 @@ public interface IPMode {
 
     /**
      * Gets the MEP binding used by the P-Mode.
-     * <p>NOTE: As Holodeck B2B only support One-Way MEPs only binding for One-Way MEP are allowed!
      *
-     * @return  The URI defined in the Core Specification that defines the MEP binding used by this P-Mode.
+     * @return  URI defining the messaging protocol used. This MUST be an URI defined in the ebMS V3 Core Specification 
+     * 			when the ebMS V3 message exchange protocol is used.
      * @see EbMSConstants#ONE_WAY_PULL
      * @see EbMSConstants#ONE_WAY_PUSH
      * @see EbMSConstants#TWO_WAY_PUSH_PUSH
@@ -146,7 +149,12 @@ public interface IPMode {
     public List<? extends ILeg> getLegs();
 
     /**
-     * Gets the configuration of the leg with the specified label within the P-Mode.
+     * Gets the configuration of the leg with the specified label within the P-Mode. 
+     * <p>Although the leg's label is only relevant for P-Modes that manage a Two-Way MEP this method is also used by 
+     * the Holodeck B2B Core to get the single leg of One-Way P-Modes. In that case either no specific label or the 
+     * <i>request</i> label may be requested depending on if the P-Mode implementation assigns a label to the leg of a
+     * One-Way P-Mode (i.e. only when the implementation does not assign a label Holodeck B2B will not provide one when 
+     * calling this method).        
      *
      * @param label     The label of the leg to get the configuration of
      * @return          A {@link ILeg} object containing the configuration of the leg

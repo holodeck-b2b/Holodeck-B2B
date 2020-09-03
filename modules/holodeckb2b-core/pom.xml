@@ -17,12 +17,12 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>4.1.2</version>
+        <version>5.0.1</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -30,15 +30,12 @@
     <artifactId>holodeckb2b-core</artifactId>
     <packaging>jar</packaging>
     <name>Holodeck B2B - Core</name>
-
+    <description>This module contains the Holodeck B2B Core processing engine that applies to all protocols</description>
+    
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-interfaces</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-common</artifactId>
         </dependency>
 
         <!-- Apache Axis2 kernel -->
@@ -46,60 +43,30 @@
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-kernel</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.ws.commons.axiom</groupId>
-            <artifactId>axiom-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ws.commons.axiom</groupId>
-            <artifactId>axiom-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ws.commons.axiom</groupId>
-            <artifactId>axiom-dom</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <!-- WS-Addressing libs required for multi-hop support -->
         <dependency>
             <groupId>org.apache.axis2</groupId>
-            <artifactId>addressing</artifactId>
-            <version>${axis2-version}</version>
-            <type>mar</type>
-            <scope>runtime</scope>
+            <artifactId>axis2-transport-http</artifactId>
         </dependency>
-
-        <!-- Simple XML framework for easy processing of XML documents -->
         <dependency>
             <groupId>org.simpleframework</groupId>
             <artifactId>simple-xml</artifactId>
         </dependency>
 
+        <!-- Apache Tika is used to determine MIME Type -->
         <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-        </dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+        </dependency>        
 
-        <!-- Logging -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
         </dependency>
-
-        <!-- Dependencies for testing -->
+        
+        <!-- Dependencies specific for testing -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-persistency</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-security</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -108,54 +75,50 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <!-- Dependency from common test util classes -->
+        <!-- This specific log4j lib is used by mockito. @todo: We should check if we can skip this dependency -->
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-common</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
             <scope>test</scope>
         </dependency>
-
-        <!--Used to parse pom.xml and get project properties, such as version-->
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-model</artifactId>
-            <version>3.0.4</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-utils</artifactId>
-            <version>2.0.6</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-core</artifactId>
-            <version>3.0.4</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-              <artifactId>maven-clean-plugin</artifactId>
-              <configuration>
-                <filesets>
-                  <fileset>
-                    <directory>db</directory>
-                    <followSymlinks>false</followSymlinks>
-                  </fileset>
-                </filesets>
-              </configuration>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>templating-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                  <execution>
+                    <id>filter-src</id>
+                    <goals>
+                      <goal>filter-sources</goal>
+                    </goals>
+                  </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
         <resources>
@@ -165,6 +128,6 @@
               <exclude>xsd/**</exclude>
             </excludes>
           </resource>
-        </resources>
+        </resources>                
     </build>
 </project>

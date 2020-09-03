@@ -26,13 +26,12 @@ import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.1.0
  */
-public interface IUTProcessingFailure extends ISecurityProcessingFailure, IUTProcessingFailureEvent {
+public interface IUTProcessingFailure extends ISecurityProcessingFailure {
 
     /**
      * Gets the target of Username token WS-Security header in which processing failed.
      *
      * @return The target of the Username token header
      */
-    @Override
 	SecurityHeaderTarget getTargetedRole();
 }

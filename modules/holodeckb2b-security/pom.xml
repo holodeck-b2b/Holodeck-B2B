@@ -21,12 +21,17 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>4.1.2</version>
+        <version>5.0.1</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>holodeckb2b-security</artifactId>
-    <packaging>jar</packaging>
-    <name>Holodeck B2B - Default Security Provider</name>
+    <packaging>pom</packaging>
+    <name>Holodeck B2B - Default Security</name>
+    <description>This project contains the default implementations of the Holodeck B2B Security Provider and Certificate Manager. 
+        Because the Security Provider and Certificate Manager are separate and lousely coupled components in the Holodeck B2B, they
+        are included in two separate modules. Do however note that the included Security Provider is tightly integrated with the
+        Certificate Manager and cannot be deployed with a different one. The Certificate Manager however can be used with other
+        Security Providers.</description>
     <inceptionYear>2017</inceptionYear>
 
     <properties>
@@ -34,84 +39,8 @@
         <wss4j.version>2.2.2</wss4j.version>
     </properties>
 
-    <dependencies>
-        <!-- The other Holodeck B2B libraries -->
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-interfaces</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-common</artifactId>
-        </dependency>
-
-        <!-- WSS4J Security libs -->
-        <dependency>
-            <groupId>org.apache.santuario</groupId>
-            <artifactId>xmlsec</artifactId>
-            <version>2.1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.wss4j</groupId>
-            <artifactId>wss4j-ws-security-common</artifactId>
-            <version>${wss4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.wss4j</groupId>
-            <artifactId>wss4j-ws-security-dom</artifactId>
-            <version>${wss4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.59</version>
-        </dependency>
-
-        <!-- Logging -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-        </dependency>
-
-        <!-- Test dependencies -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>2.3.1</version>
-                <executions>
-                    <execution>
-                        <id>xjc</id>
-                        <goals>
-                            <goal>xjc</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <sources>
-                        <source>src/main/resources/hb2b-security-cfg.xsd</source>
-                    </sources>
-                    <packageName>org.holodeckb2b.security.config</packageName>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+    <modules>
+        <module>certmanager</module>
+        <module>sec-provider</module>
+    </modules>
 </project>

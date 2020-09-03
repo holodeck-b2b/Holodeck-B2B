@@ -24,5 +24,5 @@ package org.holodeckb2b.interfaces.events.security;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.1.0
  */
-public interface IDecryptionFailure extends ISecurityProcessingFailure, IDecryptionFailedEvent {
+public interface IDecryptionFailure extends ISecurityProcessingFailure {
 }

@@ -16,44 +16,52 @@
  */
 package org.holodeckb2b.interfaces.persistency;
 
-import org.holodeckb2b.interfaces.persistency.dao.IDAOFactory;
+import java.nio.file.Path;
 
 /**
- * Defines the interface of a <i>persistency provider</i> that allows the Holodeck B2B Core to persist the meta-data of
- * processed message units. This interface is the "entry point" of the provider used to intialize the provider and to
- * access the storage functions. The actual functionality the provider has to implement is defined in all the interfaces
- * contained in this and sub packages {@link org.holodeckb2b.interfaces.persistency.dao} and {@link
- * org.holodeckb2b.interfaces.persistency.entities}.
- * <p>To allow the Holodeck B2B Core to create an instance of the persistency provider a default non-argument
- * constructor must be provided by the implementation.
+ * Defines the interface of a Holodeck B2B <i>Persistency Provider</i> that allows the Holodeck B2B Core to persist the 
+ * meta-data of processed message units. 
+ * <p>There can always be just one <i>Persistency Provider</i> active in an Holodeck B2B instance. The implementation to
+ * use is loaded using the Java <i>Service Prover Interface</i> mechanism.  
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
+ * @since  5.0.0 The interface now also includes the methods to get the manager objects. 
  */
 public interface IPersistencyProvider {
 
     /**
-     * Gets the name of this persistency provider to identify it in logging. This name is only used for logging purposes
-     * and SHOULD include a version number of the implementation.
+     * Gets the name of this persistency provider to identify it in logging. This name is only used for logging purposes 
+     * and it is recommended to include a version number of the implementation. If no name is specified by the 
+     * implementation the class name will be used. 
      *
      * @return  The name of the persistency provider.
      */
-    String getName();
+    default String getName() { return this.getClass().getName(); }
 
     /**
-     * Initializes the persistency provider. It MUST ensure that all information that is needed to create the DAO
-     * factory objects is available and correct.
+     * Initialises the persistency provider. This method is called once at startup of the Holodeck B2B instance. Since
+     * the message processing depends on the correct functioning of the Persistency Provider this method MUST ensure 
+     * that all required configuration and data is available . Required configuration parameters must be implemented by 
+     * the Certificate Manager. 
      *
      * @param hb2bHomeDir               Path to the Holodeck B2B home directory
      * @throws PersistenceException     When the initialization of the provider can not be completed. The exception
      *                                  message SHOULD include a clear indication of what caused the init failure.
      */
-    void init(final String hb2bHomeDir) throws PersistenceException;
+    void init(Path hb2bHomeDir) throws PersistenceException;
 
     /**
-     * Gets the provider's {@link IDAOFactory} implementation to create the data access objects.
+     * Gets the <i>Update Manager</i> to perform write operations on message unit meta-data.
      *
-     * @return The provider's {@link IDAOFactory} implementation
+     * @return  A {@link IUpdateManager} implementation
      */
-    IDAOFactory getDAOFactory();
+    IUpdateManager  getUpdateManager();
+
+    /**
+     * Gets the <i>Query Manager</i> to perform query (read) operations on message unit meta-data.
+     *
+     * @return  A {@link IQueryManager} implementation
+     */
+    IQueryManager   getQueryManager();
 }

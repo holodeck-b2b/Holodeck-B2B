@@ -16,24 +16,25 @@
  */
 package org.holodeckb2b.interfaces.security;
 
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+
 /**
  * Defines the interface of a Holodeck B2B <i>security provider</i> which is responsible for handling of the WS-Security
- * header in messages processed by Holodeck B2B.
- * <p>The security provider has three main components:<ol>
+ * header in ebMS3/AS4 messages processed by Holodeck B2B. The security provider has two main components:<ol>
  * <li>The <i>security header processor</i> which is responsible for processing of the WS-Security header in received
  * messages.</li>
  * <li>The <i>security header creator</i> which is responsible for creating the WS-Security header in messages send by
  * Holodeck B2B.</li>
- * <li>The <i>certificate manager</i> which is responsible for storing the keys and certificates needed in the
- * processing of the WS-Security headers.</li>
  * </ol>
- * <p>The security provider to use is configured per Holodeck B2B instance, so all messages processed by the instance
- * will use the same security provider. The security will be initialized on startup of the instance. Implementations
- * that want to support dynamic reconfiguration should handle this internally. To allow the Holodeck B2B Core to create
- * an instance of the provider a default non-argument constructor must be provided by the implementation.
- *
+ * <p>The security provider to use is configured per Holodeck B2B instance, so all ebMS3 messages processed by the 
+ * instance will use the same security provider. The security provider will be initialised on startup of the ebMS3 
+ * module using the Java SPI mechanism. Implementations that want to support dynamic reconfiguration should handle this 
+ * internally.
+ *   
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
+ * @since 5.0.0	The <i>Certificate Manager</i> is removed from the Security Provider and a stand alone component now.
+ * 				Loading of the actual provider is done using the SPI mechanism. 
  */
 public interface ISecurityProvider {
 
@@ -47,36 +48,32 @@ public interface ISecurityProvider {
     String getName();
 
     /**
-     * Initializes the security provider. This method is called once at the startup of the Holodeck B2B instance. Since
-     * the message processing depends on the correct functioning of the security provider this method MUST ensure that
-     * all its three components can be used, i.e. that all required configuration and data is available. Required
-     * configuration parameters must be implemented by the security provider.
+     * Initialises the security provider. This method is called once at the startup of the Holodeck B2B instance (more
+     * exactly when the ebMS3 Module is loaded).
+     * <p>Since the message processing depends on the correct functioning of the security provider this method MUST 
+     * ensure that all its components can be used, i.e. that all required  configuration and data is available. Required 
+     * configuration parameters must be implemented by the security provider. It can use the {@link 
+     * HolodeckB2BCoreInterface} class to get access to the Core configuration parameters like the HB2B home directory.
      *
-     * @param hb2bHome  Path to the Holodeck B2B home directory.
-     * @throws SecurityProcessingException When the security provider can not be initialized correctly.
+     * @throws SecurityProcessingException When the security provider can not be initialised correctly.
      */
-    void init(final String hb2bHome) throws SecurityProcessingException;
+    void init() throws SecurityProcessingException;
 
     /**
      * Gets the {@link ISecurityHeaderProcessor} of this security provider to process the WS-Security header in received
      * messages.
      *
      * @return The security header processor of this security provider
+     * @throws SecurityProcessingException 	When the processor cannot be created/returned due to an internal error.  
      */
-    ISecurityHeaderProcessor    getSecurityHeaderProcessor();
+    ISecurityHeaderProcessor    getSecurityHeaderProcessor() throws SecurityProcessingException;
 
     /**
      * Gets the {@link ISecurityHeaderCreator} of this security provider to create the WS-Security header in message to
      * send.
      *
      * @return The security header creator of this security provider
+     * @throws SecurityProcessingException 	When the creator cannot be created/returned due to an internal error.  
      */
-    ISecurityHeaderCreator      getSecurityHeaderCreator();
-
-    /**
-     * Gets the {@link ICertificateManager} of this security provider which manages storage of keys and certificates.
-     *
-     * @return The certificate manager of this security provider
-     */
-    ICertificateManager         getCertificateManager();
+    ISecurityHeaderCreator      getSecurityHeaderCreator() throws SecurityProcessingException;
 }

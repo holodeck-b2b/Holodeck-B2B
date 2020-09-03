@@ -35,7 +35,7 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
  * @since 4.1.0
  * @see IMessageValidationSpecification
  */
-public interface ICustomValidationFailure extends IMessageProcessingEvent, ICustomValidationFailedEvent {
+public interface ICustomValidationFailure extends IMessageProcessingEvent {
 
     /**
      * Gets the information on the errors that were found during the custom validation of the message unit, grouped by
@@ -46,7 +46,6 @@ public interface ICustomValidationFailure extends IMessageProcessingEvent, ICust
      *
      * @return  The detected validation errors, grouped per validator
      */
-    @Override
 	Map<String, Collection<MessageValidationError>> getValidationErrors();
 
     /**
@@ -57,7 +56,6 @@ public interface ICustomValidationFailure extends IMessageProcessingEvent, ICust
      *
      * @return <code>true</code> when not all validators were executed, <br><code>false</code> otherwise
      */
-    @Override
 	boolean executedAllValidators();
 
     /**
@@ -66,6 +64,5 @@ public interface ICustomValidationFailure extends IMessageProcessingEvent, ICust
      *
      * @return  <code>true</code> when the message processing was stopped,<br><code>false</code> otherwise
      */
-    @Override
 	boolean isMessageRejected();
 }

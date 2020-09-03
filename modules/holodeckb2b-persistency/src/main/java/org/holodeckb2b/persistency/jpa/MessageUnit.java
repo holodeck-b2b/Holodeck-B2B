@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -33,9 +34,11 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
+
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 
@@ -122,14 +125,6 @@ public abstract class MessageUnit implements IMessageUnit, Serializable {
 
     public void setPModeId(final String pmodeId) {
         PMODE_ID = pmodeId;
-    }
-
-    public Label getLeg() {
-        return LEG_LABEL;
-    }
-
-    public void setLeg(final Label label) {
-        LEG_LABEL = label;
     }
 
     public boolean usesMultiHop() {

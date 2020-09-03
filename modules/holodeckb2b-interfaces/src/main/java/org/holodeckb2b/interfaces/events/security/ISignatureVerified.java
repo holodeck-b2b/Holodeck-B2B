@@ -21,24 +21,38 @@ import java.util.Map;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
+import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
+import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 
 /**
  * Is the <i>message processing event</i> that indicates that the signature of a received message unit has been verified
- * successfully. This event is to inform the business application (or extensions) about the parts of the message that
- * were included in the signature. These can be for example be used to create specific evidences.
+ * successfully. This event is to inform the business application (or extensions) about the verified signature, such as
+ * the parts of the message that were included in the signature and the result of trust validation of certificate used
+ * to create the signature. These can be for example be used to create specific evidences.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.1.0
  */
-public interface ISignatureVerified extends IMessageProcessingEvent, ISignatureVerifiedEvent {
+public interface ISignatureVerified extends IMessageProcessingEvent {
 
+	/**
+	 * Gets the information on the trust validation executed by the installed {@link ICertificateManager} of the 
+	 * certificate that was used for signing the message unit.
+	 * <p>Although the validation of trust should always be executed by the Security Provider there may be cases where
+	 * no validation occurs. In such cases this method should not return a result. 
+	 *   
+	 * @return	A {@link IValidationResult} object with the results of the trust validation. <code>null</code> if no 
+	 * 			validation has been performed.
+	 * @since 5.0.0
+	 */
+	IValidationResult	getTrustValidationResult();
+	
     /**
      * Gets the information on the digest contained in the verified signature for the ebMS header of the message unit
      * that is the <i>subject</i> of this event.
      *
      * @return  A {@link ISignedPartMetadata} object with information on the calculated digest of the ebMS header.
      */
-    @Override
 	ISignedPartMetadata getHeaderDigest();
 
     /**
@@ -47,7 +61,6 @@ public interface ISignatureVerified extends IMessageProcessingEvent, ISignatureV
      * <p>NOTE: This method should only be used when the subject of the event is a User Message.
      *
      * @return  A <code>Map</code> linking the digest meta-data to each payload from the user message.
-     */
-    @Override
+     */    
 	Map<IPayload, ISignedPartMetadata>   getPayloadDigests();
 }

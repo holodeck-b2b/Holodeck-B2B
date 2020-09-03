@@ -17,6 +17,8 @@
 package org.holodeckb2b.persistency.util;
 
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +33,7 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 import org.hibernate.dialect.DerbyTenSevenDialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 
 /**
@@ -132,8 +135,11 @@ public class EntityManagerUtil {
             public Properties getProperties() {
                 Properties props = new Properties();
                 props.put(org.hibernate.cfg.AvailableSettings.DRIVER, "org.apache.derby.jdbc.EmbeddedDriver");
+                String dbPath = System.getenv("HB2B_DB_DIR");
+                if (Utils.isNullOrEmpty(dbPath) || !Files.isDirectory(Paths.get(dbPath)) || !Files.isWritable(Paths.get(dbPath)))
+                	dbPath = "db";
                 props.put(org.hibernate.cfg.AvailableSettings.URL,
-                                                                "jdbc:derby:db/coreDB;databaseName=coreDB;create=true");
+                                                                "jdbc:derby:" + dbPath + "/coreDB;databaseName=coreDB;create=true");
                 props.put(org.hibernate.cfg.AvailableSettings.DIALECT, DerbyTenSevenDialect.class);
                 props.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, "update");
                 props.put(org.hibernate.cfg.AvailableSettings.SHOW_SQL, false);

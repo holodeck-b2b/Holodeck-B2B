@@ -19,7 +19,7 @@ package org.holodeckb2b.core.validation;
 import java.util.Collection;
 import java.util.Map;
 
-import org.holodeckb2b.common.events.AbstractMessageProcessingEvent;
+import org.holodeckb2b.common.events.impl.AbstractMessageProcessingEvent;
 import org.holodeckb2b.common.util.Utils;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.holodeckb2b.interfaces.events.ICustomValidationFailure;

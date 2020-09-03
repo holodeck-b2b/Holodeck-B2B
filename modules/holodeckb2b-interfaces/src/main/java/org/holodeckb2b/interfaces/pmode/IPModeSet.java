@@ -17,29 +17,43 @@
 package org.holodeckb2b.interfaces.pmode;
 
 
+import java.nio.file.Path;
 import java.util.Collection;
 
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
  * Represents the set of {@link IPMode}s that configure how Holodeck B2B should process the ebMS messages. The set of
- * P-Modes is therefore one of the most important configuration items in Holodeck B2B, without P-Modes it will not be
- * possible to send or receive any message! Within Holodeck B2B there is always just one <code>IPModeSet</code>
- * instance, which is available through {@link HolodeckB2BCoreInterface#getPModeSet()}.
- * <p>Implementations of this interface MUST ensure that at least the operations that modify the set are thread safe.
+ * P-Modes is therefore an essential component in Holodeck B2B as without P-Modes it will not be possible to exchange
+ * any message. The active set can be accessed through the {@link HolodeckB2BCoreInterface#getPModeSet()} method. 
+ * <p>There always is just one <code>IPModeSet</code> active within a Holodeck B2B instance. By default a in-memory
+ * implementation is used, but a custom implementation can be installed using the Java <i>Service Provide Interface</i>
+ * mechanism.<br>
+ * Implementations of this interface MUST ensure that at least the operations that modify the set are thread safe.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IPModeSet {
 	
+    /**
+     * Gets the name of this P-Mode set implementation to identify it in logging. This name is only used for logging 
+     * purposes and it is recommended to include a version number of the implementation. If no name is specified by the 
+     * implementation the class name will be used. 
+     *
+     * @return  The name of the P-Mode set to use in logging
+     * @since 5.0.0
+     */
+    default String getName() { return this.getClass().getName(); }
+    
 	/**
 	 * Initializes the P-Mode set. A default, <i>NOP</i>, implementation is provided for backward compatibility and
 	 * easy implementation.   
 	 * 
 	 * @param hb2bHomeDir	Path of the Holodeck B2B home directory.
+	 * @throws PModeSetException When the P-Mode set implementation could not successfully be initialised
 	 * @since 4.0.0
 	 */
-	default void init(final String hb2bHomeDir) {};
+	default void init(final Path hb2bHomeDir) throws PModeSetException {};
 
     /**
      * Gets the P-Mode with the given <b>PMode.id</b>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Example P-Mode configuration for a One-Way/Pull scenario where Holodeck B2B is the initiator of the MEP, i.e. sends out the PullRequest message.
+
+The PullRequest will use a WS-Security Username Token to authenticate itself at the Responding MSH.
+
+This P-Mode file should be combined with "ex-pm-pull-ut-resp.xml" on the other instance so message can be prepared for pulling. If you set up a test 
+environment based on the "Getting Started" page from the web site you should install this P-Mode on instance A. 
+-->
+<PMode xmlns="http://holodeck-b2b.org/schemas/2014/10/pmode"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2014/10/pmode ../../repository/xsd/pmode.xsd">
+    <id>ex-pm-pull-ut</id>
+    <mep>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay</mep>
+    <mepBinding>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pull</mepBinding>
+    <Initiator>
+        <PartyId>org:holodeckb2b:example:company:C</PartyId>
+        <Role>Receiver</Role>
+        <SecurityConfiguration>
+            <UsernameToken target="ebms">
+                <username>PartyC</username>
+                <password>ExampleC</password>
+            </UsernameToken>
+        </SecurityConfiguration>
+    </Initiator>
+    <Leg>
+        <Protocol>
+            <Address>http://localhost:9090/holodeckb2b/as4</Address>
+        </Protocol>
+        <DefaultDelivery>
+            <DeliveryMethod>org.holodeckb2b.backend.file.NotifyAndDeliverOperation</DeliveryMethod>
+            <Parameter>
+                <name>format</name>
+                <value>ebms</value>
+            </Parameter>
+            <Parameter>
+                <name>deliveryDirectory</name>
+                <value>data/msg_in</value>
+            </Parameter>
+        </DefaultDelivery>
+        <PullRequestFlow>
+            <Mpc>http://example.holodeckb2b.org/mpc/1</Mpc>
+        </PullRequestFlow>
+    </Leg>
+</PMode>
