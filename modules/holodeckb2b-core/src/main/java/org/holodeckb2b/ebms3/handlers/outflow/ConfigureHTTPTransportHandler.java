@@ -109,7 +109,7 @@ public class ConfigureHTTPTransportHandler extends BaseHandler {
                             destURL = leg.getReceiptConfiguration().getTo();
                         else if (primaryMU instanceof ErrorMessage)
                             destURL = leg.getUserMessageFlow().getErrorHandlingConfiguration().getReceiverErrorsTo();
-                    } finally {}
+                    } catch (NullPointerException npe) {}
 
                     // If not we use the URL defined on the leg level which is also the one to use for UserMessage and
                     // PullRequest
