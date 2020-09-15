@@ -142,26 +142,32 @@ public class ProcessReceipts extends BaseHandler {
 
     /**
      * Checks whether the message unit is waiting for receipt.
-     * <p>The message unit is waiting for a receipt when:<ol>
-     * <li>its current processing state is {@link ProcessingStates#AWAITING_RECEIPT}</li>
-     * <li>its current processing state is either {@link ProcessingStates#READY_TO_PUSH} or {@link ProcessingStates#AWAITING_PULL}
-     * and the previous state was {@link ProcessingStates#AWAITING_RECEIPT}</li></ol>
+     * <p>The message unit is waiting for a receipt when its current processing state is:<ol>
+     * <li>either {@link ProcessingStates#AWAITING_RECEIPT} or {@link ProcessingStates#TRANSPORT_FAILURE}</li>
+     * <li>either {@link ProcessingStates#READY_TO_PUSH}, {@link ProcessingStates#AWAITING_PULL} or {@link
+     * ProcessingStates#PROC_WITH_WARNING} <b>and</b> the previous state was {@link ProcessingStates#AWAITING_RECEIPT}
+     * </li></ol>
      * <p>The check must always include the current state as we do not want to change a processing state that is final.
      *
      * @param mu    The {@link MessageUnit} to check
      * @return      <code>true</code> if the message unit is waiting for a receipt, <code>false</code> otherwise
      */
     protected boolean isWaitingForReceipt(final MessageUnit mu) {
+
+        String currentState = mu.getCurrentProcessingState().getName();
         // Check the previous state (there should be, but not guaranteed if receipt is in error)
         String prevState = null;
         if (mu.getProcessingStates().size() > 1)
             prevState = mu.getProcessingStates().get(1).getName();
 
-        return ProcessingStates.AWAITING_RECEIPT.equals(mu.getCurrentProcessingState().getName())
-            || (
-                (  ProcessingStates.AWAITING_PULL.equals(mu.getCurrentProcessingState().getName())
-                || ProcessingStates.READY_TO_PUSH.equals(mu.getCurrentProcessingState().getName())
-                ) && ProcessingStates.AWAITING_RECEIPT.equals(prevState)
+        return ProcessingStates.AWAITING_RECEIPT.equals(currentState)
+            || ProcessingStates.TRANSPORT_FAILURE.equals(currentState)
+            || ( ProcessingStates.AWAITING_RECEIPT.equals(prevState)
+                &&
+                (  ProcessingStates.AWAITING_PULL.equals(currentState)
+                || ProcessingStates.READY_TO_PUSH.equals(currentState)
+                || ProcessingStates.PROC_WITH_WARNING.equals(currentState)
+                )
                );
     }
 }
