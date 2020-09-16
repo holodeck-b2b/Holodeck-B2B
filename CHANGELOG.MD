@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 5.0.2
+##### 2020-09-16
+
+### Changed
+* Included version 1.0.1 of the file back-end which fixes in the _single\_xml_ delivery format and uses a temporary
+  extension when writing the meta-data file to disk to prevent premature reading by the back-end application. See
+  also the [issues on the file back-end project](https://github.com/holodeck-b2b/file-backend/issues?q=is%3Aissue).
+
 ## 5.0.1
 ##### 2020-09-03
 
