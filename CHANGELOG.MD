@@ -15,7 +15,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 * Renewed example certificates
-* Updates example P-Modes to use new file delivery method name
+* Updated example P-Modes to use new file delivery method name
 
 ### Fixed
 * Backward compatibility for "relaxed" reading P-Mode XML documents.
