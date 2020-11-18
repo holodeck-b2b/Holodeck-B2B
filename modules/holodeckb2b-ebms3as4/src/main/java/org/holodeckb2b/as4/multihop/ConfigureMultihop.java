@@ -142,7 +142,7 @@ public class ConfigureMultihop extends AbstractBaseHandler {
         // If not sent as response, get the information from the database
         final Collection<IMessageUnitEntity> refdMessages = HolodeckB2BCore.getQueryManager()
                                                                          .getMessageUnitsWithId(refToMsgId, 
-                                                                        		 				Direction.OUT);
+                                                                        		 				Direction.IN);
         if (!Utils.isNullOrEmpty(refdMessages)) {
             IMessageUnitEntity sentMsgUnit = refdMessages.iterator().next();
             return (sentMsgUnit instanceof IUserMessageEntity) ? (IUserMessageEntity) sentMsgUnit : null;
