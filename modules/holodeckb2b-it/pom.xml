@@ -21,7 +21,7 @@
     <parent>
         <artifactId>holodeckb2b</artifactId>
         <groupId>org.holodeckb2b</groupId>
-        <version>5.0.2</version>
+        <version>5.0.3</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
