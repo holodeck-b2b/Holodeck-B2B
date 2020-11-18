@@ -84,7 +84,15 @@ public class ConfigureMultihop extends AbstractBaseHandler {
                 // This is a multi-hop message, set the multi-hop target on the eb:Messaging element
                 log.debug("Primary message is a multi-hop UserMessage -> set multi-hop target");
                 final SOAPHeaderBlock ebHeader = Messaging.getElement(procCtx.getParentContext().getEnvelope());
-                ebHeader.setRole(MultiHopConstants.NEXT_MSH_TARGET);
+                /*
+                 * The role attribute is explicitly added here because setting the role on the object results in a 
+                 * redundant namespace declaration and prefix, e.g. xmlns:role="...." , role:role="nextMSH" 
+                 * Although this isn't incorrect, this additional declaration can confuse other SOAP processors when 
+                 * performing c14n. 
+                 * Axiom should prevent the additional declaration => TODO: check patching Axiom! 
+                 */
+                //ebHeader.setRole(MultiHopConstants.NEXT_MSH_TARGET);
+                ebHeader.addAttribute("role", MultiHopConstants.NEXT_MSH_TARGET, ebHeader.getNamespace());
             }
         } else if (primMU instanceof IPullRequest) {
             // If the primary message unit is a PullRequest the message is not sent using multi-hop as this is not

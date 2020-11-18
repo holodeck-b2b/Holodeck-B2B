@@ -53,7 +53,16 @@ public class Messaging {
             messaging = env.getHeader().addHeaderBlock(Q_ELEMENT_NAME.getLocalPart(), SOAPEnv.getEbms3Namespace(env));
 
             // The messaging header must be understood by the MSH (see 5.2.1 core spec)
-            messaging.setMustUnderstand(true);
+            /*
+             * The mustUnderstand attribute is explicitly added here because setting the mustUnderstand flag on the
+             * object results in a redundant namespace declaration and prefix, e.g. xmlns:mustUnderstand="...." 
+             * mustUnderstand:mustUnderstand="true" 
+             * Although this isn't incorrect, this additional declaration can confuse other SOAP processors when 
+             * performing c14n. 
+             * Axiom should prevent the additional declaration => TODO: check patching Axiom! 
+             */
+            //messaging.setMustUnderstand(true);
+            messaging.addAttribute("mustUnderstand", "true", env.getNamespace());
         }
 
         return messaging;
