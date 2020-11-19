@@ -92,7 +92,7 @@ public class ConfigureMultihop extends AbstractBaseHandler {
                  * Axiom should prevent the additional declaration => TODO: check patching Axiom! 
                  */
                 //ebHeader.setRole(MultiHopConstants.NEXT_MSH_TARGET);
-                ebHeader.addAttribute("role", MultiHopConstants.NEXT_MSH_TARGET, ebHeader.getNamespace());
+                ebHeader.addAttribute("role", MultiHopConstants.NEXT_MSH_TARGET, procCtx.getParentContext().getEnvelope().getNamespace());
             }
         } else if (primMU instanceof IPullRequest) {
             // If the primary message unit is a PullRequest the message is not sent using multi-hop as this is not
