@@ -145,7 +145,10 @@ public class ConfigureMultihop extends AbstractBaseHandler {
                                                                         		 				Direction.IN);
         if (!Utils.isNullOrEmpty(refdMessages)) {
             IMessageUnitEntity sentMsgUnit = refdMessages.iterator().next();
-            return (sentMsgUnit instanceof IUserMessageEntity) ? (IUserMessageEntity) sentMsgUnit : null;
+            if (sentMsgUnit instanceof IUserMessageEntity) {
+            	HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(sentMsgUnit);
+            	return (IUserMessageEntity) sentMsgUnit;
+            } 
         } 
         
         return null;        
