@@ -253,7 +253,8 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
 
         final WSSConfig wssConfig = WSSConfig.getNewInstance();
         // Disable validator of the Usernametoken so no validation is done by the security provider
-        wssConfig.setValidator(WSConstants.USERNAME_TOKEN, (Validator) null);        
+        wssConfig.setValidator(WSConstants.USERNAME_TOKEN, (Validator) null);
+        wssConfig.setProcessor(WSConstants.SIGNATURE, SignatureProcessor.class);
         reqData.setWssConfig(wssConfig);
 
         // Disable BSP conformance check. Although AS4 requires conformance with BSP1.1 the check is disable to allow

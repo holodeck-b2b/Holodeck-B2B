@@ -7,6 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Refactored code to use the generic utility classes from https://github.com/holodeck-b2b/generic-utils
 
+### Fixed
+* Processing of a received message with more than 30 attachments fails [#113](https://github.com/holodeck-b2b/Holodeck-B2B/issues/113) 
+
 ### Removed
 * Generic utility classes `org.holodeckb2b.common.util.Utils`, `org.holodeckb2b.common.util.MessageIdUtils` and
  `org.holodeckb2b.security.util.KeystoreUtils` as they are moved to new separate project.
