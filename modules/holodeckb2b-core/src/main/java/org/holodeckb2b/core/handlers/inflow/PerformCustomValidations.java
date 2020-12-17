@@ -22,7 +22,7 @@ import java.util.Map;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.OtherContentError;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.core.validation.CustomValidationFailureEvent;

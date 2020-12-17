@@ -24,7 +24,7 @@ import javax.swing.table.TableModel;
 
 import org.holodeckb2b.common.messagemodel.MessageUnit;
 import org.holodeckb2b.common.util.MessageUnitUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.ui.app.gui.views.MessageStatusPanel;
 
 /**

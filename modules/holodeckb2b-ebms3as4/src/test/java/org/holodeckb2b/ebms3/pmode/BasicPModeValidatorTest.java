@@ -46,7 +46,7 @@ import org.holodeckb2b.common.pmode.UserMessageFlow;
 import org.holodeckb2b.common.pmode.UsernameTokenConfig;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;

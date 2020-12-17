@@ -27,7 +27,7 @@ import java.util.Map;
 import org.apache.axis2.modules.Module;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.pmode.InMemoryPModeSet;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCoreImpl;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.config.InternalConfiguration;

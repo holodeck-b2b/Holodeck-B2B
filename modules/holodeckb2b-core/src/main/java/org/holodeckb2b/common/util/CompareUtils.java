@@ -19,6 +19,7 @@ package org.holodeckb2b.common.util;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.general.IPartyId;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.IService;

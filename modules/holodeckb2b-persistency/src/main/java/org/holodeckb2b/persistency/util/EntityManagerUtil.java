@@ -33,7 +33,7 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 import org.hibernate.dialect.DerbyTenSevenDialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 
 /**

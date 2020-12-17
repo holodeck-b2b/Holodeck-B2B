@@ -19,7 +19,7 @@ package org.holodeckb2b.security.trust;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 

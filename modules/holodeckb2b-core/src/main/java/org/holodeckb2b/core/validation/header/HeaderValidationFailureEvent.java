@@ -19,7 +19,7 @@ package org.holodeckb2b.core.validation.header;
 import java.util.Collection;
 
 import org.holodeckb2b.common.events.impl.AbstractMessageProcessingEvent;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.holodeckb2b.interfaces.events.IHeaderValidationFailure;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;

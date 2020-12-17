@@ -2,12 +2,19 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 5.1.0
+##### Unreleased
+### Changed
+* Refactored code to use the generic utility classes from https://github.com/holodeck-b2b/generic-utils
+
+### Removed
+* Generic utility classes `org.holodeckb2b.common.util.Utils`, `org.holodeckb2b.common.util.MessageIdUtils` and
+ `org.holodeckb2b.security.util.KeystoreUtils` as they are moved to new separate project.
+
 ## 5.0.3
 ##### 2020-11-18
-
 ### Fixed
 * Multihop routing information missing in async Signal Messages [#112](https://github.com/holodeck-b2b/Holodeck-B2B/issues/112) 
-
 
 ## 5.0.2
 ##### 2020-09-16

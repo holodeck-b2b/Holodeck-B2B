@@ -29,7 +29,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.common.messagemodel.Receipt;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.core.receptionawareness.ReceiptCreatedEvent;

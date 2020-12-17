@@ -59,14 +59,14 @@ import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.crypto.CryptoFactory;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.holodeckb2b.common.VersionInfo;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.security.KeystoreUtils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.events.security.ISignatureVerifiedWithWarning;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
 import org.holodeckb2b.security.trust.config.CertManagerConfigurationType;
-import org.holodeckb2b.security.util.KeystoreUtils;
 
 /**
  * Is the default implementation of the {@link ICertificateManager} which manages the storage of private keys and 
@@ -105,7 +105,7 @@ public class DefaultCertManager implements ICertificateManager {
     /**
      * Path to the keystore holding the key pairs used for signing and decryption
      */
-    private String  privateKeystorePath;
+    private Path  privateKeystorePath;
     /**
      * Password to access the keystore holding the key pairs used for signing and decryption
      */
@@ -113,7 +113,7 @@ public class DefaultCertManager implements ICertificateManager {
     /**
      * Path to the keystore holding the trading partner certificates
      */
-    private String partnerKeystorePath;
+    private Path partnerKeystorePath;
     /**
      * Password to access the keystore holding the trading partner certificates
      */
@@ -121,7 +121,7 @@ public class DefaultCertManager implements ICertificateManager {
     /**
      * Path to the keystore holding the trusted certificates acting as trust anchors
      */
-    private String trustKeystorePath;
+    private Path trustKeystorePath;
     /**
      * Password to access the keystore holding the trusted certificates
      */
@@ -182,14 +182,11 @@ public class DefaultCertManager implements ICertificateManager {
             throw new SecurityProcessingException("Configuration file not available or invalid!");
         }
         log.trace("Check availability of configured keystores");
-        try {
-        	KeystoreUtils.check(privateKeystorePath, privateKeystorePwd);
-        	KeystoreUtils.check(partnerKeystorePath, partnerKeystorePwd);
-        	KeystoreUtils.check(trustKeystorePath, trustKeystorePwd);
-        } catch (SecurityProcessingException invalidCfg) {
-        	log.fatal("One or more of the configured key stores are not available! Details: {}", 
-        				invalidCfg.getMessage());
-        	throw new SecurityProcessingException("Invalid configuration!", invalidCfg);
+        if (!KeystoreUtils.check(privateKeystorePath, privateKeystorePwd) 
+        	|| KeystoreUtils.check(partnerKeystorePath, partnerKeystorePwd)
+        	|| KeystoreUtils.check(trustKeystorePath, trustKeystorePwd)) {        
+        	log.fatal("One or more of the configured key stores are not available!");
+        	throw new SecurityProcessingException("Invalid configuration!");
         }
         
         if (log.isDebugEnabled()) {
@@ -209,25 +206,23 @@ public class DefaultCertManager implements ICertificateManager {
      * Helper method to ensure that the paths to the Java keystores are absolute when handed over to the Certificate
      * Manager. If the gieven path is a relative path it will be prefixed with the hb2bHome path.
      *
-     * @param path      The path to check
+     * @param sPath     The path to check
      * @param hb2bHome  The HB2B home directory
      * @return          The absolute path
      */
-    private String ensureAbsolutePath(String path, Path hb2bHome) {
-        if (Utils.isNullOrEmpty(path))
+    private Path ensureAbsolutePath(String sPath, Path hb2bHome) {
+        if (Utils.isNullOrEmpty(sPath))
             return null;
 
-        if (Paths.get(path).isAbsolute())
-            return path;
-        else
-            return hb2bHome.resolve(path).toString();
+        Path path = Paths.get(sPath);
+        return path.isAbsolute() ? path : hb2bHome.resolve(path);
     }    
 
     @Override
     public KeyStore.PrivateKeyEntry getKeyPair(final String alias, final String password)
                                                                                    throws SecurityProcessingException {
-        KeyStore ks = KeystoreUtils.load(privateKeystorePath, privateKeystorePwd);
         try {
+        	KeyStore ks = KeystoreUtils.load(privateKeystorePath, privateKeystorePwd);
         	return !ks.containsAlias(alias) ? null : (KeyStore.PrivateKeyEntry) ks.getEntry(alias,
                                                               new KeyStore.PasswordProtection(password.toCharArray()));
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException ex) {
@@ -247,12 +242,23 @@ public class DefaultCertManager implements ICertificateManager {
      * @throws SecurityProcessingException When there is an error retrieving the certificate
      */
     public X509Certificate getPrivateKeyCertificate(final String alias) throws SecurityProcessingException {
-    	return this.getCertificate(KeystoreUtils.load(privateKeystorePath, privateKeystorePwd), alias);
+    	try {
+			return this.getCertificate(KeystoreUtils.load(privateKeystorePath, privateKeystorePwd), alias);
+		} catch (KeyStoreException e) {
+			log.error("Could not access the private keystore! Error details: {}", e.getMessage()); 
+			throw new SecurityProcessingException("Unable to get certificate of key pair", e);
+		}
     }
     
     @Override
     public X509Certificate getCertificate(final String alias) throws SecurityProcessingException {
-    	return this.getCertificate(KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd), alias);
+    	try {
+    		return this.getCertificate(KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd), alias);
+		} catch (KeyStoreException e) {
+			log.error("Could not access the partner keystore! Error details: {}", e.getMessage()); 
+			throw new SecurityProcessingException("Unable to get partner certificate", e);
+		}
+    		
     }
     
     /**
@@ -279,8 +285,8 @@ public class DefaultCertManager implements ICertificateManager {
 
     @Override
     public String findCertificate(final X509Certificate cert) throws SecurityProcessingException {
-        KeyStore ks = KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd);
         try {
+        	KeyStore ks = KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd);
             return ks.getCertificateAlias(cert);
         } catch (KeyStoreException ex) {
             log.error("Problem finding the trading partner certificate [Issuer/SerialNo={}/{}] in keystore!"
@@ -293,8 +299,8 @@ public class DefaultCertManager implements ICertificateManager {
     @Override
     public X509Certificate findCertificate(final X500Principal issuer, final BigInteger serial)
     																				throws SecurityProcessingException {
-    	KeyStore ks = KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd);
     	try {
+    		KeyStore ks = KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd);
 	        Enumeration<String> aliases = ks.aliases();
 	        X509Certificate cert = null;
 	        while (aliases.hasMoreElements() && cert == null) {
@@ -312,8 +318,8 @@ public class DefaultCertManager implements ICertificateManager {
 
     @Override
     public X509Certificate findCertificate(final byte[] skiBytes) throws SecurityProcessingException {
-    	KeyStore ks = KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd);
     	try {
+    		KeyStore ks = KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd);
     		Enumeration<String> aliases = ks.aliases();
     		X509Certificate cert = null;
     		while (aliases.hasMoreElements() && cert == null) {
@@ -445,7 +451,7 @@ public class DefaultCertManager implements ICertificateManager {
 	 * @return			Set of trust anchors 
 	 * @throws SecurityProcessingException	If the key store cannot be accessed or certificates cannot be read 
 	 */
-	private Set<TrustAnchor> getTrustAnchorsFromKeyStore(final String ksPath, final String ksPwd) 
+	private Set<TrustAnchor> getTrustAnchorsFromKeyStore(final Path ksPath, final String ksPwd) 
 																					throws SecurityProcessingException {
 		HashSet<TrustAnchor>	trustanchors = new HashSet<TrustAnchor>();		
 		try {
@@ -453,7 +459,7 @@ public class DefaultCertManager implements ICertificateManager {
 			Enumeration<String> aliases = ks.aliases();
 			while (aliases.hasMoreElements()) 
 				trustanchors.add(new TrustAnchor((X509Certificate) ks.getCertificate(aliases.nextElement()), null));			
-		} catch (KeyStoreException | SecurityProcessingException kse) {
+		} catch (KeyStoreException kse) {
 			log.error("Could not retrieve trust anchors from key store ({})", ksPath);
 			throw new SecurityProcessingException("Could not retrieve trust anchors");
 		}
@@ -495,13 +501,15 @@ public class DefaultCertManager implements ICertificateManager {
         switch (action) {
             case "SIGN"  :
             case "DECRYPT" :
-                cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.file", privateKeystorePath);
+                cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.file", 
+                								privateKeystorePath.toString());
                 cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.type", "jks");
                 cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.password", privateKeystorePwd);
                 break;
             case "VERIFY" :
             case "ENCRYPT" :            	
-                cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.file", partnerKeystorePath);
+                cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.file", 
+                								partnerKeystorePath.toString());
                 cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.type", "jks");
                 cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.password", partnerKeystorePwd);
             default: // do nothing
@@ -554,10 +562,10 @@ public class DefaultCertManager implements ICertificateManager {
      * @return	Map of alias and certificate
      * @throws SecurityProcessingException	When the certificates could not be retrieved from the key store.
      */
-    private Map<String, X509Certificate> getCertificates(final String ksPath, final String ksPwd) 
+    private Map<String, X509Certificate> getCertificates(final Path ksPath, final String ksPwd) 
     																				throws SecurityProcessingException {
-    	final KeyStore ks = KeystoreUtils.load(ksPath, ksPwd);
 	    try {
+	    	final KeyStore ks = KeystoreUtils.load(ksPath, ksPwd);
 	        final Map<String, X509Certificate> result = new HashMap<>(ks.size());
 	        Enumeration<String> aliases = ks.aliases();
 	        while (aliases.hasMoreElements()) {

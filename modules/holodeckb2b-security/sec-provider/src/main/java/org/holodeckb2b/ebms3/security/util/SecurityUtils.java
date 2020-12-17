@@ -30,7 +30,7 @@ import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.WSDataRef;
 import org.apache.wss4j.dom.str.STRParser;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.ebms3.security.SecurityConstants;
 import org.holodeckb2b.ebms3.security.results.SignedPartMetadata;
 import org.holodeckb2b.interfaces.general.EbMSConstants;

@@ -21,7 +21,7 @@ import javax.swing.table.TableModel;
 
 import org.holodeckb2b.common.messagemodel.MessageUnit;
 import org.holodeckb2b.common.util.MessageUnitUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 
 /**
  * The {@link TableModel} for the table listing the meta-data of the message units in the current history.

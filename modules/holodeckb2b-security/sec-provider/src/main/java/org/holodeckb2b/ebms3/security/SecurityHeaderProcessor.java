@@ -48,7 +48,7 @@ import org.apache.wss4j.dom.str.STRParser;
 import org.apache.wss4j.dom.validate.Validator;
 import org.holodeckb2b.common.security.results.EncryptionProcessingResult;
 import org.holodeckb2b.common.security.results.SignatureProcessingResult;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.axis2.Axis2Utils;
 import org.holodeckb2b.ebms3.security.callbackhandlers.AttachmentCallbackHandler;
 import org.holodeckb2b.ebms3.security.callbackhandlers.PasswordCallbackHandler;

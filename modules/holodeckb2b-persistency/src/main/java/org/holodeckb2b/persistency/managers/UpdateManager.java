@@ -28,7 +28,7 @@ import javax.persistence.RollbackException;
 
 import org.holodeckb2b.common.messagemodel.MessageProcessingState;
 import org.holodeckb2b.common.util.MessageUnitUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;

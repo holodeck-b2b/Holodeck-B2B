@@ -19,7 +19,7 @@ package org.holodeckb2b.common.pmode;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;

@@ -37,7 +37,7 @@ import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.UserMessageFlow;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestUtils;
-import org.holodeckb2b.common.util.MessageIdUtils;
+import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;

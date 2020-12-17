@@ -1,6 +1,6 @@
 package org.holodeckb2b.common.pmode;
 
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.simpleframework.xml.convert.Converter;
 import org.simpleframework.xml.stream.InputNode;

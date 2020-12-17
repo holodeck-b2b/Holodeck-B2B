@@ -31,7 +31,7 @@ import org.holodeckb2b.common.testhelpers.NullDeliveryMethod;
 import org.holodeckb2b.common.testhelpers.NullDeliveryMethod.NullDeliverer;
 import org.holodeckb2b.common.testhelpers.TestEventProcessor;
 import org.holodeckb2b.common.testhelpers.TestUtils;
-import org.holodeckb2b.common.util.MessageIdUtils;
+import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;

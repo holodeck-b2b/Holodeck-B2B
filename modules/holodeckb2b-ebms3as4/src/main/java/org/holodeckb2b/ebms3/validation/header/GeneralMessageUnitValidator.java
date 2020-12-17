@@ -19,8 +19,8 @@ package org.holodeckb2b.ebms3.validation.header;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.holodeckb2b.common.util.MessageIdUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.MessageIdUtils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;

@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;

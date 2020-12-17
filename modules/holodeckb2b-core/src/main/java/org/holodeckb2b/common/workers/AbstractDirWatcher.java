@@ -19,7 +19,7 @@ package org.holodeckb2b.common.workers;
 import java.io.File;
 import java.util.Map;
 
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.FileUtils;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
@@ -95,7 +95,7 @@ public abstract class AbstractDirWatcher extends AbstractPathWatcher {
                                             && (ext != null ? file.getName().toLowerCase().endsWith("." + ext) : true));
 
         // Sort the retrieved file list
-        Utils.sortFiles(fileList);
+        FileUtils.sortFiles(fileList);
 
         return fileList;
     }

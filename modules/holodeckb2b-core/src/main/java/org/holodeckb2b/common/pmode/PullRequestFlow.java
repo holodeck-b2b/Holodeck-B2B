@@ -18,7 +18,7 @@ package org.holodeckb2b.common.pmode;
 
 import java.io.Serializable;
 
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;

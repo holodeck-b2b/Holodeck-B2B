@@ -19,7 +19,7 @@ package org.holodeckb2b.common.pmode;
 import java.io.Serializable;
 import java.util.Map;
 
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;

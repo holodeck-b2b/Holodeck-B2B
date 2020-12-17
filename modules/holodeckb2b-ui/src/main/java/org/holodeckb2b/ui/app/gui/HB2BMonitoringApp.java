@@ -25,7 +25,7 @@ import java.util.Map;
 
 import javax.swing.JOptionPane;
 
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.ui.api.CertType;
 import org.holodeckb2b.ui.api.CoreInfo;
 import org.holodeckb2b.ui.app.gui.models.CertificatesData;

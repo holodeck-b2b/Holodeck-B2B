@@ -19,7 +19,7 @@ package org.holodeckb2b.ebms3.validation.header;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.validation.header.HeaderValidationHandler;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidator;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;

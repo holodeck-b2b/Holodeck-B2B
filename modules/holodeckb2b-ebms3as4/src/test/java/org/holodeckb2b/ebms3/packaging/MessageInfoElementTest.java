@@ -30,7 +30,7 @@ import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.junit.Test;
 

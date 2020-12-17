@@ -7,8 +7,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.holodeckb2b.common.util.MessageIdUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.MessageIdUtils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
