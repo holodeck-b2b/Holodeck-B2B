@@ -18,8 +18,6 @@ package org.holodeckb2b.core.axis2;
 
 import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
 
-import java.util.List;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.OperationClient;
@@ -73,12 +71,9 @@ public class Axis2Sender {
      *
      * @param messageUnit   The message unit to send
      */
-    public static void sendMessage(final IMessageUnitEntity messageUnit) {
-        OperationClient oc;
-        final MessageContext msgCtx = new MessageContext();
-        msgCtx.setFLOW(MessageContext.OUT_FLOW);
-
-        log.trace("Check PMode.MEPBinding which Service should be used");
+    public static void sendMessage(final IMessageUnitEntity messageUnit) {    	
+        log.trace("Starting send operation for {} (msgId={})", MessageUnitUtils.getMessageUnitName(messageUnit),
+        			messageUnit.getMessageId());        
         IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(messageUnit.getPModeId());
         if (pmode == null) {
         	log.error("Cannot send {} [msgId={}] because associated P-Mode {} is not available!", 
@@ -86,6 +81,7 @@ public class Axis2Sender {
         				messageUnit.getPModeId());
         	return;
         }
+        log.trace("Check PMode.MEPBinding which Service should be used");
         // The default protocol is AS4, so we will use the "as4" Service unless P-Mode indicates something else 
         String svcName = "as4";
         final String mepBinding = pmode.getMepBinding();
@@ -97,8 +93,8 @@ public class Axis2Sender {
         		svcName = mepBinding.substring(41, segmentEnd);        	
         }
         
-        ConfigurationContext configContext = new ConfigurationContext(HolodeckB2BCore.getConfiguration());
-        AxisConfiguration axisConfig = configContext.getAxisConfiguration();
+        final ConfigurationContext configContext = new ConfigurationContext(HolodeckB2BCore.getConfiguration());
+        final AxisConfiguration axisConfig = configContext.getAxisConfiguration();
         AxisService service;
         try {
 			service = axisConfig.getService(svcName);
@@ -110,10 +106,14 @@ public class Axis2Sender {
     				   MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId(), 
     				   svcName);
         	return;	
-        }
-        
+        }        
         log.debug("Using {} Service to send {} [msgId={}]", svcName, MessageUnitUtils.getMessageUnitName(messageUnit), 
         			messageUnit.getMessageId());
+        
+        final MessageContext msgCtx = new MessageContext();
+        msgCtx.setFLOW(MessageContext.OUT_FLOW);
+        OperationClient oc = null;
+        
         try {
 	        AxisServiceGroup axisServiceGroup = service.getAxisServiceGroup();
 	        ServiceGroupContext sgc = configContext.createServiceGroupContext(axisServiceGroup);
@@ -152,23 +152,28 @@ public class Axis2Sender {
                 procCtx.addSendingError((IErrorMessageEntity) messageUnit);
             else if (messageUnit instanceof IReceipt)
                 procCtx.addSendingReceipt((IReceiptEntity) messageUnit);
-            log.debug("Start send process for {} [msgId={}]", MessageUnitUtils.getMessageUnitName(messageUnit), 
-        			  messageUnit.getMessageId());
+        } catch (AxisFault cfgError) {
+        	log.error("An exception occurred setting up the send operation for {} (msgId={}).Exception stack below:\n",
+        			   MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId(), 
+        			   Utils.getExceptionTrace(cfgError, true));
+        	return;
+        }
+        
+        try {
+        	log.debug("Start send process for {} [msgId={}]", MessageUnitUtils.getMessageUnitName(messageUnit), 
+        				messageUnit.getMessageId());
             oc.execute(true);
+            log.debug("Finished send process for {} [msgId={}]", MessageUnitUtils.getMessageUnitName(messageUnit), 
+            		messageUnit.getMessageId());            
         } catch (final Throwable t) {
             /* An error occurred while sending the message, it should however be already processed by one of the
                handlers. In that case the message context will not contain the failure reason. To prevent redundant
                logging we check if there is a failure reason before we log the error here.
             */
-            final List<Throwable> errorStack = Utils.getCauses(t);
-            final StringBuilder logMsg = new StringBuilder("\n\tError stack: ")
-                                                    .append(errorStack.get(0).getClass().getSimpleName());
-            for(int i = 1; i < errorStack.size(); i++) {
-                logMsg.append("\n\t    Caused by: ").append(errorStack.get(i).getClass().getSimpleName());
-            }
-            logMsg.append(" {").append(errorStack.get(errorStack.size() - 1).getMessage()).append('}');
-            log.error("An error occurred while sending the message [" + messageUnit.getMessageId() + "]!"
-                     + logMsg.toString());
+        	if (msgCtx.getFailureReason() != null)
+        		log.error("An unexpected error occurred while sending {} (msgId={}). Exception trace:\n{}",
+        				  MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId(), 
+        				  Utils.getExceptionTrace(t, true));
         }
     }
 }
