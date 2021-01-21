@@ -16,14 +16,16 @@
  */
 package org.holodeckb2b.interfaces.workerpool;
 
+import java.time.Instant;
 import java.util.List;
 
 /**
- * Defines the interface for the configuration of a worker pool. Holodeck B2B uses worker pools for running daemon like
- * threads that manage messaging (re-)sending, pulling, etc. The functionality of these workers is provided by worker
- * tasks.
- * <p>The configuration of a worker pool consists of a name of the pool and the workers managed by it. Each worker in
- * the pool has its own configuration specifying which task must be executed and how it should be scheduled.
+ * Defines the interface for the configuration of a worker pool. Holodeck B2B uses worker pools to manager daemon like
+ * tasks that for example manage messaging (re-)sending, clean-up etc. The functionality of these workers is provided 
+ * by worker tasks. 
+ * <p>The configuration of a worker pool consists of the workers managed by it and optionally an interval at which the
+ * configuration should be refreshed. Each worker has its own configuration specifying which task must be executed and
+ * how it should be scheduled.
  *
  * @author Sander Fieten
  * @see IWorkerTask
@@ -33,11 +35,48 @@ public interface IWorkerPoolConfiguration {
 
     /**
      * @return The name of the worker pool
+	 * @deprecated As the management of worker pools has changed the name is now set programmatically
      */
-    public String getName();
+	@Deprecated
+    String getName();
 
-    /**
-     * @return  The list of worker configurations contained in this pool
+	/**
+	 * Gets the worker pool configuration to use.
+	 *  
+	 * @return List of {@link IWorkerConfiguration}s to use for the configuration of the pool. 
+	 * @throws WorkerPoolException  when the configuration of the workers cannot be retrieved
+	 */
+	List<IWorkerConfiguration>   getWorkers();
+	
+	 /**
+     * Gets the interval at which the configuration of the pool should be refreshed.
+     * 
+     * @return	number of seconds at which this configurator is asked for an updated configuration, or</br>
+     * 			-1 when auto refreshing of the configuration should be disabled
+     * @since 5.1.0
      */
-    public List<IWorkerConfiguration>   getWorkers();
+    default int getConfigurationRefreshInterval() {
+    	return -1;
+    }
+	
+	/**
+	 * Indicates whether the configuration has changed since the given time stamp. This is used to optimise the 
+	 * reloading of the configuration by the worker pool. Support for this functionality is optionally. By default 
+	 * <code>true</code> is returned so the pool will ask for the latest configuration. 
+	 * 
+	 * @param  since  time stamp to check against
+	 * @return <code>true</code> (default) if the configuration has changed and the worker pool should reload it,</br>
+	 * 		   <code>false</code> otherwise
+	 * @since 5.1.0 
+	 */	
+	default boolean hasConfigChanged(Instant since) {
+		return false;
+	}
+	
+	/**
+	 * Reloads the configuration.
+	 * 
+	 * @throws WorkerPoolException  when the configuration cannot be reloaded
+	 */
+	default void reload() throws WorkerPoolException {}
 }

@@ -57,7 +57,9 @@ public class TestUtils {
      * @param clazz Class instance to get class loader from
      * @param resourceName the name of the resource, which path we want to get
      * @return
+     * @deprecated TODO: should be replaced by getPath() of generic TestUtils class
      */
+	@Deprecated
     public static Path getPath(Class clazz, String resourceName) {
         try {
             URL url = clazz.getClassLoader().getResource(resourceName);
@@ -68,10 +70,14 @@ public class TestUtils {
         }
     }
     
+    // @deprecated TODO: should be replaced by getPath() of generic TestUtils class
+	@Deprecated
     public static Path getPath(String resourceName) {
     	return getPath(TestUtils.class, resourceName);
     }
     
+	// @deprecated TODO: should be replaced by getPath() of generic TestUtils class
+	@Deprecated
     public static Path getTestBasePath() {
     	return getPath(TestUtils.class, ".");
     }    

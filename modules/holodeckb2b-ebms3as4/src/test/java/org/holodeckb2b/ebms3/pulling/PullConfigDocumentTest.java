@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -37,24 +38,26 @@ import org.junit.Test;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class PullConfigurationTest {
+public class PullConfigDocumentTest {
 
     /**
      *
      */
     @Test
     public void testLoad_DefaultOnly() {
-        final String path = TestUtils.getPath(PullConfigurationTest.class.getSimpleName() + "/pullcfg1.xml").toString();
+        final Path path = TestUtils.getPath(PullConfigDocumentTest.class.getSimpleName() + "/pullcfg1.xml");
 
         try {
-            final PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);
+            final PullConfigDocument pullCfg = PullConfigDocument.loadFromFile(path);
 
             assertNotNull(pullCfg);
+            assertEquals(60, pullCfg.getRefreshInterval());
+            
             final List<IWorkerConfiguration> workers = pullCfg.getWorkers();
 
             assertEquals(1, workers.size());
             assertEquals(new Interval(1826646350, TimeUnit.SECONDS), workers.get(0).getInterval());
-
+            
         } catch (final Exception e) {
             e.printStackTrace();
             fail();
@@ -67,12 +70,14 @@ public class PullConfigurationTest {
     @SuppressWarnings ("unchecked")
     @Test
     public void testLoad_CompleteConfig() {
-    	final String path = TestUtils.getPath(PullConfigurationTest.class.getSimpleName() + "/pullcfg2.xml").toString();
+        final Path path = TestUtils.getPath(PullConfigDocumentTest.class.getSimpleName() + "/pullcfg2.xml");
 
         try {
-            final PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);
+            final PullConfigDocument pullCfg = PullConfigDocument.loadFromFile(path);
 
             assertNotNull(pullCfg);
+            assertEquals(600, pullCfg.getRefreshInterval());
+            
             final List<IWorkerConfiguration> workers = pullCfg.getWorkers();
 
             assertEquals(3, workers.size());
@@ -113,11 +118,11 @@ public class PullConfigurationTest {
      *
      */
     @Test
-    public void testLoad_ErrorConfig() {
-    	final String path = TestUtils.getPath(PullConfigurationTest.class.getSimpleName() + "/pullcfg3.xml").toString();
+    public void testNoPModesForPuller() {
+        final Path path = TestUtils.getPath(PullConfigDocumentTest.class.getSimpleName() + "/pullcfg3.xml");
 
         try {
-            final PullConfiguration pullCfg = PullConfiguration.loadFromFile(path);
+            final PullConfigDocument pullCfg = PullConfigDocument.loadFromFile(path);
 
             assertNull(pullCfg);
         } catch (final Exception e) {
@@ -126,5 +131,32 @@ public class PullConfigurationTest {
         }
     }
 
+    @Test
+    public void testPModesForDefault() {
+        final Path path = TestUtils.getPath(PullConfigDocumentTest.class.getSimpleName() + "/pullcfg4.xml");
+
+        try {
+            final PullConfigDocument pullCfg = PullConfigDocument.loadFromFile(path);
+
+            assertNull(pullCfg);
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+    
+    @Test
+    public void testInvalidRefresh() {
+        final Path path = TestUtils.getPath(PullConfigDocumentTest.class.getSimpleName() + "/pullcfg5.xml");
+        
+    	try {
+    		final PullConfigDocument pullCfg = PullConfigDocument.loadFromFile(path);
+    		
+    		assertNull(pullCfg);
+    	} catch (final Exception e) {
+    		e.printStackTrace();
+    		fail();
+    	}
+    }
 
 }

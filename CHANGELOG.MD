@@ -4,15 +4,31 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 5.1.0
 ##### Unreleased
+### Added
+* Management of worker pools by the Core, including the possibility for "on the fly" reconfiguration. For this purpose a
+ new `IWorkerPool` interface has been introduced and methods in the `HolodeckB2BCoreInterface` and 
+ `IWorkerPullConfiguration` have been added.
+
 ### Changed
+* Pull reconfiguration is now managed by the worker pool and configured in the pull configuration file by setting the
+  _refresh_ parameter
+* Improved logging of unexpected errors during message processing 
 * Refactored code to use the generic utility classes from https://github.com/holodeck-b2b/generic-utils
+* Moved `AbstractWorkerTask` class from `org.holodeckb2b.common.workerpool` to `org.holodeckb2b.common.workers`
+* Renamed `org.holodeckb2b.common.workerpool`to `org.holodeckb2b.core.workerpool`
+
+### Deprecated
+* `org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration.getName()` as worker pool names are now set in code
 
 ### Fixed
 * Processing of a received message with more than 30 attachments fails [#113](https://github.com/holodeck-b2b/Holodeck-B2B/issues/113) 
+* Setting of HTTP response code in response message context
 
 ### Removed
+* The _pullConfigWatcher_ as the pull configuration is now automatically refreshed by the worker pool itself 
 * Generic utility classes `org.holodeckb2b.common.util.Utils`, `org.holodeckb2b.common.util.MessageIdUtils` and
  `org.holodeckb2b.security.util.KeystoreUtils` as they are moved to new separate project.
+
 
 ## 5.0.3
 ##### 2020-11-18

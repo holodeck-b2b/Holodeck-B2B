@@ -35,14 +35,14 @@ import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.events.SyncEventProcessor;
-import org.holodeckb2b.common.workerpool.WorkerPool;
-import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
+import org.holodeckb2b.common.workerpool.XMLWorkerPoolConfiguration;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.config.InternalConfiguration;
 import org.holodeckb2b.core.pmode.PModeManager;
 import org.holodeckb2b.core.submission.MessageSubmitter;
 import org.holodeckb2b.core.validation.DefaultValidationExecutor;
 import org.holodeckb2b.core.validation.IValidationExecutor;
+import org.holodeckb2b.core.workerpool.WorkerPool;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
@@ -61,7 +61,9 @@ import org.holodeckb2b.interfaces.pmode.PModeSetException;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
+import org.holodeckb2b.interfaces.workerpool.IWorkerPool;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
+import org.holodeckb2b.interfaces.workerpool.WorkerPoolException;
 
 /**
  * Axis2 module class for the Holodeck B2B Core module.
@@ -91,10 +93,9 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     private InternalConfiguration  instanceConfiguration = null;
 
     /**
-     * Pool of worker threads that handle recurring tasks like message sending and
-     * resending.
+     * The list of worker pools running in this Holodeck B2B instance
      */
-    private WorkerPool      workers = null;
+    private HashMap<String, WorkerPool>      workerPools = null;
 
     /**
      * Collection of active message delivery methods mapped by the <i>id</i> of the {@link IDeliverySpecification} that
@@ -239,26 +240,26 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         log.trace("Create list of available message delivery methods");
         msgDeliveryFactories = new HashMap<>();
         log.trace("Create list of globally configured event handlers");
-        eventConfigurations = new ArrayList<>();
+        eventConfigurations = new ArrayList<>();        
+        log.trace("Create list of managed worker pools");
+        workerPools = new HashMap<>();
         
         // From this point on other components can be started which need access to the Core
         log.debug("Make Core available to outside world");
         HolodeckB2BCore.setImplementation(this);
 
-        log.trace("Initialize worker pool");
-        final IWorkerPoolConfiguration poolCfg =
-                                        XMLWorkerPoolConfig.loadFromFile(instanceConfiguration.getWorkerPoolCfgFile());
-        if (poolCfg != null) {
-            workers = new WorkerPool(poolCfg);
-            log.info("Started the worker pool");
-        } else {
-            // As the workers are needed for correct functioning of Holodeck B2B, failure to either
+        log.trace("Initialize Core worker pool");
+        
+        XMLWorkerPoolConfiguration corePoolCfg = null;
+        try {
+        	createWorkerPool("hb2b-core", new XMLWorkerPoolConfiguration(instanceConfiguration.getWorkerPoolCfgFile()));
+        } catch (WorkerPoolException corePoolCfgError) {        	
+        	// As the workers are needed for correct functioning of Holodeck B2B, failure to either
             // load the configuration or start the pool is fatal.
             log.fatal("Could not load workers from file " + instanceConfiguration.getWorkerPoolCfgFile());
             throw new AxisFault("Unable to start Holodeck B2B. Could not load workers from file "
                                 + instanceConfiguration.getWorkerPoolCfgFile());
         }
-
 
         log.info("Holodeck B2B Core " + VersionInfo.fullVersion + " STARTED.");
         System.out.println("Holodeck B2B Core module started.");      
@@ -282,11 +283,11 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     public void shutdown(final ConfigurationContext cc) throws AxisFault {
         log.info("Shutting down Holodeck B2B Core module...");
 
-        // Stop all the workers by shutting down the normal and pull worker pool
-        log.trace("Stopping worker pool");
-        workers.stop(10);
-        log.debug("Worker pool stopped");
-
+        log.trace("Stopping worker pools");
+        workerPools.forEach((n, p) -> { log.trace("Stopping worker pool: {}", n);
+        								p.shutdown(10);
+        							  });
+        log.debug("Worker pools stopped");
         log.info("Holodeck B2B Core module STOPPED.");
     }
 
@@ -503,5 +504,56 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
 		final AxisModule module = instanceConfiguration.getModule(name);
 		// The AxisModule is only meta-data on the module, we need to get the actual implementing class from it		
 		return module != null ? module.getModule() : null;
+    }
+    
+    /**
+     * Creates a new worker pool using the provided name and configuration. 
+     * 
+     * @param name 				name to identify the new pool
+     * @param configuration		the configuration for the new pool
+     * @return the created worker pool 
+     * @throws WorkerPoolException when the worker pool cannot be created because of an issue in the provided 
+     * 							   configuration or that the pool name isn't unique.
+     * @since 5.1.0 
+     */
+    @Override
+    public IWorkerPool createWorkerPool(final String name, final IWorkerPoolConfiguration configuration) 
+    																				throws WorkerPoolException {
+    	if (Utils.isNullOrEmpty(name))
+    		throw new IllegalArgumentException("A pool name must be provided");    	
+    	if (configuration == null) 
+    		throw new IllegalArgumentException("A pool configuration must be provided");
+    	
+    	if (workerPools.containsKey(name)) {
+    		log.warn("Request to add a worker pool rejected as there already exists a pool with same name ({})", name);
+    		throw new WorkerPoolException("Duplicate pool name");
+    	}
+    	
+    	try {
+    		log.trace("Creating new worker pool: {}", name);
+    		final WorkerPool newPool = new WorkerPool(name, configuration);
+    		log.trace("Starting new worker pool");
+    		newPool.start();
+    		workerPools.put(name, newPool);
+    		
+    		log.debug("Added new worker pool: {}", name);
+    		return newPool;
+    	} catch (Throwable poolFailure) {
+    		log.error("An error occurred creating the new worker pool ({}). Error details: {} - {}", name, 
+    					poolFailure.getClass().getSimpleName(), poolFailure.getMessage());
+    		throw (poolFailure instanceof WorkerPoolException) ? (WorkerPoolException) poolFailure : 
+    											new WorkerPoolException("Creating worker pool failed", poolFailure);
+    	}    	
+    }
+    
+    /**
+     * Gets the worker pool with the given name.
+     * 
+     * @param name	of the worker pool to retrieve
+     * @return		the worker pool with the given name, or <code>null</code> when no such pool exists
+     * @since 5.1.0
+     */
+    public IWorkerPool getWorkerPool(final String name) {    	
+    	return workerPools != null ? workerPools.get(name) : null;
     }
 }

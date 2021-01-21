@@ -25,6 +25,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -32,13 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.holodeckb2b.common.testhelpers.TestUtils;
-import org.holodeckb2b.common.workerpool.xml.XMLWorkerPoolConfig;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
-import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -46,36 +41,22 @@ import org.junit.Test;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class XMLWorkerPoolConfigTest {
-
-    public XMLWorkerPoolConfigTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
+public class XMLWorkerPoolCfgDocumentTest {
 
     @Test
     public void testCompleteConfig() {
-        final Path path = TestUtils.getPath("workerpoolcfg/wp_config1.xml");
+        final Path path = TestUtils.getPath("workerpoolcfg/wp_complete.xml");
 
-        final IWorkerPoolConfiguration result = XMLWorkerPoolConfig.loadFromFile(path);
+        XMLWorkerPoolCfgDocument result = null;
+		try {
+			result = XMLWorkerPoolCfgDocument.readFromFile(path);
+		} catch (Exception e1) {
+			fail();
+		}
 
         assertNotNull(result);
-        assertEquals("complete", result.getName());
-
+        assertEquals(new Integer(5), result.getRefreshInterval());
+        
         final List<IWorkerConfiguration> workers = result.getWorkers();
         assertEquals(2, workers.size());
 
@@ -92,37 +73,32 @@ public class XMLWorkerPoolConfigTest {
         params.entrySet().parallelStream().allMatch(e -> expected.containsKey(e.getKey()) && 
         													expected.get(e.getKey()).equals(e.getValue()));
     }
+    
+    @Test
+    public void testEmptyFile() {
+    	final Path path = TestUtils.getPath("workerpoolcfg/wp_empty.xml");
+    	
+        XMLWorkerPoolCfgDocument result = null;
+		try {
+			result = XMLWorkerPoolCfgDocument.readFromFile(path);
+    	} catch (Exception e) {
+    		fail();
+    	}     
+    	
+    	assertNotNull(result);
+    	assertNull(result.getRefreshInterval());
+    	assertNotNull(result.getWorkers());
+    	assertTrue(result.getWorkers().isEmpty());
+    }
 
     @Test
     public void testInvalidFile() {
-        final Path path = TestUtils.getPath("workerpoolcfg/wp_config2.xml");
+        final Path path = TestUtils.getPath("workerpoolcfg/wp_invalid.xml");
 
-        final IWorkerPoolConfiguration result = XMLWorkerPoolConfig.loadFromFile(path);
-        assertNull(result);
-    }
-
-    @Test
-    public void testLoadUnnamedFile() {
-        System.out.println("loadFromFile");
-        final Path path = TestUtils.getPath("workerpoolcfg/wp_config3.xml");
-
-        final IWorkerPoolConfiguration result = XMLWorkerPoolConfig.loadFromFile(path);
-
-        assertNotNull(result);
-        assertEquals("wp_config3", result.getName());
-
-        final List<IWorkerConfiguration> workers = result.getWorkers();
-        assertEquals(1, workers.size());
-
-        assertFalse(workers.get(0).activate());
-        assertEquals("name1", workers.get(0).getName());
-        assertEquals("workerClass1", workers.get(0).getWorkerTask());
-
-        final Map<String, ?> params = workers.get(0).getTaskParameters();
-
-        assertNotNull(params);
-        assertTrue(params.isEmpty());
-
-    }
-
+        try {
+			XMLWorkerPoolCfgDocument.readFromFile(path);
+			fail();
+		} catch (Exception e) {
+		}        
+    } 
 }

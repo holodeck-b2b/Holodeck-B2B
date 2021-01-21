@@ -39,12 +39,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<workers xmlns="http://www.holodeck-b2b.org/2012/12/workers"
+<workers xmlns="http://holodeck-b2b.org/schemas/2012/12/workers"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://www.holodeck-b2b.org/2012/12/workers file:/Users/safi/Development/holodeck-b2b-1.1-b/config/workers.xsd" poolName="correctpool">
-    <worker name="worker1" activate="true" interval="1" concurrent="4" workerClass="org.holodeckb2b.common.workerpool.TestTask">
-       <parameter name="p1">value1</parameter>
-       <parameter name="p2">value2</parameter>
-       <parameter name="p3">value3</parameter>
-    </worker>
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2012/12/workers ../../../main/resources/xsd/workers.xsd" >
+
 </workers>

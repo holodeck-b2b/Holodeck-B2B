@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-This is the default pull configuration which pulls each minute for all relevant P-Modes.
+This is the default pull configuration which pulls every 5 minutes for all relevant P-Modes. The configuration is 
+checked also every 5 minutes to see if the pulling needs to be changed.
 
 See the XML schema for more information on how to configure pulling.
 -->
 <pulling xmlns="http://holodeck-b2b.org/schemas/2014/05/pullconfiguration"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" refresh="300">
     <default interval="300"/>
 </pulling>

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
+ * Copyright (C) 2021 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,147 +16,108 @@
  */
 package org.holodeckb2b.ebms3.pulling;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.workerpool.WorkerPool;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementList;
-import org.simpleframework.xml.Namespace;
-import org.simpleframework.xml.Root;
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.PersistenceException;
-import org.simpleframework.xml.core.Persister;
-import org.simpleframework.xml.core.Validate;
 
 /**
- * Is a implementation of {@link IWorkerPoolConfiguration} specifically for creating a pool of <i>pull workers</i> that
- * send out the pull requests.
+ * Is a implementation of {@link IWorkerPoolConfiguration} specifically for managing a pool of <i>pull workers</i> that
+ * send out the <i>Pull Requests</i>.
  * <p>The pull worker pool exists of one default pull worker and zero or more specific pull workers. The specific
  * pull workers handle the pulling for a given set of P-Modes. The default pull worker will handle all other pulling.
  * For each worker an interval is specified to wait between sending of the pull request. If the interval equals 0 the
- * pull worker will not be activated and pulling will be disabled.
+ * pull worker will not be activated and pulling will be disabled.<br/>
+ * The configuration also includes a parameter that indicates the interval at which it should be refreshed and the 
+ * worker pool should be reconfigured. If this parameter is set to zero the pulling will be statically configured and
+ * Holodeck B2B needs to be restarted for configuration changes to take effect.<br/>
+ * Pulling can be disabled both permanently or temporarily. To disable pulling permanently just don't provide a pulling 
+ * configuration file. To temporarily disable pulling set the interval of the default puller to '0' and have no other 
+ * pullers defined. Pulling then can later be enabled by either changing the interval of the default puller or adding 
+ * specific pullers.
  * <p>The configuration of the pool is read from an XML document defined by the schema 
- * <i>http://holodeck-b2b.org/schemas/2014/05/pullconfiguration</i>
+ * <i>http://holodeck-b2b.org/schemas/2014/05/pullconfiguration</i>.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @see WorkerPool
  * @see PullWorker
- * @see PullerConfig
+ * @see PullerConfigElement
  */
-@Root(name = "pulling", strict = false)
-@Namespace(reference="http://holodeck-b2b.org/schemas/2014/05/pullconfiguration")
 public class PullConfiguration implements IWorkerPoolConfiguration {
+	static final Logger log = LogManager.getLogger();
+	
+	/**
+	 * Path to the configuration file 
+	 */
+	private Path	path; 
+	/**
+	 * Last read configuration
+	 */
+	private PullConfigDocument lastRead;
 
-    /**
-     * The name of the worker pool that contains the workers that execute the PullRequests
-     */
-    public static final String PULL_WORKER_POOL_NAME = "holodeckb2b:pullers";
+	/**
+	 * Creates a new instance using the configuration file located at the given path. 
+	 * 
+	 * @param p	path to the configuration file. If this is a relative path it will be resolved against the HB2B home
+	 * 			directory
+	 */
+	public PullConfiguration(final Path p) {
+		this.path = p.isAbsolute() ? p : HolodeckB2BCore.getConfiguration().getHolodeckB2BHome().resolve(p);		
+		lastRead = PullConfigDocument.loadFromFile(path);
+	}
+	
+	/**
+	 * @return whether a configuration is available 
+	 */
+	public boolean isAvailable() {
+		return lastRead != null;
+	}
+	
+	/**
+	 * @deprecated The puller worker pool is named by the module
+	 */
+	@Override
+	@Deprecated
+	public String getName() {
+		return null;
+	}
 
-    @Element(name = "default")
-    private PullerConfig  defaultPuller;
+	@Override
+	public List<IWorkerConfiguration> getWorkers() {
+		return lastRead.getWorkers();
+	}
 
-    @ElementList(entry = "pull", inline = true, required = false)
-    private List<PullerConfig>  pullers;
+	@Override
+	public int getConfigurationRefreshInterval() {
+		return lastRead.getRefreshInterval();
+	}
 
-    /**
-     * Performs additional checks to ensure that the read XML document is valid according to the XSD.
-     * <p>Because a general definition is used for reading both the default and specific pullers there is no check
-     * on the number of P-Modes referenced by the pullers when the XML is deserialized. Therefor this method performs
-     * checks:<ol>
-     * <li>There are no referenced P-Modes for the default puller</li>
-     * <li>There is at least one reference P-Mode for each specific puller</li>
-     * </ol>
-     *
-     * @throws PersistenceException When the read XML fails one of the checks
-     */
-    @Validate
-    private void validate() throws PersistenceException {
-        // Default puller should have no PModes associated with it
-        if(defaultPuller.pmodes != null && !defaultPuller.pmodes.isEmpty())
-            throw new PersistenceException("The default puller should not specify specific PModes!");
-
-        // A specific puller must specifiy at least one PMode
-        if(pullers != null) {
-            for(final PullerConfig p : pullers)
-                if(p.pmodes == null || p.pmodes.isEmpty())
-                    throw new PersistenceException("Specific puller must reference at least one PMode!");
-        }
-    }
-
-
-    /**
-     * @return The name of this worker pool is fixed and defined by {@link HolodeckB2BCore#PULL_WORKER_POOL_NAME}.
-     */
-    @Override
-    public String getName() {
-        return PULL_WORKER_POOL_NAME;
-    }
-
-    /**
-     * Converts the different pull options defined in the XML configuration to a list {@link IWorkerConfiguration}
-     * objects needed for the configuration of the worker pool.
-     *
-     * @return The configurations for the pull workers part of the worker pool based on the XML configuration.
-     * @see    WorkerPool
-     */
-    @Override
-    public List<IWorkerConfiguration> getWorkers() {
-        final ArrayList<IWorkerConfiguration> pullWorkers = new ArrayList<>();
-        // The P-Modes that have a specific pull worker should not be included in the default one, so collect them
-        final ArrayList<PullerConfig.PMode>   notDefault = new ArrayList<>();
-
-        for (int i = 0; pullers != null && i < pullers.size(); i++) {
-            final PullerConfig p = pullers.get(i);
-            // Set a unique name for each puller worker
-            p.name = "p" + (new Date()).getTime() + i;
-            pullWorkers.add(p);
-            // The handled P-Mode should be excluded from the default pull worker
-            notDefault.addAll(p.pmodes);
-        }
-
-        // Configure the default pull worker to exclude all P-Modes already taken care of
-        defaultPuller.name = "default";
-        defaultPuller.pmodes = notDefault;
-        defaultPuller.inclusive = false;
-        pullWorkers.add(defaultPuller);
-
-        return pullWorkers;
-    }
-
-    /**
-     * Loads the pulling configuration from file.
-     *
-     * @param path      Path to the XML document containing the pulling configuration
-     * @return          The pulling configuration if successfully loaded, null otherwise
-     */
-    public static PullConfiguration  loadFromFile(final String  path) {
-        final Log log = LogFactory.getLog(PullConfiguration.class);
-        PullConfiguration    pullCfg = null;
-
-        log.debug("Loading pulling configuration from XML document in " + path);
-
-        final File f = new File(path);
-
-        if (f.exists() && f.canRead()) {
-            final Serializer serializer = new Persister();
-            try {
-                pullCfg = serializer.read(PullConfiguration.class, f);
-                log.debug("Loaded configuration");
-            } catch (final Exception ex) {
-                log.error("Error while reading configuration from " + path + "! Details: " + ex.getMessage());
-            }
-         } else
-            log.error("Unable to access configuration file" + path + "!");
-
-
-        return pullCfg;
-    }
+	@Override
+	public boolean hasConfigChanged(Instant since) {
+		try {
+			return Files.getLastModifiedTime(path).compareTo(FileTime.from(since)) > 0;
+		} catch (IOException e) {
+			log.error("An error occurred while checking status of config file {}. Error was: {}", path.toString(), 
+						e.getClass().getSimpleName());
+			// Maybe the error is just a glitch and the configuration can still be read, so return true so there will
+			// be another read attempt
+			return true;
+		}
+	}
+	
+	@Override
+	public void reload() {
+		final PullConfigDocument newConfig = PullConfigDocument.loadFromFile(path);
+		if (newConfig == null) 
+			log.warn("Could not read new configuration from file ({}). Keep using current.", path.toString());
+		else
+			lastRead = newConfig;
+	}	
 }

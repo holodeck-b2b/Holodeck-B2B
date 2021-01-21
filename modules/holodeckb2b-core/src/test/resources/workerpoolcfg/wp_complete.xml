@@ -17,23 +17,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<!-- Pull configuration for testing
-
-Contains both the default puller als well as specific pullers. The specific pullers contain one or more P-Modes
--->
-<pulling xmlns="http://holodeck-b2b.org/schemas/2014/05/pullconfiguration"
+<workers xmlns="http://holodeck-b2b.org/schemas/2012/12/workers"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://holodeck-b2b.org/schemas/2014/05/pullconfiguration file:/Users/safi/Development/NetbeansProjects/holodeck-b2b/modules/holodeck-ebms3/src/main/resources/xsd/pullingconfig.xsd">
-    <default interval="1491039197"/>
-    <pull interval="1985496162">
-        <pmodes>
-            <pmode id="LO7.wrubhpHfZ9Kzr3buPpHMVI"/>
-        </pmodes>
-    </pull>
-    <pull interval="1622097273">
-        <pmodes>
-            <pmode id="INyEfTQuibb8t"/>
-            <pmode id="Qw1hfHh"/>
-        </pmodes>
-    </pull>
-</pulling>
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2012/12/workers ../../../main/resources/xsd/workers.xsd" 
+ poolName="complete" refresh="5">
+    <worker name="worker1" activate="false" workerClass="workerClass1">
+       <parameter name="p1">value1</parameter>
+       <parameter name="p2">value2</parameter>
+       <parameter name="p3">value3</parameter>
+       <parameter name="p4">value4</parameter>
+    </worker>
+    <worker name="worker2" activate="true" workerClass="workerClass2" concurrent="5" interval="30">
+       <parameter name="p5">value5</parameter>
+    </worker>
+</workers>

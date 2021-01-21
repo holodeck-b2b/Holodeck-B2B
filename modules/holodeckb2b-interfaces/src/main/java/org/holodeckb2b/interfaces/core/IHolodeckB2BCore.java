@@ -33,6 +33,9 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
+import org.holodeckb2b.interfaces.workerpool.IWorkerPool;
+import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
+import org.holodeckb2b.interfaces.workerpool.WorkerPoolException;
 
 /**
  * Defines the interface the Holodeck B2B Core implementation has to provide to the outside world, like submitters
@@ -160,4 +163,26 @@ public interface IHolodeckB2BCore {
      * @since 5.0.0
      */
     IVersionInfo getVersion();
+    
+    /**
+     * Creates a new worker pool using the provided name and configuration. 
+     * 
+     * @param name 				name to identify the new pool
+     * @param configuration		the configuration for the new pool
+     * @return the created worker pool 
+     * @throws WorkerPoolException when the worker pool cannot be created because of an issue in the provided 
+     * 							   configuration or that the pool name isn't unique.
+     * @since 5.1.0 
+     */
+    IWorkerPool createWorkerPool(final String name, final IWorkerPoolConfiguration configuration) 
+																							throws WorkerPoolException;    
+    
+    /**
+     * Gets the worker pool with the given name.
+     * 
+     * @param name	of the worker pool to retrieve
+     * @return		the worker pool with the given name, or <code>null</code> when no such pool exists
+     * @since 5.1.0
+     */
+    IWorkerPool getWorkerPool(final String name);
 }

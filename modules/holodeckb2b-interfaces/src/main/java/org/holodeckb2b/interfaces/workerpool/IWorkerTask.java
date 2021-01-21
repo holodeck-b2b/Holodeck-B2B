@@ -53,7 +53,7 @@ public interface IWorkerTask extends Runnable {
      * Set the parameters for correctly executing the workers task.
      *
      * @param  parameters    The parameters to configure this worker
-     * @throws TaskConfigurationException   When the task can not be configured correctly based on the supplied parameters
+     * @throws TaskConfigurationException  When the task can not be configured based on the supplied parameters
      */
     public void setParameters(Map<String, ?> parameters) throws TaskConfigurationException;
 }

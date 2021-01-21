@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.common.workerpool.xml;
+package org.holodeckb2b.common.workerpool;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,9 +27,8 @@ import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Root;
 
 /**
- * Implements the configuration of a Worker as defined by {@link IWorkerConfiguration} using XML.
- *
- * <p>The XML element containing the configuration is shown here:
+ * Implements the configuration of a Worker as defined by {@link IWorkerConfiguration} using XML. The element is 
+ * specified by XML schema <i>http://holodeck-b2b.org/schemas/2012/12/workers</i>. The element definition is shown here:
  * <pre>
  *  &lt;worker
  *      name=<i>String : Name of this worker</i>

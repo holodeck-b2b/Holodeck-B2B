@@ -30,19 +30,18 @@ import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
 /**
- * Is an implementation of {@link IWorkerConfiguration} specifically for the configuration of a {@link PullWorker} that
- * is part of the pull worker pool. These workers are responsible for sending out the pull requests.
+ * Represents the <code>genericPullerType</code> complex type defined in the XML schema 
+ * <i>http://holodeck-b2b.org/schemas/2014/05/pullconfiguration≤/i>. It implements {@link IWorkerConfiguration} so it 
+ * can directly be used for the configuration of the {@link PullWorker}s in the pull worker pool. 
  * <p>There are two type of pull workers: one specific for a set of P-Modes and a default one responsible for all other
  * P-Modes. Both type share this configuration which includes a list of P-Modes which for the specific worker indicates
  * the P-Modes for which to send the pull requests and for the default worker which P-Modes to exclude.
- * <p>The configuration is read from an XML document defined by the schema
- * <code>http://holodeck-b2b.org/schemas/2014/05/pullconfiguration</code>. This class handles the
- * <code>genericPullerType</code>. The overall configuration document is handled by {@link PullConfiguration}.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @see PullConfigDocument
  */
 @Root
-public class PullerConfig implements IWorkerConfiguration {
+public class PullerConfigElement implements IWorkerConfiguration {
 
     /**
      * Represents the <code>pmode</code> element in the XML document for the pulling configuration
@@ -63,7 +62,7 @@ public class PullerConfig implements IWorkerConfiguration {
      * The name to assign to this <i>pull worker</i>. Is not read from the XML configuration but assigned at runtime
      * by the pool configuration
      *
-     * @see PullConfiguration
+     * @see PullConfigDocument
      */
     String  name;
 
@@ -75,7 +74,7 @@ public class PullerConfig implements IWorkerConfiguration {
 
     @Override
     public String getName() {
-        return PullWorker.class.getName() + "." + name;
+        return name;
     }
 
     /**

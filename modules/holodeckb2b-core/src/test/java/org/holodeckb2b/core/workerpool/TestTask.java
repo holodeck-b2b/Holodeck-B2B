@@ -14,9 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.common.workerpool;
+package org.holodeckb2b.core.workerpool;
 
 import java.util.Map;
+
+import org.holodeckb2b.common.workers.AbstractWorkerTask;
+import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
  * Simple task used in test of the Worker pool
@@ -25,22 +28,20 @@ import java.util.Map;
  */
 public class TestTask extends AbstractWorkerTask {
 
-    String[]    pnames;
-    String[]    pvalues;
-
-    int         runs = 0;
-
+	TaskReporter 	reporter;
+    
     @Override
-    public void setParameters(final Map<String, ?> parameters) {
-        pnames = parameters.keySet().toArray(new String[0]);
-        pvalues = parameters.values().toArray(new String[0]);
+    public void setParameters(final Map<String, ?> parameters) throws TaskConfigurationException {
+    	reporter = (TaskReporter) parameters.get("reporter");
+    	reporter.reportParams(this.name, parameters);
+    	
+    	if (parameters.containsKey("REJECT"))
+    		throw new TaskConfigurationException("REJECTED on request");
     }
 
     @Override
-    public void doProcessing() {
-        System.out.println("TestTask is running for the " + runs + " time! Parameter " + pnames[runs%pnames.length] + "=" + pvalues[runs%pvalues.length]);
-
-        runs = runs + 1;
+    public void doProcessing() {        
+        reporter.reportRun(this.name);
     }
 
 }

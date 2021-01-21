@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
-import org.holodeckb2b.common.workerpool.AbstractWorkerTask;
+import org.holodeckb2b.common.workers.AbstractWorkerTask;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
@@ -46,6 +46,7 @@ import org.holodeckb2b.interfaces.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
+import org.holodeckb2b.interfaces.workerpool.WorkerPoolException;
 
 /**
  * This worker is responsible for the retransmission of User Messages that did not receive an AS4 receipt as expected.
@@ -160,8 +161,6 @@ public class RetransmissionWorker extends AbstractWorkerTask {
     /**
      * This worker does not need any configuration.
      *
-     * @param parameters
-     * @throws TaskConfigurationException
      */
     @Override
     public void setParameters(final Map<String, ?> parameters) throws TaskConfigurationException {
