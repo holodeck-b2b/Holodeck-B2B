@@ -183,8 +183,8 @@ public class DefaultCertManager implements ICertificateManager {
         }
         log.trace("Check availability of configured keystores");
         if (!KeystoreUtils.check(privateKeystorePath, privateKeystorePwd) 
-        	|| KeystoreUtils.check(partnerKeystorePath, partnerKeystorePwd)
-        	|| KeystoreUtils.check(trustKeystorePath, trustKeystorePwd)) {        
+        	|| !KeystoreUtils.check(partnerKeystorePath, partnerKeystorePwd)
+        	|| !KeystoreUtils.check(trustKeystorePath, trustKeystorePwd)) {        
         	log.fatal("One or more of the configured key stores are not available!");
         	throw new SecurityProcessingException("Invalid configuration!");
         }
