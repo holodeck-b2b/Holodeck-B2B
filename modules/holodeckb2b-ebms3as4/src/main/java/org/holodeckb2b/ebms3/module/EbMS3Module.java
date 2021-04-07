@@ -18,8 +18,6 @@ package org.holodeckb2b.ebms3.module;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Iterator;
-import java.util.ServiceLoader;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
@@ -85,20 +83,22 @@ public class EbMS3Module implements Module {
         }
         
         log.trace("Load the ebMS3 Security Provider");
-    	Iterator<ISecurityProvider> providers = ServiceLoader.load(ISecurityProvider.class).iterator();
-    	secProvider = providers.hasNext() ? providers.next() : null;
-    	if (providers.hasNext()) 
-    		log.warn("Multiple Security Providers are available, using first one found");
-        log.debug("Using security provider: " + secProvider.getName());
-        try {
-             secProvider.init();
-        } catch (SecurityProcessingException initializationFailure) {
-            log.fatal("Initialisation of required ebMS3 security provider ({}) failed!\n\tError details: {}",
-            		  secProvider.getName(), initializationFailure.getMessage());
-            throw new AxisFault("Unable to initialize required security provider!");
-        }
-        log.info("Succesfully loaded " + secProvider.getName() + " as security provider");
-        
+    	secProvider = Utils.getFirstAvailableProvider(ISecurityProvider.class);
+    	if (secProvider != null) {
+	    	log.debug("Using security provider: " + secProvider.getName());
+	        try {
+	             secProvider.init();
+	        } catch (SecurityProcessingException initializationFailure) {
+	            log.fatal("Initialisation of required ebMS3 security provider ({}) failed!\n\tError details: {}",
+	            		  secProvider.getName(), initializationFailure.getMessage());
+	            throw new AxisFault("Unable to initialize required security provider!");
+	        }
+	        log.info("Succesfully loaded " + secProvider.getName() + " as security provider");        
+    	} else {
+    		log.fatal("No ebMS3 security provider available!");
+    		throw new AxisFault("Missing required security provider!");
+    	}
+    	
         final Parameter cfgFileParam = HolodeckB2BCore.getConfiguration().getParameter("EbMSPullConfigFile");
         Path cfgFilePath;
         if (cfgFileParam == null)
