@@ -18,10 +18,8 @@ package org.holodeckb2b.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
@@ -174,38 +172,33 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
 		}
 
         log.trace("Load the event processor");
-    	Iterator<IMessageProcessingEventProcessor> procs = ServiceLoader.load(IMessageProcessingEventProcessor.class)
-    																		.iterator();
-    	eventProcessor = procs.hasNext() ? procs.next() : new SyncEventProcessor();
-    	if (procs.hasNext()) 
-    		log.warn("Multiple Event Processors are installed, only using first one found");
-	    log.trace("Initialising event processor : {}", eventProcessor.getName());
-        try {
-        	eventProcessor.init(instanceConfiguration.getHolodeckB2BHome());
-        } catch (MessageProccesingEventHandlingException initializationFailure) {
-        	log.error("Could not initialize the event processor - {} : {}", certManager.getName(),
-        				initializationFailure.getMessage());
-        	if (instanceConfiguration.eventProcessorFallback()) {
-        		log.debug("Using the default event processor as fall back");
-        		eventProcessor = new SyncEventProcessor();
-        	} else {
-        		log.fatal("Fall back to default event processor disabled, cannot start Holodeck B2B!");
-        		throw new AxisError("Configured event processor is required but not available!");
-        	}
-        }
+    	eventProcessor = Utils.getFirstAvailableProvider(IMessageProcessingEventProcessor.class);
+    	if (eventProcessor == null && instanceConfiguration.eventProcessorFallback()) 
+    		eventProcessor = new SyncEventProcessor();    	
+    	if (eventProcessor != null) {
+	        try {
+	        	log.trace("Initialising event processor : {}", eventProcessor.getName());
+	        	eventProcessor.init(instanceConfiguration.getHolodeckB2BHome());
+	        } catch (MessageProccesingEventHandlingException initializationFailure) {
+	        	log.error("Could not initialize the event processor - {} : {}", eventProcessor.getName(),
+	        				initializationFailure.getMessage());
+	        	eventProcessor = null;
+	        }
+    	}
+    	if (eventProcessor == null) {
+    		log.fatal("No event processor available, cannot start Holodeck B2B!");
+    		throw new AxisError("No event processor available!");
+    	}
         log.info("Loaded event processor : {}", eventProcessor.getName());
 
         log.debug("Load the persistency provider for storing meta-data on message units");
-        Iterator<IPersistencyProvider> providers = ServiceLoader.load(IPersistencyProvider.class).iterator();
-        persistencyProvider = providers.hasNext() ? providers.next() : null;
-        if (providers.hasNext()) 
-        	log.warn("Multiple Persistency Providers are installed, only using first one found");
+        persistencyProvider = Utils.getFirstAvailableProvider(IPersistencyProvider.class);
         if (persistencyProvider != null) {	        	
         	log.debug("Using Persistency Provider: {}", persistencyProvider.getName());
         	try {
         		persistencyProvider.init(instanceConfiguration.getHolodeckB2BHome());
         	} catch (PersistenceException initializationFailure) {
-        		log.error("Could not initialize the persistency provider - {} : {}", certManager.getName(),
+        		log.error("Could not initialize the persistency provider - {} : {}", persistencyProvider.getName(),
         				initializationFailure.getMessage());
         		persistencyProvider = null;
         	}
@@ -217,10 +210,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         log.info("Loaded Persistency Provider : {}", persistencyProvider.getName());
         
         log.trace("Load the certificate manager");
-    	Iterator<ICertificateManager> mgrs = ServiceLoader.load(ICertificateManager.class).iterator();
-    	certManager = mgrs.hasNext() ? mgrs.next() : null;
-    	if (mgrs.hasNext()) 
-    		log.warn("Multiple Certificate Managers are installed, only using first one found");
+    	certManager = Utils.getFirstAvailableProvider(ICertificateManager.class); 
     	if (certManager != null) {	        	
 	        log.debug("Using certificate manager: {}", certManager.getName());
 	        try {

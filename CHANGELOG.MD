@@ -12,6 +12,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Pull reconfiguration is now managed by the worker pool and configured in the pull configuration file by setting the
   _refresh_ parameter
+* Loading of the _Event Processor_, _Certificate Manager_, _Persistency Provider_ and ebMS3 _Security Provider_ has been
+  changed to load the first available provider instead of trying to load just the first one registered
 * Improved logging of unexpected errors during message processing 
 * Refactored code to use the generic utility classes from https://github.com/holodeck-b2b/generic-utils
 * Moved `AbstractWorkerTask` class from `org.holodeckb2b.common.workerpool` to `org.holodeckb2b.common.workers`
