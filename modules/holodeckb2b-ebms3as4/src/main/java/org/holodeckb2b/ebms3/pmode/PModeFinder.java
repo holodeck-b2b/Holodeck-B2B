@@ -144,7 +144,7 @@ public class PModeFinder {
         	 */
         	final boolean initiator = PModeUtils.isHolodeckB2BInitiator(p);
         	final String  mepBinding = p.getMepBinding();
-        	if ((initiator && !mepBinding.equals(EbMSConstants.ONE_WAY_PULL)) // sending using Push
+        	if ((initiator && mepBinding.equals(EbMSConstants.ONE_WAY_PUSH)) // sending using Push
     		|| (!initiator && mepBinding.equals(EbMSConstants.ONE_WAY_PULL))) // sending using Pull
                 continue;            
 
