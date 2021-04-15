@@ -18,8 +18,6 @@ package org.holodeckb2b.ebms3.module;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Iterator;
-import java.util.ServiceLoader;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
