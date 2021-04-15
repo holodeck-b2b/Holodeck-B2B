@@ -29,7 +29,6 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.WorkerPoolException;
-import org.simpleframework.xml.Root;
 
 /**
  * Is a {@link IWorkerPoolConfiguration} implementation that uses an XML file to specify the configuration of the pool. 
@@ -40,7 +39,6 @@ import org.simpleframework.xml.Root;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.1.0 added methods related to automatic configuration refresh 
  */
-@Root(name = "workers", strict=false)
 public class XMLWorkerPoolConfiguration implements IWorkerPoolConfiguration {
 	private final Logger log = LogManager.getLogger();
 	

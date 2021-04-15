@@ -45,7 +45,7 @@ import org.simpleframework.xml.core.Persister;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.1.0
  */
-@Root (name="worker", strict = false)
+@Root(name="workers", strict = false)
 class XMLWorkerPoolCfgDocument {
 	/**
 	 * XML parser 
