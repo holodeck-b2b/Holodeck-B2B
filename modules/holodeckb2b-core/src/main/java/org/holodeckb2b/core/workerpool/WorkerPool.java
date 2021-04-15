@@ -137,19 +137,20 @@ public class WorkerPool implements IWorkerPool {
     		
     	log.trace("Starting up worker pool");    	
     	List<IWorkerConfiguration> workerCfgs = configuration.getWorkers();
-    	pool = new ScheduledThreadPoolExecutor(1);
     	refreshInterval = configuration.getConfigurationRefreshInterval();
+	    if (Utils.isNullOrEmpty(workerCfgs) && refreshInterval <= 0) { 
+	    	log.warn("Pool NOT STARTED because configuration contains no workers and refreshing is disabled");
+	    	pool = null;
+	    	return;
+	    }
+	    pool = new ScheduledThreadPoolExecutor(1);
+	    log.debug("Initial configuration of workers");
+	    reconfigure(workerCfgs);
+	    lastRefresh = Instant.now();
     	if (refreshInterval > 0) {
     		log.trace("Adding task to pool to refresh configuration");
     		refreshTask = pool.scheduleAtFixedRate(() -> refresh(), refreshInterval, refreshInterval, TimeUnit.SECONDS);
-    	} else if (Utils.isNullOrEmpty(workerCfgs)) { 
-    		log.warn("Pool NOT STARTED because configuration contains no workers and refreshing is disabled");
-    		pool = null;
-    		return;
     	}
-    	
-    	log.debug("Initial configuration of workers");
-    	reconfigure(workerCfgs);
     	log.info("Pool STARTED");
     }
             
