@@ -147,10 +147,8 @@ final class MMDCompleter {
         }
 
         // Get sender info from P-Mode
-        ITradingPartner pmodeSender = null;
-        // When pulling is used the responder is sending the message!
-        pmodeSender = pmode.getMepBinding().equals(EbMSConstants.ONE_WAY_PULL) ? pmode.getResponder()
-                                                                               : pmode.getInitiator();
+        ITradingPartner pmodeSender = null;        
+        pmodeSender = PModeUtils.isHolodeckB2BInitiator(pmode) ? pmode.getInitiator() : pmode.getResponder();
         Collection<IPartyId> pmPartyIds = null;
         String  pmRole = null;
         if (pmodeSender != null) {
@@ -206,8 +204,7 @@ final class MMDCompleter {
         }
         // Get receiver info from P-Mode
         ITradingPartner pr = null;
-        // When pulling is used the intiator is receiving the message!
-        pr = pmode.getMepBinding().equals(EbMSConstants.ONE_WAY_PULL) ? pmode.getInitiator() : pmode.getResponder();
+        pr = PModeUtils.isHolodeckB2BInitiator(pmode) ? pmode.getResponder() : pmode.getInitiator();
         Collection<IPartyId> pmPartyIds = null;
         String  pmRole = null;
         if (pr != null) {
