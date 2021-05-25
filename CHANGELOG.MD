@@ -23,7 +23,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * `org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration.getName()` as worker pool names are now set in code
 
 ### Fixed
-* Finding the correct P-Mode for User Messages received on response leg of a Two-Way P-Mode 
+* Finding the correct P-Mode for User Messages received on response leg of a Two-Way P-Mode
+* Completion of submission  for Two-Way P-Modes 
 * Processing of a received message with more than 30 attachments fails [#113](https://github.com/holodeck-b2b/Holodeck-B2B/issues/113) 
 * Setting of HTTP response code in response message context
 
