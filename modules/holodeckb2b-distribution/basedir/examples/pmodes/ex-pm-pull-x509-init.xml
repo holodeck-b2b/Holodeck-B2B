@@ -5,8 +5,7 @@ Example P-Mode configuration for a One-Way/Pull scenario where Holodeck B2B is t
 The PullRequest must  be signed using a X.509 certificate to get it authenticated and authorized for pulling by the responding MSH. 
 
 NOTE: To execute this P-Mode successfully the used certificate must be loaded into the private keystore («Holodeck B2B home»/repository/certs/privatekeys.jks). 
-If you are just running the examples you can copy a complete keystore containing all example certificates from the examples/certs directory. Do not forget
-to change the keystore password in the module.xml (parameter = "PrivateKeyStorePassword", value for example keystore = "secrets").
+If you are just running the examples you can copy a complete keystore containing all example certificates from the examples/certs directory. 
 
 This P-Mode file should be combined with "ex-pm-pull-x509-resp.xml" on the other instance so message can be prepared for pulling. If you set up a test 
 environment based on the "Getting Started" page from the web site you should install this P-Mode on instance A. 
