@@ -31,7 +31,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 * The _pullConfigWatcher_ as the pull configuration is now automatically refreshed by the worker pool itself 
 * Generic utility classes `org.holodeckb2b.common.util.Utils`, `org.holodeckb2b.common.util.MessageIdUtils` and
- `org.holodeckb2b.security.util.KeystoreUtils` as they are moved to new separate project.
+ `org.holodeckb2b.security.util.KeystoreUtils` as they are moved to a new, separate project.
 
 
 ## 5.0.3
