@@ -96,8 +96,6 @@
     <parameter name="attachmentDIR"></parameter>
     <parameter name="sizeThreshold">4000</parameter-->
     
-    <module ref="holodeckb2b-core"/>
-
     <parameter name="EnableChildFirstClassLoading">false</parameter>
 
     <!--Uncomment if you want to plugin your own attachments lifecycle implementation -->
