@@ -24,7 +24,7 @@
         <version>5.1.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>hb2b-ebms3-secprovider</artifactId>
+    <artifactId>holodeckb2b-ebms3-secprovider</artifactId>
     <packaging>jar</packaging>
     <name>Holodeck B2B - Default Security Provider</name>
     <description>This module includes the default implementation of the Holodeck B2B Security Provider for creating/processing the WS-Security header in ebMS3/AS4 messages</description>
@@ -99,4 +99,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    
 </project>
