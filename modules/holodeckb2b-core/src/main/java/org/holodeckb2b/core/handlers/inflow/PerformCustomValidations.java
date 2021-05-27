@@ -51,6 +51,11 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
     @Override
     protected InvocationResponse doProcessing(IUserMessageEntity userMessage, IMessageProcessingContext procCtx,
     										  final Logger log) throws Exception {
+    	
+    	// If the User Message is a duplicate, no processing is required. 
+    	if (userMessage.getCurrentProcessingState().getState() == ProcessingState.DUPLICATE) 
+    		return InvocationResponse.CONTINUE;
+    	
         // For the execution of the validation a separate component is used. This component will also raise the event
         log.trace("Validate user message if specified");
         try {
