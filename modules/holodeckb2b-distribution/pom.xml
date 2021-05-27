@@ -59,7 +59,7 @@
         <!-- The default security provider implementation -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>hb2b-ebms3-secprovider</artifactId>
+            <artifactId>holodeckb2b-ebms3-secprovider</artifactId>
             <version>${project.version}</version>
         </dependency>        
         <!-- The extension for API to provide info to the default UI -->
