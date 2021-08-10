@@ -11,7 +11,7 @@ Issue tracker https://github.com/holodeck-b2b/Holodeck-B2B/issues
 
 ## Installation
 ### Prerequisites
-Java 8 is required to run Holodeck B2B.
+Java 8 or higher is required to run Holodeck B2B.
 
 ### Getting started guide
 To help you set up your first instance of Holodeck B2B, you will find a [step-by-step guide to setting up Holodeck B2B](http://holodeck-b2b.org/documentation/getting-started/) on the project website.
