@@ -2,8 +2,25 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 5.1.0
+## 5.2.0
 ##### Unreleased
+### Added
+* `org.holodeckb2b.core.axis2.HTTPWorker` puts the request parameters included in the HTTP URL in _MessageContext_
+  property "hb2b:" + `org.apache.axis2.Constants.REQUEST_PARAMETER_MAP`. The property value is a `Map<String, String>` 
+  of parameter names to values.
+
+### Changed
+* Removed Core Axis2 module as default 
+* Maven ArtifactId of the default ebMS3 Security Provider module to make it consistent with other module names.
+* Log message when no event handers are configured in P-Mode
+
+### Fixed
+* Duplicate messages not eliminated [#117](https://github.com/holodeck-b2b/Holodeck-B2B/issues/117) 
+* Setting of threads available for a _worker pool_  
+* NPE when writing P-Mode XML document with retry configuration
+
+## 5.1.0
+##### Not released
 ### Added
 * Management of worker pools by the Core, including the possibility for "on the fly" reconfiguration. For this purpose a
  new `IWorkerPool` interface has been introduced and methods in the `HolodeckB2BCoreInterface` and 
