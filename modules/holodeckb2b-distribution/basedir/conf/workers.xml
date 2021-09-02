@@ -1,6 +1,6 @@
 <workers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://www.holodeck-b2b.org/2012/12/workers ../repository/xsds/workers.xsd"
- xmlns="http://holodeck-b2b.org/2012/12/workers"
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2012/12/workers ../repository/xsds/workers.xsd"
+ xmlns="http://holodeck-b2b.org/schemas/2012/12/workers"
 >
 
     <!-- ==============================================================

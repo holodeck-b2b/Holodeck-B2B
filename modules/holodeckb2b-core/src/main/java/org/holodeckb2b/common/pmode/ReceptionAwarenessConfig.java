@@ -106,6 +106,8 @@ public class ReceptionAwarenessConfig implements IReceptionAwareness, Serializab
 					csList.append(',');
 			}
 			flexibleIntervalsText = csList.toString();
+			maxRetries = null;
+			fixedInterval = null;
 		} else
 			flexibleIntervalsText = null;
 	}

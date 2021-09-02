@@ -94,7 +94,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
             log.error("The P-Mode for the message unit [" + subject.getMessageId() + "] is not available!");
         }        
         if (!isEventHandled) {
-        	log.trace(eventType + " not handled by P-Mode configured handlers => check global configuration");
+        	log.trace("No P-Mode configured event handlers => check global configuration");
         	if (!handleEvent(HolodeckB2BCoreInterface.getMessageProcessingEventConfiguration(), event))
         		log.debug("No handler defined for " + eventType + ", event [" + event.getId() + "] ignored!");
         }            
