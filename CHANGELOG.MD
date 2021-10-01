@@ -3,10 +3,14 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 2.1.7
-###### Unreleased
+###### 2021-10-01
 ### Fixed
 * Inconsistency in reception awareness [#104](https://github.com/holodeck-b2b/Holodeck-B2B/issues/104)
 * Fall back to default destination URL if no specific one has been specified for async Receipt or Error
+* Pull worker stops pulling when the database connection is lost during execution
+
+### Removed
+* Examples from the distribution package
 
 ## 2.1.6
 ###### 2019-10-01
