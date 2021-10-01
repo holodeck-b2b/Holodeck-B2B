@@ -194,8 +194,9 @@ public class PullWorker implements IWorkerTask {
                     Axis2Sender.sendMessage(pullRequest, log);
                 } catch (final MessageSubmitException ex) {
                     log.error("Could not submit PullRequest for P-Mode [" + p.getId() + "] and MPC=" + mpc);
-                } catch (DatabaseException ex) {
-                    log.error("Could not retrieve the created PullRequest from the database");
+                } catch (Throwable t) {
+                    log.error("An unexpected error occurred during submission of Pull Request. Details:"
+                                + t.getMessage());
                 }
             }
     }
