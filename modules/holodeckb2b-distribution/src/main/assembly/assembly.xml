@@ -130,14 +130,9 @@
         <!-- 
               (5) Copy the examples 
         -->
-        <fileSet>
-            <directory>src/main/examples/</directory>
-            <outputDirectory>holodeck-b2b-${project.version}/examples/</outputDirectory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <useDefaultExcludes>true</useDefaultExcludes>
-        </fileSet>
+        <!--
+            REMOVED
+        -->
         
         <!-- 
               (6a) Copy the patched versions of libs
