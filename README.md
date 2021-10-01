@@ -13,9 +13,6 @@ Issue tracker https://github.com/holodeck-b2b/Holodeck-B2B/issues
 ### Prerequisites
 Java 7 is required to run Holodeck B2B itself (as provided in this project). Extensions however may need Java 8. 
 
-### Getting started guide
-You will find a [step-by-step guide to setting up Holodeck B2B](http://holodeck-b2b.org/documentation/getting-started/) on the project website.
-
 ## Contributing
 We are using the simplified Github workflow to accept modifications which means you should:
 * create an issue related to the problem you want to fix or the function you want to add (good for traceability and cross-reference)
