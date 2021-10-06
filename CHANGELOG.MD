@@ -12,7 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Removed Core Axis2 module as default 
 * Maven ArtifactId of the default ebMS3 Security Provider module to make it consistent with other module names.
-* Log message when no event handers are configured in P-Mode
+* Log message when no event handlers are configured in P-Mode
 
 ### Fixed
 * Duplicate messages not eliminated [#117](https://github.com/holodeck-b2b/Holodeck-B2B/issues/117) 
