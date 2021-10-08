@@ -149,8 +149,8 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         // Check if module name in module.xml is equal to constant use in code
         if (!am.getName().equals(HOLODECKB2B_CORE_MODULE)) {
             // Name is not equal! This is a fatal configuration error, stop loading this module and alert operator
-            log.fatal("Invalid Holodeck B2B Core module configuration found! Name in configuration is: "
-                        + am.getName() + ", expected was: " + HOLODECKB2B_CORE_MODULE);
+            log.fatal("Invalid Holodeck B2B Core module configuration! Name in configuration is: {}, expected was: {}",
+            			am.getName(), HOLODECKB2B_CORE_MODULE);
             throw new AxisFault("Invalid configuration found for module: " + am.getName());
         }
 
@@ -246,7 +246,8 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         } catch (WorkerPoolException corePoolCfgError) {        	
         	// As the workers are needed for correct functioning of Holodeck B2B, failure to either
             // load the configuration or start the pool is fatal.
-            log.fatal("Could not load workers from file " + instanceConfiguration.getWorkerPoolCfgFile());
+            log.fatal("Could not load workers from file {}. Error details: {}", 
+            			instanceConfiguration.getWorkerPoolCfgFile(), Utils.getExceptionTrace(corePoolCfgError));
             throw new AxisFault("Unable to start Holodeck B2B. Could not load workers from file "
                                 + instanceConfiguration.getWorkerPoolCfgFile());
         }
@@ -312,25 +313,23 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
             throw new MessageDeliveryException("No delivery specification given!");
         }
 
-        log.trace("Check if there is a factory available for this specification [" + deliverySpec.getId() +"]");
+        log.trace("Check if there is a factory available for this specification [{}]", deliverySpec.getId());
         IMessageDelivererFactory mdf = msgDeliveryFactories.get(deliverySpec.getId());
 
         if (mdf == null) {
             try {
-                log.trace("No factory available yet for this specification [" + deliverySpec.getId() + "]");
+                log.trace("No factory available yet for this specification [{}]", deliverySpec.getId());
                 final String factoryClassName = deliverySpec.getFactory();
-                log.debug("Create a factory [" + factoryClassName + "] for delivery specification ["
-                        + deliverySpec.getId() + "]");
+                log.debug("Create a factory [{}] for delivery specification [{}]",factoryClassName,deliverySpec.getId());
                 mdf = (IMessageDelivererFactory) Class.forName(factoryClassName).newInstance();
                 // Initialize the new factory with the settings from the delivery spec
                 mdf.init(deliverySpec.getSettings());
-                log.debug("Created factory [" + factoryClassName + "] for delivery specification ["
-                        + deliverySpec.getId() + "]");
+                log.debug("Created factory [{}] for delivery specification [{}]",factoryClassName,deliverySpec.getId());
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
                      | ClassCastException | MessageDeliveryException ex) {
                 // Somehow the factory class failed to load
-                log.error("The factory for delivery specification [" + deliverySpec.getId()
-                            + "] could not be created! Error details: " + ex.getMessage());
+                log.error("The factory for delivery specification [{}] could not be created! Error details: {}",
+                			deliverySpec.getId(), ex.getMessage());
                 throw new MessageDeliveryException("Factory class not available!", ex);
             }
             // Add the new factory to the list of available factories
@@ -433,11 +432,11 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     	for(i = 0; i < eventConfigurations.size() && !exists; i++)
     		exists = eventConfigurations.get(i).getId().equals(id);
     	if (exists) {
-    		log.trace("Replacing existing event handler configuration [id=" + id + "]");
+    		log.trace("Replacing existing event handler configuration [id={}]", id);
     		eventConfigurations.set(i, eventConfiguration);
     	} else 
     		eventConfigurations.add(eventConfiguration);
-    	log.info("Registered event handler configuration [id" + id + "]");
+    	log.info("Registered event handler configuration [id=]", id);
     	return exists;
     }
     
@@ -454,9 +453,9 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     		exists = eventConfigurations.get(i).getId().equals(id);
     	if (exists) {    		
     		eventConfigurations.remove(i);
-    		log.info("Removing event handler configuration [id=" + id + "]");
+    		log.info("Removing event handler configuration [id=]", id);
     	} else
-    		log.warn("No event handler configuration registered for id=" + id);
+    		log.warn("No event handler configuration registered for id=[{}]", id);
     }
     
     /**
