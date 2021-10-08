@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 5.3.0
+##### Unreleased
+### Added
+* Option to have multiple event handlers for one event. See `IMessageProcessingEventConfiguration`
+* `IReceivedMessageProcessingFailure` is now also raised when a message unit cannot be (re)sent, i.e. before the actual
+  send process is started
+
+### Fixed
+* Delivery events (`IMessageDelivered` and `IMessageDeliveryFailure`) not raised for delivered Signal Messages
+
 ## 5.2.0
 ##### Unreleased
 ### Added
