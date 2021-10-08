@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.holodeckb2b.common.events.impl.GenericSendMessageFailure;
+import org.holodeckb2b.common.events.impl.MessageDeliveryFailure;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.workers.AbstractWorkerTask;
 import org.holodeckb2b.commons.util.Utils;
@@ -46,7 +48,6 @@ import org.holodeckb2b.interfaces.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
-import org.holodeckb2b.interfaces.workerpool.WorkerPoolException;
 
 /**
  * This worker is responsible for the retransmission of User Messages that did not receive an AS4 receipt as expected.
@@ -99,13 +100,19 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                     // Retry information is contained in Leg, and as we only have One-way it is always the first
                     // and because retries is part of AS4 reception awareness feature leg should be instance of
                     // ILegAS4, if it is not we can not retransmit
-                    final ILeg leg = PModeUtils.getLeg(um);
+                    final ILeg leg = PModeUtils.getLeg(um);                   
+                    if (leg == null) {
+                    	log.error("P-Mode [{}] governing User Message [msgId={}] is not available!", um.getPModeId(), 
+                    				um.getMessageId());
+                    	// Set state to FAILURE
+                    	HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.FAILURE, 
+                    															"P-Mode not available");
+                    	// And raise event to signal this issue
+                    	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(
+                    										new GenericSendMessageFailure(um, "P-Mode not available"));
+                    	continue;
+                    }                    
                     final IReceptionAwareness raConfig = leg != null ? leg.getReceptionAwareness() : null;
-                    if (raConfig == null) {
-                        // Could not get configuration for retries, maybe P-Mode configuration was deleted?
-                        log.error("Message [" + um.getMessageId() + "] can not be resent due to missing P-Mode ["
-                                    + um.getPModeId() + "]");
-                    }
                     final Interval[] intervals = raConfig != null ? raConfig.getWaitIntervals() : null; 
                     if (intervals != null && intervals.length > 0) {
                     	maxAttempts = intervals.length;
@@ -117,8 +124,8 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                     														 intervals[attempts-1].getUnit());
                     } else 
                         // There is no retry config available, can't determine if and how to resend.
-                        log.warn("Message [" + um.getMessageId() + "] can not be resent due to missing Reception"
-                                 + " Awareness retry configuration in P-Mode [" + um.getPModeId() + "]");
+                        log.warn("Message [" + um.getMessageId() + "] cannot be resent due to missing Reception"
+                                 	+ " Awareness retry configuration in P-Mode [" + um.getPModeId() + "]");
                     
                     // Check if the interval has expired
                     if (((new Date()).getTime() - um.getCurrentProcessingState().getStartTime().getTime())
@@ -136,7 +143,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                             // Generate and report (if requested) MissingReceipt
                             generateMissingReceiptError(um, leg);
                         } else {
-                            // Message can be resend, is the message to be pushed or pulled?
+                            // Message can be resent, is the message to be pushed or pulled?
                         	log.debug("Sending of User Message [msgId=" + um.getMessageId() + "] should be retried");
                             if (PModeUtils.doesHolodeckB2BTrigger(leg)) {
                                 log.trace("Message must be pushed to receiver again");
@@ -216,6 +223,10 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                                 + " P-Mode=" + um.getPModeId());
                     // Indicate delivery failure
                     HolodeckB2BCore.getStorageManager().setProcessingState(errorMessage, ProcessingState.FAILURE);
+                    // Raise event 
+                	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(
+                				new MessageDeliveryFailure(errorMessage,
+                									new MessageDeliveryException("Missing delivery specification")));
                 } else {
                     try {
                         // Deliver the MissingReceipt error using the given delivery spec
@@ -223,11 +234,19 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         deliverer.deliver(errorMessage);
                         // Indicate successful delivery
                         HolodeckB2BCore.getStorageManager().setProcessingState(errorMessage, ProcessingState.DONE);
-                    } catch (final MessageDeliveryException ex) {
-                        log.error("An error occurred while delivering the MissingReceipt error to business application!"
-                                    + "Details: "  + ex.getMessage());
-                        // Indicate delivery failure
-                        HolodeckB2BCore.getStorageManager().setProcessingState(errorMessage, ProcessingState.FAILURE);
+                    } catch (final Throwable t) {
+                    	// Catch of Throwable used for extra safety in case the DeliveryMethod implementation does not
+                    	// handle all exceptions correctly
+                    	log.error("Could not deliver Missing Receipt error to business application! Error details: {}",
+                    				t.getMessage());
+                    	// Indicate delivery failure
+                    	HolodeckB2BCore.getStorageManager().setProcessingState(errorMessage, ProcessingState.FAILURE);
+                    	// Raise event
+                    	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(
+                    			new MessageDeliveryFailure(errorMessage, 
+        										 (t instanceof MessageDeliveryException) ? (MessageDeliveryException) t 
+            									  : new MessageDeliveryException("Unexpected error in delivery", t)
+            									   ));
                     }
                 }
             } else
