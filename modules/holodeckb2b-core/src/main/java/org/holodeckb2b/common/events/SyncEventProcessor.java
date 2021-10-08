@@ -20,8 +20,8 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.apache.axis2.context.MessageContext;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.pmode.PModeUtils;
@@ -54,7 +54,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
     /**
      * Logging
      */
-    private static final Log log = LogFactory.getLog(SyncEventProcessor.class);
+    private static final Logger log = LogManager.getLogger(SyncEventProcessor.class);
 
     @Override
     public String getName() {
@@ -74,29 +74,27 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
     public void raiseEvent(final IMessageProcessingEvent event) {
         final String eventType = event.getClass().getSimpleName();
         if (event.getSubject() == null) {
-            log.warn("A " + eventType + " was raised, but without reference to a message unit!");
+            log.warn("A {} was raised, but without reference to a message unit!", eventType);
             return;
         }
         final String msgUnitType = MessageUnitUtils.getMessageUnitName(event.getSubject());
         final String messageId = event.getSubject().getMessageId();
-        log.trace("A " + eventType + " event [" + event.getId() + "] was raised for " + msgUnitType 
-        			+ " with msgId=" + messageId);
+        log.trace("A {} event [{}] was raised for {} with msgId={}", eventType, event.getId(), msgUnitType, messageId);
         final IMessageUnit subject = event.getSubject();
-        boolean isEventHandled = false;
-        // Get the event handler configuration from the correct leg of the P-Mode.         	
+        boolean continueProcessing = true;
+        log.trace("Check event handler configuration in the P-Mode");         	
         try {
         	final ILeg leg = PModeUtils.getLeg(subject);
         	final List<IMessageProcessingEventConfiguration> eventHandlers = leg == null ? null :
         															leg.getMessageProcessingEventConfiguration();
-        	isEventHandled = handleEvent(eventHandlers, event);
+        	continueProcessing = handleEvent(eventHandlers, event);
         } catch (IllegalStateException pmodeNotAvailable) {
         	// The P-Mode is not available anymore (should not happen as the message unit is current in process)
-            log.error("The P-Mode for the message unit [" + subject.getMessageId() + "] is not available!");
+            log.error("The P-Mode for the message unit [{}] is not available!", subject.getMessageId());
         }        
-        if (!isEventHandled) {
-        	log.trace("No P-Mode configured event handlers => check global configuration");
-        	if (!handleEvent(HolodeckB2BCoreInterface.getMessageProcessingEventConfiguration(), event))
-        		log.debug("No handler defined for " + eventType + ", event [" + event.getId() + "] ignored!");
+        if (continueProcessing) {
+        	log.trace("Check global event handler configuration");
+        	handleEvent(HolodeckB2BCoreInterface.getMessageProcessingEventConfiguration(), event);
         }            
     }
 
@@ -109,7 +107,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
 	private boolean handleEvent(List<IMessageProcessingEventConfiguration> eventHandlers, IMessageProcessingEvent event)
 	{
 		if (Utils.isNullOrEmpty(eventHandlers))
-			return false;
+			return true;
 		
         final String eventType = event.getClass().getSimpleName();
         final String msgUnitType = MessageUnitUtils.getMessageUnitName(event.getSubject());
@@ -117,16 +115,16 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
 		for (final IMessageProcessingEventConfiguration c : eventHandlers) {
 			final boolean shouldHandle = EventUtils.shouldHandleEvent(c, event);
 			final String handlerClassname = c.getFactoryClass();
-			log.trace(handlerClassname + (shouldHandle ? " should" : " does not") + " handle " + eventType + " for "
-					+ msgUnitType);
+			log.trace("{} {} handle {} for {}", handlerClassname, (shouldHandle ? "should" : "does not"),
+						eventType, msgUnitType);
 			if (shouldHandle) {
 				// Create the factory class
 				IMessageProcessingEventHandlerFactory factory = null;
 				try {
 					factory = (IMessageProcessingEventHandlerFactory) Class.forName(handlerClassname).newInstance();
 				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-					log.error("Could not create factory instance (specified class name=" + c.getFactoryClass() 
-								+ ") due to a " + ex.getClass().getSimpleName());
+					log.error("Could not create factory instance (specified class name={}) due to a {}", 
+								c.getFactoryClass(), ex.getClass().getSimpleName());
 					continue;
 				}
 				// Catch exceptions while the event is processed by the handler to prevent that error in one handler
@@ -136,18 +134,19 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
 					factory.init(c.getHandlerSettings());
 					log.trace("Pass event to handler for further processing");
 					factory.createHandler().handleEvent(event);
-					log.debug(eventType + "[id= " + event.getId() + "] for " + msgUnitType + "] handled by " 
-								+ handlerClassname);
+					log.debug("{} [id={}] for {} handled by {}", eventType, event.getId(), msgUnitType, handlerClassname);
+					if (!c.continueEventProcessing()) {
+						log.debug("No further processing of {} needed after handling by {}", eventType, 
+								  handlerClassname);
+						return false;
+					}
 				} catch (final Throwable t) {
-					log.warn("An exception occurred when " + eventType + " [id= " + event.getId() + " was processed by "
-							+ handlerClassname + "\n\tException details: " + t.getMessage());
+					log.warn("An exception occurred when {} [id={}] was processed by {}.\n\tException details:",
+								eventType, event.getId(), handlerClassname, Utils.getExceptionTrace(t));
 				}
-				// Even if the handler failed to execute correctly we consider the event as handled because this was
-				// the first configured handler able to handle the event
-				return true;
 			}
 		}		
-		return false;
+		return true;
 	}
 
 	@Override

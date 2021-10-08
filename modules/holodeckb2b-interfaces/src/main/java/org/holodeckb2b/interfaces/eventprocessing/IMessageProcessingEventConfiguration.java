@@ -19,18 +19,27 @@ package org.holodeckb2b.interfaces.eventprocessing;
 import java.util.List;
 import java.util.Map;
 
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.events.security.ISecurityCreationFailure;
+import org.holodeckb2b.interfaces.events.security.ISigningFailure;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
  * Defines the interface for the configuration of an event handler instance. Event handlers are configured in the P-Mode
- * as events need only be processed for specific message exchanges. The configuration is used by the {@link
- * IMessageProcessingEventProcessor} to decide if a handler needs to be created and called to handle an event.
+ * if events need only be processed for specific message exchanges or can be registered globally if events need to 
+ * handled for all message exchanges. The configuration is used by the {@link IMessageProcessingEventProcessor} to 
+ * decide if a handler needs to be created and called to handle an event.
+ * <p>NOTE: Event handlers are executed in the order that they are configured. Therefore configure the handlers for 
+ * specific events first before the ones handling more generic events, e.g.  {@link ISigningFailure} before {@link 
+ * ISecurityCreationFailure}.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IPMode
  * @see IMessageProcessingEventProcessor
+ * @see HolodeckB2BCoreInterface#registerEventHandler(IMessageProcessingEventConfiguration)
  * @since 2.1.0
+ * @since 5.3.0 Option to continue processing of the event, see {@link #continueEventProcessing()}
  */
 public interface IMessageProcessingEventConfiguration {
 
@@ -39,7 +48,7 @@ public interface IMessageProcessingEventConfiguration {
      *
      * @return A {@link String} containing the unique identifier of this configuration
      */
-    public String getId();
+    String getId();
 
     /**
      * Gets the list of events that this configuration applies to, i.e. which event types can and should be handled by
@@ -53,7 +62,7 @@ public interface IMessageProcessingEventConfiguration {
      *         that will be handled by this configuration. If none are given (value is <code>null</code> or empty list)
      *         all events will be passed to the configured handler.
      */
-    public List<Class<? extends IMessageProcessingEvent>> getHandledEvents();
+    List<Class<? extends IMessageProcessingEvent>> getHandledEvents();
 
     /**
      * Gets the list of message unit types for which the specified event should be handled. Using this list the
@@ -63,7 +72,7 @@ public interface IMessageProcessingEventConfiguration {
      *         handled. If no classes are given (value is <code>null</code> or empty list) events will be passed to the
      *         configured handler for all message unit types.
      */
-    public List<Class<? extends IMessageUnit>> appliesTo();
+    List<Class<? extends IMessageUnit>> appliesTo();
 
     /**
      * Gets the name of factory class that is responsible to create the actual event handler.
@@ -71,7 +80,7 @@ public interface IMessageProcessingEventConfiguration {
      * @return A {@link String} containing the class name of the {@link IMessageProcessingEventHandlerFactory} that
      *         should be used to create the {@link IMessageProcessingEventHandler}
      */
-    public String getFactoryClass();
+    String getFactoryClass();
 
     /**
      * Gets the settings that must be used to initialize the event handler [factory]. The settings for handling the
@@ -79,5 +88,15 @@ public interface IMessageProcessingEventConfiguration {
      *
      * @return The settings as a {@link Map}<code>&lt;String, ?&gt;</code> where the keys are the parameter names.
      */
-    public Map<String, ?> getHandlerSettings();
+    Map<String, ?> getHandlerSettings();
+    
+    /**
+     * Indicates whether the processing of the event should continue after the handler specified by this configuration
+     * has processed the event. The handler is considered to have processed the event when its {@link 
+     * IMessageProcessingEventHandler#handleEvent()} method has completed without exceptions.
+     * 
+     * @return	<i>true</i> if processing should continue, <i>false</i> if no further processing should take place
+     * @since 5.3.0	For back-ward compatibility the default implementation returns <i>false</i>
+     */
+    default boolean continueEventProcessing() { return false; };
 }

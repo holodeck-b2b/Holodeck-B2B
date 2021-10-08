@@ -19,8 +19,6 @@ package org.holodeckb2b.interfaces.eventprocessing;
 import java.nio.file.Path;
 
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.events.security.ISecurityCreationFailure;
-import org.holodeckb2b.interfaces.events.security.ISigningFailure;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 
 /**
@@ -34,6 +32,7 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0
  * @since 4.1.0 Requirement to take the global event configuration into account when processing the event.
+ * @since 5.3.0 Option to have multiple handlers process the same event
  * @see ILeg#getMessageProcessingEventConfiguration()
  * @see HolodeckB2BCoreInterface#getMessageProcessingEventConfiguration()
  */
@@ -67,9 +66,8 @@ public interface IMessageProcessingEventProcessor {
      * <p>Because the event is only to inform about the message processing but not part of it the implementation MUST
      * ensure that message processing is not affected, i.e. not change any information of the referenced message unit
      * and not throw any exception. 
-     * <p>NOTE: Only the first event handler in the configured set able to handle the given event is executed. Therefore
-     * configure the handlers for specific events first before the ones handling more generic events, e.g. 
-     * {@link ISigningFailure} before {@link ISecurityCreationFailure}.
+     * <p>NOTE: Event handlers are executed in the order that they are configured and execution continues until all 
+     * handlers have been executed or when a handler's configuration specifies execution should stop when it has run.
      *
      * @param event         The event that occurred while processing the message unit and that should be processed
      */
