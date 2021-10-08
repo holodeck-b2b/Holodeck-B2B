@@ -19,6 +19,7 @@ package org.holodeckb2b.core.handlers.inflow;
 import java.util.Collection;
 
 import org.apache.logging.log4j.Logger;
+import org.holodeckb2b.common.events.impl.MessageDelivered;
 import org.holodeckb2b.common.events.impl.MessageDeliveryFailure;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
@@ -126,7 +127,8 @@ public class DeliverErrors extends AbstractBaseHandler {
             	HolodeckB2BCoreInterface.getMessageDeliverer(deliverySpec).deliver(deliverySignal);
                 log.info("Error Signal [msgId= " + errorSignal.getMessageId() 
 	                		+ "] successfully delivered for referenced message unit [msgId=" + msgInError.getMessageId() 
-	                		+ "]!");                
+	                		+ "]!");
+            	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new MessageDelivered(deliverySignal));                 
             } catch (final Throwable t) {
             	// Catch of Throwable used for extra safety in case the DeliveryMethod implementation does not
             	// handle all exceptions correctly

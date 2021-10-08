@@ -19,6 +19,7 @@ package org.holodeckb2b.core.handlers.inflow;
 import java.util.Collection;
 
 import org.apache.logging.log4j.Logger;
+import org.holodeckb2b.common.events.impl.MessageDelivered;
 import org.holodeckb2b.common.events.impl.MessageDeliveryFailure;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.commons.util.Utils;
@@ -114,6 +115,7 @@ public class DeliverReceipts extends AbstractBaseHandler {
             try {
                 deliverer.deliver(receipt);
                 log.info("Receipt Signal [msgId=" + receipt.getMessageId() + "] successfully delivered!");
+            	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new MessageDelivered(receipt));
             } catch (final MessageDeliveryException ex) {
                 // There was an "normal/expected" issue during delivery, continue as normal
                 throw ex;
