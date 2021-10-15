@@ -29,6 +29,8 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcess
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.general.IVersionInfo;
 import org.holodeckb2b.interfaces.persistency.IQueryManager;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
@@ -185,4 +187,18 @@ public interface IHolodeckB2BCore {
      * @since 5.1.0
      */
     IWorkerPool getWorkerPool(final String name);
+    
+    /**
+     * Resumes processing of the <i>suspended</i> User Message.  
+     * <p>Note that only outgoing User Messages can be in suspended state and resumed. The resume operation will change 
+     * the processing state from <i>SUSPENDED</i> to either <i>READY_TO_PUSH</i> or <i>AWAIT_PULL</i> depending on the 
+     * MEP defined in the P-Mode. If the current processing state however has already changed it assumed that the 
+     * message has already been resumed and no further action is needed.
+     *  
+     * @param userMessage	to be resumed 
+     * @throws PersistenceException		when an error occurs updating the processing state of the message unit
+     * @throws IllegalArgumentException when the given User Message is an incoming User Message 
+     * @since 5.3.0
+     */
+    void resumeProcessing(IUserMessageEntity userMessage) throws PersistenceException, IllegalArgumentException;
 }

@@ -29,6 +29,8 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcess
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.general.IVersionInfo;
 import org.holodeckb2b.interfaces.persistency.IQueryManager;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
@@ -242,7 +244,25 @@ public class HolodeckB2BCoreInterface {
     	assertInitialized();
     	return coreImplementation.getWorkerPool(name);
     }
-    
+   
+    /**
+     * Resumes processing of the <i>suspended</i> User Message.  
+     * <p>Note that only outgoing User Messages can be in suspended state and resumed. The resume operation will change 
+     * the processing state from <i>SUSPENDED</i> to either <i>READY_TO_PUSH</i> or <i>AWAIT_PULL</i> depending on the 
+     * MEP defined in the P-Mode. If the current processing state however has already changed it assumed that the 
+     * message has already been resumed and no further action is needed.
+     *  
+     * @param userMessage	to be resumed 
+     * @throws PersistenceException		when an error occurs updating the processing state of the message unit
+     * @throws IllegalArgumentException when the given User Message is an incoming User Message 
+     * @since 5.3.0
+     */
+    public static void resumeProcessing(IUserMessageEntity userMessage) throws PersistenceException, 
+    																			IllegalArgumentException {
+    	assertInitialized();
+    	coreImplementation.resumeProcessing(userMessage);
+    }
+       
    /**
      * Sets the Holodeck B2B Core implementation that is in use.
      * <p><b>NOTE: </b>This method is for <b>internal use only</b>!
@@ -252,7 +272,7 @@ public class HolodeckB2BCoreInterface {
     public static synchronized void setImplementation(final IHolodeckB2BCore impl) {
         coreImplementation = impl;
     }
-
+    
     /**
      * Ensures that the Holodeck B2B is loaded and available
      */

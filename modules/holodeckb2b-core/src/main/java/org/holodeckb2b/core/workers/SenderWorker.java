@@ -86,7 +86,7 @@ public class SenderWorker extends AbstractWorkerTask {
                 }
             } 
         } catch (final PersistenceException dbError) {
-            log.error("Could not process message because a database error occurred. Details:"
+            log.error("Could not process messages because a database error occurred. Details:"
                         + dbError.toString() + "\n");
         } 
     }

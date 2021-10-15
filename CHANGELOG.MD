@@ -8,6 +8,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Option to have multiple event handlers for one event. See `IMessageProcessingEventConfiguration`
 * `IReceivedMessageProcessingFailure` is now also raised when a message unit cannot be (re)sent, i.e. before the actual
   send process is started
+* New processing state _SUSPENDED_ to indicate that an error occurred that prevented the sending of a User Message to 
+  the trading partner and the possibility to resume their processing by calling the 
+  `HolodeckB2BCoreInterface#resumeProcessing()` method.
 
 ### Fixed
 * Delivery events (`IMessageDelivered` and `IMessageDeliveryFailure`) not raised for delivered Signal Messages

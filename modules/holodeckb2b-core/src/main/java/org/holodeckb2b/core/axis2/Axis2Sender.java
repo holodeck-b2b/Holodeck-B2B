@@ -199,7 +199,10 @@ public class Axis2Sender {
 		// Raise event to signal this issue
 		HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(
 				new GenericSendMessageFailure(messageUnit, failureDescription));		
-		// Set state to FAILURE
-    	HolodeckB2BCore.getStorageManager().setProcessingState(messageUnit, ProcessingState.FAILURE, failureDescription);
+		// Set state to FAILURE for Signals or SUSPENDED for User Messages		
+    	HolodeckB2BCore.getStorageManager()
+    				   .setProcessingState(messageUnit, 
+							messageUnit instanceof IUserMessage ? ProcessingState.SUSPENDED : ProcessingState.FAILURE, 
+							failureDescription);
 	}
 }

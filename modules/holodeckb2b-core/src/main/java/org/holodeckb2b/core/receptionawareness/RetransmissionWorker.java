@@ -100,12 +100,17 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                     // Retry information is contained in Leg, and as we only have One-way it is always the first
                     // and because retries is part of AS4 reception awareness feature leg should be instance of
                     // ILegAS4, if it is not we can not retransmit
-                    final ILeg leg = PModeUtils.getLeg(um);                   
+                    ILeg leg;
+                    try {
+                    	leg = PModeUtils.getLeg(um);                   
+                    } catch (IllegalStateException pmodeNotAvailable) {
+                    	leg = null;
+                    }
                     if (leg == null) {
                     	log.error("P-Mode [{}] governing User Message [msgId={}] is not available!", um.getPModeId(), 
                     				um.getMessageId());
                     	// Set state to FAILURE
-                    	HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.FAILURE, 
+                    	HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.SUSPENDED, 
                     															"P-Mode not available");
                     	// And raise event to signal this issue
                     	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(

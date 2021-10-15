@@ -32,6 +32,7 @@ import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -83,7 +84,8 @@ public class CatchAxisFault extends AbstractBaseHandler {
                     	&& ProcessingState.DONE != curState && ProcessingState.TRANSPORT_FAILURE != curState) {
                         log.error(MessageUnitUtils.getMessageUnitName(mu) + " with msg-id [" + mu.getMessageId()
                                     + "] could not be processed due to an unexpected error.");
-                        HolodeckB2BCore.getStorageManager().setProcessingState(mu, ProcessingState.FAILURE);
+                        HolodeckB2BCore.getStorageManager().setProcessingState(mu,
+                        			mu instanceof IUserMessage ? ProcessingState.SUSPENDED : ProcessingState.FAILURE);
                         // Raise event to signal the processing failure
                         HolodeckB2BCore.getEventProcessor().raiseEvent(receiving ? 
 		                        								new GenericReceiveMessageFailure(mu, failureDescription)

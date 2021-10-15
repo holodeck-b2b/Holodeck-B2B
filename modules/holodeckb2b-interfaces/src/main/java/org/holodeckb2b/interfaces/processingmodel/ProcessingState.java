@@ -96,6 +96,15 @@ public enum ProcessingState {
     WARNING(false),
 
     /**
+     * This state is used to indicate that an [unexpected] error occurred during the processing of an outgoing User 
+     * Message that currently prevents further processing, but which could potentially be resolved by an external action
+     * after which processing could be resumed.     
+     * 
+     * @since 5.3.0
+     */
+    SUSPENDED(false, READY_TO_PUSH, AWAITING_PULL),
+    
+    /**
      * This final state indicates that a <i>User Message</i> message unit is successfully delivered either to the other
      * MSH or to the business application.
      */

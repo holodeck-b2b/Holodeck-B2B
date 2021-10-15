@@ -37,6 +37,7 @@ import org.holodeckb2b.common.workerpool.XMLWorkerPoolConfiguration;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.config.InternalConfiguration;
 import org.holodeckb2b.core.pmode.PModeManager;
+import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.core.submission.MessageSubmitter;
 import org.holodeckb2b.core.validation.DefaultValidationExecutor;
 import org.holodeckb2b.core.validation.IValidationExecutor;
@@ -51,11 +52,14 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfigu
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.general.IVersionInfo;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.persistency.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
@@ -436,7 +440,7 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     		eventConfigurations.set(i, eventConfiguration);
     	} else 
     		eventConfigurations.add(eventConfiguration);
-    	log.info("Registered event handler configuration [id=]", id);
+    	log.info("Registered event handler configuration [id={}]", id);
     	return exists;
     }
     
@@ -545,4 +549,35 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
     public IWorkerPool getWorkerPool(final String name) {    	
     	return workerPools != null ? workerPools.get(name) : null;
     }
+    
+    /**
+     * Resumes processing of the <i>suspended</i> User Message.  
+     * <p>Note that only outgoing User Messages can be in suspended state and resumed. The resume operation will change 
+     * the processing state from <i>SUSPENDED</i> to either <i>READY_TO_PUSH</i> or <i>AWAITING_PULL</i> depending on 
+     * the MEP defined in the P-Mode. If the current processing state however has already changed it assumed that the 
+     * message has already been resumed and no further action is needed.
+     *  
+     * @param userMessage	to be resumed 
+     * @throws PersistenceException		when an error occurs updating the processing state of the message unit
+     * @throws IllegalArgumentException when the given User Message is an incoming User Message 
+     * @since 5.3.0
+     */
+    public void resumeProcessing(IUserMessageEntity userMessage) throws PersistenceException, IllegalArgumentException {
+    	if (userMessage.getDirection() == Direction.IN) {
+    		log.warn("Illegal request to resume processing of received message unit [msgId={}]", 
+    					userMessage.getMessageId());
+    		throw new IllegalArgumentException("Incoming message unit cannot be resumed");
+    	}
+    	
+    	ProcessingState newState = PModeUtils.doesHolodeckB2BTrigger(PModeUtils.getLeg(userMessage)) ?
+    									ProcessingState.READY_TO_PUSH : ProcessingState.AWAITING_PULL;
+    	log.trace("Resume processing of User Message [msgId={}], set proc state to {}", userMessage.getMessageId(), 
+    				newState.name());
+    	getStorageManager().setProcessingState(userMessage, ProcessingState.SUSPENDED, newState);
+    	if (userMessage.getCurrentProcessingState().getState() == newState)
+    		log.info("Processing of User Message [msgId={}] resumed", userMessage.getMessageId());
+    	else
+    		log.info("Processing of User Message [msgId={}] already changed.", userMessage.getMessageId());
+    }
+    
 }

@@ -126,7 +126,7 @@ public class CatchAxisFaultTest {
 			Collection<IMessageUnitEntity> storedMsg = HolodeckB2BCore.getQueryManager()
 																	.getMessageUnitsWithId(userMessage.getMessageId());
 			assertFalse(Utils.isNullOrEmpty(storedMsg));
-			assertEquals(ProcessingState.FAILURE, storedMsg.iterator().next().getCurrentProcessingState().getState());
+			assertEquals(ProcessingState.SUSPENDED, storedMsg.iterator().next().getCurrentProcessingState().getState());
 			
 			storedMsg = HolodeckB2BCore.getQueryManager().getMessageUnitsWithId(receipt.getMessageId());
 			assertFalse(Utils.isNullOrEmpty(storedMsg));
