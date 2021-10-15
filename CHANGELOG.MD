@@ -11,6 +11,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * New processing state _SUSPENDED_ to indicate that an error occurred that prevented the sending of a User Message to 
   the trading partner and the possibility to resume their processing by calling the 
   `HolodeckB2BCoreInterface#resumeProcessing()` method.
+  
+### Changed
+* Improved shutdown process in `org.holodeckb2b.core.HolodeckB2BServer`. Includes support for [Apache commons deamon|
+https://commons.apache.org/proper/commons-daemon/index.html] (using _jvm_ mode).
 
 ### Fixed
 * Delivery events (`IMessageDelivered` and `IMessageDeliveryFailure`) not raised for delivered Signal Messages

@@ -7,7 +7,7 @@ Holodeck B2B uses the Log4j v2 logging framework, see the Log4j website for more
 information about configuration. When deploying in a production environment it is 
 recommended to raise log levels to at least INFO.
 ===================================================================================== -->
-<Configuration status="warn" monitorInterval="30">
+<Configuration status="warn" monitorInterval="30" shutdownHook="disable">
   
     <Appenders>        
         <!-- 
