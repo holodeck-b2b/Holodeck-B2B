@@ -5,16 +5,18 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 5.3.0
 ##### Unreleased
 ### Added
-* Option to have multiple event handlers for one event. See `IMessageProcessingEventConfiguration`
-* `IReceivedMessageProcessingFailure` is now also raised when a message unit cannot be (re)sent, i.e. before the actual
-  send process is started
 * New processing state _SUSPENDED_ to indicate that an error occurred that prevented the sending of a User Message to 
   the trading partner and the possibility to resume their processing by calling the 
   `HolodeckB2BCoreInterface#resumeProcessing()` method.
+* Option to have multiple event handlers for one event. See `IMessageProcessingEventConfiguration`
+* `ISendMessageProcessingFailure` is now also raised when a message unit cannot be (re)sent, i.e. before the actual
+  send process is started
   
 ### Changed
 * Improved shutdown process in `org.holodeckb2b.core.HolodeckB2BServer`. Includes support for [Apache commons deamon|
 https://commons.apache.org/proper/commons-daemon/index.html] (using _jvm_ mode).
+* Message properties are included in P-Mode matching, i.e. all properties defined in a P-Mode must be specified in the
+  received message for a P-Mode to match. But any properties in the message not defined in the P-Mode are ignored.
 
 ### Fixed
 * Delivery events (`IMessageDelivered` and `IMessageDeliveryFailure`) not raised for delivered Signal Messages
