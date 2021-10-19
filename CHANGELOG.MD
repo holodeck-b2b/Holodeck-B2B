@@ -22,7 +22,7 @@ https://commons.apache.org/proper/commons-daemon/index.html] (using _jvm_ mode).
 * Delivery events (`IMessageDelivered` and `IMessageDeliveryFailure`) not raised for delivered Signal Messages
 
 ## 5.2.0
-##### Unreleased
+##### 2021-09-02
 ### Added
 * `org.holodeckb2b.core.axis2.HTTPWorker` puts the request parameters included in the HTTP URL in _MessageContext_
   property "hb2b:" + `org.apache.axis2.Constants.REQUEST_PARAMETER_MAP`. The property value is a `Map<String, String>` 
@@ -39,7 +39,7 @@ https://commons.apache.org/proper/commons-daemon/index.html] (using _jvm_ mode).
 * NPE when writing P-Mode XML document with retry configuration
 
 ## 5.1.0
-##### Not released
+##### 2021-05-26
 ### Added
 * Management of worker pools by the Core, including the possibility for "on the fly" reconfiguration. For this purpose a
  new `IWorkerPool` interface has been introduced and methods in the `HolodeckB2BCoreInterface` and 
