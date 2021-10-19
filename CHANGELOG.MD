@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 5.3.0
-##### Unreleased
+##### 2021-10-19
 ### Added
 * New processing state _SUSPENDED_ to indicate that an error occurred that prevented the sending of a User Message to 
   the trading partner and the possibility to resume their processing by calling the 
