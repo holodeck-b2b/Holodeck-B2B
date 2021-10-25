@@ -349,19 +349,11 @@ public class WorkerPool implements IWorkerPool {
         }
         
         log.trace("Recalculate the pool size");
-        int contRun = 0, singleRun = 0, intRun = 0, intRunW = 0;
-        for (RunningWorker w : workers) {
-        	Interval interval = w.config.getInterval();
-        	if (interval != null && TimeUnit.MILLISECONDS.convert(interval.getLength(), interval.getUnit()) < 5000) 
-        		contRun += w.instances.size();
-        	else if (interval == null) 
-        		singleRun++;
-        	else {
-        		intRun += w.instances.size();
-        		intRunW++;
-        	}
-        }        
-        pool.setCorePoolSize(Math.max(1, contRun + singleRun + (intRun / Math.max(1, intRunW))));
+        int threads = 2;
+        for (RunningWorker w : workers)
+			threads += w.instances.size();
+		log.trace("Setting pool size to : {}", threads);
+        pool.setCorePoolSize(threads);
         
         if (failedUpdates.isEmpty())
         	log.debug("Worker pool reconfigured");
