@@ -203,7 +203,7 @@ public class CreateSecurityHeaders extends AbstractBaseHandler {
                       ))
                     + " security header failed! Details: " + reason.getMessage());
             for (final IMessageUnitEntity mu : sentMsgUnits) {
-                storageManager.setProcessingState(mu, ProcessingState.FAILURE);
+                storageManager.setProcessingState(mu, ProcessingState.SUSPENDED);
 
                 IMessageProcessingEvent event;
                 if (result instanceof ISignatureProcessingResult)
