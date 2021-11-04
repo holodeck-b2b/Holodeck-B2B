@@ -20,6 +20,7 @@ https://commons.apache.org/proper/commons-daemon/index.html] (using _jvm_ mode).
 
 ### Fixed
 * Delivery events (`IMessageDelivered` and `IMessageDeliveryFailure`) not raised for delivered Signal Messages
+* Getting send and receive legs for 2-Way P-Mode does not work for non ebMS3 MEP bindings
 
 ## 5.2.0
 ##### 2021-09-02

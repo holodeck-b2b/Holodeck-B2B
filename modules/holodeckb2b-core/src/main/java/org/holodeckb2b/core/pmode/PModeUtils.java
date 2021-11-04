@@ -140,25 +140,24 @@ public class PModeUtils {
     public static ILeg getSendLeg(final IPMode pmode) {
         ILeg   outLeg = null;
         switch (pmode.getMepBinding()) {
-            case EbMSConstants.ONE_WAY_PUSH :
-            case EbMSConstants.TWO_WAY_PUSH_PULL:
-            case EbMSConstants.TWO_WAY_PUSH_PUSH :
-            case EbMSConstants.TWO_WAY_SYNC :
-            	outLeg = doesHolodeckB2BTrigger(pmode.getLeg(Label.REQUEST)) ? pmode.getLeg(Label.REQUEST): 
-            														EbMSConstants.TWO_WAY_MEP.equals(pmode.getMep()) ? 
-            																   pmode.getLeg(Label.REPLY) 
-            																 : null; 
-            	break;
-            case EbMSConstants.ONE_WAY_PULL :
-            case EbMSConstants.TWO_WAY_PULL_PUSH :
-            case EbMSConstants.TWO_WAY_PULL_PULL :
-            	outLeg = !doesHolodeckB2BTrigger(pmode.getLeg(Label.REQUEST)) ? pmode.getLeg(Label.REQUEST): 
-																	EbMSConstants.TWO_WAY_MEP.equals(pmode.getMep()) ? 
-																			   pmode.getLeg(Label.REPLY) 
-																			 : null;
-				break;
-            default:
-            	outLeg = pmode.getLeg(Label.REQUEST);																				   
+        case EbMSConstants.ONE_WAY_PUSH :
+        case EbMSConstants.TWO_WAY_PUSH_PULL:
+        case EbMSConstants.TWO_WAY_PUSH_PUSH :
+        case EbMSConstants.TWO_WAY_SYNC :
+        default:
+        	outLeg = doesHolodeckB2BTrigger(pmode.getLeg(Label.REQUEST)) ? pmode.getLeg(Label.REQUEST): 
+        														EbMSConstants.TWO_WAY_MEP.equals(pmode.getMep()) ? 
+        																   pmode.getLeg(Label.REPLY) 
+        																 : null; 
+        	break;
+        case EbMSConstants.ONE_WAY_PULL :
+        case EbMSConstants.TWO_WAY_PULL_PUSH :
+        case EbMSConstants.TWO_WAY_PULL_PULL :
+        	outLeg = !doesHolodeckB2BTrigger(pmode.getLeg(Label.REQUEST)) ? pmode.getLeg(Label.REQUEST): 
+																EbMSConstants.TWO_WAY_MEP.equals(pmode.getMep()) ? 
+																		   pmode.getLeg(Label.REPLY) 
+																		 : null;
+			break;
         }        
         return outLeg;    	
     }
@@ -179,11 +178,12 @@ public class PModeUtils {
     	case EbMSConstants.TWO_WAY_PUSH_PULL:
     	case EbMSConstants.TWO_WAY_PUSH_PUSH :
     	case EbMSConstants.TWO_WAY_SYNC :
+		default:
     		inLeg = !doesHolodeckB2BTrigger(pmode.getLeg(Label.REQUEST)) ? pmode.getLeg(Label.REQUEST): 
 													    			EbMSConstants.TWO_WAY_MEP.equals(pmode.getMep()) ? 
 													    					pmode.getLeg(Label.REPLY) 
 													    					: null; 
-													    					break;
+			break;
     	case EbMSConstants.ONE_WAY_PULL :
     	case EbMSConstants.TWO_WAY_PULL_PUSH :
     	case EbMSConstants.TWO_WAY_PULL_PULL :
@@ -191,9 +191,7 @@ public class PModeUtils {
 													    			EbMSConstants.TWO_WAY_MEP.equals(pmode.getMep()) ? 
 													    					pmode.getLeg(Label.REPLY) 
 													    					: null;
-													    					break;
-        default:
-        	inLeg = pmode.getLeg(Label.REQUEST);													    					
+			break;
     	}        
     	return inLeg;    	
     }
