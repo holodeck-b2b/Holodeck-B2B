@@ -335,9 +335,6 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
                     sc.setTargetEPR(responseMessageContext.getReplyTo());
                 }
 
-            // rampart handlers change the envelope and set the decrypted envelope
-                // so need to check the new one else resenvelope.hasFault() become false.
-                resenvelope = responseMessageContext.getEnvelope();
                 if (resenvelope.hasFault() || responseMessageContext.isProcessingFault()) {
                     if (options.isExceptionToBeThrownOnSOAPFault()) {
                         // does the SOAPFault has a detail element for Excpetion
