@@ -34,7 +34,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name="MSG_STATE", indexes = {
-        @Index(name = "ix_msgoid_procstatenum", columnList = "msgunit_oid, proc_state_num desc")
+        @Index(name = "ix_msgoid_procstatenum", columnList = "msgunit_oid, proc_state_num desc"),
         @Index(name = "ix_state_start", columnList = "start")
 })
 public class ProcessingState implements Serializable {
