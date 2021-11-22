@@ -869,13 +869,13 @@ public class MessageUnitDAO {
                     .setParameter("msgId", messageId)
                     .setParameter("direction", direction)
                     .getResultList();
+            em.getTransaction().commit();
         } catch (final NoResultException nothingFound) {
             result = null;
         } catch (final Exception e) {
             // Something went wrong during query execution
             throw new DatabaseException("Could not execute query", e);
         } finally {
-            em.getTransaction().commit();
             em.close();
         }
         return createProxyResultList(result);
@@ -900,13 +900,13 @@ public class MessageUnitDAO {
             result = em.createNamedQuery("MessageUnit.findWithLastStateChangeBefore", MessageUnit.class)
                     .setParameter("beforeDate", maxLastChangeDate)
                     .getResultList();
+            em.getTransaction().commit();
         } catch (final NoResultException nothingFound) {
             result = null;
         } catch (final Exception e) {
             // Something went wrong during query execution
             throw new DatabaseException("Could not execute query", e);
         } finally {
-            em.getTransaction().commit();
             em.close();
         }
         return createProxyResultList(result);
