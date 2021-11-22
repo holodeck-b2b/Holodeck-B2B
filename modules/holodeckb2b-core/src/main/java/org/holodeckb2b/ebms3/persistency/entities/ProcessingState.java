@@ -18,14 +18,7 @@ package org.holodeckb2b.ebms3.persistency.entities;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 
 /**
  * Is the JPA entity class that represent a state during the processing of a message unit. A state consists of a name,
@@ -40,7 +33,10 @@ import javax.persistence.TemporalType;
  * @author Sander Fieten <sander at holodeckb2b.org>
  */
 @Entity
-@Table(name="MSG_STATE")
+@Table(name="MSG_STATE", indexes = {
+        @Index(name = "ix_msgoid_procstatenum", columnList = "msgunit_oid, proc_state_num desc")
+        @Index(name = "ix_state_start", columnList = "start")
+})
 public class ProcessingState implements Serializable {
 
     /*
@@ -110,6 +106,7 @@ public class ProcessingState implements Serializable {
     private long        OID;
 
     @ManyToOne
+    @JoinColumn(name = "MSGUNIT_OID")
     private MessageUnit msgUnit;
 
     @Column(nullable = false)
