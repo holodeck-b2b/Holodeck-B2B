@@ -144,12 +144,8 @@ public class CreateReceipt extends AbstractUserMessageHandler {
                     mc.setProperty(MessageContextProperties.RESPONSE_RECEIPT, receipt);
                     mc.setProperty(MessageContextProperties.RESPONSE_REQUIRED, true);
                 } else {
-                    if (rcptConfig.getTo() != null && !rcptConfig.getTo().isEmpty()) {
-                        log.debug("The Receipt should be sent separately, change its processing state to READY_TO_PUSH");
-                        MessageUnitDAO.setReadyToPush(receipt);
-                    } else {
-                        log.debug("Receipt will be piggybacked on next PullRequest");
-                    }
+                    log.debug("The Receipt should be sent separately, change its processing state to READY_TO_PUSH");
+                    MessageUnitDAO.setReadyToPush(receipt);
                 }
                 log.debug("Receipt for message [msgId=" + um.getMessageId() + "] created successfully");
                 // Trigger event to signal that the event was created
