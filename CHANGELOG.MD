@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 5.3.1
+##### 2021-12-11
+### Changed
+* Remove ".." from directory names on Windows
+
+### Fixed
+* Vulnerability in log4j2 [#123](https://github.com/holodeck-b2b/Holodeck-B2B/issues/123)
+
+
 ## 5.3.0
 ##### 2021-10-25
 ### Added
@@ -13,7 +22,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   send process is started
   
 ### Changed
-* Improved shutdown process in `org.holodeckb2b.core.HolodeckB2BServer`. Includes support for [Apache commons deamon|
+* Improved shutdown process in `org.holodeckb2b.core.HolodeckB2BServer`. Includes support for [Apache commons daemon|
 https://commons.apache.org/proper/commons-daemon/index.html] (using _jvm_ mode).
 * Message properties are included in P-Mode matching, i.e. all properties defined in a P-Mode must be specified in the
   received message for a P-Mode to match. But any properties in the message not defined in the P-Mode are ignored.
