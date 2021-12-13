@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.1.8
+###### 2021-12-13
+### Fixed
+* Vulnerability in log4j2 [#123](https://github.com/holodeck-b2b/Holodeck-B2B/issues/123)
+
 ## 2.1.7
 ###### 2021-11-22
 ### Changed
