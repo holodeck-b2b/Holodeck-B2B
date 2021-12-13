@@ -19,6 +19,8 @@ package org.holodeckb2b.core.axis2;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.axis2.AxisFault;
@@ -42,6 +44,7 @@ import org.apache.axis2.transport.http.server.AxisHttpResponse;
 import org.apache.axis2.transport.http.server.HttpUtils;
 import org.apache.axis2.transport.http.server.Worker;
 import org.apache.axis2.transport.http.util.RESTUtil;
+import org.apache.axis2.transport.http.util.URIEncoderDecoder;
 import org.apache.commons.fileupload.util.Streams;
 import org.apache.http.HttpException;
 import org.apache.http.HttpStatus;
@@ -50,7 +53,7 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EncodingUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 
@@ -281,10 +284,12 @@ public class HTTPWorker implements Worker {
 		msgContext.setTransportIn(httpConfiguration);
 		msgContext.setIncomingTransportName(httpConfiguration.getName());
         final String ip = (String)msgContext.getProperty(MessageContext.TRANSPORT_ADDR);
-        final String requestURL = (!Utils.isNullOrEmpty(ip) ? ip : "") + uriPath; 		
+        final String requestURL = (!Utils.isNullOrEmpty(ip) ? ip : "") + uriPath;
         msgContext.setTo(new EndpointReference(requestURL));
         msgContext.setServerSide(true);
-
+        // extract URL query parameters
+        msgContext.setProperty("hb2b:" + Constants.REQUEST_PARAMETER_MAP, extractRequestParameters(uriPath));
+        
         // get the type of char encoding
         String charSetEnc = BuilderUtil.getCharSetEncoding(contentType);
         if (Utils.isNullOrEmpty(charSetEnc))
@@ -292,5 +297,45 @@ public class HTTPWorker implements Worker {
         msgContext.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, charSetEnc);        
         msgContext.setProperty(MessageContext.TRANSPORT_OUT, response.getOutputStream());
         MessageProcessingContext.getFromMessageContext(msgContext);
+	}
+
+	/**
+	 * Extracts the request parameters from the URI query part. Parameters must be included as "key=value" pairs and 
+	 * separated by a '&' character. This method does not throw an exception if it cannot read any part of the query 
+	 * part, but simply ignores the problematic part. This means one or more parameters may be skipped and not included
+	 * in the result map.
+	 * 
+	 * @param uriPath	the path part of the request URI
+	 * @return			Map with the found parameters
+	 * @since 5.2.0
+	 */
+	private Map<String,String> extractRequestParameters(String uriPath) {
+		final HashMap<String, String>	pMap = new HashMap<>();
+		int queryPartStart = uriPath.indexOf('?');
+		if (queryPartStart > 0) {
+			int queryPartEnd = uriPath.indexOf(queryPartStart, '#');
+			String paramPart = uriPath.substring(queryPartStart + 1, Math.max(queryPartEnd, uriPath.length()));
+			String[] reqParams =  paramPart.split("&");
+			for(String param : reqParams) {
+				int nameEnd = param.indexOf('=');
+				if (nameEnd > 0) {
+					String pName = null;
+					try { 
+						pName = URIEncoderDecoder.decode(param.substring(0, nameEnd));
+					} catch (UnsupportedEncodingException urlDecodeFailure) {
+						pName = param.substring(0, nameEnd);
+					}
+					String pValue = null;
+					try { 
+						pValue = URIEncoderDecoder.decode(param.substring(nameEnd + 1));
+					} catch (UnsupportedEncodingException urlDecodeFailure) {
+						pValue = param.substring(nameEnd + 1);
+					}
+					if (!Utils.isNullOrEmpty(pName)) 
+						pMap.put(pName, pValue);					
+				}
+			}
+		}
+		return pMap;
 	}
 }

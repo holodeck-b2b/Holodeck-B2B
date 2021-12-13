@@ -30,7 +30,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
 import org.apache.commons.codec.binary.Hex;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 
 /**
  * The {@link TableModel} for the table listing one of the three sets of certificates currently registered with the

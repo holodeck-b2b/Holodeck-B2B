@@ -36,8 +36,9 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.common.messagemodel.Payload;
-import org.holodeckb2b.common.util.MessageIdUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.FileUtils;
+import org.holodeckb2b.commons.util.MessageIdUtils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -149,7 +150,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
                 String mimeType = p.getMimeType();
                 if (mimeType == null || mimeType.isEmpty()) {
                     log.trace("Detecting MIME type of payload");
-                    mimeType = Utils.detectMimeType(f);
+                    mimeType = FileUtils.detectMimeType(f);
                 }
 
                 log.trace("Payload mime type is " + mimeType);

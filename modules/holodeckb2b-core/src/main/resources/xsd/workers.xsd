@@ -19,17 +19,27 @@
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
   targetNamespace="http://holodeck-b2b.org/schemas/2012/12/workers"
-  xmlns="http://holodeck-b2b.org/schemas/2012/12/workers">
+  xmlns="http://holodeck-b2b.org/schemas/2012/12/workers"
+  version="5.1.0">
   <xs:annotation>
-    <xs:documentation>This XML schema specifies an XML representation of the configuration of a worker pool. </xs:documentation>
+    <xs:documentation>This XML schema specifies the XML representation of the configuration of a worker pool as used
+     by the org.holodeckb2b.common.workerpool.XMLWorkerPoolConfigurator. </xs:documentation>
+    <xs:documentation>The structure of the schema is the same as in earlier version in Holodeck B2B. As the worker pool
+    name is since version 5.1.0 however set programmatically the name parameter is deprecated. Also the minimum number
+    of workers is now zero as the configuration can be refreshed automatically during runtime. For the configuration of
+    the automatic refresh a optional refresh parameter has been added.
+    </xs:documentation>
   </xs:annotation>
   <xs:element name="workers">
     <xs:annotation>
-      <xs:documentation>The worker pool MUST contain at least one worker definition and MAY have a name. </xs:documentation>
+      <xs:documentation>If the worker pool uses automatic refreshing of its configuration there is no minimum number of
+       workers that must be configured as workers can be added later on. If the worker pool however is configured 
+       statically it must contain at least one worker definition as it otherwise will quit immediately.
+       </xs:documentation>
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <xs:element maxOccurs="unbounded" name="worker">
+        <xs:element minOccurs="0" maxOccurs="unbounded" name="worker">
           <xs:annotation>
             <xs:documentation>The worker element contains the configuration of a specific worker in the pool and consist of five attributes and zero or more parameter child elements. The attributes are:
 <ul>
@@ -56,7 +66,18 @@ The parameter child elements can contain settings specific to the worker and con
           </xs:complexType>
         </xs:element>
       </xs:sequence>
-      <xs:attribute name="poolName" type="xs:string"/>
+      <xs:attribute name="poolName" type="xs:string">
+	      <xs:annotation>
+	      <xs:documentation>This attribute is <b>deprecated</b> and SHOULD NOT be used anymore. It will be ignored as
+	      	the pool name is now set programmatically on instantiation of the pool</xs:documentation>	      
+	      </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="refresh" type="xs:positiveInteger">
+	      <xs:annotation>
+	      <xs:documentation>This optional attribute defines the interval, in seconds, at which the configuration should
+	      	be refreshed.</xs:documentation>	      
+	      </xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
   <xs:complexType name="parameter">

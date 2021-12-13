@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>5.0.3</version>
+        <version>5.3.1</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -59,7 +59,7 @@
         <!-- The default security provider implementation -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>hb2b-ebms3-secprovider</artifactId>
+            <artifactId>holodeckb2b-ebms3-secprovider</artifactId>
             <version>${project.version}</version>
         </dependency>        
         <!-- The extension for API to provide info to the default UI -->
@@ -70,7 +70,7 @@
         <dependency>
             <groupId>org.holodeckb2b.extensions</groupId>
 			<artifactId>file-backend</artifactId>
-			<version>1.0.1</version>
+			<version>1.1.0</version>
         </dependency>
         
         <!--===============================================================

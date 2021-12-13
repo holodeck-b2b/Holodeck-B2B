@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+Example messsage meta-data document to send the response message of a 2-Way message exchange
+using P-Mode ex-pm-2way-push-resp
+
+The message contains a JPEG image as payload
+-->
+<MessageMetaData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2014/06/mmd ../repository/xsd/messagemetadata.xsd"
+ xmlns="http://holodeck-b2b.org/schemas/2014/06/mmd">
+    <MessageInfo>
+        <!-- In a 2-way message exchange the response must contain a reference to the request message.
+            For ease of executing the examples we let Holodeck B2B generate the ebMS MessageIds and
+            therefore we cannot set the correct reference here. But in a real situation this should
+            be replace with the actual messageIds. -->
+        <RefToMessageId>messageId-of-request-should-go-here</RefToMessageId>
+    </MessageInfo>
+    <CollaborationInfo>
+        <AgreementRef pmode="ex-pm-2way-push-resp"/>
+        <ConversationId>org:holodeckb2b:test:conversation</ConversationId>
+    </CollaborationInfo>
+    <PayloadInfo deleteFilesAfterSubmit="false">
+        <PartInfo containment="attachment" mimeType="image/jpeg" location="payloads/dandelion.jpg"/>
+    </PayloadInfo>
+</MessageMetaData>

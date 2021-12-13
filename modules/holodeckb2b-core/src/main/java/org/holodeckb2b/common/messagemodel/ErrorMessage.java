@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
-import org.holodeckb2b.common.util.MessageIdUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.MessageIdUtils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 

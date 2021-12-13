@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.ebms3.security.util;
 
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.ebms3.security.DefaultSecurityAlgorithms;
 import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
 import org.holodeckb2b.interfaces.pmode.IKeyTransport;

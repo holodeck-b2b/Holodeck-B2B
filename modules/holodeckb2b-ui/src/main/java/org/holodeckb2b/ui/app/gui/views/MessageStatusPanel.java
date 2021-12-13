@@ -44,7 +44,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.ui.app.gui.HB2BMonitoringApp;
 import org.holodeckb2b.ui.app.gui.models.MessageUnitStatesData;
 

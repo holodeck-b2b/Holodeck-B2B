@@ -26,12 +26,13 @@ import org.holodeckb2b.common.events.impl.GenericReceiveMessageFailure;
 import org.holodeckb2b.common.events.impl.GenericSendMessageFailure;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
-import org.holodeckb2b.common.util.MessageIdUtils;
 import org.holodeckb2b.common.util.MessageUnitUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.MessageIdUtils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -39,8 +40,9 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
  * Is a special handler to handle unexpected and previously unhandled errors. When such errors are detected the
- * processing state of message units currently being processed will be changed to either indicate failed processing.
- * This means that the processing state of all message units in the current flow are set to <i>FAILURE</i>.
+ * processing state of message units currently being processed will be changed to indicate failed processing. This means 
+ * that the processing state of all message units in the current flow are set to <i>FAILURE</i> unless their current
+ * state already indicate a failure or when the processing is in a "stable" state, e.g. waiting for receipt or completed
  * <p>When the error occurs while processing a request an ebMS <i>Other</i> error is generated and reported to the 
  * sender of the request. No other message unit is included in the response to the sender.<br>
  * <p>Note that this is a kind of "last resort" error handler and therefore is not supposed to handle normal errors that
@@ -59,14 +61,13 @@ public class CatchAxisFault extends AbstractBaseHandler {
     @Override
     public void doFlowComplete(final IMessageProcessingContext procCtx, final Logger log) {
     	final MessageContext msgContext = procCtx.getParentContext();
-        // This handler only needs to act when there was an unexpected failure
+        // This handler only needs to act when there was a failure
         if (msgContext.getFailureReason() != null) {
-            log.error("A Fault was raised while processing messages!  Reported cause= "
-                        + msgContext.getFailureReason().getMessage());
+            log.error("An error occurred while processing messages! Error stack=\n {}",
+                        Utils.getExceptionTrace(msgContext.getFailureReason(), true));
             // As we don't know the exact cause of the error the processing state of all message units that are being
             // currently processed should be set to failed if there processing is not completed yet
             Collection<IMessageUnitEntity>  msgUnitsInProcess = null;
-
             final boolean receiving = msgContext.getFLOW() == MessageContext.IN_FLOW
             							|| msgContext.getFLOW() == MessageContext.IN_FAULT_FLOW;
             if (receiving)
@@ -82,8 +83,9 @@ public class CatchAxisFault extends AbstractBaseHandler {
                     if (ProcessingState.DELIVERED != curState && ProcessingState.AWAITING_RECEIPT != curState
                     	&& ProcessingState.DONE != curState && ProcessingState.TRANSPORT_FAILURE != curState) {
                         log.error(MessageUnitUtils.getMessageUnitName(mu) + " with msg-id [" + mu.getMessageId()
-                                    + "] could not be processed due to an internal error.");
-                        HolodeckB2BCore.getStorageManager().setProcessingState(mu, ProcessingState.FAILURE);
+                                    + "] could not be processed due to an unexpected error.");
+                        HolodeckB2BCore.getStorageManager().setProcessingState(mu,
+                        			mu instanceof IUserMessage ? ProcessingState.SUSPENDED : ProcessingState.FAILURE);
                         // Raise event to signal the processing failure
                         HolodeckB2BCore.getEventProcessor().raiseEvent(receiving ? 
 		                        								new GenericReceiveMessageFailure(mu, failureDescription)

@@ -29,10 +29,15 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcess
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.general.IVersionInfo;
 import org.holodeckb2b.interfaces.persistency.IQueryManager;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
+import org.holodeckb2b.interfaces.workerpool.IWorkerPool;
+import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
+import org.holodeckb2b.interfaces.workerpool.WorkerPoolException;
 
 /**
  * Defines the interface the Holodeck B2B Core implementation has to provide to the outside world, like submitters
@@ -160,4 +165,40 @@ public interface IHolodeckB2BCore {
      * @since 5.0.0
      */
     IVersionInfo getVersion();
+    
+    /**
+     * Creates a new worker pool using the provided name and configuration. 
+     * 
+     * @param name 				name to identify the new pool
+     * @param configuration		the configuration for the new pool
+     * @return the created worker pool 
+     * @throws WorkerPoolException when the worker pool cannot be created because of an issue in the provided 
+     * 							   configuration or that the pool name isn't unique.
+     * @since 5.1.0 
+     */
+    IWorkerPool createWorkerPool(final String name, final IWorkerPoolConfiguration configuration) 
+																							throws WorkerPoolException;    
+    
+    /**
+     * Gets the worker pool with the given name.
+     * 
+     * @param name	of the worker pool to retrieve
+     * @return		the worker pool with the given name, or <code>null</code> when no such pool exists
+     * @since 5.1.0
+     */
+    IWorkerPool getWorkerPool(final String name);
+    
+    /**
+     * Resumes processing of the <i>suspended</i> User Message.  
+     * <p>Note that only outgoing User Messages can be in suspended state and resumed. The resume operation will change 
+     * the processing state from <i>SUSPENDED</i> to either <i>READY_TO_PUSH</i> or <i>AWAIT_PULL</i> depending on the 
+     * MEP defined in the P-Mode. If the current processing state however has already changed it assumed that the 
+     * message has already been resumed and no further action is needed.
+     *  
+     * @param userMessage	to be resumed 
+     * @throws PersistenceException		when an error occurs updating the processing state of the message unit
+     * @throws IllegalArgumentException when the given User Message is an incoming User Message 
+     * @since 5.3.0
+     */
+    void resumeProcessing(IUserMessageEntity userMessage) throws PersistenceException, IllegalArgumentException;
 }

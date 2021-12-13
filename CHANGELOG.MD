@@ -2,12 +2,88 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 5.0.3
-##### 2020-11-18
+## 5.3.1
+##### 2021-12-13
+### Changed
+* Removed ".." from directory names on Windows
 
 ### Fixed
-* Multihop routing information missing in async Signal Messages [#112](https://github.com/holodeck-b2b/Holodeck-B2B/issues/112) 
+* Vulnerability in log4j2 [#123](https://github.com/holodeck-b2b/Holodeck-B2B/issues/123)
 
+
+## 5.3.0
+##### 2021-10-25
+### Added
+* New processing state _SUSPENDED_ to indicate that an error occurred that prevented the sending of a User Message to 
+  the trading partner and the possibility to resume their processing by calling the 
+  `HolodeckB2BCoreInterface#resumeProcessing()` method.
+* Option to have multiple event handlers for one event. See `IMessageProcessingEventConfiguration`
+* `ISendMessageProcessingFailure` is now also raised when a message unit cannot be (re)sent, i.e. before the actual
+  send process is started.
+  
+### Changed
+* Improved shutdown process in `org.holodeckb2b.core.HolodeckB2BServer`. Includes support for [Apache commons daemon|
+https://commons.apache.org/proper/commons-daemon/index.html] (using _jvm_ mode).
+* Message properties are included in P-Mode matching, i.e. all properties defined in a P-Mode must be specified in the
+  received message for a P-Mode to match. But any properties in the message not defined in the P-Mode are ignored.
+
+### Fixed
+* Delivery events (`IMessageDelivered` and `IMessageDeliveryFailure`) not raised for delivered Signal Messages.
+* Getting send and receive legs for 2-Way P-Mode does not work for non ebMS3 MEP bindings.
+
+## 5.2.0
+##### 2021-09-02
+### Added
+* `org.holodeckb2b.core.axis2.HTTPWorker` puts the request parameters included in the HTTP URL in _MessageContext_
+  property "hb2b:" + `org.apache.axis2.Constants.REQUEST_PARAMETER_MAP`. The property value is a `Map<String, String>` 
+  of parameter names to values.
+
+### Changed
+* Removed Core Axis2 module as default. 
+* Maven ArtifactId of the default ebMS3 Security Provider module to make it consistent with other module names.
+* Log message when no event handlers are configured in P-Mode.
+
+### Fixed
+* Duplicate messages not eliminated [#117](https://github.com/holodeck-b2b/Holodeck-B2B/issues/117) 
+* Setting of threads available for a _worker pool_  
+* NPE when writing P-Mode XML document with retry configuration
+
+## 5.1.0
+##### 2021-05-26
+### Added
+* Management of worker pools by the Core, including the possibility for "on the fly" reconfiguration. For this purpose a
+ new `IWorkerPool` interface has been introduced and methods in the `HolodeckB2BCoreInterface` and 
+ `IWorkerPullConfiguration` have been added.
+
+### Changed
+* Pull reconfiguration is now managed by the worker pool and configured in the pull configuration file by setting the
+  _refresh_ parameter
+* Loading of the _Event Processor_, _Certificate Manager_, _Persistency Provider_ and ebMS3 _Security Provider_ has been
+  changed to load the first available provider instead of trying to load just the first one registered
+* Improved logging of unexpected errors during message processing 
+* Refactored code to use the generic utility classes from https://github.com/holodeck-b2b/generic-utils
+* Moved `AbstractWorkerTask` class from `org.holodeckb2b.common.workerpool` to `org.holodeckb2b.common.workers`
+* Renamed `org.holodeckb2b.common.workerpool`to `org.holodeckb2b.core.workerpool`
+
+### Deprecated
+* `org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration.getName()` as worker pool names are now set in code
+
+### Fixed
+* Finding the correct P-Mode for User Messages received on response leg of a Two-Way P-Mode
+* Completion of submission  for Two-Way P-Modes 
+* Processing of a received message with more than 30 attachments fails [#113](https://github.com/holodeck-b2b/Holodeck-B2B/issues/113) 
+* Setting of HTTP response code in response message context
+
+### Removed
+* The _pullConfigWatcher_ as the pull configuration is now automatically refreshed by the worker pool itself 
+* Generic utility classes `org.holodeckb2b.common.util.Utils`, `org.holodeckb2b.common.util.MessageIdUtils` and
+ `org.holodeckb2b.security.util.KeystoreUtils` as they are moved to a new, separate project.
+
+
+## 5.0.3
+##### 2020-11-18
+### Fixed
+* Multihop routing information missing in async Signal Messages [#112](https://github.com/holodeck-b2b/Holodeck-B2B/issues/112) 
 
 ## 5.0.2
 ##### 2020-09-16

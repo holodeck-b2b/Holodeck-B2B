@@ -21,10 +21,10 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b-security</artifactId>
-        <version>5.0.3</version>
+        <version>5.3.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>hb2b-ebms3-secprovider</artifactId>
+    <artifactId>holodeckb2b-ebms3-secprovider</artifactId>
     <packaging>jar</packaging>
     <name>Holodeck B2B - Default Security Provider</name>
     <description>This module includes the default implementation of the Holodeck B2B Security Provider for creating/processing the WS-Security header in ebMS3/AS4 messages</description>
@@ -37,10 +37,6 @@
 
     <dependencies>
         <!-- The other Holodeck B2B libraries -->
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-interfaces</artifactId>
-        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
@@ -86,12 +82,6 @@
             <version>1.61</version>
         </dependency>
 
-        <!-- Logging -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-        </dependency>
-
         <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -109,4 +99,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    
 </project>

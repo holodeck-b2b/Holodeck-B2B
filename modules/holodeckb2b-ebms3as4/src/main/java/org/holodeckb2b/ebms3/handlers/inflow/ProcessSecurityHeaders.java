@@ -29,7 +29,7 @@ import org.holodeckb2b.common.events.impl.SignatureVerifiedWithWarning;
 import org.holodeckb2b.common.events.impl.UTProcessingFailure;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.EbmsError;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;

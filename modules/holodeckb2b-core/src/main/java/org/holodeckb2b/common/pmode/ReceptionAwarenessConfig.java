@@ -19,7 +19,7 @@ package org.holodeckb2b.common.pmode;
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.general.Interval;
 import org.holodeckb2b.interfaces.pmode.IReceptionAwareness;
 import org.simpleframework.xml.Element;
@@ -106,6 +106,8 @@ public class ReceptionAwarenessConfig implements IReceptionAwareness, Serializab
 					csList.append(',');
 			}
 			flexibleIntervalsText = csList.toString();
+			maxRetries = null;
+			fixedInterval = null;
 		} else
 			flexibleIntervalsText = null;
 	}

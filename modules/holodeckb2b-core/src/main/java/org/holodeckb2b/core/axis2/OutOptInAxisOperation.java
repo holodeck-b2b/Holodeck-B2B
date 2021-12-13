@@ -40,9 +40,10 @@ import org.apache.axis2.i18n.Messages;
 import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.wsdl.WSDLConstants;
+import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.MessageProcessingContext;
 
 
@@ -164,7 +165,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
          */
         protected MessageContext send(final MessageContext msgContext) throws AxisFault {
 
-        // create the responseMessageContext
+        	// create the responseMessageContext
             final MessageContext responseMessageContext
                     = msgContext.getConfigurationContext().createMessageContext();
 
@@ -195,8 +196,13 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
             } else
             	responseMessageContext.setProperty(MessageContext.TRANSPORT_HEADERS, httpHeaders);
             
-            responseMessageContext.setProperty(HTTPConstants.MC_HTTP_STATUS_CODE,
-                    msgContext.getProperty(HTTPConstants.MC_HTTP_STATUS_CODE));
+            Integer statusCode = (Integer) msgContext.getProperty(HTTPConstants.MC_HTTP_STATUS_CODE);
+            if (statusCode == null) {
+            	// The status code is not set explicitly, get it from the HTTP method
+            	HttpMethodBase method = (HttpMethodBase) msgContext.getProperty(HTTPConstants.HTTP_METHOD);
+            	statusCode = method != null ? method.getStatusCode() : null;
+            }
+            responseMessageContext.setProperty(HTTPConstants.MC_HTTP_STATUS_CODE, statusCode);
 
             responseMessageContext.setProperty(MessageContext.TRANSPORT_IN, msgContext
                     .getProperty(MessageContext.TRANSPORT_IN));

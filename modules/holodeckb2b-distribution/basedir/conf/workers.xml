@@ -1,7 +1,7 @@
 <workers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://www.holodeck-b2b.org/2012/12/workers ../../../../holodeck-common/src/main/resources/xsd/workers.xsd"
- xmlns="http://holodeck-b2b.org/2012/12/workers"
- poolName="holodeckb2b:workers">
+ xsi:schemaLocation="http://holodeck-b2b.org/schemas/2012/12/workers ../repository/xsds/workers.xsd"
+ xmlns="http://holodeck-b2b.org/schemas/2012/12/workers"
+>
 
     <!-- ==============================================================
     This worker is responsible for reading the P-Modes from file. It is
@@ -54,24 +54,6 @@
     =============================================================== -->
     <worker name="cleanupWorker" interval="3600" activate="true" delay="60"
         workerClass="org.holodeckb2b.core.workers.PurgeOldMessagesWorker"/>
-
-    <!-- ==============================================================
-    This worker checks the pulling configuration and configure a
-    separate pool of workers responsible for sending the pull requests.
-    See PullWorker, PullConfiguration and PullConfigurationWatcher
-    classes for more details.
-
-    The worker has one parameter that is the path to the file containing
-    the pulling configuration. It is RECOMMENDED to specify it as an
-    absolute path.
-
-    De-activating this worker will disable the pulling feature, i.e.
-    the ability to send out Pull Request signals!
-    =============================================================== -->
-    <worker name="pullConfigWatcher" interval="60" activate="true" delay="10"
-        workerClass="org.holodeckb2b.ebms3.pulling.PullConfigurationWatcher">
-        <parameter name="watchPath">conf/pulling_configuration.xml</parameter>
-    </worker>
 
     <!-- ==============================================================
     This worker is the default method for submitting messages to

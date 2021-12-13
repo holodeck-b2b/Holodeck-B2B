@@ -7,7 +7,7 @@ Holodeck B2B uses the Log4j v2 logging framework, see the Log4j website for more
 information about configuration. When deploying in a production environment it is 
 recommended to raise log levels to at least INFO.
 ===================================================================================== -->
-<Configuration status="warn" monitorInterval="30">
+<Configuration status="warn" monitorInterval="30" shutdownHook="disable">
   
     <Appenders>        
         <!-- 
@@ -61,10 +61,12 @@ recommended to raise log levels to at least INFO.
         <!-- Some logging of often recurring tasks is already 
             reduced to prevent clutter         
         -->
-        <Logger name="org.holodeckb2b.common.pmode.PModeWatcher" level="INFO"/>
-        <Logger name="org.holodeckb2b.backend.file.SubmitOperation" level="INFO"/>        
-        <Logger name="org.holodeckb2b.core.receptionawareness.RetransmissionWorker" level="INFO"/>        
+        <Logger name="org.holodeckb2b.core.workerpool" level="INFO"/>
         <Logger name="org.holodeckb2b.core.workers" level="WARN"/>
+        <Logger name="org.holodeckb2b.core.receptionawareness.RetransmissionWorker" level="INFO"/>        
+        <Logger name="org.holodeckb2b.common.events.SyncEventProcessor" level="WARN"/>
+        <Logger name="org.holodeckb2b.common.pmode.PModeWatcher" level="WARN"/>
+        <Logger name="org.holodeckb2b.backend.file.SubmitOperation" level="INFO"/>        
         <Logger name="org.holodeckb2b.ebms3.pulling" level="WARN"/>
         
         <!--

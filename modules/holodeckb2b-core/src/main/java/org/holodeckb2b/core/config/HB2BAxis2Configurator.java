@@ -31,7 +31,7 @@ import org.apache.axis2.deployment.ModuleDeployer;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisConfigurator;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 
 /**
  * Is a specialised {@link AxisConfigurator} that will uses the {@link HB2BConfigBuilder} to build a configuration that

@@ -27,7 +27,7 @@ import org.holodeckb2b.common.events.impl.SigningFailure;
 import org.holodeckb2b.common.events.impl.UTCreationFailure;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.CompareUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
@@ -203,7 +203,7 @@ public class CreateSecurityHeaders extends AbstractBaseHandler {
                       ))
                     + " security header failed! Details: " + reason.getMessage());
             for (final IMessageUnitEntity mu : sentMsgUnits) {
-                storageManager.setProcessingState(mu, ProcessingState.FAILURE);
+                storageManager.setProcessingState(mu, ProcessingState.SUSPENDED);
 
                 IMessageProcessingEvent event;
                 if (result instanceof ISignatureProcessingResult)

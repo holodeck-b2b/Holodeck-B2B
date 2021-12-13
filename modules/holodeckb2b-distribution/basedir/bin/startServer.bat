@@ -16,6 +16,9 @@ if "%OS%"=="WINNT" @setlocal
 
 rem %~dp0 is expanded pathname of the current script under NT
 set DEFAULT_HB2B_HOME=%~dp0..
+pushd %DEFAULT_HB2B_HOME%
+set DEFAULT_HB2B_HOME=%CD%
+popd
 
 if "%HB2B_HOME%"=="" set HB2B_HOME=%DEFAULT_HB2B_HOME%
 set DEFAULT_HB2B_HOME=

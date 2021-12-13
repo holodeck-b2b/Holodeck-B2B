@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<module name="holodeckb2b-core" class="org.holodeckb2b.core.HolodeckB2BCoreImpl">
+<module name="holodeckb2b-core" class="org.holodeckb2b.core.HolodeckB2BCoreModule">
 	<Description>This module contains the configuration of the Holodeck B2B Core handlers</Description>
 	<!-- Although the Core processing doesn't handle a specific protocol, we still
 	 	 specify a handled message protocol for nicer logging -->

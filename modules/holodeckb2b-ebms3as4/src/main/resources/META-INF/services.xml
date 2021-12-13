@@ -27,8 +27,7 @@
   <parameter name="supportSingleOperation" locked="xsd:true">true</parameter>
   <parameter name="disableREST" locked="xsd:true">true</parameter>
 
- 
-  <module ref="addressing"/>
-  <module ref="holodeckb2b-ebms3as4"/>
   <module ref="holodeckb2b-core"/>
+  <module ref="holodeckb2b-ebms3as4"/>
+  <module ref="addressing"/>
 </service>

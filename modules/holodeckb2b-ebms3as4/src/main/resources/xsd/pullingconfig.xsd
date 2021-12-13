@@ -19,20 +19,24 @@
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
     targetNamespace="http://holodeck-b2b.org/schemas/2014/05/pullconfiguration"
-    xmlns="http://holodeck-b2b.org/schemas/2014/05/pullconfiguration">
+    xmlns="http://holodeck-b2b.org/schemas/2014/05/pullconfiguration"
+    version="5.1.0">
     <xs:annotation>
         <xs:documentation>This XML schema specifies the configuration of the Pull worker pool which contains the worker responsible for executing pull requests. The pool consist of zero or more workers that will execute pull requests for specific P-Modes and a default worker that will handle all other P-Modes requiring pulling.</xs:documentation>
+        <xs:documentation>Since version 5.1.0 the configuration includes the <code>refresh</code> attribute on the root element to indicate the interval at which the Holodeck B2B ebMS3/AS4 module should refresh the pull configuration.</xs:documentation>
     </xs:annotation>
     <xs:element name="pulling">
         <xs:annotation>
-            <xs:documentation>The pulling configuration contains zero or more worker for pulling specific P-Modes and one default worker. If pulling should be disabled at all the interval of the default pull worker should be set to '0' and no other worker should be defined.</xs:documentation>
+            <xs:documentation><p>The pulling configuration contains zero or more worker for pulling specific P-Modes and one default worker. The pulling configuration will be refreshed at the specified interval (in seconds).</p> 
+<p>Pulling on a Holodeck B2B instance can be disabled both permanently or temporarily. To disable pulling permanently just don't provide a pulling configuration file.<br/>
+To temporarily disable pulling set the interval of the default puller should to '0' and have no other pullers defined. Pulling can later be enabled by either changing the interval of the default puller or adding specific pullers. Note that the refresh interval must be greater than zero because otherwise the changed configuration will not be loaded!</p></xs:documentation>
         </xs:annotation>
         <xs:complexType>
             <xs:sequence>
                 <xs:element name="default" type="defaultPuller">
                     <xs:annotation>
                         <xs:documentation>Configuration of the default pull worker. Because the default pull worker will pull for all P-Modes that do not have their own pull worker no specific P-Mode may be specified.
-If all P-Modes that need pulling have their own pull worker the default worker can be disable by specifying '0' as the interval.</xs:documentation>
+If all P-Modes that need pulling have their own pull worker the default worker can be disabled by specifying '0' as the interval.</xs:documentation>
                     </xs:annotation>
                 </xs:element>
                 <xs:element maxOccurs="unbounded" minOccurs="0" name="pull" type="specificPuller">
@@ -41,6 +45,11 @@ If all P-Modes that need pulling have their own pull worker the default worker c
                     </xs:annotation>
                 </xs:element>
             </xs:sequence>
+            <xs:attribute default="60" name="refresh" type="xs:nonNegativeInteger">
+                <xs:annotation>
+                    <xs:documentation>Represents the interval, in seconds, at which this pull configuration should be refreshed. If set to zero the configuration will not be refreshed "on the fly" and a restart of the Holodeck B2B instance is requirement to reload the configuration. Default value is 60 seconds.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
     <xs:complexType name="genericPullerType">

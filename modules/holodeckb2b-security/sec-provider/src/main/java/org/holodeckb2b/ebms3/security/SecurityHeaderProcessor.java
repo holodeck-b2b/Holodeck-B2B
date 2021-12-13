@@ -48,7 +48,7 @@ import org.apache.wss4j.dom.str.STRParser;
 import org.apache.wss4j.dom.validate.Validator;
 import org.holodeckb2b.common.security.results.EncryptionProcessingResult;
 import org.holodeckb2b.common.security.results.SignatureProcessingResult;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.axis2.Axis2Utils;
 import org.holodeckb2b.ebms3.security.callbackhandlers.AttachmentCallbackHandler;
 import org.holodeckb2b.ebms3.security.callbackhandlers.PasswordCallbackHandler;
@@ -253,7 +253,8 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
 
         final WSSConfig wssConfig = WSSConfig.getNewInstance();
         // Disable validator of the Usernametoken so no validation is done by the security provider
-        wssConfig.setValidator(WSConstants.USERNAME_TOKEN, (Validator) null);        
+        wssConfig.setValidator(WSConstants.USERNAME_TOKEN, (Validator) null);
+        wssConfig.setProcessor(WSConstants.SIGNATURE, SignatureProcessor.class);
         reqData.setWssConfig(wssConfig);
 
         // Disable BSP conformance check. Although AS4 requires conformance with BSP1.1 the check is disable to allow

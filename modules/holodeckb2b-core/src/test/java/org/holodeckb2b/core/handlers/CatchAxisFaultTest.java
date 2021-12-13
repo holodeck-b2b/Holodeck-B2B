@@ -30,8 +30,8 @@ import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestUtils;
-import org.holodeckb2b.common.util.MessageIdUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.MessageIdUtils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;
@@ -126,7 +126,7 @@ public class CatchAxisFaultTest {
 			Collection<IMessageUnitEntity> storedMsg = HolodeckB2BCore.getQueryManager()
 																	.getMessageUnitsWithId(userMessage.getMessageId());
 			assertFalse(Utils.isNullOrEmpty(storedMsg));
-			assertEquals(ProcessingState.FAILURE, storedMsg.iterator().next().getCurrentProcessingState().getState());
+			assertEquals(ProcessingState.SUSPENDED, storedMsg.iterator().next().getCurrentProcessingState().getState());
 			
 			storedMsg = HolodeckB2BCore.getQueryManager().getMessageUnitsWithId(receipt.getMessageId());
 			assertFalse(Utils.isNullOrEmpty(storedMsg));

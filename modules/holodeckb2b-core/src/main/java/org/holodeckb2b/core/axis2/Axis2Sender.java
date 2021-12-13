@@ -18,8 +18,6 @@ package org.holodeckb2b.core.axis2;
 
 import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
 
-import java.util.List;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.OperationClient;
@@ -38,8 +36,9 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.holodeckb2b.common.events.impl.GenericSendMessageFailure;
 import org.holodeckb2b.common.util.MessageUnitUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -48,12 +47,14 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
  * Is responsible for sending the message unit using the Axis2 framework. Depending on the messaging protocol the 
@@ -72,20 +73,20 @@ public class Axis2Sender {
      * Sends the given message unit to the other MSH.
      *
      * @param messageUnit   The message unit to send
+     * @throws PersistenceException when the processing state could not be updated
      */
-    public static void sendMessage(final IMessageUnitEntity messageUnit) {
-        OperationClient oc;
-        final MessageContext msgCtx = new MessageContext();
-        msgCtx.setFLOW(MessageContext.OUT_FLOW);
-
-        log.trace("Check PMode.MEPBinding which Service should be used");
+    public static void sendMessage(final IMessageUnitEntity messageUnit) throws PersistenceException {    	
+        log.trace("Starting send operation for {} (msgId={})", MessageUnitUtils.getMessageUnitName(messageUnit),
+        			messageUnit.getMessageId());        
         IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(messageUnit.getPModeId());
         if (pmode == null) {
         	log.error("Cannot send {} [msgId={}] because associated P-Mode {} is not available!", 
         				MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId(), 
         				messageUnit.getPModeId());
+        	registerSendFailure(messageUnit, "P-Mode not available");        	
         	return;
         }
+        log.trace("Check PMode.MEPBinding which Service should be used");
         // The default protocol is AS4, so we will use the "as4" Service unless P-Mode indicates something else 
         String svcName = "as4";
         final String mepBinding = pmode.getMepBinding();
@@ -97,8 +98,8 @@ public class Axis2Sender {
         		svcName = mepBinding.substring(41, segmentEnd);        	
         }
         
-        ConfigurationContext configContext = new ConfigurationContext(HolodeckB2BCore.getConfiguration());
-        AxisConfiguration axisConfig = configContext.getAxisConfiguration();
+        final ConfigurationContext configContext = new ConfigurationContext(HolodeckB2BCore.getConfiguration());
+        final AxisConfiguration axisConfig = configContext.getAxisConfiguration();
         AxisService service;
         try {
 			service = axisConfig.getService(svcName);
@@ -109,11 +110,16 @@ public class Axis2Sender {
         	log.error("Cannot send {} [msgId={}] because required {} Service is not installed!", 
     				   MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId(), 
     				   svcName);
+        	registerSendFailure(messageUnit, "Required messaging service not installed");
         	return;	
-        }
-        
+        }        
         log.debug("Using {} Service to send {} [msgId={}]", svcName, MessageUnitUtils.getMessageUnitName(messageUnit), 
         			messageUnit.getMessageId());
+        
+        final MessageContext msgCtx = new MessageContext();
+        msgCtx.setFLOW(MessageContext.OUT_FLOW);
+        OperationClient oc = null;
+        
         try {
 	        AxisServiceGroup axisServiceGroup = service.getAxisServiceGroup();
 	        ServiceGroupContext sgc = configContext.createServiceGroupContext(axisServiceGroup);
@@ -152,23 +158,51 @@ public class Axis2Sender {
                 procCtx.addSendingError((IErrorMessageEntity) messageUnit);
             else if (messageUnit instanceof IReceipt)
                 procCtx.addSendingReceipt((IReceiptEntity) messageUnit);
-            log.debug("Start send process for {} [msgId={}]", MessageUnitUtils.getMessageUnitName(messageUnit), 
-        			  messageUnit.getMessageId());
+        } catch (AxisFault cfgError) {
+        	log.error("An exception occurred setting up the send operation for {} (msgId={}).Exception stack below:\n",
+        			   MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId(), 
+        			   Utils.getExceptionTrace(cfgError, true));
+        	registerSendFailure(messageUnit, "Axis2 initialisation failure");
+        	return;
+        }
+        
+        try {
+        	log.debug("Start send process for {} [msgId={}]", MessageUnitUtils.getMessageUnitName(messageUnit), 
+        				messageUnit.getMessageId());
             oc.execute(true);
+            log.debug("Finished send process for {} [msgId={}]", MessageUnitUtils.getMessageUnitName(messageUnit), 
+            		messageUnit.getMessageId());            
         } catch (final Throwable t) {
             /* An error occurred while sending the message, it should however be already processed by one of the
                handlers. In that case the message context will not contain the failure reason. To prevent redundant
                logging we check if there is a failure reason before we log the error here.
             */
-            final List<Throwable> errorStack = Utils.getCauses(t);
-            final StringBuilder logMsg = new StringBuilder("\n\tError stack: ")
-                                                    .append(errorStack.get(0).getClass().getSimpleName());
-            for(int i = 1; i < errorStack.size(); i++) {
-                logMsg.append("\n\t    Caused by: ").append(errorStack.get(i).getClass().getSimpleName());
-            }
-            logMsg.append(" {").append(errorStack.get(errorStack.size() - 1).getMessage()).append('}');
-            log.error("An error occurred while sending the message [" + messageUnit.getMessageId() + "]!"
-                     + logMsg.toString());
+        	if (msgCtx.getFailureReason() != null) {
+        		log.error("An unexpected error occurred while sending {} (msgId={}). Exception trace:\n{}",
+        				  MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId(), 
+        				  Utils.getExceptionTrace(t, true));
+        		registerSendFailure(messageUnit, null);
+        	}
         }
     }
+
+    /**
+     * Sets the processing state of the given message unit to <i>FAILURE</i> and raises a event to indicate that the
+     * sending of the message unit failed.
+     * 
+     * @param messageUnit				to be sent
+     * @param failureDescription		description of the failure
+     * @throws PersistenceException		when the message unit's state could not be updated
+     */
+	private static void registerSendFailure(IMessageUnitEntity messageUnit, String failureDescription) 
+																						throws PersistenceException {
+		// Set state to FAILURE for Signals or SUSPENDED for User Messages		
+    	HolodeckB2BCore.getStorageManager()
+    				   .setProcessingState(messageUnit, 
+							messageUnit instanceof IUserMessage ? ProcessingState.SUSPENDED : ProcessingState.FAILURE, 
+							failureDescription);
+    	// Raise event to signal this issue
+    	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(
+    			new GenericSendMessageFailure(messageUnit, failureDescription));		
+	}
 }

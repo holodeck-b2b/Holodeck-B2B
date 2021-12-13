@@ -32,7 +32,7 @@ import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.deployment.DeploymentException;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.util.XMLUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 
 /**
  * Is a specialised {@link AxisConfigBuilder} that will not only build the Axis2 configuration but also read the 

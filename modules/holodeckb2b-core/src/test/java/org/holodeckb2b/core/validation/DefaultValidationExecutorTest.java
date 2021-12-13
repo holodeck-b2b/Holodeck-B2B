@@ -8,7 +8,7 @@ import static org.junit.Assert.assertTrue;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.CustomValidationConfiguration;
 import org.holodeckb2b.common.pmode.MessageValidatorConfiguration;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError.Severity;
 import org.junit.Test;
 

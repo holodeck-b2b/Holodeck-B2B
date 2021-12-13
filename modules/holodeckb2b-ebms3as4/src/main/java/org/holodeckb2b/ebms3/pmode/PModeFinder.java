@@ -25,12 +25,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.holodeckb2b.common.util.CompareUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IAgreement;
 import org.holodeckb2b.interfaces.general.IPartyId;
+import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
 import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
@@ -69,23 +70,24 @@ public class PModeFinder {
 	/**
      * Identifiers for the meta-data that is being used in the matching
      */
-    protected static enum PARAMETERS {ID, FROM, FROM_ROLE, TO, TO_ROLE, SERVICE, ACTION, MPC, AGREEMENT}
+    protected static enum PARAMETERS {ID, FROM, FROM_ROLE, TO, TO_ROLE, SERVICE, ACTION, MPC, AGREEMENT, MSG_PROPERTY}
 
     /**
      * The weight for each of the parameters
      */
-    protected static Map<PARAMETERS, Integer> MATCH_WEIGHTS; // {37, 7, 2, 7, 2, 5, 5, 1};
+    protected static Map<PARAMETERS, Integer> MATCH_WEIGHTS; 
     static {
         final Map<PARAMETERS, Integer> aMap = new EnumMap<> (PARAMETERS.class);
-        aMap.put(PARAMETERS.ID, 37);
-        aMap.put(PARAMETERS.FROM, 7);
-        aMap.put(PARAMETERS.FROM_ROLE, 2);
-        aMap.put(PARAMETERS.TO, 7);
-        aMap.put(PARAMETERS.TO_ROLE, 2);
-        aMap.put(PARAMETERS.SERVICE, 5);
-        aMap.put(PARAMETERS.ACTION, 5);
-        aMap.put(PARAMETERS.MPC, 1);
-        aMap.put(PARAMETERS.AGREEMENT, 1);
+        aMap.put(PARAMETERS.ID, 74);
+        aMap.put(PARAMETERS.FROM, 14);
+        aMap.put(PARAMETERS.FROM_ROLE, 4);
+        aMap.put(PARAMETERS.TO, 14);
+        aMap.put(PARAMETERS.TO_ROLE, 4);
+        aMap.put(PARAMETERS.SERVICE, 10);
+        aMap.put(PARAMETERS.ACTION, 10);
+        aMap.put(PARAMETERS.MPC, 2);
+        aMap.put(PARAMETERS.AGREEMENT, 2);
+        aMap.put(PARAMETERS.MSG_PROPERTY, 1);
 
         MATCH_WEIGHTS = Collections.unmodifiableMap(aMap);
     }
@@ -102,15 +104,16 @@ public class PModeFinder {
      * no value if specified in the P-Mode the element is not considered and not scored.
      * <p><table border="1">
      * <tr><th>Element</th><th>Weight</th></tr>
-     * <tr><td>PMode id</td><td>37</td></tr>
-     * <tr><td>From Party Id's</td><td>7</td></tr>
-     * <tr><td>From.Role</td><td>2</td></tr>
-     * <tr><td>To Party Id's</td><td>7</td></tr>
-     * <tr><td>To.Role</td><td>2</td></tr>
-     * <tr><td>Service</td><td>5</td></tr>
-     * <tr><td>Action</td><td>5</td></tr>
-     * <tr><td>Agreement ref</td><td>1</td></tr>
-     * <tr><td>MPC</td><td>1</td></tr>
+     * <tr><td>PMode id</td><td>74</td></tr>
+     * <tr><td>From Party Id's</td><td>14</td></tr>
+     * <tr><td>From.Role</td><td>4</td></tr>
+     * <tr><td>To Party Id's</td><td>14</td></tr>
+     * <tr><td>To.Role</td><td>4</td></tr>
+     * <tr><td>Service</td><td>10</td></tr>
+     * <tr><td>Action</td><td>10</td></tr>
+     * <tr><td>Agreement ref</td><td>2</td></tr>
+     * <tr><td>MPC</td><td>2</td></tr>
+     * <tr><td>Message Property</td><td>1</td></tr>
      * </table> </p>
      * <p>Because the 2-Way MEP can be governed by two 1-Way P-Modes this method will just check all P-Modes that govern
      * message receiving. It is up to the handlers to decide whether the result is acceptable or not. This method will 
@@ -144,7 +147,7 @@ public class PModeFinder {
         	 */
         	final boolean initiator = PModeUtils.isHolodeckB2BInitiator(p);
         	final String  mepBinding = p.getMepBinding();
-        	if ((initiator && !mepBinding.equals(EbMSConstants.ONE_WAY_PULL)) // sending using Push
+        	if ((initiator && mepBinding.equals(EbMSConstants.ONE_WAY_PUSH)) // sending using Push
     		|| (!initiator && mepBinding.equals(EbMSConstants.ONE_WAY_PULL))) // sending using Pull
                 continue;            
 
@@ -293,7 +296,28 @@ public class PModeFinder {
                 else
                     continue; // mis-match on MPC
             }
-
+            
+            /*
+             * Check the message properties. Only the properties defined in the P-Mode are checked for matching, i.e.
+             * when a property exists in the message, but is not defined in the P-Mode, it is ignored. Properties 
+             * defined in the P-Mode, but not available in the message result in a mismatch.    
+             */
+            Collection<IProperty> pModeProperties = pmBI != null ? pmBI.getProperties() : null;
+            if (!Utils.isNullOrEmpty(pModeProperties)) { 
+            	Collection<IProperty> messageProperties = mu.getMessageProperties();
+            	if (Utils.isNullOrEmpty(messageProperties)) 
+            		continue; // mismatch because properties defined in P-Mode are missing
+            	boolean propMisMatch = false;
+            	for(IProperty pp : pModeProperties) {
+            		if (messageProperties.stream().anyMatch(mp -> CompareUtils.areEqual(mp, pp))) 
+            			cValue += MATCH_WEIGHTS.get(PARAMETERS.MSG_PROPERTY);
+            		else
+            			propMisMatch = true;
+            	}
+            	if (propMisMatch)
+            		continue; // mismatch on a property
+            }
+            
             // Does this P-Mode better match to the message meta data than the current highest match?
             if (cValue > hValue) {
                 // Yes, it does, set it as new best match

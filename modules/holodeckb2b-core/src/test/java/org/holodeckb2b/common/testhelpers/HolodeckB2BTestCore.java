@@ -24,10 +24,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.modules.Module;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.pmode.InMemoryPModeSet;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCoreImpl;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.config.InternalConfiguration;
@@ -69,11 +70,11 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	private Map<String, IMessageDelivererFactory> msgDeliveryMethods = new HashMap<>();
 	private Map<String, Module> modules = new HashMap<>();
 	
-	public HolodeckB2BTestCore() {
+	public HolodeckB2BTestCore() throws AxisFault {
 		this(".");
 	}
 
-	public HolodeckB2BTestCore(final String homeDir) {
+	public HolodeckB2BTestCore(final String homeDir) throws AxisFault {
 		this.configuration = new InternalConfiguration(Paths.get(homeDir));
 		this.configuration.setHostName("local.test");
 		this.configuration.setTempDirectory(Paths.get(homeDir).resolve("temp_t"));

@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.ebms3.security.results;
 
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.ebms3.security.Action;
 import org.holodeckb2b.ebms3.security.SecurityHeaderCreator;
 import org.holodeckb2b.ebms3.security.SecurityHeaderProcessor;

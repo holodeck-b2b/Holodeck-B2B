@@ -29,8 +29,9 @@ import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.events.impl.MessageSubmission;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.util.MessageIdUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.FileUtils;
+import org.holodeckb2b.commons.util.MessageIdUtils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
@@ -319,7 +320,7 @@ public class MessageSubmitter implements IMessageSubmitter {
             for (final IPayload p : payloads) {
                 final Path srcPath = Paths.get(p.getContentLocation());
                 // Ensure that the filename in the temp directory is unique
-                final Path destPath = Utils.createFileWithUniqueName(pathPlDir.toString() + "/" + srcPath.getFileName());
+                final Path destPath = FileUtils.createFileWithUniqueName(pathPlDir.resolve(srcPath.getFileName()));
                 try {
                 	log.trace("{} payload [{}] to internal directory", move ? "Moving" : "Copying", 
                 													   p.getContentLocation());

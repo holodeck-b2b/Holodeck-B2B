@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.holodeckb2b.common.util.CompareUtils;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;

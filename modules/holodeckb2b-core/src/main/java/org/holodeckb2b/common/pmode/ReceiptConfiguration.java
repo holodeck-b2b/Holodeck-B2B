@@ -18,12 +18,11 @@ package org.holodeckb2b.common.pmode;
 
 import java.io.Serializable;
 
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
 import org.simpleframework.xml.Element;
-
 /**
  * Contains the parameters related to the configuration of Receipt handling.
  *

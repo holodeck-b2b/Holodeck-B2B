@@ -22,7 +22,7 @@ import java.util.Map;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.OtherContentError;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
-import org.holodeckb2b.common.util.Utils;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.core.validation.CustomValidationFailureEvent;
@@ -51,6 +51,11 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
     @Override
     protected InvocationResponse doProcessing(IUserMessageEntity userMessage, IMessageProcessingContext procCtx,
     										  final Logger log) throws Exception {
+    	
+    	// If the User Message is a duplicate, no processing is required. 
+    	if (userMessage.getCurrentProcessingState().getState() == ProcessingState.DUPLICATE) 
+    		return InvocationResponse.CONTINUE;
+    	
         // For the execution of the validation a separate component is used. This component will also raise the event
         log.trace("Validate user message if specified");
         try {
