@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 5.3.1
 ##### 2021-12-11
 ### Changed
-* Remove ".." from directory names on Windows
+* Removed ".." from directory names on Windows
 
 ### Fixed
 * Vulnerability in log4j2 [#123](https://github.com/holodeck-b2b/Holodeck-B2B/issues/123)
@@ -19,7 +19,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   `HolodeckB2BCoreInterface#resumeProcessing()` method.
 * Option to have multiple event handlers for one event. See `IMessageProcessingEventConfiguration`
 * `ISendMessageProcessingFailure` is now also raised when a message unit cannot be (re)sent, i.e. before the actual
-  send process is started
+  send process is started.
   
 ### Changed
 * Improved shutdown process in `org.holodeckb2b.core.HolodeckB2BServer`. Includes support for [Apache commons daemon|
@@ -28,8 +28,8 @@ https://commons.apache.org/proper/commons-daemon/index.html] (using _jvm_ mode).
   received message for a P-Mode to match. But any properties in the message not defined in the P-Mode are ignored.
 
 ### Fixed
-* Delivery events (`IMessageDelivered` and `IMessageDeliveryFailure`) not raised for delivered Signal Messages
-* Getting send and receive legs for 2-Way P-Mode does not work for non ebMS3 MEP bindings
+* Delivery events (`IMessageDelivered` and `IMessageDeliveryFailure`) not raised for delivered Signal Messages.
+* Getting send and receive legs for 2-Way P-Mode does not work for non ebMS3 MEP bindings.
 
 ## 5.2.0
 ##### 2021-09-02
@@ -39,9 +39,9 @@ https://commons.apache.org/proper/commons-daemon/index.html] (using _jvm_ mode).
   of parameter names to values.
 
 ### Changed
-* Removed Core Axis2 module as default 
+* Removed Core Axis2 module as default. 
 * Maven ArtifactId of the default ebMS3 Security Provider module to make it consistent with other module names.
-* Log message when no event handlers are configured in P-Mode
+* Log message when no event handlers are configured in P-Mode.
 
 ### Fixed
 * Duplicate messages not eliminated [#117](https://github.com/holodeck-b2b/Holodeck-B2B/issues/117) 
