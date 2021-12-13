@@ -16,21 +16,39 @@
  */
 package org.holodeckb2b.core;
 
+import org.apache.axis2.AxisFault;
 import org.holodeckb2b.core.config.InternalConfiguration;
 import org.holodeckb2b.core.validation.IValidationExecutor;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
- * Provides access to the Holodeck B2B Core of a running instance to the Holodeck B2B Core classes. It is an extension
- * of the public interface the Core offers to extensions and adds methods that are intended for internal use only. Note
- * that this is just a <i>facade</i> to the actual Core implementation that is still one object.
+ * Is a <i>facade</i> to {@link HolodeckB2BCoreImpl} to [rovides access to the Holodeck B2B Core components. It is an 
+ * extension of the public interface of the Core offered to extensions as defined in the interface module that adds 
+ * methods intended for internal use only. 
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
 public class HolodeckB2BCore extends HolodeckB2BCoreInterface {
 
+    /**
+	 * Initialises Holodeck B2B based on the provided configuration.
+	 * 
+	 * @param config	the configuration to use for this instance
+	 * @throws AxisFault	when the Core could not be correctly initialised
+	 */
+	public static void init(final InternalConfiguration config) throws AxisFault {
+		new HolodeckB2BCoreImpl(config);
+	}
+	
+	/**
+	 * Shuts down the Holodeck B2B Core.
+	 */
+	public static void shutdown() {
+		 coreImpl().shutdown();
+	}	
+		
     /**
      * Returns the current configuration of this Holodeck B2B instance. The configuration parameters can be used
      * by extension to integrate their functionality with the core.
@@ -50,7 +68,7 @@ public class HolodeckB2BCore extends HolodeckB2BCoreInterface {
      * @since  3.0.0
      */
     public static StorageManager getStorageManager() {
-        return ((HolodeckB2BCoreImpl) coreImplementation).getStorageManager();
+        return coreImpl().getStorageManager();
     }
 
     /**
@@ -61,6 +79,14 @@ public class HolodeckB2BCore extends HolodeckB2BCoreInterface {
      * @since 4.0.0
      */
     public static IValidationExecutor getValidationExecutor() {
-        return ((HolodeckB2BCoreImpl) coreImplementation).getValidationExecutor();
+        return coreImpl().getValidationExecutor();
+    }
+    
+    /** 
+     * @return the Core implementation object.	
+     * @since 5.3.1
+     */
+    static HolodeckB2BCoreImpl coreImpl() {
+    	return (HolodeckB2BCoreImpl) coreImplementation;
     }
 }

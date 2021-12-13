@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.axis2.AxisFault;
 import org.hibernate.LazyInitializationException;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.Property;
@@ -90,7 +91,7 @@ public class UpdateManagerTest {
     }
 
     @BeforeClass
-    public static void setUpClass() throws PersistenceException {
+    public static void setUpClass() throws PersistenceException, AxisFault {
         em = EntityManagerUtil.getEntityManager();
         updManager = new UpdateManager();
         

@@ -22,15 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.description.AxisDescription;
 import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.engine.AxisError;
 import org.apache.axis2.modules.Module;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.neethi.Assertion;
-import org.apache.neethi.Policy;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.events.SyncEventProcessor;
 import org.holodeckb2b.common.workerpool.XMLWorkerPoolConfiguration;
@@ -68,21 +64,15 @@ import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.WorkerPoolException;
 
 /**
- * Axis2 module class for the Holodeck B2B Core module.
- * <p>This class is responsible for the initialization and shutdown of the ebMS module. This includes
- * starting and stopping the workers needed to drive the message exchanges.
- *
+ * The Holodeck B2B Core which provides access to and ensures that core componenents like the P-Mode and persistency 
+ * provider.
+ * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
+public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     private static final class SubmitterSingletonHolder {
         static final IMessageSubmitter instance = new MessageSubmitter();
     }
-
-    /**
-     * The name of the Axis2 Module that contains the Holodeck B2B Core implementation
-     */
-    public static final String HOLODECKB2B_CORE_MODULE = "holodeckb2b-core";
 
     /**
      * Logger
@@ -136,36 +126,20 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
      * 
      */
     private List<IMessageProcessingEventConfiguration>	eventConfigurations = null;
-
+	
+    // This constructor is only here so a test mock can use it as base class, it should be removed!
+    protected HolodeckB2BCoreImpl() {};
+    
     /**
-     * Initializes the Holodeck B2B Core module.
+     * Initializes the Holodeck B2B Core.
      *
-     * @param cc
-     * @param am
-     * @throws AxisFault
+     * @param config the loaded configuration file
+     * @throws AxisFault	when the Core cannot be initialised correctly
      */
-    @Override
-    public void init(final ConfigurationContext cc, final AxisModule am) throws AxisFault {
-        log.info("Starting Holodeck B2B Core module...");
-
-        System.out.println("Starting Holodeck B2B Core module...");
-
-        // Check if module name in module.xml is equal to constant use in code
-        if (!am.getName().equals(HOLODECKB2B_CORE_MODULE)) {
-            // Name is not equal! This is a fatal configuration error, stop loading this module and alert operator
-            log.fatal("Invalid Holodeck B2B Core module configuration! Name in configuration is: {}, expected was: {}",
-            			am.getName(), HOLODECKB2B_CORE_MODULE);
-            throw new AxisFault("Invalid configuration found for module: " + am.getName());
-        }
-
-        try {
-            instanceConfiguration = (InternalConfiguration) cc.getAxisConfiguration();
-        } catch (ClassCastException nonH2BConfig) {
-            log.fatal("Incorrect configuration found. Found {} instead of {}", 
-            			cc.getAxisConfiguration().getClass().getName(), InternalConfiguration.class.getName());
-            throw new AxisFault("Could not initialize Holodeck B2B module!", nonH2BConfig);
-        }
-
+    HolodeckB2BCoreImpl(final InternalConfiguration config) throws AxisFault {
+        log.info("Starting Holodeck B2B Core...");       
+        System.out.println("Starting Holodeck B2B Core...");
+        this.instanceConfiguration = config;
         try {
         	log.trace("Initialize the P-Mode manager");
 			pmodeManager = new PModeManager(instanceConfiguration);
@@ -257,33 +231,17 @@ public class HolodeckB2BCoreImpl implements Module, IHolodeckB2BCore {
         }
 
         log.info("Holodeck B2B Core " + VersionInfo.fullVersion + " STARTED.");
-        System.out.println("Holodeck B2B Core module started.");      
+        System.out.println("Holodeck B2B Core started.");      
     }
 
-    @Override
-    public void engageNotify(final AxisDescription ad) throws AxisFault {
-    }
-
-    @Override
-    public boolean canSupportAssertion(final Assertion asrtn) {
-        return false;
-    }
-
-    @Override
-    public void applyPolicy(final Policy policy, final AxisDescription ad) throws AxisFault {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void shutdown(final ConfigurationContext cc) throws AxisFault {
-        log.info("Shutting down Holodeck B2B Core module...");
-
+    public void shutdown() {
+        log.info("Shutting down Holodeck B2B Core...");
         log.trace("Stopping worker pools");
         workerPools.forEach((n, p) -> { log.trace("Stopping worker pool: {}", n);
         								p.shutdown(10);
         							  });
         log.debug("Worker pools stopped");
-        log.info("Holodeck B2B Core module STOPPED.");
+        log.info("Holodeck B2B Core STOPPED.");
     }
 
     /**

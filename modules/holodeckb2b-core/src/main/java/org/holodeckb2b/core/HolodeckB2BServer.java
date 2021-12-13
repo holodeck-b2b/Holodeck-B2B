@@ -41,7 +41,7 @@ public class HolodeckB2BServer extends AxisServer {
 	private static final String A_HOME = "-home";
 	
 	private static HolodeckB2BServer server = null;
-	
+		
 	/**
 	 * The server configuration read from the <code>holodeckb2b.xml</code> file
 	 */
@@ -56,8 +56,9 @@ public class HolodeckB2BServer extends AxisServer {
     public HolodeckB2BServer(final String hb2bHome) throws AxisFault {
         super(false);
         final HB2BAxis2Configurator configurator = new HB2BAxis2Configurator(hb2bHome);
+        serverConfig = (InternalConfiguration) configurator.getAxisConfiguration();
+        HolodeckB2BCore.init(serverConfig);
         configContext = ConfigurationContextFactory.createConfigurationContext(configurator);
-        serverConfig = (InternalConfiguration) configurator.getAxisConfig();
     }
 
     /**
@@ -142,11 +143,14 @@ public class HolodeckB2BServer extends AxisServer {
 			log.info("Shutting down server");
 			System.out.println("[HolodeckB2BServer] Shutting down server");
 			try {
+				log.debug("Shutting down Axis2 components");
 				server.stop();
 			} catch (AxisFault e) {
 				System.err.println("[HolodeckB2BServer] An error occurred during shutdown. See log for details.");
 				log.error("Error during shutdown of the server: {}", Utils.getExceptionTrace(e));
 			}
+			log.debug("Shutting down HB2B Core components");
+			HolodeckB2BCore.shutdown();
 			synchronized(server) {
 				server.notify();
 			}			
