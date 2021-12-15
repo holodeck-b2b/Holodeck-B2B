@@ -44,7 +44,7 @@
         <hibernate.version>5.3.23.Final</hibernate.version>
         <wss4j.version>2.0.4</wss4j.version>
         <xmlsec.version>2.0.4</xmlsec.version>
-        <log4j.version>2.15.0</log4j.version>
+        <log4j.version>2.16.0</log4j.version>
     </properties>
 
     <modules>
