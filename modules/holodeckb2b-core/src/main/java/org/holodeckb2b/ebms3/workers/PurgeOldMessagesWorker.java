@@ -35,6 +35,9 @@ import org.holodeckb2b.events.MessageUnitPurgedEvent;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.events.types.IMessageUnitPurgedEvent;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
  * Is the default <i>purge worker</i> responsible for cleaning up information on old and processed messages, i.e. remove
@@ -106,15 +109,16 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
         }
 
         log.debug("Removing " + experidMsgUnits.size() + " expired message units.");
-        for(final EntityProxy<MessageUnit> p : experidMsgUnits) {
-            final MessageUnit mu = p.entity;
+        int u = 0, p = 0, e = 0, r = 0;
+        for(final EntityProxy<MessageUnit> ep : experidMsgUnits) {
+            final MessageUnit mu = ep.entity;
             log.debug("Removing " + MessageUnitUtils.getMessageUnitName(mu) + " with msgId: " + mu.getMessageId());
             try {
                 if (mu instanceof UserMessage) {
                     log.debug("Delete the payload data of the User Message");
                     // Complete loading is needed as it is not done when querying
-                    MessageUnitDAO.loadCompletely(p);
-                    final Collection<IPayload> payloads = ((UserMessage) p.entity).getPayloads();
+                    MessageUnitDAO.loadCompletely(ep);
+                    final Collection<IPayload> payloads = ((UserMessage) ep.entity).getPayloads();
                     if (!Utils.isNullOrEmpty(payloads)) {
                         for (final IPayload pl : payloads) {
                             if (Utils.isNullOrEmpty(pl.getContentLocation()))
@@ -134,8 +138,16 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
                         log.debug("User Message [" + mu.getMessageId() + "] has no payloads");
                 }
                 // Remove meta-data from database
-                MessageUnitDAO.deleteMessageUnit(p);
-                log.info(MessageUnitUtils.getMessageUnitName(mu) + " [msgId=" + mu.getMessageId() + "] is removed");
+                MessageUnitDAO.deleteMessageUnit(ep);
+                if (mu instanceof IUserMessage)
+                    u++;
+                else if (mu instanceof IPullRequest)
+                    p++;
+                else if (mu instanceof IReceipt)
+                    r++;
+                else
+                    e++;
+                log.debug(MessageUnitUtils.getMessageUnitName(mu) + " [msgId=" + mu.getMessageId() + "] is removed");
 
                 // Raise event so extension can process purge actions (for User Messages only)
                 if (mu instanceof UserMessage)
@@ -145,6 +157,8 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
                         + " [msgId=" + mu.getMessageId() + "]. Error details: " + dbe.getMessage());
             }
         }
+        log.info("Completed purge process. Removed " + u + " User Messages, " + p + " Pull Requests, "
+                + r + " Receipts and " + e + " Error Message");
     }
 
     /**
