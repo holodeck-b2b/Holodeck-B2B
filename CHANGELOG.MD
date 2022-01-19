@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.1.10
+###### 2022-01-19
+### Changed
+* Update of log4j2 dependency to version 2.17.1 
+* Logging of purge process. Change log level of individual removal message to DEBUG and added a summary message with level INFO on completion.  
+
 ## 2.1.9
 ###### 2021-12-15
 ### Fixed
