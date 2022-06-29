@@ -26,8 +26,8 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
- * @since  5.0.0  Added methods for initialisation and determining whether a P-Mode can be validated. Also 
- * 				  implementations MUST now be provided as a Java SPI Service Provider. 
+ * @since  5.0.0  Added method for determining whether a P-Mode can be validated. Also implementations MUST now be 
+ * 				  provided as a Java SPI Service Provider. 
  */
 public interface IPModeValidator {
 
