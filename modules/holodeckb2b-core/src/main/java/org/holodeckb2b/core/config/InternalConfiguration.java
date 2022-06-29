@@ -55,11 +55,6 @@ public class InternalConfiguration extends AxisConfiguration implements IConfigu
     private Path  tempDirectory = null;
 
     /*
-     * Indication whether bundling of signals is allowed
-     */
-    private boolean allowSignalBundling = false;
-
-    /*
      * Default setting whether errors on errors should be reported to sender or not
      */
     private boolean defaultReportErrorOnError = false;
@@ -88,7 +83,7 @@ public class InternalConfiguration extends AxisConfiguration implements IConfigu
      */
     private boolean acceptNonValidablePModes = false;
 
-    /*
+    /**
      * Indicator whether strict header validation should be applied to all messages
      * @since 4.0.0
      */
@@ -210,12 +205,6 @@ public class InternalConfiguration extends AxisConfiguration implements IConfigu
 	 */
 	public void setTempDirectory(final Path tempdir) {
 		tempDirectory = tempdir;
-	}
-	
-	@Override
-	@Deprecated
-	public boolean allowSignalBundling() {
-		return allowSignalBundling;
 	}
 
 	@Override

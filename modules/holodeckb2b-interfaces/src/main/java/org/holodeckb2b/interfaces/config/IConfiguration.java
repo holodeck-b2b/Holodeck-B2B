@@ -18,6 +18,8 @@ package org.holodeckb2b.interfaces.config;
 
 import java.nio.file.Path;
 
+import org.apache.axiom.om.OMElement;
+
 /**
  * Defines the interface to access the Holodeck B2B <i>public</i> configuration. This public configuration contains
  * settings that may be used by extensions.
@@ -56,19 +58,6 @@ public interface IConfiguration {
 	 * @return The absolute path to the temp directory
 	 */
 	Path getTempDirectory();
-
-	/**
-	 * Indicates whether bundling of signal message units in a response message is allowed. When enabled Holodeck B2B
-	 * can add multiple signal message units generated during the processing of the request message to the response.
-	 * This however will create ebMS messages that DO NOT conform to the ebMS v3 Core Spec and AS4 profile.
-	 * <p>
-	 * The default setting is not to allow this bundling to ensure Core Spec and AS4 compliant ebMS messages. To enable
-	 * the feature set the <i>AllowSignalBundling</i> to "on" or "true".
-	 *
-	 * @return Indication whether bundling of signals in a response is allowed
-	 */
-	@Deprecated
-	boolean allowSignalBundling();
 
 	/**
 	 * Gets the default setting whether Errors on Errors should be reported to the sender of the faulty error. This
@@ -110,4 +99,16 @@ public interface IConfiguration {
 	 * @since 4.0.0
 	 */
 	boolean useStrictHeaderValidation();
+	
+	/**
+	 * Gets the value of the <i>custom</i> parameter with the specified name. 
+	 * <p>
+	 * Extension may add their configuration parameters to the <code>holodeckb2b.xml</code> configuration file   
+	 * 
+	 * @param name	the parameter name
+	 * @return	the value of the parameter if it exists, which is a String for simple parameter or {@link OMElement} for
+	 * 			complex ones. If there is no parameter found with the specified name <code>null</code> is returned. 
+	 * @since 6.0.0
+	 */
+//	Object getParameter(final String name);
 }

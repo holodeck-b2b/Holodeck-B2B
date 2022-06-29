@@ -50,27 +50,18 @@ public class PrepareResponseMessage extends AbstractBaseHandler {
         log.trace("Check for error signals generated during in flow to be included");
         final Collection<IErrorMessageEntity> errors = procCtx.getSendingErrors();
         if (!Utils.isNullOrEmpty(errors) && errors.size() > 1) {
-            /* The were multiple error signals generated in the in flow, check if bundling is allowed
-             * NOTE: this configuration option is deprecated, so if used we will log a warning
-             */
-            log.trace("Response contains multiple error signals");
-            if (HolodeckB2BCore.getConfiguration().allowSignalBundling()) {
-                // Bundling is enabled, so include all errors
-                log.warn("Deprecated bundling option is used! This will be removed in feature version!");
-            } else {
-                // Bundling not allowed, select one error signal to include
-                log.trace("Bundling is not allowed, select one error to report");
-                final IErrorMessageEntity include = selectError(errors, procCtx);
-                log.debug("Include the selected error [msgID/refTo" + include.getMessageId() + "/"
-                		 + include.getRefToMessageId() + "] for processing");
-                procCtx.setSendingErrors(Collections.singletonList(include));
-                // The other errors can not be further processed, so change their state to failed
-                errors.remove(include);
-                final StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-                for(IErrorMessageEntity e : errors) {
-                	log.warn("Unable to send Error Signal [msgId=" + e.getMessageId() + "] to sender");
-                	updateManager.setProcessingState(e, ProcessingState.FAILURE, "Too many errors in response");
-                }
+            // Bundling not allowed, select one error signal to include
+            log.trace("Bundling is not allowed, select one error to report");
+            final IErrorMessageEntity include = selectError(errors, procCtx);
+            log.debug("Include the selected error [msgID/refTo" + include.getMessageId() + "/"
+            		 + include.getRefToMessageId() + "] for processing");
+            procCtx.setSendingErrors(Collections.singletonList(include));
+            // The other errors can not be further processed, so change their state to failed
+            errors.remove(include);
+            final StorageManager updateManager = HolodeckB2BCore.getStorageManager();
+            for(IErrorMessageEntity e : errors) {
+            	log.warn("Unable to send Error Signal [msgId=" + e.getMessageId() + "] to sender");
+            	updateManager.setProcessingState(e, ProcessingState.FAILURE, "Too many errors in response");
             }
         } 
 
