@@ -44,6 +44,7 @@ import org.simpleframework.xml.core.Validate;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
+ * @since NEXT_HB2B_VERSION Support for the <i>continueProcessing</i> setting. Uses <i>true</i> as default value.
  */
 public class EventHandlerConfig implements IMessageProcessingEventConfiguration, Serializable {
 	private static final long serialVersionUID = 7648905261512216386L;
@@ -69,6 +70,9 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration,
 
     @ElementList(entry = "ForMessageUnit", required = false, inline = true)
     private List<String>    messageUnitNames = null;
+    
+    @Element(name = "continueProcessing", required = false)
+    private Boolean	continueProcessing;
 
     @ElementList(entry = "Parameter", inline = true, required = false)
     private Collection<Parameter>    parameters;
@@ -141,6 +145,7 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration,
      */
     public EventHandlerConfig(final IMessageProcessingEventConfiguration source) {
     	this.handlerFactoryClass = source.getFactoryClass();
+    	this.continueProcessing = source.continueEventProcessing();
         setHandledEvents(source.getHandledEvents());
         setAppliesTo(source.appliesTo());
         setHandlerSettings((Map<String, Object>) source.getHandlerSettings());
@@ -215,5 +220,14 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration,
         if (this.parameters == null)
             this.parameters = new ArrayList<>();
         this.parameters.add(new Parameter(name, value.toString()));
+    }
+    
+    public void setContinueProcessing(boolean cont) {
+    	this.continueProcessing = cont;
+    }
+    
+    @Override
+    public boolean continueEventProcessing() {
+    	return continueProcessing != null ? continueProcessing.booleanValue() : true;
     }
 }
