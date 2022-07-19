@@ -62,7 +62,7 @@ public class BusinessInfo implements IBusinessInfo, Serializable {
     public BusinessInfo(final IBusinessInfo source) {
         this.action = source.getAction();
         this.mpc = source.getMpc();
-        this.service = new Service(source.getService());
+        this.service = source.getService() != null ? new Service(source.getService()) : null;
         if (!Utils.isNullOrEmpty(source.getProperties())) {
         	this.properties = new ArrayList<IProperty>(source.getProperties().size());
             source.getProperties().forEach(p -> this.properties.add(new Property(p)));
