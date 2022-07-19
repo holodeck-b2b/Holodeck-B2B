@@ -264,8 +264,13 @@ public class HTTPWorker implements Worker {
         	Object status = msgContext.getProperty(HTTPConstants.MC_HTTP_STATUS_CODE);
         	if (status != null && status instanceof Integer) {
         		response.setStatus(((Integer) status).intValue());
-        	} else
-        		response.setStatus(HttpStatus.SC_ACCEPTED);
+        	} else {
+        		status = msgContext.getProperty(HTTPConstants.RESPONSE_CODE);
+            	if (status != null && status instanceof Integer) 
+            		response.setStatus(((Integer) status).intValue());
+            	else
+            		response.setStatus(HttpStatus.SC_ACCEPTED);
+        	}
         }
     }
 
