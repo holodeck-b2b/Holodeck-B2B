@@ -7,12 +7,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Support for the _continueProcessing_ setting in the message processing event handler in the default P-Mode implementation.
   It uses _true_ as default value, so by default all applicable event handlers are executed.
-*
+* In `org.holodeckb2b.core.axis2.HTTPWorker` also use the `HTTPConstants.RESPONSE_CODE` message context property to 
+  determine HTTP response code.
+* New methods in `org.holodeckb2b.interfaces.security.trust.ICertificateManager` to allow better decoupling between the
+  _ebMS Security Provider_ and _Certificate Manager_
 
 ### Changed
 
 
 ### Fixed
+* NPE when copying BusinessInfo P-Mode meta-data that does not contain Service meta-data
+* Continuation of ebMS3 message processing when there was an issue in creating the WS-Security header
 
 
 ### Removed
