@@ -148,11 +148,12 @@ public class CreateSecurityHeaders extends AbstractBaseHandler {
             Collection<ISecurityProcessingResult> results = hdrCreator.createHeaders(procCtx, 
             																		 senderConfig, receiverConfig);
             log.trace("Security header creation finished, handle results");
-            if (!Utils.isNullOrEmpty(results))
+            boolean success = true;
+            if (!Utils.isNullOrEmpty(results)) {
                 for(ISecurityProcessingResult r : results)
-                    handleResult(r, procCtx, log);
-
-            return InvocationResponse.CONTINUE;
+                    success &= handleResult(r, procCtx, log);
+            }
+            return success ? InvocationResponse.CONTINUE : InvocationResponse.ABORT;
         } catch (SecurityProcessingException spe) {
             log.error("An error occurred in the security provider when creating the WSS header(s). Details:"
                      + "\n\tSecurity provider: " + secProvider.getName()
@@ -171,8 +172,10 @@ public class CreateSecurityHeaders extends AbstractBaseHandler {
      * @param result    The result of creating a part of the security header
      * @param procCtx   The current message processing context
      * @param log		The log to be used
+     * @return	<code>true</code> when the WS-Security header part was created successfully, 
+     * 			<code>false</code> otherwise 
      */
-    private void handleResult(final ISecurityProcessingResult result, final IMessageProcessingContext procCtx,
+    private boolean handleResult(final ISecurityProcessingResult result, final IMessageProcessingContext procCtx,
     						  final Logger log) throws PersistenceException {
         final Collection<IMessageUnitEntity> sentMsgUnits = procCtx.getSendingMessageUnits();
         final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
@@ -190,6 +193,7 @@ public class CreateSecurityHeaders extends AbstractBaseHandler {
                     eventProcessor.raiseEvent(new SignatureCreated((IUserMessage) mu, msgDigests));
                 });
             }
+            return true;
         } else {
             final SecurityProcessingException reason = result.getFailureReason();
             final StorageManager storageManager = HolodeckB2BCore.getStorageManager();
@@ -214,6 +218,7 @@ public class CreateSecurityHeaders extends AbstractBaseHandler {
                     event = new UTCreationFailure(mu, result.getTargetedRole(), reason);
                 eventProcessor.raiseEvent(event);
             }
+            return false;
         }
     }
 }
