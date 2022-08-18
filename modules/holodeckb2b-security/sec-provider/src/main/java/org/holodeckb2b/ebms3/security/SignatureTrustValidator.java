@@ -30,9 +30,9 @@ import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
 
 /**
- * Is a WSS4J <code>Validator</code> that uses the default <i>Certificate Manager</i>v to verify the trust in the 
- * certificate(s) used in a signature. The WSS4J signature processor extracts the certificate(s) from the WS-Security 
- * header and provides it/them to this validator.
+ * Is a WSS4J <code>Validator</code> that uses the <i>Certificate Manager</i>v to verify the trust in the certificate(s) 
+ * used in a signature. The WSS4J signature processor extracts the certificate(s) from the WS-Security header and 
+ * provides it/them to this validator.
  * <p>The validator stores there result reported by the <i>Certificate Manager</i> so it can be retrieved by the 
  * security header processor to create a complete result. 
  * 

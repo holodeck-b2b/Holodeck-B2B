@@ -23,12 +23,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.holodeckb2b.common.VersionInfo;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderCreator;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderProcessor;
 import org.holodeckb2b.interfaces.security.ISecurityProvider;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
-import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.security.trust.DefaultCertManager;
 
 /**
@@ -44,8 +42,6 @@ import org.holodeckb2b.security.trust.DefaultCertManager;
 public class DefaultProvider implements ISecurityProvider {
 
     private final Logger  log = LogManager.getLogger(DefaultProvider.class);
-    
-    private DefaultCertManager	certManager;
     
     /**
      * {@inheritDoc}
@@ -75,31 +71,12 @@ public class DefaultProvider implements ISecurityProvider {
     
     @Override
     public ISecurityHeaderProcessor getSecurityHeaderProcessor() throws SecurityProcessingException {
-        return new SecurityHeaderProcessor(getCertManager());
+        return new SecurityHeaderProcessor();
     }
 
     @Override
     public ISecurityHeaderCreator getSecurityHeaderCreator() throws SecurityProcessingException {
-        return new SecurityHeaderCreator(getCertManager());
+        return new SecurityHeaderCreator();
     }
     
-    /**
-     * Retrieves the installed Certificate Manager from the HB2B Core and checks that it is the default implementation
-     * coupled to this provider.
-     * 
-     * @return	The default certificate manager
-     * @throws SecurityProcessingException When a incompatible Certificate Manager is installed
-     */
-    private DefaultCertManager getCertManager() throws SecurityProcessingException {
-    	if (certManager == null) {
-    		ICertificateManager hb2bCertManager = HolodeckB2BCoreInterface.getCertificateManager();
-    		if (!(hb2bCertManager instanceof DefaultCertManager)) {
-    			log.fatal("An incompatible Certificate Manager [" + hb2bCertManager.getName() + "] is installed!");
-    			throw new SecurityProcessingException("An incompatible Certificate Manager ["
-    												  + hb2bCertManager.getName() + "] is installed!");
-    		}
-    		certManager = (DefaultCertManager) hb2bCertManager;
-    	}
-    	return certManager;    	
-    }
-}
+ }

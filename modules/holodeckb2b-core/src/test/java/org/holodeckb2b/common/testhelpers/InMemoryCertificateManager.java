@@ -21,16 +21,19 @@ import java.math.BigInteger;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.UnrecoverableEntryException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.holodeckb2b.commons.security.CertificateUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
@@ -69,13 +72,11 @@ class InMemoryCertificateManager implements ICertificateManager {
         final char[] entryPwd = Utils.isNullOrEmpty(password) ? 
         									Long.toHexString(Double.doubleToLongBits(Math.random())).toCharArray()
                                           : password.toCharArray();
-        X509Certificate cert = null;
         try {
-            cert = (X509Certificate) keypair.getCertificate();
+            if (!(keypair.getCertificate() instanceof X509Certificate))
+	    		throw new SecurityProcessingException("Not a X509 Certificate");            		
             privateKeys.setEntry(alias, keypair, new KeyStore.PasswordProtection(entryPwd));
             return new String(entryPwd);
-        } catch (ClassCastException notX509) {
-            throw new SecurityProcessingException("Not a X509 Certificate");
         } catch (KeyStoreException ex) {
             throw new SecurityProcessingException("Can not registered key pair", ex);
         }
@@ -99,6 +100,40 @@ class InMemoryCertificateManager implements ICertificateManager {
     	}
     }
 
+    @Override
+    public String findKeyPair(X509Certificate cert) throws SecurityProcessingException {
+    	return findEntry(privateKeys, c -> c.equals(cert));
+    }
+    
+    @Override
+    public String findKeyPair(byte[] skiBytes) throws SecurityProcessingException {
+    	return findEntry(privateKeys, c -> CertificateUtils.hasSKI(c, skiBytes));    	
+    }
+    
+    @Override
+    public String findKeyPair(byte[] hash, MessageDigest digester) throws SecurityProcessingException {
+    	return findEntry(privateKeys, c -> CertificateUtils.hasThumbprint(c, hash, digester));
+    }
+    
+    @Override
+    public String findKeyPair(X500Principal issuer, BigInteger serial) throws SecurityProcessingException {
+    	return findEntry(privateKeys, c -> CertificateUtils.hasIssuerSerial(c, issuer, serial));
+    }
+    
+    @Override
+	public String findKeyPair(PublicKey key) throws SecurityProcessingException {
+    	return findEntry(privateKeys, c -> c.getPublicKey().equals(key));
+	}
+    
+    @Override
+    public X509Certificate getKeyPairCertificate(String alias) throws SecurityProcessingException {
+    	try {
+			return (X509Certificate) privateKeys.getCertificate(alias);
+		} catch (KeyStoreException e) {
+			throw new SecurityProcessingException("KeyStore error", e);
+		}
+    }
+    
     @Override
     public KeyStore.PrivateKeyEntry getKeyPair(final String alias, final String password)
                                                                                    throws SecurityProcessingException {
@@ -137,14 +172,8 @@ class InMemoryCertificateManager implements ICertificateManager {
     public X509Certificate findCertificate(final X500Principal issuer, final BigInteger serial)
     																				throws SecurityProcessingException {
     	try {
-	        Enumeration<String> aliases = partnerCerts.aliases();
-	        X509Certificate cert = null;
-	        while (aliases.hasMoreElements() && cert == null) {
-	        	final X509Certificate c = (X509Certificate) partnerCerts.getCertificate(aliases.nextElement());
-	        	if (c.getIssuerX500Principal().equals(issuer) && c.getSerialNumber().equals(serial))
-	        		cert = c;	        			
-	        }    		     		
-    		return cert;
+    		return (X509Certificate) partnerCerts.getCertificate(
+    							findEntry(partnerCerts, c -> CertificateUtils.hasIssuerSerial(c, issuer, serial)));
     	} catch (KeyStoreException ex) {
     		throw new SecurityProcessingException("Error retrieving the certificate", ex);
     	}
@@ -153,23 +182,41 @@ class InMemoryCertificateManager implements ICertificateManager {
     @Override
     public X509Certificate findCertificate(final byte[] skiBytes) throws SecurityProcessingException {    	
     	try {
-    		Enumeration<String> aliases = partnerCerts.aliases();
-    		X509Certificate cert = null;
-    		while (aliases.hasMoreElements() && cert == null) {
-    			final X509Certificate c = (X509Certificate) partnerCerts.getCertificate(aliases.nextElement());
-    			byte[] skiExtValue = c.getExtensionValue("2.5.29.14");
-				if (skiExtValue != null) {
-					byte[] ski = Arrays.copyOfRange(skiExtValue, 4, skiExtValue.length);    			
-					if (Arrays.equals(ski, skiBytes))
-						cert = c;
-				}
-    		}    		     		
-    		return cert;
+    		return (X509Certificate) partnerCerts.getCertificate(
+    							findEntry(partnerCerts, c -> CertificateUtils.hasSKI(c, skiBytes)));
     	} catch (KeyStoreException ex) {
     		throw new SecurityProcessingException("Error retrieving the certificate", ex);
     	}
     }        
 
+    @Override
+    public X509Certificate findCertificate(byte[] hash, MessageDigest digester) throws SecurityProcessingException {
+    	try {
+    		return (X509Certificate) partnerCerts.getCertificate(
+    							findEntry(partnerCerts, c -> CertificateUtils.hasThumbprint(c, hash, digester)));
+    	} catch (KeyStoreException ex) {
+    		throw new SecurityProcessingException("Error retrieving the certificate", ex);
+    	}
+    }
+    
+    private String findEntry(KeyStore ks, CertCondition cond) throws SecurityProcessingException {
+		try {
+	    	for (Enumeration<String> e = ks.aliases(); e.hasMoreElements();) {
+	            String a = e.nextElement();
+	            Certificate c = ks.getCertificate(a);
+	            if (c != null && cond.matches((X509Certificate) c))
+	            	return a;
+			}
+			return null;
+		} catch (KeyStoreException e) {
+			throw new SecurityProcessingException("KeyStore error", e);
+		}
+    }        
+    
+    private interface CertCondition {
+    	boolean matches(X509Certificate c);
+    }   
+    
     public synchronized void removeKeyPair(String alias) throws SecurityProcessingException {
         try {
             // Check if the alias exists

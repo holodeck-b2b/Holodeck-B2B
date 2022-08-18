@@ -88,9 +88,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
- * Is a copy of the WSS4J {@link org.apache.wss4j.dom.processor.SignatureProcessor} which allows for a unlimited number
- * of <code>@lt;ds:Reference&gt;</code> elements in the signature and therefore an unlimited number of payloads in the 
- * message.
+ * Is a copy of the WSS4J <code>org.apache.wss4j.dom.processor.SignatureProcessor</code> modified to allow an unlimited 
+ * number of <code>@lt;ds:Reference&gt;</code> elements in the signature and therefore an unlimited number of payloads 
+ * in the ebMS message.
+ * <p>The limitation in the number of references is part of the Java "secure validation mode". In the default WSS4J 
+ * signature processor use of this mode is hard-coded in a private method. Therefore we cannot simply extend the class
+ * and override the method where the mode is enabled, but have to create a copy of the class.   
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  5.1.0

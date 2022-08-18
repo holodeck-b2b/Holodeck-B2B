@@ -27,7 +27,9 @@ import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -363,6 +365,48 @@ public class BasicPModeValidatorTest {
 
 		@Override
 		public X509Certificate findCertificate(byte[] skiBytes) throws SecurityProcessingException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public String findKeyPair(X509Certificate cert) throws SecurityProcessingException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public String findKeyPair(PublicKey key) throws SecurityProcessingException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public String findKeyPair(X500Principal issuer, BigInteger serial) throws SecurityProcessingException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public String findKeyPair(byte[] skiBytes) throws SecurityProcessingException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public String findKeyPair(byte[] hash, MessageDigest digester) throws SecurityProcessingException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public X509Certificate getKeyPairCertificate(String alias) throws SecurityProcessingException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public X509Certificate findCertificate(byte[] hash, MessageDigest digester) throws SecurityProcessingException {
 			// TODO Auto-generated method stub
 			return null;
 		}

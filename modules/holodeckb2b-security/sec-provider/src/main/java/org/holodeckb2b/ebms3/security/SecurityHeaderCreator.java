@@ -63,6 +63,7 @@ import org.holodeckb2b.ebms3.security.util.EncryptionConfigWithDefaults;
 import org.holodeckb2b.ebms3.security.util.SecurityUtils;
 import org.holodeckb2b.ebms3.security.util.SignedMessagePartsInfo;
 import org.holodeckb2b.ebms3.security.util.SigningConfigWithDefaults;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
@@ -78,7 +79,7 @@ import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
 import org.holodeckb2b.interfaces.security.X509ReferenceType;
-import org.holodeckb2b.security.trust.DefaultCertManager;
+import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -100,7 +101,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
     /**
      * The Certificate manager of the security provider
      */
-    private DefaultCertManager certManager;
+    private ICertificateManager certManager;
 
     /**
      * Map for holding the WSS4J parameters for creating the header
@@ -139,11 +140,9 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
 
     /**
      * Creates a new <code>SecurityHeaderCreator</code> instance
-     *
-     * @param certManager The certificate manager of the provider
      */
-    SecurityHeaderCreator(final DefaultCertManager certManager) {
-        this.certManager = certManager;
+    SecurityHeaderCreator() {
+        this.certManager = HolodeckB2BCoreInterface.getCertificateManager();
     }
 
     /**
@@ -645,22 +644,12 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
 
     @Override
     protected Crypto loadEncryptionCrypto(RequestData requestData) throws WSSecurityException {
-        try {
-            return certManager.getWSS4JCrypto(org.holodeckb2b.ebms3.security.Action.ENCRYPT.name());
-        } catch (SecurityProcessingException ex) {
-            // The thrown excepiton will contain a WSSecurityException as cause, so we can just rethrow that one
-            throw (WSSecurityException) ex.getCause();
-        }
+    	return new CertManWSS4JCrypto(Action.ENCRYPT);
     }
 
     @Override
     public Crypto loadSignatureCrypto(RequestData requestData) throws WSSecurityException {
-        try {
-            return certManager.getWSS4JCrypto(org.holodeckb2b.ebms3.security.Action.SIGN.name());
-        } catch (SecurityProcessingException ex) {
-            // The thrown excepiton will contain a WSSecurityException as cause, so we can just rethrow that one
-            throw (WSSecurityException) ex.getCause();
-        }
+        return new CertManWSS4JCrypto(Action.SIGN);
     }
 
     @Override

@@ -22,7 +22,9 @@ import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.Security;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertPath;
@@ -30,6 +32,7 @@ import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertPathValidatorException.BasicReason;
 import java.security.cert.CertPathValidatorException.Reason;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.PKIXCertPathValidatorResult;
@@ -37,13 +40,11 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
@@ -52,13 +53,10 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.apache.commons.codec.binary.Hex;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.wss4j.common.crypto.Crypto;
-import org.apache.wss4j.common.crypto.CryptoFactory;
-import org.apache.wss4j.common.ext.WSSecurityException;
 import org.holodeckb2b.common.VersionInfo;
+import org.holodeckb2b.commons.security.CertificateUtils;
 import org.holodeckb2b.commons.security.KeystoreUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.events.security.ISignatureVerifiedWithWarning;
@@ -219,6 +217,50 @@ public class DefaultCertManager implements ICertificateManager {
     }    
 
     @Override
+    public String findKeyPair(X509Certificate cert) throws SecurityProcessingException {		
+    	return findKeyPair("certificate", c -> c.equals(cert));
+    }
+        
+    @Override
+    public String findKeyPair(PublicKey key) throws SecurityProcessingException {
+		return findKeyPair("public key", c -> c.getPublicKey().equals(key));
+    }
+        
+    @Override
+    public String findKeyPair(byte[] skiBytes) throws SecurityProcessingException {
+    	return findKeyPair("SKI", c -> CertificateUtils.hasSKI(c, skiBytes));
+    }
+
+    @Override
+    public String findKeyPair(X500Principal issuer, BigInteger serial) throws SecurityProcessingException {
+    	return findKeyPair("IssuerAndSerial", c -> CertificateUtils.hasIssuerSerial(c, issuer, serial));
+    }
+    
+    @Override
+    public String findKeyPair(byte[] hash, MessageDigest digester) throws SecurityProcessingException {
+    	return findKeyPair("thumbprint", c -> CertificateUtils.hasThumbprint(c, hash, digester));
+    }
+
+    /**
+     * Helper method to search the registered key pairs for an entry that has a certificate that matches to the given
+     * condition.
+     * 
+     * @param descr		description of search condition, used for logging
+     * @param cond		the condition to match
+     * @return			the alias of the first entry that holds a certificate that matches the condition, 
+     * 					<code>null</code> if no matching entry is found
+     * @throws SecurityProcessingException when an error occurs searching the key store
+     */
+    private String findKeyPair(String descr, CertCondition cond) throws SecurityProcessingException {
+    	try {
+    		return findEntry(KeystoreUtils.load(privateKeystorePath, privateKeystorePwd), cond);
+		} catch (KeyStoreException ex) {
+	        log.error("Problem searching for key pair based on {}!\n\tError details: {}", descr, ex.getMessage());
+	        throw new SecurityProcessingException("Error searching for keypair", ex);
+		}
+    }
+    
+    @Override
     public KeyStore.PrivateKeyEntry getKeyPair(final String alias, final String password)
                                                                                    throws SecurityProcessingException {
         try {
@@ -232,18 +274,11 @@ public class DefaultCertManager implements ICertificateManager {
         }
     }
     
-    /**
-     * Gets only the certificate part of the key pair registered under the given alias. This method is used by the UI
-     * for display information about the private key without exposing it.
-     * 
-     * @param alias		The alias of the key pair
-     * @return			The certificate of the key pair registered under this alias, or<br>
-     * 					<code>null</code> when no key pair is found 
-     * @throws SecurityProcessingException When there is an error retrieving the certificate
-     */
-    public X509Certificate getPrivateKeyCertificate(final String alias) throws SecurityProcessingException {
+    @Override
+    public X509Certificate getKeyPairCertificate(final String alias) throws SecurityProcessingException {
     	try {
-			return this.getCertificate(KeystoreUtils.load(privateKeystorePath, privateKeystorePwd), alias);
+			return (X509Certificate) 
+						KeystoreUtils.load(privateKeystorePath, privateKeystorePwd).getCertificate(alias);
 		} catch (KeyStoreException e) {
 			log.error("Could not access the private keystore! Error details: {}", e.getMessage()); 
 			throw new SecurityProcessingException("Unable to get certificate of key pair", e);
@@ -253,92 +288,87 @@ public class DefaultCertManager implements ICertificateManager {
     @Override
     public X509Certificate getCertificate(final String alias) throws SecurityProcessingException {
     	try {
-    		return this.getCertificate(KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd), alias);
+    		return (X509Certificate) 
+    				KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd).getCertificate(alias);
 		} catch (KeyStoreException e) {
 			log.error("Could not access the partner keystore! Error details: {}", e.getMessage()); 
 			throw new SecurityProcessingException("Unable to get partner certificate", e);
-		}
-    		
-    }
-    
-    /**
-     * Helper method to retrieve a certificate from a key store.
-     * 
-     * @param ks		Key store to retrieve certificate from
-     * @param alias		Alias of certificate to retrieve
-     * @return			The certificate or <code>null</code> if not found
-     * @throws SecurityProcessingException	If there is an error retrieving the certificate
-     */
-    private X509Certificate getCertificate(final KeyStore ks, final String alias) throws SecurityProcessingException {
-        try {
-            // Check if the alias exists
-            if (ks.containsAlias(alias))
-                return (X509Certificate) ks.getCertificate(alias);
-            else
-                return null;
-        } catch (KeyStoreException ex) {
-            log.error("Problem retrieving certificate with alias {} from partner keystore!"
-                    + "\n\tError details: {}", alias, ex.getMessage());
-            throw new SecurityProcessingException("Error retrieving the certificate", ex);
-        }
+		}    		
     }
 
     @Override
     public String findCertificate(final X509Certificate cert) throws SecurityProcessingException {
-        try {
-        	KeyStore ks = KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd);
-            return ks.getCertificateAlias(cert);
-        } catch (KeyStoreException ex) {
-            log.error("Problem finding the trading partner certificate [Issuer/SerialNo={}/{}] in keystore!"
-                     + "\n\tError details: {}", cert.getIssuerX500Principal().getName(),
-                     cert.getSerialNumber().toString(), ex.getMessage());
-            throw new SecurityProcessingException("Error retrieving the certificate", ex);
-        }
+    	try {
+    		return findEntry(KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd), c -> c.equals(cert));    		
+    	} catch (KeyStoreException e) {
+    		log.error("Could not access the partner keystore! Error details: {}", e.getMessage()); 
+    		throw new SecurityProcessingException("Unable to get partner certificate", e);    		
+    	}    	
     }
     
     @Override
     public X509Certificate findCertificate(final X500Principal issuer, final BigInteger serial)
     																				throws SecurityProcessingException {
-    	try {
-    		KeyStore ks = KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd);
-	        Enumeration<String> aliases = ks.aliases();
-	        X509Certificate cert = null;
-	        while (aliases.hasMoreElements() && cert == null) {
-	        	final X509Certificate c = (X509Certificate) ks.getCertificate(aliases.nextElement());
-	        	if (c.getIssuerX500Principal().equals(issuer) && c.getSerialNumber().equals(serial))
-	        		cert = c;	        			
-	        }    		     		
-    		return cert;
-    	} catch (KeyStoreException ex) {
-    		log.error("Problem finding the trading partner certificate [Issuer/SerialNo={}/{}] in keystore!"
-    				+ "\n\tError details: {}", issuer.getName(),serial.toString(), ex.getMessage());
-    		throw new SecurityProcessingException("Error retrieving the certificate", ex);
-    	}
+    	return getCertificate("IssuerAndSerial", c -> CertificateUtils.hasIssuerSerial(c, issuer, serial));
     }
-
+    
     @Override
     public X509Certificate findCertificate(final byte[] skiBytes) throws SecurityProcessingException {
-    	try {
-    		KeyStore ks = KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd);
-    		Enumeration<String> aliases = ks.aliases();
-    		X509Certificate cert = null;
-    		while (aliases.hasMoreElements() && cert == null) {
-    			final X509Certificate c = (X509Certificate) ks.getCertificate(aliases.nextElement());
-    			byte[] skiExtValue = c.getExtensionValue("2.5.29.14");
-				if (skiExtValue != null) {
-					byte[] ski = Arrays.copyOfRange(skiExtValue, 4, skiExtValue.length);    			
-					if (Arrays.equals(ski, skiBytes))
-						cert = c;
-				}
-    		}    		     		
-    		return cert;
-    	} catch (KeyStoreException ex) {
-    		log.error("Problem finding the trading partner certificate [SKI={}] in keystore!"
-    				+ "\n\tError details: {}", Hex.encodeHexString(skiBytes), ex.getMessage());
-    		throw new SecurityProcessingException("Error retrieving the certificate", ex);
-    	}
+    	return getCertificate("SKI", c -> CertificateUtils.hasSKI(c, skiBytes));
     }    
 
+    @Override
+    public X509Certificate findCertificate(byte[] hash, MessageDigest digester) throws SecurityProcessingException {
+    	return getCertificate("thumbprint", c -> CertificateUtils.hasThumbprint(c, hash, digester));
+    }
+    
+    /**
+     * Helper method to search the registered partner certificates for a certificate that matches the given condition.
+     * 
+     * @param descr		description of search condition, used for logging
+     * @param cond		the condition to match
+     * @return			the alias of the first entry that holds a certificate that matches the condition, 
+     * 					<code>null</code> if no matching entry is found
+     * @throws SecurityProcessingException when an error occurs searching the key store
+     */
+    private X509Certificate getCertificate(String descr, CertCondition cond) throws SecurityProcessingException {
+    	try {
+    		KeyStore ks = KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd);
+    		String alias = findEntry(ks, cond);
+    		return alias != null ? (X509Certificate) ks.getCertificate(alias) : null;
+    	} catch (KeyStoreException e) {
+    		log.error("Problem finding the trading partner certificate based on {}!\n\tError details: {}", descr, 
+    					e.getMessage());
+    		throw new SecurityProcessingException("Error retrieving the certificate", e);
+    	}    	
+    }
+    
+    /**
+     * Helper method to search a key store for an entry that holds a certificate matching a given condition.
+     *   
+     * @param kt	indicator which key store to search
+     * @param cond	the condition to check	
+     * @return		the alias of the matching entry if found, <code>null</code> if not found
+     * @throws KeyStoreException when an error occurs searching the key store
+     */
+    private String findEntry(KeyStore ks, CertCondition cond) throws KeyStoreException {
+		for (Enumeration<String> e = ks.aliases(); e.hasMoreElements();) {
+            String a = e.nextElement();
+            Certificate c = ks.getCertificate(a);
+            if (c != null && cond.matches((X509Certificate) c))
+            	return a;
+		}
+		return null;
+    }        
+    
+    /**
+     * Functional interface used to determine whether the given Certificate matches a given condition, e.g. has the
+     * specified SKI.
+     */
+    private interface CertCondition {
+    	boolean matches(X509Certificate c);
+    }    
+    
 	@Override
 	public IValidationResult validateTrust(List<X509Certificate> certs) throws SecurityProcessingException {
 		if (Utils.isNullOrEmpty(certs)) {
@@ -481,49 +511,12 @@ public class DefaultCertManager implements ICertificateManager {
 		  .append(cp.get(cp.size() -1).getSubjectDN().getName())
 		  .append(']');
 		return sb.toString();												
-	}
-	
-    /**
-     * Gets the WSS4J {@link Crypto} instance configured for use in the given action. This means that the returned
-     * Crypto instance will have access to the keystore containing the key pairs when the action is <code>SIGN</code> or
-     * <code>DECRYPT</code>, to the public keys keystore when the action is <code>ENCRYPT</code>. Since the trust 
-     * validation of certificates is not handled by WSS4J it should not access to any of the key stores when the action 
-     * is <code>VERIFY</code>.   
-     *
-     * @param action    The action for which the Crypto instance should be configured
-     * @return          A configured {@link Crypto} instance ready for use in the specified action
-     * @throws SecurityProcessingException When the Crypto instance could not be created.
-     */
-    public Crypto getWSS4JCrypto(final String action) throws SecurityProcessingException {
-        final Properties cryptoProperties = new Properties();
-        // All instances will use Merlin
-        cryptoProperties.setProperty("org.apache.wss4j.crypto.provider", "org.apache.wss4j.common.crypto.Merlin");
-        switch (action) {
-            case "SIGN"  :
-            case "DECRYPT" :
-                cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.file", 
-                								privateKeystorePath.toString());
-                cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.type", "jks");
-                cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.password", privateKeystorePwd);
-                break;
-            case "VERIFY" :
-            case "ENCRYPT" :            	
-                cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.file", 
-                								partnerKeystorePath.toString());
-                cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.type", "jks");
-                cryptoProperties.setProperty("org.apache.wss4j.crypto.merlin.keystore.password", partnerKeystorePwd);
-            default: // do nothing
-        }
-
-        try {
-            // Now create the Crypto instance using the prepared props
-            return CryptoFactory.getInstance(cryptoProperties);
-        } catch (WSSecurityException ex) {
-            log.error("Could not create a WSS4J Crypto instance for performing the {} action", action);
-            throw new SecurityProcessingException("Could not instantiate WSS4J Crypto", ex);
-        }
-    }
+	}	
     
+	/*
+	 * The following methods are used by the user interface module to display the registered certificates
+	 */
+	
     /**
      * Gets all the certificates of all registered key pairs together with the alias their registered under.
      * 
@@ -578,4 +571,5 @@ public class DefaultCertManager implements ICertificateManager {
 	        throw new SecurityProcessingException("Error retrieving the certificates", ex);       	
 	    }
     }    
+    
 }

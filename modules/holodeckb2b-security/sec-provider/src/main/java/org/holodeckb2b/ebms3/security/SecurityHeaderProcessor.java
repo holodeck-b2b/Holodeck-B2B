@@ -69,7 +69,6 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.SignatureTrustException;
 import org.holodeckb2b.interfaces.security.X509ReferenceType;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
-import org.holodeckb2b.security.trust.DefaultCertManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -90,7 +89,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
     /**
      * The Certificate manager of the security provider
      */
-    private DefaultCertManager certManager;
+//    private DefaultCertManager certManager;
 
     /**
      * Reference to the current message processing context
@@ -136,15 +135,6 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
      */
     private Action getAction(final QName el) {
         return FAULT_CAUSES.get(el);
-    }
-
-    /**
-     * Creates a new <code>SecurityHeaderProcessor</code> instance
-     *
-     * @param certManager The certificate manager of the provider
-     */
-    SecurityHeaderProcessor(final DefaultCertManager certManager) {
-        this.certManager = certManager;
     }
 
     /**
@@ -272,12 +262,12 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         reqData.setAllowUsernameTokenNoPassword(true);
 
         // Configure signature verification action
-        reqData.setSigVerCrypto(certManager.getWSS4JCrypto(Action.VERIFY.name()));
+        reqData.setSigVerCrypto(new CertManWSS4JCrypto(Action.VERIFY));
         wssConfig.setValidator(WSConstants.SIGNATURE, new SignatureTrustValidator());
         reqData.setEnableRevocation(false);
         reqData.setEnableSignatureConfirmation(false);
         // Configure decryption action
-        reqData.setDecCrypto(certManager.getWSS4JCrypto(Action.DECRYPT.name()));
+        reqData.setDecCrypto(new CertManWSS4JCrypto(Action.DECRYPT));
         reqData.setCallbackHandler(new PasswordCallbackHandler());
         reqData.setAllowRSA15KeyTransportAlgorithm(false);
         reqData.setRequireSignedEncryptedDataElements(false);

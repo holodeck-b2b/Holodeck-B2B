@@ -19,6 +19,8 @@ package org.holodeckb2b.interfaces.security.trust;
 import java.math.BigInteger;
 import java.nio.file.Path;
 import java.security.KeyStore;
+import java.security.MessageDigest;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
@@ -77,6 +79,68 @@ public interface ICertificateManager {
     void init(final Path hb2bHome) throws SecurityProcessingException;
 
     /**
+     * Searches the set of registered key pairs with Certificate Manager for a key pair with the given certificate and 
+     * returns the alias if found.
+     *
+     * @param cert  The certificate to search for
+     * @return      The alias under which the key pair with the certificate is registered if it was found, or<br>
+     * 				<code>null</code> if the no key pair with the given certificate is found
+     * @throws SecurityProcessingException When there is a problem in searching the key pairs
+     * @since 6.0.0   
+     */
+    String findKeyPair(final X509Certificate cert) throws SecurityProcessingException;
+    
+    /**
+     * Searches the set of registered key pairs with Certificate Manager for a key pair with the given public key and 
+     * returns the alias if found.
+     *
+     * @param key   The public key to search for
+     * @return      The alias under which the key pair with the public key is registered if it was found, or<br>
+     * 				<code>null</code> if the no key pair with the given public key is found
+     * @throws SecurityProcessingException When there is a problem in searching the key pairs
+     * @since 6.0.0   
+     */
+    String findKeyPair(final PublicKey key) throws SecurityProcessingException;
+    
+    /**
+     * Searches the set of registered key pairs with Certificate Manager for a key pair with a certificate with the 
+     * given serial number and issuer and returns the alias if found.
+     *
+     * @param issuer	Issuer of the certificate 
+     * @param serial	Serial number of the certificate
+     * @return	The alias under which the key pair with the specified certificate is registered if it was found, or<br>
+     * 			<code>null</code> if the no key pair with the given public key is found
+     * @throws SecurityProcessingException When there is a problem in searching the key pairs
+     * @since 6.0.0
+     */
+    String findKeyPair(final X500Principal issuer, final BigInteger serial) throws SecurityProcessingException;
+    
+    /**
+     * Searches the set of registered key pairs with Certificate Manager for a key pair with a certificate with the 
+     * given <i>Subject Key Identifier</i> and returns the alias if found.
+     *
+     * @param issuer	The byte array with the SKI of the certificate 
+     * @return	The alias under which the key pair with the specified certificate is registered if it was found, or<br>
+     * 			<code>null</code> if the no key pair with the given public key is found
+     * @throws SecurityProcessingException When there is a problem in searching the key pairs
+     * @since 6.0.0
+     */
+    String findKeyPair(final byte[] skiBytes) throws SecurityProcessingException;
+
+    /**
+     * Searches the set of registered key pairs with Certificate Manager for a key pair with a certificate with the 
+     * given thumbprint as calculated with the specified digest algorithm and return the alias if found.
+     *
+     * @param hash		The byte array with the hash value of the encoded certificate 
+     * @param digester  The message digest function used to calculate the hash value 
+     * @return	The alias under which the key pair with the specified certificate is registered if it was found, or<br>
+     * 			<code>null</code> if the no key pair with the given public key is found
+     * @throws SecurityProcessingException When there is a problem in searching the key pairs
+     * @since 6.0.0
+     */
+    String findKeyPair(final byte[] hash, MessageDigest digester) throws SecurityProcessingException;
+    
+    /**
      * Gets the key pair registered under the given alias.
      *
      * @param alias     The alias of the key pair to retrieve
@@ -87,6 +151,17 @@ public interface ICertificateManager {
      */
     KeyStore.PrivateKeyEntry getKeyPair(final String alias, final String password) throws SecurityProcessingException;
    
+    /**
+     * Gets only the Certificate from the key pair registered under the given alias.
+     *
+     * @param alias     The alias of the key pair to retrieve
+     * @return      	The certificate of the key pair if it was found, or<br>
+     * 					<code>null</code> if no key pair is registered under the given alias
+     * @throws SecurityProcessingException When there is a problem in retrieving the key pair.
+     * @since 6.0.0
+     */
+    X509Certificate getKeyPairCertificate(final String alias) throws SecurityProcessingException;
+    
     /**
      * Gets the trading partner's certificate registered under the given alias.
      *
@@ -133,6 +208,19 @@ public interface ICertificateManager {
      */
     X509Certificate findCertificate(final byte[] skiBytes) throws SecurityProcessingException;
 
+    /**
+     * Searches for the trading partner certificate registered with Certificate Manager that has the given thumbprint 
+     * as calculated with the specified digest algorithm.
+     *
+     * @param hash		The byte array with the hash value of the encoded certificate 
+     * @param digester  The message digest function used to calculate the hash value 
+     * @return      The partner certificate if it was found, or<br><code>null</code> if no certificate is registered 
+     * 				issued by the given hash value
+     * @throws SecurityProcessingException When there is a problem in searching for the certificate.
+     * @since 6.0.0
+     */
+    X509Certificate findCertificate(final byte[] hash, MessageDigest digester) throws SecurityProcessingException;
+    
     /**
      * Checks if the given certificate path is trusted for the validation of signatures. The Certificate Manager may
      * extend the given path with already registered trusted certificates to perform the actual trust validation. 
