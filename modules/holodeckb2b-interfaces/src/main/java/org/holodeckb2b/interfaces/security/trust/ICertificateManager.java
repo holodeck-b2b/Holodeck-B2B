@@ -152,15 +152,15 @@ public interface ICertificateManager {
     KeyStore.PrivateKeyEntry getKeyPair(final String alias, final String password) throws SecurityProcessingException;
    
     /**
-     * Gets only the Certificate from the key pair registered under the given alias.
+     * Gets only the Certificate [chain] from the key pair registered under the given alias. 
      *
      * @param alias     The alias of the key pair to retrieve
-     * @return      	The certificate of the key pair if it was found, or<br>
+     * @return      	The certificate chain of the key pair if it was found, or<br>
      * 					<code>null</code> if no key pair is registered under the given alias
      * @throws SecurityProcessingException When there is a problem in retrieving the key pair.
      * @since 6.0.0
      */
-    X509Certificate getKeyPairCertificate(final String alias) throws SecurityProcessingException;
+    List<X509Certificate> getKeyPairCertificates(final String alias) throws SecurityProcessingException;
     
     /**
      * Gets the trading partner's certificate registered under the given alias.

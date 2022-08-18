@@ -40,6 +40,7 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -275,10 +276,16 @@ public class DefaultCertManager implements ICertificateManager {
     }
     
     @Override
-    public X509Certificate getKeyPairCertificate(final String alias) throws SecurityProcessingException {
+    public List<X509Certificate> getKeyPairCertificates(final String alias) throws SecurityProcessingException {
     	try {
-			return (X509Certificate) 
-						KeystoreUtils.load(privateKeystorePath, privateKeystorePwd).getCertificate(alias);
+			Certificate[] cc = KeystoreUtils.load(privateKeystorePath, privateKeystorePwd).getCertificateChain(alias);
+			if (cc != null && cc.length > 0) {
+				List<X509Certificate> result = new ArrayList<>(cc.length);
+				for(Certificate c : cc) 					
+					result.add((X509Certificate) c);
+				return result;
+			} else
+				return null;
 		} catch (KeyStoreException e) {
 			log.error("Could not access the private keystore! Error details: {}", e.getMessage()); 
 			throw new SecurityProcessingException("Unable to get certificate of key pair", e);

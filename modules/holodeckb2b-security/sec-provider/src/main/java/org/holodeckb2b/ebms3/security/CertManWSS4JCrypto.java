@@ -113,7 +113,7 @@ public class CertManWSS4JCrypto extends CryptoBase {
 					throw new WSSecurityException(WSSecurityException.ErrorCode.UNSUPPORTED_SECURITY_TOKEN);
 				}			
 				if (kpAlias != null) 
-					return new X509Certificate[] { certManager.getKeyPairCertificate(kpAlias) };
+					return certManager.getKeyPairCertificates(kpAlias).toArray(new X509Certificate[] {});
 				else
 					throw new WSSecurityException(WSSecurityException.ErrorCode.SECURITY_TOKEN_UNAVAILABLE);
 			case ENCRYPT :
