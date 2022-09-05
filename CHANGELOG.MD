@@ -11,9 +11,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   determine HTTP response code.
 * New methods in `org.holodeckb2b.interfaces.security.trust.ICertificateManager` to allow better decoupling between the
   _ebMS Security Provider_ and _Certificate Manager_
+* Support for custom parameters in the Holodeck B2B configuration file `holodeckb2b.xml`. These can be retrieved by
+  using the following call `HolodeckB2BCoreInterface.getConfiguration().getParameter(String name)` 
 
 ### Changed
-
+* The P-Mode is now set on _MissingReceipt_ Error Messages (same as P-Mode of ref'd User Message)
 
 ### Fixed
 * NPE when copying BusinessInfo P-Mode meta-data that does not contain Service meta-data
