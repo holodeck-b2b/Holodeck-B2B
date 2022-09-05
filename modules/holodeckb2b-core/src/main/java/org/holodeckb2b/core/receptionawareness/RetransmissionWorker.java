@@ -190,6 +190,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
         log.trace("Create and store MissingReceipt error");
         // Create the error and set reference to user message
         final ErrorMessage missingReceiptError = new ErrorMessage(new MissingReceipt());
+        missingReceiptError.setPModeId(um.getPModeId());
         missingReceiptError.setRefToMessageId(um.getMessageId());
 
         IErrorMessageEntity   errorMessage;
