@@ -103,12 +103,12 @@ public interface IConfiguration {
 	/**
 	 * Gets the value of the <i>custom</i> parameter with the specified name. 
 	 * <p>
-	 * Extension may add their configuration parameters to the <code>holodeckb2b.xml</code> configuration file   
+	 * Extensions may add their configuration parameters to the <code>holodeckb2b.xml</code> configuration file.   
 	 * 
 	 * @param name	the parameter name
 	 * @return	the value of the parameter if it exists, which is a String for simple parameter or {@link OMElement} for
 	 * 			complex ones. If there is no parameter found with the specified name <code>null</code> is returned. 
 	 * @since 6.0.0
 	 */
-//	Object getParameter(final String name);
+	Object getParameter(final String name);
 }
