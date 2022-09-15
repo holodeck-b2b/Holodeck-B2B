@@ -53,9 +53,11 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EncodingUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.holodeckb2b.common.axis2.RequestParameters;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
+import org.holodeckb2b.interfaces.core.IURLRequestParameters;
 
 /**
  * Is an Axis2 {@link Worker} implementation to handle a single HTTP request. If the HTTP POST method is used it will 
@@ -293,7 +295,7 @@ public class HTTPWorker implements Worker {
         msgContext.setTo(new EndpointReference(requestURL));
         msgContext.setServerSide(true);
         // extract URL query parameters
-        msgContext.setProperty("hb2b:" + Constants.REQUEST_PARAMETER_MAP, extractRequestParameters(uriPath));
+        msgContext.setProperty(IURLRequestParameters.MC_PROPERTY, new RequestParameters(uriPath));
         
         // get the type of char encoding
         String charSetEnc = BuilderUtil.getCharSetEncoding(contentType);
@@ -304,43 +306,4 @@ public class HTTPWorker implements Worker {
         MessageProcessingContext.getFromMessageContext(msgContext);
 	}
 
-	/**
-	 * Extracts the request parameters from the URI query part. Parameters must be included as "key=value" pairs and 
-	 * separated by a '&' character. This method does not throw an exception if it cannot read any part of the query 
-	 * part, but simply ignores the problematic part. This means one or more parameters may be skipped and not included
-	 * in the result map.
-	 * 
-	 * @param uriPath	the path part of the request URI
-	 * @return			Map with the found parameters
-	 * @since 5.2.0
-	 */
-	private Map<String,String> extractRequestParameters(String uriPath) {
-		final HashMap<String, String>	pMap = new HashMap<>();
-		int queryPartStart = uriPath.indexOf('?');
-		if (queryPartStart > 0) {
-			int queryPartEnd = uriPath.indexOf(queryPartStart, '#');
-			String paramPart = uriPath.substring(queryPartStart + 1, Math.max(queryPartEnd, uriPath.length()));
-			String[] reqParams =  paramPart.split("&");
-			for(String param : reqParams) {
-				int nameEnd = param.indexOf('=');
-				if (nameEnd > 0) {
-					String pName = null;
-					try { 
-						pName = URIEncoderDecoder.decode(param.substring(0, nameEnd));
-					} catch (UnsupportedEncodingException urlDecodeFailure) {
-						pName = param.substring(0, nameEnd);
-					}
-					String pValue = null;
-					try { 
-						pValue = URIEncoderDecoder.decode(param.substring(nameEnd + 1));
-					} catch (UnsupportedEncodingException urlDecodeFailure) {
-						pValue = param.substring(nameEnd + 1);
-					}
-					if (!Utils.isNullOrEmpty(pName)) 
-						pMap.put(pName, pValue);					
-				}
-			}
-		}
-		return pMap;
-	}
 }

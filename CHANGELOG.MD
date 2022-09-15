@@ -16,6 +16,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 * The P-Mode is now set on _MissingReceipt_ Error Messages (same as P-Mode of ref'd User Message)
+* The request parameters parsed from the URL (available in the MessageContext property "hb2b:" + `org.apache.axis2.Constants.REQUEST_PARAMETER_MAP`)   
+  are now represented through `org.holodeckb2b.interfaces.core.IURLRequestParameters`.
+* `org.holodeckb2b.common.testhelpers.URLRequestParamHelper` for setting URL parameters when testing services
 * `ICertificateManager.getCertificate()` renamed to `ICertificateManager.getPartnerCertificate()` to clarify which kind
   of certificate is retrieved
 
