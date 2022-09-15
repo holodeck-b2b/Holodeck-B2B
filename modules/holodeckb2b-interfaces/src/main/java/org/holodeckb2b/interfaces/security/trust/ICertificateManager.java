@@ -169,8 +169,9 @@ public interface ICertificateManager {
      * @return      Trading partner's certificate if it was found, or<br>
      * 				<code>null</code> if no certificate is registered under the given alias
      * @throws SecurityProcessingException When there is a problem in retrieving the certificate.
+     * @since 6.0.0 previously this method was named getCertificate()
      */
-    X509Certificate getCertificate(final String alias) throws SecurityProcessingException;
+    X509Certificate getPartnerCertificate(final String alias) throws SecurityProcessingException;
     
     /**
      * Searches for the given certificate in the set of trading partner certificates registered with Certificate Manager 

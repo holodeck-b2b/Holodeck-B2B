@@ -16,6 +16,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 * The P-Mode is now set on _MissingReceipt_ Error Messages (same as P-Mode of ref'd User Message)
+* `ICertificateManager.getCertificate()` renamed to `ICertificateManager.getPartnerCertificate()` to clarify which kind
+  of certificate is retrieved
 
 ### Fixed
 * NPE when copying BusinessInfo P-Mode meta-data that does not contain Service meta-data

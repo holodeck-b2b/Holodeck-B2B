@@ -266,8 +266,9 @@ public class DefaultCertManager implements ICertificateManager {
                                                                                    throws SecurityProcessingException {
         try {
         	KeyStore ks = KeystoreUtils.load(privateKeystorePath, privateKeystorePwd);
+        	final char[] pwd = !Utils.isNullOrEmpty(password) ? password.toCharArray() : new char[] {};
         	return !ks.containsAlias(alias) ? null : (KeyStore.PrivateKeyEntry) ks.getEntry(alias,
-                                                              new KeyStore.PasswordProtection(password.toCharArray()));
+                                                              					new KeyStore.PasswordProtection(pwd));
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException ex) {
             log.error("Problem retrieving key pair with alias {} from keystore!"
                     + "\n\tError details: {}-{}", alias, ex.getClass().getSimpleName(), ex.getMessage());
@@ -293,7 +294,7 @@ public class DefaultCertManager implements ICertificateManager {
     }
     
     @Override
-    public X509Certificate getCertificate(final String alias) throws SecurityProcessingException {
+    public X509Certificate getPartnerCertificate(final String alias) throws SecurityProcessingException {
     	try {
     		return (X509Certificate) 
     				KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd).getCertificate(alias);

@@ -28,12 +28,14 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
 
 import org.holodeckb2b.commons.security.CertificateUtils;
+import org.holodeckb2b.commons.security.KeystoreUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
@@ -126,9 +128,16 @@ class InMemoryCertificateManager implements ICertificateManager {
 	}
     
     @Override
-    public X509Certificate getKeyPairCertificate(String alias) throws SecurityProcessingException {
+    public List<X509Certificate> getKeyPairCertificates(String alias) throws SecurityProcessingException {
     	try {
-			return (X509Certificate) privateKeys.getCertificate(alias);
+    		Certificate[] cc = privateKeys.getCertificateChain(alias);
+    		if (cc != null && cc.length > 0) {
+				List<X509Certificate> result = new ArrayList<>(cc.length);
+				for(Certificate c : cc) 					
+					result.add((X509Certificate) c);
+				return result;
+			} else
+				return null;
 		} catch (KeyStoreException e) {
 			throw new SecurityProcessingException("KeyStore error", e);
 		}
@@ -150,7 +159,7 @@ class InMemoryCertificateManager implements ICertificateManager {
     }
 
     @Override
-    public X509Certificate getCertificate(final String alias) throws SecurityProcessingException {
+    public X509Certificate getPartnerCertificate(final String alias) throws SecurityProcessingException {
         try {
             return (X509Certificate) partnerCerts.getCertificate(alias);
         } catch (KeyStoreException ex) {

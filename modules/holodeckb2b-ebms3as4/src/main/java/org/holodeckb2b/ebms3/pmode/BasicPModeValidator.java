@@ -286,7 +286,7 @@ public class BasicPModeValidator implements IPModeValidator {
      */
     protected boolean isCertificateAvailable(String keystoreAlias) {
         try {
-            return HolodeckB2BCore.getCertificateManager().getCertificate(keystoreAlias) != null;
+            return HolodeckB2BCore.getCertificateManager().getPartnerCertificate(keystoreAlias) != null;
         } catch (SecurityProcessingException ex) {
             return false;
         }

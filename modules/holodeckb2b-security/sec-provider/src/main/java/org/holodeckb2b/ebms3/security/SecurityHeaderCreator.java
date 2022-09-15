@@ -562,7 +562,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
                                                    .forEach(p -> encryptedPayloads.add(p)));
 
         // Get the Certificate used for encryption
-        final X509Certificate cert = certManager.getCertificate(encryptionConfig.getKeystoreAlias());
+        final X509Certificate cert = certManager.getPartnerCertificate(encryptionConfig.getKeystoreAlias());
         final IKeyTransport ktInfo = encryptionConfig.getKeyTransport();
         return new EncryptionProcessingResult(cert, ktInfo.getKeyReferenceMethod(), ktInfo.getAlgorithm(),
                                               ktInfo.getDigestAlgorithm(), ktInfo.getMGFAlgorithm(),

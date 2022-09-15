@@ -324,7 +324,7 @@ public class BasicPModeValidatorTest {
 		}
 
 		@Override
-		public X509Certificate getCertificate(String alias) throws SecurityProcessingException {
+		public X509Certificate getPartnerCertificate(String alias) throws SecurityProcessingException {
 			try {
 				return (X509Certificate) keystore.getCertificate(alias);
 			} catch (Exception e) {
@@ -400,7 +400,7 @@ public class BasicPModeValidatorTest {
 		}
 
 		@Override
-		public X509Certificate getKeyPairCertificate(String alias) throws SecurityProcessingException {
+		public List<X509Certificate> getKeyPairCertificates(String alias) throws SecurityProcessingException {
 			// TODO Auto-generated method stub
 			return null;
 		}

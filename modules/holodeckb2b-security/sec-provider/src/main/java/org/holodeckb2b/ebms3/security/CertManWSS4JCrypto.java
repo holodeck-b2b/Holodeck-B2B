@@ -128,7 +128,7 @@ public class CertManWSS4JCrypto extends CryptoBase {
 				case SKI_BYTES:
 					return new X509Certificate[] { certManager.findCertificate(cryptoType.getBytes()) };				
 				case ALIAS:
-					return new X509Certificate[] { certManager.getCertificate(cryptoType.getAlias()) };								
+					return new X509Certificate[] { certManager.getPartnerCertificate(cryptoType.getAlias()) };								
 				case SUBJECT_DN:
 				case ENDPOINT:
 				default:
