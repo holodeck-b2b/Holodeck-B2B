@@ -19,6 +19,7 @@ package org.holodeckb2b.interfaces.config;
 import java.nio.file.Path;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axis2.description.Parameter;
 
 /**
  * Defines the interface to access the Holodeck B2B <i>public</i> configuration. This public configuration contains
@@ -101,14 +102,13 @@ public interface IConfiguration {
 	boolean useStrictHeaderValidation();
 	
 	/**
-	 * Gets the value of the <i>custom</i> parameter with the specified name. 
+	 * Gets the <i>custom</i> parameter with the specified name. 
 	 * <p>
 	 * Extensions may add their configuration parameters to the <code>holodeckb2b.xml</code> configuration file.   
 	 * 
 	 * @param name	the parameter name
-	 * @return	the value of the parameter if it exists, which is a String for simple parameter or {@link OMElement} for
-	 * 			complex ones. If there is no parameter found with the specified name <code>null</code> is returned. 
+	 * @return	the parameter if it exists or <code>null</code> when no parameter found with the specified name  
 	 * @since 6.0.0
 	 */
-	Object getParameter(final String name);
+	Parameter getParameter(final String name);
 }
