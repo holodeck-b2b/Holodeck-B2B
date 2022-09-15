@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 6.0.0-SNAPSHOT-1
+## 6.0.0-SNAPSHOT-2
 ##### 
 ### Added
 * Support for the _continueProcessing_ setting in the message processing event handler in the default P-Mode implementation.

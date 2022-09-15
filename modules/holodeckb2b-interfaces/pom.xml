@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>6.0.0-SNAPSHOT-1</version>
+        <version>6.0.0-SNAPSHOT-2</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>holodeckb2b-interfaces</artifactId>
@@ -39,21 +39,115 @@
         to make clear that you develop closed source custom extension for Holodeck B2B as long as you only use the
         interfaces as provided in this module.
     </description>
-    <organization>
-        <name>The Holodeck B2B Team</name>
-        <url>http://www.holodeck-b2b.org/team</url>
-    </organization>
-    <licenses>
-        <license>
-            <name>GNU Lesser General Public License v3</name>
-            <url>http://www.gnu.org/licenses/lgpl-3.0.html</url>
-        </license>
-    </licenses>
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.axis2</groupId>
-            <artifactId>axis2-kernel</artifactId>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+	<organization>
+		<name>The Holodeck B2B Team</name>
+		<url>http://www.holodeck-b2b.org/team</url>
+	</organization>
+	<developers>
+		<developer>
+			<name>Sander Fieten</name>
+			<organization>Chasquis</organization>
+			<organizationUrl>http://chasquis-consulting.com/holodeck-b2b-support/</organizationUrl>
+			<email>sander at chasquis-consulting.com</email>
+			<roles>
+				<role>Architect</role>
+				<role>Lead developer</role>
+			</roles>
+			<timezone>Europe/Amsterdam</timezone>
+		</developer>
+		<developer>
+			<name>Renate Slebe</name>
+			<organization>Chasquis</organization>
+			<organizationUrl>http://chasquis-consulting.com/holodeck-b2b-support/</organizationUrl>
+			<email>renate at chasquis-consulting.com</email>
+			<roles>
+				<role>Product manager</role>
+				<role>QA and documentation</role>
+			</roles>
+			<timezone>Europe/Amsterdam</timezone>
+		</developer>
+	</developers>
+	<licenses>
+		<license>
+			<name>GNU Lesser General Public License v3</name>
+			<url>http://www.gnu.org/licenses/lgpl-3.0.html</url>
+		</license>
+	</licenses>
+	<scm>
+		<url>https://github.com/holodeck-b2b/Holodeck-B2B</url>
+		<connection>scm:git:https://github.com/holodeck-b2b/Holodeck-B2B.git</connection>
+		<developerConnection>scm:git:git@github.com:holodeck-b2b/Holodeck-B2B.git</developerConnection>
+	</scm>
+	<issueManagement>
+		<url>https://github.com/holodeck-b2b/Holodeck-B2B/issues</url>
+	</issueManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.axis2</groupId>
+			<artifactId>axis2-kernel</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>3.0.1</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>3.2.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>3.3.0</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.8</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>true</autoReleaseAfterClose>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
