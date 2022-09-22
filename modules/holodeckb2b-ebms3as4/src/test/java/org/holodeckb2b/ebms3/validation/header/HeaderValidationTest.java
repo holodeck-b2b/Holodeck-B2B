@@ -52,6 +52,7 @@ import org.holodeckb2b.core.HolodeckB2BCoreModule;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.validation.header.HeaderValidationHandler;
+import org.holodeckb2b.ebms3.module.EbMS3Module;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
@@ -88,7 +89,7 @@ public class HeaderValidationTest {
         handlerDesc.addParameter(new Parameter(HeaderValidationHandler.P_VALIDATOR_FACTORY, 
         										Ebms3HeaderValidatorFactory.class.getName()));
         
-        ParameterInclude parent = new AxisModule(HolodeckB2BCoreModule.HOLODECKB2B_CORE_MODULE);
+        ParameterInclude parent = new AxisModule(EbMS3Module.HOLODECKB2B_EBMS3_MODULE);
         parent.addParameter(new Parameter("HandledMessagingProtocol", "AS4"));
         handlerDesc.setParent(parent);
         handler.init(handlerDesc);
