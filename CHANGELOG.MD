@@ -15,6 +15,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   using the following call `HolodeckB2BCoreInterface.getConfiguration().getParameter(String name)` 
 
 ### Changed
+* Initialisation of the _Persistency Provider_, _Event Processor_ and _Certificate Manager_ now uses the full Holodeck B2B
+  configuration instead of only the home directory. As a result the following interfaces changed by deprecating the 
+  path based `init` method as introducing a configuration based one:
+	- `org.holodeckb2b.interfaces.persistency.IPersistencyProvider`
+	- `org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor`
+	- `org.holodeckb2b.interfaces.security.trust.ICertificateManager`
 * The P-Mode is now set on _MissingReceipt_ Error Messages (same as P-Mode of ref'd User Message)
 * The request parameters parsed from the URL (available in the MessageContext property "hb2b:" + `org.apache.axis2.Constants.REQUEST_PARAMETER_MAP`)   
   are now represented through `org.holodeckb2b.interfaces.core.IURLRequestParameters`.

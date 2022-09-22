@@ -18,6 +18,10 @@ package org.holodeckb2b.interfaces.persistency;
 
 import java.nio.file.Path;
 
+import org.holodeckb2b.interfaces.config.IConfiguration;
+import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
+import org.holodeckb2b.interfaces.security.SecurityProcessingException;
+
 /**
  * Defines the interface of a Holodeck B2B <i>Persistency Provider</i> that allows the Holodeck B2B Core to persist the 
  * meta-data of processed message units. 
@@ -48,9 +52,28 @@ public interface IPersistencyProvider {
      * @param hb2bHomeDir               Path to the Holodeck B2B home directory
      * @throws PersistenceException     When the initialization of the provider can not be completed. The exception
      *                                  message SHOULD include a clear indication of what caused the init failure.
+     * @deprecated Implementations should implement {@link #init(IConfiguration)}
      */
-    void init(Path hb2bHomeDir) throws PersistenceException;
+    @Deprecated
+    default void init(Path hb2bHome) throws PersistenceException {
+    	throw new UnsupportedOperationException();
+    }
 
+    /**
+     * Initialises the persistency provider. This method is called once at startup of the Holodeck B2B instance. Since
+     * the message processing depends on the correct functioning of the Persistency Provider this method MUST ensure 
+     * that all required configuration and data is available . Required configuration parameters must be implemented by 
+     * the Certificate Manager. 
+     *
+     * @param config	the Holodeck B2B configuration
+     * @throws PersistenceException     When the initialization of the provider can not be completed. The exception
+     *                                  message SHOULD include a clear indication of what caused the init failure.
+     * @since 6.0.0
+     */
+	default void init(final IConfiguration config) throws PersistenceException {
+		init(config.getHolodeckB2BHome());
+	}
+    
     /**
      * Gets the <i>Update Manager</i> to perform write operations on message unit meta-data.
      *

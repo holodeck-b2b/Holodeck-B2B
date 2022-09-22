@@ -26,6 +26,8 @@ import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.holodeckb2b.interfaces.config.IConfiguration;
+import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 
@@ -75,9 +77,28 @@ public interface ICertificateManager {
      *
      * @param hb2bHome  Path to the Holodeck B2B home directory.
      * @throws SecurityProcessingException When the certificate manager can not be initialized correctly.
+     * @deprecated Implementations should implement {@link #init(IConfiguration)}
      */
-    void init(final Path hb2bHome) throws SecurityProcessingException;
+    @Deprecated
+    default void init(Path hb2bHome) throws SecurityProcessingException {
+    	throw new UnsupportedOperationException();
+    }
 
+    /**
+     * Initializes the Certificate Manager. This method is called once at startup of the Holodeck B2B instance. Since
+     * the message processing depends on the correct functioning of the Certificate Manager this method MUST ensure that
+     * that all required configuration and data is available. Required configuration parameters must be implemented by 
+     * the Certificate Manager.
+     *
+     * @param config	the Holodeck B2B configuration
+     * @throws SecurityProcessingException When the certificate manager can not be initialized correctly.
+     * @since 6.0.0
+     */    
+	default void init(final IConfiguration config) throws SecurityProcessingException {
+		init(config.getHolodeckB2BHome());
+	}
+
+    
     /**
      * Searches the set of registered key pairs with Certificate Manager for a key pair with the given certificate and 
      * returns the alias if found.

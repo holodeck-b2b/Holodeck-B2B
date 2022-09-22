@@ -156,7 +156,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     	if (eventProcessor != null) {
 	        try {
 	        	log.trace("Initialising event processor : {}", eventProcessor.getName());
-	        	eventProcessor.init(instanceConfiguration.getHolodeckB2BHome());
+	        	eventProcessor.init(instanceConfiguration);
 	        } catch (MessageProccesingEventHandlingException initializationFailure) {
 	        	log.error("Could not initialize the event processor - {} : {}", eventProcessor.getName(),
 	        				initializationFailure.getMessage());
@@ -174,7 +174,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         if (persistencyProvider != null) {	        	
         	log.debug("Using Persistency Provider: {}", persistencyProvider.getName());
         	try {
-        		persistencyProvider.init(instanceConfiguration.getHolodeckB2BHome());
+        		persistencyProvider.init(instanceConfiguration);
         	} catch (PersistenceException initializationFailure) {
         		log.error("Could not initialize the persistency provider - {} : {}", persistencyProvider.getName(),
         				initializationFailure.getMessage());
@@ -192,7 +192,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     	if (certManager != null) {	        	
 	        log.debug("Using certificate manager: {}", certManager.getName());
 	        try {
-	        	certManager.init(instanceConfiguration.getHolodeckB2BHome());
+	        	certManager.init(instanceConfiguration);
 	        } catch (SecurityProcessingException initializationFailure) {
 	        	log.error("Could not initialize the certificate manager - {} : {}", certManager.getName(),
 	        				initializationFailure.getMessage());
