@@ -2,8 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 6.0.0-SNAPSHOT-3
+##### Changed
+* Initialisation of the _P-Mode storage_ component now uses the full Holodeck B2B configuration instead of only the home
+  directory. As a result the path based `init` method of `org.holodeckb2b.interfaces.pmode.IPModeSet` is deprecated and
+  replaced with an new configuration based one.
+
+
 ## 6.0.0-SNAPSHOT-2
-##### 
+##### 2022-09-22
 ### Added
 * Support for the _continueProcessing_ setting in the message processing event handler in the default P-Mode implementation.
   It uses _true_ as default value, so by default all applicable event handlers are executed.

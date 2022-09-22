@@ -85,15 +85,12 @@ public class PModeManager implements IPModeSet {
      */
     public PModeManager(final InternalConfiguration config) throws PModeSetException {
         log.trace("Load P-Mode storage component");        
-        final Iterator<IPModeSet> storageProv = ServiceLoader.load(IPModeSet.class).iterator();
-        if (storageProv.hasNext()) {
+        deployedPModes = Utils.getFirstAvailableProvider(IPModeSet.class);
+        if (deployedPModes != null) {
             // A specific P-Mode storage implementation is available, try to initialise it
-        	deployedPModes = storageProv.next();
-        	if (storageProv.hasNext()) 
-        		log.warn("Multiple P-Mode storage implementations are installed, only using first one found");
             try {
                 log.debug("Initialising P-Mode storage implementation: {}", deployedPModes.getName());
-                deployedPModes.init(config.getHolodeckB2BHome());
+                deployedPModes.init(config);
             } catch (PModeSetException initFailure) {
                // Could not initialise the custom storage implementation
                log.error("Could not initialise the P-Mode storage implementation: {}. Error details: {}",

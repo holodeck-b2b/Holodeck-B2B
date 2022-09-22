@@ -20,6 +20,7 @@ package org.holodeckb2b.interfaces.pmode;
 import java.nio.file.Path;
 import java.util.Collection;
 
+import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
@@ -46,15 +47,27 @@ public interface IPModeSet {
     default String getName() { return this.getClass().getName(); }
     
 	/**
-	 * Initializes the P-Mode set. A default, <i>NOP</i>, implementation is provided for backward compatibility and
-	 * easy implementation.   
+	 * Initializes the P-Mode set. 
 	 * 
 	 * @param hb2bHomeDir	Path of the Holodeck B2B home directory.
 	 * @throws PModeSetException When the P-Mode set implementation could not successfully be initialised
 	 * @since 4.0.0
+	 * @deprecated Implementations should implement {@link #init(IConfiguration)}
 	 */
-	default void init(final Path hb2bHomeDir) throws PModeSetException {};
+    @Deprecated
+	default void init(final Path hb2bHomeDir) throws PModeSetException {
+		throw new UnsupportedOperationException();
+	}
 
+	/**
+	 * Initializes the P-Mode set. 
+	 * 
+	 * @param config	the Holodeck B2B configuration
+	 * @throws PModeSetException When the P-Mode set implementation could not successfully be initialised
+     * @since 6.0.0 For backward compatibility a default, <i>NOP</i> implementation is provided 
+     */  
+	default void init(final IConfiguration config) throws PModeSetException {}
+	
     /**
      * Gets the P-Mode with the given <b>PMode.id</b>
      * <p>NOTE: The returned {@link IPMode} instance represents the P-Mode as it is configured <b>at the moment</b> this
