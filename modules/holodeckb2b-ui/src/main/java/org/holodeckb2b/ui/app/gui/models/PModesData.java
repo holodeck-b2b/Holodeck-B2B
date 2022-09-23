@@ -16,12 +16,12 @@
  */
 package org.holodeckb2b.ui.app.gui.models;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Date;
 
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
-import org.apache.geronimo.mail.util.StringBufferOutputStream;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.general.IAgreement;
@@ -86,8 +86,9 @@ public class PModesData extends AbstractTableModel {
 			StringBuffer sb = new StringBuffer();
 			sb.append("<!--\n P-Mode as extracted from Holodeck B2B instance ").append(hb2bHostName);
 			sb.append(" on ").append(new Date()).append("\n-->\n");					 				 						
-			try (StringBufferOutputStream os = new StringBufferOutputStream(sb)) { 
-				pmodes[row].writeAsXMLTo(os);
+			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) { 
+				pmodes[row].writeAsXMLTo(baos);
+				sb.append(baos.toString());
 			} catch (Exception e) {
 				return "COULD NOT CREATE THE XML REPRESENTATION FOR P-MODE: " + pmodes[row].getId();
 			}

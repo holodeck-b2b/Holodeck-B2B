@@ -8,6 +8,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   directory. As a result the path based `init` method of `org.holodeckb2b.interfaces.pmode.IPModeSet` is deprecated and
   replaced with an new configuration based one.
 
+##### Removed
+* Dependency of the UI module on Geronimo Java mail implementation
 
 ## 6.0.0-SNAPSHOT-2
 ##### 2022-09-22
