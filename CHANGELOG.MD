@@ -4,9 +4,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 6.0.0-SNAPSHOT-3
 ##### Added
+* A _Delivery Method_ that only logs meta-data of the received message unit but does not further process it. The factory
+  class name to configure in P-Modes is `org.holodeckb2b.common.util.LogOnlyDeliveryMethod`. 
 * New API for the delivery of message units to the back-end, including support for async delivery. Added interfaces:
 	- `org.holodeckb2b.interfaces.delivery.IDeliveryMethod`
 	- `org.holodeckb2b.interfaces.delivery.IDeliveryCallback`
+
 ##### Changed
 * Initialisation of the _P-Mode storage_ component now uses the full Holodeck B2B configuration instead of only the home
   directory. As a result the path based `init` method of `org.holodeckb2b.interfaces.pmode.IPModeSet` is deprecated and
