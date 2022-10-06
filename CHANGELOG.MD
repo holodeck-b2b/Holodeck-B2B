@@ -36,6 +36,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * `ICertificateManager.getCertificate()` renamed to `ICertificateManager.getPartnerCertificate()` to clarify which kind 
   of certificate is retrieved
 
+### Deprecated
+* The path based `init` methods of:
+	- `org.holodeckb2b.interfaces.persistency.IPersistencyProvider`
+	- `org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor`	
+
 ### Fixed
 * NPE when copying BusinessInfo P-Mode meta-data that does not contain Service meta-data
 * Continuation of ebMS3 message processing when there was an issue in creating the WS-Security header
