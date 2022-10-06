@@ -3,10 +3,19 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 6.0.0-SNAPSHOT-3
+##### Added
+* New API for the delivery of message units to the back-end, including support for async delivery. Added interfaces:
+	- `org.holodeckb2b.interfaces.delivery.IDeliveryMethod`
+	- `org.holodeckb2b.interfaces.delivery.IDeliveryCallback`
 ##### Changed
 * Initialisation of the _P-Mode storage_ component now uses the full Holodeck B2B configuration instead of only the home
   directory. As a result the path based `init` method of `org.holodeckb2b.interfaces.pmode.IPModeSet` is deprecated and
   replaced with an new configuration based one.
+* `org.holodeckb2b.interfaces.delivery.IDeliverySpecification` was changed to adapt it to the new delivery method API
+
+### Deprecated
+* `org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory` and `org.holodeckb2b.interfaces.delivery.IMessageDeliverer`
+* `org.holodeckb2b.interfaces.delivery.IDeliverySpecification.getFactory()`
 
 ##### Removed
 * Dependency of the UI module on Geronimo Java mail implementation

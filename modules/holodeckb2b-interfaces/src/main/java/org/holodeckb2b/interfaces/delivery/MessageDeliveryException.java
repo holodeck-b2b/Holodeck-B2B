@@ -26,10 +26,10 @@ package org.holodeckb2b.interfaces.delivery;
  * the delivery handler can generate an ebMS Error Signal to inform the <i>Sending</i> MSH.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @see IMessageDeliverer
- * @see IMessageDelivererFactory
+ * @see IDeliveryMethod
  */
 public class MessageDeliveryException extends Exception {
+
     /**
      * Indicator whether this delivery exception represents a permanent or recoverable failure. For backward
      * compatibility the default is <code>false</code>

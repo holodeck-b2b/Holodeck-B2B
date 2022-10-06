@@ -21,38 +21,12 @@ import java.util.Map;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
- * Defines the interface for factoring pre-configured {@link IMessageDeliverer} implementations.
- * <p>Message delivery to the business application is not done by the Holodeck B2B core but left to special <i>message
- * deliverers</i>. This makes it possible to support different protocols by adding new deliverers. To allow for
- * optimization of resources Holodeck B2B uses a factory to create the deliverers.
- * <p>Because the delivery may need some configuration the factory is initialized with a set of parameters before
- * deliverers are requested. The parameters to use for an actual delivery are specified by an {@link IDeliverySpecification}
- * which should be configured in the P-Mode of the message unit to be delivered. As the factory is specific for each
- * set of parameters Holodeck B2B will create a factory per {@link IDeliverySpecification}.
- *
- * @author Sander Fieten (sander at holodeck-b2b.org)
- * @see IMessageDeliverer
- * @see IDeliverySpecification
- * @see IPMode
+ * @deprecated Replaced by {@link IDeliveryMethod}. This interface will be removed in the next version!
  */
+@Deprecated
 public interface IMessageDelivererFactory {
 
-    /**
-     * Initializes the factory with the specific settings to use for instantiating {@link IMessageDeliverer} objects.
-     * <p>This method is called once by Holodeck B2B before requesting message delivers.
-     *
-     * @param settings    The settings to use for initialization of the factory
-     * @throws MessageDeliveryException When the factory is unable to successfully initialize itself and therefor can
-     *                                  not create message delivers.
-     */
     void init(Map<String, ?> settings) throws MessageDeliveryException;
 
-    /**
-     * Creates a {@link IMessageDeliverer} that can be used to deliver a message unit to
-     * the consuming business application.
-     *
-     * @return  The {@link IMessageDeliverer} to use for the delivery of the message unit
-     * @throws  MessageDeliveryException
-     */
     IMessageDeliverer createMessageDeliverer() throws MessageDeliveryException;
 }
