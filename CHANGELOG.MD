@@ -28,13 +28,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   configuration instead of only the home directory. As a result the following interfaces changed by deprecating the 
   path based `init` method as introducing a configuration based one:
 	- `org.holodeckb2b.interfaces.persistency.IPersistencyProvider`
-	- `org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor`
-	- `org.holodeckb2b.interfaces.security.trust.ICertificateManager`
+	- `org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor`	
 * The P-Mode is now set on _MissingReceipt_ Error Messages (same as P-Mode of ref'd User Message)
 * The request parameters parsed from the URL (available in the MessageContext property "hb2b:" + `org.apache.axis2.Constants.REQUEST_PARAMETER_MAP`)   
   are now represented through `org.holodeckb2b.interfaces.core.IURLRequestParameters`.
 * `org.holodeckb2b.common.testhelpers.URLRequestParamHelper` for setting URL parameters when testing services
-* `ICertificateManager.getCertificate()` renamed to `ICertificateManager.getPartnerCertificate()` to clarify which kind
+* `ICertificateManager.getCertificate()` renamed to `ICertificateManager.getPartnerCertificate()` to clarify which kind 
   of certificate is retrieved
 
 ### Fixed
@@ -44,7 +43,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Removed
 * Deprecated configuration setting _allowSignalBundling_
-
+* `org.holodeckb2b.interfaces.security.trust.ICertificateManager.init(Path)`, replaced by `org.holodeckb2b.interfaces.security.trust.ICertificateManager.init(IConfiguration)`
 
 ## 5.3.2
 ##### 2021-12-20
