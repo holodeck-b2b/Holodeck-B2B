@@ -209,7 +209,7 @@ public abstract class MessageUnit implements IMessageUnit, Serializable {
      */
     @Override
 	public IMessageUnitProcessingState getCurrentProcessingState() {
-        return states.get(states.size() - 1);
+        return states != null && states.size() > 0 ? states.get(states.size() - 1) : null;
     }
 
     /**
