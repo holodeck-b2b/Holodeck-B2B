@@ -38,6 +38,7 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.entities.MessageUnitEntity;
 import org.holodeckb2b.persistency.jpa.ErrorMessage;
@@ -181,8 +182,8 @@ public class UpdateManager implements IUpdateManager {
         EntityManager em = null;
         EntityTransaction tx = null;
         try {
-        		em = EntityManagerUtil.getEntityManager();
-        		tx = em.getTransaction();
+    		em = EntityManagerUtil.getEntityManager();
+    		tx = em.getTransaction();
             tx.begin();
             // Reload the entity object from the database so we've actual data and a managed JPA object ready for change
             MessageUnit jpaMsgUnit = em.find(MessageUnit.class, msgUnitEntity.getOID());
@@ -209,6 +210,14 @@ public class UpdateManager implements IUpdateManager {
             jpaObject.setPModeId(pmodeId);
         });
     }
+    
+	@Override
+	public void setPModeAndLeg(final IErrorMessageEntity errorMessage, final String pmode, final ILeg.Label leg) 
+    																					throws PersistenceException {
+		performUpdate((MessageUnitEntity) errorMessage, jpaObject -> { 
+														jpaObject.setPModeId(pmode); 
+														((ErrorMessage) jpaObject).setLegLabel(leg); });
+	}
 
     @Override
     public void setMultiHop(final IMessageUnitEntity msgUnit, final boolean isMultihop) throws PersistenceException {

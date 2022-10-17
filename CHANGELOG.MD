@@ -11,6 +11,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 	- `org.holodeckb2b.interfaces.delivery.IDeliveryCallback`
 * `shutdown()` method to the _Persistency Provider_, _Event Processor_, _Certificate Manager_ and _P-Mode Set_
 to release any held resources.
+* `getPrimarySentMessageUnit()` and `getPrimaryReceivedMessageUnit()` to `org.holodeckb2b.interfaces.core.IMessageProcessingContext`
+* `IErrorMessageEntity.getLeg()` and `IUpdateManager.setPModeAndLeg(IErrorMessageEntity, String, Label)` to persist also 
+  the Leg on which an Error Message is exchanged. 
 
 ##### Changed
 * Initialisation of the _P-Mode storage_ component now uses the full Holodeck B2B configuration instead of only the home
@@ -21,6 +24,7 @@ to release any held resources.
 ### Deprecated
 * `org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory` and `org.holodeckb2b.interfaces.delivery.IMessageDeliverer`
 * `org.holodeckb2b.interfaces.delivery.IDeliverySpecification.getFactory()`
+* The P-Mode for an AS4 Error message without a RefToMessageId is now set to the P-Mode of the primary sent message unit
 
 ##### Removed
 * Dependency of the UI module on Geronimo Java mail implementation

@@ -18,6 +18,7 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.inmemory.dto.ErrorMessageDTO;
 import org.holodeckb2b.persistency.inmemory.dto.PullRequestDTO;
@@ -126,6 +127,17 @@ public class UpdateManager implements IUpdateManager {
 	@Override
 	public void deleteMessageUnit(IMessageUnitEntity messageUnit) throws PersistenceException {
 		msgUnits.remove(messageUnit);
+	}
+
+	@Override
+	public void setPModeAndLeg(IErrorMessageEntity errorMessage, String pmode, Label leg) throws PersistenceException {
+		if (errorMessage instanceof ErrorMessageDTO)
+			synchronized (errorMessage) {				
+				((ErrorMessageDTO) errorMessage).setPModeId(pmode);				
+				((ErrorMessageDTO) errorMessage).setLeg(leg);				
+			}
+		else
+			throw new IllegalArgumentException("Unmanaged message unit");		
 	}
 
 }

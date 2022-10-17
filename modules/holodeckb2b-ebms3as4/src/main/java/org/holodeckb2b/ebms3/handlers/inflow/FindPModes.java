@@ -22,9 +22,11 @@ import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.ProcessingModeMismatch;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.MessageUnitUtils;
+import org.holodeckb2b.commons.Pair;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
+import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.ebms3.pmode.PModeFinder;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
@@ -35,6 +37,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
@@ -95,8 +98,8 @@ public class FindPModes extends AbstractBaseHandler {
         if (!Utils.isNullOrEmpty(errorSignals)) {
             log.debug("Message contains " + errorSignals.size() + " Error Signals, finding P-Modes");
             for (final IErrorMessageEntity e : errorSignals) {
-                final IPMode pmode = findForReceivedErrorSignal(e, procCtx);
-                if (pmode == null) {
+                final Pair<IPMode, ILeg.Label> pl = findForReceivedErrorSignal(e, procCtx);
+                if (pl == null) {
                     log.warn("No P-Mode found for Error Signal [" + e.getMessageId() + "]");
                     procCtx.addGeneratedError(new ProcessingModeMismatch(
                     								"Can not process message because no P-Mode was found for the message!",
@@ -104,8 +107,8 @@ public class FindPModes extends AbstractBaseHandler {
                     log.trace("Set the processing state of this Error Signal to failure");
                     updateManager.setProcessingState(e, ProcessingState.FAILURE);
                 } else {
-                    log.info("Found P-Mode [" + pmode.getId() + "] for Error Signal [" + e.getMessageId() + "]");
-                    updateManager.setPModeId(e, pmode.getId());
+                    log.info("Found P-Mode [" + pl.value1().getId() + "] for Error Signal [" + e.getMessageId() + "]");
+                    updateManager.setPModeAndLeg(e, pl);
                 }
             }
         } 
@@ -114,8 +117,8 @@ public class FindPModes extends AbstractBaseHandler {
         if (!Utils.isNullOrEmpty(rcptSignals)) {
             log.debug("Message contains " + rcptSignals.size() + " Receipt Signals, finding P-Modes");
             for (final IReceiptEntity r : rcptSignals) {
-                final IPMode pmode = getPModeFromRefdMessage(r.getRefToMessageId());
-                if (pmode == null) {
+                final Pair<IPMode, ILeg.Label> pl = getPModeAndLegFromRefdMessage(r.getRefToMessageId());
+                if (pl == null) {
                     log.warn("No P-Mode found for Receipt Signal [" + r.getMessageId() + "]");
                     procCtx.addGeneratedError(new ProcessingModeMismatch(
                     								"Can not process message because no P-Mode was found for the message!",
@@ -123,6 +126,7 @@ public class FindPModes extends AbstractBaseHandler {
                     log.trace("Set the processing state of this Receipt Signal to failure");
                     updateManager.setProcessingState(r, ProcessingState.FAILURE);
                 } else {
+                	IPMode pmode = pl.value1();
                     log.info("Found P-Mode [" + pmode.getId() + "] for message [" + r.getMessageId() + "]");
                     updateManager.setPModeId(r, pmode.getId());
                 }
@@ -133,37 +137,36 @@ public class FindPModes extends AbstractBaseHandler {
     }
 
     /**
-     * Helper method that finds the P-Mode for a received Error signal message unit.
+     * Helper method that finds the P-Mode and Leg for a received Error signal message unit.
      * <p>The P-Mode that handles a received Error signal is the same as the P-Mode that handles the message unit the
      * error is response to. So the referenced message unit is determined and its P-Mode is set on the error signal.
      * <p>If the error signal itself does not contain a reference to the message unit in error but it is received as an
-     * HTTP response to an outgoing ebMS message containing just one message unit, that message unit is the referenced
-     * message and its message id can be used.
-     * <p><b>NOTE: </b> When the referenced message id is derived from the outgoing message the <code>refToMessageId
-     * </code> attribute of the {@link IErrorMessageEntity} is also set.
+     * HTTP response to an outgoing ebMS message, the primary message unit of that message is used to determine the 
+     * P-Mode.
      *
      * @param e     The received Error signal message unit
      * @param mc    The message context of the Error signal
-     * @return      The P-Mode that handles this Error signal if the referenced message id can be matched to a sent
-     *              message unit,<br><code>null</code> otherwise.
+     * @return      Pair consisting of the P-Mode and the label of Leg that handles this Error signal if the referenced 
+     * 				message id can be matched to a sent message unit,<br/>
+     * 				<code>null</code> otherwise 
      * @throws PersistenceException When an error occurs retrieving the referenced message unit
      */
-    private IPMode findForReceivedErrorSignal(final IErrorMessageEntity e, final IMessageProcessingContext procCtx) throws PersistenceException {
-        IPMode pmode = null;
-        // First get the referenced message id, starting with information from the header
-        final String refToMessageId = MessageUnitUtils.getRefToMessageId(e);
-        // If there is no referenced message unit and the error is received as a response to a single message unit
-        //  we sent out we still have a reference
+    private Pair<IPMode, ILeg.Label> findForReceivedErrorSignal(final IErrorMessageEntity e, 
+    											final IMessageProcessingContext procCtx) throws PersistenceException {
+    	// First get the referenced message id, starting with information from the header
+        String refToMessageId = MessageUnitUtils.getRefToMessageId(e);
+        // If there is no referenced message unit and the error is received as a response we will use the primary 
+        // message unit from the message we sent out
         if (Utils.isNullOrEmpty(refToMessageId) && !procCtx.getParentContext().isServerSide()) {
-            final Collection<IMessageUnitEntity>  reqMUs = procCtx.getSendingMessageUnits();
-            if (reqMUs.size() == 1)
-                // Request contained one message unit, assuming error applies to it, use its P-Mode
-               pmode = HolodeckB2BCore.getPModeSet().get(reqMUs.iterator().next().getPModeId());
-            //else:  No or more than one message unit in request => can not be related to specific message unit
+        	IMessageUnitEntity primarySentMessageUnit = procCtx.getPrimarySentMessageUnit();
+        	if (primarySentMessageUnit != null) 
+    			return new Pair<>(HolodeckB2BCoreInterface.getPModeSet().get(primarySentMessageUnit.getPModeId()), 
+    								PModeUtils.getLeg(primarySentMessageUnit).getLabel());
+        	else
+        		return null;
         } else
-            // Use the referenced message id to get the P-Mode
-            pmode = getPModeFromRefdMessage(refToMessageId);
-        return pmode;
+	        // Use the referenced message id to get the P-Mode and Leg
+	    	return getPModeAndLegFromRefdMessage(refToMessageId);
     }
 
     /**
@@ -175,16 +178,19 @@ public class FindPModes extends AbstractBaseHandler {
      * @throws PersistenceException When a problem occurs retrieving the meta-data from the database for the referenced
      *                              message unit
      */
-    protected static IPMode getPModeFromRefdMessage(final String refToMsgId) throws PersistenceException {
-        IPMode pmode = null;
+    private Pair<IPMode, ILeg.Label> getPModeAndLegFromRefdMessage(final String refToMsgId) throws PersistenceException {
+    	Pair<IPMode, ILeg.Label> result = null;
         if (!Utils.isNullOrEmpty(refToMsgId)) {
             Collection<IMessageUnitEntity> refdMsgUnits = HolodeckB2BCore.getQueryManager()
                                                                          .getMessageUnitsWithId(refToMsgId,
                                                                         		 				Direction.OUT);
-            if (!Utils.isNullOrEmpty(refdMsgUnits) && refdMsgUnits.size() == 1)
-                pmode = HolodeckB2BCoreInterface.getPModeSet().get(refdMsgUnits.iterator().next().getPModeId());
+            if (!Utils.isNullOrEmpty(refdMsgUnits) && refdMsgUnits.size() == 1) {
+            	IMessageUnitEntity refdMsg = refdMsgUnits.iterator().next();
+        		result = new Pair<>(HolodeckB2BCoreInterface.getPModeSet().get(refdMsg.getPModeId()), 
+        							PModeUtils.getLeg(refdMsg).getLabel());
+            }
         }
-        return pmode;
+        return result;
     }
 
 }

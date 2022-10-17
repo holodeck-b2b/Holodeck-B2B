@@ -29,11 +29,13 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
+import org.holodeckb2b.interfaces.pmode.PModeSetException;
 
 /**
  * Contains some common operations on ebMS V3 / AS4 P-Modes to determine the message exchange pattern they support and 
@@ -91,12 +93,19 @@ public class PModeUtils {
     		if (m.getDirection() == Direction.OUT)
     			return getSendLeg(pmode);
     		else
-    			return getReceiveLeg(pmode);
-    	else if (m instanceof IErrorMessage) {
-    		/* When the P-Mode is Two-Way the Error can be on both legs and we need to use the referenced message unit
-    		 * to find the correct leg. As no message processing context is available at this point we can only use the 
-    		 * reference included in the Error Message. This implies that for Error Messages without a reference we
-    		 * won't be able to determine their leg. 
+    			return getReceiveLeg(pmode);    	
+		/* For Error Message it can be complicated to find the P-Mode because it is possible that there is no
+		 * reference message unit, in which case the Error Message applies to all message units of the related 
+		 * request. Therefore the Leg is persisted with the Error Message, so we first try to use that stored info.
+		 * If that is not available be we will try to find the Leg based on the referenced message.
+		 */
+    	else if (m instanceof IErrorMessageEntity && ((IErrorMessageEntity) m).getLeg() != null)
+			return pmode.getLeg(((IErrorMessageEntity) m).getLeg());
+		else if (m instanceof IErrorMessage) 
+    		/* When the P-Mode is Two-Way the Error can be on both legs and we need to use the referenced message 
+    		 * unit to find the correct leg. As no message processing context is available at this point we can only 
+    		 * use the reference included in the Error Message. This implies that for Error Messages without a 
+    		 * reference we won't be able to determine their leg. 
     		 */
     		if (EbMSConstants.TWO_WAY_MEP.equals(pmode.getMep())) {
     			final String refToMsgInError = MessageUnitUtils.getRefToMessageId(m);
@@ -120,8 +129,8 @@ public class PModeUtils {
     			}
     		} else 
     			// For one way it's easy, as it must be the single leg :-)
-    			return pmode.getLeg(Label.REQUEST);    		
-    	} else // m instanceof IReceipt | IPullRequest
+    			return pmode.getLeg(Label.REQUEST);		    		
+    	else // m instanceof IReceipt | IPullRequest
     		if (m.getDirection() == Direction.OUT)
     			return getReceiveLeg(pmode);
     		else

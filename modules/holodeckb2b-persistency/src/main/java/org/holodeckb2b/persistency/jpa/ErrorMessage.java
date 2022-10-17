@@ -24,10 +24,13 @@ import javax.persistence.CollectionTable;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.pmode.ILeg;
 
 /**
  * Is the JPA entity class for storing the meta-data of an ebMS <b>Error Signal</b> message unit as described by the
@@ -86,6 +89,30 @@ public class ErrorMessage extends MessageUnit implements IErrorMessage, Serializ
         this.ADD_SOAP_FAULT = addFault;
     }
 
+    /**
+     * Gets the label of the leg within the P-Mode on which this Error Message is exchanged. Although the Leg can in
+     * most cases be calculated there can be an issue when there is no explicit reference to the message unit in error 
+     * and there are more than one sent message units in the message the Error Message is a reply to. In that case the
+     * P-Mode and Leg of the primary message unit from the sent message are used. But this information is not persisted
+     * and therefore the leg is stored with the Error Message.    
+     * 
+     * @return  The leg label
+     * @since 6.0.0
+     */
+    public ILeg.Label getLeg() {
+    	return LEG;
+    }
+    
+    /**
+     * Sets the label of the leg within the P-Mode on which this Error Message is exchanged. 
+     * 
+     * @param label	of the Leg
+     * @since 6.0.0
+     */
+    public void setLegLabel(ILeg.Label label) {
+    	this.LEG = label;
+    }
+    
     /*
      * Constructors
      */
@@ -151,4 +178,10 @@ public class ErrorMessage extends MessageUnit implements IErrorMessage, Serializ
      * <p>NOTE: The SOAP Fault will only be added if the Error signal is not bundled with other message units.
      */
     private boolean     ADD_SOAP_FAULT = false;
+    
+    /**
+     * The label of the Leg that governs the processing of the Error Message. 
+     */
+    @Enumerated(EnumType.STRING)
+    private ILeg.Label	LEG;
 }

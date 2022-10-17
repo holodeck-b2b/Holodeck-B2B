@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
-import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
@@ -216,45 +215,47 @@ public interface IMessageProcessingContext {
 	Map<String, Collection<IEbmsError>> getGeneratedErrors();
 
 	/**
-	 * Adds a entry to the map that registers the relationship between received Error Signals and the message units they
-	 * reference.  
-	 * 
-	 * @param error			The received Error Signal
-	 * @param refdMsgUnits	The referenced message units
-	 */
-	void addRefdMsgUnitByError(IErrorMessage error, Collection<IMessageUnitEntity> refdMsgUnits);
-
-	/**
-	 * Gets the message units that are referenced by the given Error Signal as registered using the {@link 
-	 * IMessageProcessingContext#addRefdMsgUnitByError(IErrorMessage, Collection)}
-	 * 
-	 * @param error		The received Error Signal
-	 * @return 			The referenced message units if the given Error Signal is registered in this context,<br>
-	 * 					<code>null</code> otherwise
-	 */
-	Collection<IMessageUnitEntity> getRefdMsgUnitByError(IErrorMessage error);
-
-	/**
-	 * Gets the primary message unit from a message. The primary message unit determines which settings must be used for
-	 * message wide P-Mode parameters, i.e. parameters that do not relate to the content of a specific message unit.
-	 * Examples are the destination URL for a message and the WS-Security settings.
-	 * <p>The primary message unit is determined by the type of message unit, but differs depending on whether the
-	 * message is sent or received by Holodeck B2B. The following table lists the priority of message unit types for
-	 * each direction, the first message unit with the highest classified type is considered to be the primary message
-	 * unit of the message:
-	 * <table border="1">
-	 * <tr><th>Prio</th><th>Received</th><th>Sent</th></tr>
-	 * <tr><td>1</td><td>User message</td><td>Pull request</td></tr>
-	 * <tr><td>2</td><td>Receipt</td><td>User message</td></tr>
-	 * <tr><td>3</td><td>Error</td><td>Receipt</td></tr>
-	 * <tr><td>4</td><td>Pull request</td><td>Error</td></tr>
-	 * </table>
+	 * Gets the primary message unit from the currently processed message. The primary message unit determines which 
+	 * settings must be used for message wide P-Mode parameters, i.e. parameters that do not relate to the content of a 
+	 * specific message unit. Examples are the destination URL for a message and the WS-Security settings.
 	 *
 	 * @return      The entity object of the primary message unit if one was found, or
 	 *              <code>null</code> if no message unit could be found in the message context
 	 */
 	IMessageUnitEntity getPrimaryMessageUnit();
 
+	/**
+	 * Gets the primary sent message unit from the processing context. 
+	 * <p>The primary message unit is determined by the type of message unit, but differs depending on whether the
+	 * message is sent or received by Holodeck B2B. The first message unit with the highest classified type, as 
+	 * described in the list below, is considered to be the primary message unit of the sent message:<ol>
+	 * <li>Pull Request</li>
+	 * <li>User Message</li>
+	 * <li>Receipt</li>
+	 * <li>Error</li></ol>
+	 *  
+	 * @return	the primary message unit of the sent message from the processing context,<br/>
+	 * 			<code>null</code> if the processing context does not contain a sent message
+	 * @since 6.0.0
+	 */
+	IMessageUnitEntity getPrimarySentMessageUnit();
+	
+	/**
+	 * Gets the primary received message unit from the processing context. 
+	 * <p>The primary message unit is determined by the type of message unit, but differs depending on whether the
+	 * message is sent or received by Holodeck B2B. The first message unit with the highest classified type, as 
+	 * described in the list below, is considered to be the primary message unit of the received message:<ol>
+	 * <li>User Message</li>
+	 * <li>Receipt</li>
+	 * <li>Error</li></ol>
+	 * <li>Pull Request</li>
+	 * 
+	 * @return	the primary message unit of the received message from the processing context,<br/>
+	 * 			<code>null</code> if the processing context does not contain a received message
+	 * @since 6.0.0
+	 */
+	IMessageUnitEntity getPrimaryReceivedMessageUnit();
+	
 	/**
 	 * Adds the result of processing a security token in the received message to the context.
 	 * 

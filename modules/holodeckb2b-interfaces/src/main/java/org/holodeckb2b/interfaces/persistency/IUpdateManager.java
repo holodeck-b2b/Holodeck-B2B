@@ -23,6 +23,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
@@ -133,6 +134,18 @@ public interface IUpdateManager {
      */
     void setAddSOAPFault(final IErrorMessageEntity errorMessage, final boolean addSOAPFault)
                                                                                         throws PersistenceException;
+    
+    /**
+     * Sets the P-Mode.id and [label of] the Leg on which an error message is exchanged.
+     *
+     * @param errorMessage      The entity object representing the Error Message
+     * @param pmode				Id of the P-Mode on which the Error Message is exchanged
+     * @param leg      			Label of the Leg on which the Error Message is exchanged
+     * @throws PersistenceException  If an error occurs when updating the meta-data
+     * @since 6.0.0
+     */
+    void setPModeAndLeg(final IErrorMessageEntity errorMessage, final String pmode, final ILeg.Label leg) 
+    																					throws PersistenceException;
 
     /**
      * Deletes the meta-data of the given message unit from the database.

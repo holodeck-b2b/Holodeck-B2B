@@ -21,10 +21,12 @@ import java.util.Collection;
 
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
+import org.holodeckb2b.commons.Pair;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
@@ -36,6 +38,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.interfaces.pmode.PModeSetException;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
@@ -106,8 +109,11 @@ public class DetermineErrorReporting extends AbstractBaseHandler {
             		procCtx.setNeedsResponse(true);
             	} else {
 	                log.debug("Get P-Mode information to determine if and how Error Signal must be reported");
-	                // Errorhandling config is contained in flow
 	                final ILeg leg = PModeUtils.getLeg(msgInError);
+	                storageManager.setPModeAndLeg(error, new Pair<>(
+		                							HolodeckB2BCoreInterface.getPModeSet().get(msgInError.getPModeId()),
+		                							leg.getLabel()));
+	                // Errorhandling config is contained in flow
 	                final IUserMessageFlow flow = leg != null ? leg.getUserMessageFlow() : null;
                     final IErrorHandling errorHandling = (flow != null ? flow.getErrorHandlingConfiguration()
                                                                        : null);

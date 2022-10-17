@@ -367,6 +367,27 @@ public class UpdateManagerTest {
     }
 
     @Test
+    public void setPModeAndLeg() throws PersistenceException {
+        em.getTransaction().begin();
+        ErrorMessage errMsgJPA = new ErrorMessage(TestData.error4);
+        em.persist(errMsgJPA);
+        ErrorMessageEntity errorMsg = new ErrorMessageEntity(errMsgJPA);
+        em.getTransaction().commit();
+        assertNotEquals(T_NEW_PMODE_ID_1, errorMsg.getPModeId());
+
+        updManager.setPModeAndLeg(errorMsg, T_NEW_PMODE_ID_1, ILeg.Label.REPLY);
+
+        assertEquals(T_NEW_PMODE_ID_1, errorMsg.getPModeId());
+        assertEquals(ILeg.Label.REPLY, errorMsg.getLeg());
+
+        // Check that database is updated
+        em.refresh(errMsgJPA);
+        assertEquals(T_NEW_PMODE_ID_1, errMsgJPA.getPModeId());
+        assertEquals(ILeg.Label.REPLY, errMsgJPA.getLeg());
+    	
+    }
+    
+    @Test
     public void setMultiHop() throws PersistenceException {
         // Add a message unit to the database so we can change it
         em.getTransaction().begin();

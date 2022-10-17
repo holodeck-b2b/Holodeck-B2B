@@ -19,6 +19,7 @@ package org.holodeckb2b.persistency.entities;
 import java.util.Collection;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.persistency.jpa.ErrorMessage;
 
 /**
@@ -42,4 +43,9 @@ public class ErrorMessageEntity extends MessageUnitEntity<ErrorMessage> implemen
     public Collection<IEbmsError> getErrors() {
         return jpaEntityObject.getErrors();
     }
+
+	@Override
+	public Label getLeg() {
+		return jpaEntityObject.getLeg();
+	}
 }

@@ -17,6 +17,7 @@
 package org.holodeckb2b.interfaces.persistency.entities;
 
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.pmode.ILeg;
 
 /**
  * This interface is used to indicate that the <i>Error Signal Message</i> message unit meta-data is stored by the
@@ -39,5 +40,17 @@ public interface IErrorMessageEntity extends IMessageUnitEntity, IErrorMessage {
      * @return  <code>true</code> if this Error Signal should be combined with SOAP Fault,<br>
      *          <code>false</code> when not
      */
-    public boolean shouldHaveSOAPFault();
+    boolean shouldHaveSOAPFault();
+    
+    /**
+     * Gets the label of the leg within the P-Mode on which this Error Message is exchanged. Although the Leg can in
+     * most cases be calculated there can be an issue when there is no explicit reference to the message unit in error 
+     * and there are more than one sent message units in the message the Error Message is a reply to. In that case the
+     * P-Mode and Leg of the primary message unit from the sent message are used. But this information is not persisted
+     * and therefore the leg is stored with the Error Message.    
+     * 
+     * @return  The leg label
+     * @since 6.0.0
+     */
+    ILeg.Label getLeg();
 }
