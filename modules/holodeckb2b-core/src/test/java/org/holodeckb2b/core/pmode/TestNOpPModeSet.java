@@ -27,6 +27,11 @@ public class TestNOpPModeSet implements IPModeSet {
 	}
 	
 	@Override
+	public void shutdown() {
+		// TODO Auto-generated method stub		
+	}
+	
+	@Override
 	public IPMode get(String id) {
 		// TODO Auto-generated method stub
 		return null;
