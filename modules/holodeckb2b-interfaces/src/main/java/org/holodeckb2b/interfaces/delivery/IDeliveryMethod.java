@@ -25,18 +25,19 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
  * Defines the interface of a <i>Delivery Method</i> that is used by the Holodeck B2B Core to deliver a received
- * message unit to the business application. Decoupling the internal [of the Delivery Method] and external interface 
+ * message unit to the business application. Decoupling the internal [Delivery Method] and external interface 
  * [of the business application] creates flexibility as only a new <i>Delivery Method</i> needs to be deployed when 
  * needed for the back-end integration without making any change to the Holodeck B2B Core.
  * <p>
  * To setup the Delivery Method for a specific back-end integration and allow re-use of resources it is initialised 
  * before the first delivery operation is requested. The parameters to use for an actual back-end integration are 
- * specified by an {@link IDeliverySpecification} which are provided by the P-Mode of the message unit to be delivered.
- * Only one <i>Delivery Method</i> instance will be created by Holodeck B2B per <i>Delivery Specification</i>.
+ * specified by an {@link IDeliverySpecification} which are generally provided by the P-Mode of the message unit to be 
+ * delivered.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 6.0.0	Replaces {@link IMessageDelivererFactory} and {@link IMessageDeliverer}
+ * @since 6.0.0
  * @see IDeliverySpecification
+ * @see IDeliveryManager
  */
 public interface IDeliveryMethod {
 

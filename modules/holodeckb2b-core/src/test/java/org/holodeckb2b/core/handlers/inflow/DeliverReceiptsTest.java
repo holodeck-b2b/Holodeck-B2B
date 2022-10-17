@@ -17,39 +17,25 @@
 package org.holodeckb2b.core.handlers.inflow;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
+import java.util.UUID;
 
-import javax.xml.namespace.QName;
-
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.messagemodel.Receipt;
-import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.pmode.DeliveryConfiguration;
-import org.holodeckb2b.common.pmode.Leg;
-import org.holodeckb2b.common.pmode.PMode;
-import org.holodeckb2b.common.pmode.ReceiptConfiguration;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.NullDeliveryMethod;
-import org.holodeckb2b.common.testhelpers.NullDeliveryMethod.NullDeliverer;
-import org.holodeckb2b.common.testhelpers.TestUtils;
-import org.holodeckb2b.commons.util.MessageIdUtils;
+import org.holodeckb2b.common.testhelpers.TestDeliveryManager;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
-import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -59,70 +45,70 @@ import org.junit.Test;
  * Checked for cases coverage (24.04.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class DeliverReceiptsTest {
-    private static final QName RECEIPT_CHILD_ELEMENT_NAME = new QName(EbMSConstants.EBMS3_NS_URI, "ReceiptChild");
+    
+	static TestDeliveryManager delman;
+	
+	@BeforeClass
+    public static void setUpClass() throws Exception {
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
+        delman = (TestDeliveryManager) HolodeckB2BCore.getDeliveryManager();
+    }
+	
+	@Before
+	public void resetRejection() {
+		delman.rejection = null;
+	}
 
-   	@BeforeClass
-       public static void setUpClass() throws Exception {
-           HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
-       }
+    @Test
+    public void testDoProcessing() throws Exception {
+    	MessageContext mc = new MessageContext();
+    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
 
-       @After
-       public void tearDown() throws Exception {
-           TestUtils.cleanOldMessageUnitEntities();
-           HolodeckB2BCoreInterface.getPModeSet().removeAll();
-       }
+    	for(int i = 0; i < 4; i++) {
+	    	Receipt receipt = new Receipt();
+	        receipt.setMessageId(UUID.randomUUID().toString());
+	        
+	        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
+	        IReceiptEntity rcptEntity = storageManager.storeIncomingMessageUnit(receipt);        
+	        
+	        storageManager.setProcessingState(rcptEntity, ProcessingState.READY_FOR_DELIVERY);
+	        
+	        procCtx.addReceivedReceipt(rcptEntity);
+    	}
+    	
+        try {
+            assertEquals(Handler.InvocationResponse.CONTINUE, new DeliverReceipts().invoke(mc));
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
 
-       @Test
-       public void testDoProcessing() throws Exception {
-    	   PMode pmode = TestUtils.create1WaySendPushPMode();        
-           Leg leg = pmode.getLeg(Label.REQUEST);
-           
-           DeliveryConfiguration deliverySpecification = new DeliveryConfiguration();
-           deliverySpecification.setFactory(NullDeliveryMethod.class.getName());
-           deliverySpecification.setId("delivery_spec_id");
-           leg.setDefaultDelivery(deliverySpecification);
-           
-           ReceiptConfiguration rcptCfg = new ReceiptConfiguration();
-           rcptCfg.setNotifyReceiptToBusinessApplication(true);
-           leg.setReceiptConfiguration(rcptCfg);
-           
-           HolodeckB2BCore.getPModeSet().add(pmode);
-
-           UserMessage userMessage = new UserMessage();
-           userMessage.setMessageId(MessageIdUtils.createMessageId());
-           userMessage.setPModeId(pmode.getId());
-           
-           MessageContext mc = new MessageContext();
-           mc.setFLOW(MessageContext.IN_FLOW);
-
-           Receipt receipt = new Receipt();
-           OMElement receiptChildElement = OMAbstractFactory.getOMFactory().createOMElement(RECEIPT_CHILD_ELEMENT_NAME);
-           ArrayList<OMElement> content = new ArrayList<>();
-           content.add(receiptChildElement);
-           receipt.setContent(content);
-           receipt.setMessageId(MessageIdUtils.createMessageId());
-           receipt.setPModeId(pmode.getId());
-           receipt.setRefToMessageId(userMessage.getMessageId());
-
-           StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-           IMessageUnitEntity umEntity = storageManager.storeOutGoingMessageUnit(userMessage);        
-           
-           IReceiptEntity rcptMessageEntity = storageManager.storeIncomingMessageUnit(receipt);        
-           storageManager.setProcessingState(rcptMessageEntity, ProcessingState.READY_FOR_DELIVERY);
-           
-           IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
-           procCtx.addReceivedReceipt(rcptMessageEntity);        
-           
-           try {
-               assertEquals(Handler.InvocationResponse.CONTINUE, new DeliverReceipts().invoke(mc));
-           } catch (Exception e) {
-               fail(e.getMessage());
-           }
-
-           assertTrue(((NullDeliverer) HolodeckB2BCore.getMessageDeliverer(deliverySpecification))
-        		   														  .wasDelivered(receipt.getMessageId()));
-           assertEquals(ProcessingState.DONE, rcptMessageEntity.getCurrentProcessingState().getState());
-       }
+        assertTrue(procCtx.getReceivedReceipts().parallelStream().allMatch(r -> delman.isDelivered(r.getMessageId())));
+    }
+    
+    @Test
+    public void testIgnoreNonReady() throws Exception {
+    	MessageContext mc = new MessageContext();
+    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	
+    	Receipt receipt = new Receipt();
+        receipt.setMessageId(UUID.randomUUID().toString());
+        
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
+        IReceiptEntity rcptEntity = storageManager.storeIncomingMessageUnit(receipt);        
+        
+        storageManager.setProcessingState(rcptEntity, ProcessingState.PROCESSING);
+        
+        procCtx.addReceivedReceipt(rcptEntity);
+    	
+    	try {
+    		assertEquals(Handler.InvocationResponse.CONTINUE, new DeliverReceipts().invoke(mc));
+    	} catch (Exception e) {
+    		fail(e.getMessage());
+    	}
+    	
+    	assertFalse(delman.isDelivered(receipt.getMessageId()));
+    }
 }

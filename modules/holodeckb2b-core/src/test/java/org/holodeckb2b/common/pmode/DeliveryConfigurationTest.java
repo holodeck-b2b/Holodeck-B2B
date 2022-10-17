@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.holodeckb2b.common.util.LogOnlyDeliveryMethod;
 import org.holodeckb2b.commons.util.Utils;
 import org.junit.Test;
 
@@ -37,7 +38,7 @@ public class DeliveryConfigurationTest extends AbstractBaseTest<DeliveryConfigur
 		final DeliveryConfiguration dc = createObject(
 				"<DefaultDelivery xmlns:tns=\"http://holodeck-b2b.org/schemas/2014/10/pmode\"" + 
 		        " 				  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
-				"   <DeliveryMethod>org.holodeckb2b.test.FakeVDelivery</DeliveryMethod>" +
+				"   <DeliveryMethod>org.holodeckb2b.common.util.LogOnlyDeliveryMethod</DeliveryMethod>" +
 				"	<Parameter>" +
 				"		<name>param-1</name>" +
 				"		<value>setting1</value>" +
@@ -49,7 +50,7 @@ public class DeliveryConfigurationTest extends AbstractBaseTest<DeliveryConfigur
 				"</DefaultDelivery>");
 		
 		assertNotNull(dc);
-		assertEquals("org.holodeckb2b.test.FakeVDelivery", dc.getFactory());
+		assertEquals(org.holodeckb2b.common.util.LogOnlyDeliveryMethod.class, dc.getDeliveryMethod());
 		assertFalse(Utils.isNullOrEmpty(dc.getSettings()));
 		assertTrue(dc.getSettings().size() == 2);
 	}
@@ -59,11 +60,11 @@ public class DeliveryConfigurationTest extends AbstractBaseTest<DeliveryConfigur
 		final DeliveryConfiguration dc = createObject(
 				"<DefaultDelivery xmlns:tns=\"http://holodeck-b2b.org/schemas/2014/10/pmode\"" + 
 		        " 				  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
-				"   <DeliveryMethod>org.holodeckb2b.test.FakeVDelivery</DeliveryMethod>" +
+				"   <DeliveryMethod>org.holodeckb2b.common.util.LogOnlyDeliveryMethod</DeliveryMethod>" +
 				"</DefaultDelivery>");
 		
 		assertNotNull(dc);
-		assertEquals("org.holodeckb2b.test.FakeVDelivery", dc.getFactory());
+		assertEquals(org.holodeckb2b.common.util.LogOnlyDeliveryMethod.class, dc.getDeliveryMethod());
 		assertTrue(Utils.isNullOrEmpty(dc.getSettings()));		
 	}
 	
@@ -85,7 +86,7 @@ public class DeliveryConfigurationTest extends AbstractBaseTest<DeliveryConfigur
 	public void writeComplete() {
 		final DeliveryConfiguration dc = new DeliveryConfiguration();
 		dc.setId("useless-id");
-		dc.setFactory("org.holodeckb2b.nothing.NoRealClass");
+		dc.setDeliveryMethod(LogOnlyDeliveryMethod.class);
 		dc.addSetting("param-1", "configuresSomething");
 		dc.addSetting("param-2", "configuresSomethingElse");
 		
@@ -93,7 +94,7 @@ public class DeliveryConfigurationTest extends AbstractBaseTest<DeliveryConfigur
 		
 		assertFalse(Utils.isNullOrEmpty(xml));
 		assertTrue(countElements(xml, "DeliveryMethod") == 1);
-		assertEquals(dc.getFactory(), findElements(xml, "DeliveryMethod").get(0).getTextContent());
+		assertEquals(dc.getDeliveryMethod().getName(), findElements(xml, "DeliveryMethod").get(0).getTextContent());
 		assertTrue(countElements(xml, "Parameter") == 2);		
 	}
 
@@ -102,13 +103,13 @@ public class DeliveryConfigurationTest extends AbstractBaseTest<DeliveryConfigur
 	public void writeFactoryOnly() {
 		final DeliveryConfiguration dc = new DeliveryConfiguration();
 		dc.setId("useless-id");
-		dc.setFactory("org.holodeckb2b.nothing.NoRealClass");
+		dc.setDeliveryMethod(LogOnlyDeliveryMethod.class);
 		
 		final String xml = createXML(dc);
 		
 		assertFalse(Utils.isNullOrEmpty(xml));
 		assertTrue(countElements(xml, "DeliveryMethod") == 1);
-		assertEquals(dc.getFactory(), findElements(xml, "DeliveryMethod").get(0).getTextContent());
+		assertEquals(dc.getDeliveryMethod().getName(), findElements(xml, "DeliveryMethod").get(0).getTextContent());
 		assertTrue(countElements(xml, "Parameter") == 0);		
 	}
 	
@@ -128,14 +129,14 @@ public class DeliveryConfigurationTest extends AbstractBaseTest<DeliveryConfigur
 	public void testCopy() {
 		final DeliveryConfiguration source = new DeliveryConfiguration();
 		source.setId("some-id");
-		source.setFactory("org.holodeckb2b.nothing.NoRealClass");
+		source.setDeliveryMethod(LogOnlyDeliveryMethod.class);
 		source.addSetting("param-1", "configuresSomething");
 		source.addSetting("param-2", "configuresSomethingElse");
 		
 		final DeliveryConfiguration copy = new DeliveryConfiguration(source);
 		
 		assertEquals(source.getId(), copy.getId());
-		assertEquals(source.getFactory(), copy.getFactory());
+		assertEquals(source.getDeliveryMethod(), copy.getDeliveryMethod());
 		assertNotNull(copy.getSettings());
 		assertTrue(copy.getSettings().size() == 2);
 	}

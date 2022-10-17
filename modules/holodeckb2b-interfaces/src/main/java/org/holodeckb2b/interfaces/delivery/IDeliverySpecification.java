@@ -29,12 +29,12 @@ import java.util.Map;
  * configure it and whether the delivery should be done synchronously in the message processing pipeline or can be done
  * asynchronously. The delivery specification is part of the P-Mode that governs the message exchange and multiple
  * specifications can be specified for the different message unit types, e.g. specific for <i>Receipts</i>.
- * <p>Holodeck B2B will create one {@link IDeliveryMethod} instance for each unique Delivery Specification identifier. 
- * This allows for re-use of <i>Delivery Specifications</i> in P-Modes. How such re-use is implemented is left up to the
- * component(s) responsible for handling the P-Modes in an Holodeck B2B instance.
+ * <p>The delivery methods are managed by the {@linkplain IDeliveryManager Holodeck B2B Core <i>Deployment Manager</i>} 
+ * which may cache instances and re-use them based on the Delivery Specification's identifier. 
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IDeliveryMethod
+ * @see IDeliveryManager
  */
 public interface IDeliverySpecification {
 
@@ -48,21 +48,14 @@ public interface IDeliverySpecification {
      * @return  The id of this delivery specification or <code>null</code> if this specification has no id.
      */
     String getId();
-
-    /**
-     * @deprecated Implementations should implement {@link #getDeliveryMethod()}. This method will be removed in the 
-     * 			   next version!
-     */
-    @Deprecated
-    default String getFactory() { return null; }
-
+    
     /**
      * Gets the class of the {@link IDeliveryMethod} implementation that should be used for the actual message delivery.
      *
      * @return  Class object of the {@link IDeliveryMethod} implementation to use
      * @since 6.0.0
      */
-    default Class<? extends IDeliveryMethod> getDeliveryMethod() { return null; }
+    Class<? extends IDeliveryMethod> getDeliveryMethod();
 
     /**
      * Returns the settings that should be used to configure the <i>Delivery Method</i> for a specific back-end 

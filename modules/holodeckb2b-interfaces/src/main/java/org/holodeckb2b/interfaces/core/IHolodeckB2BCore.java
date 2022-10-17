@@ -20,9 +20,7 @@ import java.util.List;
 
 import org.apache.axis2.modules.Module;
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
-import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
-import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
@@ -65,17 +63,6 @@ public interface IHolodeckB2BCore {
      */
     Module getModule(final String name);
     
-    /**
-     * Gets a {@link IMessageDeliverer} object configured as specified by the {@link IDeliverySpecification} that can be
-     * used to deliver message units to the <i>Consumer</i> business application.
-     *
-     * @param deliverySpec      Specification of the delivery method for which a deliver must be returned.
-     * @return                  A {@link IMessageDeliverer} object for the given delivery specification
-     * @throws MessageDeliveryException When no delivery specification is given or when the message deliverer can not
-     *                                  be created
-     */
-    IMessageDeliverer getMessageDeliverer(IDeliverySpecification deliverySpec) throws MessageDeliveryException;
-
     /**
      * Gets a {@link IMessageSubmitter} object that can be used by the <i>Producer</i> business application for
      * submitting User Messages to the Holodeck B2B Core.
@@ -201,4 +188,12 @@ public interface IHolodeckB2BCore {
      * @since 5.3.0
      */
     void resumeProcessing(IUserMessageEntity userMessage) throws PersistenceException, IllegalArgumentException;
+    
+    /**
+     * Gets the active <i>Delivery Manager</i> of this Holodeck B2B instance.
+     * 
+     * @return the active {@link IDeliveryManager} implementation
+     * @since 6.0.0
+     */
+    IDeliveryManager getDeliveryManager();
 }

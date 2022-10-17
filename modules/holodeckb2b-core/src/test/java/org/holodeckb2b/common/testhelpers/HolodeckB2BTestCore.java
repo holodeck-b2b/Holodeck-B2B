@@ -35,10 +35,7 @@ import org.holodeckb2b.core.config.InternalConfiguration;
 import org.holodeckb2b.core.validation.DefaultValidationExecutor;
 import org.holodeckb2b.core.validation.IValidationExecutor;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
-import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
-import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
-import org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory;
-import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
@@ -67,7 +64,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	private ICertificateManager certManager;
 	private IPersistencyProvider persistencyProvider;
 	private List<IMessageProcessingEventConfiguration> eventConfig = new ArrayList<>();
-	private Map<String, IMessageDelivererFactory> msgDeliveryMethods = new HashMap<>();
+	private IDeliveryManager	deliveryManager;
 	private Map<String, Module> modules = new HashMap<>();
 	
 	public HolodeckB2BTestCore() throws AxisFault {
@@ -101,28 +98,25 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	        }
 	    }
 	    return(directory.delete());
-	}	
-	/* (non-Javadoc)
-	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getMessageDeliverer(org.holodeckb2b.interfaces.delivery.IDeliverySpecification)
-	 */
-	@Override
-	public IMessageDeliverer getMessageDeliverer(IDeliverySpecification deliverySpec) throws MessageDeliveryException {
-		IMessageDelivererFactory mdf = msgDeliveryMethods.get(deliverySpec.getId());
-		if (mdf == null) {
-	        try {
-	            final String factoryClassName = deliverySpec.getFactory();
-	            mdf = (IMessageDelivererFactory) Class.forName(factoryClassName).newInstance();
-	        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
-	            // Somehow the factory class failed to load
-	            throw new MessageDeliveryException("Factory class not available!", ex);
-	        }
-	        // Initialize the new factory with the settings from the delivery spec
-	        mdf.init(deliverySpec.getSettings());
-	        msgDeliveryMethods.put(deliverySpec.getId(), mdf);
-		}
-        return mdf.createMessageDeliverer();
+	}		
+	
+	public void setDeliveryManager(final IDeliveryManager dm) {
+		this.deliveryManager = dm;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getMessageSubmitter()
+	 */
+	@Override
+	public IDeliveryManager getDeliveryManager() {
+		if (deliveryManager == null)
+			synchronized (this) {
+				if (deliveryManager == null)
+					deliveryManager = new TestDeliveryManager();
+			}
+		return deliveryManager;
+	}
+
 	public void setMessageSubmitter(final IMessageSubmitter submitter) {
 		this.messageSubmitter = submitter;
 	}
@@ -135,7 +129,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 		if (messageSubmitter == null)
 			synchronized (this) {
 				if (messageSubmitter == null)
-					messageSubmitter = new Submitter();
+					messageSubmitter = new TestMessageSubmitter();
 			}
 		return messageSubmitter;
 	}
@@ -170,7 +164,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 
 	public void setPersistencyProvider(IPersistencyProvider provider) throws PersistenceException {
 		persistencyProvider = provider;
-		persistencyProvider.init(configuration.getHolodeckB2BHome());
+		persistencyProvider.init(configuration);
 	}
 	
 	/* (non-Javadoc)
@@ -207,7 +201,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	public ICertificateManager getCertificateManager() {
 		if (certManager == null)
 			try {
-				certManager = new InMemoryCertificateManager();
+				certManager = new TestCertificateManager();
 			} catch (SecurityProcessingException e) {				
 			}
 		return certManager;

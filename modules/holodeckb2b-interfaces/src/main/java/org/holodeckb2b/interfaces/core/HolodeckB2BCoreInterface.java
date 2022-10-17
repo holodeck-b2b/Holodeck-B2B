@@ -20,9 +20,7 @@ import java.util.List;
 
 import org.apache.axis2.modules.Module;
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
-import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
-import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
+import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
@@ -68,21 +66,6 @@ public class HolodeckB2BCoreInterface {
     public static IConfiguration getConfiguration() {
         assertInitialized();
         return coreImplementation.getConfiguration();
-    }
-
-    /**
-     * Gets a {@link IMessageDeliverer} object configured as specified by the {@link IDeliverySpecification} that can be
-     * used to deliver message units to the <i>Consumer</i> business application.
-     *
-     * @param deliverySpec      Specification of the delivery method for which a deliver must be returned.
-     * @return                  A {@link IMessageDeliverer} object for the given delivery specification
-     * @throws MessageDeliveryException When no delivery specification is given or when the message deliverer can not
-     *                                  be created
-     */
-    public static IMessageDeliverer getMessageDeliverer(final IDeliverySpecification deliverySpec)
-                                                        throws MessageDeliveryException {
-        assertInitialized();
-        return coreImplementation.getMessageDeliverer(deliverySpec);
     }
 
     /**
@@ -263,7 +246,18 @@ public class HolodeckB2BCoreInterface {
     	coreImplementation.resumeProcessing(userMessage);
     }
        
-   /**
+    /**
+     * Gets the active <i>Delivery Manager</i> of this Holodeck B2B instance.
+     * 
+     * @return the active {@link IDeliveryManager} implementation
+     * @since 6.0.0
+     */    
+    public static IDeliveryManager getDeliveryManager() {
+    	assertInitialized();
+    	return coreImplementation.getDeliveryManager();
+    }
+    
+    /**
      * Sets the Holodeck B2B Core implementation that is in use.
      * <p><b>NOTE: </b>This method is for <b>internal use only</b>!
      *

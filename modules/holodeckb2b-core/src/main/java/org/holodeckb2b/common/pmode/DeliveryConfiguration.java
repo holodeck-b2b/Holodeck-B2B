@@ -23,10 +23,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.holodeckb2b.commons.util.Utils;
+import org.holodeckb2b.interfaces.delivery.IDeliveryMethod;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Transient;
+import org.simpleframework.xml.core.PersistenceException;
+import org.simpleframework.xml.core.Validate;
 
 /**
  * Contains the parameters related to a delivery method. 
@@ -36,10 +39,16 @@ import org.simpleframework.xml.Transient;
  */
 public class DeliveryConfiguration implements IDeliverySpecification, Serializable {
 	private static final long serialVersionUID = -4375532353411434169L;
-
+	
     @Element(name = "DeliveryMethod", required = true)
-    private String  delivererFactoryClass;
+    private String  deliveryMethodClassName;
 
+    @Element(name = "PerformAsyncDelivery", required = false)
+    private boolean performAsync = false;    
+    
+    @Transient
+    private Class<? extends IDeliveryMethod> deliveryMethodClass;
+    
     @ElementList(entry = "Parameter", inline = true, required = false)
     private Collection<Parameter>    parameters;
 
@@ -60,9 +69,32 @@ public class DeliveryConfiguration implements IDeliverySpecification, Serializab
      */
     public DeliveryConfiguration(final IDeliverySpecification source) {
         this.id = source.getId();
-        this.delivererFactoryClass = source.getFactory();
-        setSettings((Map<String, Object>) source.getSettings());
+        this.deliveryMethodClass = source.getDeliveryMethod();
+        this.deliveryMethodClassName = source.getDeliveryMethod().getName();
+        this.performAsync = source.performAsyncDelivery();
+        setSettings((Map<String, ?>) source.getSettings());
     }
+
+    /**
+     * Validates and converts the string provided in the <code>DeliveryMethod</code> element into the class object as 
+     * required by the {@link IDeliverySpecification} interface.
+     *
+     * @throws PersistenceException When the string provided in the XML can not be converted to a class.
+     */
+	@SuppressWarnings("unchecked")
+	@Validate
+    public void convertToClass() throws PersistenceException {
+		if (Utils.isNullOrEmpty(deliveryMethodClassName))
+			throw new PersistenceException("Missing required class name of Delivery Method");		
+		try {
+			Class<?> c = Class.forName(deliveryMethodClassName);
+            if (!IDeliveryMethod.class.isAssignableFrom(c))
+                throw new PersistenceException("%s is not a IDeliveryMethod!", deliveryMethodClassName);
+            deliveryMethodClass = (Class<? extends IDeliveryMethod>) c;
+        } catch (final ClassNotFoundException ex) {
+            throw new PersistenceException("Class %s could not be loaded!", deliveryMethodClassName);
+        }        
+    }    
     
     @Override
     public String getId() {
@@ -74,14 +106,37 @@ public class DeliveryConfiguration implements IDeliverySpecification, Serializab
     }
 
     @Override
-    public String getFactory() {
-        return delivererFactoryClass;
+    public Class<? extends IDeliveryMethod> getDeliveryMethod() {
+    	return deliveryMethodClass;
     }
 
-    public void setFactory(final String factory) {
-        this.delivererFactoryClass = factory;
+    public void setDeliveryMethod(final Class<? extends IDeliveryMethod> deliveryMethodClass) {
+    	this.deliveryMethodClass = deliveryMethodClass;
+        this.deliveryMethodClassName = deliveryMethodClass.getName();
     }
 
+    /**
+     * @since 6.0.0
+     */
+    @Override
+    public boolean performAsyncDelivery() {
+    	return performAsync;
+    }
+    
+    /**
+     * Sets whether the delivery of message units should be performed asynchronous. 
+     * <p>
+     * Note that the configured Delivery Method must support asynchronous delivery when asynchronous delivery is 
+     * requested.
+     * 
+     * @param useAsync	<code>true</code> when message units should be delivered asynchronously,
+     * 					<code>false</code> if not
+     * @since 6.0.0
+     */
+    public void setAsyncDelivery(boolean useAsync) {
+    	performAsync = useAsync;
+    }
+    
     @Override
     public Map<String, ?> getSettings() {
     	if (!Utils.isNullOrEmpty(parameters)) {
@@ -92,7 +147,7 @@ public class DeliveryConfiguration implements IDeliverySpecification, Serializab
     		return null;
     }	
 
-    public void setSettings(final Map<String, Object> sourceSettings) {
+    public void setSettings(final Map<String, ?> sourceSettings) {
         if (!Utils.isNullOrEmpty(sourceSettings)) {
             this.parameters = new ArrayList<>(sourceSettings.size());
             sourceSettings.forEach((n, v) -> this.parameters.add(new Parameter(n, v.toString())));

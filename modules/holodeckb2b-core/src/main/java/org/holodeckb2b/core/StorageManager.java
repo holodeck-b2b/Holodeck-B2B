@@ -25,6 +25,7 @@ import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.SelectivePullRequest;
 import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.commons.Pair;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
@@ -40,6 +41,8 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
@@ -66,7 +69,7 @@ public class StorageManager {
 
     /**
      * Creates a new persistency object to store the meta-data of the given message unit that is received by Holodeck
-     * B2B.
+     * B2B. Will set the direction as IN and assign the RECEIVED processing state if no state has been assigned yet. 
      *
      * @param <T>           Limits the <code>messageUnit</code> to message units types
      * @param <V>           Only entity objects will be returned, V and T will be of the same message type
@@ -79,7 +82,8 @@ public class StorageManager {
         MessageUnit tempObject = createMutableObject(messageUnit);
         // Set correct direction
         tempObject.setDirection(Direction.IN);
-        tempObject.setProcessingState(ProcessingState.RECEIVED);
+        if (tempObject.getCurrentProcessingState() == null) 
+        	tempObject.setProcessingState(ProcessingState.RECEIVED);
         return parent.storeMessageUnit(tempObject);
     }
 
@@ -122,6 +126,20 @@ public class StorageManager {
         parent.setPModeId(msgUnit, pmodeId);
     }
 
+    /**
+     * Sets the ID of the P-Mode and [label of] the Leg that define how the Error Message unit should be processed.
+     *
+     * @param msgUnit   The entity object representing the Error Message unit
+     * @param pl   		Pair consisting of the P-Mode and label of the Leg that govern the processing of the Error 
+     * 					Message 
+     * @throws PersistenceException If an error occurs when saving the meta-data to the database
+     * @since 6.0.0
+     */
+    public void setPModeAndLeg(final IErrorMessageEntity msgUnit, final Pair<IPMode, ILeg.Label> pl) 
+    																					throws PersistenceException {
+    	parent.setPModeAndLeg(msgUnit, pl.value1().getId(), pl.value2());
+    }
+    
     /**
      * Updates the processing state of the given message unit to the specified state without checking the current state.
      * <br>The start time of the new processing state will be set to the current time.

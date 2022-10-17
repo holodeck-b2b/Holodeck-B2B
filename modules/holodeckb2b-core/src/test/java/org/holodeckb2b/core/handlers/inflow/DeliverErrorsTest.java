@@ -16,38 +16,23 @@
  */
 package org.holodeckb2b.core.handlers.inflow;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
-import java.util.Collections;
+import java.util.UUID;
 
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
-import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.pmode.DeliveryConfiguration;
-import org.holodeckb2b.common.pmode.ErrorHandlingConfig;
-import org.holodeckb2b.common.pmode.Leg;
-import org.holodeckb2b.common.pmode.PMode;
-import org.holodeckb2b.common.pmode.UserMessageFlow;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.NullDeliveryMethod;
-import org.holodeckb2b.common.testhelpers.NullDeliveryMethod.NullDeliverer;
-import org.holodeckb2b.common.testhelpers.TestUtils;
-import org.holodeckb2b.commons.util.MessageIdUtils;
+import org.holodeckb2b.common.testhelpers.TestDeliveryManager;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
-import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -57,76 +42,72 @@ import org.junit.Test;
  * Checked for cases coverage (24.04.2017)
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class DeliverErrorsTest {
-	private static final String T_MSG_ID = "t-msg-id-1@test.holodeck-b2b.org";
 
+	static TestDeliveryManager delman;
+	
 	@BeforeClass
     public static void setUpClass() throws Exception {
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
+        delman = (TestDeliveryManager) HolodeckB2BCore.getDeliveryManager();
     }
-
-    @After
-    public void tearDown() throws Exception {
-        TestUtils.cleanOldMessageUnitEntities();
-        HolodeckB2BCoreInterface.getPModeSet().removeAll();
-    }
+	
+	@Before
+	public void resetRejection() {
+		delman.rejection = null;
+	}
 
     @Test
     public void testDoProcessing() throws Exception {
-    	PMode pmode = TestUtils.create1WaySendPushPMode();        
-        Leg leg = pmode.getLeg(Label.REQUEST);
-        
-        UserMessageFlow umFlow = new UserMessageFlow();
+    	MessageContext mc = new MessageContext();
+    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
 
-        ErrorHandlingConfig errorHandlingConfig = new ErrorHandlingConfig();
-        errorHandlingConfig.setNotifyErrorToBusinessApplication(true);
-        
-        DeliveryConfiguration deliverySpecification = new DeliveryConfiguration();
-        deliverySpecification.setFactory(NullDeliveryMethod.class.getName());
-        deliverySpecification.setId("delivery_spec_id");
-        errorHandlingConfig.setErrorDelivery(deliverySpecification);
-        umFlow.setErrorHandlingConfiguration(errorHandlingConfig);
-
-        leg.setUserMessageFlow(umFlow);
-       
-        HolodeckB2BCore.getPModeSet().add(pmode);
-
-        UserMessage userMessage = new UserMessage();
-        userMessage.setMessageId(MessageIdUtils.createMessageId());
-        userMessage.setPModeId(pmode.getId());
-        
-        MessageContext mc = new MessageContext();
-        mc.setFLOW(MessageContext.IN_FLOW);
-        mc.setServerSide(true);
-
-        EbmsError ebmsError = new EbmsError();
-        ebmsError.setSeverity(IEbmsError.Severity.failure);
-        ebmsError.setErrorCode("some_error_code");
-        ebmsError.setRefToMessageInError(userMessage.getMessageId());
-        ebmsError.setMessage("some error message");
-        ErrorMessage errorMessage = new ErrorMessage(ebmsError);
-        errorMessage.setMessageId(T_MSG_ID);
-        errorMessage.setPModeId(pmode.getId());
-        errorMessage.setRefToMessageId(userMessage.getMessageId());
-        
-        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-        IMessageUnitEntity umEntity = storageManager.storeOutGoingMessageUnit(userMessage);        
-        
-        IErrorMessageEntity errorMessageEntity = storageManager.storeIncomingMessageUnit(errorMessage);        
-        storageManager.setProcessingState(errorMessageEntity, ProcessingState.READY_FOR_DELIVERY);
-        
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
-        procCtx.addReceivedError(errorMessageEntity);        
-        procCtx.addRefdMsgUnitByError(errorMessageEntity, Collections.singletonList(umEntity));
-        
+    	for(int i = 0; i < 4; i++) {
+	    	ErrorMessage errorMessage = new ErrorMessage();
+	        errorMessage.setMessageId(UUID.randomUUID().toString());
+	        
+	        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
+	        IErrorMessageEntity errorMessageEntity = storageManager.storeIncomingMessageUnit(errorMessage);        
+	        
+	        storageManager.setProcessingState(errorMessageEntity, ProcessingState.READY_FOR_DELIVERY);
+	        
+	        procCtx.addReceivedError(errorMessageEntity);
+    	}
+    	
         try {
             assertEquals(Handler.InvocationResponse.CONTINUE, new DeliverErrors().invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
-        assertTrue(((NullDeliverer) HolodeckB2BCore.getMessageDeliverer(deliverySpecification)).wasDelivered(T_MSG_ID));
-        assertEquals(ProcessingState.DONE, errorMessageEntity.getCurrentProcessingState().getState());
+        assertTrue(procCtx.getReceivedErrors().parallelStream().allMatch(e -> delman.isDelivered(e.getMessageId())));
     }
+    
+    @Test
+    public void testIgnoreNonReady() throws Exception {
+    	MessageContext mc = new MessageContext();
+    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	
+		ErrorMessage errorMessage = new ErrorMessage();
+		errorMessage.setMessageId(UUID.randomUUID().toString());
+		
+		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
+		IErrorMessageEntity errorMessageEntity = storageManager.storeIncomingMessageUnit(errorMessage);        
+		
+		storageManager.setProcessingState(errorMessageEntity, ProcessingState.PROCESSING);
+		
+		procCtx.addReceivedError(errorMessageEntity);
+    	
+    	try {
+    		assertEquals(Handler.InvocationResponse.CONTINUE, new DeliverErrors().invoke(mc));
+    	} catch (Exception e) {
+    		fail(e.getMessage());
+    	}
+    	
+    	assertFalse(delman.isDelivered(errorMessage.getMessageId()));
+    }
+    
+    
 }

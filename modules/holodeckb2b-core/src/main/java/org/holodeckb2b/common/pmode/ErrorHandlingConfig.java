@@ -88,17 +88,14 @@ public class ErrorHandlingConfig implements IErrorHandling, Serializable {
      * @param source The source object to copy the parameters from
      */
     public ErrorHandlingConfig(final IErrorHandling source) {
-    	if (source.getPattern() != null) {
-	        this.replyPattern = source.getPattern().toString();
-	        this.errorsTo = source.getReceiverErrorsTo();
-	        this.addSOAPFault = source.shouldAddSOAPFault();
-	        this.reportOnError = source.shouldReportErrorOnError();
-	        this.reportOnReceipt = source.shouldReportErrorOnReceipt();
-    	} else {
-	        this.notifyBusinessApplication = source.shouldNotifyErrorToBusinessApplication();
-	        this.errorDelivery = source.getErrorDelivery()!= null ? 
-	        											new DeliveryConfiguration(source.getErrorDelivery()) : null;
-    	}
+        this.replyPattern = source.getPattern() != null ? source.getPattern().toString() : null;
+        this.errorsTo = source.getReceiverErrorsTo();
+        this.addSOAPFault = source.shouldAddSOAPFault();
+        this.reportOnError = source.shouldReportErrorOnError();
+        this.reportOnReceipt = source.shouldReportErrorOnReceipt();
+        this.notifyBusinessApplication = source.shouldNotifyErrorToBusinessApplication();
+        this.errorDelivery = source.getErrorDelivery()!= null ? 
+        											new DeliveryConfiguration(source.getErrorDelivery()) : null;
     }
 
     @Override

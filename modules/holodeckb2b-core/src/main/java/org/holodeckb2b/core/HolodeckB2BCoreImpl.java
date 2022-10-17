@@ -19,7 +19,6 @@ package org.holodeckb2b.core;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisModule;
@@ -39,11 +38,7 @@ import org.holodeckb2b.core.validation.DefaultValidationExecutor;
 import org.holodeckb2b.core.validation.IValidationExecutor;
 import org.holodeckb2b.core.workerpool.WorkerPool;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
-import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
-import org.holodeckb2b.interfaces.delivery.IMessageDeliverer;
-import org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory;
-import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
-import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
@@ -64,7 +59,7 @@ import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.WorkerPoolException;
 
 /**
- * The Holodeck B2B Core which provides access to and ensures that core componenents like the P-Mode and persistency 
+ * The Holodeck B2B Core which provides access to and ensures that core components like the P-Mode and persistency 
  * provider.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
@@ -74,7 +69,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         static final IMessageSubmitter instance = new MessageSubmitter();
     }
 
-    /**
+	/**
      * Logger
      */
     private static final Logger log = LogManager.getLogger(HolodeckB2BCoreImpl.class);
@@ -88,14 +83,6 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
      * The list of worker pools running in this Holodeck B2B instance
      */
     private HashMap<String, WorkerPool>      workerPools = null;
-
-    /**
-     * Collection of active message delivery methods mapped by the <i>id</i> of the {@link IDeliverySpecification} that
-     * defined their configuration.
-     * <p>For each unique delivery specification id Holodeck B2B will create factory class that creates the actual
-     * {@link IMessageDeliverer} objects that are used to deliver messages to the business application.
-     */
-    private Map<String, IMessageDelivererFactory>    msgDeliveryFactories = null;
 
     /**
      * The P-Mode manager that maintains the set of deployed P-Modes
@@ -114,12 +101,22 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
      * @since  5.0.0 In previous versions the DAOFactory was referenced. 
      */
     private IPersistencyProvider    persistencyProvider = null;
+    /**
+     * The storage manager facade to manage updates of the message units' meta-data
+     */
+    private StorageManager	storageManager = null;
     
     /**
      * The installed certificate manager that manages and checks certificates used in the message processing
      * @since 5.0.0
      */
     private ICertificateManager certManager = null;
+
+    /**
+     * The installed delivery manager that handles the delivery of message units to the back-end application
+     * @since 6.0.0
+     */    
+    private DeliveryManager deliveryManager = null;    
     
     /**
      * The list of globally configured event handlers 
@@ -142,7 +139,8 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         this.instanceConfiguration = config;
         try {
         	log.trace("Initialize the P-Mode manager");
-			pmodeManager = new PModeManager(instanceConfiguration);
+			pmodeManager = new PModeManager();
+			pmodeManager.init(config);
 		} catch (PModeSetException e) {
 			log.fatal("Cannot start Holodeck B2B because P-Mode manager couldn't be initialised!\n\tError details: {}", 
 						e.getMessage());
@@ -168,7 +166,8 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     		throw new AxisError("No event processor available!");
     	}
         log.info("Loaded event processor : {}", eventProcessor.getName());
-
+        eventConfigurations = new ArrayList<>();        
+        
         log.debug("Load the persistency provider for storing meta-data on message units");
         persistencyProvider = Utils.getFirstAvailableProvider(IPersistencyProvider.class);
         if (persistencyProvider != null) {	        	
@@ -185,6 +184,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         	log.fatal("Cannot start Holodeck B2B because required Persistency Provider is not available!");
         	throw new AxisFault("Unable to load required persistency provider!");
         }
+        storageManager = new StorageManager(persistencyProvider.getUpdateManager());
         log.info("Loaded Persistency Provider : {}", persistencyProvider.getName());
         
         log.trace("Load the certificate manager");
@@ -205,10 +205,10 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         }
         log.info("Loaded Certficate Manager : {}", certManager.getName());
         
-        log.trace("Create list of available message delivery methods");
-        msgDeliveryFactories = new HashMap<>();
-        log.trace("Create list of globally configured event handlers");
-        eventConfigurations = new ArrayList<>();        
+        log.trace("Initialise the Delivery Manager");
+        deliveryManager = new DeliveryManager(storageManager, config);
+        log.info("Initialised the Delivery Manager");
+        
         log.trace("Create list of managed worker pools");
         workerPools = new HashMap<>();
         
@@ -216,9 +216,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         log.debug("Make Core available to outside world");
         HolodeckB2BCore.setImplementation(this);
 
-        log.trace("Initialize Core worker pool");
-        
-        XMLWorkerPoolConfiguration corePoolCfg = null;
+        log.trace("Initialize Core worker pool");        
         try {
         	createWorkerPool("hb2b-core", new XMLWorkerPoolConfiguration(instanceConfiguration.getWorkerPoolCfgFile()));
         } catch (WorkerPoolException corePoolCfgError) {        	
@@ -237,10 +235,50 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     public void shutdown() {
         log.info("Shutting down Holodeck B2B Core...");
         log.trace("Stopping worker pools");
-        workerPools.forEach((n, p) -> { log.trace("Stopping worker pool: {}", n);
-        								p.shutdown(10);
+        workerPools.forEach((n, p) -> { try {
+        									log.trace("Stopping worker pool: {}", n);
+        									p.shutdown(10);
+        								} catch (Throwable t) {
+        									log.error("Error during worker pool ({}) shutdown: {}", n, 
+        												Utils.getExceptionTrace(t));
+        								}
         							  });
         log.debug("Worker pools stopped");
+        try {
+        	log.trace("Shutting down Certificate Manager");
+        	certManager.shutdown();
+        	log.debug("Certificate Manager shut down");
+        } catch (Throwable t) {
+        	log.error("Error during Certificate Manager shutdown: {}", Utils.getExceptionTrace(t));
+        }
+        try {
+        	log.trace("Shutting down Delivery Manager");
+        	deliveryManager.shutdown();
+        	log.debug("Delivery Manager shut down");
+        } catch (Throwable t) {
+        	log.error("Error during Delivery Manager shutdown: {}", Utils.getExceptionTrace(t));
+        }
+        try {
+        	log.trace("Shutting down Persistency Provider");
+        	persistencyProvider.shutdown();
+        	log.debug("Persistency Provider shut down");
+        } catch (Throwable t) {
+        	log.error("Error during Persistency Provider shutdown: {}", Utils.getExceptionTrace(t));
+        }
+        try {
+        	log.trace("Shutting down Event Processor");
+        	eventProcessor.shutdown();
+        	log.debug("Event processor shut down");
+        } catch (Throwable t) {
+        	log.error("Error during Event Processor shutdown: {}", Utils.getExceptionTrace(t));
+        }
+        try {
+        	log.trace("Shutting down P-Mode Manager");
+        	pmodeManager.shutdown();
+        	log.debug("P-Mode Manager shut down");
+        } catch (Throwable t) {
+        	log.error("Error during P-Mode Manager shutdown: {}", Utils.getExceptionTrace(t));
+        }
         log.info("Holodeck B2B Core STOPPED.");
     }
 
@@ -268,49 +306,6 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
      * {@inheritDoc}
      */
     @Override
-    public IMessageDeliverer getMessageDeliverer(final IDeliverySpecification deliverySpec)
-                                                        throws MessageDeliveryException {
-        if (deliverySpec == null) {
-            log.error("No delivery specification given!");
-            throw new MessageDeliveryException("No delivery specification given!");
-        }
-
-        log.trace("Check if there is a factory available for this specification [{}]", deliverySpec.getId());
-        IMessageDelivererFactory mdf = msgDeliveryFactories.get(deliverySpec.getId());
-
-        if (mdf == null) {
-            try {
-                log.trace("No factory available yet for this specification [{}]", deliverySpec.getId());
-                final String factoryClassName = deliverySpec.getFactory();
-                log.debug("Create a factory [{}] for delivery specification [{}]",factoryClassName,deliverySpec.getId());
-                mdf = (IMessageDelivererFactory) Class.forName(factoryClassName).newInstance();
-                // Initialize the new factory with the settings from the delivery spec
-                mdf.init(deliverySpec.getSettings());
-                log.debug("Created factory [{}] for delivery specification [{}]",factoryClassName,deliverySpec.getId());
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-                     | ClassCastException | MessageDeliveryException ex) {
-                // Somehow the factory class failed to load
-                log.error("The factory for delivery specification [{}] could not be created! Error details: {}",
-                			deliverySpec.getId(), ex.getMessage());
-                throw new MessageDeliveryException("Factory class not available!", ex);
-            }
-            // Add the new factory to the list of available factories
-            //@todo: Synchronizing here does not prevent that multiple instances of a factory can be created, should we change this?
-            synchronized (msgDeliveryFactories) {
-                if (msgDeliveryFactories.get(deliverySpec.getId()) == null)
-                    msgDeliveryFactories.put(deliverySpec.getId(), mdf);
-            }
-            log.trace("Added new factory to list of available delivery methods");
-        }
-
-        log.trace("Get and return deliverer from the factory");
-        return mdf.createMessageDeliverer();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public IPModeSet getPModeSet() {
         return pmodeManager;
     }
@@ -325,15 +320,11 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     }
 
     /**
-     * Gets the data access object that should be used to store and update the meta-data on processed message units.
-     * <p>The returned data access object is a facade to the one provided by the persistency provider to ensure that
-     * changes in the message unit meta-data are managed correctly.
-     *
-     * @return  The {@link StorageManager} that Core classes should use to update meta-data of message units
-     * @since  3.0.0
+     * @see HolodeckB2BCore#getStorageManager()
+     * @since 3.0.0
      */
     public StorageManager getStorageManager() {
-        return new StorageManager(persistencyProvider.getUpdateManager());
+        return storageManager;
     }
 
     /**
@@ -346,12 +337,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     }
 
     /**
-     * Gets the {@link IValidationExecutor} implementation that should be used for the execution of the custom
-     * message validations.<br>
-     * Currently the executor is not configurable and a simple, i.e. non-optimized, executor is used, see {@link
-     * DefaultValidationExecutor}
-     *
-     * @return  The component responsible for execution of the custom validations.
+     * @see HolodeckB2BCore#getValidationExecutor()
      * @since 4.0.0
      */
     public IValidationExecutor getValidationExecutor() {
@@ -368,18 +354,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     }
 
     /**
-     * Registers a <i>global</i> event handler for handling {@link IMessageProcessingEvent}s that occur during the 
-     * processing of messages. If there is already a configuration registered with the same <code>id</code> it will be
-     * replaced by the new configuration.
-     * <p>NOTE: When the P-Mode of a message also defines an event handler for an event for which also a global 
-     * configuration exists the one in the P-Mode takes precedence over the global configuration.
-     * 
-     * @param eventConfiguration	The event handler's configuration  	
-     * @return 						<code>true</code> if an existing event configuration was replaced,
-     * 								<code>false</code> if this was a new registration 
-     * @throws MessageProccesingEventHandlingException When the given event handler configuration cannot be registered,
-     * 												   for example because the handler class is not available or no id
-     * 												   is specified
+     * {@inheritDoc}
      * @since 4.1.0
      */
     @Override
@@ -403,9 +378,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     }
     
     /**
-     * Removes a <i>global</i> event handler configuration.
-     * 
-     * @param id	The id of the event handler configuration to remove
+     * {@inheritDoc}
      * @since 4.1.0 
      */
     @Override
@@ -421,9 +394,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     }
     
     /**
-     * Gets the list of globally configured event handlers. 
-     *  
-     * @return		The list of event handler configurations 
+     * {@inheritDoc}
      * @since 4.1.0
      */
     @Override
@@ -432,9 +403,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     }
     
     /**
-     * Gets information about the version of the Holodeck B2B Core of this instance. 
-     *   
-     * @return	The version info
+     * {@inheritDoc}
      * @since 5.0.0
      */
     @Override
@@ -443,11 +412,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     }
     
     /**
-     * Gets the active Axis2 Module with the given name. This can for example be used by protocol extension to get 
-     * access to "their" module for protocol specific settings.  
-     * 
-     * @param name	the requested module's name
-     * @return 		the active Axis2 module if it exists in this Holodeck B2B instance,<br><code>null</code> otherwise
+     * {@inheritDoc}
      * @since 5.0.0
      */
     @Override
@@ -458,13 +423,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     }
     
     /**
-     * Creates a new worker pool using the provided name and configuration. 
-     * 
-     * @param name 				name to identify the new pool
-     * @param configuration		the configuration for the new pool
-     * @return the created worker pool 
-     * @throws WorkerPoolException when the worker pool cannot be created because of an issue in the provided 
-     * 							   configuration or that the pool name isn't unique.
+     * {@inheritDoc}
      * @since 5.1.0 
      */
     @Override
@@ -498,28 +457,19 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     }
     
     /**
-     * Gets the worker pool with the given name.
-     * 
-     * @param name	of the worker pool to retrieve
-     * @return		the worker pool with the given name, or <code>null</code> when no such pool exists
+     * {@inheritDoc}
      * @since 5.1.0
      */
+    @Override
     public IWorkerPool getWorkerPool(final String name) {    	
     	return workerPools != null ? workerPools.get(name) : null;
     }
     
     /**
-     * Resumes processing of the <i>suspended</i> User Message.  
-     * <p>Note that only outgoing User Messages can be in suspended state and resumed. The resume operation will change 
-     * the processing state from <i>SUSPENDED</i> to either <i>READY_TO_PUSH</i> or <i>AWAITING_PULL</i> depending on 
-     * the MEP defined in the P-Mode. If the current processing state however has already changed it assumed that the 
-     * message has already been resumed and no further action is needed.
-     *  
-     * @param userMessage	to be resumed 
-     * @throws PersistenceException		when an error occurs updating the processing state of the message unit
-     * @throws IllegalArgumentException when the given User Message is an incoming User Message 
+     * {@inheritDoc}
      * @since 5.3.0
      */
+    @Override
     public void resumeProcessing(IUserMessageEntity userMessage) throws PersistenceException, IllegalArgumentException {
     	if (userMessage.getDirection() == Direction.IN) {
     		log.warn("Illegal request to resume processing of received message unit [msgId={}]", 
@@ -536,6 +486,15 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     		log.info("Processing of User Message [msgId={}] resumed", userMessage.getMessageId());
     	else
     		log.info("Processing of User Message [msgId={}] already changed.", userMessage.getMessageId());
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @since 6.0.0
+     */
+    @Override
+    public IDeliveryManager getDeliveryManager() {
+    	return deliveryManager;
     }
     
 }
