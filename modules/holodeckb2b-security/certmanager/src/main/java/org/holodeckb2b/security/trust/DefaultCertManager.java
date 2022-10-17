@@ -40,7 +40,6 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,6 +59,7 @@ import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.commons.security.CertificateUtils;
 import org.holodeckb2b.commons.security.KeystoreUtils;
 import org.holodeckb2b.commons.util.Utils;
+import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.events.security.ISignatureVerifiedWithWarning;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
@@ -152,7 +152,8 @@ public class DefaultCertManager implements ICertificateManager {
      *                                      missing or incorrect references to keystores.
      */
     @Override
-    public void init(final Path hb2bHome) throws SecurityProcessingException {
+    public void init(final IConfiguration config) throws SecurityProcessingException {
+    	final Path hb2bHome = config.getHolodeckB2BHome();
         final Path cfgFilePath = hb2bHome.resolve("conf/certmanager_config.xml");
         try {
             log.debug("Reading configuration file at {}", cfgFilePath.toString());
@@ -199,6 +200,10 @@ public class DefaultCertManager implements ICertificateManager {
             log.debug(logMsg.toString());
         } else
         	log.info("Completed initialisation");
+    }
+    
+    @Override
+    public void shutdown() {
     }
 
     /**

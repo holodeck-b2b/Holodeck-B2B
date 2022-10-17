@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.persistency.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.IUpdateManager;
@@ -24,10 +25,6 @@ public class InMemoryProvider implements IPersistencyProvider {
 	public String getName() {
 		return "In Memory Test Provider";
 	}
-
-	@Override
-	public void init(Path hb2bHomeDir) throws PersistenceException {
-	}
 		
 	@Override
 	public IUpdateManager getUpdateManager() {
@@ -37,5 +34,13 @@ public class InMemoryProvider implements IPersistencyProvider {
 	@Override
 	public IQueryManager getQueryManager() {
 		return new QueryManager(msgUnitStore);
+	}
+
+	@Override
+	public void init(IConfiguration config) throws PersistenceException {
+	}
+
+	@Override
+	public void shutdown() {
 	}		
 }

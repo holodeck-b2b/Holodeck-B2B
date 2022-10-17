@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * New API for the delivery of message units to the back-end, including support for async delivery. Added interfaces:
 	- `org.holodeckb2b.interfaces.delivery.IDeliveryMethod`
 	- `org.holodeckb2b.interfaces.delivery.IDeliveryCallback`
+* `shutdown()` method to the _Persistency Provider_, _Event Processor_, _Certificate Manager_ and _P-Mode Set_
+to release any held resources.
 
 ##### Changed
 * Initialisation of the _P-Mode storage_ component now uses the full Holodeck B2B configuration instead of only the home

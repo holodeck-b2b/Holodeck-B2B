@@ -17,7 +17,6 @@
 package org.holodeckb2b.interfaces.security.trust;
 
 import java.math.BigInteger;
-import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.PublicKey;
@@ -27,7 +26,6 @@ import java.util.List;
 import javax.security.auth.x500.X500Principal;
 
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 
@@ -81,6 +79,15 @@ public interface ICertificateManager {
      */    
 	void init(final IConfiguration config) throws SecurityProcessingException;
     
+	/**
+	 * Shuts down the Certificate Manager. 
+	 * <p>This method is called by the Holodeck B2B Core when the instance is shut down. Implementations should use it
+	 * to release resources held for storing the certificates.
+	 * 
+	 * @since 6.0.0
+	 */
+	void shutdown();
+	
     /**
      * Searches the set of registered key pairs with Certificate Manager for a key pair with the given certificate and 
      * returns the alias if found.

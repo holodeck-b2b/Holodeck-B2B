@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.common.events;
 
-import java.nio.file.Path;
 import java.util.List;
 
 import org.apache.axis2.context.MessageContext;
@@ -25,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
@@ -150,6 +150,10 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
 	}
 
 	@Override
-	public void init(Path hb2bHome) throws MessageProccesingEventHandlingException {
+	public void init(IConfiguration config) throws MessageProccesingEventHandlingException {
+	}
+
+	@Override
+	public void shutdown() {
 	}
 }

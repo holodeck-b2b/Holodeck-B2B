@@ -17,7 +17,6 @@
 package org.holodeckb2b.interfaces.pmode;
 
 
-import java.nio.file.Path;
 import java.util.Collection;
 
 import org.holodeckb2b.interfaces.config.IConfiguration;
@@ -49,24 +48,20 @@ public interface IPModeSet {
 	/**
 	 * Initializes the P-Mode set. 
 	 * 
-	 * @param hb2bHomeDir	Path of the Holodeck B2B home directory.
-	 * @throws PModeSetException When the P-Mode set implementation could not successfully be initialised
-	 * @since 4.0.0
-	 * @deprecated Implementations should implement {@link #init(IConfiguration)}
-	 */
-    @Deprecated
-	default void init(final Path hb2bHomeDir) throws PModeSetException {
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * Initializes the P-Mode set. 
-	 * 
 	 * @param config	the Holodeck B2B configuration
 	 * @throws PModeSetException When the P-Mode set implementation could not successfully be initialised
-     * @since 6.0.0 For backward compatibility a default, <i>NOP</i> implementation is provided 
+     * @since 6.0.0 
      */  
-	default void init(final IConfiguration config) throws PModeSetException {}
+	void init(final IConfiguration config) throws PModeSetException;
+	
+	/**
+	 * Shuts down the P-Mode set. 
+	 * <p>This method is called by the Holodeck B2B Core when the instance is shut down. Implementations should use it
+	 * to release resources held for storing the P-Modes.
+	 * 
+	 * @since 6.0.0
+	 */
+	void shutdown();
 	
     /**
      * Gets the P-Mode with the given <b>PMode.id</b>

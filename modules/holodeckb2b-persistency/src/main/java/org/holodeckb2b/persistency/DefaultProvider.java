@@ -19,6 +19,7 @@ package org.holodeckb2b.persistency;
 import java.nio.file.Path;
 
 import org.holodeckb2b.common.VersionInfo;
+import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.persistency.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.IUpdateManager;
@@ -43,8 +44,12 @@ public class DefaultProvider implements IPersistencyProvider {
     }
 
     @Override
-    public void init(final Path hb2bHomeDir) throws PersistenceException {
+    public void init(final IConfiguration config) throws PersistenceException {
         EntityManagerUtil.check();
+    }
+    
+    @Override
+    public void shutdown() {
     }
     
     @Override

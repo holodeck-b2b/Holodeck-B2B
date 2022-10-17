@@ -28,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.pmode.InMemoryPModeSet;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.config.InternalConfiguration;
+import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
@@ -75,15 +76,16 @@ public class PModeManager implements IPModeSet {
     private boolean acceptNonValidable = true;
 
     /**
-     * Creates a new <code>PModeManager</code> which will use the {@link IPModeSet} implementation as specified in the 
-     * configuration for storing the deployed the P-Modes. If not specified the default {@link InMemoryPModeSet} 
+     * Initialises a new <code>PModeManager</code> which will use the {@link IPModeSet} implementation as specified in 
+     * the configuration for storing the deployed the P-Modes. If not specified the default {@link InMemoryPModeSet} 
      * implementation will be used.
      *
      * @param config   The configuration of this instance 
      * @throws PModeSetException When no P-Mode validators are available (maybe due to Java SPI issue) but validation of
      * 							 P-Modes is required (i.e. non validable P-Modes are configured to be rejected)
      */
-    public PModeManager(final InternalConfiguration config) throws PModeSetException {
+    @Override
+    public void init(final IConfiguration config) throws PModeSetException {
         log.trace("Load P-Mode storage component");        
         deployedPModes = Utils.getFirstAvailableProvider(IPModeSet.class);
         if (deployedPModes != null) {
@@ -104,7 +106,7 @@ public class PModeManager implements IPModeSet {
     	validators = new ArrayList<>();       
     	ServiceLoader.load(IPModeValidator.class).forEach(v -> validators.add(v));
 
-    	acceptNonValidable = config.acceptNonValidablePMode();
+    	acceptNonValidable = ((InternalConfiguration) config).acceptNonValidablePMode();
         // If no validators were loaded and validation is required we have a problem, otherwise we just log the loaded 
         // validators
         if (!acceptNonValidable && validators.isEmpty()) {
@@ -128,6 +130,11 @@ public class PModeManager implements IPModeSet {
         }
     }
 
+    @Override
+    public void shutdown() {
+    	deployedPModes.shutdown();
+    }
+    
     @Override
     public IPMode get(String id) {
         return deployedPModes.get(id);
