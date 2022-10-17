@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 import org.holodeckb2b.commons.util.Utils;
+import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
@@ -38,6 +39,14 @@ public class InMemoryPModeSet implements IPModeSet {
      */
     private HashMap<String, IPMode>     pmodeSet = new HashMap<>();
 
+    @Override
+    public void init(IConfiguration config) throws PModeSetException {
+    }
+    
+    @Override
+    public void shutdown() {
+    }
+    
     @Override
     public IPMode get(final String id) {
         if (this.containsId(id))

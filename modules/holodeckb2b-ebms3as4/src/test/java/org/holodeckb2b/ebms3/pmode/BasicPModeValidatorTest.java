@@ -49,6 +49,7 @@ import org.holodeckb2b.common.pmode.UsernameTokenConfig;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.commons.util.Utils;
+import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
@@ -352,11 +353,6 @@ public class BasicPModeValidatorTest {
 		}
 
 		@Override
-		public void init(Path hb2bHome) throws SecurityProcessingException {
-			
-		}
-
-		@Override
 		public X509Certificate findCertificate(X500Principal issuer, BigInteger serial)
 				throws SecurityProcessingException {
 			// TODO Auto-generated method stub
@@ -410,6 +406,17 @@ public class BasicPModeValidatorTest {
 			// TODO Auto-generated method stub
 			return null;
 		}
+
+		@Override
+		public void init(IConfiguration config) throws SecurityProcessingException {
+			// TODO Auto-generated method stub
+			
+		}
     	
+		@Override
+		public void shutdown() {
+			// TODO Auto-generated method stub
+			
+		}
     }
 }

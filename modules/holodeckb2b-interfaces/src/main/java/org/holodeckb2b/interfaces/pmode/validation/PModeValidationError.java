@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.interfaces.pmode.validation;
 
+import org.holodeckb2b.interfaces.pmode.IPMode;
+
 /**
  * Represents an error that was detected during the validation of a {@link IPMode} when it was attempted to be deployed.
  * <p>These errors will be included in the {@link InvalidPModeException} when the P-Mode that is being deployed is

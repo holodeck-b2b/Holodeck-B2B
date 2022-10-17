@@ -49,173 +49,184 @@ import org.junit.Test;
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class PModeManagerTest {
-	
+
 	private static InternalConfiguration config;
-	
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    	config = new InternalConfiguration(TestUtils.getPath("."));
-        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
-    }
-    
-    @Before
-    public void setupTest() {
-    	config.setAcceptNonValidablePMode(true);
-    	TestNOpPModeSet.failOnInit = false; 
-    }
-    
-    @Test
-    public void testDefaultConfig() {
-    	try {
-    		PModeManager manager = new PModeManager(config);
-    		
-    		Field pmodeStorage = PModeManager.class.getDeclaredField("deployedPModes");
-    		pmodeStorage.setAccessible(true);
-    		assertTrue(pmodeStorage.get(manager) instanceof InMemoryPModeSet);
 
-    	} catch (Throwable t) {
-    		t.printStackTrace();
-    		fail();
-    	}
-    }
+	@BeforeClass
+	public static void setUpClass() throws Exception {
+		config = new InternalConfiguration(TestUtils.getPath("."));
+		HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
+	}
 
-    @Test
-    public void testStorageLoading() {
-    	
-    	ClassLoader ccl = this.getClass().getClassLoader();
-    	URLClassLoader ecl = new URLClassLoader(new URL[] { ccl.getResource("pmodeManager/") }, ccl);    	
-    	Thread.currentThread().setContextClassLoader(ecl);
-    	
-    	PModeManager manager = null; 
-    	try {
-    		manager = new PModeManager(config);
-    	} catch (PModeSetException pse) {
-    		fail();
-    	}
-    	
-    	try {
+	@Before
+	public void setupTest() {
+		config.setAcceptNonValidablePMode(true);
+		TestNOpPModeSet.failOnInit = false;
+	}
+
+	@Test
+	public void testDefaultConfig() {
+		try {
+			PModeManager manager = new PModeManager();
+			manager.init(config);
+			
+			Field pmodeStorage = PModeManager.class.getDeclaredField("deployedPModes");
+			pmodeStorage.setAccessible(true);
+			assertTrue(pmodeStorage.get(manager) instanceof InMemoryPModeSet);
+
+		} catch (Throwable t) {
+			t.printStackTrace();
+			fail();
+		}
+	}
+
+	@Test
+	public void testStorageLoading() {
+
+		ClassLoader ccl = this.getClass().getClassLoader();
+		URLClassLoader ecl = new URLClassLoader(new URL[] { ccl.getResource("pmodeManager/") }, ccl);
+		Thread.currentThread().setContextClassLoader(ecl);
+
+		PModeManager manager = null;
+		try {
+			manager = new PModeManager();
+			manager.init(config);			
+		} catch (PModeSetException pse) {
+			fail();
+		}
+
+		try {
 			Field pmodeStorage = PModeManager.class.getDeclaredField("deployedPModes");
 			pmodeStorage.setAccessible(true);
 			IPModeSet storageComp = (IPModeSet) pmodeStorage.get(manager);
-			
+
 			assertNotNull(storageComp);
-			assertEquals(TestNOpPModeSet.class, storageComp.getClass());			
-    	} catch (Throwable t) {
-    		t.printStackTrace();
-    		fail();
-    	}
+			assertEquals(TestNOpPModeSet.class, storageComp.getClass());
+		} catch (Throwable t) {
+			t.printStackTrace();
+			fail();
+		}
 
-    	TestNOpPModeSet.failOnInit = true; 
-    	try {
-    		manager = new PModeManager(config);
-    		fail();
-    	} catch (PModeSetException pse) {
-    		// Correct
-    	}
+		TestNOpPModeSet.failOnInit = true;
+		try {
+			manager = new PModeManager();
+			manager.init(config);
+			;
+			fail();
+		} catch (PModeSetException pse) {
+			// Correct
+		}
 
-    	Thread.currentThread().setContextClassLoader(ccl);
-    }
-    
-    @Test
-    public void testValidatorLoading() {
-    	
-    	ClassLoader ccl = this.getClass().getClassLoader();
-    	URLClassLoader ecl = new URLClassLoader(new URL[] { ccl.getResource("pmodeManager/") }, ccl);    	
-    	Thread.currentThread().setContextClassLoader(ecl);
-    	
-    	PModeManager manager = null; 
-    	try {
-    		manager = new PModeManager(config);
-    	} catch (PModeSetException pse) {
-    		fail();
-    	}
-    	
-    	try {
+		Thread.currentThread().setContextClassLoader(ccl);
+	}
+
+	@Test
+	public void testValidatorLoading() {
+
+		ClassLoader ccl = this.getClass().getClassLoader();
+		URLClassLoader ecl = new URLClassLoader(new URL[] { ccl.getResource("pmodeManager/") }, ccl);
+		Thread.currentThread().setContextClassLoader(ecl);
+
+		PModeManager manager = null;
+		try {
+			manager = new PModeManager();
+			manager.init(config);			
+		} catch (PModeSetException pse) {
+			fail();
+		}
+
+		try {
 			Field pmodeValidators = PModeManager.class.getDeclaredField("validators");
 			pmodeValidators.setAccessible(true);
 			List<IPModeValidator> validators = (List<IPModeValidator>) pmodeValidators.get(manager);
-			
+
 			assertNotNull(validators);
 			assertEquals(2, validators.size());
-			assertTrue(  validators.parallelStream().anyMatch(v -> v.getName().equals(new TestValidatorAllWrong().getName()))
-					  && validators.parallelStream().anyMatch(v -> v.getName().equals(new TestValidatorAllGood().getName())));
-    	} catch (Throwable t) {
-    		t.printStackTrace();
-    		fail();
-    	}
+			assertTrue(
+					validators.parallelStream().anyMatch(v -> v.getName().equals(new TestValidatorAllWrong().getName()))
+							&& validators.parallelStream()
+									.anyMatch(v -> v.getName().equals(new TestValidatorAllGood().getName())));
+		} catch (Throwable t) {
+			t.printStackTrace();
+			fail();
+		}
 
-    	Thread.currentThread().setContextClassLoader(ccl);
-    }
-    
-    @Test
-    public void testInvalidConfig() {
-    	try {
-    		config.setAcceptNonValidablePMode(false);
-    		PModeManager manager = new PModeManager(config);
-    		fail();
-    	} catch (PModeSetException correct) {
-    	}
-    }    
+		Thread.currentThread().setContextClassLoader(ccl);
+	}
 
-    @Test
-    public void testPModeAddReplace() throws PModeSetException {
-    	PModeManager manager = new PModeManager(config);
-    	
-    	PMode pmode = new PMode();
-        pmode.setId("valid-pmode-1");
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-        pmode.addLeg(new Leg());
+	@Test
+	public void testInvalidConfig() {
+		try {
+			config.setAcceptNonValidablePMode(false);
+			PModeManager manager = new PModeManager();
+			manager.init(config);			
+			fail();
+		} catch (PModeSetException correct) {
+		}
+	}
 
-        try {
-            manager.add(pmode);
-        } catch (PModeSetException ex) {
-            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-            fail();
-        }
-        assertTrue(manager.containsId(pmode.getId()));
-        
-        pmode.setMepBinding(EbMSConstants.ONE_WAY_PULL);
-        try {
-            manager.replace(pmode);
-        } catch (PModeSetException ex) {
-            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-            fail();
-        }        
-        assertTrue(manager.containsId(pmode.getId()));
-        assertEquals(EbMSConstants.ONE_WAY_PULL, pmode.getMepBinding());
-    }
-    
-    
-    @Test
-    public void testPModeValidation() throws PModeSetException {
-    	PModeManager manager = new PModeManager(config);
-    	final TestValidatorAllWrong vAllWrong = new TestValidatorAllWrong();
-    	final TestValidatorAllGood vAllGood = new TestValidatorAllGood();
-    	try {
-    		Field pmodeValidators = PModeManager.class.getDeclaredField("validators");
-    		pmodeValidators.setAccessible(true);
-    		List<IPModeValidator> validators = (List<IPModeValidator>) pmodeValidators.get(manager);
-    		validators.add(vAllWrong);
-    		validators.add(vAllGood);
-    	} catch (Throwable t) {
-    		fail();
-    	}
-    	PMode pmode = new PMode();
-    	pmode.setId("invalid-pmode");    	
-    	try {
-    		manager.add(pmode);
-    	} catch (PModeSetException ex) {
-    	}
-    	
-    	assertTrue(vAllGood.isExecuted());
-    	assertTrue(vAllWrong.isExecuted());
-    }
-    
-    @Test
-    public void testPModeRejectInvalid() throws PModeSetException {
-		PModeManager manager = new PModeManager(config);
+	@Test
+	public void testPModeAddReplace() throws PModeSetException {
+		PModeManager manager = new PModeManager();
+		manager.init(config);
+		
+		PMode pmode = new PMode();
+		pmode.setId("valid-pmode-1");
+		pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+		pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
+		pmode.addLeg(new Leg());
 
+		try {
+			manager.add(pmode);
+		} catch (PModeSetException ex) {
+			System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
+			fail();
+		}
+		assertTrue(manager.containsId(pmode.getId()));
+
+		pmode.setMepBinding(EbMSConstants.ONE_WAY_PULL);
+		try {
+			manager.replace(pmode);
+		} catch (PModeSetException ex) {
+			System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
+			fail();
+		}
+		assertTrue(manager.containsId(pmode.getId()));
+		assertEquals(EbMSConstants.ONE_WAY_PULL, pmode.getMepBinding());
+	}
+
+	@Test
+	public void testPModeValidation() throws PModeSetException {
+		PModeManager manager = new PModeManager();
+		manager.init(config);
+		
+		final TestValidatorAllWrong vAllWrong = new TestValidatorAllWrong();
+		final TestValidatorAllGood vAllGood = new TestValidatorAllGood();
+		try {
+			Field pmodeValidators = PModeManager.class.getDeclaredField("validators");
+			pmodeValidators.setAccessible(true);
+			List<IPModeValidator> validators = (List<IPModeValidator>) pmodeValidators.get(manager);
+			validators.add(vAllWrong);
+			validators.add(vAllGood);
+		} catch (Throwable t) {
+			fail();
+		}
+		PMode pmode = new PMode();
+		pmode.setId("invalid-pmode");
+		try {
+			manager.add(pmode);
+		} catch (PModeSetException ex) {
+		}
+
+		assertTrue(vAllGood.isExecuted());
+		assertTrue(vAllWrong.isExecuted());
+	}
+
+	@Test
+	public void testPModeRejectInvalid() throws PModeSetException {
+		PModeManager manager = new PModeManager();
+		manager.init(config);
+		
 		try {
 			Field pmodeValidators = PModeManager.class.getDeclaredField("validators");
 			pmodeValidators.setAccessible(true);
@@ -224,45 +235,46 @@ public class PModeManagerTest {
 		} catch (Throwable t) {
 			fail();
 		}
-    	PMode pmode = new PMode();
-        pmode.setId("invalid-pmode");
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-        pmode.setAgreement(new Agreement());
-        pmode.addLeg(new Leg());
+		PMode pmode = new PMode();
+		pmode.setId("invalid-pmode");
+		pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+		pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
+		pmode.setAgreement(new Agreement());
+		pmode.addLeg(new Leg());
 
-        try {
-            manager.add(pmode);
-            fail();
-        } catch (PModeSetException ex) {
-        }
-        assertFalse(manager.containsId(pmode.getId()));
-    }
-    
-    @Test
-    public void testPModeRemove() throws PModeSetException {
-		PModeManager manager = new PModeManager(config);
-    	
-    	PMode pmode = new PMode();
-        pmode.setId("valid-pmode-1");
-        pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-        pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-        pmode.addLeg(new Leg());
+		try {
+			manager.add(pmode);
+			fail();
+		} catch (PModeSetException ex) {
+		}
+		assertFalse(manager.containsId(pmode.getId()));
+	}
 
-        try {
-            manager.add(pmode);
-        } catch (PModeSetException ex) {
-            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-            fail();
-        }
-        assertTrue(manager.containsId(pmode.getId()));
-        
-        try {
-            manager.remove(pmode.getId());
-        } catch (PModeSetException ex) {
-            System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-            fail();
-        }        
-        assertFalse(manager.containsId(pmode.getId()));
-    }
+	@Test
+	public void testPModeRemove() throws PModeSetException {
+		PModeManager manager = new PModeManager();
+		manager.init(config);
+	
+		PMode pmode = new PMode();
+		pmode.setId("valid-pmode-1");
+		pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+		pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
+		pmode.addLeg(new Leg());
+
+		try {
+			manager.add(pmode);
+		} catch (PModeSetException ex) {
+			System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
+			fail();
+		}
+		assertTrue(manager.containsId(pmode.getId()));
+
+		try {
+			manager.remove(pmode.getId());
+		} catch (PModeSetException ex) {
+			System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
+			fail();
+		}
+		assertFalse(manager.containsId(pmode.getId()));
+	}
 }
