@@ -73,13 +73,7 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	 * IMessageProcessingEvent}s there is no need to store these in the context.
 	 */
 	private Map<String, Collection<IEbmsError>>		generatedErrors  = new HashMap<>();
-	
-	/**
-	 * Holds a map of received errors to the message units they reference. This mapping is maintained in the context
-	 * so the handlers responsible for processing and delivery of the errors do not need to both query the database. 
-	 */
-	private Map<IErrorMessage, Collection<IMessageUnitEntity>>	refdMessagesByError = new HashMap<>();
-		
+			
 	private boolean	needsResponse = false;
 	
 	private boolean execDupElimination = false;
@@ -389,49 +383,50 @@ public class MessageProcessingContext implements IMessageProcessingContext {
     }    
     
     /* (non-Javadoc)
-	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#addRefdMsgUnitByError(org.holodeckb2b.interfaces.messagemodel.IErrorMessage, java.util.Collection)
-	 */
-    @Override
-	public void addRefdMsgUnitByError(final IErrorMessage error, final Collection<IMessageUnitEntity> refdMsgUnits) {
-    	refdMessagesByError.put(error, refdMsgUnits);
-    }
-  
-    /* (non-Javadoc)
-	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getRefdMsgUnitByError(org.holodeckb2b.interfaces.messagemodel.IErrorMessage)
-	 */
-    @Override
-	public Collection<IMessageUnitEntity> getRefdMsgUnitByError(final IErrorMessage error) {
-    	return refdMessagesByError.get(error);
-    }
-    
-    /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getPrimaryMessageUnit()
 	 */
     @Override
 	public IMessageUnitEntity getPrimaryMessageUnit() {
-        if (currentFlowIsIn()) {
-            if (receivedUserMessage != null)
-                return receivedUserMessage;
-            else if (!Utils.isNullOrEmpty(receivedReceipts))
-                return receivedReceipts.get(0);
-            else if (!Utils.isNullOrEmpty(receivedErrors))
-                return receivedErrors.get(0);
-            else 
-            	return receivedPullRequest;
-        } else {
-        	if (sendingPullRequest != null)
-        		return sendingPullRequest;
-        	else if (sendingUserMessage != null)
-    			return sendingUserMessage;
-        	else if (!Utils.isNullOrEmpty(sendingReceipts))
-                return sendingReceipts.get(0);
-            else if (!Utils.isNullOrEmpty(sendingErrors))
-                return sendingErrors.get(0);
-            else
-            	return null;
-        }
+    	if (currentFlowIsIn()) 
+    		return getPrimaryReceivedMessageUnit(); 
+    	else 
+    		return getPrimarySentMessageUnit();    	
     }
     
+	/* (non-Javadoc)
+	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getPrimaryMessageUnit()
+	 * @since 6.0.0
+	 */
+	@Override
+	public IMessageUnitEntity getPrimaryReceivedMessageUnit() {
+        if (receivedUserMessage != null)
+            return receivedUserMessage;
+        else if (!Utils.isNullOrEmpty(receivedReceipts))
+            return receivedReceipts.get(0);
+        else if (!Utils.isNullOrEmpty(receivedErrors))
+            return receivedErrors.get(0);
+        else 
+        	return receivedPullRequest;
+    }
+    
+    /* (non-Javadoc)
+  	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getPrimarySentMessageUnit()
+  	 * @since 6.0.0
+  	 */
+    @Override
+  	public IMessageUnitEntity getPrimarySentMessageUnit() {
+    	if (sendingPullRequest != null)
+    		return sendingPullRequest;
+    	else if (sendingUserMessage != null)
+			return sendingUserMessage;
+    	else if (!Utils.isNullOrEmpty(sendingReceipts))
+            return sendingReceipts.get(0);
+        else if (!Utils.isNullOrEmpty(sendingErrors))
+            return sendingErrors.get(0);
+        else
+        	return null;    	
+    }
+ 
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#addSecurityProcessingResult(org.holodeckb2b.interfaces.security.ISecurityProcessingResult)
 	 */

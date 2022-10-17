@@ -36,6 +36,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
@@ -155,6 +156,11 @@ public class CatchAxisFault extends AbstractBaseHandler {
 		@Override
 		public boolean shouldHaveSOAPFault() {
 			return true;
+		}
+		
+		@Override
+		public Label getLeg() {
+			return null;
 		}
     }
 }

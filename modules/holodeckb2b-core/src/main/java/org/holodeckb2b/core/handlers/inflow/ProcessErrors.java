@@ -144,8 +144,7 @@ public class ProcessErrors extends AbstractBaseHandler {
                 }
             }
             log.info("Processed Error Signal [" + errSignal.getMessageId() + "]");
-            storageManager.setProcessingState(errSignal, ProcessingState.READY_FOR_DELIVERY);
-            procCtx.addRefdMsgUnitByError(errSignal, refdMessages);
+            storageManager.setProcessingState(errSignal, ProcessingState.READY_FOR_DELIVERY);            
         }
     }
 }
