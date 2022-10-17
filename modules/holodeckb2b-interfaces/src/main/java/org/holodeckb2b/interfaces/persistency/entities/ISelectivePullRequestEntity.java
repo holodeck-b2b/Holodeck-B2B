@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.interfaces.persistency.entities;
 
-import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
 
 /**

@@ -18,7 +18,6 @@ package org.holodeckb2b.interfaces.config;
 
 import java.nio.file.Path;
 
-import org.apache.axiom.om.OMElement;
 import org.apache.axis2.description.Parameter;
 
 /**

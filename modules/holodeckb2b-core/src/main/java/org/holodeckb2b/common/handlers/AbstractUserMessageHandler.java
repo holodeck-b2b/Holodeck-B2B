@@ -42,7 +42,7 @@ public abstract class AbstractUserMessageHandler extends AbstractBaseHandler {
     @Override
     protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
     																								throws Exception {
-        log.trace("Check if MessageContext contains a MessageUnit");
+        log.trace("Check if MessageContext contains a User Message");
         final int currentFlow = procCtx.getParentContext().getFLOW();
         IUserMessageEntity userMessage = currentFlow == MessageContext.IN_FLOW 
         								 || currentFlow == MessageContext.IN_FAULT_FLOW ?
