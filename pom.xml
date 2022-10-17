@@ -276,6 +276,14 @@
                 <version>2.13.0</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+				<groupId>org.holodeckb2b.commons</groupId>
+				<artifactId>generic-utils</artifactId>
+				<version>1.2.0-SNAPSHOT-1</version>
+				<type>test-jar</type>
+				<scope>test</scope>            
+            </dependency>
+                     
         </dependencies>
     </dependencyManagement>
 

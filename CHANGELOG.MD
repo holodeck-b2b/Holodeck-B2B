@@ -6,9 +6,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ##### Added
 * A _Delivery Method_ that only logs meta-data of the received message unit but does not further process it. The factory
   class name to configure in P-Modes is `org.holodeckb2b.common.util.LogOnlyDeliveryMethod`. 
-* New API for the delivery of message units to the back-end, including support for async delivery. Added interfaces:
+* New API for the delivery of message units to the back-end, including support for async and re-delivery. Added 
+ interfaces: 
+	- `org.holodeckb2b.interfaces.delivery.IDeliveryManager`
 	- `org.holodeckb2b.interfaces.delivery.IDeliveryMethod`
 	- `org.holodeckb2b.interfaces.delivery.IDeliveryCallback`
+	- `org.holodeckb2b.interfaces.delivery.IDeliverySpecification.performAsyncDelivery()` 
+	- `org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface.getDeliveryManager()`
 * `shutdown()` method to the _Persistency Provider_, _Event Processor_, _Certificate Manager_ and _P-Mode Set_
 to release any held resources.
 * `getPrimarySentMessageUnit()` and `getPrimaryReceivedMessageUnit()` to `org.holodeckb2b.interfaces.core.IMessageProcessingContext`
@@ -19,14 +23,16 @@ to release any held resources.
 * Initialisation of the _P-Mode storage_ component now uses the full Holodeck B2B configuration instead of only the home
   directory. As a result the path based `init` method of `org.holodeckb2b.interfaces.pmode.IPModeSet` is deprecated and
   replaced with an new configuration based one.
-* `org.holodeckb2b.interfaces.delivery.IDeliverySpecification` was changed to adapt it to the new delivery method API
-
-### Deprecated
-* `org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory` and `org.holodeckb2b.interfaces.delivery.IMessageDeliverer`
-* `org.holodeckb2b.interfaces.delivery.IDeliverySpecification.getFactory()`
 * The P-Mode for an AS4 Error message without a RefToMessageId is now set to the P-Mode of the primary sent message unit
 
 ##### Removed
+* Due to refactoring of the message delivery API the following interfaces:
+	- `org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory`
+	- `org.holodeckb2b.interfaces.delivery.IMessageDeliverer`
+	- `org.holodeckb2b.interfaces.delivery.IDeliverySpecification.getFactory()`
+	- `org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface.getMessageDeliverer(IDeliverySpecification)`
+	- `org.holodeckb2b.interfaces.core.IMessageProcessingContext.addRefdMsgUnitByError(IErrorMessage, Collection<IMessageUnitEntity>)`
+	- `org.holodeckb2b.interfaces.core.IMessageProcessingContext.getRefdMsgUnitByError(IErrorMessage)`
 * Dependency of the UI module on Geronimo Java mail implementation
 
 ## 6.0.0-SNAPSHOT-2
@@ -43,10 +49,11 @@ to release any held resources.
 
 ### Changed
 * Initialisation of the _Persistency Provider_, _Event Processor_ and _Certificate Manager_ now uses the full Holodeck B2B
-  configuration instead of only the home directory. As a result the following interfaces changed by deprecating the 
+  configuration instead of only the home directory. As a result the following interfaces changed by replacing the 
   path based `init` method as introducing a configuration based one:
 	- `org.holodeckb2b.interfaces.persistency.IPersistencyProvider`
 	- `org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor`	
+	- `org.holodeckb2b.interfaces.security.trust.ICertificateManager`
 * The P-Mode is now set on _MissingReceipt_ Error Messages (same as P-Mode of ref'd User Message)
 * The request parameters parsed from the URL (available in the MessageContext property "hb2b:" + `org.apache.axis2.Constants.REQUEST_PARAMETER_MAP`)   
   are now represented through `org.holodeckb2b.interfaces.core.IURLRequestParameters`.
@@ -54,19 +61,12 @@ to release any held resources.
 * `ICertificateManager.getCertificate()` renamed to `ICertificateManager.getPartnerCertificate()` to clarify which kind 
   of certificate is retrieved
 
-### Deprecated
-* The path based `init` methods of:
-	- `org.holodeckb2b.interfaces.persistency.IPersistencyProvider`
-	- `org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor`	
-
 ### Fixed
 * NPE when copying BusinessInfo P-Mode meta-data that does not contain Service meta-data
 * Continuation of ebMS3 message processing when there was an issue in creating the WS-Security header
 
-
 ### Removed
 * Deprecated configuration setting _allowSignalBundling_
-* `org.holodeckb2b.interfaces.security.trust.ICertificateManager.init(Path)`, replaced by `org.holodeckb2b.interfaces.security.trust.ICertificateManager.init(IConfiguration)`
 
 ## 5.3.2
 ##### 2021-12-20
@@ -277,7 +277,7 @@ https://commons.apache.org/proper/commons-daemon/index.html] (using _jvm_ mode).
   However this back-end is still included in the default distribution. 
 * `org.holodeckb2b.interfaces.config.IConfiguration.getAxisConfigurationContext()` method, as extensions should not need 
   access to internal Axis configuration.
-* `org.holodeckb2b.interfaces.entities.IMessageUnit.getLeg()`, as the leg can be calculated based on the P-Mode.
+* `org.holodeckb2b.interfaces.entities.IMessageUnitEntity.getLeg()`, as the leg can be calculated based on the P-Mode.
 * Deprecated methods from `IReceptionAwarness`
 
 ## 4.1.2
