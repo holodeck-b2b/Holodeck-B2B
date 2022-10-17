@@ -16,12 +16,9 @@
  */
 package org.holodeckb2b.interfaces.eventprocessing;
 
-import java.nio.file.Path;
-
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 
 /**
  * Defines the interface of the Holodeck B2B Core component that is responsible for the processing of {@link
@@ -57,30 +54,20 @@ public interface IMessageProcessingEventProcessor {
      * functioning of the gateway this fall back can be disabled in the configuration, in which case the startup will
      * be aborted if loading the event processor fails.  
      *
-     * @param hb2bHome  Path to the Holodeck B2B home directory.
-	 * @throws MessageProccesingEventHandlingException when the event processor cannot be initialised correctly.
-	 * @since 5.0.0
-	 * @deprecated Implementations should implement {@link #init(IConfiguration)} 
-	 */
-    @Deprecated
-    default void init(Path hb2bHome) throws MessageProccesingEventHandlingException {
-    	throw new UnsupportedOperationException();
-    }
-	
-	/**
-     * Initializes the event processor. This method is called once at startup of the Holodeck B2B instance. 
-     * <p><b>NOTE:</b> When the event processor cannot be successfully initialised the Holodeck B2B Core uses the 
-     * default event processor as fall back. If running the configured event processor is required for correct 
-     * functioning of the gateway this fall back can be disabled in the configuration, in which case the startup will
-     * be aborted if loading the event processor fails.  
-     *
      * @param config 	the Holodeck B2B configuration
 	 * @throws MessageProccesingEventHandlingException when the event processor cannot be initialised correctly.
 	 * @since 6.0.0
 	 */	
-	default void init(final IConfiguration config) throws MessageProccesingEventHandlingException {
-		init(config.getHolodeckB2BHome());
-	}
+	void init(final IConfiguration config) throws MessageProccesingEventHandlingException;
+	
+	/**
+	 * Shuts down the event processor. 
+	 * <p>This method is called by the Holodeck B2B Core when the instance is shut down. Implementations should use it
+	 * to release resources held needed for the event processing.
+	 * 
+	 * @since 6.0.0
+	 */
+	void shutdown();
 	
     /**
      * Raises an event for processing by the configured event handler.
