@@ -18,7 +18,6 @@ package org.holodeckb2b.common.testhelpers;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
@@ -35,8 +34,8 @@ import java.util.List;
 import javax.security.auth.x500.X500Principal;
 
 import org.holodeckb2b.commons.security.CertificateUtils;
-import org.holodeckb2b.commons.security.KeystoreUtils;
 import org.holodeckb2b.commons.util.Utils;
+import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
@@ -48,13 +47,13 @@ import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-class InMemoryCertificateManager implements ICertificateManager {
+class TestCertificateManager implements ICertificateManager {
 
     private final KeyStore privateKeys;
     private final KeyStore partnerCerts;
     private final KeyStore trustedCerts;
     
-    InMemoryCertificateManager() throws SecurityProcessingException {
+    TestCertificateManager() throws SecurityProcessingException {
     	try {
 			privateKeys = KeyStore.getInstance("JKS");
 			privateKeys.load(null, null);
@@ -256,11 +255,7 @@ class InMemoryCertificateManager implements ICertificateManager {
 
 	@Override
 	public String getName() {
-		return InMemoryCertificateManager.class.getName();
-	}
-
-	@Override
-	public void init(Path hb2bHome) throws SecurityProcessingException {		
+		return TestCertificateManager.class.getName();
 	}
 
 	@Override
@@ -313,5 +308,13 @@ class InMemoryCertificateManager implements ICertificateManager {
 			return details;
 		}
 		
+	}
+
+	@Override
+	public void init(IConfiguration config) throws SecurityProcessingException {
+	}
+
+	@Override
+	public void shutdown() {
 	}
 }

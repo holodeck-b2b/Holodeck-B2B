@@ -22,7 +22,7 @@ import org.holodeckb2b.interfaces.submit.MessageSubmitException;
  * 
  * @author Sander Fieten (sander at chasquis-consulting.com)
  */
-public class Submitter implements IMessageSubmitter {
+public class TestMessageSubmitter implements IMessageSubmitter {
 
 	private Map<String, IMessageUnit>	submittedMessages = new HashMap<>();
 	
