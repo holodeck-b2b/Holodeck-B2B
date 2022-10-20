@@ -67,14 +67,14 @@ public interface IDeliveryManager {
      * process is started to reduce the risk of concurrent processing of the message unit. 
      * 
      * @param messageUnit for which the delivery process should be restarted
-     * @throws IllegalArgumentException when the given message unit is an outgoing message or when it has never been in
+     * @throws IllegalStateException    when the given message unit is an outgoing message or when it has never been in
      *  								<i>READY_FOR_DELIVERY</i> state.
      * @throws MessageDeliveryException when the message unit cannot be delivered because the delivery process cannot
      * 									be started (for async deliveries) or completed (for sync). The processing state
      * 									of the message unit will be set to <i>DELIVERY_FAILED}</i> or <i>FAILURE</i>
      * 									depending on whether the error is permanent or not
      */
-    void deliver(IMessageUnitEntity messageUnit) throws IllegalArgumentException, MessageDeliveryException;
+    void deliver(IMessageUnitEntity messageUnit) throws IllegalStateException, MessageDeliveryException;
 	
 	/**
 	 * Registers a <i>Delivery Specification</i> for later referencing by P-Modes.

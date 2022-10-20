@@ -115,7 +115,7 @@ class DeliveryManager implements IDeliveryManager {
 	}
 	
 	@Override
-	public void deliver(IMessageUnitEntity messageUnit) throws IllegalArgumentException, MessageDeliveryException {		
+	public void deliver(IMessageUnitEntity messageUnit) throws IllegalStateException, MessageDeliveryException {		
 		log.trace("Delivery requested for {} (msgId={})", MessageUnitUtils.getMessageUnitName(messageUnit), 
 					messageUnit.getMessageId());
 		// Make sure the P-Mode of the message unit is available
@@ -136,7 +136,7 @@ class DeliveryManager implements IDeliveryManager {
 		if (!messageUnit.getProcessingStates().stream()
 											  .anyMatch(s -> s.getState() == ProcessingState.READY_FOR_DELIVERY)) {
 			log.error("Message unit (msgId={}) is not ready for delivery!", messageUnit.getMessageId());
-			throw new IllegalArgumentException("Message unit not ready for delivery");
+			throw new IllegalStateException("Message unit not ready for delivery");
 		}		
 		
 		try {

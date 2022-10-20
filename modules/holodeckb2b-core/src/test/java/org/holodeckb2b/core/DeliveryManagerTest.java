@@ -109,7 +109,7 @@ public class DeliveryManagerTest {
 		try {
 			HolodeckB2BCoreInterface.getDeliveryManager().deliver(umEntity);
 			fail();
-		} catch (IllegalArgumentException expected) {}
+		} catch (IllegalStateException expected) {}
 	}
 	
 	@Test
