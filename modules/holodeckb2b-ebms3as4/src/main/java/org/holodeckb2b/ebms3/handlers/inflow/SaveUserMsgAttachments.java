@@ -59,8 +59,6 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 /**
  * Is the <i>IN_FLOW</i> handler responsible for reading the payload content from the SOAP message. The payloads are
  * stored temporarily on the file system.
- * <p>Once the payloads are successfully read the UserMessage is ready for delivery to the business application. So this
- * handler changes the processing state to {@link ProcessingState#READY_FOR_DELIVERY}.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
