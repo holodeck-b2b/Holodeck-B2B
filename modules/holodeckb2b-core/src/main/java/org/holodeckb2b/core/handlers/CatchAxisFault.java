@@ -31,6 +31,7 @@ import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -41,10 +42,10 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
  * Is a special handler to handle unexpected and previously unhandled errors. When such errors are detected the
- * processing state of message units currently being processed will be changed to indicate failed processing. This means 
+ * processing state of message units currently being processed will be changed to indicate failed processing. This means
  * that the processing state of all message units in the current flow are set to <i>FAILURE</i> unless their current
  * state already indicate a failure or when the processing is in a "stable" state, e.g. waiting for receipt or completed
- * <p>When the error occurs while processing a request an ebMS <i>Other</i> error is generated and reported to the 
+ * <p>When the error occurs while processing a request an ebMS <i>Other</i> error is generated and reported to the
  * sender of the request. No other message unit is included in the response to the sender.<br>
  * <p>Note that this is a kind of "last resort" error handler and therefore is not supposed to handle normal errors that
  * can occur in the processing of ebMS messages. These errors should all result in an ebMS error and handled
@@ -76,7 +77,7 @@ public class CatchAxisFault extends AbstractBaseHandler {
             else
                 msgUnitsInProcess = procCtx.getSendingMessageUnits();
 
-            final String failureDescription = Utils.getExceptionTrace(msgContext.getFailureReason());            
+            final String failureDescription = Utils.getExceptionTrace(msgContext.getFailureReason());
             for (final IMessageUnitEntity mu : msgUnitsInProcess) {
                 // Changing the processing state may fail if the problems are caused by the database.
                 try {
@@ -86,9 +87,10 @@ public class CatchAxisFault extends AbstractBaseHandler {
                         log.error(MessageUnitUtils.getMessageUnitName(mu) + " with msg-id [" + mu.getMessageId()
                                     + "] could not be processed due to an unexpected error.");
                         HolodeckB2BCore.getStorageManager().setProcessingState(mu,
-                        			mu instanceof IUserMessage ? ProcessingState.SUSPENDED : ProcessingState.FAILURE);
+                        			mu instanceof IUserMessage && mu.getDirection() == Direction.OUT ?
+                        										ProcessingState.SUSPENDED : ProcessingState.FAILURE);
                         // Raise event to signal the processing failure
-                        HolodeckB2BCore.getEventProcessor().raiseEvent(receiving ? 
+                        HolodeckB2BCore.getEventProcessor().raiseEvent(receiving ?
 		                        								new GenericReceiveMessageFailure(mu, failureDescription)
 		                        							  : new GenericSendMessageFailure(mu, failureDescription));
                     }
@@ -101,9 +103,9 @@ public class CatchAxisFault extends AbstractBaseHandler {
 
             log.debug("Clear the message processing context");
             procCtx.removeAllMessages();
-            
-            // If we are in the in flow and responding to received messages 
-            if (msgContext.isServerSide() && receiving) {                 
+
+            // If we are responding to a received messages and were in the normal flow, try to send an Error back
+            if (msgContext.isServerSide() && msgContext.getFLOW() != MessageContext.OUT_FAULT_FLOW) {
             	procCtx.addSendingError(createOtherError(log));
             }
         	// We have handled the error, so nothing to do for Axis
@@ -133,12 +135,12 @@ public class CatchAxisFault extends AbstractBaseHandler {
             return new NonPersistedErrorMessage(errorMessage);
         }
     }
-    
+
     /**
-     * Helper class to allow sending of an error the sender of the message even if the persistency layer is down. 
+     * Helper class to allow sending of an error the sender of the message even if the persistency layer is down.
      */
     class NonPersistedErrorMessage extends ErrorMessage implements IErrorMessageEntity {
-    	
+
     	public NonPersistedErrorMessage(final ErrorMessage source) {
 			super(source);
 		}
@@ -157,7 +159,7 @@ public class CatchAxisFault extends AbstractBaseHandler {
 		public boolean shouldHaveSOAPFault() {
 			return true;
 		}
-		
+
 		@Override
 		public Label getLeg() {
 			return null;
