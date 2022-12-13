@@ -43,13 +43,13 @@ import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 
 /**
  * Is a {@link Crypto} implementation that uses the Holodeck B2B <i>Certificate Manager</i> to retrieve the key pairs
- * and certificates needed in the processing of the WS-Security headers in the ebMS messages. It uses {@link 
- * CryptoBase} as base class to implement functionality that does not depend on how key pairs and certificates are 
- * managed. Since the trust validation of certificates used for signing the messages is done in {@link 
- * SignatureTrustValidator} this class does not provide trust validation functions.  
- * 
+ * and certificates needed in the processing of the WS-Security headers in the ebMS messages. It uses {@link
+ * CryptoBase} as base class to implement functionality that does not depend on how key pairs and certificates are
+ * managed. Since the trust validation of certificates used for signing the messages is done in {@link
+ * SignatureTrustValidator} this class does not provide trust validation functions.
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since  6.0.0 
+ * @since  6.0.0
  */
 public class CertManWSS4JCrypto extends CryptoBase {
 	private static final MessageDigest SHA1;
@@ -61,27 +61,27 @@ public class CertManWSS4JCrypto extends CryptoBase {
 			throw new RuntimeException("No SHA-1 implementation available!");
 		}
 	}
-	
+
 	/**
-	 * The Holodeck B2B Certificate Manager currently in use   
+	 * The Holodeck B2B Certificate Manager currently in use
 	 */
 	private ICertificateManager		certManager;
 	/**
 	 * The cryptographic action, e.g. encryption, being performed
 	 */
 	private Action	action;
-	
+
 	/**
 	 * Initialises a new instance for use with the specified action. The action determines whether certificate searches
-	 * are executed againstthe set of registered key pairs or trading partner certificates.  
-	 * 
+	 * are executed againstthe set of registered key pairs or trading partner certificates.
+	 *
 	 * @param action 	the crypto action in which this instance is used
 	 */
 	public CertManWSS4JCrypto(final Action action) {
 		this.certManager = HolodeckB2BCoreInterface.getCertificateManager();
-		this.action = action;		
+		this.action = action;
 	}
-	
+
 	@Override
 	public X509Certificate[] getX509Certificates(CryptoType cryptoType) throws WSSecurityException {
         if (cryptoType == null) {
@@ -111,30 +111,38 @@ public class CertManWSS4JCrypto extends CryptoBase {
 				default:
 					// These methods for retrieving a key pair are never needed when processing ebMS messages
 					throw new WSSecurityException(WSSecurityException.ErrorCode.UNSUPPORTED_SECURITY_TOKEN);
-				}			
-				if (kpAlias != null) 
+				}
+				if (kpAlias != null)
 					return certManager.getKeyPairCertificates(kpAlias).toArray(new X509Certificate[] {});
 				else
 					throw new WSSecurityException(WSSecurityException.ErrorCode.SECURITY_TOKEN_UNAVAILABLE);
 			case ENCRYPT :
 			case VERIFY :
 			default :
+				X509Certificate cert;
 				switch (type) {
 				case ISSUER_SERIAL:
-					return new X509Certificate[] 
-						{ certManager.findCertificate(new X500Principal(cryptoType.getIssuer()), cryptoType.getSerial()) };
+					cert = certManager.findCertificate(new X500Principal(cryptoType.getIssuer()), cryptoType.getSerial());
+					break;
 				case THUMBPRINT_SHA1:
-					return new X509Certificate[] { certManager.findCertificate(cryptoType.getBytes(), SHA1) };				
+					cert = certManager.findCertificate(cryptoType.getBytes(), SHA1);
+					break;
 				case SKI_BYTES:
-					return new X509Certificate[] { certManager.findCertificate(cryptoType.getBytes()) };				
+					cert = certManager.findCertificate(cryptoType.getBytes());
+					break;
 				case ALIAS:
-					return new X509Certificate[] { certManager.getPartnerCertificate(cryptoType.getAlias()) };								
+					cert = certManager.getPartnerCertificate(cryptoType.getAlias());
+					break;
 				case SUBJECT_DN:
 				case ENDPOINT:
 				default:
 					// These methods for retrieving a certificate are never needed when processing ebMS messages
 					throw new WSSecurityException(WSSecurityException.ErrorCode.UNSUPPORTED_SECURITY_TOKEN);
-				}			
+				}
+				if (cert != null)
+					return new X509Certificate[] { cert };
+				else
+					return null;
 	        }
         } catch (SecurityProcessingException e) {
         	throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, e);
@@ -155,7 +163,7 @@ public class CertManWSS4JCrypto extends CryptoBase {
 			}
 		} catch (SecurityProcessingException e) {
 			throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, e);
-		}		
+		}
 	}
 
 	@Override
@@ -166,7 +174,7 @@ public class CertManWSS4JCrypto extends CryptoBase {
 			return getPrivateKey(alias, getPassword(callbackHandler, alias));
 		} catch (SecurityProcessingException e) {
 			throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, e);
-		}		
+		}
 	}
 
 	@Override
@@ -176,21 +184,21 @@ public class CertManWSS4JCrypto extends CryptoBase {
 			return getPrivateKey(alias, getPassword(callbackHandler, alias));
 		} catch (SecurityProcessingException e) {
 			throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, e);
-		}		
+		}
 	}
 
 	private String getPassword(CallbackHandler callbackHandler, String alias) throws WSSecurityException {
 		if (!(callbackHandler instanceof PasswordCallbackHandler))
 			throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, "Invalid callback handler");
-		
+
 		WSPasswordCallback pwCb = new WSPasswordCallback(alias, WSPasswordCallback.UNKNOWN);
         try {
 			callbackHandler.handle(new Callback[]{pwCb});
 		} catch (IOException | UnsupportedCallbackException e) {
-			throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, e, 
+			throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, e,
 										   "noPassword", new Object[] {alias});
 		}
-        return pwCb.getPassword();		
+        return pwCb.getPassword();
 	}
 
 	@Override
@@ -205,10 +213,10 @@ public class CertManWSS4JCrypto extends CryptoBase {
 	@Override
 	public void verifyTrust(X509Certificate[] certs, boolean enableRevocation,
 			Collection<Pattern> subjectCertConstraints, Collection<Pattern> issuerCertConstraints)
-			throws WSSecurityException {		
+			throws WSSecurityException {
 	}
 
 	@Override
-	public void verifyTrust(PublicKey publicKey) throws WSSecurityException {		
+	public void verifyTrust(PublicKey publicKey) throws WSSecurityException {
 	}
 }
