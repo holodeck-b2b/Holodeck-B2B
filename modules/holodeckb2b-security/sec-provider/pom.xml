@@ -76,11 +76,6 @@
             <artifactId>wss4j-ws-security-dom</artifactId>
             <version>${wss4j.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.71</version>
-        </dependency>
 
         <!-- Test dependencies -->
         <dependency>

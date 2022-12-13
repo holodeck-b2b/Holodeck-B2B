@@ -16,11 +16,8 @@
  */
 package org.holodeckb2b.ebms3.security;
 
-import java.security.Provider;
 import java.security.Security;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderCreator;
@@ -40,9 +37,6 @@ import org.holodeckb2b.security.trust.DefaultCertManager;
  * 			manager has been split off.
  */
 public class DefaultProvider implements ISecurityProvider {
-
-    private final Logger  log = LogManager.getLogger(DefaultProvider.class);
-    
     /**
      * {@inheritDoc}
      */
@@ -51,24 +45,11 @@ public class DefaultProvider implements ISecurityProvider {
         return "HB2B Default Security/" + VersionInfo.fullVersion;
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>The only initialisation needed here is to ensure that the BouncyCastle security provider is loaded and set as
-     * preferred one.
-     */
     @Override
     public void init() throws SecurityProcessingException {
-		// Make sure that BouncyCastle is the preferred JCE security provider
-		final Provider[] providers = Security.getProviders();
-		if (providers != null && providers.length > 0)
-			Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);		
-		log.debug("Registering BouncyCastle as preferred Java security provider");
-		Security.insertProviderAt(new BouncyCastleProvider(), 2);		        
-        
-        // Initialization done
-        log.info("Default Security Provider version {} is ready!", VersionInfo.fullVersion);
+    	Security.addProvider(new BouncyCastleProvider());
     }
-    
+
     @Override
     public ISecurityHeaderProcessor getSecurityHeaderProcessor() throws SecurityProcessingException {
         return new SecurityHeaderProcessor();
@@ -78,5 +59,5 @@ public class DefaultProvider implements ISecurityProvider {
     public ISecurityHeaderCreator getSecurityHeaderCreator() throws SecurityProcessingException {
         return new SecurityHeaderCreator();
     }
-    
+
  }
