@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 6.0.0-SNAPSHOT-3
+##### 2022-12-13
 ##### Added
 * A _Delivery Method_ that only logs meta-data of the received message unit but does not further process it. The factory
   class name to configure in P-Modes is `org.holodeckb2b.common.util.LogOnlyDeliveryMethod`. 
@@ -25,6 +26,9 @@ to release any held resources.
   directory. As a result the path based `init` method of `org.holodeckb2b.interfaces.pmode.IPModeSet` is deprecated and
   replaced with an new configuration based one.
 * The P-Mode for an AS4 Error message without a RefToMessageId is now set to the P-Mode of the primary sent message unit
+
+##### Fixed
+* NPE when the certificate used to sign a received message is not found
 
 ##### Removed
 * Due to refactoring of the message delivery API the following interfaces:
