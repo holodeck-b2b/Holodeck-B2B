@@ -211,6 +211,24 @@
                 <version>1.4.01</version>
                 <scope>runtime</scope>
             </dependency>
+	        <!-- Add JAXB for Java9 and later compatibilitu -->
+	        <dependency>
+	            <groupId>javax.xml.bind</groupId>
+	            <artifactId>jaxb-api</artifactId>
+	            <version>2.3.1</version>
+	        </dependency>
+	        <dependency>
+	            <groupId>com.sun.xml.bind</groupId>
+	            <artifactId>jaxb-impl</artifactId>
+	            <version>2.3.1</version>
+	            <scope>runtime</scope>
+	        </dependency>
+	        <dependency>
+	            <groupId>com.sun.istack</groupId>
+	            <artifactId>istack-commons-runtime</artifactId>
+	            <version>3.0.10</version>
+	            <scope>runtime</scope>
+	        </dependency>            
 
             <!--==================================================================
                 Apache Tika is used in the Common project to determine MIME Type
@@ -231,6 +249,7 @@
                 <artifactId>commons-io</artifactId>
                 <version>2.5</version>
             </dependency>
+            
 
             <!--===============================================================
                 Log4j is used for logging in Holodeck B2B
@@ -273,7 +292,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>2.13.0</version>
+                <version>2.19.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
