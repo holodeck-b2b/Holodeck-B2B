@@ -124,7 +124,7 @@ final class MMDCompleter {
         if (!Utils.isNullOrEmpty(submission.getPayloads()))
         	submission.getPayloads().parallelStream().filter(p -> p.getContainment() == null)
         										 	 .forEach(p -> ((Payload) p).setContainment(Containment.ATTACHMENT));
-        
+
         return submission;
     }
 
@@ -147,7 +147,7 @@ final class MMDCompleter {
         }
 
         // Get sender info from P-Mode
-        ITradingPartner pmodeSender = null;        
+        ITradingPartner pmodeSender = null;
         pmodeSender = PModeUtils.isHolodeckB2BInitiator(pmode) ? pmode.getInitiator() : pmode.getResponder();
         Collection<IPartyId> pmPartyIds = null;
         String  pmRole = null;
@@ -293,7 +293,7 @@ final class MMDCompleter {
         final Service ssi = submission.getCollaborationInfo().getService();
 
         if (ssi == null && psi == null)
-            throw new MessageSubmitException("Missing required information on the receiver of the message");
+            throw new MessageSubmitException("Missing required Service information of the message");
         else if (ssi == null)
             // Take P-Mode info
             submission.getCollaborationInfo().setService(psi);
@@ -402,10 +402,10 @@ final class MMDCompleter {
      */
     private MMDCompleter(final IUserMessage submittedMMD, final IPMode pmode) {
         this.pmode = pmode;
-        this.leg = PModeUtils.getSendLeg(pmode); 
+        this.leg = PModeUtils.getSendLeg(pmode);
 
         // Start with a copy of the supplied MMD
-        this.submission = new UserMessage(submittedMMD);  
+        this.submission = new UserMessage(submittedMMD);
         this.submission.setDirection(Direction.OUT);
     }
 }
