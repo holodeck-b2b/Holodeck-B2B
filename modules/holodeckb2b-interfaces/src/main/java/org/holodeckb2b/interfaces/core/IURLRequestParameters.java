@@ -19,14 +19,16 @@ package org.holodeckb2b.interfaces.core;
 import java.util.List;
 
 import org.apache.axis2.Constants;
+import org.apache.axis2.context.MessageContext;
 
 /**
  * Represents the request parameters that are included in the query part of a URL. Parameters must be included in <code>
- * application/x-www-form-urlencoded</code> format, i.e. as "key=value" pairs separated by a '&' character. When a 
- * parameter is repeated in the URL, the values are grouped into a single list. Note that the query part of "http(s)" 
- * URLs are case-sensitive and therefore the parameters names are so too.   
- * <p>The request parameters are available through the Axis2 {@link MessageContext} property named {@link #MC_PROPERTY}.
- * 
+ * application/x-www-form-urlencoded</code> format, i.e. as "key=value" pairs separated by a '&' character. When a
+ * parameter is repeated in the URL, the values are grouped into a single list. Note that the query part of "http(s)"
+ * URLs are case-sensitive and therefore the parameters names are so too.
+ * <p>The request parameters can be retrieved from the Axis2 <code>MessageContext</code> using the {@link #get()}
+ * method.
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 6.0.0
  */
@@ -34,39 +36,53 @@ public interface IURLRequestParameters {
 	/**
 	 * Name of the Axis2 MessageContext property that holds the request parameters of the current request
 	 */
-	public static final String	MC_PROPERTY = "hb2b:" + Constants.REQUEST_PARAMETER_MAP; 
+	public static final String	MC_PROPERTY = "hb2b:" + Constants.REQUEST_PARAMETER_MAP;
+
+	/**
+	 * Gets the set of URL parameters for the current request.
+	 *
+	 * @param mc	the Axis2 <code>MessageContext</code> of the current request
+	 * @return		the URL parameters represented by an object of this type
+	 */
+	static IURLRequestParameters get(MessageContext mc) {
+		try {
+			return (IURLRequestParameters) mc.getProperty(MC_PROPERTY);
+		} catch (ClassCastException cce) {
+			return null;
+		}
+	}
 
 	/**
 	 * Indicates whether the URL contained a request parameter with the given name.
-	 * 
+	 *
 	 * @param name	parameter name to check for existence
 	 * @return		<code>true</code> if the URL contained a parameter with the specified name,<br/>
 	 * 			    <code>false</code> otherwise
 	 */
 	boolean contains(final String name);
-	
+
 	/**
 	 * Indicates if the parameter with the specified name occurred more than once in the URL.
-	 * 
+	 *
 	 * @param name	parameter name to check
-	 * @return		<code>Boolean.TRUE</code> if the URL contained multiple occurrences of a parameter with the 
-	 * 				specified name. <code>Boolean.FALSE</code> if the URL contained a single occurrence of the parameter 
-	 * 				with the name. <code>null</code> if the URL does not contain a parameter with the specified name. 
+	 * @return		<code>Boolean.TRUE</code> if the URL contained multiple occurrences of a parameter with the
+	 * 				specified name. <code>Boolean.FALSE</code> if the URL contained a single occurrence of the parameter
+	 * 				with the name. <code>null</code> if the URL does not contain a parameter with the specified name.
 	 */
 	Boolean isMultiValue(final String name);
-	
+
 	/**
 	 * Gets the single value of the parameter with the specified name.
-	 * 
+	 *
 	 * @param name	parameter to retrieve value of
-	 * @return		String value of the parameter, <code>null</code> if no value is specified or there is no parameter 
+	 * @return		String value of the parameter, <code>null</code> if no value is specified or there is no parameter
 	 * 				with the specified name.
 	 */
 	String getValue(final String name);
-	
+
 	/**
 	 * Gets the list of values of the parameter with the specified name.
-	 * 
+	 *
 	 * @param name	parameter to retrieve value of
 	 * @return		List of Strings representing all occurrences of the parameter with the given name. Empty list if
 	 * 				no values are specified or there is no parameter with the specified name.

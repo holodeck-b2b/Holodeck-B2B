@@ -18,6 +18,7 @@ to release any held resources.
 * `getPrimarySentMessageUnit()` and `getPrimaryReceivedMessageUnit()` to `org.holodeckb2b.interfaces.core.IMessageProcessingContext`
 * `IErrorMessageEntity.getLeg()` and `IUpdateManager.setPModeAndLeg(IErrorMessageEntity, String, Label)` to persist also 
   the Leg on which an Error Message is exchanged. 
+* Static method `IURLRequestParameters.get(MessageContext)` to retrieve the URL parameters from the request message context
 
 ##### Changed
 * Initialisation of the _P-Mode storage_ component now uses the full Holodeck B2B configuration instead of only the home
