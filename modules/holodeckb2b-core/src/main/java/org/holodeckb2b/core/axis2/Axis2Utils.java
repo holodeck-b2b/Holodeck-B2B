@@ -18,9 +18,14 @@ package org.holodeckb2b.core.axis2;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMXMLBuilderFactory;
@@ -139,13 +144,20 @@ public final class Axis2Utils {
 	 */
 	public static SOAPEnvelope convertDOMSOAPEnvToAxiom(final Document document) {
 	    try {
-	        final SOAPEnvelope env = OMXMLBuilderFactory.createSOAPModelBuilder(new DOMSource(document))
+    		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+    		// initialize StreamResult with File object to save to file
+    		StreamResult result = new StreamResult(new StringWriter());
+    		DOMSource source = new DOMSource(document);
+    		transformer.transform(source, result);
+    		String xmlString = result.getWriter().toString();
+	    	
+	        final SOAPEnvelope env = OMXMLBuilderFactory.createSOAPModelBuilder(new StringReader(xmlString))
 	        																						.getSOAPEnvelope();
 	        env.build();
 	        return env;
 	    } catch (final Exception e) {
 	        // If anything goes wrong converting the document, just return null
-	        return null;
+	    	return null;
 	    }
 	}
 
