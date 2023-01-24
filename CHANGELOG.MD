@@ -4,16 +4,21 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 6.0.0-SNAPSHOT-4
 #####
-##### Changed
+### Added
+* New abstract base class `org.holodeckb2b.common.handlers.AbstractConfigureHTTPTransport` for configuration of the HTTP
+  parameters 
+
+### Changed
 * Improved logging of `org.holodeckb2b.core.DeliveryManager`
 * Perform customer validation of User Message only if its processing state is _PROCESSING_
+* Refactored `org.holodeckb2b.ebms3.handlers.outflow.ConfigureHTTPTransportHandler` to use new base class
 
-##### Fixed
+### Fixed
 * Encryption of Signal Messages. These were encrypted when encryption was specified for both parties in a Two-Way P-Mode
 
 ## 6.0.0-SNAPSHOT-3
 ##### 2022-12-13
-##### Added
+### Added
 * A _Delivery Method_ that only logs meta-data of the received message unit but does not further process it. The factory
   class name to configure in P-Modes is `org.holodeckb2b.common.util.LogOnlyDeliveryMethod`. 
 * New API for the delivery of message units to the back-end, including support for async and re-delivery. Added 
@@ -29,7 +34,7 @@ to release any held resources.
   the Leg on which an Error Message is exchanged. 
 * Static method `IURLRequestParameters.get(MessageContext)` to retrieve the URL parameters from the request message context
 
-##### Changed
+### Changed
 * Changed `org.holodeckb2b.interfaces.delivery.IDeliverySpecification` to align with the new message delivery API. 
 * Refactored default P-Mode implementation to support the new message delivery API, including suppport for configuration
  of async delivery.
@@ -38,10 +43,10 @@ to release any held resources.
   replaced with an new configuration based one.
 * The P-Mode for an AS4 Error message without a RefToMessageId is now set to the P-Mode of the primary sent message unit
 
-##### Fixed
+### Fixed
 * NPE when the certificate used to sign a received message is not found
 
-##### Removed
+### Removed
 * Due to refactoring of the message delivery API the following interfaces:
 	- `org.holodeckb2b.interfaces.delivery.IMessageDelivererFactory`
 	- `org.holodeckb2b.interfaces.delivery.IMessageDeliverer`
