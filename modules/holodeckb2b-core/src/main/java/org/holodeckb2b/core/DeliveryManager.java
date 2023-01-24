@@ -18,15 +18,12 @@ package org.holodeckb2b.core;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 
 import org.apache.axis2.description.Parameter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ehcache.Cache;
 import org.ehcache.UserManagedCache;
 import org.ehcache.config.builders.CacheEventListenerConfigurationBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
@@ -61,8 +58,8 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 
 /**
- * Is the default implementation of {@link IDeliveryManager}. 
- * 
+ * Is the default implementation of {@link IDeliveryManager}.
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 6.0.0
  */
@@ -70,7 +67,7 @@ class DeliveryManager implements IDeliveryManager {
 	private static final Logger log = LogManager.getLogger();
 
 	/**
-	 * Cache containing already instantiated Delivery Methods.   
+	 * Cache containing already instantiated Delivery Methods.
 	 */
 	private UserManagedCache<String, IDeliveryMethod> 	dmCache;
 
@@ -78,15 +75,15 @@ class DeliveryManager implements IDeliveryManager {
 	 * The collection of pre-registered Delivery Specifications
 	 */
 	private Map<String, IDeliverySpecification> registeredSpecs;
-	
+
 	/**
 	 * The HolodeckB2B Core StorageManager to use for updating the processing state of message units
 	 */
 	private StorageManager mdManager;
-	
+
 	/**
 	 * Initialises the Delivery Manager.
-	 * 
+	 *
 	 * @param sm		the {@link StorageManager} to use for updating the meta-data of message units
 	 * @param config	the Holodeck B2B configuration which may contain settings for the delivery method cache
 	 */
@@ -97,31 +94,31 @@ class DeliveryManager implements IDeliveryManager {
 		Parameter cacheParam = config.getParameter("MaxDeliveryMethodCacheSize");
 		if (cacheParam != null && cacheParam.getParameterType() == Parameter.TEXT_PARAMETER) {
 			try { maxCacheSize = Integer.parseInt((String) cacheParam.getValue()); }
-			catch (NumberFormatException nan) {}			
-		}		
+			catch (NumberFormatException nan) {}
+		}
 		if (maxCacheSize > 0) {
 			log.trace("Initialise Delivery Method cache with max size = {}", maxCacheSize);
 			dmCache = UserManagedCacheBuilder.newUserManagedCacheBuilder(String.class, IDeliveryMethod.class)
-		    				.withEventExecutors(Executors.newSingleThreadExecutor(), Executors.newFixedThreadPool(5)) 
+		    				.withEventExecutors(Executors.newSingleThreadExecutor(), Executors.newFixedThreadPool(5))
 		    				.withEventListeners(
 		    					CacheEventListenerConfigurationBuilder
 		    						.newEventListenerConfiguration(DMRemovalListener.class, EventType.EVICTED).build(),
 		    					CacheEventListenerConfigurationBuilder
-				    				.newEventListenerConfiguration(DMRemovalListener.class, EventType.REMOVED)		    								    						
-				    				.synchronous().build()) 
+				    				.newEventListenerConfiguration(DMRemovalListener.class, EventType.REMOVED)
+				    				.synchronous().build())
 		    				.withResourcePools(ResourcePoolsBuilder.heap(maxCacheSize))
-		    				.build(true);			
+		    				.build(true);
 		}
 	}
-	
+
 	@Override
-	public void deliver(IMessageUnitEntity messageUnit) throws IllegalStateException, MessageDeliveryException {		
-		log.trace("Delivery requested for {} (msgId={})", MessageUnitUtils.getMessageUnitName(messageUnit), 
+	public void deliver(IMessageUnitEntity messageUnit) throws IllegalStateException, MessageDeliveryException {
+		log.trace("Delivery requested for {} (msgId={})", MessageUnitUtils.getMessageUnitName(messageUnit),
 					messageUnit.getMessageId());
 		// Make sure the P-Mode of the message unit is available
-		if (Utils.isNullOrEmpty(messageUnit.getPModeId()) 
+		if (Utils.isNullOrEmpty(messageUnit.getPModeId())
 			|| !HolodeckB2BCoreInterface.getPModeSet().containsId(messageUnit.getPModeId())) {
-			log.error("Unable to deliver message unit (msgId={}) as no P-Mode is available!", 
+			log.error("Unable to deliver message unit (msgId={}) as no P-Mode is available!",
 					messageUnit.getMessageId());
 			throw new MessageDeliveryException("No P-Mode available for message unit");
 		}
@@ -129,7 +126,7 @@ class DeliveryManager implements IDeliveryManager {
 		try {
 			HolodeckB2BCoreInterface.getQueryManager().ensureCompletelyLoaded(messageUnit);
 		} catch (PersistenceException dbError) {
-			log.error("Error retrieving current meta-data of message unit (msgId={}) from database : ", 
+			log.error("Error retrieving current meta-data of message unit (msgId={}) from database : ",
 					messageUnit.getMessageId(), Utils.getExceptionTrace(dbError));
 			throw new MessageDeliveryException("Error retrieving current meta-data", dbError);
 		}
@@ -137,13 +134,13 @@ class DeliveryManager implements IDeliveryManager {
 											  .anyMatch(s -> s.getState() == ProcessingState.READY_FOR_DELIVERY)) {
 			log.error("Message unit (msgId={}) is not ready for delivery!", messageUnit.getMessageId());
 			throw new IllegalStateException("Message unit not ready for delivery");
-		}		
-		
+		}
+
 		try {
 			IDeliverySpecification delSpec;
 			delSpec = getDeliverySpec(messageUnit);
 			if (delSpec != null) {
-				if (!mdManager.setProcessingState(messageUnit, messageUnit.getCurrentProcessingState().getState(), 
+				if (!mdManager.setProcessingState(messageUnit, messageUnit.getCurrentProcessingState().getState(),
 														ProcessingState.OUT_FOR_DELIVERY)) {
 					log.error("Cannot start delivery of message unit (msgId={})", messageUnit.getMessageId());
 					throw new MessageDeliveryException("Message unit already in process");
@@ -161,28 +158,28 @@ class DeliveryManager implements IDeliveryManager {
 						handleResult(messageUnit, null);
 					}
 				} catch (MessageDeliveryException deliveryError) {
-					handleResult(messageUnit, deliveryError);					
+					handleResult(messageUnit, deliveryError);
 					throw deliveryError;
 				} catch (Throwable deliveryError) {
 					log.error("Unexpected error during delivery of message unit (msgId={}): {}",
 							messageUnit.getMessageId(), Utils.getExceptionTrace(deliveryError));
-					MessageDeliveryException mde = new MessageDeliveryException(deliveryError.getMessage(), 
+					MessageDeliveryException mde = new MessageDeliveryException(deliveryError.getMessage(),
 																				deliveryError);
 					handleResult(messageUnit, mde);
 					throw mde;
-				}			
+				}
 			} else {
 				boolean updated = false;
-				if (messageUnit instanceof IUserMessageEntity) { 					
-					log.warn("No delivery specified in P-Mode ({}) used for User Message (msgId={})", 
+				if (messageUnit instanceof IUserMessageEntity) {
+					log.warn("No delivery specified in P-Mode ({}) used for User Message (msgId={})",
 							messageUnit.getPModeId(), messageUnit.getMessageId());
-					updated = mdManager.setProcessingState(messageUnit, 
-											messageUnit.getCurrentProcessingState().getState(), ProcessingState.DONE, 
+					updated = mdManager.setProcessingState(messageUnit,
+											messageUnit.getCurrentProcessingState().getState(), ProcessingState.DONE,
 											"No delivery specified");
 				} else {
-					log.info("{} (msgId={}) does not need to be delivered to back-end", 
+					log.info("{} (msgId={}) does not need to be delivered to back-end",
 							MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId());
-					updated = mdManager.setProcessingState(messageUnit, 
+					updated = mdManager.setProcessingState(messageUnit,
 											messageUnit.getCurrentProcessingState().getState(), ProcessingState.DONE);
 				}
 				if (!updated) {
@@ -192,14 +189,14 @@ class DeliveryManager implements IDeliveryManager {
 			}
 		} catch (PersistenceException dbError) {
 			log.error("Error updating processing state of message unit (msgId={}) : {}", messageUnit.getMessageId(),
-					dbError.getMessage());	
+					dbError.getMessage());
 			throw new MessageDeliveryException("Error updating processing state", dbError);
 		}
 	}
 
 	/**
-	 * Determines if and how the message unit should be delivered to the back-end application. 
-	 * 
+	 * Determines if and how the message unit should be delivered to the back-end application.
+	 *
 	 * @param messageUnit	the received message unit
 	 * @return	the {@link IDeliverySpecification} how the message unit should be delivered to the back-end,<br/>
 	 * 			<code>null</code> if the message does not need to be delivered to the back-end
@@ -208,13 +205,13 @@ class DeliveryManager implements IDeliveryManager {
 		IDeliverySpecification deliverySpec = null;
 		if (messageUnit instanceof IUserMessageEntity)
             deliverySpec = PModeUtils.getLeg(messageUnit).getDefaultDelivery();
-		else if (messageUnit instanceof IReceiptEntity) { 
+		else if (messageUnit instanceof IReceiptEntity) {
 			ILeg leg = PModeUtils.getLeg(messageUnit);
 	        IReceiptConfiguration rcptConfig = leg != null ? leg.getReceiptConfiguration() : null;
 	        if (rcptConfig != null && rcptConfig.shouldNotifyReceiptToBusinessApplication()) {
 	            deliverySpec = rcptConfig.getReceiptDelivery();
-	            if (deliverySpec == null)                
-	                deliverySpec = leg.getDefaultDelivery();            
+	            if (deliverySpec == null)
+	                deliverySpec = leg.getDefaultDelivery();
 	        }
 		} else { // messageUnit instanceof IErrorMessageEntity
 			/*
@@ -225,7 +222,7 @@ class DeliveryManager implements IDeliveryManager {
 			 * is one specific for errors.
 			 */
 			IErrorHandling errHandlingCfg = null;
-	        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(messageUnit.getPModeId());       	        
+	        IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(messageUnit.getPModeId());
 	        ILeg leg = pmode.getLeg(((IErrorMessageEntity) messageUnit).getLeg());
 	        ILeg pullLeg = PModeUtils.getOutPullLeg(pmode);
 	        if (pullLeg != null && leg.getLabel() == pullLeg.getLabel()) {
@@ -236,10 +233,10 @@ class DeliveryManager implements IDeliveryManager {
 	        	IUserMessageFlow umFlow = leg.getUserMessageFlow();
 	        	errHandlingCfg = umFlow != null ? umFlow.getErrorHandlingConfiguration() : null;
 	        }
-	        
+
 	        if (errHandlingCfg != null && errHandlingCfg.shouldNotifyErrorToBusinessApplication()) {
 	        	deliverySpec = errHandlingCfg.getErrorDelivery();
-	        	if (deliverySpec == null) 
+	        	if (deliverySpec == null)
 	        		// No specific error delivery specified, fall back to default
 	        		deliverySpec = leg.getDefaultDelivery();
 	        }
@@ -248,13 +245,13 @@ class DeliveryManager implements IDeliveryManager {
 	}
 
 	/**
-	 * Gets the Delivery Method for the given Delivery Specification. 
+	 * Gets the Delivery Method for the given Delivery Specification.
 	 * <p>
 	 * If the cache does not a Delivery Method for the given specification a new instance will be created and added to
 	 * the cache (only if the spec has a unique id).
-	 * 
-	 * @param spec	the Delivery Specification 
-	 * @return		a Delivery Method configured according to the provided specification 
+	 *
+	 * @param spec	the Delivery Specification
+	 * @return		a Delivery Method configured according to the provided specification
 	 * @throws MessageDeliveryException	when there is an issue creating the Delivery Method
 	 */
 	private IDeliveryMethod getDeliveryMethod(IDeliverySpecification spec) throws MessageDeliveryException {
@@ -270,14 +267,15 @@ class DeliveryManager implements IDeliveryManager {
 				log.debug("Using registered spec to create delivery method");
 				spec2use = registeredSpecs.get(specId);
 			} else
-				log.debug("Using provided spec to create delivery method");			
-			try {				
+				log.debug("Using provided spec to create delivery method");
+			try {
+				log.trace("Create Delivery Method ({})", spec2use.getDeliveryMethod().getName());
 				deliveryMethod = spec2use.getDeliveryMethod().newInstance();
 				log.trace("Initialise Delivery Method");
 				deliveryMethod.init(spec2use.getSettings());
 				log.debug("Created Delivery Method {}", spec2use.getDeliveryMethod().getName());
 			} catch (Throwable dmError) {
-				log.error("Error creating Delivery Method ({}) for spec ({}): {}", spec2use.getClass().getName(), 
+				log.error("Error creating Delivery Method ({}) for spec ({}): {}", spec2use.getDeliveryMethod().getName(),
 						specId, Utils.getExceptionTrace(dmError));
 				if (dmError instanceof MessageDeliveryException)
 					throw (MessageDeliveryException) dmError;
@@ -291,48 +289,48 @@ class DeliveryManager implements IDeliveryManager {
 		}
 		return deliveryMethod;
 	}
-	
+
 	/**
 	 * Handles the result of the delivery attempt to the back-end application by updating the processing state of the
-	 * message unit and raising the applicable message processing event.  
-	 * 	
+	 * message unit and raising the applicable message processing event.
+	 *
 	 * @param msgUnit			message unit being delivered
-	 * @param deliveryError		the exception that caused the delivery attempt to fail, <code>null</code> if the 
-	 * 							delivery was successful 
+	 * @param deliveryError		the exception that caused the delivery attempt to fail, <code>null</code> if the
+	 * 							delivery was successful
 	 * @throws PersistenceException when an error occurs updating the processing state of the message unit
 	 */
-	private void handleResult(IMessageUnitEntity msgUnit, MessageDeliveryException deliveryError) 
+	private void handleResult(IMessageUnitEntity msgUnit, MessageDeliveryException deliveryError)
 																						throws PersistenceException {
 		if (deliveryError == null) {
 			log.info("Successfully delivered {} (msgId={})", MessageUnitUtils.getMessageUnitName(msgUnit),
 					 msgUnit.getMessageId());
-			mdManager.setProcessingState(msgUnit, 
+			mdManager.setProcessingState(msgUnit,
 									msgUnit instanceof IUserMessage ? ProcessingState.DELIVERED : ProcessingState.DONE);
 		} else {
 			log.error("An error occurred during delivery of {} (msgId={}): {}",
-					MessageUnitUtils.getMessageUnitName(msgUnit), msgUnit.getMessageId(), 
+					MessageUnitUtils.getMessageUnitName(msgUnit), msgUnit.getMessageId(),
 					Utils.getExceptionTrace(deliveryError));
 	        // Indicate failure in processing state
 	        mdManager.setProcessingState(msgUnit, ProcessingState.DELIVERY_FAILED, deliveryError.getMessage());
 	        // If the problem that occurred is indicated as permanent, we can set the state to FAILURE and return
 	        //  an ebMS Error to the sender
-	        if (deliveryError.isPermanent()) 
-	            mdManager.setProcessingState(msgUnit, ProcessingState.FAILURE);			
-		}		
+	        if (deliveryError.isPermanent())
+	            mdManager.setProcessingState(msgUnit, ProcessingState.FAILURE);
+		}
         // Raise delivery event to inform external components
         HolodeckB2BCore.getEventProcessor().raiseEvent(deliveryError == null ? new MessageDelivered(msgUnit)
         											  			: new MessageDeliveryFailure(msgUnit, deliveryError));
-		
-		
+
+
 	}
-	
+
 	@Override
 	public void registerDeliverySpec(IDeliverySpecification spec) {
 		if (registeredSpecs.put(spec.getId(), spec) != null)
 			log.debug("Replaced Delivery Specification ({})", spec.getId());
 		else
 			log.debug("Added Delivery Specification ({})", spec.getId());
-		
+
 		if (dmCache != null)
 			dmCache.remove(spec.getId());
 	}
@@ -356,11 +354,11 @@ class DeliveryManager implements IDeliveryManager {
 	public void removeDeliverySpec(String id) {
 		registeredSpecs.remove(id);
 		if (dmCache != null)
-			dmCache.remove(id);		
+			dmCache.remove(id);
 	}
-	
+
 	/**
-	 * Shuts down the Delivery Manager, removing all cached Delivery Methods which automatically results in shutting 
+	 * Shuts down the Delivery Manager, removing all cached Delivery Methods which automatically results in shutting
 	 * them down.
 	 */
 	public void shutdown() {
@@ -370,17 +368,17 @@ class DeliveryManager implements IDeliveryManager {
 			dmCache.close();
 		}
 	}
-	
+
 	/**
 	 * Callback handler for processing the result of the async delivery process.
 	 */
 	class DeliveryResultHandler implements IDeliveryCallback {
 		private final IMessageUnitEntity msgUnit;
-		
+
 		private DeliveryResultHandler(IMessageUnitEntity m) {
 			this.msgUnit = m;
 		}
-		
+
 		@Override
 		public void success() {
 			try {
@@ -389,8 +387,8 @@ class DeliveryManager implements IDeliveryManager {
 				log.error("Error updating processing state of message unit (msgId={}) : {}", msgUnit.getMessageId(),
 						dbError.getMessage());
 			}
-		}							
-	
+		}
+
 		@Override
 		public void failed(MessageDeliveryException failure) {
 			try {
@@ -399,32 +397,32 @@ class DeliveryManager implements IDeliveryManager {
 				log.error("Error updating processing state of message unit (msgId={}) : {}", msgUnit.getMessageId(),
 						dbError.getMessage());
 			}
-		}		
-	}	
-	
+		}
+	}
+
 	/**
 	 * Is a cache event listener which handles the removal, either explicit or implicit through eviction of Delivery
-	 * Methods from the cache. It {@link IDeliveryMethod#shutdown() shuts down} the Delivery Method to release the 
+	 * Methods from the cache. It {@link IDeliveryMethod#shutdown() shuts down} the Delivery Method to release the
 	 * resources it may hold.
 	 */
 	public static class DMRemovalListener extends CacheEventAdapter<String, IDeliveryMethod> {
 		@Override
 		protected void onEviction(String key, IDeliveryMethod dm) {
 			log.trace("Delivery Method (specId={}) evicted from cache", key);
-			try { 
+			try {
 				dm.shutdown();
 			} catch (Throwable t) {
-				log.error("An error occurred during Delivery Method (specId={}) shutdown:", key, 
+				log.error("An error occurred during Delivery Method (specId={}) shutdown:", key,
 						Utils.getExceptionTrace(t));
 			}
 		}
 		@Override
 		protected void onRemoval(String key, IDeliveryMethod dm) {
 			log.trace("Delivery Method (specId={}) removed from cache", key);
-			try { 
+			try {
 				dm.shutdown();
 			} catch (Throwable t) {
-				log.error("An error occurred during Delivery Method (specId={}) shutdown:", key, 
+				log.error("An error occurred during Delivery Method (specId={}) shutdown:", key,
 						Utils.getExceptionTrace(t));
 			}
 		}

@@ -5,6 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 6.0.0-SNAPSHOT-4
 #####
 ##### Changed
+* Improved logging of `org.holodeckb2b.core.DeliveryManager`
 * Perform customer validation of User Message only if its processing state is _PROCESSING_
 
 ##### Fixed
