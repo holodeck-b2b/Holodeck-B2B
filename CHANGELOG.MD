@@ -21,7 +21,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 	- `org.holodeckb2b.interfaces.delivery.IDeliveryManager`
 	- `org.holodeckb2b.interfaces.delivery.IDeliveryMethod`
 	- `org.holodeckb2b.interfaces.delivery.IDeliveryCallback`
-	- `org.holodeckb2b.interfaces.delivery.IDeliverySpecification.performAsyncDelivery()` 
 	- `org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface.getDeliveryManager()`
 * `shutdown()` method to the _Persistency Provider_, _Event Processor_, _Certificate Manager_ and _P-Mode Set_
 to release any held resources.
@@ -31,6 +30,9 @@ to release any held resources.
 * Static method `IURLRequestParameters.get(MessageContext)` to retrieve the URL parameters from the request message context
 
 ##### Changed
+* Changed `org.holodeckb2b.interfaces.delivery.IDeliverySpecification` to align with the new message delivery API. 
+* Refactored default P-Mode implementation to support the new message delivery API, including suppport for configuration
+ of async delivery.
 * Initialisation of the _P-Mode storage_ component now uses the full Holodeck B2B configuration instead of only the home
   directory. As a result the path based `init` method of `org.holodeckb2b.interfaces.pmode.IPModeSet` is deprecated and
   replaced with an new configuration based one.
