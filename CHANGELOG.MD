@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 6.0.0-SNAPSHOT-4
 #####
+##### Changed
+* Perform customer validation of User Message only if its processing state is _PROCESSING_
 
 ##### Fixed
 * Encryption of Signal Messages. These were encrypted when encryption was specified for both parties in a Two-Way P-Mode

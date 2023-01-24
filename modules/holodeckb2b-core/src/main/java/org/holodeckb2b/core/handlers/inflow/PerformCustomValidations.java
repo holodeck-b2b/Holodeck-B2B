@@ -51,23 +51,23 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
     @Override
     protected InvocationResponse doProcessing(IUserMessageEntity userMessage, IMessageProcessingContext procCtx,
     										  final Logger log) throws Exception {
-    	
-    	// If the User Message is a duplicate, no processing is required. 
-    	if (userMessage.getCurrentProcessingState().getState() == ProcessingState.DUPLICATE) 
+
+    	// If the User Message is not in Processing state we should skip the validation
+    	if (userMessage.getCurrentProcessingState().getState() != ProcessingState.PROCESSING)
     		return InvocationResponse.CONTINUE;
-    	
+
         // For the execution of the validation a separate component is used. This component will also raise the event
         log.trace("Validate user message if specified");
         try {
             // Get custom validation specifcation from P-Mode
-            final IUserMessageFlow userMessageFlow = PModeUtils.getLeg(userMessage).getUserMessageFlow();            	
-            IMessageValidationSpecification validationSpec = userMessageFlow == null ? null : 
+            final IUserMessageFlow userMessageFlow = PModeUtils.getLeg(userMessage).getUserMessageFlow();
+            IMessageValidationSpecification validationSpec = userMessageFlow == null ? null :
             														 userMessageFlow.getCustomValidationConfiguration();
 
             if (validationSpec == null) {
                 log.debug("No custom validation specified for user message, ready for delivery");
-                HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, 
-                													   ProcessingState.READY_FOR_DELIVERY);                
+                HolodeckB2BCore.getStorageManager().setProcessingState(userMessage,
+                													   ProcessingState.READY_FOR_DELIVERY);
                 return InvocationResponse.CONTINUE;
             }
 
@@ -76,16 +76,16 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
 
             if (validationResult == null || Utils.isNullOrEmpty(validationResult.getValidationErrors())) {
                 log.debug("User message is valid");
-            	HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, 
-            														   ProcessingState.READY_FOR_DELIVERY);                
+            	HolodeckB2BCore.getStorageManager().setProcessingState(userMessage,
+            														   ProcessingState.READY_FOR_DELIVERY);
             } else {
                 if (!validationResult.shouldRejectMessage()) {
-                    log.info("User message [" + userMessage.getMessageId() 
+                    log.info("User message [" + userMessage.getMessageId()
                     										+ "] contains validation errors, but can be processed");
-                	HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, 
-                														   ProcessingState.READY_FOR_DELIVERY);                
+                	HolodeckB2BCore.getStorageManager().setProcessingState(userMessage,
+                														   ProcessingState.READY_FOR_DELIVERY);
                 } else {
-                    log.info("User message [" + userMessage.getMessageId() 
+                    log.info("User message [" + userMessage.getMessageId()
                     								+ "] is not valid and must be rejected, generate Other error.");
                     OtherContentError otherError = new OtherContentError(
                                                            buildErrorDetailText(validationResult.getValidationErrors()),
