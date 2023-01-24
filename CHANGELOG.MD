@@ -3,7 +3,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 6.0.0-SNAPSHOT-4
+#####
 
+##### Fixed
+* Encryption of Signal Messages. These were encrypted when encryption was specified for both parties in a Two-Way P-Mode
 
 ## 6.0.0-SNAPSHOT-3
 ##### 2022-12-13

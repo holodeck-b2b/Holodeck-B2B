@@ -237,7 +237,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
         final IEncryptionConfiguration encryptionCfg = receiverConfig != null ?
                                                                             receiverConfig.getEncryptionConfiguration()
                                                                           : null;
-        if (encryptionCfg != null) {
+        if (encryptionCfg != null && procCtx.getSendingUserMessage() != null) {
             log.debug("The message must be encrypted, set up encryption configuration");
             encryptionConfig = new EncryptionConfigWithDefaults(encryptionCfg);
             setupEncryption();
@@ -443,9 +443,9 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
         final RequestData reqData = new RequestData();
         final WSSConfig wssConfig = WSSConfig.getNewInstance();
         wssConfig.setIdAllocator(new WsuIdAllocator() {
-        	private static final String HB2B_ID_PREFIX = "4b28" + VersionInfo.majorVersion 
+        	private static final String HB2B_ID_PREFIX = "4b28" + VersionInfo.majorVersion
 		        												+ VersionInfo.minorVersion
-		        												+ VersionInfo.patchVersion; 
+		        												+ VersionInfo.patchVersion;
             @Override
 			public String createId(String prefix, Object o) {
                 return (!Utils.isNullOrEmpty(prefix) ? prefix : "") + HB2B_ID_PREFIX + UUID.randomUUID().toString();
