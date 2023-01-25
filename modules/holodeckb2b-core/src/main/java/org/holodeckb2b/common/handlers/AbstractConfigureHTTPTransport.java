@@ -144,8 +144,6 @@ public abstract class AbstractConfigureHTTPTransport extends AbstractBaseHandler
         	options.setProperty(Constants.Configuration.DISABLE_SOAP_ACTION, "true");
 
             log.debug("HTTP configuration done");
-        } else
-            log.debug("Message does not contain ebMS message unit, nothing to do");
 
         return InvocationResponse.CONTINUE;
     }
