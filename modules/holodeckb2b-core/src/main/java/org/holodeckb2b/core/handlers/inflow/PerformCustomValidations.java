@@ -32,6 +32,7 @@ import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecificati
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
@@ -60,7 +61,8 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
         log.trace("Validate user message if specified");
         try {
             // Get custom validation specifcation from P-Mode
-            final IUserMessageFlow userMessageFlow = PModeUtils.getLeg(userMessage).getUserMessageFlow();
+        	final ILeg leg = PModeUtils.getLeg(userMessage);
+            final IUserMessageFlow userMessageFlow = leg != null ? leg.getUserMessageFlow() : null;
             IMessageValidationSpecification validationSpec = userMessageFlow == null ? null :
             														 userMessageFlow.getCustomValidationConfiguration();
 
