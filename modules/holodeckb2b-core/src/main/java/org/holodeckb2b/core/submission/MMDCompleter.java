@@ -279,8 +279,9 @@ final class MMDCompleter {
     /**
      * Completes the service information for the message. The service information is required for sending the message
      * and is used to fill the <code>eb:areEqual</code> element in the message header.
-     * <p>Although service information is a composed information item, it must be provided completely by either
-     * submitted meta-data or P-Mode.
+     * <p>The P-Mode may specify only the Service.type, in which it is combined with the Service.name value contained in
+     * the submission. If both provide a value for type the values must match. Also if P-Mode contains only the
+     * Service.name the submission must also contain only that same Service.name.
      *
      * @throws MessageSubmitException   When service information is missing in both submitted meta-data and P-Mode or
      *                                  when the service information in submitted meta-data and P-Mode conflicts
@@ -292,16 +293,36 @@ final class MMDCompleter {
             psi = pbi.getService();
         final Service ssi = submission.getCollaborationInfo().getService();
 
-        if (ssi == null && psi == null)
-            throw new MessageSubmitException("Missing required Service information of the message");
-        else if (ssi == null)
-            // Take P-Mode info
-            submission.getCollaborationInfo().setService(psi);
-        else if (psi != null) {
-            // Both P-Mode and submitted MMD contain service info, ensure they are equal
-            if (!CompareUtils.areEqual(ssi, psi))
-                throw new MessageSubmitException("Different values given for Service information!");
-        }
+        if (ssi == null && psi != null && !Utils.isNullOrEmpty(psi.getName()))
+        	// Take P-Mode info
+        	submission.getCollaborationInfo().setService(psi);
+        else if (ssi != null && psi != null) {
+        	switch (Utils.compareStrings(ssi.getName(), psi.getName())) {
+        	case -2 :
+        		throw new MessageSubmitException("Different values given for Service.name information!");
+        	case -1 :
+        		throw new MessageSubmitException("Missing required Service.name information of the message");
+        	case 2 : // Use name from P-Mode
+        		ssi.setName(psi.getName());
+        	case 0 : // No name in P-Mode or equal, nothing to do
+        	case 1 :
+        	}
+        	// Check if they both contain the type attribute
+        	switch (Utils.compareStrings(ssi.getType(), psi.getType())) {
+        	case -2 :
+        		throw new MessageSubmitException("Different values given for Service.type information!");
+        	case 1 : // Only submission contained type. Only allowed if the P-Mode didn't defined a Service name either
+        		if (!Utils.isNullOrEmpty(psi.getName()))
+        			throw new MessageSubmitException("Different values given for Service.type information!");
+        		else
+        			break;
+        	case 2 :
+        		ssi.setType(psi.getType());
+        	case -1 : //  Both the submission and P-Mode didn't specify or used equal values
+        	case 0 :
+        	}
+        } else // Neither submission nor P-Mode contain at least the Service name
+        	throw new MessageSubmitException("Missing required Service information of the message");
     }
 
     /**

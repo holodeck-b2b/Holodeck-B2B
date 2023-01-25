@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * New abstract base class `org.holodeckb2b.common.handlers.AbstractConfigureHTTPTransport` for configuration of the HTTP
   parameters 
+* Possibility to only specify the **Service.type** in the P-Mode and complete the Service meta-data on submission of a
+  User Message.
 
 ### Changed
 * Improved logging of `org.holodeckb2b.core.DeliveryManager`

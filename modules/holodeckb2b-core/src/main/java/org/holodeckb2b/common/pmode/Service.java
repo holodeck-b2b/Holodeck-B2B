@@ -1,16 +1,16 @@
 /*******************************************************************************
  * Copyright (C) 2019 The Holodeck B2B Team, Sander Fieten
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
@@ -33,14 +33,14 @@ public class Service implements IService, Serializable {
     @Element (name = "type", required = false)
     private String type;
 
-    @Element (name = "name", required = true)
+    @Element (name = "name", required = false)
     private String name;
-    
+
 	/**
      * Default constructor creates a new and empty <code>Service</code> instance.
      */
     public Service() {}
-    
+
     /**
      * Creates a new <code>Service</code> instance with the given name
      *
@@ -48,8 +48,8 @@ public class Service implements IService, Serializable {
      */
     public Service(final String name) {
     	this.name = name;
-    }        
-    
+    }
+
     /**
      * Creates a new <code>Service</code> instance with the given name and type
      *
@@ -59,7 +59,7 @@ public class Service implements IService, Serializable {
     public Service(final String name, final String type) {
     	this.name = name;
     	this.type = type;
-    }        
+    }
 
     /**
      * Creates a new <code>Service</code> instance using the parameters from the provided {@link IService} object.
@@ -70,11 +70,11 @@ public class Service implements IService, Serializable {
         this.name = source.getName();
         this.type = source.getType();
     }
-    
+
     public void setType(final String type) {
     	this.type = type;
     }
-    
+
     @Override
     public String getType() {
         return this.type;
@@ -83,9 +83,9 @@ public class Service implements IService, Serializable {
     public void setName(final String name) {
     	this.name = name;
     }
-    
+
     @Override
     public String getName() {
         return this.name;
-    }    
+    }
 }

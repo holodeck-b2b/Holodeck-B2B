@@ -28,7 +28,11 @@
 		<xs:documentation><p>In version 4.0.0 of the schema the structure of the <code>ReceptionAwareness</code> element was changed to enable more flexible configuration of retries. For back-ward compatibility the old fixed intervals can also be used although there use
             is NOT RECOMMENDED.</p></xs:documentation>
 		<xs:documentation><p>In version 5.0.0 of the schema the cardinality for Leg has been changed to 1..2 to support Two-Way P-Modes. Also the default values for the key transport algorithms were updated to RSA-OAEP and MGF1 with SHA256</p></xs:documentation>
-		<xs:documentation><p>In version 6.0.0 of the schema the element <code>PerformAsyncDelivery</code> was added to the complex type <code>DeliverySpecification</code> and <code>ContinueProcessing</code> was added to complex type <code>EventHandlerConfiguration</code>. The first element can be used to indicate whether the delivery process to the back-end should be performed asynchronous. The second one indicates whether event processing should continue after the configured handler has processed an event.</p></xs:documentation>
+		<xs:documentation><p>Changes in version 6.0.0 of the schema are:<ol>
+		<li>addition of element <code>PerformAsyncDelivery</code> to the complex type <code>DeliverySpecification</code> to indicate whether the delivery process to the back-end should be performed asynchronous.</li>
+		<li>addition of element <code>ContinueProcessing</code> to complex type <code>EventHandlerConfiguration</code>, used to indicate whether event processing should continue after the configured handler has processed an event.</li>
+		<li>making the <code>name</code> element in complex type <code>Service</code> optional. This makes it possible to only specify the <b>Service.type</b> in the P-Mode and complete the Service meta-data on submission of a message.</li>
+		</ol></p></xs:documentation>
 	</xs:annotation>
 	<xs:element name="PMode" type="tns:PMode">
 		<xs:annotation>
@@ -527,7 +531,7 @@ The notification of errors uses the same delivery mechanism as user messages wit
 	</xs:complexType>
 	<xs:complexType name="Service">
 		<xs:sequence>
-			<xs:element name="name" type="tns:non-empty-string"/>
+			<xs:element name="name" type="tns:non-empty-string" minOccurs="0"/>
 			<xs:element name="type" type="tns:non-empty-string" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
