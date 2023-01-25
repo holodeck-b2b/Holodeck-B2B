@@ -60,13 +60,13 @@ import org.junit.Test;
  */
 
 public class PerformCustomValidationsTest {
-	
+
 	private static TestEventProcessor eventProcessor;
-	
+
     @BeforeClass
     public static void setUpClass() throws Exception {
         HolodeckB2BTestCore core = new HolodeckB2BTestCore();
-        core.setValidationExecutor(new IValidationExecutor() {			
+        core.setValidationExecutor(new IValidationExecutor() {
 			@Override
 			public ValidationResult validate(IMessageUnit messageUnit, IMessageValidationSpecification validationSpec)
 					throws MessageValidationException {
@@ -74,9 +74,9 @@ public class PerformCustomValidationsTest {
 				r.setExecutedAllValidators(true);
 				if (validationSpec.getStopSeverity() != null) {
 					r.setShouldRejectMessage(validationSpec.getRejectionSeverity() != null);
-					r.addValidationErrors("TestingValidator", 
+					r.addValidationErrors("TestingValidator",
 											Collections.singletonList(new MessageValidationError("Test")));
-				}				
+				}
 				return r;
 			}
 		});
@@ -88,33 +88,34 @@ public class PerformCustomValidationsTest {
     public void clearEvents() {
     	eventProcessor.reset();
     }
-    
+
     @Test
     public void testValid() throws Exception {
-    	PMode pmode = TestUtils.create1WayReceivePushPMode();        
+    	PMode pmode = TestUtils.create1WayReceivePushPMode();
         Leg leg = pmode.getLeg(Label.REQUEST);
         UserMessageFlow flow = new UserMessageFlow();
         CustomValidationConfiguration validationSpec = new CustomValidationConfiguration();
         flow.setCustomValidationConfiguration(validationSpec);
         leg.setUserMessageFlow(flow);
         HolodeckB2BCore.getPModeSet().add(pmode);
-        
+
     	UserMessage userMessage = new UserMessage();
         userMessage.setMessageId(MessageIdUtils.createMessageId());
         userMessage.setPModeId(pmode.getId());
-        
+        userMessage.setProcessingState(ProcessingState.PROCESSING);
+
         IUserMessageEntity umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
-        
+
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(umEntity);
-        
+
         try {
             new PerformCustomValidations().invoke(mc);
         } catch (Exception e) {
             fail(e.getMessage());
-        }        
+        }
         assertTrue(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
         assertTrue(eventProcessor.events.isEmpty());
         assertEquals(ProcessingState.READY_FOR_DELIVERY, umEntity.getCurrentProcessingState().getState());
@@ -122,7 +123,7 @@ public class PerformCustomValidationsTest {
 
     @Test
     public void testRejection() throws Exception {
-    	PMode pmode = TestUtils.create1WayReceivePushPMode();        
+    	PMode pmode = TestUtils.create1WayReceivePushPMode();
         Leg leg = pmode.getLeg(Label.REQUEST);
         UserMessageFlow flow = new UserMessageFlow();
         CustomValidationConfiguration validationSpec = new CustomValidationConfiguration();
@@ -131,36 +132,37 @@ public class PerformCustomValidationsTest {
         flow.setCustomValidationConfiguration(validationSpec);
         leg.setUserMessageFlow(flow);
         HolodeckB2BCore.getPModeSet().add(pmode);
-        
+
     	UserMessage userMessage = new UserMessage();
         userMessage.setMessageId(MessageIdUtils.createMessageId());
         userMessage.setPModeId(pmode.getId());
-        
+        userMessage.setProcessingState(ProcessingState.PROCESSING);
+
         IUserMessageEntity umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
         ProcessingState currentState = umEntity.getCurrentProcessingState().getState();
-        
+
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(umEntity);
-        
+
         try {
             new PerformCustomValidations().invoke(mc);
         } catch (Exception e) {
             fail(e.getMessage());
         }
-        
+
         assertFalse(Utils.isNullOrEmpty(procCtx.getGeneratedErrors().get(umEntity.getMessageId())));
         assertEquals("EBMS:0004" ,
         			 procCtx.getGeneratedErrors().get(umEntity.getMessageId()).iterator().next().getErrorCode());
         assertFalse(eventProcessor.events.isEmpty());
         assertTrue(eventProcessor.events.get(0) instanceof ICustomValidationFailure);
-        assertEquals(ProcessingState.FAILURE, umEntity.getCurrentProcessingState().getState());        
+        assertEquals(ProcessingState.FAILURE, umEntity.getCurrentProcessingState().getState());
     }
-    
+
     @Test
     public void testWarningOnly() throws Exception {
-    	PMode pmode = TestUtils.create1WayReceivePushPMode();        
+    	PMode pmode = TestUtils.create1WayReceivePushPMode();
     	Leg leg = pmode.getLeg(Label.REQUEST);
     	UserMessageFlow flow = new UserMessageFlow();
     	CustomValidationConfiguration validationSpec = new CustomValidationConfiguration();
@@ -168,28 +170,63 @@ public class PerformCustomValidationsTest {
     	flow.setCustomValidationConfiguration(validationSpec);
     	leg.setUserMessageFlow(flow);
     	HolodeckB2BCore.getPModeSet().add(pmode);
-    	
+
     	UserMessage userMessage = new UserMessage();
     	userMessage.setMessageId(MessageIdUtils.createMessageId());
     	userMessage.setPModeId(pmode.getId());
-    	
+        userMessage.setProcessingState(ProcessingState.PROCESSING);
+
     	IUserMessageEntity umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
     	ProcessingState currentState = umEntity.getCurrentProcessingState().getState();
-    	
+
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.IN_FLOW);
     	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	procCtx.setUserMessage(umEntity);
-    	
+
     	try {
     		new PerformCustomValidations().invoke(mc);
     	} catch (Exception e) {
     		fail(e.getMessage());
     	}
-    	
+
     	assertTrue(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
         assertEquals(ProcessingState.READY_FOR_DELIVERY, umEntity.getCurrentProcessingState().getState());
     	assertFalse(eventProcessor.events.isEmpty());
-    	assertTrue(eventProcessor.events.get(0) instanceof ICustomValidationFailure);    	       
+    	assertTrue(eventProcessor.events.get(0) instanceof ICustomValidationFailure);
+    }
+
+    @Test
+    public void testSkipNpnProcessing() throws Exception {
+    	PMode pmode = TestUtils.create1WayReceivePushPMode();
+    	Leg leg = pmode.getLeg(Label.REQUEST);
+    	UserMessageFlow flow = new UserMessageFlow();
+    	CustomValidationConfiguration validationSpec = new CustomValidationConfiguration();
+    	validationSpec.setStopSeverity(Severity.Failure);
+    	flow.setCustomValidationConfiguration(validationSpec);
+    	leg.setUserMessageFlow(flow);
+    	HolodeckB2BCore.getPModeSet().add(pmode);
+
+    	UserMessage userMessage = new UserMessage();
+    	userMessage.setMessageId(MessageIdUtils.createMessageId());
+    	userMessage.setPModeId(pmode.getId());
+        userMessage.setProcessingState(ProcessingState.READY_FOR_DELIVERY);
+
+    	IUserMessageEntity umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
+
+    	MessageContext mc = new MessageContext();
+    	mc.setFLOW(MessageContext.IN_FLOW);
+    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	procCtx.setUserMessage(umEntity);
+
+    	try {
+    		new PerformCustomValidations().invoke(mc);
+    	} catch (Exception e) {
+    		fail(e.getMessage());
+    	}
+
+    	assertTrue(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
+        assertEquals(ProcessingState.READY_FOR_DELIVERY, umEntity.getCurrentProcessingState().getState());
+    	assertTrue(eventProcessor.events.isEmpty());
     }
 }
