@@ -68,12 +68,8 @@ public abstract class AbstractConfigureHTTPTransport extends AbstractBaseHandler
     protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, Logger log) throws PersistenceException {
         final IMessageUnitEntity primaryMU = procCtx.getPrimaryMessageUnit();
         // Only when message contains a message unit there is something to do
-        if (primaryMU != null) {
-            log.debug("Get P-Mode configuration for primary MU");
-            final IPMode pmode = HolodeckB2BCore.getPModeSet().get(primaryMU.getPModeId());
-            // For response error messages the P-Mode may be unknown, so no special HTTP configuration
-            if (pmode == null) {
-                log.debug("No P-Mode given for primary message unit, using default HTTP configuration");
+        if (primaryMU == null) {
+        	log.debug("Message does not contain a message unit, nothing to do");
                 return InvocationResponse.CONTINUE;
             }
 
