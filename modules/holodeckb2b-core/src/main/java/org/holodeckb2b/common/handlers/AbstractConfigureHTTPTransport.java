@@ -73,23 +73,16 @@ public abstract class AbstractConfigureHTTPTransport extends AbstractBaseHandler
                 return InvocationResponse.CONTINUE;
             }
 
-            ILeg leg;
-            try {
-            	leg = PModeUtils.getLeg(primaryMU);
-            } catch (IllegalStateException pmodeNotAvailable) {
-            	log.error("P-Mode set for primary message unit [" + primaryMU.getMessageId() + "] is not available");
-            	leg = null;
-            }
-            // For response error messages the P-Mode may be unknown, so no special HTTP configuration
-            if (leg == null)
-            	if (procCtx.isHB2BInitiated()) {
-            		// When responding we don't need P-Mode for configuring HTTP and use default settings
-            		log.debug("No P-Mode given for primary message unit, using default HTTP configuration");
-            		return InvocationResponse.CONTINUE;
-            	} else {
-            		// For sending however we need the P-Mode to provide the URL, so the process cannot here
-            		log.error("No P-Mode available for primary message unit [msgId=" + primaryMU.getMessageId()
-            					+ "] to get the destination!");
+        log.debug("Get P-Mode Leg for primary MU (msgID={})", primaryMU.getPModeId(), primaryMU.getMessageId());
+        final ILeg leg = getLeg(primaryMU);
+
+        /* For sending the request we need the P-Mode to provide the URL, so the process cannot if we didn't find a
+         Leg for requests, but for response Signal Messages there may not be a specific out leg defined and we can just
+         use default values and use the HTTP response
+        */
+        if (leg == null && !(primaryMU instanceof ISignalMessage) && procCtx.isHB2BInitiated()) {
+    		log.error("P-Mode configuration not available for primary message unit [msgId={}]!",
+    				  primaryMU.getMessageId());
             		setMessagesToFailed(procCtx, log);
             		return InvocationResponse.ABORT;
             	}
@@ -155,6 +148,22 @@ public abstract class AbstractConfigureHTTPTransport extends AbstractBaseHandler
             log.debug("Message does not contain ebMS message unit, nothing to do");
 
         return InvocationResponse.CONTINUE;
+    }
+
+    /**
+     * Gets the Leg of the P-Mode that configures the sending of the given message. Normally the Leg found by
+     * {@linkplain PModeUtils#getLeg()} will work, but for some messages and protocols the leg may need to be determined
+     * differently. This can be done by overriding this method.
+     *
+     * @param msgToSend		the message for which to get the Leg
+     * @return	the Leg that configures the sending of the message if found, <code>null</code> otherwise
+     */
+    protected ILeg getLeg(IMessageUnitEntity msgToSend) {
+        try {
+        	return PModeUtils.getLeg(msgToSend);
+        } catch (IllegalStateException pmodeNotAvailable) {
+        	return null;
+        }
     }
 
 	/**
