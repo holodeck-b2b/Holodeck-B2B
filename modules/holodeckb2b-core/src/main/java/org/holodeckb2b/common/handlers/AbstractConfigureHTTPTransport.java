@@ -28,10 +28,10 @@ import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
+import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IProtocol;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
@@ -70,8 +70,8 @@ public abstract class AbstractConfigureHTTPTransport extends AbstractBaseHandler
         // Only when message contains a message unit there is something to do
         if (primaryMU == null) {
         	log.debug("Message does not contain a message unit, nothing to do");
-                return InvocationResponse.CONTINUE;
-            }
+        	return InvocationResponse.CONTINUE;
+        }
 
         log.debug("Get P-Mode Leg for primary MU (msgID={})", primaryMU.getPModeId(), primaryMU.getMessageId());
         final ILeg leg = getLeg(primaryMU);
@@ -83,67 +83,64 @@ public abstract class AbstractConfigureHTTPTransport extends AbstractBaseHandler
         if (leg == null && !(primaryMU instanceof ISignalMessage) && procCtx.isHB2BInitiated()) {
     		log.error("P-Mode configuration not available for primary message unit [msgId={}]!",
     				  primaryMU.getMessageId());
-            		setMessagesToFailed(procCtx, log);
-            		return InvocationResponse.ABORT;
-            	}
+    		setMessagesToFailed(procCtx, log);
+    		return InvocationResponse.ABORT;
+    	}
 
-            // If Holodeck B2B is initiator the destination URL must be set
-            if (procCtx.isHB2BInitiated()) {
-                // Get the destination URL via the P-Mode of this message unit
-                String destURL = null;
-                try {
-                	destURL = getDestinationURL(primaryMU, leg, procCtx);
-                } catch (Throwable t) {
-                	log.error("Error in determination of target URL for message (msgID={}) : {}",
-                				primaryMU.getMessageId(), t.getMessage());
-                }
-                if (Utils.isNullOrEmpty(destURL)) {
-                	// No destination URL available, unable to sent this message!
-                    log.error("No destination URL availabel for " + MessageUnitUtils.getMessageUnitName(primaryMU)
-                    			+ " with msgId: " + primaryMU.getMessageId());
-                    setMessagesToFailed(procCtx, log);
-                    return InvocationResponse.ABORT;
-                }
-                log.debug("Destination URL=" + destURL);
-                procCtx.getParentContext().setProperty(Constants.Configuration.TRANSPORT_URL, destURL);
+        // If Holodeck B2B is initiator the destination URL must be set
+        if (procCtx.isHB2BInitiated()) {
+            // Get the destination URL via the P-Mode of this message unit
+            String destURL = null;
+            try {
+            	destURL = getDestinationURL(primaryMU, leg, procCtx);
+            } catch (Throwable t) {
+            	log.error("Error in determination of target URL for message (msgID={}) : {}",
+            				primaryMU.getMessageId(), t.getMessage());
             }
-
-            // Get current set of options
-            final Options options = procCtx.getParentContext().getOptions();
-            // Check if HTTP compression and/or chunking should be used and set options accordingly
-            final IProtocol protocolCfg = leg.getProtocol();
-            final boolean compress = (protocolCfg != null ? protocolCfg.useHTTPCompression() : false);
-            if (compress) {
-                log.debug("Enable HTTP compression using gzip Content-Encoding");
-                log.debug("Enable gzip content-encoding");
-                if (procCtx.isHB2BInitiated())
-                    // Holodeck B2B is sending the message, so request has to be compressed
-                    options.setProperty(HTTPConstants.MC_GZIP_REQUEST, Boolean.TRUE);
-                else
-                    // Holodeck B2B is responding the message, so request has to be compressed
-                    options.setProperty(HTTPConstants.MC_GZIP_RESPONSE, Boolean.TRUE);
+            if (Utils.isNullOrEmpty(destURL)) {
+            	// No destination URL available, unable to sent this message!
+                log.error("No destination URL availabel for " + MessageUnitUtils.getMessageUnitName(primaryMU)
+                			+ " with msgId: " + primaryMU.getMessageId());
+                setMessagesToFailed(procCtx, log);
+                return InvocationResponse.ABORT;
             }
+            log.debug("Destination URL=" + destURL);
+            procCtx.getParentContext().setProperty(Constants.Configuration.TRANSPORT_URL, destURL);
+        }
 
-            // Check if HTTP "chunking" should be used. In case of gzip CE, chunked TE is required. But as Axis2 does
-            // not automaticly enable this we also enable chunking here when compression is used
-            if (compress || (protocolCfg != null ? protocolCfg.useChunking() : false)) {
-                log.debug("Enable chunked transfer-encoding");
-                options.setProperty(HTTPConstants.CHUNKED, Boolean.TRUE);
-            } else {
-                log.debug("Disable chunked transfer-encoding");
-                options.setProperty(HTTPConstants.CHUNKED, Boolean.FALSE);
-            }
+        // Get current set of options
+        final Options options = procCtx.getParentContext().getOptions();
+        // Check if HTTP compression and/or chunking should be used and set options accordingly
+        final IProtocol protocolCfg = leg != null ? leg.getProtocol() : null;
+        final boolean compress = (protocolCfg != null ? protocolCfg.useHTTPCompression() : false);
+        log.debug("{} HTTP compression using gzip Content-Encoding", compress ? "Enable" : "Disable");
+        if (procCtx.isHB2BInitiated())
+            // Holodeck B2B is sending the message, so request has to be compressed
+            options.setProperty(HTTPConstants.MC_GZIP_REQUEST, compress);
+        else
+            // Holodeck B2B is responding the message, so request has to be compressed
+            options.setProperty(HTTPConstants.MC_GZIP_RESPONSE, compress);
 
-            // If the message does not contain any attachments we can disable SwA
-            if (procCtx.getParentContext().getAttachmentMap().getContentIDSet().isEmpty()) {
-                log.debug("Disable SwA as message does not contain attachments");
-                options.setProperty(Constants.Configuration.ENABLE_SWA, Boolean.FALSE);
-            }
+        // Check if HTTP "chunking" should be used. In case of gzip CE, chunked TE is required. But as Axis2 does
+        // not automaticly enable this we also enable chunking here when compression is used
+        if (compress || (protocolCfg != null ? protocolCfg.useChunking() : false)) {
+            log.debug("Enable chunked transfer-encoding");
+            options.setProperty(HTTPConstants.CHUNKED, Boolean.TRUE);
+        } else {
+            log.debug("Disable chunked transfer-encoding");
+            options.setProperty(HTTPConstants.CHUNKED, Boolean.FALSE);
+        }
 
-            // Disable use of SOAP Action (=> will result in empty SOAPAction http header for SOAP 1.1)
-        	options.setProperty(Constants.Configuration.DISABLE_SOAP_ACTION, "true");
+        // If the message does not contain any attachments we can disable SwA
+        boolean hasAttachments = !procCtx.getParentContext().getAttachmentMap().getContentIDSet().isEmpty();
+        log.debug("{} SwA as message does{} contain attachments", hasAttachments ? "Enable" : "Disable",
+        		  hasAttachments ? "" : " not");
+        options.setProperty(Constants.Configuration.ENABLE_SWA, hasAttachments);
 
-            log.debug("HTTP configuration done");
+        // Disable use of SOAP Action (=> will result in empty SOAPAction http header for SOAP 1.1)
+    	options.setProperty(Constants.Configuration.DISABLE_SOAP_ACTION, "true");
+
+        log.debug("HTTP configuration done");
 
         return InvocationResponse.CONTINUE;
     }
