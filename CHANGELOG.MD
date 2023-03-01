@@ -72,7 +72,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 5.3.2
 ##### 2021-12-20
 ### Fixed
-** Vulnerability in log4j2, see [CVE-2021-45105](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-45105)
+* Vulnerability in log4j2, see [CVE-2021-45105](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-45105)
 
 ## 5.3.1
 ##### 2021-12-13
