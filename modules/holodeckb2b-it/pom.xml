@@ -21,7 +21,7 @@
     <parent>
         <artifactId>holodeckb2b</artifactId>
         <groupId>org.holodeckb2b</groupId>
-        <version>6.0.0-SNAPSHOT-4</version>
+        <version>6.0.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -31,7 +31,7 @@
     <name>Holodeck B2B - Integration Tests</name>
 
 	<properties>
-	        <!-- This version of Holodeck B2B requires at least JDK 1.8 -->
+		<!-- This version of Holodeck B2B requires at least JDK 1.8 -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
@@ -46,6 +46,11 @@
             <artifactId>holodeckb2b-distribution</artifactId>
             <version>${project.version}</version>
             <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.holodeckb2b.commons</groupId>
+            <artifactId>generic-utils</artifactId>
+            <type>test-jar</type>
         </dependency>
 
         <!-- JUnit is used creating the interop tests -->
@@ -69,7 +74,6 @@
             <artifactId>log4j-api</artifactId>
             <scope>test</scope>
         </dependency>
-        
 
 
         <!-- Used to parse pom.xml and get project properties, such as version -->

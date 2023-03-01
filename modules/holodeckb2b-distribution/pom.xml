@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>6.0.0-SNAPSHOT-4</version>
+        <version>6.0.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -67,6 +67,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-ui</artifactId>
         </dependency>
+        <!-- Add the file based back-end integration as default -->
         <dependency>
             <groupId>org.holodeckb2b.extensions</groupId>
 			<artifactId>file-backend</artifactId>
