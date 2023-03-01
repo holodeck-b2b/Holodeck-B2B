@@ -41,7 +41,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
-import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.testhelpers.FilesUtility;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -69,7 +69,7 @@ public class ITHelper {
     private static Process processB;
 
     static {
-    	final Path projectHome = TestUtils.getPath(".").resolve("../..");
+    	final Path projectHome = TestUtils.getTestClassBasePath().resolve("../..");
     	MavenProject project;
     	
     	final File pomFile = projectHome.resolve("pom.xml").toFile();
@@ -88,7 +88,7 @@ public class ITHelper {
     												+ "/target/holodeckb2b-distribution-" + projectVersion + ".zip")
     										.toString();        
 
-    	workingDirPath = TestUtils.getPath("integ");
+    	workingDirPath = TestUtils.getTestClassBasePath().resolve("integ");
     }
 
     /**
