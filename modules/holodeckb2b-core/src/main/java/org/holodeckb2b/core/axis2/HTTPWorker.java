@@ -19,8 +19,6 @@ package org.holodeckb2b.core.axis2;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.axis2.AxisFault;
@@ -44,7 +42,6 @@ import org.apache.axis2.transport.http.server.AxisHttpResponse;
 import org.apache.axis2.transport.http.server.HttpUtils;
 import org.apache.axis2.transport.http.server.Worker;
 import org.apache.axis2.transport.http.util.RESTUtil;
-import org.apache.axis2.transport.http.util.URIEncoderDecoder;
 import org.apache.commons.fileupload.util.Streams;
 import org.apache.http.HttpException;
 import org.apache.http.HttpStatus;
@@ -162,7 +159,7 @@ public class HTTPWorker implements Worker {
         
 		final AxisService axisService = msgContext.getAxisService();
 		if (axisService == null) {
-			log.warn("No service configured for Request");
+			log.warn("No service configured for Request : {}", url);
 			response.setStatus(HttpStatus.SC_NOT_FOUND);
 			return;
 		} 
@@ -226,7 +223,7 @@ public class HTTPWorker implements Worker {
 	            throw new MethodNotSupportedException(method + " method not supported");
 	        }
         } catch (AxisFault f) {
-        	log.error("An error occurred while processing the request. Error message: " + f.getMessage());
+        	log.error("Error while processing request, URL={};Error message= {}", url, f.getMessage());
         	throw f;
 		}
 		               
