@@ -7,6 +7,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Also acknowledge message delivery when a Receipt is received for a currently suspended User Message that was 
   previously waiting for an acknowledgement or experienced a transport failure.
+
+### Fixed
+* Calculation of last retry interval. In some scenarios this was incorrectly set to 0.
+* Race condition between retransmission worker and regular message processing that could trigger both a Receipt and
+  Missing Receipt notification to the back-end [#128](https://github.com/holodeck-b2b/Holodeck-B2B/issues/128) 
+
 ## 5.3.2
 ##### 2021-12-20
 ### Fixed

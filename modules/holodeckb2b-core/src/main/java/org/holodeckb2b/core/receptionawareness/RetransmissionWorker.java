@@ -90,6 +90,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
             // For each message check if it should be retransmitted or not
             for (final IUserMessageEntity um : waitingForRcpt) {
                 try {
+                	final ProcessingState cState = um.getCurrentProcessingState().getState();
                     log.trace("Check if User Message [msgId=" + um.getMessageId() 
                     		  + "] should be resend using retry configuration from P-Mode [" + um.getPModeId() + "]");
                     // We need the current interval duration, the number of attempts already executed and the maximum
@@ -106,31 +107,28 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                     } catch (IllegalStateException pmodeNotAvailable) {
                     	leg = null;
                     }
-                    if (leg == null) {
-                    	log.error("P-Mode [{}] governing User Message [msgId={}] is not available!", um.getPModeId(), 
-                    				um.getMessageId());
-                    	// Set state to FAILURE
-                    	HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.SUSPENDED, 
-                    															"P-Mode not available");
-                    	// And raise event to signal this issue
-                    	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(
-                    										new GenericSendMessageFailure(um, "P-Mode not available"));
-                    	continue;
-                    }                    
                     final IReceptionAwareness raConfig = leg != null ? leg.getReceptionAwareness() : null;
                     final Interval[] intervals = raConfig != null ? raConfig.getWaitIntervals() : null; 
                     if (intervals != null && intervals.length > 0) {
                     	maxAttempts = intervals.length;
                     	// Check the current interval
                     	attempts = Integer.max(1, HolodeckB2BCore.getQueryManager().getNumberOfTransmissions(um));
-                    	if (attempts <= maxAttempts)
-                    		// Get the current applicable interval in milliseconds
-                    		intervalInMillis = TimeUnit.MILLISECONDS.convert(intervals[attempts-1].getLength(),
-                    														 intervals[attempts-1].getUnit());
-                    } else 
+                		// Get the current applicable interval in milliseconds
+                    	int interval = Math.min(attempts, maxAttempts) - 1;
+                		intervalInMillis = TimeUnit.MILLISECONDS.convert(intervals[interval].getLength(),
+                    													 intervals[interval].getUnit());
+                    } else {
                         // There is no retry config available, can't determine if and how to resend.
-                        log.warn("Message [" + um.getMessageId() + "] cannot be resent due to missing Reception"
-                                 	+ " Awareness retry configuration in P-Mode [" + um.getPModeId() + "]");
+                        log.warn("Message [{}] cannot be resent due to missing retry configuration in P-Mode [{}]",
+                        		 um.getMessageId(), um.getPModeId());
+                    	// Set state to SUSPENDED as a new P-Mode with retry configuration may come available
+                        // And raise event to signal this issue
+                    	if (HolodeckB2BCore.getStorageManager().setProcessingState(um, cState, ProcessingState.SUSPENDED, 
+                    													"Missing reception awareness configuration")) 
+	                    	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new GenericSendMessageFailure(um, 
+                    													"Missing reception awareness configuration"));
+                    	continue;
+                    }
                     
                     // Check if the interval has expired
                     if (((new Date()).getTime() - um.getCurrentProcessingState().getStartTime().getTime())
@@ -138,15 +136,15 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         // The interval expired, check if message can be resend or if a MissingReceipt error
                         // has to be generated
                         if (attempts >= maxAttempts) {
-                            // No retries left, generate MissingReceipt error
-                        	log.info("Retry attempts exhausted for User Message [msgId=" + um.getMessageId() + "]!");
-                            missingReceiptsLog.error("No Receipt received for UserMessage with messageId="
-                                                        + um.getMessageId());
-                            // Change processing state accordingly
-                            storageManager.setProcessingState(um, ProcessingState.FAILURE);
-                            log.trace("Changed processing state of user message to reflect failure");
-                            // Generate and report (if requested) MissingReceipt
-                            generateMissingReceiptError(um, leg);
+                            // No retries left, set the state to FAILURE, log and generate MissingReceipt error
+                        	if (storageManager.setProcessingState(um, cState, ProcessingState.FAILURE)) {                         	
+	                        	log.info("Retry attempts exhausted for User Message [msgId=" + um.getMessageId() + "]!");
+	                            missingReceiptsLog.error("No Receipt received for UserMessage with messageId="
+	                                                        + um.getMessageId());
+	                            log.trace("Changed processing state of user message to reflect failure");
+	                            // Generate and report (if requested) MissingReceipt
+	                            generateMissingReceiptError(um, leg);
+                        	}
                         } else {
                             // Message can be resent, is the message to be pushed or pulled?
                         	log.debug("Sending of User Message [msgId=" + um.getMessageId() + "] should be retried");
