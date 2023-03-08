@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 5.3.3
+##### 
+### Changed
+* Also acknowledge message delivery when a Receipt is received for a currently suspended User Message that was 
+  previously waiting for an acknowledgement or experienced a transport failure.
 ## 5.3.2
 ##### 2021-12-20
 ### Fixed

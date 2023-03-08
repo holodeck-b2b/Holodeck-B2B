@@ -121,7 +121,7 @@ public class ProcessReceipts extends AbstractBaseHandler {
                     												+ "] is not configured for receipts",
                     												receipt.getMessageId()));
                 }  else {
-                    // Change to processing state of the reference message unit to delivered, but only if it is
+                    // Change processing state of the reference message unit to delivered, but only if it is
                     // waiting for a receipt as we may otherwise overwrite an error state.
                     if (isWaitingForReceipt(ackedMessage)) {
                         log.info("Receipt received for User Message [msgId= " + refToMsgId 
@@ -155,8 +155,10 @@ public class ProcessReceipts extends AbstractBaseHandler {
      * Checks whether the message unit is waiting for receipt.
      * <p>The message unit is waiting for a receipt when its current processing state is:<ol>
      * <li>either {@link ProcessingState#AWAITING_RECEIPT} or {@link ProcessingState#TRANSPORT_FAILURE}</li>
-     * <li>either {@link ProcessingState#READY_TO_PUSH}, {@link ProcessingState#AWAITING_PULL} or 
-     * {@link ProcessingState#WARNING} <b>and</b> the previous state was {@link ProcessingState#AWAITING_RECEIPT}</li>
+     * <li>either {@link ProcessingState#READY_TO_PUSH}, {@link ProcessingState#AWAITING_PULL}, 
+     * 		{@link ProcessingState#SUSPENDED} or {@link ProcessingState#WARNING} 
+     *    <b>and</b> the previous state was {@link ProcessingState#AWAITING_RECEIPT} 
+     *    			 or {@link ProcessingState#TRANSPORT_FAILURE}</li>
      * </ol>
      * <p>The check must always include the current state as we do not want to change a processing state that is final.
      *
@@ -170,12 +172,12 @@ public class ProcessReceipts extends AbstractBaseHandler {
         if (currentState == ProcessingState.AWAITING_RECEIPT || currentState == ProcessingState.TRANSPORT_FAILURE)
             return true;
         else if (currentState == ProcessingState.AWAITING_PULL || currentState == ProcessingState.READY_TO_PUSH
-        		|| currentState == ProcessingState.WARNING) {
+        		|| currentState == ProcessingState.WARNING || currentState == ProcessingState.SUSPENDED) {
             // Check if the previous state was AWAITING_RECEIPT and we are now wiating for resend
             if (!mu.isLoadedCompletely())
                 HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(mu);
-            return mu.getProcessingStates().get(mu.getProcessingStates().size() - 2).getState()
-                                                                                    == ProcessingState.AWAITING_RECEIPT;
+            ProcessingState prevState = mu.getProcessingStates().get(mu.getProcessingStates().size() - 2).getState();
+            return prevState == ProcessingState.AWAITING_RECEIPT || prevState == ProcessingState.TRANSPORT_FAILURE;
         } else 
             return false;
     }
