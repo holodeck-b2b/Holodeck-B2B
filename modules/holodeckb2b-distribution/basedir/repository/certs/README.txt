@@ -33,17 +33,17 @@ It contains three key stores:
 
 3) "trustedcerts.jks" holding trusted certificates used to the validate trust
    in certificates used to sign received messages. As these certificates are
-   considered trusted they are not checked on validaty. Therefore this key 
+   considered trusted they are not checked on validity. Therefore this key 
    store should only contain certificates of trusted Certificate Authorities.
 
-The distribution package by default includes empty keystores, with simple
-passwords: "secret" for the private one, "nosecrets" for the public
+The distribution package by default includes empty key stores, with simple
+passwords: "secrets" for the private one, "nosecrets" for the public
 one and "trusted" for the one with CA certificates. It is HIGHLY RECOMMENDED to
 change these passwords to safer ones, see below how to configure Holodeck B2B
 for the new passwords.
 
-NOTE: If you want the change the passwords for the default keystores you must
-also change the password on the keystore files by executing the following
+NOTE: If you want the change the passwords for the default key stores you must
+also change the password on the key store files by executing the following
 command:
     keytool -storepasswd -keystore «path to keystore»
 
@@ -64,7 +64,7 @@ parameters:
 
 2) "DirectTrustPartnerCertificates" : defines whether the Certificate
    Manager should treat the partner certificates as trust anchors. In 
-   that case only the validaty of the certificate is checked (including
+   that case only the validity of the certificate is checked (including
    the revocation check if enabled).
 
 
@@ -81,7 +81,7 @@ Although the aliases of trusted certificate authorities' certificates (in
 to use meaningful aliases for these too.
 
 To add a X.509v3 certificate holding the public key of a trading
-partner or trusted CA to the public or trusted keystore use the following
+partner or trusted CA to the public or trusted key store use the following
 command:
 
 keytool -importcert \
@@ -91,16 +91,16 @@ keytool -importcert \
         -file «path to certificate file»
 
 To add a PKCS#12 formatted certificate holding the private of a trading 
-partner to the private keystore use the following command:
+partner to the private key store use the following command:
 
 keytool -importkeystore -srcstoretype PKCS12 \
         -srckeystore «path to certificate file» \
         -srcalias «the name of the certificate in the PKCS#12 file» \
         -srcstorepass «the password to access the PKCS#12 file» \
         -destkeystore «Holodeck B2B base dir»/repository/certs/privatekeys.jks \
-        -deststorepass «your keystore password» \
-        -destalias «alias for cert in keystore» \
-        -destkeypass «the password to set on the new entry in the keystore»
+        -deststorepass «your key store password» \
+        -destalias «alias for cert in key store» \
+        -destkeypass «the password to set on the new entry in the key store»
 
 NOTE: Use the following command to list the certificates in the PKCS#12
 file and show their names / aliases:
@@ -109,11 +109,11 @@ keytool -list -v -storetype pkcs12 -keystore «path to certificate file»
 4. Examples
 ===========
 
-The examples/certs directory contains three sample keystores which contain
+The examples/certs directory contains three sample key stores which contain
 the certificates that are used in the example P-Modes (contained in
-examples/pmodes). Their passwords are the same as the default keystores.
-You can therefore just overwrite the default keystores with the example
-keystores.
+examples/P-Modes). Their passwords are the same as the default key stores.
+You can therefore just overwrite the default key stores with the example
+key stores.
 
 When using a key pair in a P-Mode the password is
 "Example" + 'A' | 'B' | 'C' | 'D' | 'E'

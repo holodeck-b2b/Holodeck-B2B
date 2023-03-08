@@ -26,7 +26,7 @@ are checked for validity.
 <p>Another new feature of this Certificate Manager is the option to perform a revocation 
 check using OCSP on certificates. This check is disabled by default for back-ward 
 compatibility and can be enabled in the configuration. Note however that when enabled and 
-used in an environment where certificates don't provide OSCP information this will result 
+used in an environment where certificates don't provide OCSP information this will result 
 in a lot of <code>ISignatureVerifiedWithWarning</code> events as the revocation check 
 could not be executed.
 ===================================================================================== -->
