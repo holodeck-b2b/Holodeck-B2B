@@ -321,7 +321,8 @@ final class MMDCompleter {
         	case -1 : //  Both the submission and P-Mode didn't specify or used equal values
         	case 0 :
         	}
-        } else // Neither submission nor P-Mode contain at least the Service name
+        } else if (ssi != null && Utils.isNullOrEmpty(ssi.getName()))
+        	// Neither submission nor P-Mode contain at least the Service name
         	throw new MessageSubmitException("Missing required Service information of the message");
     }
 
