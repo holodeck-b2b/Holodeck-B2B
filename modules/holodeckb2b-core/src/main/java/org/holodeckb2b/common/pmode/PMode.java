@@ -1,16 +1,16 @@
 /*******************************************************************************
  * Copyright (C) 2019 The Holodeck B2B Team, Sander Fieten
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
@@ -41,17 +41,18 @@ import org.simpleframework.xml.Text;
 import org.simpleframework.xml.convert.AnnotationStrategy;
 import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persister;
+import org.simpleframework.xml.core.Validate;
 
 /**
- * Is a generic {@link IPMode} implementation that uses XML documents to persist the P-Mode. This implementation 
- * supports the parameters needed for the configuration of the extensions defined in the AS4 Profile like Reception 
+ * Is a generic {@link IPMode} implementation that uses XML documents to persist the P-Mode. This implementation
+ * supports the parameters needed for the configuration of the extensions defined in the AS4 Profile like Reception
  * Awareness, AS4 Compression and multi-hop. The structure of the XML documents is defined in the
  * <a href="http://holodeck-b2b.org/schemas/2014/10/pmode">http://holodeck-b2b.org/schemas/2014/10/pmode</a> XSD which
  * is contained in <code>src/main/resources/xsd/pmode.xsd</code>.
- * <p>Instances of this class can be created either manually, by reading XML representation or using another {@link 
- * IPMode} object. The latter allows the source to act as a "profile" which configures most parameters and can be 
+ * <p>Instances of this class can be created either manually, by reading XML representation or using another {@link
+ * IPMode} object. The latter allows the source to act as a "profile" which configures most parameters and can be
  * adjusted to create a specfic and complete P-Mode.
- * 
+ *
  * @author Bram Bakx (bram at holodeck-b2b.org)
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IPMode
@@ -78,8 +79,8 @@ public class PMode implements IPMode, Serializable {
          */
         @Attribute(required = false)
         Boolean include = false;
-    }  
-    
+    }
+
     @Element (name = "id", required = true)
     private PModeId pmodeId = new PModeId();
 
@@ -128,9 +129,9 @@ public class PMode implements IPMode, Serializable {
             }
         }
     }
-    
+
     /**
-     * Creates a new <code>PMode</code> object based from a XML Document in the given input stream. The XML document in 
+     * Creates a new <code>PMode</code> object based from a XML Document in the given input stream. The XML document in
      * the stream must conform to the XML schema definition given in <code>pmode.xsd</code>
      *
      * @param  is      Input stream that contains the P-Mode XML document
@@ -141,7 +142,7 @@ public class PMode implements IPMode, Serializable {
     	// When the P-Mode cannot be read from the stream the Persister.read() may throw a InvocationTargetException
         // that will contain a PersistenceException exception that describes the actual error. Therefore we catch
         // InvocationTargetException and only throw the PersistenceException
-        try {        	
+        try {
             return new Persister(new AnnotationStrategy()).read(PMode.class, is, false);
         } catch (final InvocationTargetException ex) {
             // Only throw the target exception when it really is an exception
@@ -151,10 +152,10 @@ public class PMode implements IPMode, Serializable {
             else
                 throw ex;
         }
-    }    
-    
+    }
+
     /**
-     * Writes the XML representation of this <code>PMode</code> object to the given output stream. 
+     * Writes the XML representation of this <code>PMode</code> object to the given output stream.
      *
      * @param  os      		The output stream t write the P-Mode XML document to
      * @throws Exception    When an error occurs writing the XML document to the stream
@@ -163,7 +164,7 @@ public class PMode implements IPMode, Serializable {
     	// When the P-Mode cannot be written to the stream the Persister.read() may throw a InvocationTargetException
     	// that will contain a PersistenceException exception that describes the actual error. Therefore we catch
     	// InvocationTargetException and only throw the PersistenceException
-    	try {        	
+    	try {
     		new Persister(new AnnotationStrategy()).write(this, os);
     	} catch (final InvocationTargetException ex) {
     		// Only throw the target exception when it really is an exception
@@ -173,8 +174,8 @@ public class PMode implements IPMode, Serializable {
     		else
     			throw ex;
     	}
-    }    
-    
+    }
+
     /**
      * Is responsible for solving dependencies child elements/objects may have on the P-Mode id. Currently this applies
      * to the identification of the delivery specifications included in the P-Mode. Because the Holodeck B2B Core
@@ -201,7 +202,39 @@ public class PMode implements IPMode, Serializable {
                                                     + "-" + k);
         }
     }
-    
+
+    /**
+     * Is responsible for checking that no more than two legs are specified and assigning the leg labels if they are
+     * not explicitly declared
+     *
+     * @throws IllegalArgumentException	when more than two legs are specified
+     */
+    @Validate
+    public void checkLegs() {
+    	if (Utils.isNullOrEmpty(legs))
+    		return;
+
+		if (legs.size() > 2)
+			throw new IllegalArgumentException("P-Mode cannot contain more than 2 Legs");
+
+		Leg l1 = legs.get(0);
+		if (legs.size() == 1) {
+			if (l1.getLabel() == null)
+				l1.setLabel(Label.REQUEST);
+			return;
+		}
+		Leg l2 = legs.get(1);
+		if (l1.getLabel() == null && l2.getLabel() == null) {
+			l1.setLabel(Label.REQUEST);
+			l2.setLabel(Label.REPLY);
+		} else if (l1.getLabel() != null && l2.getLabel() == null)
+			l2.setLabel(l1.getLabel() == Label.REQUEST ? Label.REPLY : Label.REQUEST);
+		else if (l1.getLabel() == null && l2.getLabel() != null)
+			l1.setLabel(l2.getLabel() == Label.REPLY ? Label.REQUEST : Label.REPLY);
+		else if (l1.getLabel() == l2.getLabel())
+			throw new IllegalArgumentException("The Leg labels MUST be different between legs");
+    }
+
     @Override
     public String getId() {
         return pmodeId.id;
@@ -272,36 +305,29 @@ public class PMode implements IPMode, Serializable {
 
     @Override
 	public Leg getLeg(Label label) {
-        // First try to find the leg based on the label
         for (Leg l : legs)
             if (l.getLabel() == label)
                 return l;
-
-        // If the Leg were not labelled, get the first leg when requested label is REQUEST or null, second when REPLY
-        switch (label) {
-            case REPLY :
-                return legs.get(1);
-            case REQUEST :
-            default :	
-                return legs.get(0);
-        }
+        return null;
     }
 
     public void setLegs(final Collection<Leg> legs) {
     	if (!Utils.isNullOrEmpty(legs)) {
     		this.legs = new ArrayList<>(legs.size());
     		legs.forEach(l -> this.legs.add(l));
+    		checkLegs();
     	} else
-    		this.legs = null;    	
+    		this.legs = null;
     }
-    
+
     public void addLeg(final Leg leg) {
         if (this.legs == null)
             this.legs = new ArrayList<>();
 
         this.legs.add(leg);
+        checkLegs();
     }
-    
+
     @Override
     public boolean useStrictHeaderValidation() {
         return useStrictHeaderValidation;
