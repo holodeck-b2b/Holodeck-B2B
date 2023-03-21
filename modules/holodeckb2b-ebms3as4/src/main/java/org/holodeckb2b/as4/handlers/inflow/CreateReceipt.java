@@ -91,10 +91,11 @@ public class CreateReceipt extends AbstractUserMessageHandler {
     @Override
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final IMessageProcessingContext procCtx,
     										  final Logger log) {
-        // Only when user message was successfully delivered to business application the Receipt should be created,
-    	// this can also be the case when the message is a duplicate and delivered earlier
+        // Only when user message was successfully or is being delivered to business application the Receipt should be 
+    	// created, this can also be the case when the message is a duplicate and delivered earlier
     	final ProcessingState currentState = um.getCurrentProcessingState().getState();
-        if (currentState == ProcessingState.DELIVERED || currentState == ProcessingState.DUPLICATE) {
+        if (currentState == ProcessingState.DELIVERED || currentState == ProcessingState.OUT_FOR_DELIVERY ||
+        		currentState == ProcessingState.DUPLICATE) {
             log.trace("User message was succesfully delivered, check if Receipt is needed");
 
             IReceiptConfiguration rcptConfig;

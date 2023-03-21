@@ -24,6 +24,7 @@ import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
@@ -111,11 +112,18 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
                 // Also log in special duplicate log
                 duplicateLog.info("UserMessage [msgId=" + msgId
                                             + "] is a duplicate of an already processed message");
-
                 log.trace("Update processing state to duplicate");
                 HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.DUPLICATE);
+                log.trace("Check if duplicate failed");
+                if (HolodeckB2BCore.getQueryManager().getMessageUnitsWithId(msgId, Direction.IN).parallelStream()
+                		.map(m -> m.getCurrentProcessingState().getState())
+                		.anyMatch(s -> s == ProcessingState.FAILURE)) {
+                	log.debug("Duplicate failed, set processing state again to failure");
+                	HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.FAILURE);                			
+                }
                 // Raise message processing event to inform other components of the duplicate message
                 HolodeckB2BCore.getEventProcessor().raiseEvent(new DuplicateReceivedEvent(um));
+                
             }
 
             return InvocationResponse.CONTINUE;

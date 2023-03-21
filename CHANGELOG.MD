@@ -5,7 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 6.0.2
 ##### 
 ### Fixed
+* Duplicate message will generate a receipt even if the delivery is failed [#142](https://github.com/holodeck-b2b/Holodeck-B2B/issues/142)
+* No Receipt sent when parallel delivery is used
 * Missing Leg labels in default P-Mode implementation 
+
 ## 6.0.1
 ##### 2023-03-08
 ### Changed
