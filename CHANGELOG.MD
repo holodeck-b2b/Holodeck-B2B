@@ -4,6 +4,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 6.0.2
 ##### 
+### Changed
+* Updated dependency of _generic-utils_ library to fix error in security processing due to certificates not found 
+
 ### Fixed
 * Duplicate message will generate a receipt even if the delivery is failed [#142](https://github.com/holodeck-b2b/Holodeck-B2B/issues/142)
 * No Receipt sent when parallel delivery is used
