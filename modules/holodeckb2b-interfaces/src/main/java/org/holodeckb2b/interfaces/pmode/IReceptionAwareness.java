@@ -21,12 +21,10 @@ import org.holodeckb2b.interfaces.general.Interval;
 
 /**
  * Represents P-Mode parameters related to the <i>AS4 Reception Awareness feature</i>. This feature is a (simple)
- * reliability protocol that uses ebMS Receipt signals for acknowledgments. See section 3.2 of the AS4 profile for more
+ * reliability protocol that uses ebMS Receipt signals for acknowledgements. See section 3.2 of the AS4 profile for more
  * information.
- * <p>The <i>AS4 Reception Awareness feature</i> feature is a (simple) reliability protocol that uses ebMS Receipt
- * signals for acknowledgments. See section 3.2 of the AS4 profile for more information. Although the AS4 profile
- * defines five P-Mode parameters for this feature, this interface defines only two methods. This is due to the fact
- * that the other parameters are derived. The explicitly mapped parameters are:<ol>
+ * <p>Although the AS4 profile defines five P-Mode parameters for this feature, this interface defines only two methods.
+ * This is due to the fact that the other parameters are derived. The explicitly mapped parameters are:<ol>
  * <li><b>PMode[1].ReceptionAwareness.Retry.Parameters</b> -> {@link #getWaitIntervals()} : Indicates the intervals to
  * wait for a Receipt and after which the User Message should be resend. Note that after the last interval there will be
  * no resending, so the actual number of retries is one less then the number of intervals specified. If no interval is
@@ -39,16 +37,17 @@ import org.holodeckb2b.interfaces.general.Interval;
  * message was received (and delivered) before. There is no further parameterization. This corresponds to the <b>
  * PMode[1].ReceptionAwareness.DuplicateDetection</b> and <b>DuplicateDetection.Parameters</b> P-Mode parameters from
  * the AS4 profiile.</li></ol>
- * NOTE: Either the {@link #shouldRetry()} and {@link #getWaitIntervals()} or the {@link #useDuplicateDetection()}
- * should be used in a specific instance on a Leg as these settings apply to sent or received User Messages.
+ * NOTE: Either the {@link #getWaitIntervals()} or the {@link #useDuplicateDetection()} should be used in a specific
+ * instance on a Leg as these settings apply to sent or received User Messages.
  * <p>Enabling the Reception Awareness feature itself (<b>PMode[1].ReceptionAwareness</b>) is done by including an
- * object of this type on the leg, i.e. when {@link IAS4Leg#getReceptionAwareness()} returns a non-null value. Note that
- * we use a special type of leg ({@link IAS4Leg}) to indicate that the leg includes AS4 specific features.
+ * object of this type on the leg, i.e. when {@link ILeg#getReceptionAwareness()} returns a non-null value.
  * <b>NOTE:</b> In version 4.0.0 the interface changed to allow a more flexible configuration of the
- * intervals between retries. To allow an easy migration path all methods related to the retry configuration were 
+ * intervals between retries. To allow an easy migration path all methods related to the retry configuration were
  * depracted and had a default implementation. Since version 5.0.0 the deprecated methods have been removed.
  * <p><b>NOTE:</b> Although Reception Awareness is based on the AS4 specification it is implemented in Holodeck B2B
- * generically for all messaging protocols.  
+ * generically for all messaging protocols. When the feature is used for other protocols the {@link
+ * #useDuplicateDetection()} may also be used on a sending Leg to indicate whether duplicate eliminiation should be
+ * requested, as for example done in ebMS V2.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */

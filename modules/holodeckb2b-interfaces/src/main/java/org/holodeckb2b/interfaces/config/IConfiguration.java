@@ -24,7 +24,7 @@ import org.apache.axis2.description.Parameter;
  * Defines the interface to access the Holodeck B2B <i>public</i> configuration. This public configuration contains
  * settings that may be used by extensions.
  *
- * @author Sander Fieten <sander at holodeck-b2b.org>
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public interface IConfiguration {
 
@@ -99,14 +99,14 @@ public interface IConfiguration {
 	 * @since 4.0.0
 	 */
 	boolean useStrictHeaderValidation();
-	
+
 	/**
-	 * Gets the <i>custom</i> parameter with the specified name. 
+	 * Gets the <i>custom</i> parameter with the specified name.
 	 * <p>
-	 * Extensions may add their configuration parameters to the <code>holodeckb2b.xml</code> configuration file.   
-	 * 
+	 * Extensions may add their configuration parameters to the <code>holodeckb2b.xml</code> configuration file.
+	 *
 	 * @param name	the parameter name
-	 * @return	the parameter if it exists or <code>null</code> when no parameter found with the specified name  
+	 * @return	the parameter if it exists or <code>null</code> when no parameter found with the specified name
 	 * @since 6.0.0
 	 */
 	Parameter getParameter(final String name);

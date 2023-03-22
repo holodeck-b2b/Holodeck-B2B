@@ -18,18 +18,18 @@
  * This package contains the interface and classes related to the validation of P-Modes. To reduce the risk of problems
  * in the execution of message exchanges the Holodeck B2B Core will validate P-Modes before adding them to the <i>P-Mode
  * Set</i>. What however is a valid P-Mode is depends on the context, for example the used messaging protocol and the
- * environment the gateway is deployed in. Therefore <i>P-Mode validation</i> is implemented using the <i>pluggable 
- * extension<i>. Using a separate component for the validation of a P-Mode also decouples the implementation of P-Mode 
- * definition, storage and validation. E.g. an implementation of {@link IPMode} is only responsible for supplying the 
- * P-Mode parameter values as they are configured by the user.   
+ * environment the gateway is deployed in. Therefore <i>P-Mode validation</i> is implemented using the <i>pluggable
+ * extension</i>. Using a separate component for the validation of a P-Mode also decouples the implementation of P-Mode
+ * definition, storage and validation. E.g. an implementation of {@link org.holodeckb2b.interfaces.pmode.IPMode} is
+ * only responsible for supplying the P-Mode parameter values as they are configured by the user.
  * <p>
- * As there can be multiple P-Mode validators needed in a deployment the <i>Java Service Provider Interface</i> (SPI) 
+ * As there can be multiple P-Mode validators needed in a deployment the <i>Java Service Provider Interface</i> (SPI)
  * extension mechanism is used for implementation. When a P-Mode is loaded the Core will check if a P-Mode validator is
  * registered that can validate it. This determination is based on the value of <b>PMode.MEPbinding</b> parameter. If no
- * applicable validator is found it depends on the configuration whether the P-Mode will be rejected or still be 
+ * applicable validator is found it depends on the configuration whether the P-Mode will be rejected or still be
  * accepted. Note also that it is possible to use multiple validators for one P-Mode type as all available validators
  * will be used.
- *     
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  5.0.0
  */

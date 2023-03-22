@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * should be used to provide additional information to the business application about the processing of a message unit.
  * For example to inform the application that a message unit has been (re)sent.
  * <p>Event are generally triggered by components of the Holodeck B2B Core (see package {@link
- * org.holodeckb2b.interfaces.events.types} for overview of events) but handled by extensions to report them to
+ * org.holodeckb2b.interfaces.events} for overview of events) but handled by extensions to report them to
  * the external applications. These extension should implement the {@link IMessageProcessingEventHandler} interface. The
  * P-Mode is used to configure the handlers as events may be only of interest for certain messages and applications.
  * <p>This interface is very generic and only defines the relation to the <i>message unit</i> to which the event applies

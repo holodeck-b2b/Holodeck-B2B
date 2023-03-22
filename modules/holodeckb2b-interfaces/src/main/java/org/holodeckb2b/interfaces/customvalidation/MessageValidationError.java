@@ -31,7 +31,20 @@ public class MessageValidationError {
      * Enumerates the severity levels that validation errors can have
      */
     public enum Severity {
-        Info, Warning, Failure
+    	/**
+    	 * The issue found is small and does not block further processing, but the user may need to be informed
+    	 */
+        Info,
+        /**
+         * The issue found is relatively small and could prevent further processing. Generally the user should be
+         * informed about these kind of issues.
+         */
+        Warning,
+        /**
+         * The issue found is severe and prevents further processing. The user must be informed about these kind of
+         * issues.
+         */
+        Failure
     }
 
     /**
@@ -87,20 +100,26 @@ public class MessageValidationError {
     }
 
     /**
-     * @return the severityLevel
+     * Gets the severity of this error.
+     *
+     * @return the severity level
      */
     public Severity getSeverityLevel() {
         return severityLevel;
     }
 
     /**
-     * @param severityLevel the severityLevel to set
+     * Sets the error severity.
+     *
+     * @param severityLevel the severity level to set
      */
     public void setSeverityLevel(Severity severityLevel) {
         this.severityLevel = severityLevel;
     }
 
     /**
+     * Gets a description of the error that can be used to inform the user.
+     *
      * @return the description
      */
     public String getDescription() {
@@ -108,6 +127,8 @@ public class MessageValidationError {
     }
 
     /**
+     * Set the error description that can be used to inform the user.
+     *
      * @param description the description to set
      */
     public void setDescription(String description) {
@@ -115,6 +136,8 @@ public class MessageValidationError {
     }
 
     /**
+     * Gets the error details. This can be more precise indication of what caused the validation to fail.
+     *
      * @return the details
      */
     public String getDetails() {
@@ -122,6 +145,8 @@ public class MessageValidationError {
     }
 
     /**
+     * Sets the error details. This can be more precise indication of what caused the validation to fail.
+     *
      * @param details the details to set
      */
     public void setDetails(String details) {

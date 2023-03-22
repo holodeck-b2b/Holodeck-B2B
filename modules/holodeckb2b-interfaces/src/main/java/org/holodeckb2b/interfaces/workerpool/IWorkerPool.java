@@ -21,50 +21,53 @@ import java.util.List;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 
 /**
- * Defines the interface of a worker pool. Holodeck B2B uses worker pools for running daemon like threads that manage 
+ * Defines the interface of a worker pool. Holodeck B2B uses worker pools for running daemon like threads that manage
  * messaging (re-)sending, pulling, etc. The functionality of these workers is provided by worker tasks. Management of
- * the worker pool is done by the Holodeck B2B Core. 
- * <p>Worker pools can be created by calling one of the {@link HolodeckB2BCoreInterface#createWorkerPool()} methods 
- * depending on whether the configuration of the pool should be automatically refreshed.
+ * the worker pool is done by the Holodeck B2B Core.
  *
- * @author Sander Fieten
+ * @author Sander Fieten (sander at holodeck-b2b.org)
  * @see IWorkerConfiguration
+ * @see HolodeckB2BCoreInterface#createWorkerPool(String, IWorkerPoolConfiguration)
  * @since 5.1.0
  */
 public interface IWorkerPool {
 
     /**
+     * Gets the name assigned to the worker pool.
+     *
      * @return The name of the worker pool
      */
     String getName();
- 
+
     /**
      * Gets the current list of worker configurations representing the currently active workers in the pool.
-     *   
+     *
      * @return  configurations of currently active workers in this pool
      * @throws WorkerPoolException when the worker pool is (being) stopped
      */
     List<IWorkerConfiguration>   getCurrentWorkers() throws WorkerPoolException;
-    
+
     /**
      * Gets the interval at which the configuration of this pool is refreshed.
-     * 
-     * @return	number of seconds at which the configurator is asked for an updated configuration, or</br>
+     *
+     * @return	number of seconds at which the configurator is asked for an updated configuration, or<br>
      * 			-1 when auto refreshing of the configuration is disabled
      */
     int getConfigurationRefreshInterval();
-        
+
     /**
-     * @return <code>true</code> when this pool is running, <code>false</code> if it is (being) stopped 
+     * Indicates if the worker pool is running.
+     *
+     * @return <code>true</code> when this pool is running, <code>false</code> if it is (being) stopped
      */
     boolean isRunning();
-    
+
     /**
-     * Shuts down this worker pool. Implementations may return immediately and perform the shutdown operation in the 
+     * Shuts down this worker pool. Implementations may return immediately and perform the shutdown operation in the
      * back ground.
-     * 
+     *
      * @param shutdownTime	number of seconds that the pool should wait for tasks to finish their work. If set to 0
      * 						the pool will try to stop running tasks immediately
      */
-    void shutdown(int shutdownTime); 
+    void shutdown(int shutdownTime);
 }

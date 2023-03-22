@@ -23,15 +23,29 @@ package org.holodeckb2b.interfaces.pmode;
  */
 public class PModeSetException extends Exception {
 
+	/**
+     * Default constructor creates the exception without specifying details why it was caused.
+     */
     public PModeSetException() {
         super();
     }
 
+    /**
+     * Creates a new exception with a description of the reason it was thrown.
+     *
+     * @param message	description of the reason that caused the exception
+     */
     public PModeSetException(final String message) {
         super(message);
     }
-    
-    public PModeSetException(final String message, final Throwable t) {
-    	super(message, t);
+
+    /**
+     * Creates a new exception with a description and a related exception that were the reason it was thrown
+     *
+     * @param message	description of the reason that caused the exception
+     * @param cause		the exception that caused the exception
+     */
+    public PModeSetException(final String message, final Throwable cause) {
+    	super(message, cause);
     }
 }

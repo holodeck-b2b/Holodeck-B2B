@@ -22,7 +22,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
  * Defines the interface of the callback handler that processes the result of an asynchronous message delivery process.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 6.0.0
  */
@@ -30,18 +30,20 @@ public interface IDeliveryCallback {
 
 	/**
 	 * This method must be called by the {@link IDeliveryMethod} when it successfully delivered the message unit to the
-	 * back-end application. 
-	 * <p>The Holodeck B2B Core will set the processing state of the message unit to {@link ProcessingState#DELIVERED} 
-	 * for <i>User Messages</i> or {@link ProcessingState#DONE} for <i>Signal Messages</i> and trigger a {@link 
+	 * back-end application.
+	 * <p>The Holodeck B2B Core will set the processing state of the message unit to {@link ProcessingState#DELIVERED}
+	 * for <i>User Messages</i> or {@link ProcessingState#DONE} for <i>Signal Messages</i> and trigger a {@link
 	 * IMessageDelivered} event.
 	 */
 	void success();
-	
+
 	/**
 	 * This method must be called by the {@link IDeliveryMethod} when it could not deliver the message unit to the
-	 * back-end application. 
-	 * <p>The Holodeck B2B Core will set the processing state of the message unit to {@link 
+	 * back-end application.
+	 * <p>The Holodeck B2B Core will set the processing state of the message unit to {@link
 	 * ProcessingState#DELIVERY_FAILED} and trigger a {@link IMessageDeliveryFailure} event.
+	 *
+	 * @param failure	the reason why the delivery failed
 	 */
 	void failed(MessageDeliveryException failure);
 }

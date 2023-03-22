@@ -38,7 +38,12 @@ public interface ILeg {
     /**
      * Enumeration of the allowed <i>"labels"</i> of a leg.
      */
-    public enum Label  { REQUEST, REPLY }
+    public enum Label  {
+    	/** Indicates the "request" leg, **/
+    	REQUEST,
+    	/** Indicates the "reply" leg, **/
+    	REPLY
+    }
 
     /**
      * Gets the <i>label</i> of this leg.
@@ -119,11 +124,11 @@ public interface ILeg {
      * @return A {@link List} of {@link IMessageProcessingEventConfiguration}s that specify which event handlers should
      *         be used for events that occur while processing message units of this leg.
      * @see IMessageProcessingEvent
-     * @see org.holodeckb2b.interfaces.events.types
+     * @see org.holodeckb2b.interfaces.eventprocessing
      * @since 2.1.0
      */
     public List<IMessageProcessingEventConfiguration> getMessageProcessingEventConfiguration();
-    
+
     /**
      * Gets the P-Mode parameters for the reception awareness feature.
      *

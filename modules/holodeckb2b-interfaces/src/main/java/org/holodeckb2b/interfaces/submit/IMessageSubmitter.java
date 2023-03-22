@@ -46,13 +46,13 @@ public interface IMessageSubmitter {
      * ONLY GUARANTEES that the message CAN be sent to the receiver and that Holodeck B2B will try to do so.
      *
      * @param submission            The meta data on the user message to be sent to the other trading partner.
-     * @param movePayloads          Indicator whether the files containing the payload data must be deleted or not
+     * @param deletePayloadFiles    Indicator whether the files containing the payload data must be deleted or not
      * @return                      The ebMS message-id assigned to the user message.
      * @throws MessageSubmitException   When the user message can not be submitted successfully. Reasons for failure can
      *                                  be that no P-Mode can be found to handle the message or the given P-Mode
      *                                  conflicts with supplied meta-data.
      */
-    public String submitMessage(IUserMessage um, boolean deletePayloadFiles) throws MessageSubmitException;
+    public String submitMessage(IUserMessage submission, boolean deletePayloadFiles) throws MessageSubmitException;
 
     /**
      * Submits the specified <b>Pull Request</b> to Holodeck B2B for sending.
@@ -60,7 +60,7 @@ public interface IMessageSubmitter {
      * in ebMS specification terminology, can control the moments when the pull operation must be performed. Holodeck
      * B2B will try to send the message directly.
      * <p>The meta-data for the Pull Request MUST contain the P-Mode [id] and MAY contain a MPC and messageId. If no
-     * MPC is defined in either the P-Mode and the submitted Pull Request the <i>default MPC</i> will be used. 
+     * MPC is defined in either the P-Mode and the submitted Pull Request the <i>default MPC</i> will be used.
      *
      * @param pullRequest    The meta-data on the pull request that should be sent.
      * @return               The ebMS message-id assigned to the pull request.
@@ -69,5 +69,5 @@ public interface IMessageSubmitter {
      * @since  2.1.0
      * @since  4.1.0 Checks that the P-Mode specified can be used for pulling and use of default MPC when none specified
      */
-    public String submitMessage(IPullRequest pr) throws MessageSubmitException;
+    public String submitMessage(IPullRequest pullRequest) throws MessageSubmitException;
 }

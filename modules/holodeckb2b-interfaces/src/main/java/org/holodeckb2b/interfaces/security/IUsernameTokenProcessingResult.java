@@ -16,8 +16,6 @@
  */
 package org.holodeckb2b.interfaces.security;
 
-import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
-
 /**
  * Represents the results of processing of the username token part of the WS-Security header. It provides information on
  * when the token was created, the username, password and whether a nonce was used.
@@ -49,7 +47,7 @@ public interface IUsernameTokenProcessingResult extends ISecurityProcessingResul
     /**
      * Gets the actual value of the password included in the username token. This corresponds to the <code>
      * wsse:UsernameToken/wsse:Password</code> element. Note that depending on the type of password the value may
-     * be clear text (password type equals {@link IUsernameTokenConfiguration#PasswordType.TEXT} or a digest.
+     * be clear text (password type equals {@link UTPasswordType#TEXT} or a digest.
      *
      * @return The actual password value
      */

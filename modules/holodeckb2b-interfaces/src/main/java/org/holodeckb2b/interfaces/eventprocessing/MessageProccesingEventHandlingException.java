@@ -29,18 +29,37 @@ public class MessageProccesingEventHandlingException extends Exception {
 
     private static final long serialVersionUID = -5368707258538227063L;
 
+    /**
+     * Default constructor creates the exception without specifying details why it was caused.
+     */
     public MessageProccesingEventHandlingException() {
         super();
     }
 
+    /**
+     * Creates a new exception with a description of the reason it was thrown.
+     *
+     * @param message	description of the reason that caused the exception
+     */
     public MessageProccesingEventHandlingException(final String message) {
         super(message);
     }
 
+    /**
+     * Creates a new exception with a description and a related exception that were the reason it was thrown
+     *
+     * @param message	description of the reason that caused the exception
+     * @param cause		the exception that caused the event processing failure
+     */
     public MessageProccesingEventHandlingException(final String message, final Exception cause) {
         super(message, cause);
     }
-    
+
+    /**
+     * Creates a new exception with only the related exception that was the reason it was thrown
+     *
+     * @param cause		the exception that caused the event processing failure
+     */
     public MessageProccesingEventHandlingException(final Exception cause) {
         super(cause);
     }

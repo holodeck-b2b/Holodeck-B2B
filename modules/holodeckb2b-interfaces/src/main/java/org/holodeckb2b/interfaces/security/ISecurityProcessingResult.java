@@ -43,7 +43,7 @@ public interface ISecurityProcessingResult {
 
     /**
      * Gets the {@link SecurityProcessingException} that caused the security processing to fail.
-     * <p>NOTE: This method should only be called when the {@link #isSuccessfull()} returns <code>false</code>.
+     * <p>NOTE: This method should only be called when the {@link #isSuccessful()} returns <code>false</code>.
      *
      * @return  Exception providing information on the reason why security processing failed
      */

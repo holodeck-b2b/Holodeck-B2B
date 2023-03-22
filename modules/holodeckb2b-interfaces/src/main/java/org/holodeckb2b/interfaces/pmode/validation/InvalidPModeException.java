@@ -18,6 +18,7 @@ package org.holodeckb2b.interfaces.pmode.validation;
 
 import java.util.Collection;
 import java.util.Collections;
+
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
 
 /**
@@ -32,6 +33,9 @@ import org.holodeckb2b.interfaces.pmode.PModeSetException;
  */
 public class InvalidPModeException extends PModeSetException {
 
+	/**
+	 * The collection of found errors
+	 */
     private final Collection<PModeValidationError>  errors;
 
     /**

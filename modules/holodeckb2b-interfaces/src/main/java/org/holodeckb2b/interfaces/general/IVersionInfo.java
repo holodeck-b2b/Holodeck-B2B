@@ -17,33 +17,41 @@
 package org.holodeckb2b.interfaces.general;
 
 /**
- * Represents the version of the Holodeck B2B Core. 
- * <p>Holodeck B2B uses <a href="https://semver.org/>Semantic Versioning</a> to identify its versions. This interface
+ * Represents the version of the Holodeck B2B Core.
+ * <p>Holodeck B2B uses <a href="https://semver.org/">Semantic Versioning</a> to identify its versions. This interface
  * defines access to the different parts of the version number. As we don't use build numbers in Holodeck B2B and pre
- * release info is not relevant for production use these parts are not made available through this interface. 
- * 
+ * release info is not relevant for production use these parts are not made available through this interface.
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
  */
 public interface IVersionInfo {
 
 	/**
-	 * @return String containing the complete version number  
+	 * Gets the full version number
+	 *
+	 * @return String containing the complete version number
 	 */
 	String getFullVersion();
-	
+
 	/**
-	 * @return the major version.	
+	 * Gets the major version number
+	 *
+	 * @return the major version.
 	 */
 	int getMajorVersion();
 
 	/**
-	 * @return the minor version.	
+	 * Gets the minor version number
+	 *
+	 * @return the minor version.
 	 */
 	int getMinorVersion();
-	
+
 	/**
-	 * @return the patch version.	
+	 * Gets the patch version number
+	 *
+	 * @return the patch version.
 	 */
-	int getPatchVersion();	
+	int getPatchVersion();
 }

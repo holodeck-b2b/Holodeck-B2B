@@ -23,10 +23,10 @@ import org.apache.axis2.context.MessageContext;
 
 /**
  * Represents the request parameters that are included in the query part of a URL. Parameters must be included in <code>
- * application/x-www-form-urlencoded</code> format, i.e. as "key=value" pairs separated by a '&' character. When a
+ * application/x-www-form-urlencoded</code> format, i.e. as "key=value" pairs separated by a '&amp;' character. When a
  * parameter is repeated in the URL, the values are grouped into a single list. Note that the query part of "http(s)"
  * URLs are case-sensitive and therefore the parameters names are so too.
- * <p>The request parameters can be retrieved from the Axis2 <code>MessageContext</code> using the {@link #get()}
+ * <p>The request parameters can be retrieved from the Axis2 <code>MessageContext</code> using the {@link #get(MessageContext)}
  * method.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)

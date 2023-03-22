@@ -39,7 +39,7 @@ public interface IQueryManager {
 
     /**
      * Retrieves all message units of the specified type and that are in one of the given states and are flowing in the
-     * specified direction. The found message units are sorted on their time stamp starting with the oldest message 
+     * specified direction. The found message units are sorted on their time stamp starting with the oldest message
      * units.
      * <p><b>NOTE:</b> The entity objects in the resulting collection may not be completely loaded! Before a message
      * unit is going to be processed it must be checked if it is loaded completely.
@@ -49,8 +49,8 @@ public interface IQueryManager {
      * @param type      The type of message units to retrieve specified by the interface they implement
      * @param direction The direction of the message units to retrieve
      * @param states    Array of processing states that the message units to retrieve should be in
-     * @return          List with entity objects representing the message units of the specified type that are 
-     * 					in one of the given states, in descending order on time stamp 
+     * @return          List with entity objects representing the message units of the specified type that are
+     * 					in one of the given states, in descending order on time stamp
      * @throws PersistenceException When a problem occurs during the retrieval of the message units
      */
     <T extends IMessageUnit, V extends IMessageUnitEntity> List<V>
@@ -60,7 +60,7 @@ public interface IQueryManager {
                                                                                         throws PersistenceException;
 
     /**
-     * Retrieves all message units with the given <code>MessageId</code>. Optionally the direction in which the 
+     * Retrieves all message units with the given <code>MessageId</code>. Optionally the direction in which the
      * searched messages units flow can also be specified.
      * <p>Although messageIds should be unique there can exist multiple <code>MessageUnits</code> with the same
      * messageId due to resending (and because other MSH or business applications may not conform to this constraint).
@@ -68,12 +68,12 @@ public interface IQueryManager {
      * unit is going to be processed it must be checked if it is loaded completely.
      *
      * @param messageId     The messageId of the message units to retrieve
-     * @param direction		The direction in which the message units to retrieve should be.  
-     * @return              The list of received {@link MessageUnit}s with the given message id
+     * @param direction		The direction in which the message units to retrieve should be.
+     * @return              The list of received {@link IMessageUnitEntity}s with the given message id
      * @throws PersistenceException If an error occurs when saving the object to the database
      */
-    Collection<IMessageUnitEntity> getMessageUnitsWithId(final String messageId, 
-    													 final Direction... direction) 
+    Collection<IMessageUnitEntity> getMessageUnitsWithId(final String messageId,
+    													 final Direction... direction)
     															 						throws PersistenceException;
 
     /**
@@ -145,7 +145,7 @@ public interface IQueryManager {
      * @return            <code>true</code> if there exists a User Message entity with {@link
      *                    IUserMessage#getMessageId()} == <code>messageId</code> and {@link IUserMessage#getDirection()}
      *                    == <code>IN</code> and {@link IUserMessage#getCurrentProcessingState()} ==
-     *                    {@link ProcessingStates.DELIVERED} | {@link ProcessingStates.FAILURE},
+     *                    {@link ProcessingState#DELIVERED} | {@link ProcessingState#FAILURE},
      *                    <br><code>false</code> otherwise.
      * @throws PersistenceException If an error occurs when executing this query
      * @since 4.0.0

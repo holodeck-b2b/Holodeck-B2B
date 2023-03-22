@@ -17,6 +17,8 @@
 package org.holodeckb2b.interfaces.customvalidation;
 
 import java.util.List;
+
+import org.holodeckb2b.interfaces.events.ICustomValidationFailure;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 
 /**
@@ -67,7 +69,7 @@ public interface IMessageValidationSpecification {
      * validator finds a {@link MessageValidationError} with the returned severity the processing state of the message
      * unit is set to <i>FAILURE</i> and an ebMS Error Signal is returned.
      * <p>NOTE: Even if the message unit is not rejected (<code>null</code> is returned) there is still a {@link
-     * ICustomValidationFailedEvent} raised.
+     * ICustomValidationFailure} raised.
      *
      * @return  The severity level when to stop further validations,<br>
      *          or <code>null</code> when the message unit should not be rejected at all.

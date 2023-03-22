@@ -20,22 +20,22 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Is the exception used to indicate that there was a problem in the configuration of a {@link IWorkerPool} or one of 
- * the <i>workers</i> contained in it. 
- * <p>When the exception is thrown because of a problem with one or more specific workers within it, the workers that 
+ * Is the exception used to indicate that there was a problem in the configuration of a {@link IWorkerPool} or one of
+ * the <i>workers</i> contained in it.
+ * <p>When the exception is thrown because of a problem with one or more specific workers within it, the workers that
  * failed can be retrieved using the {@link #getFailedWorkers()} which returns a list of {@link IWorkerConfiguration}s
- * of the failed workers. When there is a generic error this list will be empty and the error is described by the 
+ * of the failed workers. When there is a generic error this list will be empty and the error is described by the
  * exception message.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 5.1.0 
+ * @since 5.1.0
  */
 public class WorkerPoolException extends Exception {
 	/**
 	 * The list of workers which (re-)configuration failed
 	 */
 	private final List<IWorkerConfiguration>	failedWorkers;
-	
+
     /**
      * Creates a new instance of <code>TaskConfigurationException</code> without detail message.
      */
@@ -47,17 +47,17 @@ public class WorkerPoolException extends Exception {
     /**
      * Creates a new instance of <code>TaskConfigurationException</code> without detail message but including the
      * exception that caused the problem in processing.
-     * 
+     *
      * @param cause The exception that caused the error
      */
     public WorkerPoolException(final Throwable cause) {
     	super(cause);
     	this.failedWorkers = null;
     }
-    
+
     /**
-     * Constructs a new instance with the specified detail message. This constructor is used on generic errors during 
-     * (re-)configuration of the pool. 
+     * Constructs a new instance with the specified detail message. This constructor is used on generic errors during
+     * (re-)configuration of the pool.
      *
      * @param msg  The detailed error message.
      */
@@ -67,8 +67,8 @@ public class WorkerPoolException extends Exception {
     }
 
     /**
-     * Constructs a new instance with the specified detail message and an exception that caused the problem in 
-     * processing. This constructor is used on generic errors during (re-)configuration of the pool. 
+     * Constructs a new instance with the specified detail message and an exception that caused the problem in
+     * processing. This constructor is used on generic errors during (re-)configuration of the pool.
      *
      * @param msg   The detailed error message.
      * @param cause The exception that caused the error
@@ -76,10 +76,10 @@ public class WorkerPoolException extends Exception {
     public WorkerPoolException(final String msg, final Throwable cause) {
     	super(msg, cause);
     	this.failedWorkers = null;
-    }    
-    
+    }
+
     /**
-     * Constructs a new instance with a list of workers that failed during the (re-)configuration of the pool. 
+     * Constructs a new instance with a list of workers that failed during the (re-)configuration of the pool.
      *
      * @param failed The workers which could not be configured
      */
@@ -87,8 +87,10 @@ public class WorkerPoolException extends Exception {
     	super();
     	this.failedWorkers = Collections.unmodifiableList(failed);
     }
-    
+
     /**
+     * Gets the collection of tasks that could not be initialised correctly.
+     *
      * @return list of {@link IWorkerConfiguration}s representing the workers which failed to be configured
      */
     public List<IWorkerConfiguration> getFailedWorkers() {

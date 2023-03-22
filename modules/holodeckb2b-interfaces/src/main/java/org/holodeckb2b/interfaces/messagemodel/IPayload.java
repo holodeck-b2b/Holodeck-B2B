@@ -18,6 +18,7 @@ package org.holodeckb2b.interfaces.messagemodel;
 
 
 import java.util.Collection;
+
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.ISchemaReference;
@@ -37,7 +38,20 @@ public interface IPayload {
      *
      * @see #getContainment()
      */
-    public enum Containment { BODY, ATTACHMENT, EXTERNAL }
+    public enum Containment {
+    	/**
+    	 * The payload should be contained in the body of the User Message. NOTE that this can only done when the
+    	 * payload is a XML document.
+    	 */
+    	BODY,
+    	/**
+    	 * THe payload is added as an attachment to the User Message
+    	 */
+    	ATTACHMENT,
+    	/**
+    	 * The payload is not added to the User Message but available on a different location
+    	 */
+    	EXTERNAL }
 
     /**
      * Gets the indication how the payload is contained in the ebMS message. A payload can be included in the message as

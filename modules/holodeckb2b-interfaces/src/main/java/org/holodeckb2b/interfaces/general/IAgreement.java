@@ -18,6 +18,7 @@ package org.holodeckb2b.interfaces.general;
 
 
 /**
+ * Represents the meta-data on the agreement that governs a message exchange.
  *
  * @author Bram Bakx (bram at holodeck-b2b.org)
  */

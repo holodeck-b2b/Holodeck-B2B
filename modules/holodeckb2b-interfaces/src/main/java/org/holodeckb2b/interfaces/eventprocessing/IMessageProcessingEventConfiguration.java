@@ -27,11 +27,11 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
 
 /**
  * Defines the interface for the configuration of an event handler instance. Event handlers are configured in the P-Mode
- * if events need only be processed for specific message exchanges or can be registered globally if events need to 
- * handled for all message exchanges. The configuration is used by the {@link IMessageProcessingEventProcessor} to 
+ * if events need only be processed for specific message exchanges or can be registered globally if events need to
+ * handled for all message exchanges. The configuration is used by the {@link IMessageProcessingEventProcessor} to
  * decide if a handler needs to be created and called to handle an event.
- * <p>NOTE: Event handlers are executed in the order that they are configured. Therefore configure the handlers for 
- * specific events first before the ones handling more generic events, e.g.  {@link ISigningFailure} before {@link 
+ * <p>NOTE: Event handlers are executed in the order that they are configured. Therefore configure the handlers for
+ * specific events first before the ones handling more generic events, e.g.  {@link ISigningFailure} before {@link
  * ISecurityCreationFailure}.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
@@ -89,12 +89,12 @@ public interface IMessageProcessingEventConfiguration {
      * @return The settings as a {@link Map}<code>&lt;String, ?&gt;</code> where the keys are the parameter names.
      */
     Map<String, ?> getHandlerSettings();
-    
+
     /**
      * Indicates whether the processing of the event should continue after the handler specified by this configuration
-     * has processed the event. The handler is considered to have processed the event when its {@link 
-     * IMessageProcessingEventHandler#handleEvent()} method has completed without exceptions.
-     * 
+     * has processed the event. The handler is considered to have processed the event when its {@link
+     * IMessageProcessingEventHandler#handleEvent(IMessageProcessingEvent)} method has completed without exceptions.
+     *
      * @return	<i>true</i> if processing should continue, <i>false</i> if no further processing should take place
      * @since 5.3.0	For back-ward compatibility the default implementation returns <i>false</i>
      */

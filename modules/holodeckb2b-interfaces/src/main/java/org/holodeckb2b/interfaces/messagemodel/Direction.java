@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.holodeckb2b.interfaces.messagemodel;
 
@@ -10,5 +10,12 @@ package org.holodeckb2b.interfaces.messagemodel;
  * @since  4.0.0
  */
 public enum Direction {
-	IN, OUT 
+	/**
+	 * Indicates a received message
+	 */
+	IN,
+	/**
+	 * Indicates a sent message
+	 */
+	OUT
 }

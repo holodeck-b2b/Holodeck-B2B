@@ -36,14 +36,28 @@ public class MessageDeliveryException extends Exception {
      */
     private boolean permanent = false;
 
+    /**
+     * Default constructor creates the exception without specifying details why it was caused.
+     */
     public MessageDeliveryException() {
         super();
     }
 
+    /**
+     * Creates a new exception with a description of the reason it was thrown.
+     *
+     * @param message	description of the reason that caused the exception
+     */
     public MessageDeliveryException(final String message) {
         super(message);
     }
 
+    /**
+     * Creates a new exception with a description and a related exception that were the reason it was thrown
+     *
+     * @param message	description of the reason that caused the exception
+     * @param cause		the exception that caused the delivery failure
+     */
     public MessageDeliveryException(final String message, final Throwable cause) {
         super(message, cause);
     }

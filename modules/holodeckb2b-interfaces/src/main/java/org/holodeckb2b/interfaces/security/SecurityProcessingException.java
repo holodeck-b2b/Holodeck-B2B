@@ -39,28 +39,57 @@ public class SecurityProcessingException extends Exception {
      */
     private boolean isPolicyViolation = false;
 
+	/**
+     * Default constructor creates the exception without specifying details why it was caused.
+     */
     public SecurityProcessingException() {
         super();
     }
 
+    /**
+     * Creates a new exception with a description of the reason it was thrown.
+     *
+     * @param message	description of the reason that caused the exception
+     */
     public SecurityProcessingException(final String message) {
         super(message);
     }
 
+    /**
+     * Creates a new exception with a description of the reason it was thrown and an indication if the issue that caused
+     * the security processing to fail is a violation of a policy.
+     *
+     * @param message	description of the reason that caused the exception
+     * @param isPolicyError indicates if the failure is caused by a policy violation
+     */
     public SecurityProcessingException(final String message, final boolean isPolicyError) {
         super(message);
         this.isPolicyViolation = isPolicyError;
     }
 
+    /**
+     * Creates a new exception with a description and a related exception that were the reason it was thrown
+     *
+     * @param message	description of the reason that caused the exception
+     * @param cause		the exception that caused the security processing failure
+     */
     public SecurityProcessingException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Creates a new exception with a description and a related exception that were the reason it was thrown and an
+     * indication if the issue that caused the security processing to fail is a violation of a policy.
+     *
+     * @param message	description of the reason that caused the exception
+     * @param cause		the exception that caused the security processing failure
+     * @param isPolicyError indicates if the failure is caused by a policy violation
+     */
     public SecurityProcessingException(final String message, final Throwable cause, final boolean isPolicyError) {
     	super(message, cause);
     	this.isPolicyViolation = isPolicyError;
     }
-    
+
     /**
      * Indicates whether this found error in processing of the WS-Security headers is caused by a violation of the
      * security policies.

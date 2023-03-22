@@ -32,7 +32,9 @@ public interface IEbmsError {
      * The defined error severities in the ebMS specification (see §6.2.5).
      */
     public enum Severity {
+    	/** Indicates a problem in the message exchange which could be resolved by retrying **/
         warning,
+        /** Indicates a problem in the message exchange that prevents the message being processed **/
         failure
     }
 
