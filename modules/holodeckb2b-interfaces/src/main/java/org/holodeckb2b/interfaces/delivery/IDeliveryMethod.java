@@ -29,10 +29,10 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * [of the business application] creates flexibility as only a new <i>Delivery Method</i> needs to be deployed when 
  * needed for the back-end integration without making any change to the Holodeck B2B Core.
  * <p>
- * To setup the Delivery Method for a specific back-end integration and allow re-use of resources it is initialised 
- * before the first delivery operation is requested. The parameters to use for an actual back-end integration are 
- * specified by an {@link IDeliverySpecification} which are generally provided by the P-Mode of the message unit to be 
- * delivered.
+ * The parameters needed to setup a Delivery Method instance for a specific back-end integration are specified by a 
+ * {@link IDeliverySpecification} which are generally provided by the P-Mode of the message unit to be delivered.<br/>
+ * When the Holodeck B2B <i>Delivery Manager</i> caches delivery methods the initialisation of the instance is done only
+ * once before the first delivery request upon which it's added to the cache.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 6.0.0
@@ -43,7 +43,7 @@ public interface IDeliveryMethod {
 
 	/**
      * Initialises the delivery method with the specific settings to use for the delivery of the message units. This 
-     * method is only called once by Holodeck B2B before requesting the first message delivery.
+     * method is called by Holodeck B2B before requesting the message delivery. 
      *
      * @param settings    The settings to use for initialisation of the delivery method
      * @throws MessageDeliveryException When the delivery method is unable to successfully initialise itself and 
