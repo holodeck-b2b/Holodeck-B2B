@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * No Receipt sent when parallel delivery is used
 * Missing Leg labels in default P-Mode implementation 
 * Message submission rejected if P-Mode does not contain Service meta-data
+* NPE when User Message is submitted using a receive only P-Mode [#131](https://github.com/holodeck-b2b/Holodeck-B2B/issues/131)
 
 ## 6.0.1
 ##### 2023-03-08

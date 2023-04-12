@@ -94,12 +94,11 @@ public class MessageSubmitter implements IMessageSubmitter {
 
         log.trace("Get the P-Mode for the message");
         final IPMode  pmode = HolodeckB2BCore.getPModeSet().get(submission.getPModeId());
-
-        if (pmode == null) {
-            log.warn("No P-Mode found for submitted message, rejecting message!");
+        if (pmode == null || PModeUtils.getSendLeg(pmode) == null) {
+            log.warn("Specified P-Mode ({}) does not exist or does not support sending, rejecting message!", 
+            		 submission.getPModeId());
             throw new MessageSubmitException("No P-Mode found for message");
         }
-        log.debug("Found P-Mode: {}", pmode.getId());
 
         log.trace("Check for completeness: combined with P-Mode all info must be known");
         // The complete operation will throw aMessageSubmitException if meta-data is not complete
