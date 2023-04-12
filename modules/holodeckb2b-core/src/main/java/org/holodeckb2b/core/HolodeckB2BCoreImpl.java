@@ -222,8 +222,9 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         } catch (WorkerPoolException corePoolCfgError) {        	
         	// As the workers are needed for correct functioning of Holodeck B2B, failure to either
             // load the configuration or start the pool is fatal.
-            log.fatal("Could not load workers from file {}. Error details: {}", 
-            			instanceConfiguration.getWorkerPoolCfgFile(), Utils.getExceptionTrace(corePoolCfgError));
+        	log.fatal("Could not load workers from file {}. Failed workers are: {}", 
+            			instanceConfiguration.getWorkerPoolCfgFile(), corePoolCfgError.getFailedWorkers().stream()
+            																		  .map(c -> c.getName()).toArray());
             throw new AxisFault("Unable to start Holodeck B2B. Could not load workers from file "
                                 + instanceConfiguration.getWorkerPoolCfgFile());
         }
@@ -448,11 +449,12 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     		
     		log.debug("Added new worker pool: {}", name);
     		return newPool;
-    	} catch (Throwable poolFailure) {
+    	} catch (WorkerPoolException poolFailure) {
+    		throw poolFailure;
+    	} catch (Throwable unexpected) {
     		log.error("An error occurred creating the new worker pool ({}). Error details: {} - {}", name, 
-    					poolFailure.getClass().getSimpleName(), poolFailure.getMessage());
-    		throw (poolFailure instanceof WorkerPoolException) ? (WorkerPoolException) poolFailure : 
-    											new WorkerPoolException("Creating worker pool failed", poolFailure);
+    					unexpected.getClass().getSimpleName(), unexpected.getMessage());
+    		throw new WorkerPoolException("Unexpected worker pool failure", unexpected);
     	}    	
     }
     
