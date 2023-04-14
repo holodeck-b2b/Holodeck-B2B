@@ -16,12 +16,25 @@
  */
 package org.holodeckb2b.core.axis2;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.TransportInDescription;
+import org.apache.axis2.transport.http.server.DefaultHttpConnectionManager;
+import org.apache.axis2.transport.http.server.HttpConnectionManager;
+import org.apache.axis2.transport.http.server.RequestSessionCookie;
+import org.apache.axis2.transport.http.server.ResponseSessionCookie;
+import org.apache.axis2.transport.http.server.WorkerFactory;
+import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.BasicHttpProcessor;
+import org.apache.http.protocol.HttpProcessor;
+import org.apache.http.protocol.ResponseConnControl;
+import org.apache.http.protocol.ResponseContent;
+import org.apache.http.protocol.ResponseDate;
+import org.apache.http.protocol.ResponseServer;
 
 /**
  * Is a customised {@link org.apache.axis2.transport.http.server.HttpFactory} that uses the actual {@link 
@@ -60,6 +73,28 @@ public class HTTPFactory extends org.apache.axis2.transport.http.server.HttpFact
         return httpConfiguration;
     }	
 	
+    @Override
+    public HttpProcessor newHttpProcessor() {
+        BasicHttpProcessor httpProcessor = new BasicHttpProcessor();
+        httpProcessor.addInterceptor(new RequestSessionCookie());
+        httpProcessor.addInterceptor(new ResponseDate());
+        httpProcessor.addInterceptor(new ResponseServer(getOriginServer()));
+        httpProcessor.addInterceptor(new ResponseContent());
+        httpProcessor.addInterceptor(new ResponseConnControl());
+        httpProcessor.addInterceptor(new ResponseSessionCookie());
+        return httpProcessor;
+    }
+    
+    /**
+     * Create the connection manager used to launch request threads
+     */
+    public HttpConnectionManager newRequestConnectionManager(ExecutorService requestExecutor,
+                                                             WorkerFactory workerFactory,
+                                                             HttpParams params) {
+        return new DefaultHttpConnectionManager(getConfigurationContext(), requestExecutor,
+                                                workerFactory, params, this);
+    }
+    
     private int getIntParam(String name, int def) {
         String config = getStringParam(name, null);
         if (config != null) {
