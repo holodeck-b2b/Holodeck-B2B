@@ -1,16 +1,16 @@
 /*******************************************************************************
  * Copyright (C) 2019 The Holodeck B2B Team, Sander Fieten
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
@@ -70,8 +70,8 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration,
 
     @ElementList(entry = "ForMessageUnit", required = false, inline = true)
     private List<String>    messageUnitNames = null;
-    
-    @Element(name = "continueProcessing", required = false)
+
+    @Element(name = "ContinueProcessing", required = false)
     private Boolean	continueProcessing;
 
     @ElementList(entry = "Parameter", inline = true, required = false)
@@ -82,7 +82,7 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration,
 
     @Transient
     private List<Class<? extends IMessageUnit>> forMessageUnits = null;
-    
+
     @Transient
     private Map<String, String>		settings;
 
@@ -182,7 +182,7 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration,
     		msgUnits.forEach(mu -> messageUnitNames.add(mu.getClass().getName()));
     	}
     }
-    
+
     @Override
     public List<Class<? extends IMessageUnit>> appliesTo() {
         return forMessageUnits;
@@ -196,24 +196,24 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration,
     public void setFactoryClass(final String className) {
     	this.handlerFactoryClass = className;
     }
-    
+
     @Override
     public Map<String, ?> getHandlerSettings() {
     	if (settings != null)
     		return settings;
-    	
+
         settings = new HashMap<>(parameters != null ? parameters.size() : 0);
         if (parameters != null)
         	parameters.forEach(p -> settings.put(p.getName(), p.getValue()));
-        
+
         return settings;
     }
-    
+
     public void setHandlerSettings(final Map<String, Object> sourceSettings) {
         if (!Utils.isNullOrEmpty(sourceSettings)) {
             this.parameters = new ArrayList<>(sourceSettings.size());
             sourceSettings.forEach((n, v) -> this.parameters.add(new Parameter(n, v.toString())));
-        }    
+        }
     }
 
     public void addHandlerSetting(final String name, final Object value) {
@@ -221,11 +221,11 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration,
             this.parameters = new ArrayList<>();
         this.parameters.add(new Parameter(name, value.toString()));
     }
-    
+
     public void setContinueProcessing(boolean cont) {
     	this.continueProcessing = cont;
     }
-    
+
     @Override
     public boolean continueEventProcessing() {
     	return continueProcessing != null ? continueProcessing.booleanValue() : true;
