@@ -964,7 +964,7 @@ NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting 
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
-			<xs:element default="false" minOccurs="0" name="ContinueProcessing" type="xs:boolean"/>
+			<xs:element default="true" minOccurs="0" name="ContinueProcessing" type="xs:boolean"/>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="Parameter"
 				type="tns:ParameterType"/>
 		</xs:sequence>
