@@ -272,7 +272,8 @@ class DeliveryManager implements IDeliveryManager {
 				log.trace("Create Delivery Method ({})", spec2use.getDeliveryMethod().getName());
 				deliveryMethod = spec2use.getDeliveryMethod().newInstance();
 				log.trace("Initialise Delivery Method");
-				deliveryMethod.init(spec2use.getSettings());
+				Map<String, ?> settings = spec2use.getSettings();
+				deliveryMethod.init(settings != null ? settings : new HashMap<>());
 				log.debug("Created Delivery Method {}", spec2use.getDeliveryMethod().getName());
 			} catch (Throwable dmError) {
 				log.error("Error creating Delivery Method ({}) for spec ({}): {}", spec2use.getDeliveryMethod().getName(),
