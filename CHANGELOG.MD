@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ##### 
 ### Changed
 * Updated dependency of _generic-utils_ library to fix error in security processing due to certificates not found 
+* Updated dependency of _file-backend_ library to fix errors in file based delivery
 
 ### Fixed
 * Duplicate message will generate a receipt even if the delivery is failed [#142](https://github.com/holodeck-b2b/Holodeck-B2B/issues/142)
