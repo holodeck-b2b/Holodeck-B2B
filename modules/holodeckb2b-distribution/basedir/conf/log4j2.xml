@@ -19,6 +19,14 @@ recommended to raise log levels to at least INFO.
             </PatternLayout>
         </File>        
         <!--
+            Log file for submitted messages
+        -->
+        <File name="submissions" fileName="logs/submissions.log">
+            <PatternLayout>
+                <Pattern>%d;%m%n</Pattern>
+            </PatternLayout>
+        </File>        
+        <!--
             Log file for received ebMS errors
         -->
         <File name="ebmsErrors" fileName="logs/ebms_errors.log">
@@ -69,6 +77,20 @@ recommended to raise log levels to at least INFO.
         <Logger name="org.holodeckb2b.backend.file.SubmitOperation" level="INFO"/>        
         <Logger name="org.holodeckb2b.ebms3.pulling" level="WARN"/>
     	<Logger name="org.apache.axis2.engine.AxisEngine" level="OFF"/>
+        
+        <!-- 
+        	Submission logging
+        	
+        For each successfully submitted message unit the meta-data is logged to a separate
+        log file. Which meta-data is logged depends on the log level configured here. 
+        
+        For more information on the meta-data that is logged and the log format, see the
+        Javadoc of `org.holodeckb2b.core.submission.SubmissionLog`         
+        -->
+        <Logger name="org.holodeckb2b.core.submission.SubmissionLog" level="TRACE"
+        	additivity="false">
+        	<AppenderRef ref="submissions"/>
+        </Logger>
         
         <!--
             SOAP Envelope logging

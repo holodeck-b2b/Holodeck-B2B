@@ -4,6 +4,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 6.0.2
 ##### 
+### Added
+* Submission log that contains the meta-data of successfully submitted messages. 
+
 ### Changed
 * Updated dependency of _generic-utils_ library to fix error in security processing due to certificates not found 
 * Updated dependency of _file-backend_ library to fix errors in file based delivery

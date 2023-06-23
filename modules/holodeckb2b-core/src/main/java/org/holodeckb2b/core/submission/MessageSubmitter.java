@@ -72,6 +72,7 @@ public class MessageSubmitter implements IMessageSubmitter {
     public String submitMessage(final IUserMessage submission, final boolean movePayloads) throws MessageSubmitException {
     	try {
     		final IUserMessage acceptedUM = doSubmission(submission, movePayloads);
+    		SubmissionLog.logSubmission(acceptedUM);
     		HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new MessageSubmission(acceptedUM));
     		return acceptedUM.getMessageId();
     	} catch (MessageSubmitException mse) {
@@ -158,6 +159,7 @@ public class MessageSubmitter implements IMessageSubmitter {
     	try {
     		final IPullRequest acceptedPR = doSubmission(pullRequest);
     		HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new MessageSubmission(acceptedPR));
+    		SubmissionLog.logSubmission(acceptedPR);
     		return acceptedPR.getMessageId();
     	} catch (MessageSubmitException mse) {
     		HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new MessageSubmission(pullRequest, mse));
