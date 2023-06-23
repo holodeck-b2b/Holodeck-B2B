@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Message submission rejected if P-Mode does not contain Service meta-data
 * NPE when User Message is submitted using a receive only P-Mode [#131](https://github.com/holodeck-b2b/Holodeck-B2B/issues/131)
 * NPE on initialisation of a delivery method when `IDeliverySpecification.getSettings()` returns `null`
+* Missing exception trace on event processing error in the default event processor
 * Processing of the `/PMode//EventHandler/ContinueProcessing` element
 * Documentation of the default value for `/PMode//EventHandler/ContinueProcessing`
 

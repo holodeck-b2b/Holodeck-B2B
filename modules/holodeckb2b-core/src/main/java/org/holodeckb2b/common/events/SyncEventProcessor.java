@@ -141,7 +141,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
 						return false;
 					}
 				} catch (final Throwable t) {
-					log.warn("An exception occurred when {} [id={}] was processed by {}.\n\tException details:",
+					log.warn("An exception occurred when {} [id={}] was processed by {}.\n\tException details: {}",
 								eventType, event.getId(), handlerClassname, Utils.getExceptionTrace(t));
 				}
 			}
