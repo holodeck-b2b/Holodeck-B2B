@@ -74,7 +74,7 @@ public class LogOnlyDeliveryMethod implements IDeliveryMethod {
 	@Override
 	public void deliver(IMessageUnit rcvdMsgUnit) throws MessageDeliveryException {
 		if (log.isInfoEnabled()) {
-			StringBuffer msg = new StringBuffer();
+			StringBuilder msg = new StringBuilder();
 			msg.append(MessageUnitUtils.getMessageUnitName(rcvdMsgUnit)).append(';');
 			msg.append(rcvdMsgUnit.getMessageId()).append(';');
 			msg.append(Utils.toXMLDateTime(rcvdMsgUnit.getTimestamp())).append(';');
