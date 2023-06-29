@@ -12,7 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Updated dependency of _file-backend_ library to fix errors in file based delivery
 
 ### Fixed
-* Duplicate message will generate a receipt even if the delivery is failed [#142](https://github.com/holodeck-b2b/Holodeck-B2B/issues/142)
+* Duplicate message will generate a receipt even if the delivery failed [#142](https://github.com/holodeck-b2b/Holodeck-B2B/issues/142)
 * No Receipt sent when parallel delivery is used
 * Missing Leg labels in default P-Mode implementation 
 * Message submission rejected if P-Mode does not contain Service meta-data
