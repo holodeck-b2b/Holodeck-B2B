@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 6.1.1
+##### 2023-08-01
+### Added
+* Debug log in P-Mode finder. 
+
 ## 6.1.0
 ##### 2023-06-29
 ### Added
@@ -12,7 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Updated dependency of _file-backend_ library to fix errors in file based delivery
 
 ### Fixed
-* Duplicate message will generate a receipt even if the delivery is failed [#142](https://github.com/holodeck-b2b/Holodeck-B2B/issues/142)
+* Duplicate message will generate a receipt even if the delivery failed [#142](https://github.com/holodeck-b2b/Holodeck-B2B/issues/142)
 * No Receipt sent when parallel delivery is used
 * Missing Leg labels in default P-Mode implementation 
 * Message submission rejected if P-Mode does not contain Service meta-data

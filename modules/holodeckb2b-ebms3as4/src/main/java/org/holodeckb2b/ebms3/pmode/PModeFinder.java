@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.util.CompareUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.pmode.PModeUtils;
@@ -125,6 +126,43 @@ public class PModeFinder {
      *                  <code>null</code> if no P-Mode could be found for the user message message unit.
      */
     public static IPMode forReceivedUserMessage(final IUserMessage mu) {
+        return forReceivedUserMessage(mu, null);
+    }
+
+    /**
+     * Finds the P-Mode for a received <i>User Message</i> message unit.
+     * <p>The ebMS specifications do not describe or recommend how the P-Mode for a user message should be determined,
+     * see also <a href="https://issues.oasis-open.org/browse/EBXMLMSG-48">issue 48 in the OASIS TC issue tracker</a>.
+     * In the issue two suggestions for matching the P-Mode are given. Based on these we compare the meta-data from the 
+     * message with all P-Modes and return the best matching P-Mode.
+     * <p>The following table shows the information that is used for matching and their importance (expressed as a 
+     * weight). The match of a P-Mode is the sum of the weights for the elements that are equal to the corresponding 
+     * P-Mode parameter. If there is a mismatch on any of the elements the P-Mode is considered as a mismatch, but if
+     * no value if specified in the P-Mode the element is not considered and not scored.
+     * <p><table border="1">
+     * <tr><th>Element</th><th>Weight</th></tr>
+     * <tr><td>PMode id</td><td>74</td></tr>
+     * <tr><td>From Party Id's</td><td>14</td></tr>
+     * <tr><td>From.Role</td><td>4</td></tr>
+     * <tr><td>To Party Id's</td><td>14</td></tr>
+     * <tr><td>To.Role</td><td>4</td></tr>
+     * <tr><td>Service</td><td>10</td></tr>
+     * <tr><td>Action</td><td>10</td></tr>
+     * <tr><td>Agreement ref</td><td>2</td></tr>
+     * <tr><td>MPC</td><td>2</td></tr>
+     * <tr><td>Message Property</td><td>1</td></tr>
+     * </table> </p>
+     * <p>Because the 2-Way MEP can be governed by two 1-Way P-Modes this method will just check all P-Modes that govern
+     * message receiving. It is up to the handlers to decide whether the result is acceptable or not. This method will 
+     * only find one matching P-Mode. This means that when multiple P-Modes with the highest match score are found none 
+     * is returned. 
+     *
+     * @param mu        The user message message unit to find the P-Mode for
+     * @param log       Logger used for logging
+     * @return          The P-Mode for the message unit if the message unit can be matched to a <b>single</b> P-Mode,
+     *                  <code>null</code> if no P-Mode could be found for the user message message unit.
+     */
+    public static IPMode forReceivedUserMessage(final IUserMessage mu, final Logger log) {
         final IPModeSet pmodes = HolodeckB2BCoreInterface.getPModeSet();
         if (pmodes == null)
             return null;
@@ -137,9 +175,12 @@ public class PModeFinder {
         for (final IPMode p : pmodes.getAll()) {
         	// If the P-Mode MEP binding does not start with the ebMS3 namespace URI it does not apply to ebMS3/AS4 and
         	// therefore should be ignored
-        	if (!p.getMepBinding().startsWith(EbMSConstants.EBMS3_NS_URI))
+        	if (!p.getMepBinding().startsWith(EbMSConstants.EBMS3_NS_URI)) {
+                if (log != null)
+                    log.debug("Checking P-Mode [" + p.getId() + "] - MEP namespace prefix mis-match");
         		continue;
-        	
+            }
+
         	/*
         	 * First step is to determine if the P-Mode should be evaluated, i.e. if it governs message receiving. For
         	 * a 2-Way P-Mode this is always true. But for 1-Way P-Modes this is only the case when it is not triggering
@@ -148,8 +189,11 @@ public class PModeFinder {
         	final boolean initiator = PModeUtils.isHolodeckB2BInitiator(p);
         	final String  mepBinding = p.getMepBinding();
         	if ((initiator && mepBinding.equals(EbMSConstants.ONE_WAY_PUSH)) // sending using Push
-    		|| (!initiator && mepBinding.equals(EbMSConstants.ONE_WAY_PULL))) // sending using Pull
+    		|| (!initiator && mepBinding.equals(EbMSConstants.ONE_WAY_PULL))) { // sending using Pull
+                if (log != null)
+                    log.debug("Checking P-Mode [" + p.getId() + "] - one way pull/push mis-match");
                 continue;            
+            } 
 
         	/*
         	 * Now first check the generic meta-data elements like P-Mode identifier, agreement reference and trading
@@ -163,8 +207,11 @@ public class PModeFinder {
                 // The P-Mode id can be used for matching, so check if one is given in message
                 if (agreementRef != null) {
                     final String pid = agreementRef.getPModeId();
-                    if (!Utils.isNullOrEmpty(pid) && pid.equals(p.getId()))
+                    if (!Utils.isNullOrEmpty(pid) && pid.equals(p.getId())) {
                         cValue = MATCH_WEIGHTS.get(PARAMETERS.ID);
+                        if (log != null)
+                            log.debug("Checking P-Mode [" + p.getId() + "] - agreement found in user message");
+                    }
                 }
             }
 
@@ -177,14 +224,22 @@ public class PModeFinder {
                     case -2 :
                     case 2 :
                         // mismatch on agreement name, either because different or one defined in P-Mode but not in msg
+                        if (log != null)
+                            log.debug("Checking P-Mode [" + p.getId() + "] - agreement name mis-match");
                         continue;
                     case 0 :
                         // names equal, but for match also types must be equal
                         final int j = Utils.compareStrings(agreementRef.getType(), agreementPMode.getType());
-                        if (j == -1 || j == 0)
+                        if (j == -1 || j == 0) {
                             cValue += MATCH_WEIGHTS.get(PARAMETERS.AGREEMENT);
-                        else
+                            if (log != null)
+                                log.debug("Checking P-Mode [" + p.getId() + "] - agreement found");
+                        }
+                        else {
+                            if (log != null)
+                                log.debug("Checking P-Mode [" + p.getId() + "] - agreement type mis-match");
                             continue; // mis-match on agreement type
+                        }
                     case -1 :
                         // both P-Mode and message agreement ref are empty, ignore
                     case 1 :
@@ -210,31 +265,55 @@ public class PModeFinder {
             // Check To info
             if (toPMode != null) {
                 final int c = Utils.compareStrings(to.getRole(), toPMode.getRole());
-                if ( c == -1 || c == 0)
+                if ( c == -1 || c == 0) {
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.TO_ROLE);
-                else if (c != 1)
+                    if (log != null)
+                        log.debug("Checking P-Mode [" + p.getId() + "] - to-patry role found");
+                }
+                else if (c != 1) {
+                    if (log != null)
+                        log.debug("Checking P-Mode [" + p.getId() + "] - to-party role mis-match");
                     continue; // mis-match on To party role
+                }
                 Collection<IPartyId> pmodeToIds = toPMode.getPartyIds();
                 if (!Utils.isNullOrEmpty(pmodeToIds))
-                    if (CompareUtils.areEqual(to.getPartyIds(), pmodeToIds))
+                    if (CompareUtils.areEqual(to.getPartyIds(), pmodeToIds)) {
                         cValue += MATCH_WEIGHTS.get(PARAMETERS.TO);
-                    else
+                        if (log != null)
+                            log.debug("Checking P-Mode [" + p.getId() + "] - to-party ids match");
+                    }
+                    else {
+                        if (log != null)
+                            log.debug("Checking P-Mode [" + p.getId() + "] - to-party ids mis-match");
                         continue; // mis-match on To party id('s)
+                    }
             }
 
             // Check From info
             if (fromPMode != null) {
                 final int c = Utils.compareStrings(from.getRole(), fromPMode.getRole());
-                if ( c == -1 || c == 0)
+                if ( c == -1 || c == 0) {
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.FROM_ROLE);
-                else if (c != 1)
+                    if (log != null)
+                        log.debug("Checking P-Mode [" + p.getId() + "] - from-party role found");
+                }
+                else if (c != 1) {
+                    if (log != null)
+                        log.debug("Checking P-Mode [" + p.getId() + "] - from-party role mis-match");
                     continue; // mis-match on From party role
+                }
                 Collection<IPartyId> pmodeFromIds = fromPMode.getPartyIds();
                 if (!Utils.isNullOrEmpty(pmodeFromIds))
-                    if (CompareUtils.areEqual(from.getPartyIds(), pmodeFromIds))
+                    if (CompareUtils.areEqual(from.getPartyIds(), pmodeFromIds)) {
                         cValue += MATCH_WEIGHTS.get(PARAMETERS.FROM);
-                    else
+                        if (log != null)
+                            log.debug("Checking P-Mode [" + p.getId() + "] - from-party ids match");
+                    }
+                    else {
+                        if (log != null)
+                            log.debug("Checking P-Mode [" + p.getId() + "] - from-party ids mis-match");
                         continue;  // mis-match on From party id('s)
+                    }
             }
 
             /*
@@ -251,19 +330,34 @@ public class PModeFinder {
                     final IService svc = mu.getCollaborationInfo().getService();
                     if (svc.getName().equals(svcPMode.getName())) {
                         final int i = Utils.compareStrings(svc.getType(), svcPMode.getType());
-                        if (i == -1 || i == 0)
+                        if (i == -1 || i == 0) {
                             cValue += MATCH_WEIGHTS.get(PARAMETERS.SERVICE);
-                        else
+                            if (log != null)
+                                log.debug("Checking P-Mode [" + p.getId() + "] - leg business-info service match");
+                        }
+                        else {
+                            if (log != null)
+                                log.debug("Checking P-Mode [" + p.getId() + "] - leg business-info service type mis-match");
                             continue; // mis-match on service type
-                    } else
+                        }
+                    } else {
+                        if (log != null)
+                            log.debug("Checking P-Mode [" + p.getId() + "] - leg business-info service name mis-match");
                         continue; // mis-match on service name
+                    }
                 }
                 // Check Action
                 final int i = Utils.compareStrings(mu.getCollaborationInfo().getAction(), pmBI.getAction());
-                if (i == 0)
+                if (i == 0) {
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.ACTION);
-                else if (i == -2)
+                    if (log != null)
+                        log.debug("Checking P-Mode [" + p.getId() + "] - leg business-info action match");
+                }
+                else if (i == -2) {
+                    if (log != null)
+                        log.debug("Checking P-Mode [" + p.getId() + "] - leg business-info action mis-match");
                     continue; // mis-match on action
+                }
             }
 
             /*
@@ -282,19 +376,31 @@ public class PModeFinder {
                     mpcPMode = EbMSConstants.DEFAULT_MPC;
                 // Now compare MPC, but take into account that MPC in a PullRequestFlow can be a sub MPC, so the one
                 // from the message can be a parent MPC
-                if (mpcPMode.startsWith(mpc))
+                if (mpcPMode.startsWith(mpc)) {
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.MPC);
-                else
+                    if (log != null)
+                        log.debug("Checking P-Mode [" + p.getId() + "] - leg MPC match");
+                }
+                else {
+                    if (log != null)
+                        log.debug("Checking P-Mode [" + p.getId() + "] - leg MPC mis-match");
                     continue; // mis-match on MPC
+                }
             } else {
                 // If no MPC is given in P-Mode, it uses the default
                 if (Utils.isNullOrEmpty(mpcPMode))
                     mpcPMode = EbMSConstants.DEFAULT_MPC;
                 // Now compare the MPC values
-                if (mpc.equals(mpcPMode))
+                if (mpc.equals(mpcPMode)) {
                     cValue += MATCH_WEIGHTS.get(PARAMETERS.MPC);
-                else
+                    if (log != null)
+                        log.debug("Checking P-Mode [" + p.getId() + "] - leg default MPC match");
+                }
+                else {
+                    if (log != null)
+                        log.debug("Checking P-Mode [" + p.getId() + "] - leg default MPC mis-match");
                     continue; // mis-match on MPC
+                }
             }
             
             /*
@@ -309,10 +415,16 @@ public class PModeFinder {
             		continue; // mismatch because properties defined in P-Mode are missing
             	boolean propMisMatch = false;
             	for(IProperty pp : pModeProperties) {
-            		if (messageProperties.stream().anyMatch(mp -> CompareUtils.areEqual(mp, pp))) 
+            		if (messageProperties.stream().anyMatch(mp -> CompareUtils.areEqual(mp, pp))) {
             			cValue += MATCH_WEIGHTS.get(PARAMETERS.MSG_PROPERTY);
-            		else
+                        if (log != null)
+                            log.debug("Checking P-Mode [" + p.getId() + "] - property '" + pp.getName() + "' match");    
+                    }
+            		else {
             			propMisMatch = true;
+                        if (log != null)
+                            log.debug("Checking P-Mode [" + p.getId() + "] - property '" + pp.getName() + "' mis-match");    
+                    }
             	}
             	if (propMisMatch)
             		continue; // mismatch on a property
@@ -324,9 +436,14 @@ public class PModeFinder {
                 hValue = cValue;
                 hPMode = p;
                 multiple = false;
-            } else if (cValue == hValue)
+                if (log != null)
+                    log.debug("Checking P-Mode [" + p.getId() + "] - new candidate");
+            } else if (cValue == hValue) {
                 // It has the same match as the current highest scoring one
                 multiple = true;
+                if (log != null)
+                    log.debug("Checking P-Mode [" + p.getId() + "] - duplicate candidate");
+            }
         }
 
         // Only return a single P-Mode
