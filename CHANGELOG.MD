@@ -2,6 +2,27 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 7.0.0-SNAPSHOT
+##### 
+### Added
+* New `org.holodeckb2b.interfaces.submit.DuplicateMessageIdException` to indicate that a duplicate MessageId is used
+  in a submitted message unit.
+* New `org.holodeckb2b.interfaces.persistency.AlreadyChangedException` to indicate that a requested update of the 
+  message meta-data could not be executed because the database already contains newer data
+* The entity classes used by the Core for storing the message meta-data have been extended with a _CoreId_ so each 
+  message unit has a unique internal identifier making unambiguous relations between message units possible as there may
+  exist different incoming message units with the same MessageId.
+
+### Changed
+* The interface of the _Persistency Provider_ has been refactored. The methods for updating specific meta-data 
+  attributes in `org.holodeckb2b.interfaces.persistency.IUpdateManager` have been replaced by more generic create,  
+  update and delete methods that operate on the entity classes. New update methods have been added to the entity classes
+  which indicate which meta-data the Holodeck B2b Core can change during the message processing.
+  
+### Removed
+* `org.holodeckb2b.interfaces.messagemodel.IMessageUnit.getCurrentProcessingState()`. The current state is the last item
+  from the list retrieved using `org.holodeckb2b.interfaces.messagemodel.IMessageUnit.getProcessingStates()`
+
 ## 6.1.0
 ##### 2023-06-29
 ### Added
