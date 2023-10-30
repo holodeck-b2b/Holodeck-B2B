@@ -43,6 +43,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
+import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for creating a <i>Receipt</i> signal for the received user message.
@@ -155,7 +156,9 @@ public class CreateReceipt extends AbstractUserMessageHandler {
                 // can be regenerated when a retry is received.
                 log.error("Saving the Receipt signal in repsonse to user message [msgId="
                             + um.getMessageId() + "] failed! Details: " + ex.getMessage());
-            }
+            } catch (DuplicateMessageIdException e) {
+				// Will never occur as a unique MessageId will be assigned 
+			}
         } else {
             // The user message is not delivered to the business application, so do not create a receipt
             log.debug("User message is not delivered successfully, so no Receipt possible");

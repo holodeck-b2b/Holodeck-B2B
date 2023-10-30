@@ -51,7 +51,7 @@ public class PayloadInfoElement {
      * @param payloads      The information on the payloads of the user message to include in the element
      * @return  The new element if there is payload data available, null when no payload data is available
      */
-    public static OMElement createElement(final OMElement umElement, final Collection<IPayload> payloads) {
+    public static OMElement createElement(final OMElement umElement, final Collection<? extends IPayload> payloads) {
         // Check for availability of payloads before doing any processing
         if (Utils.isNullOrEmpty(payloads))
             return null;

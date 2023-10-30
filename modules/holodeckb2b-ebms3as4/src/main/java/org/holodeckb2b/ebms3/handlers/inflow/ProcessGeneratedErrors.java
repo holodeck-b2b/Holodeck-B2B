@@ -35,6 +35,7 @@ import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 
 /**
  * Is the <i>in flow</i> handler that collects all ebMS errors generated during the processing of the received message
@@ -65,7 +66,7 @@ public class ProcessGeneratedErrors extends AbstractBaseHandler {
     
     @Override
     protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
-    																					throws PersistenceException {
+															throws PersistenceException, DuplicateMessageIdException {
         log.debug("Check if errors were generated");
         final Map<String, Collection<IEbmsError>> errors = procCtx.getGeneratedErrors();
 

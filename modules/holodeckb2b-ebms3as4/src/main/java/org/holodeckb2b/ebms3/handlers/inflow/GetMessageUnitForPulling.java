@@ -124,7 +124,6 @@ public class GetMessageUnitForPulling extends AbstractBaseHandler {
                 if (rMPC.startsWith(uMPC)) {
                     log.trace("User Message can be pulled, set processing state to Processing");
                     r = HolodeckB2BCore.getStorageManager().setProcessingState(userMsgToPull,
-                                                                              ProcessingState.AWAITING_PULL,
                                                                               ProcessingState.PROCESSING);
                     log.trace("Processing state was " + (r ? "" : "not ")  + "changed");
                 } else

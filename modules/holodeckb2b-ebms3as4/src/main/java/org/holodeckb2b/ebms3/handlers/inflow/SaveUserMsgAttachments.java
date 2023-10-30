@@ -24,7 +24,6 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.zip.ZipException;
@@ -44,15 +43,14 @@ import org.holodeckb2b.common.errors.OtherContentError;
 import org.holodeckb2b.common.errors.ValueInconsistent;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.common.messagemodel.EbmsError;
-import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IPayloadEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
@@ -79,7 +77,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
     										  final Logger log) throws PersistenceException {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
 
-        final Collection<IPayload> payloads = um.getPayloads();
+        final Collection<IPayloadEntity> payloads = um.getPayloads();
         // If there are no payloads in the UserMessage directly continue processing
         if (Utils.isNullOrEmpty(payloads)) {
             log.debug("UserMessage contains no payloads.");
@@ -93,11 +91,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
             log.trace("Payload content will be stored in " + tmpPayloadDir.getAbsolutePath());
 
             // Save each payload to a file
-            // We built a new collection of payload meta-data so we can update the content location
-            ArrayList<IPayload>  newPayloadData = new ArrayList<>(payloads.size());
-            for(final IPayload ip : payloads) {
-                // Convert to Payload object so we can set properties
-                Payload p = new Payload(ip);
+            for(final IPayloadEntity p : payloads) {
                 // Create a unique filename for temporarily storing the payload
                 final File plFile = File.createTempFile("pl-", null, tmpPayloadDir);
 
@@ -182,18 +176,14 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                         log.debug("Payload is not contained in message but located at " + plRef);
                         // External payload are not processed by Holodeck B2B, the URI is just passed to business app
                 }
-                // Add update payload meta-data to collection
-                newPayloadData.add(p);
+                // Update payload meta-data in database
+                updateManager.setPayloadInformation(p);                
             }
-
             log.debug("All payloads saved to temp file");
-            // Update the message meta data in database 
-            updateManager.setPayloadInformation(um, newPayloadData);
         } catch (IOException | XMLStreamException ex) {
             log.error("Payload(s) could not be saved to temporary file! Details:" + ex.getMessage());
             procCtx.addGeneratedError(new OtherContentError("Internal error", um.getMessageId()));
-            updateManager.setProcessingState(um, ProcessingState.FAILURE);
-            
+            updateManager.setProcessingState(um, ProcessingState.FAILURE);            
         }
 
         return InvocationResponse.CONTINUE;

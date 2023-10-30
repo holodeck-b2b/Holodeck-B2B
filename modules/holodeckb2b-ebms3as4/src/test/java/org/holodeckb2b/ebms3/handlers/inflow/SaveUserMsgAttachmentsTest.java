@@ -22,7 +22,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.net.URL;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;

@@ -20,7 +20,6 @@ import static org.holodeckb2b.interfaces.messagemodel.IPayload.Containment.ATTAC
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.activation.FileDataSource;
@@ -35,7 +34,6 @@ import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.axis2.context.MessageContext;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
-import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.commons.util.FileUtils;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
@@ -44,6 +42,7 @@ import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
+import org.holodeckb2b.interfaces.persistency.entities.IPayloadEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 
 /**
@@ -72,7 +71,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
         }
 
         log.trace("All meta-data of User Message available, check for payloads to include");
-        final Collection<IPayload> payloads = um.getPayloads();
+        final Collection<IPayloadEntity> payloads = um.getPayloads();
 
         if (Utils.isNullOrEmpty(payloads)) {
             // No payloads in this user message, so nothing to do
@@ -80,35 +79,25 @@ public class AddPayloads extends AbstractUserMessageHandler {
         } else {
             // Add each payload to the message as described by the containment attribute
             log.trace("User message contains " + payloads.size() + " payload(s)");
-            // If a MIME Content-Id is generated it should be saved to database as well, therefor we need to construct
-            // new set of payload meta-data
-            ArrayList<IPayload>  newPayloadInfo = new ArrayList<>(payloads.size());
-            boolean cidGenerated = false;
-            for (final IPayload pl : payloads) {
-                // Create copy of existing meta-data
-                Payload p = new Payload(pl);
+            for (final IPayloadEntity pl : payloads) {
                 // First ensure that the payload is assigned a MIME Content-Id when it added as an attachment
                 if (pl.getContainment() == ATTACHMENT && Utils.isNullOrEmpty(pl.getPayloadURI())) {
                     // No MIME Content-Id assigned on submission, assign now
                     final String cid = MessageIdUtils.createContentId(um.getMessageId());
                     log.trace("Generated a new Content-id [" + cid + "] for payload [" + pl.getContentLocation() + "]");
-                    p.setPayloadURI(cid);
-                    cidGenerated = true;
-                }
-                newPayloadInfo.add(p);
+                    pl.setPayloadURI(cid);                    
+                    HolodeckB2BCore.getStorageManager().setPayloadInformation(pl);
+                    log.debug("Generated MIME Content-Id(s) saved to database");
+                }                
                 // Add the content of the payload to the SOAP message
                 try {
-                    addContent(p, procCtx.getParentContext(), log);
+                    addContent(pl, procCtx.getParentContext(), log);
                 } catch (final Exception e) {
                     log.error("Adding the payload content to message failed. Error details: " + e.getMessage());
                     // If adding the payload fails, the message is in an incomplete state and should not
                     // be sent. Therefor cancel further processing
                     return InvocationResponse.ABORT;
                 }
-            }
-            if (cidGenerated) {
-                HolodeckB2BCore.getStorageManager().setPayloadInformation(um, newPayloadInfo);
-                log.debug("Generated MIME Content-Id(s) saved to database");
             }
             log.debug("Payloads successfully added to User Message [msgId=" + um.getMessageId() + "]");
         }
