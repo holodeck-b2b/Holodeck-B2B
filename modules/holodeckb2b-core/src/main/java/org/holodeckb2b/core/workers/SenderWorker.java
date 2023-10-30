@@ -71,8 +71,7 @@ public class SenderWorker extends AbstractWorkerTask {
                     }
 
                     // Indicate that processing will start
-                    if (HolodeckB2BCore.getStorageManager().setProcessingState(msgUnit, ProcessingState.READY_TO_PUSH,
-                                                                              ProcessingState.PROCESSING)) {
+                    if (HolodeckB2BCore.getStorageManager().setProcessingState(msgUnit, ProcessingState.PROCESSING)) {
                         // only when we could succesfully set processing state really start processing
                         log.trace("Start processing " + MessageUnitUtils.getMessageUnitName(msgUnit)
                                     + "[" + msgUnit.getMessageId() + "]");

@@ -17,6 +17,8 @@
 package org.holodeckb2b.core.handlers;
 
 import java.util.Collection;
+import java.util.Set;
+import java.util.UUID;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
@@ -39,6 +41,7 @@ import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 
 /**
  * Is a special handler to handle unexpected and previously unhandled errors. When such errors are detected the
@@ -130,19 +133,27 @@ public class CatchAxisFault extends AbstractBaseHandler {
         } catch (final PersistenceException dbe) {
             // (Still) a problem with the database, create the Error signal message without storing it
             log.fatal("Could not store error signal message in database! Details: " + dbe.getMessage());
-            log.trace("Create a non-persisted ErrorMessageEntity so we can still send the message");
-            errorMessage.setMessageId(MessageIdUtils.createMessageId());
+            log.trace("Create a non-persisted ErrorMessageEntity so we can still send the message");            
             return new NonPersistedErrorMessage(errorMessage);
-        }
+        } catch (DuplicateMessageIdException e) {
+        	// Can never occur because a unique id is generated for the Error Message
+        	return null;
+		}
     }
 
     /**
      * Helper class to allow sending of an error the sender of the message even if the persistency layer is down.
      */
-    class NonPersistedErrorMessage extends ErrorMessage implements IErrorMessageEntity {
-
+    public class NonPersistedErrorMessage extends ErrorMessage implements IErrorMessageEntity {
+    	private String	coreId;
+    	private boolean addSOAPFault = false;
+    	private boolean isMultiHop = false;
+    	private Label	leg;
+    	
     	public NonPersistedErrorMessage(final ErrorMessage source) {
 			super(source);
+			coreId = UUID.randomUUID().toString();
+			setMessageId(MessageIdUtils.createMessageId());			
 		}
 
 		@Override
@@ -152,17 +163,50 @@ public class CatchAxisFault extends AbstractBaseHandler {
 
 		@Override
 		public boolean usesMultiHop() {
-			return false;
+			return isMultiHop;
 		}
 
 		@Override
 		public boolean shouldHaveSOAPFault() {
-			return true;
+			return addSOAPFault;
+		}
+
+		@Override
+		public String getCoreId() {
+			return coreId;
+		}
+
+		@Override
+		public Set<String> getRelatedTo() {
+			return null;
+		}
+
+		@Override
+		public void addRelatesTo(String coreId) {
+		}
+
+		@Override
+		public void setMultiHop(boolean usingMultiHop) {
+			isMultiHop = usingMultiHop;
+		}
+
+		@Override
+		public void setAddSOAPFault(boolean addSOAPFault) {
+			this.addSOAPFault = addSOAPFault;
 		}
 
 		@Override
 		public Label getLeg() {
-			return null;
+			return leg;
+		}
+
+		@Override
+		public void setLeg(Label leg) {
+			this.leg = leg;
+		}
+
+		@Override
+		public void setProcessingState(ProcessingState newState, String description) {
 		}
     }
 }

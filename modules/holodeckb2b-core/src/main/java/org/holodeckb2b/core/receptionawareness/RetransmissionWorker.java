@@ -87,8 +87,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
             // For each message check if it should be retransmitted or not
             for (final IUserMessageEntity um : waitingForRcpt) {
                 try {
-					final ProcessingState cState = um.getCurrentProcessingState().getState();
-                    log.trace("Check if User Message [msgId={}] should be resend based on its P-Mode [{}]", 
+					log.trace("Check if User Message [msgId={}] should be resend based on its P-Mode [{}]", 
                     			um.getMessageId(), um.getPModeId());
                     // We need the current interval duration, the number of attempts already executed and the maximum
                     // number of attempts allowed
@@ -118,7 +117,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         		 um.getMessageId(), um.getPModeId());
                     	// Set state to SUSPENDED as a new P-Mode with retry configuration may come available
                         // And raise event to signal this issue
-                    	if (HolodeckB2BCore.getStorageManager().setProcessingState(um, cState, ProcessingState.SUSPENDED, 
+                    	if (HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.SUSPENDED, 
                     													"Missing reception awareness configuration")) 
 	                    	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new GenericSendMessageFailure(um, 
                     													"Missing reception awareness configuration"));
@@ -132,7 +131,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         // has to be generated
                         if (attempts >= maxAttempts) {
                             // No retries left, set the state to FAILURE, log and generate MissingReceipt error
-                        	if (storageManager.setProcessingState(um, cState, ProcessingState.FAILURE)) {                         	
+                        	if (storageManager.setProcessingState(um, ProcessingState.FAILURE)) {                         	
 	                        	log.info("Retry attempts exhausted for User Message [msgId=" + um.getMessageId() + "]!");
 	                            missingReceiptsLog.error("No Receipt received for UserMessage with messageId="
 	                                                        + um.getMessageId());

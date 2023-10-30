@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
@@ -86,9 +85,14 @@ public class QueryManager implements IQueryManager {
 	}
 
 	@Override
-	public boolean isAlreadyProcessed(IUserMessage userMessage) throws PersistenceException {
+	public boolean isAlreadyProcessed(IUserMessageEntity userMessage) throws PersistenceException {
 		return userMessage.getCurrentProcessingState().getState() == ProcessingState.FAILURE ||
 					userMessage.getCurrentProcessingState().getState() == ProcessingState.DELIVERED;
+	}
+
+	@Override
+	public IMessageUnitEntity getMessageUnitWithCoreId(String coreId) throws PersistenceException {
+		return msgUnits.stream().filter(m -> m.getCoreId().equals(coreId)).findFirst().orElse(null);
 	}
 
 }

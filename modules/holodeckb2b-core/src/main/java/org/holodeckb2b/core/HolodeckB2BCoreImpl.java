@@ -44,6 +44,7 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcess
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.general.IVersionInfo;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
+import org.holodeckb2b.interfaces.persistency.AlreadyChangedException;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.persistency.IQueryManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
@@ -478,13 +479,23 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     					userMessage.getMessageId());
     		throw new IllegalArgumentException("Incoming message unit cannot be resumed");
     	}
+    	if (userMessage.getCurrentProcessingState().getState() != ProcessingState.SUSPENDED) {
+    		log.warn("Processing state of message unit [msgId={}] has already changed to {}", 
+					userMessage.getMessageId(), userMessage.getCurrentProcessingState().getState());
+    		return;
+    	}
     	
     	ProcessingState newState = PModeUtils.doesHolodeckB2BTrigger(PModeUtils.getLeg(userMessage)) ?
     									ProcessingState.READY_TO_PUSH : ProcessingState.AWAITING_PULL;
     	log.trace("Resume processing of User Message [msgId={}], set proc state to {}", userMessage.getMessageId(), 
     				newState.name());
-    	getStorageManager().setProcessingState(userMessage, ProcessingState.SUSPENDED, newState);
-    	if (userMessage.getCurrentProcessingState().getState() == newState)
+    	boolean resumed;
+    	try {
+    		resumed = getStorageManager().setProcessingState(userMessage, newState);
+    	} catch (AlreadyChangedException changed) {
+    		resumed = false;
+    	}
+    	if (resumed)
     		log.info("Processing of User Message [msgId={}] resumed", userMessage.getMessageId());
     	else
     		log.info("Processing of User Message [msgId={}] already changed.", userMessage.getMessageId());

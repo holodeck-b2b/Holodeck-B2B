@@ -141,7 +141,7 @@ public class UserMessage extends MessageUnit implements IUserMessage, Serializab
      *
      * @param payloads  The meta-data on the payloads
      */
-    public void setPayloads(final Collection<IPayload> payloads) {
+    public void setPayloads(final Collection<? extends IPayload> payloads) {
         if (!Utils.isNullOrEmpty(payloads)) {
             this.payloads = new ArrayList<>();
             for (IPayload p : payloads)

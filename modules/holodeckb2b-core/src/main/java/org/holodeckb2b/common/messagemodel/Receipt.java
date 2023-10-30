@@ -36,7 +36,7 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 public class Receipt extends MessageUnit implements IReceipt, Serializable {
 	private static final long serialVersionUID = 2638231745969207571L;
 	
-	private transient ArrayList<OMElement>    content;
+	private ArrayList<OMElement>    content;
 
     /**
      * Default constructor creates a new empty <code>Receipt</code> object

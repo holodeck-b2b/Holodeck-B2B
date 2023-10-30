@@ -140,8 +140,7 @@ class DeliveryManager implements IDeliveryManager {
 			IDeliverySpecification delSpec;
 			delSpec = getDeliverySpec(messageUnit);
 			if (delSpec != null) {
-				if (!mdManager.setProcessingState(messageUnit, messageUnit.getCurrentProcessingState().getState(),
-														ProcessingState.OUT_FOR_DELIVERY)) {
+				if (!mdManager.setProcessingState(messageUnit, ProcessingState.OUT_FOR_DELIVERY)) {
 					log.error("Cannot start delivery of message unit (msgId={})", messageUnit.getMessageId());
 					throw new MessageDeliveryException("Message unit already in process");
 				}
@@ -173,14 +172,11 @@ class DeliveryManager implements IDeliveryManager {
 				if (messageUnit instanceof IUserMessageEntity) {
 					log.warn("No delivery specified in P-Mode ({}) used for User Message (msgId={})",
 							messageUnit.getPModeId(), messageUnit.getMessageId());
-					updated = mdManager.setProcessingState(messageUnit,
-											messageUnit.getCurrentProcessingState().getState(), ProcessingState.DONE,
-											"No delivery specified");
+					updated = mdManager.setProcessingState(messageUnit, ProcessingState.DONE, "No delivery specified");
 				} else {
 					log.info("{} (msgId={}) does not need to be delivered to back-end",
 							MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId());
-					updated = mdManager.setProcessingState(messageUnit,
-											messageUnit.getCurrentProcessingState().getState(), ProcessingState.DONE);
+					updated = mdManager.setProcessingState(messageUnit, ProcessingState.DONE);
 				}
 				if (!updated) {
 					log.error("Message unit (msgId={}) is already in process", messageUnit.getMessageId());

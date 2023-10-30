@@ -1,6 +1,8 @@
 package org.holodeckb2b.persistency.inmemory.dto;
 
-import org.holodeckb2b.common.messagemodel.Receipt;
+import java.util.List;
+
+import org.apache.axiom.om.OMElement;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 
@@ -9,26 +11,33 @@ import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class ReceiptDTO extends Receipt implements IReceiptEntity {
+public class ReceiptDTO extends MessageUnitDTO implements IReceiptEntity {
+	private List<OMElement>    content;
+	
+	public ReceiptDTO() {
+		super();
+	}
 
-	private boolean isMultiHop = false;
-
-	public ReceiptDTO(IReceipt source) {
-		super(source);
+	@Override
+	public MessageUnitDTO clone() {
+		return new ReceiptDTO(this);
 	}
 	
+    public ReceiptDTO(final IReceipt source) {
+        super(source);
+        copyFrom(source);
+    }
+    
+    public void copyFrom(IReceipt source) {
+    	if (source == null)
+    		return;
+    	
+    	super.copyFrom(source);
+    	content = source.getContent();        	
+    }
+    
 	@Override
-	public boolean isLoadedCompletely() {
-		return true;
-	}
-
-
-	@Override
-	public boolean usesMultiHop() {
-		return isMultiHop;
-	}
-
-	public void setIsMultiHop(boolean usesMultiHop) {
-		isMultiHop = usesMultiHop;
-	}
+	public List<OMElement> getContent() {
+		return content;
+	}	
 }

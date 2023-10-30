@@ -84,7 +84,7 @@ public class ProcessReceipts extends AbstractBaseHandler {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         // Change processing state to indicate we start processing the receipt. Also checks that the receipt is not
         // already being processed
-        if (!updateManager.setProcessingState(receipt, ProcessingState.RECEIVED, ProcessingState.PROCESSING)) {
+        if (!updateManager.setProcessingState(receipt, ProcessingState.PROCESSING)) {
             log.warn("Receipt [msgId=" + receipt.getMessageId() + "] is already being processed, skipping");
             return;
         }

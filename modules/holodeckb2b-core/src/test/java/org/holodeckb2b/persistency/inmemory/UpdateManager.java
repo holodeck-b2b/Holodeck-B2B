@@ -1,29 +1,24 @@
 package org.holodeckb2b.persistency.inmemory;
 
-import java.util.Collection;
+import java.util.Date;
 import java.util.Set;
 
-import org.holodeckb2b.common.messagemodel.MessageProcessingState;
-import org.holodeckb2b.common.messagemodel.MessageUnit;
-import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.persistency.AlreadyChangedException;
 import org.holodeckb2b.interfaces.persistency.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg.Label;
-import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.persistency.entities.IPayloadEntity;
 import org.holodeckb2b.persistency.inmemory.dto.ErrorMessageDTO;
+import org.holodeckb2b.persistency.inmemory.dto.MessageUnitDTO;
+import org.holodeckb2b.persistency.inmemory.dto.PayloadDTO;
 import org.holodeckb2b.persistency.inmemory.dto.PullRequestDTO;
 import org.holodeckb2b.persistency.inmemory.dto.ReceiptDTO;
-import org.holodeckb2b.persistency.inmemory.dto.SelectivePullRequestDTO;
 import org.holodeckb2b.persistency.inmemory.dto.UserMessageDTO;
 
 public class UpdateManager implements IUpdateManager {
@@ -53,91 +48,46 @@ public class UpdateManager implements IUpdateManager {
 		
 		msgUnits.add(dto);
 		
-		return (V) dto;
+		return (V) ((MessageUnitDTO) dto).clone();
 	}
 
 	@Override
-	public void setPModeId(IMessageUnitEntity msgUnit, String pmodeId) throws PersistenceException {
-		if (msgUnit instanceof MessageUnit)
-			synchronized (msgUnit) {
-				((MessageUnit) msgUnit).setPModeId(pmodeId);				
-			}
-		else
-			throw new IllegalArgumentException("Unmanaged message unit");
+	public void updateMessageUnit(IMessageUnitEntity messageUnit) throws PersistenceException {
+		if (!(messageUnit instanceof MessageUnitDTO))
+			throw new PersistenceException("Unsupported entity class");
+		
+		MessageUnitDTO update = ((MessageUnitDTO) messageUnit);
+		MessageUnitDTO stored = (MessageUnitDTO) msgUnits.stream().filter(m -> messageUnit.getCoreId().equals(m.getCoreId())).findFirst().orElse(null);
+		if (stored == null)
+			throw new PersistenceException("Entity not managed");
+		
+		if (stored.getLastChanged().after(update.getLastChanged())) {
+			update.copyFrom(stored);
+			throw new AlreadyChangedException(); 
+		}
+		
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		update.setChanged(new Date());
+		if (stored != messageUnit)
+			stored.copyFrom(update);
 	}
-
+	
 	@Override
-	public boolean setProcessingState(IMessageUnitEntity msgUnit, ProcessingState currentProcState,
-			ProcessingState newProcState) throws PersistenceException {
-		return this.setProcessingState(msgUnit, currentProcState, newProcState, null);
-	}
-
-	@Override
-	public boolean setProcessingState(IMessageUnitEntity msgUnit, ProcessingState currentProcState,
-			ProcessingState newProcState, String description) throws PersistenceException {
-		if (msgUnit instanceof MessageUnit)
-			synchronized(msgUnit) {
-				if (currentProcState != null && msgUnit.getCurrentProcessingState().getState() != currentProcState)
-					return false;
-				
-				((MessageUnit) msgUnit).setProcessingState(new MessageProcessingState(newProcState, description));
-				return true;
-			}
-		else
-			throw new IllegalArgumentException("Unmanaged message unit");
-	}
-
-	@Override
-	public void setMultiHop(IMessageUnitEntity messageUnit, boolean isMultihop) throws PersistenceException {
-		if (messageUnit instanceof IUserMessage)
-			((UserMessageDTO) messageUnit).setIsMultiHop(isMultihop);
-		else if (messageUnit instanceof ISelectivePullRequest)
-			((SelectivePullRequestDTO) messageUnit).setIsMultiHop(isMultihop);
-		else if (messageUnit instanceof IPullRequest)
-			((PullRequestDTO) messageUnit).setIsMultiHop(isMultihop);
-		else if (messageUnit instanceof IReceipt)
-			((ReceiptDTO) messageUnit).setIsMultiHop(isMultihop);
-		else if (messageUnit instanceof IErrorMessage)
-			((ErrorMessageDTO) messageUnit).setIsMultiHop(isMultihop);
-		else
-			throw new IllegalArgumentException("Unknown message unit type");
-	}
-
-	@Override
-	public void setPayloadInformation(IUserMessageEntity userMessage, Collection<IPayload> payloadInfo)
-			throws PersistenceException {
-		if (userMessage instanceof UserMessage)
-			synchronized (userMessage) {
-				((UserMessage) userMessage).setPayloads(payloadInfo);				
-			}
-		else
-			throw new IllegalArgumentException("Unmanaged message unit");
-	}
-
-	@Override
-	public void setAddSOAPFault(IErrorMessageEntity errorMessage, boolean addSOAPFault) throws PersistenceException {
-		if (errorMessage instanceof ErrorMessageDTO)
-			synchronized (errorMessage) {
-				((ErrorMessageDTO) errorMessage).setUseSOAPFault(addSOAPFault);				
-			}
-		else
-			throw new IllegalArgumentException("Unmanaged message unit");
-	}
+	public void updatePayload(IPayloadEntity payload) throws PersistenceException {
+		if (!(payload instanceof PayloadDTO))
+			throw new PersistenceException("Unsupported entity class");
+		
+		if (msgUnits.stream().noneMatch(m -> 
+									((PayloadDTO) payload).getParentUserMessage().getCoreId().equals(m.getCoreId())))
+			throw new PersistenceException("Entity not managed");
+	}	
 
 	@Override
 	public void deleteMessageUnit(IMessageUnitEntity messageUnit) throws PersistenceException {
-		msgUnits.remove(messageUnit);
+		msgUnits.removeIf(m -> messageUnit.getCoreId().equals(m.getCoreId()));
 	}
-
-	@Override
-	public void setPModeAndLeg(IErrorMessageEntity errorMessage, String pmode, Label leg) throws PersistenceException {
-		if (errorMessage instanceof ErrorMessageDTO)
-			synchronized (errorMessage) {				
-				((ErrorMessageDTO) errorMessage).setPModeId(pmode);				
-				((ErrorMessageDTO) errorMessage).setLeg(leg);				
-			}
-		else
-			throw new IllegalArgumentException("Unmanaged message unit");		
-	}
-
 }

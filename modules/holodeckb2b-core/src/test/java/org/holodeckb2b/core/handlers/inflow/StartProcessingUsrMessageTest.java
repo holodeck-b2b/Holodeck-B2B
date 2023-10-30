@@ -17,6 +17,7 @@
 package org.holodeckb2b.core.handlers.inflow;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.apache.axis2.context.MessageContext;
@@ -74,17 +75,20 @@ public class StartProcessingUsrMessageTest {
 
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(new UserMessage());
-        updateManager.setProcessingState(userMessageEntity, ProcessingState.OUT_FOR_DELIVERY);
         
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         
+        updateManager.setProcessingState(HolodeckB2BCore.getQueryManager()
+        		.getMessageUnitWithCoreId(userMessageEntity.getCoreId()), 
+        		ProcessingState.OUT_FOR_DELIVERY);
         try {
             assertEquals(InvocationResponse.CONTINUE, new StartProcessingUsrMessage().invoke(mc));
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
+        assertNull(procCtx.getReceivedUserMessage());
         assertEquals(ProcessingState.OUT_FOR_DELIVERY, userMessageEntity.getCurrentProcessingState().getState());        
     }    
 }

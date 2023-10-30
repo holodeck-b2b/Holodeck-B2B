@@ -84,7 +84,7 @@ public class ProcessErrors extends AbstractBaseHandler {
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();
         // Change processing state to indicate we start processing the error. Also checks that the error is not
         // already being processed
-        if (!storageManager.setProcessingState(errSignal, ProcessingState.RECEIVED, ProcessingState.PROCESSING)) {
+        if (!storageManager.setProcessingState(errSignal, ProcessingState.PROCESSING)) {
             log.warn("Error Signal [msgId=" + errSignal.getMessageId() + "] is already (being) processed, skipping");
             return;
         }

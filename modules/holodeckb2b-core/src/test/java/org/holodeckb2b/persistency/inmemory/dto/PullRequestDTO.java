@@ -1,6 +1,5 @@
 package org.holodeckb2b.persistency.inmemory.dto;
 
-import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 
@@ -9,26 +8,32 @@ import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class PullRequestDTO extends PullRequest implements IPullRequestEntity {
-
-	private boolean isMultiHop = false;
+public class PullRequestDTO extends MessageUnitDTO implements IPullRequestEntity {
+	private String mpc;
+	
+	public PullRequestDTO() {}
 	
 	public PullRequestDTO(IPullRequest source) {
 		super(source);
+		copyFrom(source);
+	}
+	
+	public void copyFrom(IPullRequest source) {
+		if (source == null)
+			return;
+		
+		super.copyFrom(source);
+		this.mpc = source.getMPC();
+	}	
+	
+	@Override
+	public MessageUnitDTO clone() {
+		return new PullRequestDTO(this);
 	}
 	
 	@Override
-	public boolean isLoadedCompletely() {
-		return true;
+	public String getMPC() {
+		return mpc;
 	}
-
-
-	@Override
-	public boolean usesMultiHop() {
-		return isMultiHop;
-	}
-
-	public void setIsMultiHop(boolean usesMultiHop) {
-		isMultiHop = usesMultiHop;
-	}
+	
 }
