@@ -68,9 +68,9 @@ public class QueryManagerTest {
         queryManager = new QueryManager();
     }
 
-    private void assertSorted(List<? extends IMessageUnit> resultSet) {
+    private void assertSorted(List<? extends IMessageUnitEntity> resultSet) {
         boolean sorted = true; Date last = null;
-        for (IMessageUnit mu : resultSet)
+        for (IMessageUnitEntity mu : resultSet)
             sorted &= last == null || mu.getCurrentProcessingState().getStartTime().before(last);
         assertTrue(sorted);
     }
@@ -114,10 +114,10 @@ public class QueryManagerTest {
     @Test
     public void isAlreadyProcessed() throws PersistenceException {
         // Then a delivered User Message
-        assertTrue(queryManager.isAlreadyProcessed(TestData.userMsg5));
+        assertTrue(queryManager.isAlreadyProcessed(new UserMessageEntity(new UserMessage(TestData.userMsg5))));
 
         // And one that is not yet delivered
-        assertFalse(queryManager.isAlreadyProcessed(TestData.userMsg3));
+        assertFalse(queryManager.isAlreadyProcessed(new UserMessageEntity(new UserMessage(TestData.userMsg3))));
     }
 
     @Test
@@ -162,6 +162,14 @@ public class QueryManagerTest {
         assertEquals(2 , result.size());
     }
 
+    @Test
+    public void getMessageUnitsWithCoreId() throws PersistenceException {
+        IMessageUnitEntity mu = queryManager.getMessageUnitWithCoreId(TestData.userMsg1.getMessageId());
+        
+        assertNotNull(mu);
+        assertEquals(TestData.userMsg1.getPModeId(), mu.getPModeId());
+    }
+    
     @Test
     public void getMessageUnitsForPModesInState() throws PersistenceException {
         Set<String> pmodeIds = new HashSet<>();
@@ -212,7 +220,7 @@ public class QueryManagerTest {
         result = queryManager.getMessageUnitsWithLastStateChangedBefore(daysBack(10));
         assertFalse(Utils.isNullOrEmpty(result));
         assertEquals(1 , result.size());
-        IMessageUnit mu = result.iterator().next();
+        IMessageUnitEntity mu = result.iterator().next();
         assertEquals(TestData.userMsg1.getMessageId(), mu.getMessageId());
 
         // Check boundary case with max allowed time equal to time stamp of state

@@ -17,11 +17,13 @@
 package org.holodeckb2b.persistency.jpa;
 
 import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 
 /**
@@ -77,14 +79,6 @@ public class PullRequest extends MessageUnit implements IPullRequest, Serializab
         this.MPC = mpc;
     }
 
-    /*
-     * Fields
-     *
-     * NOTES:
-     * 1) The JPA @Column annotation is not used so the attribute names are
-     * used as column names. Therefor the attribute names are in CAPITAL.
-     * 2) The primary key field is inherited from super class
-     */
     @Lob
     @Column(length = 1024)
     private String          MPC;

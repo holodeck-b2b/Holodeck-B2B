@@ -23,6 +23,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 
@@ -52,13 +53,13 @@ import org.holodeckb2b.persistency.util.JPAEntityHelper;
  */
 public class QueryManager implements IQueryManager {
 
-    @Override
+	@Override
     public <T extends IMessageUnit, V extends IMessageUnitEntity> List<V> getMessageUnitsInState(
                Class<T> type, Direction direction, ProcessingState[] states) throws PersistenceException {
         List<T> jpaResult = null;
         final EntityManager em = EntityManagerUtil.getEntityManager();
 
-        Class jpaEntityClass = JPAEntityHelper.determineJPAClass(type);
+        Class<T> jpaEntityClass = JPAEntityHelper.determineJPAClass(type);
         final String queryString = "SELECT mu "
                                  + "FROM " + jpaEntityClass.getSimpleName()  + " mu JOIN FETCH mu.states s1 "
                                  + "WHERE mu.DIRECTION = :direction "
@@ -148,7 +149,7 @@ public class QueryManager implements IQueryManager {
         List<T> jpaResult = null;
         final EntityManager em = EntityManagerUtil.getEntityManager();
 
-        Class jpaEntityClass = JPAEntityHelper.determineJPAClass(type);
+        Class<T> jpaEntityClass = JPAEntityHelper.determineJPAClass(type);
         final String queryString = "SELECT mu "
                                  + "FROM " + jpaEntityClass.getSimpleName()  + " mu JOIN FETCH mu.states s1 "
                                  + "WHERE mu.PMODE_ID IN :pmodeIds "
@@ -177,8 +178,12 @@ public class QueryManager implements IQueryManager {
         // Check if already loaded, then nothing to do
         if (messageUnit.isLoadedCompletely())
             return;
+        
+        if (!(messageUnit instanceof MessageUnitEntity<?>))
+        	throw new PersistenceException("Unsupported entity class");
 
-        MessageUnitEntity providerEntityObject = (MessageUnitEntity) messageUnit;
+        @SuppressWarnings("unchecked")
+		MessageUnitEntity<MessageUnit> providerEntityObject = (MessageUnitEntity<MessageUnit>) messageUnit;
         EntityManager em = EntityManagerUtil.getEntityManager();
         try {
             em.getTransaction().begin();
@@ -243,7 +248,7 @@ public class QueryManager implements IQueryManager {
     }
 
     @Override
-    public boolean isAlreadyProcessed(final IUserMessage userMessage) throws PersistenceException {
+    public boolean isAlreadyProcessed(final IUserMessageEntity userMessage) throws PersistenceException {
         boolean result = false;
         final EntityManager em = EntityManagerUtil.getEntityManager();
 
@@ -270,6 +275,32 @@ public class QueryManager implements IQueryManager {
         }
         return result;
     }
+    
+    
+	@Override
+	public IMessageUnitEntity getMessageUnitWithCoreId(String coreId) throws PersistenceException {
+        final EntityManager em = EntityManagerUtil.getEntityManager();
+        
+        StringBuilder queryString = new StringBuilder();
+        queryString.append("SELECT mu ")
+        		   .append("FROM MessageUnit mu ")
+        		   .append("WHERE mu.CORE_ID = :coreId ");
+        try {
+            em.getTransaction().begin();
+            final TypedQuery<MessageUnit> query = em.createQuery(queryString.toString(), MessageUnit.class)
+                                        						.setParameter("coreId", coreId);
+            return JPAEntityHelper.wrapInEntity(query.getSingleResult(), false);
+        } catch (NoResultException | NonUniqueResultException noResult) {
+        	return null;
+        } catch (final Exception e) {
+            // Something went wrong during query execution
+            throw new PersistenceException("Could not execute query \"getMessageUnitsWithCoreId\"", e);
+        } finally {
+            em.getTransaction().commit();
+            em.close();
+        }
+	}    
+    
     
     /**
      * Gets the meta-data of message units which processing started before the given time stamp to the indicated maximum 
@@ -312,5 +343,5 @@ public class QueryManager implements IQueryManager {
         }
 
         return JPAEntityHelper.wrapInEntity(jpaResult);
-    }    
+    }
 }

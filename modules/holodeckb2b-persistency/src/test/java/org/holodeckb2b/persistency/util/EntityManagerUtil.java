@@ -1,5 +1,3 @@
-package org.holodeckb2b.persistency.util;
-
 /**
  * Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
  *
@@ -16,11 +14,13 @@ package org.holodeckb2b.persistency.util;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.holodeckb2b.persistency.util;
 
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
 
 /**

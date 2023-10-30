@@ -19,6 +19,7 @@ package org.holodeckb2b.persistency.jpa;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+
 import javax.persistence.CollectionTable;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
@@ -29,6 +30,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import org.holodeckb2b.common.util.CompareUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.general.IProperty;
@@ -49,6 +52,10 @@ public class Payload implements IPayload, Serializable {
     /*
      * Getters and setters
      */
+	public long getOID() {
+		return OID;
+	}
+	
     @Override
     public Containment getContainment() {
         return CONTAINMENT;
@@ -85,6 +92,13 @@ public class Payload implements IPayload, Serializable {
         if( properties == null)
             properties = new ArrayList<>();
         properties.add(new Property(p));
+    }
+    
+    public void removeProperty(final IProperty p2r) {
+    	if (Utils.isNullOrEmpty(properties))
+    		return;
+    	else
+    		properties.removeIf(p -> CompareUtils.areEqual(p, p2r));
     }
 
     @Override

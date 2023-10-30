@@ -16,12 +16,12 @@
  */
 package org.holodeckb2b.persistency.jpa;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -36,6 +36,7 @@ import javax.persistence.MapKeyColumn;
 import javax.persistence.MapKeyEnumerated;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
@@ -46,15 +47,8 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
  * Is the JPA entity class for storing the meta-data of an ebMS <i>User Message</i> message unit as described by the
- * {@link IUserMessage} interface in Holodeck B2B messaging model.
- * <p>Three queries are defined:
- * <ul><li><i>UserMessage.isDelivered</i> to check whether a User Message is delivered to the <i>Consumer</i>
- *              application, i.e. its current processing state is {@link ProcessingStates#DELIVERED}</li>
- * <li><i>UserMessage.numOfTransmits</i> to retrieve the number of times the message was sent to the receiving MSH, i.e.
- *              the number of times the {@link ProcessingStates#SENDING} occurs as processing state. The result will
- *              also count the attempts that failed on the http level.</li>
- * <li><i>UserMessage.findResponsesTo</i> finds all User Messages that are a response to another User Message, i.e.
- *              which refer to the given message id.</li></ul>
+ * {@link IUserMessage} interface in Holodeck B2B persistency model. The class however does not implement this interface 
+ * as it is not the actual entity provided to the Core.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
@@ -62,14 +56,14 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 @Entity
 @Table(name="USER_MESSAGE")
 @DiscriminatorValue("USERMSG")
-public class UserMessage extends MessageUnit implements IUserMessage, Serializable {
+public class UserMessage extends MessageUnit implements IUserMessage {
+	private static final long serialVersionUID = 2076775451055156430L;
 
-    private enum PartnerType { SENDER, RECEIVER }
+	private enum PartnerType { SENDER, RECEIVER }
 
     /*
      * Getters and setters
      */
-    @Override
     public String getMPC() {
         return MPC;
     }
@@ -78,7 +72,6 @@ public class UserMessage extends MessageUnit implements IUserMessage, Serializab
         MPC = mpc;
     }
 
-    @Override
     public ITradingPartner getSender() {
         return partners.get(PartnerType.SENDER);
     }
@@ -90,7 +83,6 @@ public class UserMessage extends MessageUnit implements IUserMessage, Serializab
             partners.remove(PartnerType.SENDER);
     }
 
-    @Override
     public ITradingPartner getReceiver() {
         return partners.get(PartnerType.RECEIVER);
     }
@@ -102,7 +94,6 @@ public class UserMessage extends MessageUnit implements IUserMessage, Serializab
             partners.remove(PartnerType.RECEIVER);
     }
 
-    @Override
     public ICollaborationInfo getCollaborationInfo() {
         return collaborationInfo;
     }
@@ -111,7 +102,6 @@ public class UserMessage extends MessageUnit implements IUserMessage, Serializab
         this.collaborationInfo = info != null ? new CollaborationInfo(info) : null;
     }
 
-    @Override
     public Collection<IProperty> getMessageProperties() {
         return properties;
     }
@@ -133,8 +123,7 @@ public class UserMessage extends MessageUnit implements IUserMessage, Serializab
         }
     }
 
-    @Override
-    public Collection<IPayload> getPayloads() {
+    public Collection<Payload> getPayloads() {
         return payloads;
     }
 
@@ -143,7 +132,7 @@ public class UserMessage extends MessageUnit implements IUserMessage, Serializab
      *
      * @param payloads  The meta-data on the payloads
      */
-    public void setPayloads(final Collection<IPayload> payloads) {
+    public void setPayloads(final Collection<? extends IPayload> payloads) {
         if (!Utils.isNullOrEmpty(payloads)) {
             this.payloads = new ArrayList<>();
             for (IPayload p : payloads)
@@ -229,8 +218,8 @@ public class UserMessage extends MessageUnit implements IUserMessage, Serializab
      * normally each user message will contain one or more payload with the business data.
      * The ebMS spec however allows for user messages without payloads
      */
-    @OneToMany(targetEntity = Payload.class, cascade = CascadeType.ALL)
-    private List<IPayload>       payloads;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Payload>       payloads;
 
     /*
      * A user message can contain an unlimited number of properties, but they

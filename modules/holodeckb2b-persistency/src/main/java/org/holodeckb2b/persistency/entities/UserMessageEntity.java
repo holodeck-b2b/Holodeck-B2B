@@ -16,12 +16,17 @@
  */
 package org.holodeckb2b.persistency.entities;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
 import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.persistency.entities.IPayloadEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.persistency.jpa.Payload;
 import org.holodeckb2b.persistency.jpa.UserMessage;
 
 /**
@@ -32,6 +37,8 @@ import org.holodeckb2b.persistency.jpa.UserMessage;
  */
 public class UserMessageEntity extends MessageUnitEntity<UserMessage> implements IUserMessageEntity {
 
+	private List<IPayloadEntity>	payloadEntities;
+	
     public UserMessageEntity(UserMessage jpaObject) {
         super(jpaObject);
     }
@@ -62,7 +69,16 @@ public class UserMessageEntity extends MessageUnitEntity<UserMessage> implements
     }
 
     @Override
-    public Collection<IPayload> getPayloads() {
-        return jpaEntityObject.getPayloads();
+    public Collection<IPayloadEntity> getPayloads() {
+        if (!Utils.isNullOrEmpty(payloadEntities))
+        	return payloadEntities;
+        
+        Collection<Payload> pl = jpaEntityObject.getPayloads();
+        payloadEntities = new ArrayList<>(!Utils.isNullOrEmpty(pl) ? pl.size() : 0);
+        if (!Utils.isNullOrEmpty(pl))
+        	pl.forEach(p -> payloadEntities.add(new PayloadEntity(p)));
+        	
+        return payloadEntities;
     }
+    
 }

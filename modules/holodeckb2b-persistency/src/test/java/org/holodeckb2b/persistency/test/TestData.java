@@ -328,19 +328,19 @@ public class TestData {
 
             // Then add the test data
             em.getTransaction().begin();
-            em.persist(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.UserMessage(userMsg1), 11));
-            em.persist(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.Receipt(receipt1), 9));
-            em.persist(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.UserMessage(userMsg2), 8));
-            em.persist(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.Receipt(receipt2), 8));
-            em.persist(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.Receipt(receipt2), 8));
-            em.persist(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.UserMessage(userMsg3), 5));
-            em.persist(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.ErrorMessage(error3), 5));
-            em.persist(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.PullRequest(pull4), 4));
-            em.persist(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.ErrorMessage(error4), 4));
-            em.persist(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.PullRequest(pull5), 3));
-            em.persist(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.UserMessage(userMsg5), 3));
-            em.persist(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.UserMessage(userMsg6), 0));
-            em.persist(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.Receipt(receipt6), 0));
+            em.persist(setCoreId(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.UserMessage(userMsg1), 11)));
+            em.persist(setCoreId(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.Receipt(receipt1), 9)));
+            em.persist(setCoreId(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.UserMessage(userMsg2), 8)));
+            em.persist(setCoreId(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.Receipt(receipt2), 8)));
+            em.persist(setCoreId(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.Receipt(receipt2), 8)));
+            em.persist(setCoreId(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.UserMessage(userMsg3), 5)));
+            em.persist(setCoreId(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.ErrorMessage(error3), 5)));
+            em.persist(setCoreId(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.PullRequest(pull4), 4)));
+            em.persist(setCoreId(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.ErrorMessage(error4), 4)));
+            em.persist(setCoreId(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.PullRequest(pull5), 3)));
+            em.persist(setCoreId(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.UserMessage(userMsg5), 3)));
+            em.persist(setCoreId(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.UserMessage(userMsg6), 0)));
+            em.persist(setCoreId(modifyLastStateChange(new org.holodeckb2b.persistency.jpa.Receipt(receipt6), 0)));
             em.getTransaction().commit();
         } finally {
             if (em != null) em.close();
@@ -362,5 +362,17 @@ public class TestData {
         currentState.setStartTime(stateTime.getTime());
 
         return jpaObject;
+    }
+
+    /**
+     * Helper to set the CoreId of the message unit. For testing this is set to the MessageId, which in this test set
+     * are also unique 
+     *
+     * @param jpaObject     The message unit to change
+     * @return              The modified JPA message unit object
+     */
+    private static MessageUnit setCoreId(MessageUnit jpaObject) {
+    	jpaObject.setCoreId(jpaObject.getMessageId());
+    	return jpaObject;
     }
 }

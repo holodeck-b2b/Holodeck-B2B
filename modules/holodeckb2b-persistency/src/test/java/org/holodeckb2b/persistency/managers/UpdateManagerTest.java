@@ -18,16 +18,14 @@ package org.holodeckb2b.persistency.managers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,26 +33,28 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 
 import org.apache.axis2.AxisFault;
-import org.hibernate.LazyInitializationException;
-import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.Property;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.util.CompareUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
+import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
 import org.holodeckb2b.interfaces.persistency.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 import org.holodeckb2b.persistency.entities.ErrorMessageEntity;
 import org.holodeckb2b.persistency.entities.MessageUnitEntity;
+import org.holodeckb2b.persistency.entities.PayloadEntity;
 import org.holodeckb2b.persistency.entities.PullRequestEntity;
 import org.holodeckb2b.persistency.entities.ReceiptEntity;
 import org.holodeckb2b.persistency.entities.UserMessageEntity;
-import org.holodeckb2b.persistency.jpa.ErrorMessage;
 import org.holodeckb2b.persistency.jpa.MessageUnit;
+import org.holodeckb2b.persistency.jpa.Payload;
 import org.holodeckb2b.persistency.jpa.UserMessage;
 import org.holodeckb2b.persistency.test.TestData;
 import org.holodeckb2b.persistency.test.TestProvider;
@@ -72,23 +72,8 @@ import org.junit.Test;
  * @since  3.0.0
  */
 public class UpdateManagerTest {
-
-    private static final String          T_NEW_PMODE_ID_1 = "PMODE-NEW-01";
-    private static final boolean         T_NEW_MULTI_HOP  = true;
-    private static final ILeg.Label      T_NEW_LEG_LABEL = ILeg.Label.REPLY;
-    private static final String          T_NEW_CONTENT_LOC = "/root/holodeckb2b/test/payload/anotherfile.png";
-    private static final String          T_NEW_PL_PROP_NAME = "MimeType";
-    private static final String          T_NEW_PL_PROP_VALUE = "application/gzip";
-    private static final boolean         T_NEW_SHOULD_HAVE_FAULT = true;
-    private static final ProcessingState T_NEW_PROC_STATE_1 = ProcessingState.PROCESSING;
-    private static final ProcessingState T_NEW_PROC_STATE_2 = ProcessingState.SENDING;
-
     private static UpdateManager   updManager;
-
     private static EntityManager   em;
-
-    public UpdateManagerTest() {
-    }
 
     @BeforeClass
     public static void setUpClass() throws PersistenceException, AxisFault {
@@ -133,13 +118,13 @@ public class UpdateManagerTest {
     }
 
     @Test
-    public void storeUserMessage() throws PersistenceException {
+    public void storeUserMessage() throws PersistenceException, DuplicateMessageIdException {
         // Store a User Message
-        UserMessageEntity userMsg =
-                updManager.storeMessageUnit(new org.holodeckb2b.common.messagemodel.UserMessage(TestData.userMsg1));
+        UserMessageEntity userMsg = updManager.storeMessageUnit(TestData.userMsg1);
 
         assertNotNull(userMsg);
         assertNotNull(userMsg.getOID());
+        assertNotNull(userMsg.getCoreId());
         assertEquals(TestData.userMsg1.getPModeId(), userMsg.getPModeId());
         assertEquals(TestData.userMsg1.getMessageId(), userMsg.getMessageId());
         assertEquals(TestData.userMsg1.getRefToMessageId(), userMsg.getRefToMessageId());
@@ -173,11 +158,10 @@ public class UpdateManagerTest {
     }
 
     @Test
-    public void storeReceipt() throws PersistenceException {
-        ReceiptEntity receiptEntity =
-                updManager.storeMessageUnit(new org.holodeckb2b.common.messagemodel.Receipt(TestData.receipt6));
+    public void storeReceipt() throws PersistenceException, DuplicateMessageIdException {
+        ReceiptEntity receiptEntity = updManager.storeMessageUnit(TestData.receipt6);
         assertNotNull(receiptEntity);
-
+        assertNotNull(receiptEntity.getCoreId());
         assertEquals(TestData.receipt6.getMessageId(), receiptEntity.getMessageId());
         assertEquals(TestData.receipt6.getRefToMessageId(), receiptEntity.getRefToMessageId());
         assertEquals(TestData.receipt6.getTimestamp(), receiptEntity.getTimestamp());
@@ -189,16 +173,20 @@ public class UpdateManagerTest {
     }
 
     @Test
-    public void storePullRequest() throws PersistenceException {
+    public void storePullRequest() throws PersistenceException, DuplicateMessageIdException {
         PullRequestEntity pullEntity = updManager.storeMessageUnit(TestData.pull5);
         assertNotNull(pullEntity);
-
+        assertNotNull(pullEntity.getCoreId());
         assertEquals(TestData.pull5.getMessageId(), pullEntity.getMessageId());
         assertEquals(TestData.pull5.getRefToMessageId(), pullEntity.getRefToMessageId());
         assertEquals(TestData.pull5.getTimestamp(), pullEntity.getTimestamp());
-
-        pullEntity = updManager.storeMessageUnit(TestData.pull6);
+    }
+    
+    @Test
+    public void storeSelectivePullRequest() throws PersistenceException, DuplicateMessageIdException {
+        PullRequestEntity pullEntity = updManager.storeMessageUnit(TestData.pull6);
         assertNotNull(pullEntity);
+        assertNotNull(pullEntity.getCoreId());
         assertTrue(pullEntity instanceof ISelectivePullRequest);
 
         assertEquals(TestData.pull6.getMessageId(), pullEntity.getMessageId());
@@ -231,96 +219,151 @@ public class UpdateManagerTest {
         assertNotNull(((ISelectivePullRequest) pullEntity).getService());
         assertTrue(CompareUtils.areEqual(TestData.pull7.getService(), ((ISelectivePullRequest) pullEntity).getService()));
         assertNull(((ISelectivePullRequest) pullEntity).getAction());
-
-    }
-
-
-
-    @Test
-    public void setProcessingState() throws PersistenceException, InterruptedException {
-        // Add a message unit to the database so we can change it
-        em.getTransaction().begin();
-        UserMessage userMsgJPA = new UserMessage(TestData.userMsg1);
-        em.persist(userMsgJPA);
-        final UserMessageEntity userMsg = new UserMessageEntity(userMsgJPA);
-        em.getTransaction().commit();
-        // Check it accidentially has not already the new value
-        assertNotEquals(T_NEW_PROC_STATE_1, userMsg.getCurrentProcessingState().getState());
-
-        // Update to a new state
-        ProcUpdater updater1 = new ProcUpdater(userMsg,
-                                               userMsg.getCurrentProcessingState().getState(), T_NEW_PROC_STATE_1);
-        new Thread(updater1).start();
-        synchronized(updater1) { updater1.wait(); }
-        // Check the new processing state is set
-        assertTrue(updater1.s);
-        assertEquals(T_NEW_PROC_STATE_1, userMsg.getCurrentProcessingState().getState());
-        assertEquals(2, userMsg.getProcessingStates().size());
-        // And check database
-        em.refresh(userMsgJPA);
-        assertEquals(T_NEW_PROC_STATE_1, userMsgJPA.getCurrentProcessingState().getState());
-        assertEquals(2, userMsgJPA.getProcessingStates().size());
-
-        // Test that update is rejected when not in correct state
-        new Thread(updater1).start();
-        synchronized(updater1) { updater1.wait(); }
-        assertFalse(updater1.s);
-        assertEquals(T_NEW_PROC_STATE_1, userMsg.getCurrentProcessingState().getState());
-        assertEquals(2, userMsg.getProcessingStates().size());
-        // And check database
-        em.refresh(userMsgJPA);
-        assertEquals(T_NEW_PROC_STATE_1, userMsgJPA.getCurrentProcessingState().getState());
-        assertEquals(2, userMsgJPA.getProcessingStates().size());
-
-        // Test parallel update (one should be rejected)
-        updater1 = new ProcUpdater(userMsg, userMsg.getCurrentProcessingState().getState(), T_NEW_PROC_STATE_2);
-        ProcUpdater updater2 = new ProcUpdater(userMsg,
-                                               userMsg.getCurrentProcessingState().getState(), T_NEW_PROC_STATE_2);
-        new Thread(updater1).start();
-        new Thread(updater2).start();
-        synchronized(updater1) { updater1.wait(); }
-        if (updater2.s == null)
-            synchronized(updater2) { updater2.wait(); }
-        // One should have failed!
-        assertFalse(updater1.s && updater2.s);
-        // But stat should have changed
-        assertEquals(T_NEW_PROC_STATE_2, userMsg.getCurrentProcessingState().getState());
-        assertEquals(3, userMsg.getProcessingStates().size());
-        // And check database
-        em.refresh(userMsgJPA);
-        assertEquals(T_NEW_PROC_STATE_2, userMsgJPA.getCurrentProcessingState().getState());
-        assertEquals(3, userMsgJPA.getProcessingStates().size());
     }
 
     @Test
-    public void testStoreMessageUnit1() throws Exception {
-
+    public void storeErrorMessage () throws DuplicateMessageIdException, PersistenceException {
+    	ErrorMessageEntity errEntity = updManager.storeMessageUnit(TestData.error3);    	
+        assertNotNull(errEntity);
+        assertNotNull(errEntity.getCoreId());
+        
+        assertEquals(TestData.error3.getMessageId(), errEntity.getMessageId());
+        assertEquals(TestData.error3.getRefToMessageId(), errEntity.getRefToMessageId());
+        assertEquals(TestData.error3.getTimestamp(), errEntity.getTimestamp());
+        
+        Collection<IEbmsError> errors = TestData.error3.getErrors();
+        Collection<IEbmsError> storedErrors = errEntity.getErrors();
+        
+        assertEquals(errors.size(), storedErrors.size());
+        for(IEbmsError e : errors)
+        	assertTrue(storedErrors.stream().anyMatch(se -> Utils.nullSafeEqual(e.getCategory(), se.getCategory())
+        												 && Utils.nullSafeEqual(e.getErrorCode(), se.getErrorCode())
+        												 && Utils.nullSafeEqual(e.getMessage(), se.getMessage())
+        												 && Utils.nullSafeEqual(e.getErrorDetail(), se.getErrorDetail())
+        												 && Utils.nullSafeEqual(e.getSeverity(), se.getSeverity())        			
+        											 ));        
     }
+    
+    @Test
+    public void testDuplicateMessageId() throws PersistenceException {
+    	UserMessageEntity userMsg = null;
+    	try {
+    		userMsg = updManager.storeMessageUnit(TestData.userMsg1);
+    	} catch (DuplicateMessageIdException duplicateId) {
+    		fail();
+    	}
+    	
+    	org.holodeckb2b.common.messagemodel.UserMessage dup = new org.holodeckb2b.common.messagemodel.UserMessage();
+    	dup.setMessageId(userMsg.getMessageId());
+    	dup.setDirection(Direction.OUT);
+    	
+    	try {
+    		updManager.storeMessageUnit(dup);
+    		fail();
+    	} catch (DuplicateMessageIdException duplicateId) {    		
+    	}    	
+    }
+    
+    @Test
+    public void testUpdateUserMessage() throws DuplicateMessageIdException, PersistenceException {
+    	UserMessageEntity userMsg = updManager.storeMessageUnit(TestData.userMsg1);
 
-    class ProcUpdater implements Runnable {
-        private     MessageUnitEntity   m;
-        private     ProcessingState     c, n;
-
-        Boolean s = null;
-
-        ProcUpdater(final MessageUnitEntity m, final ProcessingState c, final ProcessingState n) {
-            this.m = m;
-            this.c = c;
-            this.n = n;
-        }
-
-        @Override
-        public void run() {
-            try {
-                s = updManager.setProcessingState(m, c, n);
-            } catch (PersistenceException ex) {
-                s = false;
-            }
-            synchronized(this) { notify(); }
-        }
+    	ProcessingState newState = ProcessingState.PROCESSING;
+    	userMsg.setProcessingState(newState, null);
+    	
+    	String relatedId = UUID.randomUUID().toString();
+    	userMsg.addRelatesTo(relatedId);
+    	
+    	boolean multiHop = !userMsg.usesMultiHop();
+    	userMsg.setMultiHop(multiHop);
+    	
+    	try {
+    		updManager.updateMessageUnit(userMsg);
+    	} catch (Exception e) {
+    		fail();
+    	}
+    	assertEquals(newState, userMsg.getCurrentProcessingState().getState());
+    	
+    	assertEquals(multiHop, userMsg.usesMultiHop());
+    	
+    	assertTrue(userMsg.getRelatedTo().contains(relatedId));    	
+    	
+		UserMessage stored = em.find(UserMessage.class, userMsg.getJPAObject().getOID());
+	
+    	assertEquals(newState, stored.getCurrentProcessingState().getState());
+    	
+    	assertEquals(multiHop, stored.usesMultiHop());
+    	
+    	assertTrue(stored.getRelatedTo().contains(relatedId));    	
+    }
+    
+    @Test
+    public void testUpdatePayload() throws DuplicateMessageIdException, PersistenceException {
+    	UserMessageEntity userMsg = updManager.storeMessageUnit(TestData.userMsg1);
+    	
+    	PayloadEntity payload = (PayloadEntity) userMsg.getPayloads().iterator().next();
+    	
+    	String location = UUID.randomUUID().toString();
+    	payload.setContentLocation(location);
+    	
+    	String mt = "application/test";
+    	payload.setMimeType(mt);
+    	
+    	String uri = UUID.randomUUID().toString();
+    	payload.setPayloadURI(uri);
+    	
+    	Property p = new Property("newProp", "newValue");
+    	payload.addProperty(p);
+    	
+    	try {
+    		updManager.updatePayload(payload);
+    	} catch (Exception e) {
+    		fail();
+    	}
+    	assertEquals(location, payload.getContentLocation());
+    	assertEquals(mt, payload.getMimeType());
+    	assertEquals(uri, payload.getPayloadURI());
+    	
+    	assertTrue(payload.getProperties().stream().anyMatch(sp -> CompareUtils.areEqual(p, sp)));
+    	
+    	assertNotNull(payload.getSchemaReference());
+    	
+    	Payload stored = em.find(Payload.class, payload.getJPAObject().getOID());
+    	
+    	assertEquals(location, stored.getContentLocation());
+    	assertEquals(mt, stored.getMimeType());
+    	assertEquals(uri, stored.getPayloadURI());
+    	
+    	assertTrue(stored.getProperties().stream().anyMatch(sp -> CompareUtils.areEqual(p, sp)));
+    	
+    	assertNotNull(stored.getSchemaReference());
     }
 
     @Test
+    public void testKeepCompletelyLoaded() throws DuplicateMessageIdException, PersistenceException {
+    	IUserMessageEntity stored = (IUserMessageEntity) 
+    						HolodeckB2BCoreInterface.getQueryManager()
+    									.getMessageUnitWithCoreId(updManager.storeMessageUnit(TestData.userMsg1)
+    																		.getCoreId());
+    	
+    	HolodeckB2BCoreInterface.getQueryManager().ensureCompletelyLoaded(stored);
+    	
+    	ProcessingState newState = ProcessingState.OUT_FOR_DELIVERY;
+    	
+    	stored.setProcessingState(newState, null);
+    	
+    	updManager.updateMessageUnit(stored);
+    	
+    	assertTrue(stored.isLoadedCompletely());
+    	try {
+    		stored.getPayloads();
+    	} catch (Exception notCompletelyLoaded) {
+    		fail();
+    	}
+    }    
+    
+    @SuppressWarnings("rawtypes")
+	@Test
     public void deleteMessageUnit() throws PersistenceException {
         // First create some records
         TestData.createTestSet();
@@ -344,188 +387,6 @@ public class UpdateManagerTest {
             } catch (EntityNotFoundException removed) {
                 // Okay
             }
-        }
-    }
-
-    @Test
-    public void setPModeId() throws PersistenceException {
-        // Add a message unit to the database so we can change it
-        em.getTransaction().begin();
-        UserMessage userMsgJPA = new UserMessage(TestData.userMsg1);
-        em.persist(userMsgJPA);
-        UserMessageEntity userMsg = new UserMessageEntity(userMsgJPA);
-        em.getTransaction().commit();
-        // Check it accidentially has not already the new value
-        assertNotEquals(T_NEW_PMODE_ID_1, userMsg.getPModeId());
-        // Perform the update
-        updManager.setPModeId(userMsg, T_NEW_PMODE_ID_1);
-        // Check update in entity object
-        assertEquals(T_NEW_PMODE_ID_1, userMsg.getPModeId());
-        // Check that database is updated
-        em.refresh(userMsgJPA);
-        assertEquals(T_NEW_PMODE_ID_1, userMsgJPA.getPModeId());
-    }
-
-    @Test
-    public void setPModeAndLeg() throws PersistenceException {
-        em.getTransaction().begin();
-        ErrorMessage errMsgJPA = new ErrorMessage(TestData.error4);
-        em.persist(errMsgJPA);
-        ErrorMessageEntity errorMsg = new ErrorMessageEntity(errMsgJPA);
-        em.getTransaction().commit();
-        assertNotEquals(T_NEW_PMODE_ID_1, errorMsg.getPModeId());
-
-        updManager.setPModeAndLeg(errorMsg, T_NEW_PMODE_ID_1, ILeg.Label.REPLY);
-
-        assertEquals(T_NEW_PMODE_ID_1, errorMsg.getPModeId());
-        assertEquals(ILeg.Label.REPLY, errorMsg.getLeg());
-
-        // Check that database is updated
-        em.refresh(errMsgJPA);
-        assertEquals(T_NEW_PMODE_ID_1, errMsgJPA.getPModeId());
-        assertEquals(ILeg.Label.REPLY, errMsgJPA.getLeg());
-    	
-    }
-    
-    @Test
-    public void setMultiHop() throws PersistenceException {
-        // Add a message unit to the database so we can change it
-        em.getTransaction().begin();
-        ErrorMessage errorMsgJPA = new ErrorMessage(TestData.error3);
-        em.persist(errorMsgJPA);
-        ErrorMessageEntity errorMsg = new ErrorMessageEntity(errorMsgJPA);
-        em.getTransaction().commit();
-        // Check it accidentially has not already the new value
-        assertNotEquals(T_NEW_MULTI_HOP, errorMsg.usesMultiHop());
-        // Perform the update
-        updManager.setMultiHop(errorMsg, T_NEW_MULTI_HOP);
-        // Check update in entity object
-        assertEquals(T_NEW_MULTI_HOP, errorMsg.usesMultiHop());
-        // Check that database is updated
-        em.refresh(errorMsgJPA);
-        assertEquals(T_NEW_MULTI_HOP, errorMsgJPA.usesMultiHop());
-    }
-
-    @Test
-    public void setPayloadInformation() throws PersistenceException {
-        // Because payload data is lazily loaded, we need to completely load the JPA object using the QueryManager
-        QueryManager    queryManager = new QueryManager();
-
-        // Add a message unit to the database so we can change it
-        em.getTransaction().begin();
-        UserMessage userMsgJPA = new UserMessage(TestData.userMsg5);
-        em.persist(userMsgJPA);
-        UserMessageEntity userMsg = new UserMessageEntity(userMsgJPA);
-        em.getTransaction().commit();
-        // Check it accidentially has not already the new value
-        queryManager.ensureCompletelyLoaded(userMsg);
-        assertTrue(Utils.isNullOrEmpty(userMsg.getPayloads()));
-        // Perform the update
-        Collection<IPayload>    newPayloads = new ArrayList<>();
-        newPayloads.add(TestData.payload2);
-        newPayloads.add(TestData.payload3);
-        updManager.setPayloadInformation(userMsg, newPayloads);
-        // Check update in entity object
-        assertFalse(Utils.isNullOrEmpty(userMsg.getPayloads()));
-        assertEquals(2, userMsg.getPayloads().size());
-        // Check that database is updated
-        em.refresh(userMsgJPA);
-        assertFalse(Utils.isNullOrEmpty(userMsgJPA.getPayloads()));
-        assertEquals(2, userMsgJPA.getPayloads().size());
-
-        // Change one of the payloads in the updated set
-        Iterator<IPayload> it = userMsg.getPayloads().iterator();
-        Payload p1 = new Payload(it.next());
-        p1.addProperty(new Property(T_NEW_PL_PROP_NAME, T_NEW_PL_PROP_VALUE));
-        Payload p2 = new Payload(it.next());
-        p2.setContentLocation(T_NEW_CONTENT_LOC);
-        newPayloads = new ArrayList<>(2);
-        newPayloads.add(p1); newPayloads.add(p2);
-
-        updManager.setPayloadInformation(userMsg, newPayloads);
-        // Check update in entity object
-        assertFalse(Utils.isNullOrEmpty(userMsg.getPayloads()));
-        assertEquals(2, userMsg.getPayloads().size());
-        for (IPayload p : userMsg.getPayloads()) {
-            if (p.getContainment() == p1.getContainment()) {
-                assertFalse(Utils.isNullOrEmpty(p.getProperties()));
-                assertEquals(1, p.getProperties().size());
-                assertTrue(CompareUtils.areEqual(p.getProperties().iterator().next(),
-                                                 p1.getProperties().iterator().next()));
-            } else if (p.getContainment() == p2.getContainment()) {
-                assertTrue(Utils.isNullOrEmpty(p.getProperties()));
-                assertEquals(p2.getContentLocation(), p.getContentLocation());
-            } else
-                fail("unknown payload");
-        }
-        // Check that database is updated
-        em.refresh(userMsgJPA);
-        assertFalse(Utils.isNullOrEmpty(userMsgJPA.getPayloads()));
-        assertEquals(2, userMsgJPA.getPayloads().size());
-        for (IPayload p : userMsgJPA.getPayloads()) {
-            if (p.getContainment() == p1.getContainment()) {
-                assertFalse(Utils.isNullOrEmpty(p.getProperties()));
-                assertEquals(1, p.getProperties().size());
-                assertTrue(CompareUtils.areEqual(p.getProperties().iterator().next(),
-                                                 p1.getProperties().iterator().next()));
-            } else if (p.getContainment() == p2.getContainment()) {
-                assertTrue(Utils.isNullOrEmpty(p.getProperties()));
-                assertEquals(p2.getContentLocation(), p.getContentLocation());
-            } else
-                fail("unknown payload");
-        }
-    }
-
-    @Test
-    public void setAddSOAPFault() throws PersistenceException {
-        // Add a message unit to the database so we can change it
-        em.getTransaction().begin();
-        ErrorMessage errorMsgJPA = new ErrorMessage(TestData.error4);
-        em.persist(errorMsgJPA);
-        ErrorMessageEntity errorMsg = new ErrorMessageEntity(errorMsgJPA);
-        em.getTransaction().commit();
-        // Check it accidentially has not already the new value
-        assertNotEquals(T_NEW_SHOULD_HAVE_FAULT, errorMsg.shouldHaveSOAPFault());
-        // Perform the update
-        updManager.setAddSOAPFault(errorMsg, T_NEW_SHOULD_HAVE_FAULT);
-        // Check update in entity object
-        assertEquals(T_NEW_SHOULD_HAVE_FAULT, errorMsg.shouldHaveSOAPFault());
-        // Check that database is updated
-        em.refresh(errorMsgJPA);
-        assertEquals(T_NEW_SHOULD_HAVE_FAULT, errorMsgJPA.shouldHaveSOAPFault());
-    }
-
-    @Test
-    public void sameLoadedState() throws PersistenceException {
-        // Store a User Message
-        UserMessageEntity userMsg =
-                    updManager.storeMessageUnit(new org.holodeckb2b.common.messagemodel.UserMessage(TestData.userMsg1));
-        assertTrue(userMsg.isLoadedCompletely());
-
-        // Update it and check it is still loaded completely
-        updManager.setProcessingState(userMsg, userMsg.getCurrentProcessingState().getState(), T_NEW_PROC_STATE_1);
-
-        assertEquals(T_NEW_PROC_STATE_1, userMsg.getCurrentProcessingState().getState());
-        assertTrue(userMsg.isLoadedCompletely());
-        assertFalse(Utils.isNullOrEmpty(userMsg.getPayloads()));
-
-        // Also check that when the indicator is not set previously the object does not load on update
-        em.getTransaction().begin();
-        ErrorMessage errorMsgJPA = new ErrorMessage(TestData.error4);
-        em.persist(errorMsgJPA);
-        em.getTransaction().commit();
-        ErrorMessageEntity errorMsg = new ErrorMessageEntity(em.find(ErrorMessage.class, errorMsgJPA.getOID()));
-        assertFalse(errorMsg.isLoadedCompletely());
-
-        // Update it and check it is still not loaded completely
-        updManager.setProcessingState(errorMsg, errorMsg.getCurrentProcessingState().getState(), T_NEW_PROC_STATE_2);
-        assertEquals(T_NEW_PROC_STATE_2, errorMsg.getCurrentProcessingState().getState());
-        assertFalse(errorMsg.isLoadedCompletely());
-        try {
-            Utils.isNullOrEmpty(errorMsg.getErrors());
-            fail();
-        } catch (LazyInitializationException notLoaded) {
-            // This is expected!
         }
     }
 }

@@ -19,9 +19,12 @@ package org.holodeckb2b.persistency.jpa;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -39,12 +42,13 @@ import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.pmode.ILeg.Label;
+import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 
 /**
  * Is the JPA persistency class to store the generic information that applies to all ebMS message unit types as
- * described by the {@link IMessageUnit} interface in the Holodeck B2B messaging model.
+ * described by the {@link IMessageUnitEntity} interface in the Holodeck B2B persistency model. The class however does 
+ * not implement this interface as it is not the actual entity provided to the Core.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
@@ -53,16 +57,33 @@ import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 @Table(name = "MSG_UNIT")
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class MessageUnit implements IMessageUnit, Serializable {
+	private static final long serialVersionUID = 7831718632775664604L;
 
     /*
      * Getters and setters
      */
-
-    public long getOID() {
+	public long getOID() {
         return OID;
     }
+    	
+    public String getCoreId() {
+    	return CORE_ID;
+    }
+    
+    public void setCoreId(String coreId) {
+    	CORE_ID = coreId;
+    }
 
-    @Override
+	public Set<String> getRelatedTo() {
+		return relatesTo;
+	}
+
+	public void addRelatesTo(String coreId) {
+		if (relatesTo == null)
+			relatesTo = new HashSet<>();
+		relatesTo.add(coreId);
+	}
+
     public Direction getDirection() {
         return DIRECTION;
     }
@@ -71,7 +92,6 @@ public abstract class MessageUnit implements IMessageUnit, Serializable {
         DIRECTION = direction;
     }
 
-    @Override
     public Date getTimestamp() {
         return MU_TIMESTAMP;
     }
@@ -80,7 +100,6 @@ public abstract class MessageUnit implements IMessageUnit, Serializable {
         MU_TIMESTAMP = timestamp;
     }
 
-    @Override
     public String getMessageId() {
         return MESSAGE_ID;
     }
@@ -89,7 +108,6 @@ public abstract class MessageUnit implements IMessageUnit, Serializable {
         MESSAGE_ID = messageId;
     }
 
-    @Override
     public String getRefToMessageId() {
         return REF_TO_MSG_ID;
     }
@@ -98,12 +116,10 @@ public abstract class MessageUnit implements IMessageUnit, Serializable {
         REF_TO_MSG_ID = refToMsgId;
     }
 
-    @Override
     public List<IMessageUnitProcessingState> getProcessingStates() {
         return states;
     }
 
-    @Override
     public IMessageUnitProcessingState getCurrentProcessingState() {
         return Utils.isNullOrEmpty(states) ? null : states.get(states.size() - 1);
     }
@@ -118,7 +134,6 @@ public abstract class MessageUnit implements IMessageUnit, Serializable {
         states.add(newState);
     }
 
-    @Override
     public String getPModeId() {
         return PMODE_ID;
     }
@@ -184,13 +199,13 @@ public abstract class MessageUnit implements IMessageUnit, Serializable {
     @Version
     private long    VERSION;
 
+    private String	CORE_ID;
+    
     private String  MESSAGE_ID;
 
     private String  REF_TO_MSG_ID;
 
     private String  PMODE_ID;
-
-    private Label   LEG_LABEL;
 
     private Direction   DIRECTION;
 
@@ -206,4 +221,8 @@ public abstract class MessageUnit implements IMessageUnit, Serializable {
                 cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("PROC_STATE_NUM")
     private List<IMessageUnitProcessingState>       states;
+
+    @ElementCollection
+    private Set<String>	relatesTo;
+    
 }

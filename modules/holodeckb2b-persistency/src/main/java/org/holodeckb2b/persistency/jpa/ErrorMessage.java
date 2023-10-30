@@ -16,10 +16,10 @@
  */
 package org.holodeckb2b.persistency.jpa;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import javax.persistence.CollectionTable;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.ElementCollection;
@@ -27,17 +27,17 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
+
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 
 /**
  * Is the JPA entity class for storing the meta-data of an ebMS <b>Error Signal</b> message unit as described by the
- * {@link IErrorMessage} interface in the Holodeck B2B messaging model.
- * <p>One query is defined:<ul>
- * <li><i>ErrorMessage.findResponsesTo</i> finds all Error Signals that are a response to another message unit, i.e.
- *              which refer to the given message id.</li></ul>
+ * {@link IErrorMessageEntity} interface in the Holodeck B2B persistency model. The class however does not implement 
+ * this interface as it is not the actual entity provided to the Core.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
@@ -45,9 +45,9 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
 @Entity
 @Table(name="ERROR_MESSAGE")
 @DiscriminatorValue("ERRORMSG")
-public class ErrorMessage extends MessageUnit implements IErrorMessage, Serializable {
+public class ErrorMessage extends MessageUnit implements IErrorMessage {
+    private static final long serialVersionUID = 130225048931288817L;
 
-    @Override
     public Collection<IEbmsError> getErrors() {
         return errors;
     }

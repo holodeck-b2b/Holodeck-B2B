@@ -16,11 +16,11 @@
  */
 package org.holodeckb2b.persistency.jpa;
 
-import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -29,21 +29,21 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 
 /**
  * Is the JPA entity class for storing the meta-data of an ebMS <b>Receipt Signal</b> message unit as described by the
- * {@link IReceipt} interface in the Holodeck B2B messaging model.
+ * {@link IReceiptEntity} interface in the Holodeck B2B persistency model. The class however does not
+ * implement this interface as it is not the actual entity provided to the Core.
  * <p>As the actual XML elements that form the Receipt's content are unknown (because not spec'd) all are wrapped in a
  * container element and converted to a String. The maximum length of the String is set to 65535 characters.
- * <p>This class also defines one query:<ul>
- * <li><i>Receipt.findResponsesTo</i> finds all Receipt Signals that are a response to another message unit, i.e.
- *              which refer to the given message id.</li></ul>
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
@@ -51,9 +51,10 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 @Entity
 @Table(name="RECEIPT")
 @DiscriminatorValue("RECEIPT")
-public class Receipt extends MessageUnit implements IReceipt, Serializable {
+public class Receipt extends MessageUnit implements IReceipt {
+    private static final long serialVersionUID = -1475865816627014255L;
 
-    /**
+	/**
      * The XML content from the receipt is wrapped in a single XML element for easy serialization and deserialization.
      * This constant defines the used container element name.
      */
@@ -125,15 +126,6 @@ public class Receipt extends MessageUnit implements IReceipt, Serializable {
         else
             setContent(source.getContent());
     }
-
-    /*
-     * Fields
-     *
-     * NOTES:
-     * 1) The JPA @Column annotation is not used so the attribute names are
-     * used as column names. Therefor the attribute names are in CAPITAL.
-     * 2) The primary key field is inherited from super class
-     */
 
     /*
      * The authentication info is saved by serializing the <code>IAuthenticationInfo</code>

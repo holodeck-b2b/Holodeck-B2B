@@ -18,11 +18,27 @@ package org.holodeckb2b.persistency.util;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.holodeckb2b.commons.util.Utils;
-import org.holodeckb2b.interfaces.messagemodel.*;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.persistency.entities.*;
-import org.holodeckb2b.persistency.jpa.*;
+import org.holodeckb2b.persistency.entities.ErrorMessageEntity;
+import org.holodeckb2b.persistency.entities.MessageUnitEntity;
+import org.holodeckb2b.persistency.entities.PullRequestEntity;
+import org.holodeckb2b.persistency.entities.ReceiptEntity;
+import org.holodeckb2b.persistency.entities.SelectivePullRequestEntity;
+import org.holodeckb2b.persistency.entities.UserMessageEntity;
+import org.holodeckb2b.persistency.jpa.ErrorMessage;
+import org.holodeckb2b.persistency.jpa.MessageUnit;
+import org.holodeckb2b.persistency.jpa.PullRequest;
+import org.holodeckb2b.persistency.jpa.Receipt;
+import org.holodeckb2b.persistency.jpa.SelectivePullRequest;
+import org.holodeckb2b.persistency.jpa.UserMessage;
 
 /**
  * Is a helper class that provides some utility methods to handle the JPA entity objects.
@@ -30,6 +46,7 @@ import org.holodeckb2b.persistency.jpa.*;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class JPAEntityHelper {
 
 
@@ -41,7 +58,7 @@ public class JPAEntityHelper {
      * @param completelyLoaded  Indicator whether all data of the message unit has been loaded
      * @return                  The given JPA entity object wrapped in the correct entity object.
      */
-    public static <V extends IMessageUnitEntity> V wrapInEntity(MessageUnit jpaObject, boolean completelyLoaded) {
+	public static <V extends IMessageUnitEntity> V wrapInEntity(MessageUnit jpaObject, boolean completelyLoaded) {
         if (jpaObject == null)
             return null;
 
@@ -72,7 +89,7 @@ public class JPAEntityHelper {
      * @param jpaObjects    The list of JPA entity objects
      * @return              List with all JPA entity objects from the given list wrapped in the correct entity object.
      */
-    public static <T extends IMessageUnit, V extends IMessageUnitEntity> List<V> wrapInEntity(List<T> jpaObjects) {
+	public static <T extends IMessageUnit, V extends IMessageUnitEntity> List<V> wrapInEntity(List<T> jpaObjects) {
         List<V> result = new ArrayList(!Utils.isNullOrEmpty(jpaObjects) ? jpaObjects.size() : 0);
         if (jpaObjects != null)
 	        for(T jpaObject : jpaObjects)
@@ -88,8 +105,8 @@ public class JPAEntityHelper {
      * @param msgUnit   The message unit type represented by a class descending from {@link IMessageUnit}
      * @return          The JPA class that corresponds to the given message unit type
      */
-    public static <T extends IMessageUnit> Class determineJPAClass(T msgUnit) {
-        return determineJPAClass(msgUnit.getClass());
+    public static <T extends IMessageUnit> Class<T> determineJPAClass(T msgUnit) {
+        return (Class<T>) determineJPAClass(msgUnit.getClass());
     }
 
     /**
@@ -99,7 +116,7 @@ public class JPAEntityHelper {
      * @param msgUnitType   The message unit type represented by a class descending from {@link IMessageUnit}
      * @return              The JPA class that corresponds to the given message unit type
      */
-    public static <T extends IMessageUnit> Class determineJPAClass(Class<T> msgUnitType) {
+    public static <T extends IMessageUnit> Class<T> determineJPAClass(Class<T> msgUnitType) {
         Class  jpaEntityClass = null;
         if (IUserMessage.class.isAssignableFrom(msgUnitType))
             jpaEntityClass = UserMessage.class;

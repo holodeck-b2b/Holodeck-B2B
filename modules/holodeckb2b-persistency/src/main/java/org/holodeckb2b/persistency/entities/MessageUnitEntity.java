@@ -18,10 +18,13 @@ package org.holodeckb2b.persistency.entities;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
+import org.holodeckb2b.common.messagemodel.MessageProcessingState;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.persistency.jpa.MessageUnit;
 import org.holodeckb2b.persistency.managers.QueryManager;
 
@@ -53,10 +56,49 @@ public abstract class MessageUnitEntity<T extends MessageUnit> implements IMessa
      *
      * @param jpaObject     The JPA entity object to create a proxy for
      */
-    public MessageUnitEntity(final T jpaObject) {
+    protected MessageUnitEntity(final T jpaObject) {
         this.jpaEntityObject = jpaObject;
     }
 
+    /**
+     * @return	the proxied JPA object
+     */
+    public T getJPAObject() {
+    	return jpaEntityObject;
+    }
+    
+    /**
+     * Updates the JPA object that is being proxied.
+     *
+     * @param jpaObject
+     */
+    public void updateJPAObject(final T jpaObject) {
+        this.jpaEntityObject = jpaObject;
+    }
+    
+    /**
+     * Indicates whether all meta-data of the Message Unit has been loaded from the database.
+     *
+     * @return <code>true</code> if all meta-data on the User Message has been loaded, <code>false</code> otherwise
+     */
+    @Override
+    public boolean isLoadedCompletely() {
+        return allMetadataLoaded;
+    }
+
+    /**
+     * Sets the indication whether all meta-data of the Message Unit has been loaded.
+     * <p>NOTE: This message should only be called by {@link QueryManager#ensureCompletelyLoaded(IMessageUnitEntity)}.
+     *
+     * @param allLoaded Indicator if User Message has been completely loaded
+     */
+    public void setMetadataLoaded(final boolean allLoaded) {
+        this.allMetadataLoaded = allLoaded;
+    }
+
+    /*
+     * Proxied methods
+     */
     /**
      * Gets the OID of the JPA object that is being proxied. This OID is needed to retrieve the actual meta-data from
      * the database.
@@ -67,14 +109,6 @@ public abstract class MessageUnitEntity<T extends MessageUnit> implements IMessa
         return jpaEntityObject.getOID();
     }
 
-    /**
-     * Updates the JPA object that is being proxied.
-     *
-     * @param jpaObject
-     */
-    public void updateJPAObject(final T jpaObject) {
-        this.jpaEntityObject = jpaObject;
-    }
 
     @Override
     public boolean usesMultiHop() {
@@ -105,7 +139,7 @@ public abstract class MessageUnitEntity<T extends MessageUnit> implements IMessa
     public String getPModeId() {
         return jpaEntityObject.getPModeId();
     }
-
+    
     @Override
     public List<IMessageUnitProcessingState> getProcessingStates() {
         return jpaEntityObject.getProcessingStates();
@@ -116,23 +150,33 @@ public abstract class MessageUnitEntity<T extends MessageUnit> implements IMessa
         return jpaEntityObject.getCurrentProcessingState();
     }
 
-    /**
-     * Indicates whether all meta-data of the Message Unit has been loaded from the database.
-     *
-     * @return <code>true</code> if all meta-data on the User Message has been loaded, <code>false</code> otherwise
-     */
-    @Override
-    public boolean isLoadedCompletely() {
-        return allMetadataLoaded;
-    }
+	@Override
+	public String getCoreId() {
+		return jpaEntityObject.getCoreId();
+	}
+	
+	@Override
+	public Set<String> getRelatedTo() {
+		return jpaEntityObject.getRelatedTo();
+	}
+	
+	@Override
+	public void setPModeId(String pmodeId) {
+		jpaEntityObject.setPModeId(pmodeId);
+	}
 
-    /**
-     * Sets the indication whether all meta-data of the Message Unit has been loaded.
-     * <p>NOTE: This message should only be called by {@link QueryManager#ensureCompletelyLoaded(IMessageUnitEntity)}.
-     *
-     * @param allLoaded Indicator if User Message has been completely loaded
-     */
-    public void setMetadataLoaded(final boolean allLoaded) {
-        this.allMetadataLoaded = allLoaded;
-    }
+	@Override
+	public void addRelatesTo(String coreId) {
+		jpaEntityObject.addRelatesTo(coreId);
+	}
+
+	@Override
+	public void setMultiHop(boolean usingMultiHop) {
+		jpaEntityObject.setMultiHop(usingMultiHop);		
+	}
+
+	@Override
+	public void setProcessingState(ProcessingState newState, String description) {
+		jpaEntityObject.setProcessingState(new MessageProcessingState(newState, description));
+	}
 }

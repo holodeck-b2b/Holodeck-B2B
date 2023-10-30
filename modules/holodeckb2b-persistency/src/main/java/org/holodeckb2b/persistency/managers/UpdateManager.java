@@ -17,34 +17,27 @@
 package org.holodeckb2b.persistency.managers;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.persistence.LockModeType;
 import javax.persistence.OptimisticLockException;
-import javax.persistence.RollbackException;
 
-import org.holodeckb2b.common.messagemodel.MessageProcessingState;
 import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.persistency.AlreadyChangedException;
 import org.holodeckb2b.interfaces.persistency.IUpdateManager;
 import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.persistency.entities.IPayloadEntity;
+import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 import org.holodeckb2b.persistency.entities.MessageUnitEntity;
-import org.holodeckb2b.persistency.jpa.ErrorMessage;
+import org.holodeckb2b.persistency.entities.PayloadEntity;
 import org.holodeckb2b.persistency.jpa.MessageUnit;
-import org.holodeckb2b.persistency.jpa.MessageUnitProcessingState;
-import org.holodeckb2b.persistency.jpa.UserMessage;
+import org.holodeckb2b.persistency.jpa.Payload;
 import org.holodeckb2b.persistency.util.EntityManagerUtil;
 import org.holodeckb2b.persistency.util.JPAEntityHelper;
 
@@ -58,35 +51,30 @@ public class UpdateManager implements IUpdateManager {
 
     @Override
     public <T extends IMessageUnit, V extends IMessageUnitEntity> V storeMessageUnit(final T messageUnit)
-                                                                                        throws PersistenceException {
+                                                            throws DuplicateMessageIdException, PersistenceException {
         // If this is an outgoing message check its messageId is unique
     	if (messageUnit.getDirection() == Direction.OUT 
     		&& !Utils.isNullOrEmpty(HolodeckB2BCoreInterface.getQueryManager()
     											.getMessageUnitsWithId(messageUnit.getMessageId(), Direction.OUT)))
-    		throw new PersistenceException("The messageId of the message unit (" + messageUnit.getMessageId() 
-    										+ ") already exists!");
+    		throw new DuplicateMessageIdException(messageUnit.getMessageId());
     	
     	EntityManager em = null;
         MessageUnit jpaMsgUnit = null;
         EntityTransaction tx = null;                
         try {
             // Determine which JPA class should be created to store the meta-data
-            Class jpaEntityClass = JPAEntityHelper.determineJPAClass(messageUnit);
-            Constructor cons = jpaEntityClass.getConstructor(MessageUnitUtils.getMessageUnitType(messageUnit));
+            Class<T> jpaEntityClass = JPAEntityHelper.determineJPAClass(messageUnit);
+            Constructor<T> cons = jpaEntityClass.getConstructor(MessageUnitUtils.getMessageUnitType(messageUnit));
             jpaMsgUnit = (MessageUnit) cons.newInstance(messageUnit);
-
+            jpaMsgUnit.setCoreId(UUID.randomUUID().toString());
             em = EntityManagerUtil.getEntityManager();
             tx = em.getTransaction();
             tx.begin();
             em.persist(jpaMsgUnit);
             tx.commit();
-        } catch (NoSuchMethodException | SecurityException | InstantiationException
-                | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-        	
-        		if (tx!=null && tx.isActive()) {
-        			tx.rollback();
-        		}
-            // Could not create a JPA entity object for the given message unit
+        } catch (Exception ex) {
+    		if (tx != null && tx.isActive())
+    			tx.rollback();    	
             throw new PersistenceException("An error occurred while saving the message unit's meta-data!", ex);
         } finally {
             if (em != null && em.isOpen())
@@ -97,62 +85,66 @@ public class UpdateManager implements IUpdateManager {
     }
 
     @Override
-    public boolean setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState currentProcState,
-                                      final ProcessingState newProcState) throws PersistenceException {
-    	return this.setProcessingState(msgUnit, currentProcState, newProcState, null);
-    }
-    
-    @Override
-    public boolean setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState currentProcState,
-                                      final ProcessingState newProcState, final String description) 
-                                    		  											  throws PersistenceException {
+    public void updateMessageUnit(IMessageUnitEntity messageUnit) throws AlreadyChangedException, PersistenceException {
+    	if (!(messageUnit instanceof MessageUnitEntity<?>))
+    		throw new PersistenceException("Unsuported entity class");
+    	
+    	@SuppressWarnings("unchecked")
+		MessageUnitEntity<MessageUnit> entityObj = (MessageUnitEntity<MessageUnit>) messageUnit;		
     	EntityManager em = null;
-        EntityTransaction tx = null;
-        try {
-        	em = EntityManagerUtil.getEntityManager();
-        	tx = em.getTransaction();
-            tx.begin();
-            // Reload the entity object from the database so we've actual data and a managed JPA object ready for change
-            MessageUnit jpaMsgUnit = em.find(MessageUnit.class, ((MessageUnitEntity) msgUnit).getOID(),
-                                             LockModeType.OPTIMISTIC_FORCE_INCREMENT);
-            // Check that the current state equals the required state
-            MessageUnitProcessingState currentState = (MessageUnitProcessingState)
-                                                                                jpaMsgUnit.getCurrentProcessingState();
-            if (currentProcState != null && currentState.getState() != currentProcState) {
-                // Not in the required state, stop execution
-                em.getTransaction().rollback();
-                return false;
-            }
-            // Current state is as requested, update to new state
-            jpaMsgUnit.setProcessingState(new MessageProcessingState(newProcState, description));
-            // Save to database, the flush is used to trigger possible an optimistic lock exception
-            em.flush();
-            tx.commit();
-            
-            // Ensure that the object stays completely loaded if it was already so previously
-            if (msgUnit.isLoadedCompletely()) {
-            	tx.begin();
-                QueryManager.loadCompletely(jpaMsgUnit);
-                tx.commit();
-            }
-            // Update the entity object
-            ((MessageUnitEntity) msgUnit).updateJPAObject(jpaMsgUnit);
-            return true;
-        } catch (final OptimisticLockException | RollbackException alreadyChanged) {
-            // During transaction the message unit was already updated, so state can not be changed.
-            // Rollback and return false
-	        	if (tx!=null && tx.isActive()) {
-	    			tx.rollback();
-	    		}
-            return false;
-        } catch (final Exception e) {
-            // Another error occurred when updating the processing state. Rollback and rethrow as DatabaseException
-            em.getTransaction().rollback();
-            throw new PersistenceException("An error occurred while updating the processing state!", e);
-        }finally {
-            em.close();
-        }
-    }
+		EntityTransaction tx = null;
+		try {
+			em = EntityManagerUtil.getEntityManager();
+			tx = em.getTransaction();
+			tx.begin();
+			MessageUnit updated = em.merge(entityObj.getJPAObject());
+			// Flushing will trigger the OptimisticLockException
+			em.flush();
+			entityObj.updateJPAObject(updated);
+		} catch (OptimisticLockException alreadyChanged) {
+			em.refresh(entityObj.getJPAObject());
+			tx.setRollbackOnly();			
+			throw new AlreadyChangedException();			
+		} catch (Exception updateFailure) {
+			tx.setRollbackOnly();
+			throw new PersistenceException("Failure updating message unit meta-data", updateFailure);			
+		} finally {
+			// Ensure that the object stays completely loaded if it was already so previously
+			if (messageUnit.isLoadedCompletely())
+				QueryManager.loadCompletely(entityObj.getJPAObject());			
+			if (tx != null && tx.isActive() && tx.getRollbackOnly())
+				tx.rollback();
+			else if (tx != null && tx.isActive())
+				tx.commit();		
+			if (em != null && em.isOpen())
+				em.close();
+		}
+    }    
+
+    @Override
+    public void updatePayload(IPayloadEntity payload) throws PersistenceException {
+    	if (!(payload instanceof PayloadEntity))
+    		throw new PersistenceException("Unsuported entity class");
+    	
+    	PayloadEntity entityObj = (PayloadEntity) payload;		
+    	EntityManager em = null;
+		EntityTransaction tx = null;
+		try {
+			em = EntityManagerUtil.getEntityManager();
+			tx = em.getTransaction();
+			tx.begin();
+			Payload updated = em.merge(entityObj.getJPAObject());
+			tx.commit();		
+			entityObj.updateJPAObject(updated);
+		} catch (Exception updateFailure) {
+			if (tx != null && tx.isActive())
+				tx.rollback();
+			throw new PersistenceException("Failure updating payload meta-data", updateFailure);			
+		} finally {
+			if (em != null && em.isOpen())
+				em.close();
+		}
+    }    
 
     @Override
     public void deleteMessageUnit(final IMessageUnitEntity messageUnit) throws PersistenceException {
@@ -163,7 +155,7 @@ public class UpdateManager implements IUpdateManager {
         		tx = em.getTransaction();
             tx.begin();
             // Reload the entity object from the database so we've actual data and a managed JPA object ready for change
-            MessageUnit jpaMsgUnit = em.find(MessageUnit.class, ((MessageUnitEntity) messageUnit).getOID());
+            MessageUnit jpaMsgUnit = em.find(MessageUnit.class, ((MessageUnitEntity<?>) messageUnit).getOID());
             em.remove(jpaMsgUnit);
             tx.commit();
         } catch (final Exception e) {
@@ -175,74 +167,5 @@ public class UpdateManager implements IUpdateManager {
         }finally {
             em.close();
         }
-    }
-
-    private void performUpdate(final MessageUnitEntity msgUnitEntity, final UpdateCallback update)
-                                                                                          throws PersistenceException {
-        EntityManager em = null;
-        EntityTransaction tx = null;
-        try {
-    		em = EntityManagerUtil.getEntityManager();
-    		tx = em.getTransaction();
-            tx.begin();
-            // Reload the entity object from the database so we've actual data and a managed JPA object ready for change
-            MessageUnit jpaMsgUnit = em.find(MessageUnit.class, msgUnitEntity.getOID());
-            update.perform(jpaMsgUnit);
-            // Ensure that the object stays completely loaded if it was already so previously
-            if (msgUnitEntity.isLoadedCompletely())
-                QueryManager.loadCompletely(jpaMsgUnit);
-            tx.commit();
-            msgUnitEntity.updateJPAObject(jpaMsgUnit);
-        } catch (final Exception e) {
-            // Something went wrong while executing the update, rollback the transaction (if active) and throw exception
-	        	if (tx!=null && tx.isActive()) {
-	    			tx.rollback();
-	    		}
-            throw new PersistenceException("An error occurred in the update of the message unit meta-data!", e);
-        }finally {
-            em.close();
-        }
-    }
-
-    @Override
-    public void setPModeId(final IMessageUnitEntity msgUnit, final String pmodeId) throws PersistenceException {
-        performUpdate((MessageUnitEntity) msgUnit, (MessageUnit jpaObject) -> {
-            jpaObject.setPModeId(pmodeId);
-        });
-    }
-    
-	@Override
-	public void setPModeAndLeg(final IErrorMessageEntity errorMessage, final String pmode, final ILeg.Label leg) 
-    																					throws PersistenceException {
-		performUpdate((MessageUnitEntity) errorMessage, jpaObject -> { 
-														jpaObject.setPModeId(pmode); 
-														((ErrorMessage) jpaObject).setLegLabel(leg); });
-	}
-
-    @Override
-    public void setMultiHop(final IMessageUnitEntity msgUnit, final boolean isMultihop) throws PersistenceException {
-        performUpdate((MessageUnitEntity) msgUnit, (MessageUnit jpaObject) -> {
-            jpaObject.setMultiHop(isMultihop);
-        });
-    }
-
-    @Override
-    public void setPayloadInformation(final IUserMessageEntity userMessage, final Collection<IPayload> payloadInfo)
-                                                                                        throws PersistenceException {
-        performUpdate((MessageUnitEntity) userMessage, (MessageUnit jpaObject) -> {
-            ((UserMessage) jpaObject).setPayloads(payloadInfo);
-        });
-    }
-
-    @Override
-    public void setAddSOAPFault(final IErrorMessageEntity errorMessage, final boolean addSOAPFault)
-                                                                                        throws PersistenceException {
-        performUpdate((MessageUnitEntity) errorMessage, (MessageUnit jpaObject) -> {
-            ((ErrorMessage) jpaObject).setAddSOAPFault(addSOAPFault);
-        });
-    }
-
-    interface UpdateCallback {
-        void perform(final MessageUnit jpaObject);
-    }
+    }  
 }
