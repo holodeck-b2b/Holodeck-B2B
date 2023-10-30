@@ -14,21 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.persistency.entities;
-
-import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+package org.holodeckb2b.interfaces.persistency;
 
 /**
- * Defines the interface of the persistent entity object that is used by the Holodeck B2B to store the Receipt message 
- * unit meta-data.
- * <p>Beside the generic meta-data fields that may be <i>lazily loaded</i> persistency implementations MAY load the
- * information on the <b>receipt content <i>lazily</i></b>, i.e. before  calling {@link #getContent()} to get this info
- * the {@link #isLoadedCompletely()} should be executed to check if all  information is loaded.
+ * Indicates that there was an update of the meta-data failed because more up to date data was found in the database.  
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since  3.0.0
- * @see   IMessageUnitEntity
+ * @since  7.0.0
  */
-public interface IReceiptEntity extends IMessageUnitEntity, IReceipt {
-
+public class AlreadyChangedException extends PersistenceException {
+	private static final long serialVersionUID = 5309676598979015162L;
 }

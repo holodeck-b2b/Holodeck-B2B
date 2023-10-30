@@ -19,8 +19,8 @@ package org.holodeckb2b.interfaces.persistency.entities;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 
 /**
- * This interface is used to indicate that the <i>Pull Request Signal</i> message unit meta-data is stored by the
- * persistency layer.
+ * Defines the interface of the persistent entity object that is used by the Holodeck B2B to store the Pull Request 
+ * message unit meta-data.
  * <p>Beside the generic meta-data fields that may be <i>lazily loaded</i> there are no fields specific to the pull
  * request signal that can be <i>lazily loaded</i>.
  *

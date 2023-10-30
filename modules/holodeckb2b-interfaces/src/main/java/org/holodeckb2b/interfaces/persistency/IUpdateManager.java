@@ -16,19 +16,14 @@
  */
 package org.holodeckb2b.interfaces.persistency;
 
-import java.util.Collection;
-
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.persistency.entities.IPayloadEntity;
+import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 
 /**
- * Defines the interface for the <i>data access object</i> that is responsible for executing the functions that write
- * message unit meta-data to storage, like creating the stored object and setting the processing state.
+ * Defines the interface for the data management component of the <i>Persistency Provider</i> that is responsible for 
+ * executing the functions that modify the persisted message unit meta-data.
  * <p>Implementations must ensure that all methods are thread-safe and the necessary locking is implemented both in the
  * Java code as well as in the database operations.<br>
  * Also implementations must take into account the "<i>completely loaded</i>" state of the message unit entity when
@@ -37,116 +32,52 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
+ * @since  7.0.0  The methods for updating specific meta-data attributes have been replaced by more generic create, 
+ * 				  update and delete methods. 
  */
 public interface IUpdateManager {
 
     /**
-     * Creates a new persistency object to store the meta-data of the given message unit.
+     * Stores the meta-data of the given message unit in database and returns a new entity object representing the saved
+     * message unit. The new entity object must have been assigned a unique <i>CoreId</i>.
      *
      * @param <T>           Limits the <code>messageUnit</code> to message units types
-     * @param <V>           Only entity objects will be returned, V and T will be of the same message type
+     * @param <E>           Only entity objects will be returned, V and T will be of the same message type
      * @param messageUnit   The meta-data on message unit that should be stored in the new persistent object
      * @return              The created persistency object.
-     * @throws PersistenceException   If an error occurs when saving the new message unit to the database or when the
-     * 								  messageId of the <b>outgoing</b> message unit already exists.  
+     * @throws DuplicateMessageIdException When the MessageId of the <b>outgoing</b> message unit already exists.  
+     * @throws PersistenceException   If an error occurs when saving the new message unit to the database
      */
-    <T extends IMessageUnit, V extends IMessageUnitEntity> V storeMessageUnit(final T messageUnit)
-                                                                                            throws PersistenceException;
-
-    /**
-     * Sets the ID of the P-Mode that defines how the message unit should be processed.
-     *
-     * @param msgUnit   The entity object representing the message unit
-     * @param pmodeId   The ID of the P-Mode that defines how the message unit must be processed
-     * @throws PersistenceException If an error occurs when saving the P-Mode ID to the database
-     */
-    void setPModeId(final IMessageUnitEntity msgUnit, final String pmodeId) throws PersistenceException;
-
-    /**
-     * Updates the processing state of the given message unit to the specified state.
-     * <p>If a current processing state is provided this method checks that the message unit is currently in this state
-     * before changing to the new state. The check and change need to be executed in one transaction to ensure that no
-     * other thread can make changes to the message unit's processing state.<br>
-     * The new processing state's start time will be set to the current time.
-     *
-     * @param msgUnit           The entity object representing the message unit
-     * @param currentProcState  The required current processing state of the message unit or<br>
-     *                          <code>null</code> if the state should always be changed regardless of current state
-     * @param newProcState      The new processing state
-     * @return                  <code>true</code> if the processing state was changed,<br>
-     *                          <code>false</code> if not because the current processing state has already changed
-     * @throws PersistenceException When a problem occurs updating the processing state of the message unit
-     */
-    boolean setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState currentProcState
-                                                               , final ProcessingState newProcState)
-                                                                                        throws PersistenceException;
+    <T extends IMessageUnit, E extends IMessageUnitEntity> E storeMessageUnit(final T messageUnit)
+    														throws DuplicateMessageIdException, PersistenceException;
     
     /**
-     * Updates the processing state of the given message unit to the specified state and given description.
-     * <p>If a current processing state is provided this method checks that the message unit is currently in this state
-     * before changing to the new state. The check and change need to be executed in one transaction to ensure that no
-     * other thread can make changes to the message unit's processing state.<br>
-     * The new processing state's start time will be set to the current time.
+     * Saves the updated meta-data of the message unit to the database. If the database already contains newer data the
+     * update must be rejected and the entity object should be "refreshed" with the current data.
+     * <p>
+     * NOTE 1: The meta-data that can be updated is limited to the data for which update methods are specified in the 
+     * entity interfaces. Implementation may use this knowledge to optimise the database updates.<br/>
+     * NOTE 2: This method should not update the meta-data on paylaods contained in a User Message. For updates to 
+     * payload meta-data the Holodeck B2B Core will use {@link #updatePayload(IPayloadEntity)}.  
      *
-     * @param msgUnit           The entity object representing the message unit
-     * @param currentProcState  The required current processing state of the message unit or<br>
-     *                          <code>null</code> if the state should always be changed regardless of current state
-     * @param newProcState      The new processing state
-     * @param description		The additional description for the new processing state
-     * @return                  <code>true</code> if the processing state was changed,<br>
-     *                          <code>false</code> if not because the current processing state has already changed
-     * @throws PersistenceException When a problem occurs updating the processing state of the message unit
-     * @since 4.1.0
+     * @param messageUnit   Entity object containing the updated data that should be saved to storage
+     * @throws AlreadyChangedException When the database contains more up to date data. The meta-data contained in the
+     * 								entity object is updated to the latest meta-data available.
+     * @throws PersistenceException   If some other error occured when saving the updated message unit to the database
      */
-    boolean setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState currentProcState,
-    						   final ProcessingState newProcState, final String description)
-    								   													throws PersistenceException;
+    void updateMessageUnit(final IMessageUnitEntity messageUnit) throws AlreadyChangedException, PersistenceException;
 
     /**
-     * Sets the multi-hop indicator of the message unit.
-     *
-     * @param msgUnit       The entity object representing the message unit which multi-hop indicator should be set
-     * @param isMultihop    The indicator whether this message unit uses multi-hop
-     * @throws PersistenceException When a database error occurs while updating the entity object
+     * Saves the updated meta-data of the payload to the database. If the database already contains newer data the
+     * update must be rejected.
+     * 
+     * @param payload	Entity object containing the updated data that should be saved to storage
+     * @return          Updated entity object
+     * @throws PersistenceException	If an error occurs when saving the updated payload data to the database, for example 
+     * 								when the database contains more up to date meta-data.
      */
-    void setMultiHop(final IMessageUnitEntity msgUnit, final boolean isMultihop) throws PersistenceException;
-
-    /**
-     * Sets the information on the payloads included in the given User Message.
-     * <p>Note that this is really a <b>setter</b> and overwrites any current payload meta-data.
-     *
-     * @param userMessage   The entity object representing the User Message
-     * @param payloadInfo   The meta-data on the payloads included with the User Message which must be persisted
-     * @throws PersistenceException     If an error occurs when saving the payload meta-data to the database
-     */
-    void setPayloadInformation(final IUserMessageEntity userMessage, final Collection<IPayload> payloadInfo)
-                                                                                        throws PersistenceException;
-
-    /**
-     * Sets the indicator on an error message whether a SOAP Fault should be added to the message when sending the
-     * error message.
-     * <p>Note that the decision whether the SOAP Fault will be added to the message is taken when the actual message
-     * is constructed and depends also on the other message units that are included in the same message.
-     *
-     * @param errorMessage      The entity object representing the Error Message
-     * @param addSOAPFault      The indicator whether to add a SOAP fault.
-     * @throws PersistenceException  If an error occurs when updating the indicator
-     */
-    void setAddSOAPFault(final IErrorMessageEntity errorMessage, final boolean addSOAPFault)
-                                                                                        throws PersistenceException;
+    void updatePayload(IPayloadEntity payload) throws PersistenceException;
     
-    /**
-     * Sets the P-Mode.id and [label of] the Leg on which an error message is exchanged.
-     *
-     * @param errorMessage      The entity object representing the Error Message
-     * @param pmode				Id of the P-Mode on which the Error Message is exchanged
-     * @param leg      			Label of the Leg on which the Error Message is exchanged
-     * @throws PersistenceException  If an error occurs when updating the meta-data
-     * @since 6.0.0
-     */
-    void setPModeAndLeg(final IErrorMessageEntity errorMessage, final String pmode, final ILeg.Label leg) 
-    																					throws PersistenceException;
-
     /**
      * Deletes the meta-data of the given message unit from the database.
      *

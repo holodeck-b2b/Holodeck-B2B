@@ -16,14 +16,15 @@
  */
 /**
  * Contains the interface definitions of the "<i>entity objects</i>" used by the Holodeck B2B Core to store information
- * on a message unit to the database. They are an abstraction from, or proxy to, the actual stored object so the
+ * on a message unit in a database. They are an abstraction from, or proxy to, the actual stored object so the
  * persistency provider can easily reload objects from storage without impacting the entity object reference as used by
  * the Core.
- * <p>The entity objects implement the generic message model and also extend the generic message model interfaces. Note
- * that even as they are used to store data there are no <i>setter</i> methods defined in the entity objects. This is
- * because changes to a stored meta-data must be performed through the data access objects so they can manage (and
- * optimize) them.
+ * <p>The entity objects implement the generic message model interface. During the processing of a message unit the 
+ * Holodeck B2B Core will need to update some meta-data, for example the processing state. For these meta-data elements
+ * the generic interfaces have been extended with update methods. Persistency Provider implementations will therefore 
+ * only need to take into account these elements when an entity objects is saved.  
  * 
  * @since  3.0.0
+ * @since  7.0.0 	Added update methods
  */
 package org.holodeckb2b.interfaces.persistency.entities;

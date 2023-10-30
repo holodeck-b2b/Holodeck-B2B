@@ -22,7 +22,10 @@ import org.holodeckb2b.interfaces.config.IConfiguration;
  * Defines the interface of a Holodeck B2B <i>Persistency Provider</i> that allows the Holodeck B2B Core to persist the 
  * meta-data of processed message units. 
  * <p>There can always be just one <i>Persistency Provider</i> active in an Holodeck B2B instance. The implementation to
- * use is loaded using the Java <i>Service Prover Interface</i> mechanism.  
+ * use is loaded using the Java <i>Service Prover Interface</i> mechanism. Therefore the JAR file containing the 
+ * <i>Persistency Provider</i> implementation must contain a 
+ * <code>META-INF/services/org.holodeckb2b.interfaces.persistency.IPersistencyProvider</code> that contains the class
+ * name of the class that implements this interface.  
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0

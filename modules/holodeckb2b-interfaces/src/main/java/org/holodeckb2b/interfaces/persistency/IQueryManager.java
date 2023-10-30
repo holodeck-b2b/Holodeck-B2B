@@ -69,8 +69,8 @@ public interface IQueryManager {
      *
      * @param messageId     The messageId of the message units to retrieve
      * @param direction		The direction in which the message units to retrieve should be.
-     * @return              The list of received {@link IMessageUnitEntity}s with the given message id
-     * @throws PersistenceException If an error occurs when saving the object to the database
+     * @return              The list of {@link IMessageUnitEntity}s with the given message id
+     * @throws PersistenceException If an error occurs retrieving the message units from the database
      */
     Collection<IMessageUnitEntity> getMessageUnitsWithId(final String messageId,
     													 final Direction... direction)
@@ -149,6 +149,21 @@ public interface IQueryManager {
      *                    <br><code>false</code> otherwise.
      * @throws PersistenceException If an error occurs when executing this query
      * @since 4.0.0
+     * @since 7.0.0 The argument type is now the entity class
      */
-    boolean isAlreadyProcessed(final IUserMessage userMessage) throws PersistenceException;
+    boolean isAlreadyProcessed(final IUserMessageEntity userMessage) throws PersistenceException;
+    
+    /**
+     * Retrieves the message unit with the given <code>CoreId</code>. 
+     * <p><b>NOTE:</b> The returned entity object may not be completely loaded! Before a message unit is going to be 
+     * processed it must be checked if it is loaded completely.
+     *
+     * @param coreId     The CoreId of the message unit to retrieve
+     * @return           The {@link IMessageUnitEntity} with the given CoreId or <code>null</code> if none exists
+     * @throws PersistenceException If an error occurs when retrieving the message unit from the database
+     * @since 7.0.0
+     */    
+    IMessageUnitEntity getMessageUnitWithCoreId(final String coreId) throws PersistenceException;
+    
+    
 }
