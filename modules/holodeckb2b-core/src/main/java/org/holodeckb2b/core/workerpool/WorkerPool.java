@@ -143,7 +143,7 @@ public class WorkerPool implements IWorkerPool {
 	    	pool = null;
 	    	return;
 	    }
-	    pool = new ScheduledThreadPoolExecutor(1);
+	    pool = new ScheduledThreadPoolExecutor(1, new PoolThreadFactory(name));
 	    log.debug("Initial configuration of workers");
 	    reconfigure(workerCfgs);
 	    lastRefresh = Instant.now();
