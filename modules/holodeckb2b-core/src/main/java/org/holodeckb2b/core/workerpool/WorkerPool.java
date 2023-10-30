@@ -465,11 +465,10 @@ public class WorkerPool implements IWorkerPool {
      */
     protected boolean needsRescheduling(final IWorkerConfiguration oldCfg, final IWorkerConfiguration newCfg) {
         boolean equal;
-        equal = (oldCfg.getWorkerTask() != null && oldCfg.getWorkerTask().equals(newCfg.getWorkerTask()))
-                || (oldCfg.getWorkerTask() == null && newCfg.getWorkerTask() == null);
+        equal = Utils.nullSafeEqual(oldCfg.getWorkerTask(), newCfg.getWorkerTask());
         equal = equal && (oldCfg.activate() == newCfg.activate());
         equal = equal && (oldCfg.getConcurrentExecutions() == newCfg.getConcurrentExecutions());
-        equal = equal && (oldCfg.getInterval() == newCfg.getInterval());
+        equal = equal && Utils.nullSafeEqual(oldCfg.getInterval(), newCfg.getInterval());
         return !equal;
     }
 
