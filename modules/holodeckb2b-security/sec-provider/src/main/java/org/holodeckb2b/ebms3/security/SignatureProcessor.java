@@ -630,7 +630,7 @@ public class SignatureProcessor implements Processor {
 
 		// Store the Timestamp/SignatureValue/Key combination in the cache
 		if (timeStamp.getExpires() != null) {
-			replayCache.add(identifier, 1L + Duration.between(Instant.now(), timeStamp.getExpires()).getSeconds());
+			replayCache.add(identifier, timeStamp.getExpires());
 		} else {
 			replayCache.add(identifier);
 		}

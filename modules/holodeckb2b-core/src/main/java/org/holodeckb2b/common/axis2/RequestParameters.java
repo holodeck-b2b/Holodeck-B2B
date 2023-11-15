@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.axis2.transport.http.util.URIEncoderDecoder;
+import org.apache.axis2.kernel.http.util.URIEncoderDecoder;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.core.IURLRequestParameters;
 

@@ -30,11 +30,6 @@
     <description>This module includes the default implementation of the Holodeck B2B Certificate Manager</description>
     <inceptionYear>2020</inceptionYear>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <wss4j.version>2.2.2</wss4j.version>
-    </properties>
-
     <dependencies>
         <!-- The other Holodeck B2B libraries -->
         <dependency>
@@ -44,27 +39,18 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
+            <exclusions>
+				<exclusion>
+					<groupId>org.simpleframework</groupId>
+					<artifactId>simple-xml</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
 
         <!-- WSS4J Security libs are needed because of service supplied to the default security provider -->
         <dependency>
             <groupId>org.apache.wss4j</groupId>
             <artifactId>wss4j-ws-security-common</artifactId>
-            <version>${wss4j.version}</version>
-            <exclusions>
-            	<exclusion>
-            		<groupId>org.opensaml</groupId>
-            		<artifactId>opensaml-saml-impl</artifactId>
-            	</exclusion>
-            	<exclusion>
-            		<groupId>org.opensaml</groupId>
-            		<artifactId>opensaml-xacml-impl</artifactId>
-            	</exclusion>
-            	<exclusion>
-            		<groupId>org.opensaml</groupId>
-            		<artifactId>opensaml-xacml-saml-impl</artifactId>
-            	</exclusion>
-            </exclusions>
         </dependency>
 
         <!-- Add JAXB for Java9 and later compatibilitu -->
@@ -72,17 +58,10 @@
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.istack</groupId>
-            <artifactId>istack-commons-runtime</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+		</dependency>
         <!-- Logging -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>

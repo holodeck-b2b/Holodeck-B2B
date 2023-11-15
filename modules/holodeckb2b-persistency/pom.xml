@@ -38,7 +38,7 @@
     </description>
 
     <properties>
-        <hibernate.version>5.4.11.Final</hibernate.version>
+        <hibernate.version>5.6.15.Final</hibernate.version>
     </properties>
 
     <dependencies>
@@ -91,10 +91,5 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>        
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>

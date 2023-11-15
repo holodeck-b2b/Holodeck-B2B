@@ -136,14 +136,6 @@
     <!--any operation -->
     <!--Note : You can override this for a particular service by adding the same element with your requirement-->
     <messageReceivers>
-        <messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only"
-                         class="org.apache.axis2.receivers.RawXMLINOnlyMessageReceiver"/>
-        <messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-out"
-                         class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
-        <messageReceiver mep="http://www.w3.org/2006/01/wsdl/in-only"
-                         class="org.apache.axis2.receivers.RawXMLINOnlyMessageReceiver"/>
-        <messageReceiver mep="http://www.w3.org/2006/01/wsdl/in-out"
-                         class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
         <messageReceiver mep="http://www.w3.org/ns/wsdl/in-only"
                          class="org.apache.axis2.receivers.RawXMLINOnlyMessageReceiver"/>
         <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out"
@@ -157,7 +149,7 @@
     <!--format  serialization in Axis2. These message formats are expected to be resolved based on the content type. -->
     <messageFormatters>
         <messageFormatter contentType="application/soap+xml"
-                          class="org.apache.axis2.transport.http.SOAPMessageFormatter"/>
+            class="org.apache.axis2.kernel.http.SOAPMessageFormatter"/>
     </messageFormatters>
 
     <!-- ================================================= -->
@@ -179,7 +171,7 @@
     <!-- Transport Outs -->
     <!-- ================================================= -->
     <transportSender name="http"
-                     class="org.apache.axis2.transport.http.CommonsHTTPTransportSender">
+        class="org.apache.axis2.transport.http.impl.httpclient4.HTTPClient4TransportSender">
         <parameter name="PROTOCOL">HTTP/1.1</parameter>
         <parameter name="Transfer-Encoding">chunked</parameter>
 
@@ -188,7 +180,7 @@
     </transportSender>
 
     <transportSender name="https"
-                     class="org.apache.axis2.transport.http.CommonsHTTPTransportSender">
+        class="org.apache.axis2.transport.http.impl.httpclient4.HTTPClient4TransportSender">
         <parameter name="PROTOCOL">HTTP/1.1</parameter>
         <parameter name="Transfer-Encoding">chunked</parameter>
     </transportSender>

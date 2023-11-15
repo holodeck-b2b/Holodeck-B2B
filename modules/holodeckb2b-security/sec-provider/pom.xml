@@ -30,16 +30,17 @@
     <description>This module includes the default implementation of the Holodeck B2B Security Provider for creating/processing the WS-Security header in ebMS3/AS4 messages</description>
     <inceptionYear>2020</inceptionYear>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <wss4j.version>2.2.2</wss4j.version>
-    </properties>
-
     <dependencies>
         <!-- The other Holodeck B2B libraries -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
+            <exclusions>
+				<exclusion>
+					<groupId>org.simpleframework</groupId>
+					<artifactId>simple-xml</artifactId>
+				</exclusion>
+			</exclusions>            
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -48,28 +49,8 @@
 
         <!-- WSS4J Security libs -->
         <dependency>
-            <groupId>org.apache.santuario</groupId>
-            <artifactId>xmlsec</artifactId>
-            <version>2.1.2</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.wss4j</groupId>
             <artifactId>wss4j-ws-security-common</artifactId>
-            <version>${wss4j.version}</version>
-            <exclusions>
-            	<exclusion>
-            		<groupId>org.opensaml</groupId>
-            		<artifactId>opensaml-saml-impl</artifactId>
-            	</exclusion>
-            	<exclusion>
-            		<groupId>org.opensaml</groupId>
-            		<artifactId>opensaml-xacml-impl</artifactId>
-            	</exclusion>
-            	<exclusion>
-            		<groupId>org.opensaml</groupId>
-            		<artifactId>opensaml-xacml-saml-impl</artifactId>
-            	</exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.wss4j</groupId>

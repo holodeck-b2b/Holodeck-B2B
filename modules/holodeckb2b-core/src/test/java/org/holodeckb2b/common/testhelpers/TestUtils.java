@@ -25,14 +25,11 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.log4j.Level;
-import org.apache.log4j.spi.LoggingEvent;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.Protocol;
@@ -82,17 +79,6 @@ public class TestUtils {
     	return getPath(TestUtils.class, ".");
     }    
 
-    public static boolean eventContainsMsg(List<LoggingEvent> events, Level logLevel, String msg) {
-        boolean flag = false;
-        for(LoggingEvent e : events) {
-            if(e.getLevel().equals(logLevel)) {
-                if(e.getRenderedMessage().trim().equals(msg)) {
-                    flag = true;
-                }
-            }
-        }
-        return flag;
-    }
     
     public static PMode create1WaySendPushPMode() {
     	PMode pmode = new PMode();

@@ -31,9 +31,7 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.AxisServiceGroup;
 import org.apache.axis2.description.OutInAxisOperation;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.params.HttpConnectionParams;
+import org.apache.axis2.kernel.http.HTTPConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.events.impl.GenericSendMessageFailure;
@@ -144,9 +142,9 @@ public class Axis2Sender {
 	        oc = sendOp.createClient(svcCtx, options);
 	        oc.addMessageContext(msgCtx);
 		
-	        final HttpClient httpClient = new HttpClient();
-	        httpClient.getParams().setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT, 5000);
-	        msgCtx.setProperty(HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
+//	        final HttpClient httpClient = new HttpClient();
+//	        httpClient.getParams().setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT, 5000);
+//	        msgCtx.setProperty(HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
 
 	        log.trace("Create an empty IMessageProcessingContext for message with current configuration");
             final IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(msgCtx);

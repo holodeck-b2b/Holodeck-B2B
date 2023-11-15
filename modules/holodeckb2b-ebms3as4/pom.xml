@@ -45,7 +45,14 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Dependencies for testing -->
+		<dependency>
+			<groupId>com.sun.activation</groupId>
+			<artifactId>jakarta.activation</artifactId>
+			<version>2.0.0</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Dependencies for testing -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -62,7 +69,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Test util classes from the Core -->
+		<!-- Test util classes from the Core -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
@@ -82,7 +89,7 @@
                     <servicesXmlFile>src/main/resources/META-INF/services.xml</servicesXmlFile>
                     <aarName>hb2b-as4-msh</aarName>
                     <includeDependencies>false</includeDependencies>
-                    <!-- The classDirectory parameter is set to a non existing directory to prevent the
+					<!-- The classDirectory parameter is set to a non existing directory to prevent the
                     	 plugin from adding the project classes to the aar
                     -->
                     <classesDirectory>no_classes</classesDirectory>

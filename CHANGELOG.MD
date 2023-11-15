@@ -14,12 +14,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   exist different incoming message units with the same MessageId.
 
 ### Changed
+* Minimal Java version required to run Holodeck B2B is now 11
 * The interface of the _Persistency Provider_ has been refactored. The methods for updating specific meta-data 
   attributes in `org.holodeckb2b.interfaces.persistency.IUpdateManager` have been replaced by more generic create,  
   update and delete methods that operate on the entity classes. New update methods have been added to the entity classes
   which indicate which meta-data the Holodeck B2b Core can change during the message processing.
-  
+* Updated version of Axis2, Axiom and WSS4J dependencies to resp. 1.8.2, 1.4.0 and 2.4.3
+* Changed JAXB implementation to Glassfish 
+
 ### Removed
+* Support for running Holodeck B2B on Java 1.8
 * `org.holodeckb2b.interfaces.messagemodel.IMessageUnit.getCurrentProcessingState()`. The current state is the last item
   from the list retrieved using `org.holodeckb2b.interfaces.messagemodel.IMessageUnit.getProcessingStates()`
 

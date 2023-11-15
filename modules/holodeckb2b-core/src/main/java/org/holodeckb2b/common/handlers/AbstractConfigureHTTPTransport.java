@@ -18,7 +18,7 @@ package org.holodeckb2b.common.handlers;
 
 import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
-import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.axis2.kernel.http.HTTPConstants;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.events.impl.MessageTransferFailure;
 import org.holodeckb2b.common.util.MessageUnitUtils;
