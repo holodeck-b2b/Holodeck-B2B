@@ -22,6 +22,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Updated version of Axis2, Axiom and WSS4J dependencies to resp. 1.8.2, 1.4.0 and 2.4.3
 * Changed JAXB implementation to Glassfish 
 
+### Fixed
+* Handle explicit reference from PartInfo-href to the SOAP body [#148](https://github.com/holodeck-b2b/Holodeck-B2B/issues/148)
+
 ### Removed
 * Support for running Holodeck B2B on Java 1.8
 * `org.holodeckb2b.interfaces.messagemodel.IMessageUnit.getCurrentProcessingState()`. The current state is the last item
