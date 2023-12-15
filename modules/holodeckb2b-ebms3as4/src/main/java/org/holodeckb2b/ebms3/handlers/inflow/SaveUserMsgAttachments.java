@@ -100,13 +100,30 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
                 switch (p.getContainment()) {
                     case BODY:
                         // Payload is a element from the SOAP body
+                        SOAPBody body = procCtx.getParentContext().getEnvelope().getBody();
                         OMElement plElement= null;
                         if (Utils.isNullOrEmpty(plRef)) {
                             log.trace("No reference included in payload meta data => SOAP body is the payload");
-                            plElement = procCtx.getParentContext().getEnvelope().getBody().getFirstElement();
+                            plElement = body.getFirstElement();
                         } else {
-                            log.trace("Payload is element with id " + plRef + " of SOAP body");
-                            plElement = getPayloadFromBody(procCtx.getParentContext().getEnvelope().getBody(), plRef);
+                            boolean bodyReferenced = false;
+                            String bodyWsuId = body.getAttributeValue(EbMSConstants.QNAME_WSUID);
+                            if (bodyWsuId != null && bodyWsuId.equals(plRef)) {
+                                // Referenced using a wsu:Id. This is often also used as the signature reference URI.
+                                bodyReferenced = true;
+                            } else {
+                                // Referenced using an xml:id.
+                                String bodyXmlId = body.getAttributeValue(EbMSConstants.QNAME_XMLID);
+                                bodyReferenced = (bodyXmlId != null && bodyXmlId.equals(plRef));
+                            }
+
+                            if (bodyReferenced) {
+                                log.trace("Payload metadata references SOAP body element");
+                                plElement = body.getFirstElement();
+                            } else {
+                                log.trace("Payload is element with id " + plRef + " of SOAP body");
+                                plElement = getPayloadFromBody(body, plRef);
+                            }
                         }
                         if (plElement == null) {
                             // The reference is invalid as no element exists in the body. This makes this an
