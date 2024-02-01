@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Holodeck B2B Team.
+ * Copyright (C) 2024 The Holodeck B2B Team.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -14,20 +14,21 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.persistency;
+package org.holodeckb2b.interfaces.storage.providers;
 
 /**
- * Indicates that there was a problem executing a persistency operation.
+ * Indicates that there was a problem executing a storage operation.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since  3.0.0
+ * @since  7.0.0
  */
-public class PersistenceException extends Exception {
+public class StorageException extends Exception {
+	private static final long serialVersionUID = 5383703909365522322L;
 
 	/**
      * Default constructor creates the exception without specifying details why it was caused.
      */
-    public PersistenceException() {
+    public StorageException() {
         super();
     }
 
@@ -36,7 +37,7 @@ public class PersistenceException extends Exception {
      *
      * @param message	description of the reason that caused the exception
      */
-    public PersistenceException(final String message) {
+    public StorageException(final String message) {
         super(message);
     }
 
@@ -46,7 +47,7 @@ public class PersistenceException extends Exception {
      * @param message	description of the reason that caused the exception
      * @param cause		the exception that caused the exception
      */
-    public PersistenceException(final String message, final Throwable cause) {
+    public StorageException(final String message, final Throwable cause) {
         super(message, cause);
     }
 }

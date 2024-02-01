@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.persistency.entities;
+package org.holodeckb2b.interfaces.storage;
 
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 
 /**
- * Defines the interface of the persistent entity object that is used by the Holodeck B2B to store the Error Message 
+ * Defines the interface of the stored object that is used by the Holodeck B2B to store the Error Message 
  * message unit meta-data.
  * <p>Beside the generic meta-data fields that may be <i>lazily loaded</i> persistency implementations MAY load the
  * information on the <b>individual errors <i>lazily</i></b>, i.e. before  calling {@link #getErrors()} to get this info

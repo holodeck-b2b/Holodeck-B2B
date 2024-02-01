@@ -14,15 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.persistency.entities;
+package org.holodeckb2b.interfaces.storage;
 
 import java.util.Collection;
 
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.persistency.IUpdateManager;
 
 /**
- * Defines the interface of the persistent entity object that is used by the Holodeck B2B to store the User Message 
+ * Defines the interface of the stored object that is used by the Holodeck B2B to store the User Message 
  * specific message unit meta-data.
  * <p>Beside the generic meta-data fields that may be <i>lazily loaded</i> persistency implementations MAY also load the
  * information on the <b>sender, receiver, payloads and message properties <i>lazily</i></b>, i.e. before calling
@@ -46,5 +45,5 @@ public interface IUserMessageEntity extends IMessageUnitEntity, IUserMessage {
 	 * @since 7.0.0
 	 */
 	@Override
-	Collection<IPayloadEntity> getPayloads();
+	Collection<? extends IPayloadEntity> getPayloads();
 }

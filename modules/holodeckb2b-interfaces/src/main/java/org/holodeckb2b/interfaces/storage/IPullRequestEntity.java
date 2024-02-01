@@ -14,20 +14,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.persistency.entities;
+package org.holodeckb2b.interfaces.storage;
 
-import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
+import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 
 /**
- * Defines the interface of the persistent entity object that is used by the Holodeck B2B to store the Selective Pull
- * Request message unit meta-data.
+ * Defines the interface of the stored object that is used by the Holodeck B2B to store the Pull Request 
+ * message unit meta-data.
  * <p>Beside the generic meta-data fields that may be <i>lazily loaded</i> there are no fields specific to the pull
  * request signal that can be <i>lazily loaded</i>.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since  4.1.0
+ * @since  3.0.0
  * @see   IMessageUnitEntity
  */
-public interface ISelectivePullRequestEntity extends IPullRequestEntity, ISelectivePullRequest {
+public interface IPullRequestEntity extends IMessageUnitEntity, IPullRequest {
 
 }

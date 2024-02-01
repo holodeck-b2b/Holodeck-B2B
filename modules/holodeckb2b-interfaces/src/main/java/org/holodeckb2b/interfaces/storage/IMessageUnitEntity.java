@@ -14,17 +14,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.persistency.entities;
-
-import java.util.Set;
+package org.holodeckb2b.interfaces.storage;
 
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
- * Defines the interface of the persistent entity object that is used by the Holodeck B2B to store the general message
+ * Defines the interface of the stored object that is used by the Holodeck B2B to store the general message
  * unit meta-data.
  * <p>It is based on the {@link IMessageUnit} interface from the message model. It however does not include
  * <i>setter</i> methods as changes need to be done through the DAO objects. This to ensure that changes in the
@@ -33,7 +31,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * valued fields immediately but perform <i>lazy loading</i>. Therefore this interface adds the
  * {@link #isLoadedCompletely()} method to the getter methods already defined in the {@link IMessageUnit} interface
  * which indicates whether all information is loaded from storage. If a getter method is used for a field that has not
- * been loaded a {@link PersistenceException} will be thrown.<br>
+ * been loaded a {@link StorageException} will be thrown.<br>
  * Lazy loading SHOULD ONLY be used by persistency implementations when multiple entity objects are retrieved from
  * storage and it is not clear if all meta-data will be used in further processing.
  * <p>In case of the general meta-data that applies to all message units only the list of processing states may be
@@ -54,25 +52,7 @@ public interface IMessageUnitEntity extends IMessageUnit {
 	 * @since 7.0.0
 	 */
 	String getCoreId();
-	
-	/**
-	 * Gets the set of <i>CoreId</i>s of message units that this message unit is related to. 
-	 * <p>This can for example be the User Message to which a Receipt or Error Message applies, but also the Pull 
-	 * Request that triggered the sending of the User Message.  
-	 * 
-	 * @return	the set of <i>CoreId</i>s of message units related to this message unit 
-	 * @since 7.0.0
-	 */
-	Set<String>	getRelatedTo();
-
-	/**
-	 * Adds a <i>CoreId</i> to the set of related message units.  
-	 *  
-	 * @param coreId	the <i>CoreId</i> of the message unit to which this message unit is related.
-	 * @since 7.0.0
-	 */
-	void addRelatesTo(String coreId);	
-	
+		
     /**
      * Indicates whether all meta-data of the object have been loaded. See the class documentation which fields may be
      * loaded lazily.

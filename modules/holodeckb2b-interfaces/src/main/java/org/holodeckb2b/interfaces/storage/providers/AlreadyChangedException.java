@@ -14,14 +14,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.persistency;
+package org.holodeckb2b.interfaces.storage.providers;
 
 /**
- * Indicates that there was an update of the meta-data failed because more up to date data was found in the database.  
+ * Indicates that an update of the message unit meta-data failed because more up to date data was found in the database.  
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  7.0.0
+ * @see IMetadataStorageProvider
  */
-public class AlreadyChangedException extends PersistenceException {
+public class AlreadyChangedException extends StorageException {
 	private static final long serialVersionUID = 5309676598979015162L;
 }

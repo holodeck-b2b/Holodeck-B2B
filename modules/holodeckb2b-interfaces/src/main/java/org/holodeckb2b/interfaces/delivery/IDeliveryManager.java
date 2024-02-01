@@ -18,9 +18,9 @@ package org.holodeckb2b.interfaces.delivery;
 
 import java.util.Collection;
 
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 
 /**
  * Defines the interface of the Holodeck B2B Core component that is responsible for managing the delivery of message 

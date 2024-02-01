@@ -14,26 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.persistency;
+package org.holodeckb2b.interfaces.storage;
 
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
- * Defines the interface for the <i>data access object</i> that is responsible for executing the functions that query
- * stored message unit meta-data, like retrieving all message units in a certain processing state or that are related
- * to another message unit.
+ * Defines the interface the Holodeck B2B Core offers to both other Core and  "external" components for retrieving the 
+ * message data (both meta-data and payload data). It acts as a facade to the <i>Meta-data Storage</i> and <i>Payload 
+ * Storage</i> Providers and ensures that the payload information is complete when returning the {@link IPayloadEntity} 
+ * object.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
+ * @since  7.0.0	Moved from the <i>Persistency Provider</i> to the Core  
  */
 public interface IQueryManager {
 
@@ -51,13 +53,13 @@ public interface IQueryManager {
      * @param states    Array of processing states that the message units to retrieve should be in
      * @return          List with entity objects representing the message units of the specified type that are
      * 					in one of the given states, in descending order on time stamp
-     * @throws PersistenceException When a problem occurs during the retrieval of the message units
+     * @throws StorageException When a problem occurs during the retrieval of the message units
      */
     <T extends IMessageUnit, V extends IMessageUnitEntity> List<V>
                                                  getMessageUnitsInState(final Class<T> type,
                                                                         final Direction direction,
                                                                         final ProcessingState[] states)
-                                                                                        throws PersistenceException;
+                                                                                        throws StorageException;
 
     /**
      * Retrieves all message units with the given <code>MessageId</code>. Optionally the direction in which the
@@ -70,11 +72,11 @@ public interface IQueryManager {
      * @param messageId     The messageId of the message units to retrieve
      * @param direction		The direction in which the message units to retrieve should be.
      * @return              The list of {@link IMessageUnitEntity}s with the given message id
-     * @throws PersistenceException If an error occurs retrieving the message units from the database
+     * @throws StorageException If an error occurs retrieving the message units from the database
      */
     Collection<IMessageUnitEntity> getMessageUnitsWithId(final String messageId,
     													 final Direction... direction)
-    															 						throws PersistenceException;
+    															 						throws StorageException;
 
     /**
      * Retrieves all message units of which the last change in processing state occurred before the given date and time.
@@ -84,10 +86,10 @@ public interface IQueryManager {
      * @param   maxLastChangeDate   The latest date of a processing state change that is to be included in the result
      * @return          Collection of entity objects representing the message units which processing state changed at
      *                  latest at the given date
-     * @throws PersistenceException If an error occurs while retrieving the message units from the database
+     * @throws StorageException If an error occurs while retrieving the message units from the database
      */
     Collection<IMessageUnitEntity> getMessageUnitsWithLastStateChangedBefore(final Date maxLastChangeDate)
-                                                                                        throws PersistenceException;
+                                                                                        throws StorageException;
 
     /**
      * Retrieves all message units of the specified type and that are in the given state and which processing is defined
@@ -105,13 +107,13 @@ public interface IQueryManager {
      * @return          The ordered list of entity objects representing the message unit objects of the specified
      *                  type and which are in the specified processing state and have their processing defined by a
      *                  P-Mode with one of the specified ids
-     * @throws PersistenceException When an error occurs while executing the query
+     * @throws StorageException When an error occurs while executing the query
      */
     <T extends IMessageUnit, V extends IMessageUnitEntity> List<V> getMessageUnitsForPModesInState(
                                                                                     final Class<T> type,
                                                                                     final Collection<String> pmodeIds,
                                                                                     final ProcessingState state)
-                                                                                throws PersistenceException;
+                                                                                throws StorageException;
 
     /**
      * Ensures that all meta-data of the given entity object is loaded and available for processing.
@@ -120,9 +122,9 @@ public interface IQueryManager {
      *
      * @param <V>           Limits the <code>messageUnit</code> parameter to only message unit classes
      * @param messageUnit   The entity object that needs to be loaded completely
-     * @throws PersistenceException When an error occurs while loading the object
+     * @throws StorageException When an error occurs while loading the object
      */
-    <V extends IMessageUnitEntity> void ensureCompletelyLoaded(V messageUnit) throws PersistenceException;
+    <V extends IMessageUnitEntity> void ensureCompletelyLoaded(V messageUnit) throws StorageException;
 
     /**
      * Gets the number of times the given <i>User Message</i> message unit has already been sent to the receiver without
@@ -132,9 +134,9 @@ public interface IQueryManager {
      *
      * @param userMessage   The user message to get the number of transmissions for
      * @return              The number of times the user message was already sent out
-     * @throws PersistenceException If an error occurs when retrieving the number of transmissions
+     * @throws StorageException If an error occurs when retrieving the number of transmissions
      */
-    int getNumberOfTransmissions(final IUserMessageEntity userMessage) throws PersistenceException;
+    int getNumberOfTransmissions(final IUserMessageEntity userMessage) throws StorageException;
 
     /**
      * Checks whether there exists a <b>received</b> <i>User Message</i> message unit with the given <code>MessageId
@@ -147,11 +149,11 @@ public interface IQueryManager {
      *                    == <code>IN</code> and {@link IUserMessage#getCurrentProcessingState()} ==
      *                    {@link ProcessingState#DELIVERED} | {@link ProcessingState#FAILURE},
      *                    <br><code>false</code> otherwise.
-     * @throws PersistenceException If an error occurs when executing this query
+     * @throws StorageException If an error occurs when executing this query
      * @since 4.0.0
      * @since 7.0.0 The argument type is now the entity class
      */
-    boolean isAlreadyProcessed(final IUserMessageEntity userMessage) throws PersistenceException;
+    boolean isAlreadyProcessed(final IUserMessageEntity userMessage) throws StorageException;
     
     /**
      * Retrieves the message unit with the given <code>CoreId</code>. 
@@ -160,10 +162,19 @@ public interface IQueryManager {
      *
      * @param coreId     The CoreId of the message unit to retrieve
      * @return           The {@link IMessageUnitEntity} with the given CoreId or <code>null</code> if none exists
-     * @throws PersistenceException If an error occurs when retrieving the message unit from the database
+     * @throws StorageException If an error occurs when retrieving the message unit from the database
      * @since 7.0.0
      */    
-    IMessageUnitEntity getMessageUnitWithCoreId(final String coreId) throws PersistenceException;
+    IMessageUnitEntity getMessageUnitWithCoreId(final String coreId) throws StorageException;
     
-    
+	/**
+	 * Gets the set of <i>CoreId</i>s of message units that are related to the message unit with the given <i>CoreId</i>. 
+	 * <p>This can for example be the User Message to which a Receipt or Error Message applies, but also the Pull 
+	 * Request that triggered the sending of the User Message.  
+	 * 
+	 * @param coreId  the <i>CoreId</i> to get related message units for
+	 * @return	the set of <i>CoreId</i>s of message units related to <code>coreId</code> 
+	 * @since 7.0.0
+	 */
+	Set<String>	getRelatedTo(final String coreId);
 }

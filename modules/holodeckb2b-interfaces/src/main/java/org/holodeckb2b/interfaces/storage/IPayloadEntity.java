@@ -14,29 +14,42 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.persistency.entities;
+package org.holodeckb2b.interfaces.storage;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.persistency.IUpdateManager;
+import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
+import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
 
 /**
- * Defines the interface of the persistent entity object that is used by the Holodeck B2B to store the payload 
- * meta-data.
+ * Defines the interface of the object that is used by the Holodeck B2B Core to store the payload meta-data. Note that
+ * this interface extends {@link IPayload} and therefore also has a {@Link #getContent()} method. Because the 
+ * <i>Metadata Storage Provider</i> doesn't handle the content it doesn't need to implement this method and providing
+ * access to the payload's content is managed by the Core.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  7.0.0
- * @see IUserMessageEntity
- * @see IUpdateManager#updatePayload(IPayloadEntity)
  */
 public interface IPayloadEntity extends IPayload {
 	
 	/**
-	 * Sets the path where the payload content is saved.
+	 * Gets the <i>payloadId</i> that uniquely identifies this payload and which is used to link the payload's meta-data
+	 * managed by the {@link IMetadataStorageProvider} and its content as managed by the {@link IPayloadStorageProvider}. 
 	 * 
-	 * @param path	to the file in which the payload content is saved
+	 * @return	<i>payloadId</i> that identifies the oayload
 	 */
-	void setContentLocation(String path);
+	String	getPayloadId();
+	
+	/**
+	 * Gets the <i>CoreId</i> of the User Message that this payload is contained in.
+	 * 
+	 * @return	the <i>CoreId> of the User Message that this payload is contained in, or <code>null</code> if the 
+	 * 			paylaod is not yet assigned to a User Message
+	 */	
+	String getParentCoreId();
 		
 	/**
 	 * Sets the Mime type of the payload.
@@ -67,4 +80,13 @@ public interface IPayloadEntity extends IPayload {
 	 * @param p	property to remove as part property
 	 */
 	void removeProperty(IProperty p);	
+
+	/**
+	 * As this method does not need to be implemented by the <i>Metadata Storage Provider</i> a default implementation
+	 * is provided.
+	 */
+	@Override
+	default InputStream getContent() throws IOException {
+		return null;
+	}
 }
