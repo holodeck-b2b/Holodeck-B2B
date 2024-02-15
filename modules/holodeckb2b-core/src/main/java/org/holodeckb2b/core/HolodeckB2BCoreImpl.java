@@ -33,6 +33,8 @@ import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.config.InternalConfiguration;
 import org.holodeckb2b.core.pmode.PModeManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.core.storage.QueryManager;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.core.submission.MessageSubmitter;
 import org.holodeckb2b.core.validation.DefaultValidationExecutor;
 import org.holodeckb2b.core.validation.IValidationExecutor;
@@ -44,16 +46,17 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcess
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.general.IVersionInfo;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
-import org.holodeckb2b.interfaces.persistency.AlreadyChangedException;
-import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
-import org.holodeckb2b.interfaces.persistency.IQueryManager;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
+import org.holodeckb2b.interfaces.storage.IQueryManager;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.AlreadyChangedException;
+import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
+import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPool;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
@@ -98,14 +101,24 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     private IMessageProcessingEventProcessor eventProcessor = null;
 
     /**
-     * The persistency provider that manages the storage of the meta-data on processed message units.
-     * @since  5.0.0 In previous versions the DAOFactory was referenced. 
+     * The Metadata Storage Provider in use
      */
-    private IPersistencyProvider    persistencyProvider = null;
+    private IMetadataStorageProvider mdsProvider;
+    
     /**
-     * The storage manager facade to manage updates of the message units' meta-data
+     * The Payload Storage Provider in use
+     */
+    private IPayloadStorageProvider psProvider;
+    
+    /**
+     * The storage manager facade to manage updates of the message units' data
      */
     private StorageManager	storageManager = null;
+    
+    /**
+     * The query manager facade to manage updates of the message units' data
+     */
+    private QueryManager	queryManager = null;
     
     /**
      * The installed certificate manager that manages and checks certificates used in the message processing
@@ -169,24 +182,40 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         log.info("Loaded event processor : {}", eventProcessor.getName());
         eventConfigurations = new ArrayList<>();        
         
-        log.debug("Load the persistency provider for storing meta-data on message units");
-        persistencyProvider = Utils.getFirstAvailableProvider(IPersistencyProvider.class);
-        if (persistencyProvider != null) {	        	
-        	log.debug("Using Persistency Provider: {}", persistencyProvider.getName());
+        log.debug("Load the Metadata Storage provider for storing meta-data on message units");
+        mdsProvider = Utils.getFirstAvailableProvider(IMetadataStorageProvider.class);
+        if (mdsProvider != null) {	        	
+        	log.debug("Using Metadata Storage Provider: {}", mdsProvider.getName());
         	try {
-        		persistencyProvider.init(instanceConfiguration);
-        	} catch (PersistenceException initializationFailure) {
-        		log.error("Could not initialize the persistency provider - {} : {}", persistencyProvider.getName(),
+        		mdsProvider.init(instanceConfiguration);
+        		log.info("Loaded Metadata Storage Provider : {}", mdsProvider.getName());
+        	} catch (StorageException initializationFailure) {
+        		log.error("Could not initialize the Metadata Storage Provider - {} : {}", mdsProvider.getName(),
         				initializationFailure.getMessage());
-        		persistencyProvider = null;
+        		mdsProvider = null;
         	}
         }
-        if (persistencyProvider == null) {
-        	log.fatal("Cannot start Holodeck B2B because required Persistency Provider is not available!");
-        	throw new AxisFault("Unable to load required persistency provider!");
+        log.debug("Load the Payload Storage provider for storing meta-data on message units");
+        psProvider = Utils.getFirstAvailableProvider(IPayloadStorageProvider.class);
+        if (psProvider != null) {	        	
+        	log.debug("Using Payload Storage Provider: {}", psProvider.getName());
+        	try {
+        		psProvider.init(instanceConfiguration);
+        		log.info("Loaded Payload Storage Provider : {}", psProvider.getName());
+        	} catch (StorageException initializationFailure) {
+        		log.error("Could not initialize the Payload Storage Provider - {} : {}", psProvider.getName(),
+        				initializationFailure.getMessage());
+        		psProvider = null;
+        	}
+        }        
+        
+        if (mdsProvider == null || psProvider == null) {
+        	log.fatal("Cannot start Holodeck B2B because required Metadata or Payload Storage Provider is not available!");
+        	throw new AxisFault("Required Metadata or Payload Storage provider not available!");
         }
-        storageManager = new StorageManager(persistencyProvider.getUpdateManager());
-        log.info("Loaded Persistency Provider : {}", persistencyProvider.getName());
+                
+        storageManager = new StorageManager(mdsProvider, psProvider);
+        queryManager = new QueryManager(mdsProvider, psProvider);
         
         log.trace("Load the certificate manager");
     	certManager = Utils.getFirstAvailableProvider(ICertificateManager.class); 
@@ -261,11 +290,18 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         	log.error("Error during Delivery Manager shutdown: {}", Utils.getExceptionTrace(t));
         }
         try {
-        	log.trace("Shutting down Persistency Provider");
-        	persistencyProvider.shutdown();
-        	log.debug("Persistency Provider shut down");
+        	log.trace("Shutting down Metadata Storage Provider");
+        	mdsProvider.shutdown();
+        	log.debug("Metadata Storage Provider shut down");
         } catch (Throwable t) {
-        	log.error("Error during Persistency Provider shutdown: {}", Utils.getExceptionTrace(t));
+        	log.error("Error during Metadata Storage Provider shutdown: {}", Utils.getExceptionTrace(t));
+        }
+        try {
+        	log.trace("Shutting down Payload Storage Provider");
+        	psProvider.shutdown();
+        	log.debug("Payload Storage Provider shut down");
+        } catch (Throwable t) {
+        	log.error("Error during Payload Storage Provider shutdown: {}", Utils.getExceptionTrace(t));
         }
         try {
         	log.trace("Shutting down Event Processor");
@@ -335,7 +371,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
      */
     @Override
     public IQueryManager getQueryManager() {
-        return persistencyProvider.getQueryManager();
+        return queryManager;
     }
 
     /**
@@ -473,7 +509,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
      * @since 5.3.0
      */
     @Override
-    public void resumeProcessing(IUserMessageEntity userMessage) throws PersistenceException, IllegalArgumentException {
+    public void resumeProcessing(IUserMessageEntity userMessage) throws StorageException, IllegalArgumentException {
     	if (userMessage.getDirection() == Direction.IN) {
     		log.warn("Illegal request to resume processing of received message unit [msgId={}]", 
     					userMessage.getMessageId());

@@ -7,8 +7,8 @@ import java.util.List;
 import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 
 /**
  * A mock for {@link IDeliveryManager} that will simply add the message unit to be delivered to a list. Does not use

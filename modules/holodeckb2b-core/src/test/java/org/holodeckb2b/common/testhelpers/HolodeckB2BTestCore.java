@@ -18,7 +18,6 @@ package org.holodeckb2b.common.testhelpers;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,10 +27,12 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.modules.Module;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.pmode.InMemoryPModeSet;
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCoreImpl;
-import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.config.InternalConfiguration;
+import org.holodeckb2b.core.storage.QueryManager;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.core.validation.DefaultValidationExecutor;
 import org.holodeckb2b.core.validation.IValidationExecutor;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
@@ -40,14 +41,16 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfigu
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.general.IVersionInfo;
-import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
-import org.holodeckb2b.interfaces.persistency.IQueryManager;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
+import org.holodeckb2b.interfaces.storage.IQueryManager;
+import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
+import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
-import org.holodeckb2b.persistency.inmemory.InMemoryProvider;
+import org.holodeckb2b.test.storage.InMemoryMDSProvider;
+import org.holodeckb2b.test.storage.InMemoryPSProvider;
 
 /**
  * Is utility class for testing that simulates the Holodeck B2B Core.
@@ -62,19 +65,20 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	private IMessageProcessingEventProcessor eventProcessor;
 	private IValidationExecutor validationExec;
 	private ICertificateManager certManager;
-	private IPersistencyProvider persistencyProvider;
+	private IMetadataStorageProvider mdsProvider;
+	private IPayloadStorageProvider  psProvider;
 	private List<IMessageProcessingEventConfiguration> eventConfig = new ArrayList<>();
 	private IDeliveryManager	deliveryManager;
 	private Map<String, Module> modules = new HashMap<>();
 	
 	public HolodeckB2BTestCore() throws AxisFault {
-		this(".");
+		this(TestUtils.getTestClassBasePath());
 	}
 
-	public HolodeckB2BTestCore(final String homeDir) throws AxisFault {
-		this.configuration = new InternalConfiguration(Paths.get(homeDir));
+	public HolodeckB2BTestCore(final Path homeDir) throws AxisFault {
+		this.configuration = new InternalConfiguration(homeDir);
 		this.configuration.setHostName("local.test");
-		this.configuration.setTempDirectory(Paths.get(homeDir).resolve("temp_t"));
+		this.configuration.setTempDirectory(homeDir.resolve("temp_t"));
 	}	
 	
 	public void cleanTemp() {
@@ -162,9 +166,26 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 		return eventProcessor;
 	}
 
-	public void setPersistencyProvider(IPersistencyProvider provider) throws PersistenceException {
-		persistencyProvider = provider;
-		persistencyProvider.init(configuration);
+	public void setMetadataStorageProvider(IMetadataStorageProvider provider) throws StorageException {
+		mdsProvider = provider;
+		mdsProvider.init(configuration);
+	}
+	
+	public IMetadataStorageProvider getMetadataStorageProvider() {
+		if (mdsProvider == null)
+			mdsProvider = new InMemoryMDSProvider();
+		return mdsProvider;
+	}
+	
+	public void setPayloadStorageProvider(IPayloadStorageProvider provider) throws StorageException {
+		psProvider = provider;
+		psProvider.init(configuration);
+	}
+	
+	public IPayloadStorageProvider getPayloadStorageProvider() {
+		if (psProvider == null)
+			psProvider = new InMemoryPSProvider();
+		return psProvider;
 	}
 	
 	/* (non-Javadoc)
@@ -172,10 +193,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	 */
 	@Override
 	public IQueryManager getQueryManager() {
-		if (persistencyProvider == null)
-			persistencyProvider = new InMemoryProvider();
-		
-		return persistencyProvider.getQueryManager();
+		return new QueryManager(getMetadataStorageProvider(), getPayloadStorageProvider());
 	}
 	
 	/* (non-Javadoc)
@@ -183,10 +201,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	 */
 	@Override
 	public StorageManager getStorageManager() {
-		if (persistencyProvider == null)
-			persistencyProvider = new InMemoryProvider();
-		
-		return new TestStorageManager(persistencyProvider.getUpdateManager());
+		return new StorageManager(getMetadataStorageProvider(), getPayloadStorageProvider());
 	}
 
 	

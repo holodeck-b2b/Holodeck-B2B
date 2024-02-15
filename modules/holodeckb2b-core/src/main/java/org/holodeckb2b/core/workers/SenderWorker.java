@@ -28,9 +28,9 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.axis2.Axis2Sender;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
@@ -84,7 +84,7 @@ public class SenderWorker extends AbstractWorkerTask {
                                     + "] because switching to processing state was unsuccesful");
                 }
             } 
-        } catch (final PersistenceException dbError) {
+        } catch (final StorageException dbError) {
             log.error("Could not process messages because a database error occurred. Details:"
                         + dbError.toString() + "\n");
         } 

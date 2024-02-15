@@ -30,11 +30,11 @@ import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestDeliveryManager;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.StorageManager;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IReceiptEntity;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -72,7 +72,7 @@ public class DeliverReceiptsTest {
 	        receipt.setMessageId(UUID.randomUUID().toString());
 	        
 	        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-	        IReceiptEntity rcptEntity = storageManager.storeIncomingMessageUnit(receipt);        
+	        IReceiptEntity rcptEntity = storageManager.storeReceivedMessageUnit(receipt);        
 	        
 	        storageManager.setProcessingState(rcptEntity, ProcessingState.READY_FOR_DELIVERY);
 	        
@@ -97,7 +97,7 @@ public class DeliverReceiptsTest {
         receipt.setMessageId(UUID.randomUUID().toString());
         
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-        IReceiptEntity rcptEntity = storageManager.storeIncomingMessageUnit(receipt);        
+        IReceiptEntity rcptEntity = storageManager.storeReceivedMessageUnit(receipt);        
         
         storageManager.setProcessingState(rcptEntity, ProcessingState.PROCESSING);
         

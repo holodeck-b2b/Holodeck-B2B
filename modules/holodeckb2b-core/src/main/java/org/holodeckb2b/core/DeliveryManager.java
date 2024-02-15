@@ -35,6 +35,7 @@ import org.holodeckb2b.common.events.impl.MessageDeliveryFailure;
 import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliveryCallback;
@@ -43,11 +44,6 @@ import org.holodeckb2b.interfaces.delivery.IDeliveryMethod;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
@@ -55,6 +51,11 @@ import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IReceiptEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 
 /**
@@ -125,7 +126,7 @@ class DeliveryManager implements IDeliveryManager {
 		// Make sure we can evaluate all processing states
 		try {
 			HolodeckB2BCoreInterface.getQueryManager().ensureCompletelyLoaded(messageUnit);
-		} catch (PersistenceException dbError) {
+		} catch (StorageException dbError) {
 			log.error("Error retrieving current meta-data of message unit (msgId={}) from database : ",
 					messageUnit.getMessageId(), Utils.getExceptionTrace(dbError));
 			throw new MessageDeliveryException("Error retrieving current meta-data", dbError);
@@ -183,7 +184,7 @@ class DeliveryManager implements IDeliveryManager {
 					throw new MessageDeliveryException("Message unit already in process");
 				}
 			}
-		} catch (PersistenceException dbError) {
+		} catch (StorageException dbError) {
 			log.error("Error updating processing state of message unit (msgId={}) : {}", messageUnit.getMessageId(),
 					dbError.getMessage());
 			throw new MessageDeliveryException("Error updating processing state", dbError);
@@ -294,10 +295,10 @@ class DeliveryManager implements IDeliveryManager {
 	 * @param msgUnit			message unit being delivered
 	 * @param deliveryError		the exception that caused the delivery attempt to fail, <code>null</code> if the
 	 * 							delivery was successful
-	 * @throws PersistenceException when an error occurs updating the processing state of the message unit
+	 * @throws StorageException when an error occurs updating the processing state of the message unit
 	 */
 	private void handleResult(IMessageUnitEntity msgUnit, MessageDeliveryException deliveryError)
-																						throws PersistenceException {
+																						throws StorageException {
 		if (deliveryError == null) {
 			log.info("Successfully delivered {} (msgId={})", MessageUnitUtils.getMessageUnitName(msgUnit),
 					 msgUnit.getMessageId());
@@ -380,7 +381,7 @@ class DeliveryManager implements IDeliveryManager {
 		public void success() {
 			try {
 				handleResult(msgUnit, null);
-			} catch (PersistenceException dbError) {
+			} catch (StorageException dbError) {
 				log.error("Error updating processing state of message unit (msgId={}) : {}", msgUnit.getMessageId(),
 						dbError.getMessage());
 			}
@@ -390,7 +391,7 @@ class DeliveryManager implements IDeliveryManager {
 		public void failed(MessageDeliveryException failure) {
 			try {
 				handleResult(msgUnit, failure);
-			} catch (PersistenceException dbError) {
+			} catch (StorageException dbError) {
 				log.error("Error updating processing state of message unit (msgId={}) : {}", msgUnit.getMessageId(),
 						dbError.getMessage());
 			}

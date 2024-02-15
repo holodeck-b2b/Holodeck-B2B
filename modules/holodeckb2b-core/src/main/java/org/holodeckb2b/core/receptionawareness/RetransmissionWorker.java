@@ -17,6 +17,7 @@
 package org.holodeckb2b.core.receptionawareness;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -24,24 +25,22 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.events.impl.GenericSendMessageFailure;
-import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.workers.AbstractWorkerTask;
-import org.holodeckb2b.commons.Pair;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.general.Interval;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IReceptionAwareness;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
@@ -73,7 +72,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                                                                                 ProcessingState.TRANSPORT_FAILURE,
                                                                                 ProcessingState.WARNING
                                                                               });
-        } catch (final PersistenceException ex) {
+        } catch (final StorageException ex) {
             log.error("Error retrieving message units from the database! Details: {}", ex.getMessage());
             return;
         }
@@ -154,7 +153,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         // Time to wait for receipt has not expired yet, wait longer
                         log.trace("Retransmit interval not expired yet. Nothing to do.");
                     }
-                } catch (final PersistenceException dbe) {
+                } catch (final StorageException dbe) {
                     log.error("An error occurred when checking or updating the message meta-data [msgID={}]: {}",
                                um.getMessageId(), dbe.getMessage());
                 }
@@ -177,22 +176,16 @@ public class RetransmissionWorker extends AbstractWorkerTask {
      * @param um        The <code>UserMessage</code> for which the <i>Receipt</i> is missing
      * @param leg       The P-Mode Leg configuration for this user message
      */
-    private void generateMissingReceiptError(final IUserMessage um, final ILeg leg) {
+    private void generateMissingReceiptError(final IUserMessageEntity um, final ILeg leg) {
         log.trace("Create and store MissingReceipt error");
-        // Create the error and set reference to user message
-        final ErrorMessage missingReceiptError = new ErrorMessage(new MissingReceipt());
-        missingReceiptError.setRefToMessageId(um.getMessageId());
-        missingReceiptError.setProcessingState(ProcessingState.CREATED);
-        
+
+        // Create the error and set reference to user message        
         IErrorMessageEntity   errorMessage;        
         try {
         	StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-            errorMessage = storageManager.storeIncomingMessageUnit(missingReceiptError);
-            storageManager.setPModeAndLeg(errorMessage, new Pair<>(
-            												HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId()), 
-            												leg.getLabel()));
+            errorMessage = storageManager.createErrorMsgFor(Collections.singleton(new MissingReceipt()), um);
             storageManager.setProcessingState(errorMessage, ProcessingState.READY_FOR_DELIVERY);
-        } catch (final PersistenceException ex) {
+        } catch (final StorageException ex) {
             log.error("An error occured saving the MissingReceipt in database! Details: {}", ex.getMessage());
             return;
         }        

@@ -25,6 +25,7 @@ import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 /**
  * Is a utility class that offers methods to check whether two message model objects are equal, i.e. refer to the same
@@ -124,21 +125,26 @@ public final class CompareUtils {
              Utils.nullSafeEqual (svc1.getType(), svc2.getType());
     }
 
-    /**
-     * Checks if two {@link IPayload} objects are equals, i.e. if they represent the same payload data.
-     *
-     * @param pl1   first payload
-     * @param pl2   second payload
-     * @return      <code>true</code> if the payloads are equal,
-     *              <code>false</code> otherwise
-     * @since 4.0.0
-     */
-    public static boolean areEqual(final IPayload pl1, final IPayload pl2) {
-        return Utils.nullSafeEqual(pl1.getContainment(), pl2.getContainment()) &&
-               Utils.nullSafeEqual(pl1.getPayloadURI(), pl2.getPayloadURI()) &&
-               Utils.nullSafeEqual(pl1.getContentLocation(), pl2.getContentLocation());
-    }
-    
+//    /**
+//     * Checks if two {@link IPayload} objects are equals, i.e. if they represent the same payload data.
+//     * <p>
+//     * NOTE: This method only checks the payloads' meta-data for equivalence and therefore it may indicate two payloads
+//     * being equal if there meta-data is the same, even if the actual content differs! 
+//     *
+//     * @param pl1   first payload
+//     * @param pl2   second payload
+//     * @return      <code>true</code> if the payloads are equal,
+//     *              <code>false</code> otherwise
+//     * @since 4.0.0
+//     */
+//    public static boolean areEqual(final IPayload pl1, final IPayload pl2) {
+//    	return (pl1 instanceof IPayloadEntity && pl2 instanceof IPayloadEntity) ?    		
+//    				((IPayloadEntity) pl1).getPayloadId().equals(((IPayloadEntity) pl2).getPayloadId())
+//    			  : Utils.nullSafeEqual(pl1.getContainment(), pl2.getContainment()) &&
+//    				Utils.nullSafeEqual(pl1.getPayloadURI(), pl2.getPayloadURI()) &&
+//    				Utils.areEqual(pl1.getProperties(), pl2.getProperties());
+//    }
+//    
     /*
      * This class only has static utility methods and should not be instantiated!
      */

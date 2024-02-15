@@ -140,8 +140,8 @@ public class PMode implements IPMode, Serializable {
      */
     public static PMode createFromXML(final InputStream is) throws Exception {
     	// When the P-Mode cannot be read from the stream the Persister.read() may throw a InvocationTargetException
-        // that will contain a PersistenceException exception that describes the actual error. Therefore we catch
-        // InvocationTargetException and only throw the PersistenceException
+        // that will contain a StorageException exception that describes the actual error. Therefore we catch
+        // InvocationTargetException and only throw the StorageException
         try {
             return new Persister(new AnnotationStrategy()).read(PMode.class, is, false);
         } catch (final InvocationTargetException ex) {
@@ -162,8 +162,8 @@ public class PMode implements IPMode, Serializable {
      */
     public void writeAsXMLTo(final OutputStream os) throws Exception {
     	// When the P-Mode cannot be written to the stream the Persister.read() may throw a InvocationTargetException
-    	// that will contain a PersistenceException exception that describes the actual error. Therefore we catch
-    	// InvocationTargetException and only throw the PersistenceException
+    	// that will contain a StorageException exception that describes the actual error. Therefore we catch
+    	// InvocationTargetException and only throw the StorageException
     	try {
     		new Persister(new AnnotationStrategy()).write(this, os);
     	} catch (final InvocationTargetException ex) {

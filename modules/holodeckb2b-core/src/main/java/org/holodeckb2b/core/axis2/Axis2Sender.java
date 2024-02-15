@@ -45,14 +45,14 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
+import org.holodeckb2b.interfaces.storage.IReceiptEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is responsible for sending the message unit using the Axis2 framework. Depending on the messaging protocol the 
@@ -71,9 +71,9 @@ public class Axis2Sender {
      * Sends the given message unit to the other MSH.
      *
      * @param messageUnit   The message unit to send
-     * @throws PersistenceException when the processing state could not be updated
+     * @throws StorageException when the processing state could not be updated
      */
-    public static void sendMessage(final IMessageUnitEntity messageUnit) throws PersistenceException {    	
+    public static void sendMessage(final IMessageUnitEntity messageUnit) throws StorageException {    	
         log.trace("Starting send operation for {} (msgId={})", MessageUnitUtils.getMessageUnitName(messageUnit),
         			messageUnit.getMessageId());        
         IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(messageUnit.getPModeId());
@@ -190,10 +190,10 @@ public class Axis2Sender {
      * 
      * @param messageUnit				to be sent
      * @param failureDescription		description of the failure
-     * @throws PersistenceException		when the message unit's state could not be updated
+     * @throws StorageException		when the message unit's state could not be updated
      */
 	private static void registerSendFailure(IMessageUnitEntity messageUnit, String failureDescription) 
-																						throws PersistenceException {
+																						throws StorageException {
 		// Set state to FAILURE for Signals or SUSPENDED for User Messages		
     	HolodeckB2BCore.getStorageManager()
     				   .setProcessingState(messageUnit, 

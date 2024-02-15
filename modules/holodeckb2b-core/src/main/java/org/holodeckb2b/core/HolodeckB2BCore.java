@@ -18,6 +18,7 @@ package org.holodeckb2b.core;
 
 import org.apache.axis2.AxisFault;
 import org.holodeckb2b.core.config.InternalConfiguration;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.core.validation.IValidationExecutor;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -60,11 +61,9 @@ public class HolodeckB2BCore extends HolodeckB2BCoreInterface {
     }
 
     /**
-     * Gets the data access object that should be used to store and update the meta-data on processed message units.
-     * <p>The returned data access object is a facade to the one provided by the persistency provider to ensure that
-     * changes in the message unit meta-data are managed correctly.
+     * Gets the data access object that should be used to store and update the data on processed message units.
      *
-     * @return  The {@link StorageManager} that Core classes should use to update meta-data of message units
+     * @return  The {@link StorageManager} that Core classes should use to update data of message units
      * @since  3.0.0
      */
     public static StorageManager getStorageManager() {

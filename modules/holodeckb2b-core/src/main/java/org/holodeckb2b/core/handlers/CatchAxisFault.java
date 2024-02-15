@@ -17,7 +17,6 @@
 package org.holodeckb2b.core.handlers;
 
 import java.util.Collection;
-import java.util.Set;
 import java.util.UUID;
 
 import org.apache.axis2.AxisFault;
@@ -32,15 +31,16 @@ import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
+import org.holodeckb2b.core.storage.NonPersistedErrorMessage;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 
 /**
@@ -97,7 +97,7 @@ public class CatchAxisFault extends AbstractBaseHandler {
 		                        								new GenericReceiveMessageFailure(mu, failureDescription)
 		                        							  : new GenericSendMessageFailure(mu, failureDescription));
                     }
-                } catch (final PersistenceException ex) {
+                } catch (final StorageException ex) {
                     // Unable to change the processing state, log the error.
                     log.error(MessageUnitUtils.getMessageUnitName(mu) + " with msg-id [" + mu.getMessageId()
                                 + "] could not be processed due to an internal error.");
@@ -130,7 +130,7 @@ public class CatchAxisFault extends AbstractBaseHandler {
         ErrorMessage errorMessage = new ErrorMessage(otherError);
         try {
             return (IErrorMessageEntity) HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(errorMessage);
-        } catch (final PersistenceException dbe) {
+        } catch (final StorageException dbe) {
             // (Still) a problem with the database, create the Error signal message without storing it
             log.fatal("Could not store error signal message in database! Details: " + dbe.getMessage());
             log.trace("Create a non-persisted ErrorMessageEntity so we can still send the message");            
@@ -138,75 +138,6 @@ public class CatchAxisFault extends AbstractBaseHandler {
         } catch (DuplicateMessageIdException e) {
         	// Can never occur because a unique id is generated for the Error Message
         	return null;
-		}
-    }
-
-    /**
-     * Helper class to allow sending of an error the sender of the message even if the persistency layer is down.
-     */
-    public class NonPersistedErrorMessage extends ErrorMessage implements IErrorMessageEntity {
-    	private String	coreId;
-    	private boolean addSOAPFault = false;
-    	private boolean isMultiHop = false;
-    	private Label	leg;
-    	
-    	public NonPersistedErrorMessage(final ErrorMessage source) {
-			super(source);
-			coreId = UUID.randomUUID().toString();
-			setMessageId(MessageIdUtils.createMessageId());			
-		}
-
-		@Override
-		public boolean isLoadedCompletely() {
-			return true;
-		}
-
-		@Override
-		public boolean usesMultiHop() {
-			return isMultiHop;
-		}
-
-		@Override
-		public boolean shouldHaveSOAPFault() {
-			return addSOAPFault;
-		}
-
-		@Override
-		public String getCoreId() {
-			return coreId;
-		}
-
-		@Override
-		public Set<String> getRelatedTo() {
-			return null;
-		}
-
-		@Override
-		public void addRelatesTo(String coreId) {
-		}
-
-		@Override
-		public void setMultiHop(boolean usingMultiHop) {
-			isMultiHop = usingMultiHop;
-		}
-
-		@Override
-		public void setAddSOAPFault(boolean addSOAPFault) {
-			this.addSOAPFault = addSOAPFault;
-		}
-
-		@Override
-		public Label getLeg() {
-			return leg;
-		}
-
-		@Override
-		public void setLeg(Label leg) {
-			this.leg = leg;
-		}
-
-		@Override
-		public void setProcessingState(ProcessingState newState, String description) {
 		}
     }
 }

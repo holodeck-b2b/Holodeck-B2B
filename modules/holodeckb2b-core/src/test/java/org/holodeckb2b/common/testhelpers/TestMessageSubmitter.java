@@ -30,7 +30,7 @@ public class TestMessageSubmitter implements IMessageSubmitter {
 	 * @see org.holodeckb2b.interfaces.submit.IMessageSubmitter#submitMessage(org.holodeckb2b.interfaces.messagemodel.IUserMessage, boolean)
 	 */
 	@Override
-	public String submitMessage(IUserMessage um, boolean deletePayloadFiles) throws MessageSubmitException {
+	public String submitMessage(IUserMessage um) throws MessageSubmitException {
 		return submitMessageUnit(um);
 	}
 

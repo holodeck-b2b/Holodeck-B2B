@@ -1,4 +1,20 @@
-package org.holodeckb2b.persistency.inmemory.dto;
+/*
+ * Copyright (C) 2019 The Holodeck B2B Team
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.holodeckb2b.test.storage;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,27 +27,26 @@ import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
 import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.persistency.entities.IPayloadEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 
 /**
  * Is the {@link IUserMessageEntity} implementation of the in-memory persistency provider used for testing.
  * 
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class UserMessageDTO extends MessageUnitDTO implements IUserMessageEntity {
+public class UserMessageEntity extends MessageUnitEntity implements IUserMessageEntity {
 	private String               mpc;
     private TradingPartner       sender;
     private TradingPartner       receiver;
     private CollaborationInfo    collabInfo;
     private ArrayList<IProperty> msgProperties = new ArrayList<>();
-    private ArrayList<IPayloadEntity>  payloads = new ArrayList<>();
+    private ArrayList<PayloadEntity>  payloads = new ArrayList<>();
 
-    public UserMessageDTO() {
+    public UserMessageEntity() {
         super();
     }
 
-    public UserMessageDTO(final IUserMessage sourceUserMessage) {
+    public UserMessageEntity(final IUserMessage sourceUserMessage) {
         super(sourceUserMessage);
         copyFrom(sourceUserMessage);
     }
@@ -48,12 +63,12 @@ public class UserMessageDTO extends MessageUnitDTO implements IUserMessageEntity
         setMessageProperties(sourceUserMessage.getMessageProperties());
         this.payloads = new ArrayList<>();
         if (!Utils.isNullOrEmpty(sourceUserMessage.getPayloads()))
-        	sourceUserMessage.getPayloads().forEach(p -> payloads.add(new PayloadDTO(this, p)));
+        	sourceUserMessage.getPayloads().forEach(p -> payloads.add(new PayloadEntity(this, p)));
     }
 
     @Override
-	public MessageUnitDTO clone() {
-		return new UserMessageDTO(this);
+	public MessageUnitEntity clone() {
+		return new UserMessageEntity(this);
 	}
     
     @Override
@@ -109,7 +124,7 @@ public class UserMessageDTO extends MessageUnitDTO implements IUserMessageEntity
     }
 
     @Override
-    public Collection<IPayloadEntity> getPayloads() {
+    public Collection<PayloadEntity> getPayloads() {
         return payloads;
     }
 }

@@ -1,4 +1,20 @@
-package org.holodeckb2b.persistency.inmemory.dto;
+/*
+ * Copyright (C) 2019 The Holodeck B2B Team
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.holodeckb2b.test.storage;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,27 +23,27 @@ import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
 
-public class ErrorMessageDTO extends MessageUnitDTO implements IErrorMessageEntity {
+public class ErrorMessageEntity extends MessageUnitEntity implements IErrorMessageEntity {
 	private ArrayList<IEbmsError>    errors = new ArrayList<>();
 	private boolean useSOAPFault = false;
 	private ILeg.Label leg = null;
 
-	public ErrorMessageDTO() {
+	public ErrorMessageEntity() {
 		super();
 	}
 	
-	public ErrorMessageDTO(IErrorMessage source) {
+	public ErrorMessageEntity(IErrorMessage source) {
 		super(source);
 		copyFrom(source);
 	}
 	
 	@Override
-	public MessageUnitDTO clone() {
-		return new ErrorMessageDTO(this);
+	public MessageUnitEntity clone() {
+		return new ErrorMessageEntity(this);
 	}
 	
 	public void copyFrom(IErrorMessage source) {

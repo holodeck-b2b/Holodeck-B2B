@@ -22,7 +22,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.util.HashMap;
 
-import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.junit.After;
 import org.junit.Before;
@@ -38,7 +38,7 @@ public class PathWatcherTest {
 
     @Before
     public void setUp() {
-        baseDir = TestUtils.getPath("workers").toString();
+        baseDir = TestUtils.getTestResource("workers").toString();
     }
 
     @After

@@ -21,16 +21,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
@@ -40,16 +40,15 @@ import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestEventProcessor;
-import org.holodeckb2b.common.testhelpers.TestStorageManager;
-import org.holodeckb2b.common.testhelpers.TestUtils;
-import org.holodeckb2b.commons.util.Utils;
-import org.holodeckb2b.core.HolodeckB2BCore;
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.events.IMessageUnitPurged;
-import org.holodeckb2b.interfaces.persistency.IUpdateManager;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
-import org.holodeckb2b.persistency.inmemory.QueryManager;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
+import org.holodeckb2b.test.storage.InMemoryMDSProvider;
+import org.holodeckb2b.test.storage.InMemoryPSProvider;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -75,132 +74,79 @@ public class PurgeOldMessagesWorkerTest {
 	private static final String MSGID_5 = "e1-msg-id@test";
 	private static final String MSGID_6 = "um6-msg-id@test";
 
-	private static String basePath = TestUtils.getPath("purgetest").toString();
-	
-	private static QueryManager	queryManager;
-	
-	private static TestEventProcessor eventProcessor;
+	private static InMemoryMDSProvider  mdsProvider;
+	private static InMemoryPSProvider   psProvider;
+	private static TestEventProcessor	eventProcessor;
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(basePath));
-		IUpdateManager updManager =  ((TestStorageManager) HolodeckB2BCore.getStorageManager()).getUpdateManager();
-		queryManager = (QueryManager) HolodeckB2BCore.getQueryManager();
-		eventProcessor = (TestEventProcessor) HolodeckB2BCore.getEventProcessor();
+		HolodeckB2BTestCore testCore = new HolodeckB2BTestCore();
+		mdsProvider = (InMemoryMDSProvider) testCore.getMetadataStorageProvider();		
+		psProvider = (InMemoryPSProvider) testCore.getPayloadStorageProvider();		
+		eventProcessor = (TestEventProcessor) testCore.getEventProcessor();
 		
-		// Make tmp directory for payload data
-		new File(basePath + "/tmp").mkdir();
-
-		Path targetPath;
-		MessageProcessingState state;
-		Calendar stateTime = Calendar.getInstance();
-
-		UserMessage um;
+		HolodeckB2BCoreInterface.setImplementation(testCore);
+	
+		createUserMessage(MSGID_1, 28);
+		createUserMessage(MSGID_2, 13);
+		createUserMessage(MSGID_3,  8);
+		createUserMessage(MSGID_4,  4);
 		
-		// UserMessage 1		
-		um = new UserMessage();
-		um.setMessageId(MSGID_1);
-
-		Payload p1 = new Payload();
-		targetPath = Paths.get(basePath, "tmp", "1-" + PAYLOAD_1_FILE);
-		Files.copy(Paths.get(basePath, PAYLOAD_1_FILE), targetPath, StandardCopyOption.REPLACE_EXISTING);
-		p1.setContentLocation(targetPath.toString());
-		um.addPayload(p1);
-
-		Payload p2 = new Payload();
-		targetPath = Paths.get(basePath, "tmp", "1-" + PAYLOAD_2_FILE);
-		Files.copy(Paths.get(basePath, PAYLOAD_2_FILE), targetPath, StandardCopyOption.REPLACE_EXISTING);
-		p2.setContentLocation(targetPath.toString());
-		um.addPayload(p2);
-		
-		state = new MessageProcessingState(ProcessingState.DELIVERY_FAILED);
-		stateTime.add(Calendar.DAY_OF_YEAR, -20);
-		state.setStartTime(stateTime.getTime());		
-		um.setProcessingState(state);
-
-		updManager.storeMessageUnit(um);
-		
-		// UserMessage 2		
-		um = new UserMessage();
-		um.setMessageId(MSGID_2);
-
-		// Simulate payload file already deleted by not making copy
-		p1 = new Payload();
-		targetPath = Paths.get(basePath, "tmp", "2-" + PAYLOAD_1_FILE);
-		p1.setContentLocation(targetPath.toString());
-		um.addPayload(p1);
-
-		state = new MessageProcessingState(ProcessingState.AWAITING_RECEIPT);
-		stateTime = Calendar.getInstance();
-		stateTime.add(Calendar.DAY_OF_YEAR, -13);
-		state.setStartTime(stateTime.getTime());
-		um.setProcessingState(state);
-
-		updManager.storeMessageUnit(um);
-		
-		// UserMessage 3
-		um = new UserMessage();
-		um.setMessageId(MSGID_3);
-		
-		p1 = new Payload();
-		targetPath = Paths.get(basePath, "tmp", "3-" + PAYLOAD_1_FILE);
-		Files.copy(Paths.get(basePath, PAYLOAD_1_FILE), targetPath, StandardCopyOption.REPLACE_EXISTING);
-		p1.setContentLocation(targetPath.toString());
-		um.addPayload(p1);
-		
-		state = new MessageProcessingState(ProcessingState.DELIVERED);
-		stateTime = Calendar.getInstance();
-		stateTime.add(Calendar.DAY_OF_YEAR, -8);
-		state.setStartTime(stateTime.getTime());
-		um.setProcessingState(state);
-		
-		updManager.storeMessageUnit(um);
-
-		// User Message 4
-		um = new UserMessage();
-		um.setMessageId(MSGID_6);
-		targetPath = Paths.get(basePath, "tmp", "6-" + PAYLOAD_1_FILE);
-		Files.copy(Paths.get(basePath, PAYLOAD_1_FILE), targetPath, StandardCopyOption.REPLACE_EXISTING);
-		p1 = new Payload();
-		p1.setContentLocation(targetPath.toString());
-		um.addPayload(p1);
-		state = new MessageProcessingState(ProcessingState.DUPLICATE);
-		stateTime = Calendar.getInstance();
-		stateTime.add(Calendar.DAY_OF_YEAR, -4);
-		state.setStartTime(stateTime.getTime());
-		um.setProcessingState(state);
-		
-		updManager.storeMessageUnit(um);
-		
-		// Receipt
 		final Receipt rcpt = new Receipt();
-		rcpt.setMessageId(MSGID_4);
-		state = new MessageProcessingState(ProcessingState.DONE);
-		stateTime = Calendar.getInstance();
-		stateTime.add(Calendar.DAY_OF_YEAR, -8);
+		rcpt.setMessageId(MSGID_5);
+		MessageProcessingState state = new MessageProcessingState(ProcessingState.DONE);
+		Calendar stateTime = Calendar.getInstance();
+		stateTime.add(Calendar.DAY_OF_YEAR, -5);
 		state.setStartTime(stateTime.getTime());
 		rcpt.setProcessingState(state);
 		rcpt.setContent(Collections.singletonList(OMAbstractFactory.getOMFactory().createOMElement("Testing", null)));
 		
-		updManager.storeMessageUnit(rcpt);
+		mdsProvider.storeMessageUnit(rcpt);
 		
 		// Error
 		final ErrorMessage error = new ErrorMessage();
-		error.setMessageId(MSGID_5);
+		error.setMessageId(MSGID_6);
 		state = new MessageProcessingState(ProcessingState.DELIVERED);
 		stateTime = Calendar.getInstance();
 		stateTime.add(Calendar.DAY_OF_YEAR, -4);
 		state.setStartTime(stateTime.getTime());
 		error.setProcessingState(state);
 
-		updManager.storeMessageUnit(error);
+		mdsProvider.storeMessageUnit(error);
 		
-		assertEquals(6, queryManager.getNumberOfStoredMessageUnits());
+		assertEquals(6, mdsProvider.getNumberOfStoredMessageUnits());
+	}
+
+	private static void createUserMessage(String msgId, int days)
+			throws DuplicateMessageIdException, StorageException, IOException, FileNotFoundException {
+		try (FileInputStream p1content = new FileInputStream(TestUtils.getTestResource(PAYLOAD_1_FILE).toFile());
+			 FileInputStream p2content = new FileInputStream(TestUtils.getTestResource(PAYLOAD_2_FILE).toFile())) {
+			
+			UserMessage um = new UserMessage();
+			um.setMessageId(msgId);
+			
+			Payload p1 = new Payload();
+			p1.setContentStream(p1content);
+			um.addPayload(p1);
+	
+			Payload p2 = new Payload();
+			p2.setContentStream(p2content);
+			um.addPayload(p2);
+			
+			MessageProcessingState state = new MessageProcessingState(ProcessingState.DELIVERY_FAILED);
+			Calendar stateTime = Calendar.getInstance();
+			stateTime.add(Calendar.DAY_OF_YEAR, -days);
+			state.setStartTime(stateTime.getTime());		
+			um.setProcessingState(state);
+	
+			mdsProvider.storeMessageUnit(um);
+		}
 	}
 
 	@AfterClass
 	public static void tearDownClass() throws Exception {
-		TestUtils.cleanOldMessageUnitEntities();
+		mdsProvider.clear();
+		psProvider.clear();
 	}
 	
 	@Before
@@ -208,13 +154,13 @@ public class PurgeOldMessagesWorkerTest {
 		eventProcessor.reset();
 	}
 	
-
 	@Test
 	public void test0_NaNPurgeDelay() {
 		final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
 		final HashMap<String, Object> parameters = new HashMap<>();
 		parameters.put(PurgeOldMessagesWorker.P_PURGE_AFTER_DAYS, "NaN");
+		
 		try {
 			worker.setParameters(parameters);
 		} catch (final Exception e) {
@@ -234,79 +180,64 @@ public class PurgeOldMessagesWorkerTest {
 			fail("Exception during processing");
 		}
 
-		assertEquals(6, queryManager.getNumberOfStoredMessageUnits());
+		assertEquals(6, mdsProvider.getNumberOfStoredMessageUnits());
 	}
 
 	@Test
-	public void test1_OneToPurge() throws PersistenceException {
+	public void test1_OneToPurge() throws StorageException {
 		final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
 		final HashMap<String, Object> parameters = new HashMap<>();
 		parameters.put(PurgeOldMessagesWorker.P_PURGE_AFTER_DAYS, 15);
 		worker.setParameters(parameters);
 
+		List<String> payloadIds = ((IUserMessageEntity) mdsProvider.getMessageUnit(MSGID_1)).getPayloads().stream()
+															.map(p -> p.getPayloadId()).collect(Collectors.toList());
+		
 		try {
 			worker.doProcessing();
-
-			assertEquals(1, eventProcessor.events.size());
-			assertTrue(eventProcessor.events.stream().allMatch(e -> e instanceof IMessageUnitPurged));
-			assertEquals(MSGID_1, eventProcessor.events.get(0).getSubject().getMessageId());
 		} catch (final Exception ex) {
 			Logger.getLogger(PurgeOldMessagesWorkerTest.class.getName()).log(Level.SEVERE, null, ex);
 			fail("Exception during processing");
 		}
+		assertEquals(1, eventProcessor.events.size());
+		assertTrue(eventProcessor.events.stream().allMatch(e -> e instanceof IMessageUnitPurged));
+		assertEquals(MSGID_1, eventProcessor.events.get(0).getSubject().getMessageId());
 
-		assertEquals(5, queryManager.getNumberOfStoredMessageUnits());
-		assertTrue(Utils.isNullOrEmpty(queryManager.getMessageUnitsWithId(MSGID_1)));
-		assertFalse(Paths.get(basePath, "tmp", "1-" + PAYLOAD_1_FILE).toFile().exists());
-		assertFalse(Paths.get(basePath, "tmp", "2-" + PAYLOAD_2_FILE).toFile().exists());
+		assertEquals(5, mdsProvider.getNumberOfStoredMessageUnits());
+		assertFalse(mdsProvider.existsMessageId(MSGID_1));
+		
+		assertTrue(payloadIds.stream().noneMatch(p -> mdsProvider.existsPayloadId(p)));
+		assertTrue(payloadIds.stream().noneMatch(p -> psProvider.exists(p)));
 	}
 
 	@Test
-	public void test2_PayloadAlreadyRemoved() throws PersistenceException {
+	public void test2_PayloadAlreadyRemoved() throws StorageException {
 		final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
 		final HashMap<String, Object> parameters = new HashMap<>();
-		parameters.put(PurgeOldMessagesWorker.P_PURGE_AFTER_DAYS, 10);
+		parameters.put(PurgeOldMessagesWorker.P_PURGE_AFTER_DAYS, 6);
 		worker.setParameters(parameters);
 
+		List<String> payloadIds = ((IUserMessageEntity) mdsProvider.getMessageUnit(MSGID_2)).getPayloads().stream()
+															.map(p -> p.getPayloadId()).collect(Collectors.toList());
+		payloadIds.addAll(((IUserMessageEntity) mdsProvider.getMessageUnit(MSGID_3)).getPayloads().stream()
+															.map(p -> p.getPayloadId()).collect(Collectors.toList()));
 		try {
 			worker.doProcessing();
-
-			assertTrue(eventProcessor.events.stream().allMatch(e -> e instanceof IMessageUnitPurged));
-			assertEquals(1, eventProcessor.events.size());
-			assertEquals(MSGID_2, eventProcessor.events.get(0).getSubject().getMessageId());
 		} catch (final Exception ex) {
 			Logger.getLogger(PurgeOldMessagesWorkerTest.class.getName()).log(Level.SEVERE, null, ex);
 			fail("Exception during processing");
 		}
+		assertTrue(eventProcessor.events.stream().allMatch(e -> e instanceof IMessageUnitPurged));
+		assertEquals(2, eventProcessor.events.size());
+		
+		assertTrue(eventProcessor.events.stream().anyMatch(ev -> MSGID_2.equals(ev.getSubject().getMessageId())));
+		assertTrue(eventProcessor.events.stream().anyMatch(ev -> MSGID_3.equals(ev.getSubject().getMessageId())));
 
-		assertEquals(4, queryManager.getNumberOfStoredMessageUnits());
-		assertTrue(Utils.isNullOrEmpty(queryManager.getMessageUnitsWithId(MSGID_2)));
-	}
+		assertEquals(3, mdsProvider.getNumberOfStoredMessageUnits());
 
-	@Test
-	public void test3_EventsOnlyForUserMsg() throws PersistenceException {
-		final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
-
-		final HashMap<String, Object> parameters = new HashMap<>();
-		parameters.put(PurgeOldMessagesWorker.P_PURGE_AFTER_DAYS, 5);
-		worker.setParameters(parameters);
-
-		try {
-			worker.doProcessing();
-
-			assertTrue(eventProcessor.events.stream().allMatch(e -> e instanceof IMessageUnitPurged));
-			assertEquals(1, eventProcessor.events.size());
-			assertEquals(MSGID_3, eventProcessor.events.get(0).getSubject().getMessageId());
-		} catch (final Exception ex) {
-			Logger.getLogger(PurgeOldMessagesWorkerTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Exception during processing");
-		}
-
-		assertEquals(2, queryManager.getNumberOfStoredMessageUnits());
-		assertTrue(Utils.isNullOrEmpty(queryManager.getMessageUnitsWithId(MSGID_3)));
-		assertTrue(Utils.isNullOrEmpty(queryManager.getMessageUnitsWithId(MSGID_4)));
-		assertFalse(Paths.get(basePath, "tmp", "3-" + PAYLOAD_1_FILE).toFile().exists());
+		assertTrue(payloadIds.stream().noneMatch(p -> mdsProvider.existsPayloadId(p)));
+		assertTrue(payloadIds.stream().noneMatch(p -> psProvider.exists(p)));
 	}
 }

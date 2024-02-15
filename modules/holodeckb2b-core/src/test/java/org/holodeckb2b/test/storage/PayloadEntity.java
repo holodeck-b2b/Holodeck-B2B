@@ -1,7 +1,25 @@
-package org.holodeckb2b.persistency.inmemory.dto;
+/*
+ * Copyright (C) 2019 The Holodeck B2B Team
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.holodeckb2b.test.storage;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.UUID;
 
 import org.holodeckb2b.common.messagemodel.Description;
 import org.holodeckb2b.common.messagemodel.Property;
@@ -12,32 +30,45 @@ import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.ISchemaReference;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.persistency.entities.IPayloadEntity;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
-public class PayloadDTO implements IPayloadEntity {
-	private UserMessageDTO			parent;
-	private String                  contentLocation;
-    private String                  mimeType;
+public class PayloadEntity implements IPayloadEntity {
+	private Date					lastChange;
+	
+	private String					payloadId;
+	private String					parentCoreId;
+	private String                  mimeType;
     private IPayload.Containment    containment;
     private String                  uri;
     private ArrayList<IProperty>    properties = new ArrayList<>();
     private SchemaReference         schemaRef;
     private Description             description;
 
-    public PayloadDTO(UserMessageDTO parent) {
-    	this.parent = parent;
+    public PayloadEntity() {
+    	this.payloadId = UUID.randomUUID().toString();
+    	this.lastChange = new Date();
     }
 
-    public PayloadDTO(final UserMessageDTO parent, final IPayload source) {
-    	this(parent);
+    public PayloadEntity(final IPayload source) {
+    	this();
     	copyFrom(source);
     }
+    
+    public PayloadEntity(final UserMessageEntity parent, final IPayload source) {
+    	this();    	
+    	copyFrom(source);
+    	this.parentCoreId = parent.getCoreId();
+    }
+    
     
     public void copyFrom(IPayload source) {
     	if (source == null)
     		return;
+    	if (source instanceof IPayloadEntity) {
+    		this.payloadId = ((IPayloadEntity) source).getPayloadId();
+    		this.parentCoreId = ((IPayloadEntity) source).getParentCoreId();
+    	}
     	
-        this.contentLocation = source.getContentLocation();
         this.mimeType = source.getMimeType();
         this.containment = source.getContainment();
         this.uri = source.getPayloadURI();
@@ -49,9 +80,17 @@ public class PayloadDTO implements IPayloadEntity {
         setDescription(source.getDescription());
     }
 
-    public UserMessageDTO getParentUserMessage() {
-    	return parent;
+    public PayloadEntity clone() {
+    	return new PayloadEntity(this);    	
     }
+    
+	public Date getLastChanged() {
+		return lastChange;
+	}
+	
+	public void setChanged(Date d) {
+		this.lastChange = d;
+	}
     
     @Override
     public Containment getContainment() {
@@ -101,15 +140,6 @@ public class PayloadDTO implements IPayloadEntity {
     }
 
     @Override
-    public String getContentLocation() {
-        return contentLocation;
-    }
-
-    public void setContentLocation(final String location) {
-        this.contentLocation = location;
-    }
-
-    @Override
     public String getMimeType() {
         return mimeType;
     }
@@ -121,5 +151,15 @@ public class PayloadDTO implements IPayloadEntity {
 	@Override
 	public void removeProperty(IProperty p2r) {
 		properties.removeIf(p -> CompareUtils.areEqual(p, p2r));		
+	}
+
+	@Override
+	public String getPayloadId() {
+		return payloadId;
+	}
+
+	@Override
+	public String getParentCoreId() {
+		return parentCoreId;
 	}
 }

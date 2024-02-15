@@ -28,13 +28,13 @@ import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Contains some common operations on ebMS V3 / AS4 P-Modes to determine the message exchange pattern they support and
@@ -128,7 +128,7 @@ public class PModeUtils {
 
 						// Use the leg of the referenced message unit
 						return getLeg(rfdMsgs.iterator().next());
-    				} catch (PersistenceException e) {
+    				} catch (StorageException e) {
 						// If we cannot get the information about the referenced message unit, just return null
     					return null;
 					}

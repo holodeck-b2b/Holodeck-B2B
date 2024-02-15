@@ -24,16 +24,16 @@ import org.holodeckb2b.common.events.impl.MessageTransferFailure;
 import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IProtocol;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is a base class for that implements the <i>out_flow</i> handler that configures the actual message transport over the
@@ -65,7 +65,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public abstract class AbstractConfigureHTTPTransport extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, Logger log) throws PersistenceException {
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, Logger log) throws StorageException {
         final IMessageUnitEntity primaryMU = procCtx.getPrimaryMessageUnit();
         // Only when message contains a message unit there is something to do
         if (primaryMU == null) {
@@ -178,9 +178,9 @@ public abstract class AbstractConfigureHTTPTransport extends AbstractBaseHandler
      *
      * @param mc	The message processing context
      * @param log	The Log to be used
-     * @throws PersistenceException  When the processing state cannot be saved in the database
+     * @throws StorageException  When the processing state cannot be saved in the database
      */
-    private void setMessagesToFailed(final IMessageProcessingContext procCtx, final Logger log) throws PersistenceException {
+    private void setMessagesToFailed(final IMessageProcessingContext procCtx, final Logger log) throws StorageException {
     	final StorageManager updManager = HolodeckB2BCore.getStorageManager();
     	final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
     	for(IMessageUnitEntity mu : procCtx.getSendingMessageUnits()) {

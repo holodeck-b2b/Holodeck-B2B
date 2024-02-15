@@ -25,9 +25,9 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IReceiptEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the handler that hands over the Receipts that are ready for delivery to the back-end application to the 
@@ -39,7 +39,7 @@ public class DeliverReceipts extends AbstractBaseHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
-    																					throws PersistenceException {
+    																					throws StorageException {
         // Check if this message contains receipt signals
         final Collection<IReceiptEntity> rcptSignals = procCtx.getReceivedReceipts();
 

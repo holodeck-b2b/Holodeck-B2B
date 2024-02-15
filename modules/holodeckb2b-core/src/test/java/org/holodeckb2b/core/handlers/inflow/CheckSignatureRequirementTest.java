@@ -33,8 +33,8 @@ import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.PartnerConfig;
 import org.holodeckb2b.common.pmode.SecurityConfig;
 import org.holodeckb2b.common.pmode.SigningConfig;
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
@@ -66,7 +66,7 @@ public class CheckSignatureRequirementTest {
     @Before
     public void prepareContext() throws Exception {
         // Create the basic test data
-        pmode = TestUtils.create1WayReceivePushPMode();
+        pmode = HB2BTestUtils.create1WayReceivePushPMode();
         PartnerConfig senderCfg = new PartnerConfig();
         senderCfg.setSecurityConfiguration(new SecurityConfig());
         pmode.setInitiator(senderCfg);
@@ -82,7 +82,7 @@ public class CheckSignatureRequirementTest {
         mc.setServerSide(true);
         
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
-        procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
+        procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(userMessage));
     }
     
     @Test

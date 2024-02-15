@@ -26,11 +26,11 @@ import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.StorageManager;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -54,7 +54,7 @@ public class StartProcessingUsrMessageTest {
         mc.setFLOW(MessageContext.IN_FLOW);
 
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(new UserMessage());
+        IUserMessageEntity userMessageEntity = updateManager.storeReceivedMessageUnit(new UserMessage());
         
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
@@ -74,7 +74,7 @@ public class StartProcessingUsrMessageTest {
         mc.setFLOW(MessageContext.IN_FLOW);
 
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(new UserMessage());
+        IUserMessageEntity userMessageEntity = updateManager.storeReceivedMessageUnit(new UserMessage());
         
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);

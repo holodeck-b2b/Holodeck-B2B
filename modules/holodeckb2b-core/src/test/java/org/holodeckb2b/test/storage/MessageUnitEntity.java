@@ -1,21 +1,35 @@
-package org.holodeckb2b.persistency.inmemory.dto;
+/*
+ * Copyright (C) 2019 The Holodeck B2B Team
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.holodeckb2b.test.storage;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.holodeckb2b.common.messagemodel.MessageProcessingState;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 
-public abstract class MessageUnitDTO implements IMessageUnitEntity {
+public abstract class MessageUnitEntity implements IMessageUnitEntity {
 	private Date	lastChange;
 	private String 	coreId;
 	private String	pModeId;
@@ -26,14 +40,13 @@ public abstract class MessageUnitDTO implements IMessageUnitEntity {
 	private boolean usesMultiHop;
 	
 	private List<IMessageUnitProcessingState> states = new ArrayList<>();
-	private Set<String>	related = new HashSet<>();
 	
-	protected MessageUnitDTO() {
+	protected MessageUnitEntity() {
 		this.coreId = UUID.randomUUID().toString();
 		this.lastChange = new Date();
 	}
 	
-	protected MessageUnitDTO(IMessageUnit source) {
+	protected MessageUnitEntity(IMessageUnit source) {
 		this();		
 		if (source ==  null)
 			copyFrom(source);
@@ -52,15 +65,12 @@ public abstract class MessageUnitDTO implements IMessageUnitEntity {
 			IMessageUnitEntity e = (IMessageUnitEntity) source;
 			this.coreId = e.getCoreId();
 			this.usesMultiHop = e.usesMultiHop();
-			this.related = new HashSet<>();
-			if (!Utils.isNullOrEmpty(e.getRelatedTo()))
-				this.related.addAll(e.getRelatedTo());
 		}
-		if (source instanceof MessageUnitDTO)
-			this.lastChange = ((MessageUnitDTO) source).getLastChanged();
+		if (source instanceof MessageUnitEntity)
+			this.lastChange = ((MessageUnitEntity) source).getLastChanged();
 	}
 	
-	public abstract MessageUnitDTO clone();
+	public abstract MessageUnitEntity clone();
 	
 	public Date getLastChanged() {
 		return lastChange;
@@ -112,16 +122,6 @@ public abstract class MessageUnitDTO implements IMessageUnitEntity {
 	@Override
 	public String getCoreId() {
 		return coreId;
-	}
-
-	@Override
-	public Set<String> getRelatedTo() {
-		return related;
-	}
-
-	@Override
-	public void addRelatesTo(String coreId) {
-		related.add(coreId);
 	}
 
 	@Override
