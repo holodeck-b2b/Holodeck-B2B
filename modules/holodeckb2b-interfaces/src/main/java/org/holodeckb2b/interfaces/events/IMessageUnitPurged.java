@@ -18,18 +18,17 @@
 package org.holodeckb2b.interfaces.events;
 
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.workerpool.IWorkerTask;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the <i>message processing event</i> that indicates that a message unit is deleted from the Holodeck B2B Core
  * message database because the period for maintaining it's meta-data has expired.
- * <p>Note that the <i>"purge"</i> {@link IWorkerTask} implementation is responsible for triggering this event and it
- * therefore depends on this implementation when this event is exactly triggered. An implementation can for example only
- * trigger the event for <i>User Message</i> message units and also decide not to include the payload data.
- * <p>This event must be considered to be the last opportunity for extension to process a message unit. After the event
- * is handled all meta-data, and for User Messages payload data is removed from the system. But note that these data can
- * still be included in back-ups of database and/or file system. It is up to the operator of the system to removed these
- * if needed.
+ * <p>This event is triggered by the Holodeck B2B Core's <i>Storage Manager</i> when the meta-data and, 
+ * for User Messages, the payload content has been removed from storage. This event is therefore the last opportunity 
+ * for extensions to process the meta-data of a message unit.
+ * <p>NOTE: As the payload data has already been removed a call to {@link IPayload#getContent()} for a payload contained
+ * in the purged User Message will not return the data and may throw a {@link StorageException}.  
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.1.0
