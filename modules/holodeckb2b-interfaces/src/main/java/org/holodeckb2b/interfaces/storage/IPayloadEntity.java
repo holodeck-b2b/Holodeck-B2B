@@ -50,6 +50,13 @@ public interface IPayloadEntity extends IPayload {
 	 * 			paylaod is not yet assigned to a User Message
 	 */	
 	String getParentCoreId();
+	
+	/**
+	 * Sets the <i>CoreId</i> of the User Message that this payload is contained in.
+	 * 
+	 * @param cordId 	the <i>CoreId> of the User Message that this payload is contained in
+	 */	
+	void setParentCoreId(String coreId);
 		
 	/**
 	 * Sets the Mime type of the payload.
