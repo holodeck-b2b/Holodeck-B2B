@@ -19,6 +19,7 @@ package org.holodeckb2b.interfaces.storage.providers;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
@@ -172,7 +173,7 @@ public interface IMetadataStorageProvider {
 	 * @param <T>       Limits the <code>type</code> parameter to only message unit classes
 	 * @param <V>       The returned objects will be entity objects. V and T will share the same parent type.
 	 * @param type      The type of message units to retrieve specified by the interface they implement
-	 * @param pmodeIds  List of P-Mode ids
+	 * @param pmodeIds  Set of P-Mode ids
 	 * @param state     The processing state the message units to retrieve should be in
 	 * @return          The ordered list of entity objects representing the message unit objects of the specified
 	 *                  type and which are in the specified processing state and have their processing defined by a
@@ -181,7 +182,7 @@ public interface IMetadataStorageProvider {
 	 */
 	<T extends IMessageUnit, V extends IMessageUnitEntity> List<V> getMessageUnitsForPModesInState(
 	                                                                                final Class<T> type,
-	                                                                                final Collection<String> pmodeIds,
+	                                                                                final Set<String> pmodeIds,
 	                                                                                final ProcessingState state)
 	                                                                            throws StorageException;
 
@@ -196,7 +197,7 @@ public interface IMetadataStorageProvider {
 	 * @param <V>       The returned objects will be entity objects. V and T will share the same parent type.
 	 * @param type      The type of message units to retrieve specified by the interface they implement
 	 * @param direction The direction of the message units to retrieve
-	 * @param states    Array of processing states that the message units to retrieve should be in
+	 * @param states    Set of processing states that the message units to retrieve should be in
 	 * @return          List with entity objects representing the message units of the specified type that are
 	 * 					in one of the given states, in descending order on time stamp
 	 * @throws StorageException When a problem occurs during the retrieval of the message units
@@ -204,7 +205,7 @@ public interface IMetadataStorageProvider {
 	<T extends IMessageUnit, V extends IMessageUnitEntity> List<V>
 	                                             getMessageUnitsInState(final Class<T> type,
 	                                                                    final Direction direction,
-	                                                                    final ProcessingState[] states)
+	                                                                    final Set<ProcessingState> states)
 	                                                                                    throws StorageException;
 
 	/**

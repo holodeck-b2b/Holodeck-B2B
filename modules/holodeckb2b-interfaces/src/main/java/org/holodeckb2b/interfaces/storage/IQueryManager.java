@@ -28,14 +28,14 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
- * Defines the interface the Holodeck B2B Core offers to both other Core and  "external" components for retrieving the 
- * message data (both meta-data and payload data). It acts as a facade to the <i>Meta-data Storage</i> and <i>Payload 
- * Storage</i> Providers and ensures that the payload information is complete when returning the {@link IPayloadEntity} 
+ * Defines the interface the Holodeck B2B Core offers to both other Core and  "external" components for retrieving the
+ * message data (both meta-data and payload data). It acts as a facade to the <i>Meta-data Storage</i> and <i>Payload
+ * Storage</i> Providers and ensures that the payload information is complete when returning the {@link IPayloadEntity}
  * object.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
- * @since  7.0.0	Moved from the <i>Persistency Provider</i> to the Core  
+ * @since  7.0.0	Moved from the <i>Persistency Provider</i> to the Core
  */
 public interface IQueryManager {
 
@@ -50,7 +50,7 @@ public interface IQueryManager {
      * @param <V>       The returned objects will be entity objects. V and T will share the same parent type.
      * @param type      The type of message units to retrieve specified by the interface they implement
      * @param direction The direction of the message units to retrieve
-     * @param states    Array of processing states that the message units to retrieve should be in
+     * @param states    Set of processing states that the message units to retrieve should be in
      * @return          List with entity objects representing the message units of the specified type that are
      * 					in one of the given states, in descending order on time stamp
      * @throws StorageException When a problem occurs during the retrieval of the message units
@@ -58,7 +58,7 @@ public interface IQueryManager {
     <T extends IMessageUnit, V extends IMessageUnitEntity> List<V>
                                                  getMessageUnitsInState(final Class<T> type,
                                                                         final Direction direction,
-                                                                        final ProcessingState[] states)
+                                                                        final Set<ProcessingState> states)
                                                                                         throws StorageException;
 
     /**
@@ -102,7 +102,7 @@ public interface IQueryManager {
      * @param <T>       Limits the <code>type</code> parameter to only message unit classes
      * @param <V>       The returned objects will be entity objects. V and T will share the same parent type.
      * @param type      The type of message units to retrieve specified by the interface they implement
-     * @param pmodeIds  List of P-Mode ids
+     * @param pmodeIds  Set of P-Mode ids
      * @param state     The processing state the message units to retrieve should be in
      * @return          The ordered list of entity objects representing the message unit objects of the specified
      *                  type and which are in the specified processing state and have their processing defined by a
@@ -111,7 +111,7 @@ public interface IQueryManager {
      */
     <T extends IMessageUnit, V extends IMessageUnitEntity> List<V> getMessageUnitsForPModesInState(
                                                                                     final Class<T> type,
-                                                                                    final Collection<String> pmodeIds,
+                                                                                    final Set<String> pmodeIds,
                                                                                     final ProcessingState state)
                                                                                 throws StorageException;
 
@@ -154,26 +154,26 @@ public interface IQueryManager {
      * @since 7.0.0 The argument type is now the entity class
      */
     boolean isAlreadyProcessed(final IUserMessageEntity userMessage) throws StorageException;
-    
+
     /**
-     * Retrieves the message unit with the given <code>CoreId</code>. 
-     * <p><b>NOTE:</b> The returned entity object may not be completely loaded! Before a message unit is going to be 
+     * Retrieves the message unit with the given <code>CoreId</code>.
+     * <p><b>NOTE:</b> The returned entity object may not be completely loaded! Before a message unit is going to be
      * processed it must be checked if it is loaded completely.
      *
      * @param coreId     The CoreId of the message unit to retrieve
      * @return           The {@link IMessageUnitEntity} with the given CoreId or <code>null</code> if none exists
      * @throws StorageException If an error occurs when retrieving the message unit from the database
      * @since 7.0.0
-     */    
+     */
     IMessageUnitEntity getMessageUnitWithCoreId(final String coreId) throws StorageException;
-    
+
 	/**
-	 * Gets the set of <i>CoreId</i>s of message units that are related to the message unit with the given <i>CoreId</i>. 
-	 * <p>This can for example be the User Message to which a Receipt or Error Message applies, but also the Pull 
-	 * Request that triggered the sending of the User Message.  
-	 * 
+	 * Gets the set of <i>CoreId</i>s of message units that are related to the message unit with the given <i>CoreId</i>.
+	 * <p>This can for example be the User Message to which a Receipt or Error Message applies, but also the Pull
+	 * Request that triggered the sending of the User Message.
+	 *
 	 * @param coreId  the <i>CoreId</i> to get related message units for
-	 * @return	the set of <i>CoreId</i>s of message units related to <code>coreId</code> 
+	 * @return	the set of <i>CoreId</i>s of message units related to <code>coreId</code>
 	 * @since 7.0.0
 	 */
 	Set<String>	getRelatedTo(final String coreId);
