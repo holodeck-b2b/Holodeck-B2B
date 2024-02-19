@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 public class PayloadEntity implements IPayloadEntity {
 	private Date					lastChange;
-	
+
 	private String					payloadId;
 	private String					parentCoreId;
 	private String                  mimeType;
@@ -53,14 +53,14 @@ public class PayloadEntity implements IPayloadEntity {
     	this();
     	copyFrom(source);
     }
-    
+
     public PayloadEntity(final UserMessageEntity parent, final IPayload source) {
-    	this();    	
+    	this();
     	copyFrom(source);
     	this.parentCoreId = parent.getCoreId();
     }
-    
-    
+
+
     public void copyFrom(IPayload source) {
     	if (source == null)
     		return;
@@ -68,30 +68,31 @@ public class PayloadEntity implements IPayloadEntity {
     		this.payloadId = ((IPayloadEntity) source).getPayloadId();
     		this.parentCoreId = ((IPayloadEntity) source).getParentCoreId();
     	}
-    	
+
         this.mimeType = source.getMimeType();
         this.containment = source.getContainment();
         this.uri = source.getPayloadURI();
 
         if (!Utils.isNullOrEmpty(source.getProperties()))
         	source.getProperties().forEach(p -> properties.add(new Property(p)));
-        
+
         setSchemaReference(source.getSchemaReference());
         setDescription(source.getDescription());
     }
 
-    public PayloadEntity clone() {
-    	return new PayloadEntity(this);    	
+    @Override
+	public PayloadEntity clone() {
+    	return new PayloadEntity(this);
     }
-    
+
 	public Date getLastChanged() {
 		return lastChange;
 	}
-	
+
 	public void setChanged(Date d) {
 		this.lastChange = d;
 	}
-    
+
     @Override
     public Containment getContainment() {
         return containment;
@@ -106,7 +107,8 @@ public class PayloadEntity implements IPayloadEntity {
         return uri;
     }
 
-    public void setPayloadURI(final String uri) {
+    @Override
+	public void setPayloadURI(final String uri) {
         this.uri = uri;
     }
 
@@ -115,9 +117,10 @@ public class PayloadEntity implements IPayloadEntity {
         return properties;
     }
 
-    public void addProperty(final IProperty prop) {
-        if (prop != null) 
-            this.properties.add(new Property(prop));        
+    @Override
+	public void addProperty(final IProperty prop) {
+        if (prop != null)
+            this.properties.add(new Property(prop));
     }
 
     @Override
@@ -144,13 +147,14 @@ public class PayloadEntity implements IPayloadEntity {
         return mimeType;
     }
 
-    public void setMimeType(final String mimeType) {
+    @Override
+	public void setMimeType(final String mimeType) {
         this.mimeType = mimeType;
     }
 
 	@Override
 	public void removeProperty(IProperty p2r) {
-		properties.removeIf(p -> CompareUtils.areEqual(p, p2r));		
+		properties.removeIf(p -> CompareUtils.areEqual(p, p2r));
 	}
 
 	@Override
@@ -161,5 +165,10 @@ public class PayloadEntity implements IPayloadEntity {
 	@Override
 	public String getParentCoreId() {
 		return parentCoreId;
+	}
+
+	@Override
+	public void setParentCoreId(String coreId) {
+		this.parentCoreId = coreId;
 	}
 }

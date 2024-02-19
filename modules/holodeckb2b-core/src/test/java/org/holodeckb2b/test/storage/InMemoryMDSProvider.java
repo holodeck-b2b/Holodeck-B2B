@@ -43,20 +43,20 @@ import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
 import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
- * Is a {@link IPersistencyProvider} implementation for testing that stores the message units in-memory. 
- * 
+ * Is a {@link IPersistencyProvider} implementation for testing that stores the message units in-memory.
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class InMemoryMDSProvider implements IMetadataStorageProvider {
 
-	private Set<IMessageUnitEntity>	 msgUnitStore = Collections.synchronizedSet(new HashSet<IMessageUnitEntity>());	
-	private Set<IPayloadEntity>	 payloadInfoStore = Collections.synchronizedSet(new HashSet<IPayloadEntity>());	
-	
+	private Set<IMessageUnitEntity>	 msgUnitStore = Collections.synchronizedSet(new HashSet<IMessageUnitEntity>());
+	private Set<IPayloadEntity>	 payloadInfoStore = Collections.synchronizedSet(new HashSet<IPayloadEntity>());
+
 	@Override
 	public String getName() {
 		return "In Memory Test Meta-data Storage Provider";
 	}
-		
+
 	@Override
 	public void init(IConfiguration config) throws StorageException {
 	}
@@ -72,12 +72,12 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 	public long getNumberOfStoredPayloads() {
 		return payloadInfoStore.size();
 	}
-	
+
 	public void clear() {
 		msgUnitStore.clear();
 		payloadInfoStore.clear();
 	}
-	
+
 	public boolean existsMessageId(String messageId) {
 		return msgUnitStore.parallelStream().anyMatch(m -> messageId.equals(m.getMessageId()));
 	}
@@ -85,7 +85,7 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 	public boolean existsPayloadId(String payloadId) {
 		return payloadInfoStore.parallelStream().anyMatch(p -> payloadId.equals(p.getPayloadId()));
 	}
-	
+
 	public IMessageUnitEntity getMessageUnit(String messageId) {
 		return msgUnitStore.parallelStream().filter(m -> messageId.equals(m.getMessageId())).findFirst().orElse(null);
 	}
@@ -93,7 +93,7 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 	public IPayloadEntity getPayloadMetadate(String payloadId) {
 		return payloadInfoStore.parallelStream().filter(p -> payloadId.equals(p.getPayloadId())).findFirst().orElse(null);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IMessageUnit, V extends IMessageUnitEntity> V storeMessageUnit(T messageUnit)
@@ -104,16 +104,16 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 		else if (messageUnit instanceof ISelectivePullRequest)
 			dto = new PullRequestEntity((IPullRequest) messageUnit);
 		else if (messageUnit instanceof IPullRequest)
-			dto = new PullRequestEntity((IPullRequest) messageUnit);		
+			dto = new PullRequestEntity((IPullRequest) messageUnit);
 		else if (messageUnit instanceof IReceipt)
 			dto = new ReceiptEntity((IReceipt) messageUnit);
 		else if (messageUnit instanceof IErrorMessage)
 			dto = new ErrorMessageEntity((IErrorMessage) messageUnit);
 		else
 			throw new IllegalArgumentException("Unknown message unit type");
-		
+
 		msgUnitStore.add(dto);
-		
+
 		return (V) ((MessageUnitEntity) dto).clone();
 	}
 
@@ -121,18 +121,18 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 	public void updateMessageUnit(IMessageUnitEntity messageUnit) throws StorageException {
 		if (!(messageUnit instanceof MessageUnitEntity))
 			throw new StorageException("Unsupported entity class");
-		
+
 		MessageUnitEntity update = ((MessageUnitEntity) messageUnit);
 		MessageUnitEntity stored = (MessageUnitEntity) msgUnitStore.stream()
 									.filter(m -> messageUnit.getCoreId().equals(m.getCoreId())).findFirst().orElse(null);
 		if (stored == null)
 			throw new StorageException("Entity not managed");
-		
+
 		if (stored.getLastChanged().after(update.getLastChanged())) {
 			update.copyFrom(stored);
-			throw new AlreadyChangedException(); 
+			throw new AlreadyChangedException();
 		}
-		
+
 		try {
 			Thread.sleep(10);
 		} catch (InterruptedException e) {
@@ -142,15 +142,15 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 		if (stored != messageUnit)
 			stored.copyFrom(update);
 	}
-	
+
 	@Override
 	public IPayloadEntity storePayloadMetadata(IPayload payload) throws StorageException {
 		PayloadEntity entity = new PayloadEntity(payload);
 		payloadInfoStore.add(entity);
-		
+
 		return entity.clone();
-	}	
-	
+	}
+
 	@Override
 	public void updatePayloadMetadata(IPayloadEntity payload) throws StorageException {
 		if (!(payload instanceof PayloadEntity))
@@ -161,12 +161,12 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 								.filter(p -> payload.getPayloadId().equals(p.getPayloadId())).findFirst().orElse(null);
 		if (stored == null)
 			throw new StorageException("Entity not managed");
-		
+
 		if (stored.getLastChanged().after(update.getLastChanged())) {
 			update.copyFrom(stored);
-			throw new AlreadyChangedException(); 
+			throw new AlreadyChangedException();
 		}
-		
+
 		try {
 			Thread.sleep(10);
 		} catch (InterruptedException e) {
@@ -175,27 +175,25 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 		update.setChanged(new Date());
 		if (stored != update)
 			stored.copyFrom(update);
-	}	
+	}
 
 	@Override
 	public void deleteMessageUnit(IMessageUnitEntity messageUnit) throws StorageException {
 		msgUnitStore.removeIf(m -> m.getCoreId().equals(messageUnit.getCoreId()));
 	}
-	
+
     @Override
    	public void deletePayloadMetadata(IPayloadEntity payload) throws StorageException {
     	payloadInfoStore.removeIf(p -> p.getPayloadId().equals(payload.getPayloadId()));
-   	}	
-	
+   	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IMessageUnit, V extends IMessageUnitEntity> List<V> getMessageUnitsInState(Class<T> type,
-			Direction direction, ProcessingState[] states) throws StorageException {
-		final List<ProcessingState> statesCollection = Arrays.asList(states);
-		
-		return 	(List<V>) msgUnitStore.stream().filter(m -> type.isAssignableFrom(m.getClass())  
-													&& m.getDirection() == direction 
-													&& statesCollection.contains(m.getCurrentProcessingState().getState()))
+			Direction direction, Set<ProcessingState> states) throws StorageException {
+		return 	(List<V>) msgUnitStore.stream().filter(m -> type.isAssignableFrom(m.getClass())
+													&& m.getDirection() == direction
+													&& states.contains(m.getCurrentProcessingState().getState()))
 										   .sorted((m1, m2) -> m1.getTimestamp().compareTo(m2.getTimestamp()))
 										   .collect(Collectors.toList());
 
@@ -209,36 +207,36 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 		else if (direction.length == 0) {
 			direction = new Direction[] { Direction.IN, Direction.OUT};
 		}
-		
-		final Collection<Direction> dirCollections = Arrays.asList(direction); 
-			
-		return msgUnitStore.stream().filter(m -> dirCollections.contains(m.getDirection()) 
-											&& messageId.equals(m.getMessageId()))		
+
+		final Collection<Direction> dirCollections = Arrays.asList(direction);
+
+		return msgUnitStore.stream().filter(m -> dirCollections.contains(m.getDirection())
+											&& messageId.equals(m.getMessageId()))
 								.collect(Collectors.toList());
 	}
 
 	@Override
 	public Collection<IMessageUnitEntity> getMessageUnitsWithLastStateChangedBefore(Date maxLastChangeDate)
 			throws StorageException {
-		return msgUnitStore.stream().filter(m -> m.getCurrentProcessingState().getStartTime().before(maxLastChangeDate))		
+		return msgUnitStore.stream().filter(m -> m.getCurrentProcessingState().getStartTime().before(maxLastChangeDate))
 								.collect(Collectors.toList());
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IMessageUnit, V extends IMessageUnitEntity> List<V> getMessageUnitsForPModesInState(Class<T> type,
-			Collection<String> pmodeIds, ProcessingState state) throws StorageException {
-		return 	(List<V>) msgUnitStore.stream().filter(m -> type.isAssignableFrom(m.getClass())  
-													&& pmodeIds.contains(m.getPModeId()) 
+			Set<String> pmodeIds, ProcessingState state) throws StorageException {
+		return 	(List<V>) msgUnitStore.stream().filter(m -> type.isAssignableFrom(m.getClass())
+													&& pmodeIds.contains(m.getPModeId())
 													&& m.getCurrentProcessingState().getState() == state)
 										   .sorted((m1, m2) -> m1.getTimestamp().compareTo(m2.getTimestamp()))
-										   .collect(Collectors.toList());	
+										   .collect(Collectors.toList());
 	}
 
 
 	@Override
 	public int getNumberOfTransmissions(IUserMessageEntity userMessage) throws StorageException {
-		return (int) 
+		return (int)
 				userMessage.getProcessingStates().stream().filter(s -> s.getState() == ProcessingState.SENDING).count();
 	}
 
@@ -255,5 +253,5 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 
 	@Override
 	public <E extends IMessageUnitEntity> void loadCompletely(E entity) throws StorageException {
-	}    
+	}
 }

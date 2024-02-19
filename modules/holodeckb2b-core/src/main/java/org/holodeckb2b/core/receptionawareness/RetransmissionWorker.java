@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
@@ -47,8 +48,8 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  * This worker is responsible for the retransmission of User Messages that did not receive a Receipt as expected. The
  * retransmission is configured in the <i>Reception Awareness</i> section of the P-Mode that governs the User Message's
  * exchange. When included Holodeck B2B will wait for a Receipt from the other gateway before marking the message unit
- * as <i>DELIVERED</i> and resend the message if no Receipt is received within the specified time. 
- * 
+ * as <i>DELIVERED</i> and resend the message if no Receipt is received within the specified time.
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class RetransmissionWorker extends AbstractWorkerTask {
@@ -68,16 +69,16 @@ public class RetransmissionWorker extends AbstractWorkerTask {
         try {
             waitingForRcpt = HolodeckB2BCore.getQueryManager()
                                                 .getMessageUnitsInState(IUserMessage.class, Direction.OUT,
-                                                        new ProcessingState[] { ProcessingState.AWAITING_RECEIPT,
+                                                        				Set.of(ProcessingState.AWAITING_RECEIPT,
                                                                                 ProcessingState.TRANSPORT_FAILURE,
                                                                                 ProcessingState.WARNING
-                                                                              });
+                                                                               ));
         } catch (final StorageException ex) {
             log.error("Error retrieving message units from the database! Details: {}", ex.getMessage());
             return;
         }
 
-        if (Utils.isNullOrEmpty(waitingForRcpt)) 
+        if (Utils.isNullOrEmpty(waitingForRcpt))
         	log.trace("There are no messages waiting for a Receipt");
         else {
             log.trace("{} messages may be waiting for a Receipt", waitingForRcpt.size());
@@ -86,22 +87,22 @@ public class RetransmissionWorker extends AbstractWorkerTask {
             // For each message check if it should be retransmitted or not
             for (final IUserMessageEntity um : waitingForRcpt) {
                 try {
-					log.trace("Check if User Message [msgId={}] should be resend based on its P-Mode [{}]", 
+					log.trace("Check if User Message [msgId={}] should be resend based on its P-Mode [{}]",
                     			um.getMessageId(), um.getPModeId());
                     // We need the current interval duration, the number of attempts already executed and the maximum
                     // number of attempts allowed
                     long intervalInMillis = 0;
                     int  attempts = 1; // there is always the initial one
-                    int  maxAttempts = 1; 
+                    int  maxAttempts = 1;
                     // Retry information is contained in Leg
                     ILeg leg;
                     try {
-                    	leg = PModeUtils.getLeg(um);                   
+                    	leg = PModeUtils.getLeg(um);
                     } catch (IllegalStateException pmodeNotAvailable) {
                     	leg = null;
                     }
                     final IReceptionAwareness raConfig = leg != null ? leg.getReceptionAwareness() : null;
-                    final Interval[] intervals = raConfig != null ? raConfig.getWaitIntervals() : null; 
+                    final Interval[] intervals = raConfig != null ? raConfig.getWaitIntervals() : null;
                     if (intervals != null && intervals.length > 0) {
                     	maxAttempts = intervals.length;
                     	// Check the current interval
@@ -116,13 +117,13 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         		 um.getMessageId(), um.getPModeId());
                     	// Set state to SUSPENDED as a new P-Mode with retry configuration may come available
                         // And raise event to signal this issue
-                    	if (HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.SUSPENDED, 
-                    													"Missing reception awareness configuration")) 
-	                    	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new GenericSendMessageFailure(um, 
+                    	if (HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.SUSPENDED,
+                    													"Missing reception awareness configuration"))
+	                    	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new GenericSendMessageFailure(um,
                     													"Missing reception awareness configuration"));
                     	continue;
                     }
-                    
+
                     // Check if the interval has expired
                     if (((new Date()).getTime() - um.getCurrentProcessingState().getStartTime().getTime())
                          >= intervalInMillis) {
@@ -130,7 +131,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                         // has to be generated
                         if (attempts >= maxAttempts) {
                             // No retries left, set the state to FAILURE, log and generate MissingReceipt error
-                        	if (storageManager.setProcessingState(um, ProcessingState.FAILURE)) {                         	
+                        	if (storageManager.setProcessingState(um, ProcessingState.FAILURE)) {
 	                        	log.info("Retry attempts exhausted for User Message [msgId=" + um.getMessageId() + "]!");
 	                            missingReceiptsLog.error("No Receipt received for UserMessage with messageId="
 	                                                        + um.getMessageId());
@@ -158,7 +159,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                                um.getMessageId(), dbe.getMessage());
                 }
             }
-        } 
+        }
     }
 
     /**
@@ -179,8 +180,8 @@ public class RetransmissionWorker extends AbstractWorkerTask {
     private void generateMissingReceiptError(final IUserMessageEntity um, final ILeg leg) {
         log.trace("Create and store MissingReceipt error");
 
-        // Create the error and set reference to user message        
-        IErrorMessageEntity   errorMessage;        
+        // Create the error and set reference to user message
+        IErrorMessageEntity   errorMessage;
         try {
         	StorageManager storageManager = HolodeckB2BCore.getStorageManager();
             errorMessage = storageManager.createErrorMsgFor(Collections.singleton(new MissingReceipt()), um);
@@ -188,7 +189,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
         } catch (final StorageException ex) {
             log.error("An error occured saving the MissingReceipt in database! Details: {}", ex.getMessage());
             return;
-        }        
+        }
         log.trace("Hand over MissingReceipt error to Delivery Manager to report error to back-end");
         try {
 			HolodeckB2BCoreInterface.getDeliveryManager().deliver(errorMessage);

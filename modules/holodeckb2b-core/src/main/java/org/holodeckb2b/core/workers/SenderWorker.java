@@ -18,6 +18,7 @@ package org.holodeckb2b.core.workers;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,7 +36,7 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
  * Is responsible for selecting the message units to be send. It looks for all messages waiting in the database to
- * get send and starts the send process for each of them. 
+ * get send and starts the send process for each of them.
  * <p>This worker does not need configuration to run. As this worker is needed for Holodeck B2B to work properly it is
  * included in the default worker pool.
  *
@@ -57,7 +58,7 @@ public class SenderWorker extends AbstractWorkerTask {
             List<IMessageUnitEntity> msgUnitsToSend = HolodeckB2BCore.getQueryManager()
                                                                .getMessageUnitsInState(IMessageUnit.class,
                                                                 Direction.OUT,
-                                                                new ProcessingState[] {ProcessingState.READY_TO_PUSH});
+                                                                Set.of(ProcessingState.READY_TO_PUSH));
 
             if (!Utils.isNullOrEmpty(msgUnitsToSend)) {
                 log.trace("Found " + msgUnitsToSend.size() + " message units to send");
@@ -83,11 +84,11 @@ public class SenderWorker extends AbstractWorkerTask {
                         log.trace("Could not start processing message [" + msgUnit.getMessageId()
                                     + "] because switching to processing state was unsuccesful");
                 }
-            } 
+            }
         } catch (final StorageException dbError) {
             log.error("Could not process messages because a database error occurred. Details:"
                         + dbError.toString() + "\n");
-        } 
+        }
     }
 
     /**

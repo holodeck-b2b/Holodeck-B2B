@@ -39,16 +39,16 @@ import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
 import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
- * Is the Holodeck B2B Core component that offers access to message data (both meta-data and payload data) to both other 
- * Core and  "external" components. 
+ * Is the Holodeck B2B Core component that offers access to message data (both meta-data and payload data) to both other
+ * Core and  "external" components.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since  7.0.0  
+ * @since  7.0.0
  */
 @SuppressWarnings("unchecked")
 public class QueryManager implements IQueryManager {
 	private static final Logger	log = LogManager.getLogger();
-	
+
 	/**
 	 * The Metadata Storage Provider in use for storing the message meta-data
 	 */
@@ -70,14 +70,14 @@ public class QueryManager implements IQueryManager {
         this.mdsProvider = mdsp;
         this.psProvider = psp;
     }
-        
+
 	@Override
 	public <T extends IMessageUnit, V extends IMessageUnitEntity> List<V> getMessageUnitsInState(Class<T> type,
-			Direction direction, ProcessingState[] states) throws StorageException {
+			Direction direction, Set<ProcessingState> states) throws StorageException {
 		return (List<V>) executeQuery(() -> mdsProvider.getMessageUnitsInState(type, direction, states))
 							.collect(Collectors.toList());
 	}
-	
+
 	@Override
 	public Collection<IMessageUnitEntity> getMessageUnitsWithId(String messageId, Direction... direction)
 			throws StorageException {
@@ -93,7 +93,7 @@ public class QueryManager implements IQueryManager {
 
 	@Override
 	public <T extends IMessageUnit, V extends IMessageUnitEntity> List<V> getMessageUnitsForPModesInState(Class<T> type,
-			Collection<String> pmodeIds, ProcessingState state) throws StorageException {
+			Set<String> pmodeIds, ProcessingState state) throws StorageException {
 		return (List<V>) executeQuery(() -> mdsProvider.getMessageUnitsForPModesInState(type, pmodeIds, state))
 							.collect(Collectors.toList());
 	}
@@ -117,12 +117,12 @@ public class QueryManager implements IQueryManager {
 	public IMessageUnitEntity getMessageUnitWithCoreId(String coreId) throws StorageException {
 		return executeQuery(() -> Collections.singleton(mdsProvider.getMessageUnitWithCoreId(coreId))).findFirst().orElse(null);
 	}
-	
+
 	public IPayloadContent retrievePayloadContent(String payloadId) throws StorageException {
 		try {
 			return psProvider.getPayloadContent(payloadId);
 		} catch (StorageException payloadFailure) {
-			log.error("Error retrieving the paylaod content (payloadId={}) : {}", payloadId, 
+			log.error("Error retrieving the paylaod content (payloadId={}) : {}", payloadId,
 						Utils.getExceptionTrace(payloadFailure));
 			throw payloadFailure;
 		}
@@ -131,15 +131,15 @@ public class QueryManager implements IQueryManager {
 	private <R> Stream<R> executeQuery(Query<R> query) throws StorageException {
 		try {
 			return (Stream<R>) query.execute().stream()
-					.map(m -> m instanceof IUserMessageEntity ? new UserMessageEntityProxy((IUserMessageEntity) m) : m);					
+					.map(m -> m instanceof IUserMessageEntity ? new UserMessageEntityProxy((IUserMessageEntity) m) : m);
 		} catch (StorageException queryError) {
-	    	log.error("Error executing query ({}) : {}", 
-	    				queryError.fillInStackTrace().getStackTrace()[1].getMethodName(), 
-	    				Utils.getExceptionTrace(queryError));			
+	    	log.error("Error executing query ({}) : {}",
+	    				queryError.fillInStackTrace().getStackTrace()[1].getMethodName(),
+	    				Utils.getExceptionTrace(queryError));
 			throw queryError;
-		}			
+		}
 	}
-	
+
 	interface Query<R> {
 		Collection<R> execute() throws StorageException;
 	}
