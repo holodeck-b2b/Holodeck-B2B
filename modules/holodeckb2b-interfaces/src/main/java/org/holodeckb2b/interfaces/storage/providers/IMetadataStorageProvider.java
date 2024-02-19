@@ -32,33 +32,33 @@ import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 
 /**
- * Defines the interface of a Holodeck B2B <i>Meta-data Storage Provider</i> that allows the Holodeck B2B Core to 
- * persist and retrieve the meta-data of processed message units. 
+ * Defines the interface of a Holodeck B2B <i>Meta-data Storage Provider</i> that allows the Holodeck B2B Core to
+ * persist and retrieve the meta-data of processed message units.
  * <p>
- * There can always be just one <i>Meta-data Storage Provider</i> active in an Holodeck B2B instance. The implementation 
- * to use is loaded using the Java <i>Service Prover Interface</i> mechanism. Therefore the JAR file containing the 
+ * There can always be just one <i>Meta-data Storage Provider</i> active in an Holodeck B2B instance. The implementation
+ * to use is loaded using the Java <i>Service Prover Interface</i> mechanism. Therefore the JAR file containing the
  * <i>Meta-data Storage Provider</i> implementation must contain a file in the <code>META-INF/services/</code> directory
- * named <code>org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider</code> that contains the class name 
+ * named <code>org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider</code> that contains the class name
  * of the provider implementation.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 7.0.0 This interface is a merge of the <code>IPersistencyProvider</coder>, <code>IUpdateManager</code> and
- * 				<code>IQueryManager</code> interfaces from the previous version. 
+ * 				<code>IQueryManager</code> interfaces from the previous version.
  */
 public interface IMetadataStorageProvider {
 
     /**
-     * Gets the name of this provider to identify it in logging. This name is only used for logging purposes and it is 
-     * recommended to include a version number of the implementation. If no name is specified by the implementation the 
-     * class name will be used. 
+     * Gets the name of this provider to identify it in logging. This name is only used for logging purposes and it is
+     * recommended to include a version number of the implementation. If no name is specified by the implementation the
+     * class name will be used.
      *
      * @return  The name of the persistency provider.
      */
     default String getName() { return this.getClass().getName(); }
 
     /**
-     * Initialises the provider. This method is called once at startup of the Holodeck B2B instance. Since the message 
-     * processing depends on the correct functioning of the provider this method MUST ensure that all required 
+     * Initialises the provider. This method is called once at startup of the Holodeck B2B instance. Since the message
+     * processing depends on the correct functioning of the provider this method MUST ensure that all required
      * configuration and data is available.
      *
      * @param config	the Holodeck B2B configuration
@@ -66,32 +66,37 @@ public interface IMetadataStorageProvider {
      *                                  message SHOULD include a clear indication of what caused the init failure.
      */
 	void init(final IConfiguration config) throws StorageException;
-	
+
 	/**
-	 * Shuts down the provider. 
+	 * Shuts down the provider.
 	 * <p>This method is called by the Holodeck B2B Core when the instance is shut down. Implementations should use it
 	 * to release resources held for storing the message meta-data.
 	 */
 	void shutdown();
-	
+
 	/*----------------------------------------------------------------------------------------------------------------
 	 * CRUD methods to manage message unit meta-data
-	 *--------------------------------------------------------------------------------------------------------------*/	
+	 *--------------------------------------------------------------------------------------------------------------*/
 
 	/**
-	 * Stores the meta-data of the given message unit in the database and returns a new entity object representing the 
+	 * Stores the meta-data of the given message unit in the database and returns a new entity object representing the
 	 * saved message unit. The new entity object MUST have been assigned a unique <i>CoreId</i>.
 	 * <p>
 	 * NOTE: When the message unit to be stored is a {@link IUserMessage} the provider must check whether the payloads
-	 * included are of type {@link IPayloadEntity} and if so, check if they have already been stored in the database. If
-	 * new {@link IPayloadEntity} objects are created the provider MUST assign a unique <i>PayloadId</i> to them.
+	 * included are {@link IPayloadEntity} instances, and if so, couple the existing payloads with the message unit. If
+	 * the <i>PayloadId</i> do not exist or are already linked to another User Message, the provider MUST throw an
+	 * exception.<br/>
+	 * If the payloads are not {@link IPayloadEntity} instances the provider MUST create new {@link IPayloadEntity}
+	 * objects and assign a unique <i>PayloadId</i> to them.
 	 *
 	 * @param <T>           Limits the <code>messageUnit</code> to message units types
 	 * @param <E>           Only entity objects will be returned, V and T will be of the same message type
 	 * @param messageUnit   The meta-data on message unit that should be stored in the new persistent object
 	 * @return              The created entity object.
-	 * @throws DuplicateMessageIdException When the MessageId of the <b>outgoing</b> message unit already exists.  
-	 * @throws StorageException   If an error occurs when saving the new message unit to the database
+	 * @throws DuplicateMessageIdException When the MessageId of the <b>outgoing</b> message unit already exists.
+	 * @throws StorageException   If an error occurs when saving the new message unit to the database. This can happen
+	 * 							  when the given message unit is a User Message that contains a {@link IPayloadEntity}
+	 * 							  with an non-existing <i>PayloadId</i>.
 	 */
 	<T extends IMessageUnit, E extends IMessageUnitEntity> E storeMessageUnit(final T messageUnit)
 															throws DuplicateMessageIdException, StorageException;
@@ -100,10 +105,10 @@ public interface IMetadataStorageProvider {
 	 * Saves the updated meta-data of the message unit to the database. If the database already contains newer data the
 	 * update must be rejected.
 	 * <p>
-	 * NOTE 1: The meta-data that can be updated is limited to the data for which update methods are specified in the 
+	 * NOTE 1: The meta-data that can be updated is limited to the data for which update methods are specified in the
 	 * entity interfaces. Implementation may use this knowledge to optimise the database updates.<br/>
-	 * NOTE 2: This method should not update the meta-data on paylaods contained in a User Message. For updates to 
-	 * payload meta-data the Holodeck B2B Core will use {@link #updatePayload(IPayloadEntity)}.  
+	 * NOTE 2: This method should not update the meta-data on paylaods contained in a User Message. For updates to
+	 * payload meta-data the Holodeck B2B Core will use {@link #updatePayload(IPayloadEntity)}.
 	 *
 	 * @param messageUnit   Entity object containing the updated data that should be saved to storage
 	 * @throws AlreadyChangedException When the database contains more up to date data.
@@ -112,8 +117,8 @@ public interface IMetadataStorageProvider {
 	void updateMessageUnit(final IMessageUnitEntity messageUnit) throws AlreadyChangedException, StorageException;
 
 	/**
-	 * Deletes the meta-data of the given message unit from the database. For User Message message units the provider 
-	 * must also remove all related {@link IPayloadEntity} objects. 
+	 * Deletes the meta-data of the given message unit from the database. For User Message message units the provider
+	 * must also remove all related {@link IPayloadEntity} objects.
 	 *
 	 * @param messageUnit       The {@link IMessageUnitEntity} object to be deleted
 	 * @throws StorageException     When a problem occurs while removing the message unit from the database.
@@ -121,38 +126,41 @@ public interface IMetadataStorageProvider {
 	void deleteMessageUnit(IMessageUnitEntity messageUnit) throws StorageException;
 
 	/**
-	 * Stores the meta-data of the given payload in the database and returns a new entity object representing the 
+	 * Stores the meta-data of the given payload in the database and returns a new entity object representing the
 	 * saved payload info. The new object MUST be assigned a unique <i>PayloadId</i>.
-	 * 
+	 *
 	 * @param payload	the payload which meta-data must be stored
-	 * @return	the created entity object 
+	 * @return	the created entity object
 	 * @throws StorageException If an error occurs when saving the payload meta-data to the database
 	 */
-	IPayloadEntity storePayloadMetadata(final IPayload payload) throws StorageException;	
-	
-	/**
-	 * Deletes the meta-data of the given payload from the database.
-	 *
-	 * @param payload       The {@link IPayloadEntity} object to be deleted
-	 * @throws StorageException     When a problem occurs while removing the payload meta-data from the database.
-	 */	
-	void deletePayloadMetadata(final IPayloadEntity payload) throws StorageException;
-	
+	IPayloadEntity storePayloadMetadata(final IPayload payload) throws StorageException;
+
 	/**
 	 * Saves the updated meta-data of the payload to the database. If the database already contains newer data the
 	 * update must be rejected.
-	 * 
+	 *
 	 * @param payload	Entity object containing the updated data that should be saved to storage
-	 * @throws AlreadyChangedException When the database contains more up to date data. 
-	 * @throws StorageException	If an error occurs when saving the updated payload data to the database, for example 
+	 * @throws AlreadyChangedException When the database contains more up to date data.
+	 * @throws StorageException	If an error occurs when saving the updated payload data to the database, for example
 	 * 								when the database contains more up to date meta-data.
 	 */
 	void updatePayloadMetadata(IPayloadEntity payload) throws AlreadyChangedException, StorageException;
-	
+
+	/**
+	 * Deletes the meta-data of the given payload from the database. If the User Message to which the payload to be
+	 * deleted is related still exists, the delete request should be rejected.
+	 *
+	 * @param payload       The {@link IPayloadEntity} object to be deleted
+	 * @throws StorageException     When a problem occurs while removing the payload meta-data from the database. This
+	 * 								exception can be thrown when the User Message to which the payload is linked still
+	 * 								exists.
+	 */
+	void deletePayloadMetadata(final IPayloadEntity payload) throws StorageException;
+
 	/*----------------------------------------------------------------------------------------------------------------
 	 * Query methods to retrieve message unit meta-data
 	 *--------------------------------------------------------------------------------------------------------------*/
-	
+
 	/**
 	 * Retrieves all message units of the specified type and that are in the given state and which processing is defined
 	 * by a P-Mode with one of the given P-Mode ids. The message units are ordered ascending on the timestamp of the
@@ -230,15 +238,15 @@ public interface IMetadataStorageProvider {
 	                                                                                    throws StorageException;
 
 	/**
-	 * Retrieves the message unit with the given <code>CoreId</code>. 
-	 * <p><b>NOTE:</b> The returned entity object may not be completely loaded! Before a message unit is going to be 
+	 * Retrieves the message unit with the given <code>CoreId</code>.
+	 * <p><b>NOTE:</b> The returned entity object may not be completely loaded! Before a message unit is going to be
 	 * processed it must be checked if it is loaded completely.
 	 *
 	 * @param coreId     The CoreId of the message unit to retrieve
 	 * @return           The {@link IMessageUnitEntity} with the given CoreId or <code>null</code> if none exists
 	 * @throws StorageException If an error occurs when retrieving the message unit from the database
 	 * @since 7.0.0
-	 */    
+	 */
 	IMessageUnitEntity getMessageUnitWithCoreId(final String coreId) throws StorageException;
 
 	/**
@@ -269,14 +277,14 @@ public interface IMetadataStorageProvider {
 	 * @since 7.0.0 The argument type is now the entity class
 	 */
 	boolean isAlreadyProcessed(final IUserMessageEntity userMessage) throws StorageException;
-	
+
 	/**
-	 * Ensures that all meta-data of the given entity object is loaded from the database. 
+	 * Ensures that all meta-data of the given entity object is loaded from the database.
 	 * <p>
-	 * As described in the methods above the {@link IMetadataStorageProvider} may, for better performance, decide not to 
+	 * As described in the methods above the {@link IMetadataStorageProvider} may, for better performance, decide not to
 	 * load related collections of meta-data of an entity object. When that meta-data is needed this method can be used
-	 * to ensure all meta-data is loaded. 
-	 * 
+	 * to ensure all meta-data is loaded.
+	 *
 	 * @param entity 	the entity to ensure to be completely loaded
 	 * @throws StorageException	when an error occurs retrieving all meta-data of the entity
 	 */
