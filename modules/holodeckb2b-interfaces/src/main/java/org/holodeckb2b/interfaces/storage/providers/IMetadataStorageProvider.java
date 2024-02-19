@@ -199,7 +199,7 @@ public interface IMetadataStorageProvider {
 	 * @param direction The direction of the message units to retrieve
 	 * @param states    Set of processing states that the message units to retrieve should be in
 	 * @return          List with entity objects representing the message units of the specified type that are
-	 * 					in one of the given states, in descending order on time stamp
+	 * 					in one of the given states, in ascending order on time stamp
 	 * @throws StorageException When a problem occurs during the retrieval of the message units
 	 */
 	<T extends IMessageUnit, V extends IMessageUnitEntity> List<V>
@@ -264,14 +264,16 @@ public interface IMetadataStorageProvider {
 
 	/**
 	 * Checks whether there exists a <b>received</b> <i>User Message</i> message unit with the given <code>MessageId
-	 * </code> that has already been processed completely, i.e. its <i>current</i> processing state is either {@link
-	 * ProcessingState#DELIVERED} or {@link ProcessingState#FAILURE}.
+	 * </code> that has already been processed completely or is in the process of delivery to the back end, i.e. its
+	 * <i>current</i> processing state is either {@link ProcessingState#DELIVERED}, {@link
+	 * ProcessingState#OUT_FOR_DELIVERY} or {@link ProcessingState#FAILURE}.
 	 *
 	 * @param userMessage The <code>User Message</code> to check for if it's already processed
 	 * @return            <code>true</code> if there exists a User Message entity with {@link
 	 *                    IUserMessage#getMessageId()} == <code>messageId</code> and {@link IUserMessage#getDirection()}
 	 *                    == <code>IN</code> and {@link IUserMessage#getCurrentProcessingState()} ==
-	 *                    {@link ProcessingState#DELIVERED} | {@link ProcessingState#FAILURE},
+	 *                    {@link ProcessingState#DELIVERED} | {@link ProcessingState#OUT_FOR_DELIVERY}
+	 *                    | {@link ProcessingState#FAILURE},
 	 *                    <br><code>false</code> otherwise.
 	 * @throws StorageException If an error occurs when executing this query
 	 * @since 4.0.0
