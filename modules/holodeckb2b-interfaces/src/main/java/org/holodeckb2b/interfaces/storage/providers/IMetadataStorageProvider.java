@@ -88,7 +88,8 @@ public interface IMetadataStorageProvider {
 	 * the <i>PayloadId</i> do not exist or are already linked to another User Message, the provider MUST throw an
 	 * exception.<br/>
 	 * If the payloads are not {@link IPayloadEntity} instances the provider MUST create new {@link IPayloadEntity}
-	 * objects and assign a unique <i>PayloadId</i> to them.
+	 * objects and assign a unique <i>PayloadId</i> to them. The assigned <i>PayloadId</i> MUST NOT contain special
+	 * characters.
 	 *
 	 * @param <T>           Limits the <code>messageUnit</code> to message units types
 	 * @param <E>           Only entity objects will be returned, V and T will be of the same message type
@@ -128,7 +129,8 @@ public interface IMetadataStorageProvider {
 
 	/**
 	 * Stores the meta-data of the given payload in the database and returns a new entity object representing the
-	 * saved payload info. The new object MUST be assigned a unique <i>PayloadId</i>.
+	 * saved payload info. The new object MUST be assigned a unique <i>PayloadId</i>. The assigned <i>PayloadId</i> MUST
+	 * NOT contain special characters.
 	 *
 	 * @param payload	the payload which meta-data must be stored
 	 * @return	the created entity object
