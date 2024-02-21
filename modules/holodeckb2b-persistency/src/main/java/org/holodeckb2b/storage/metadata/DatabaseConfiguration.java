@@ -35,10 +35,18 @@ import org.hibernate.dialect.DerbyTenSevenDialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.holodeckb2b.commons.util.Utils;
 
+/**
+ * Contains the database configuration used by the default Meta-data Storage Provider of Holodeck B2B. It creates an
+ * embedded Derby database in the <code>db</code> subdirectory of the Holodeck B2B home directory. The directory were
+ * the database is stored can be changed by setting the environment variable <code>HB2B_DB_DIR</code>.
+ *
+ * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since  7.0.0
+ */
 final class DatabaseConfiguration implements PersistenceUnitInfo {
 
 	public static final DatabaseConfiguration INSTANCE = new DatabaseConfiguration();
-	
+
     @Override
     public String getPersistenceUnitName() {
         return "hb2b-default-persistency";
@@ -74,7 +82,7 @@ final class DatabaseConfiguration implements PersistenceUnitInfo {
                              "org.holodeckb2b.storage.metadata.entities.TradingPartner",
                              "org.holodeckb2b.storage.metadata.entities.UserMessage");
     }
-    
+
     @Override
     public Properties getProperties() {
         Properties props = new Properties();
@@ -96,8 +104,8 @@ final class DatabaseConfiguration implements PersistenceUnitInfo {
         props.put(org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, 20);
 
         return props;
-    }    
-    
+    }
+
     @Override
     public DataSource getJtaDataSource() {
         return null;
