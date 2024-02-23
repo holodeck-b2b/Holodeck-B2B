@@ -396,10 +396,15 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public <E extends IMessageUnitEntity> void loadCompletely(E entity)
-			throws StorageException {
+	public <E extends IMessageUnitEntity> void loadCompletely(E entity) throws StorageException {
 		assertManagedType(entity);
-		((JPAObjectProxy) entity).loadCompletely();
+		EntityManager em = emf.createEntityManager();
+		try {
+			em.refresh(((MessageUnitEntity<MessageUnit>) entity).getJPAObject());
+			((JPAObjectProxy) entity).loadCompletely();
+		} catch (PersistenceException pe) {
+			throw new StorageException("Could not load complete meta-data of message unit", pe);
+		}
 	}
 
 	private void assertManagedType(Object entity) throws StorageException {
