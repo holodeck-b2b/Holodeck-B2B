@@ -96,7 +96,7 @@ public class DeliveryManagerTest {
 		
 	@Test
 	public void testRejectNotReady() throws Exception {
-		PMode pmode = HB2BTestUtils.create1WayReceivePushPMode();        
+		PMode pmode = HB2BTestUtils.create1WayReceivePMode();        
         HolodeckB2BCore.getPModeSet().add(pmode);
 
 		UserMessage userMessage = new UserMessage();
@@ -122,7 +122,7 @@ public class DeliveryManagerTest {
 
 		HolodeckB2BCoreInterface.getDeliveryManager().registerDeliverySpec(delSpec);
 		
-		PMode pmode = HB2BTestUtils.create1WayReceivePushPMode();
+		PMode pmode = HB2BTestUtils.create1WayReceivePMode();
 		DeliveryConfiguration pmodeSpec = new DeliveryConfiguration();
 		pmodeSpec.setId(delSpec.getId());
 		pmode.getLeg(Label.REQUEST).setDefaultDelivery(pmodeSpec);
@@ -158,7 +158,7 @@ public class DeliveryManagerTest {
 		
 		delman.registerDeliverySpec(delSpec);
 		
-		PMode pmode = HB2BTestUtils.create1WayReceivePushPMode();
+		PMode pmode = HB2BTestUtils.create1WayReceivePMode();
 		DeliveryConfiguration pmodeSpec = new DeliveryConfiguration();
 		pmodeSpec.setId(delSpec.getId());
 		pmode.getLeg(Label.REQUEST).setDefaultDelivery(pmodeSpec);
@@ -641,7 +641,7 @@ public class DeliveryManagerTest {
 	
 	
 	private IUserMessageEntity createUserMessage(boolean async) throws Exception {
-		PMode pmode = HB2BTestUtils.create1WayReceivePushPMode();		
+		PMode pmode = HB2BTestUtils.create1WayReceivePMode();		
 		DeliveryConfiguration delSpec = new DeliveryConfiguration();
 		delSpec.setId(pmode.getId() + "-DefaultDelivery");
 		delSpec.setDeliveryMethod(TestDeliveryMethod.class);

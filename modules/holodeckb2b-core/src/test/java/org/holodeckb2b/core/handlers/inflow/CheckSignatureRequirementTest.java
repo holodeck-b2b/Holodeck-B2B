@@ -66,7 +66,7 @@ public class CheckSignatureRequirementTest {
     @Before
     public void prepareContext() throws Exception {
         // Create the basic test data
-        pmode = HB2BTestUtils.create1WayReceivePushPMode();
+        pmode = HB2BTestUtils.create1WayReceivePMode();
         PartnerConfig senderCfg = new PartnerConfig();
         senderCfg.setSecurityConfiguration(new SecurityConfig());
         pmode.setInitiator(senderCfg);

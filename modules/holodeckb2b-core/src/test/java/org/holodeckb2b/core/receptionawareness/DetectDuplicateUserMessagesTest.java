@@ -77,7 +77,7 @@ public class DetectDuplicateUserMessagesTest {
 
     @Test    public void testDoProcessing() throws Exception {
 
-        PMode pmode = HB2BTestUtils.create1WayReceivePushPMode();        
+        PMode pmode = HB2BTestUtils.create1WayReceivePMode();        
         Leg leg = pmode.getLeg(Label.REQUEST);
         
         // Turning on duplicate detection

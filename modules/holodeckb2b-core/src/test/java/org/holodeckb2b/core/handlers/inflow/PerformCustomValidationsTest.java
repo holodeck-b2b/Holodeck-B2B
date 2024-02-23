@@ -95,7 +95,7 @@ public class PerformCustomValidationsTest {
 
     @Test
     public void testValid() throws Exception {
-    	PMode pmode = HB2BTestUtils.create1WayReceivePushPMode();
+    	PMode pmode = HB2BTestUtils.create1WayReceivePMode();
         Leg leg = pmode.getLeg(Label.REQUEST);
         UserMessageFlow flow = new UserMessageFlow();
         CustomValidationConfiguration validationSpec = new CustomValidationConfiguration();
@@ -127,7 +127,7 @@ public class PerformCustomValidationsTest {
 
     @Test
     public void testRejection() throws Exception {
-    	PMode pmode = HB2BTestUtils.create1WayReceivePushPMode();
+    	PMode pmode = HB2BTestUtils.create1WayReceivePMode();
         Leg leg = pmode.getLeg(Label.REQUEST);
         UserMessageFlow flow = new UserMessageFlow();
         CustomValidationConfiguration validationSpec = new CustomValidationConfiguration();
@@ -166,7 +166,7 @@ public class PerformCustomValidationsTest {
 
     @Test
     public void testWarningOnly() throws Exception {
-    	PMode pmode = HB2BTestUtils.create1WayReceivePushPMode();
+    	PMode pmode = HB2BTestUtils.create1WayReceivePMode();
     	Leg leg = pmode.getLeg(Label.REQUEST);
     	UserMessageFlow flow = new UserMessageFlow();
     	CustomValidationConfiguration validationSpec = new CustomValidationConfiguration();
@@ -202,7 +202,7 @@ public class PerformCustomValidationsTest {
 
     @Test
     public void testSkipNpnProcessing() throws Exception {
-    	PMode pmode = HB2BTestUtils.create1WayReceivePushPMode();
+    	PMode pmode = HB2BTestUtils.create1WayReceivePMode();
     	Leg leg = pmode.getLeg(Label.REQUEST);
     	UserMessageFlow flow = new UserMessageFlow();
     	CustomValidationConfiguration validationSpec = new CustomValidationConfiguration();
