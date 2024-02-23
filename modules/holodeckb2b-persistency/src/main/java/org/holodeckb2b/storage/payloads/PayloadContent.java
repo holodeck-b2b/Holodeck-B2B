@@ -72,7 +72,8 @@ public class PayloadContent implements IPayloadContent {
 			try {
 				return new FileInputStream(contentPath);
 			} catch (FileNotFoundException ioError) {
-				throw new StorageException("Could not open payload file: " + contentPath.toString(), ioError);
+				// No content has yet been written
+				return null;
 			}
 	}
 
