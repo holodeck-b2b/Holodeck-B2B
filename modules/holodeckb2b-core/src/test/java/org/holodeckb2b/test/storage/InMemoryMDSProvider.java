@@ -102,7 +102,7 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 		if (messageUnit instanceof IUserMessage)
 			dto = new UserMessageEntity((IUserMessage) messageUnit);
 		else if (messageUnit instanceof ISelectivePullRequest)
-			dto = new PullRequestEntity((IPullRequest) messageUnit);
+			dto = new SelectivePullRequestEntity((ISelectivePullRequest) messageUnit);
 		else if (messageUnit instanceof IPullRequest)
 			dto = new PullRequestEntity((IPullRequest) messageUnit);
 		else if (messageUnit instanceof IReceipt)
@@ -113,6 +113,10 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 			throw new IllegalArgumentException("Unknown message unit type");
 
 		msgUnitStore.add(dto);
+		if (dto instanceof UserMessageEntity)
+			((UserMessageEntity) dto).getPayloads().stream()
+									 .filter(p -> !existsPayloadId(p.getPayloadId()))
+									 .forEach(p -> payloadInfoStore.add(p));
 
 		return (V) ((MessageUnitEntity) dto).clone();
 	}
@@ -179,6 +183,9 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 
 	@Override
 	public void deleteMessageUnit(IMessageUnitEntity messageUnit) throws StorageException {
+		if (messageUnit instanceof IUserMessageEntity)
+			for (IPayloadEntity p : ((IUserMessageEntity) messageUnit).getPayloads())
+				deletePayloadMetadata(p);
 		msgUnitStore.removeIf(m -> m.getCoreId().equals(messageUnit.getCoreId()));
 	}
 
