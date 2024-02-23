@@ -406,16 +406,19 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
         return result;
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
 	public <E extends IMessageUnitEntity> void loadCompletely(E entity) throws StorageException {
 		assertManagedType(entity);
-		EntityManager em = emf.createEntityManager();
-		try {
-			em.refresh(((MessageUnitEntity<MessageUnit>) entity).getJPAObject());
-			((JPAObjectProxy) entity).loadCompletely();
-		} catch (PersistenceException pe) {
-			throw new StorageException("Could not load complete meta-data of message unit", pe);
+		if (!entity.isLoadedCompletely()) {
+			JPAObjectProxy<MessageUnit> proxy = (JPAObjectProxy<MessageUnit>) entity;
+			EntityManager em = emf.createEntityManager();
+			try {
+				MessageUnit jpaObject = proxy.getJPAObject();
+				proxy.updateJPAObject(em.find(jpaObject.getClass(), jpaObject.getOID()));
+				proxy.loadCompletely();
+			} catch (PersistenceException pe) {
+				throw new StorageException("Could not load complete meta-data of message unit", pe);
+			}
 		}
 	}
 
