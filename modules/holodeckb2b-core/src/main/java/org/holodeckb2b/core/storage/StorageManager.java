@@ -66,13 +66,13 @@ import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 /**
  * Is a facade to the {@link IMetadataStorageProvider} and {@link IPayloadStorageProvider} that provides a unified
  * interface to Core components to manage the data of message units.
- *  
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
 public class StorageManager {
 	private static final Logger	log = LogManager.getLogger();
-	
+
 	/**
 	 * The Metadata Storage Provider in use for storing the message meta-data
 	 */
@@ -82,7 +82,7 @@ public class StorageManager {
 	 * The Payload Storage Provider in use for storing the message meta-data
 	 */
 	private final IPayloadStorageProvider	psProvider;
-	
+
     /**
      * Creates a new facade to the given Metadata and Payload Storage Providers so other Core classes can update the
      * data of message units.
@@ -96,7 +96,7 @@ public class StorageManager {
     }
 
     /**
-     * Stores the meta-data of a received message unit. The processing state of the new entity object will be set to 
+     * Stores the meta-data of a received message unit. The processing state of the new entity object will be set to
      * {@linkplain ProcessingState#CREATED}.
      *
      * @param <T>           Limits the <code>messageUnit</code> to message units types
@@ -130,11 +130,11 @@ public class StorageManager {
 			throw saveFailed;
 		}
     }
-     
+
     /**
      * Stores the meta-data of a message unit to be sent. If the message unit has not yet been assigned a MessageId or
-     * time stamp, they will be assigned. Also if no processing state is set, it is set to {@linkplain 
-     * ProcessingState#SUBMITTED} for User Messages and Pull Requests or {@linkplain ProcessingState#CREATED} for 
+     * time stamp, they will be assigned. Also if no processing state is set, it is set to {@linkplain
+     * ProcessingState#SUBMITTED} for User Messages and Pull Requests or {@linkplain ProcessingState#CREATED} for
      * Receipt Messages.<br/>
      * If the message to store is a User Message, the manager will also store the payload content if not already stored.
      * <p>
@@ -143,11 +143,11 @@ public class StorageManager {
      *
      * @param <T>           Limits the <code>messageUnit</code> to message units types
      * @param <V>           Only entity objects will be returned, V and T will be of the same message type
-     * @param messageUnit   The message unit that should be stored 
+     * @param messageUnit   The message unit that should be stored
      * @return              The created entity object containing the meta-data of the message unit
-     * @throws DuplicateMessageIdException When the MessageId of the message unit already exists.  
-     * @throws StorageException  If an error occurs when storing the meta-data or the payload data (for a User Message) 
-     * 							 of the message unit 
+     * @throws DuplicateMessageIdException When the MessageId of the message unit already exists.
+     * @throws StorageException  If an error occurs when storing the meta-data or the payload data (for a User Message)
+     * 							 of the message unit
      */
 	public <T extends IMessageUnit, V extends IMessageUnitEntity> V storeOutGoingMessageUnit(T messageUnit)
                                                             	throws DuplicateMessageIdException, StorageException {
@@ -167,18 +167,19 @@ public class StorageManager {
 			mutableObject.setMessageId(createMessageId());
 		if (mutableObject.getTimestamp() == null)
 			mutableObject.setTimestamp(new Date());
-		
+
 		V entity;
 		try {
 			entity = mdsProvider.storeMessageUnit(mutableObject);
 		} catch (StorageException saveFailed) {
-			log.error("Error saving meta-data of received message unit (msgId={}) : {}", messageUnit.getMessageId(),
+			log.error("Error saving meta-data of outgoing message unit (msgId={}) : {}", messageUnit.getMessageId(),
 						Utils.getExceptionTrace(saveFailed));
 			throw saveFailed;
-		}		
-		
+		}
+
 		if (entity instanceof IUserMessage) {
-			UserMessageEntityProxy proxy = new UserMessageEntityProxy((IUserMessageEntity) entity);			
+			UserMessageEntityProxy proxy = new UserMessageEntityProxy((IUserMessageEntity) entity);
+			entity = (V) proxy;
 			log.trace("Check if payload data is already saved");
 			final Collection<? extends IPayload> srcPayloads = ((IUserMessage) messageUnit).getPayloads();
 			IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(messageUnit.getPModeId());
@@ -190,46 +191,46 @@ public class StorageManager {
 					try(OutputStream contentStream = content.openStorage()) {
 						Utils.copyStream(srcPayloads.stream()
 											.filter(pl -> Utils.nullSafeEqual(pl.getPayloadURI(), p.getPayloadURI()))
-											.findFirst().get().getContent(), 
-										contentStream);						
+											.findFirst().get().getContent(),
+										contentStream);
 						log.debug("Saved content of payload (URI={})", p.getPayloadURI());
 					} catch (IOException plFailure) {
 						log.error("Could not save content of payload (URI={}) of User Message (msgId={}) : {}",
 									p.getPayloadURI(), messageUnit.getMessageId(), Utils.getExceptionTrace(plFailure));
-						entity.setProcessingState(ProcessingState.FAILURE, "Payload storage error: URI=" 
+						entity.setProcessingState(ProcessingState.FAILURE, "Payload storage error: URI="
 																+ p.getPayloadURI() + " - " + plFailure.getMessage());
 						mdsProvider.updateMessageUnit(entity);
 						throw new StorageException("Could not save payload content", plFailure);
 					}
-				} else 
+				} else
 					log.debug("Payload content already stored");
 				p.setContent(content);
 			}
 		}
-		log.debug("Stored new {} with MessageId={}", MessageUnitUtils.getMessageUnitName(messageUnit), 
+		log.debug("Stored new {} with MessageId={}", MessageUnitUtils.getMessageUnitName(messageUnit),
 					entity.getMessageId());
 		return entity;
     }
-    
+
     /**
-     * Creates a new Error Signal Message with the specified errors and stores the meta-data in the Holodeck B2B 
-     * database. The processing state of the new message unit will be set to {@linkplain ProcessingState#CREATED}.  
-     * <p>When the message in error is specified all errors must either reference this message or contain no reference. 
+     * Creates a new Error Signal Message with the specified errors and stores the meta-data in the Holodeck B2B
+     * database. The processing state of the new message unit will be set to {@linkplain ProcessingState#CREATED}.
+     * <p>When the message in error is specified all errors must either reference this message or contain no reference.
      * The new error message unit will automatically be set as related to the message in error.
-     * 
+     *
      * @param errors		errors to include in the Error Message
      * @param msgInError	message unit in error, may be <code>null</code> if there is no specific message in error
-     * @return	the create entity object 
+     * @return	the create entity object
      * @throws StorageException when an error occurs creating or saving the new entity object. Is also thrown when the
-     * 							given collection of errors do not consistently reference the message in error  
+     * 							given collection of errors do not consistently reference the message in error
      */
-    public IErrorMessageEntity createErrorMsgFor(final Collection<IEbmsError> errors, 
+    public IErrorMessageEntity createErrorMsgFor(final Collection<IEbmsError> errors,
     											 final IMessageUnitEntity msgInError) throws StorageException {
     	log.trace("Creating new Error Message");
     	ErrorMessage errMsg = new ErrorMessage(errors);
     	errMsg.setMessageId(createMessageId());
     	errMsg.setProcessingState(ProcessingState.CREATED);
-    	
+
     	if (msgInError != null) {
     		log.trace("Check errors reference message in error");
     		final String refToMessageId = msgInError.getMessageId();
@@ -246,14 +247,19 @@ public class StorageManager {
 	        errMsg.setDirection(msgInError.getDirection() == Direction.IN ? Direction.OUT : Direction.IN);
 	        errMsg.setRefToMessageId(refToMessageId);
 	        errMsg.setPModeId(msgInError.getPModeId());
-    	} else 
-    		// When there is no message in error, the error is always a reaction to a request 
+    	} else
+    		// When there is no message in error, the error is always a reaction to a request
     		errMsg.setDirection(Direction.OUT);
-    	
-    	IErrorMessageEntity entity; 
+
+    	IErrorMessageEntity entity;
     	try {
     		log.trace("Store error message in database");
     		entity = mdsProvider.storeMessageUnit(errMsg);
+    		if (msgInError != null) {
+    			ILeg leg = PModeUtils.getLeg(msgInError);
+    			entity.setLeg(leg != null ? leg.getLabel() : null);
+				mdsProvider.updateMessageUnit(entity);
+    		}
     	} catch (DuplicateMessageIdException e) {
     		log.error("The Metadata Storage Provder ({}) executed duplicate check on incoming message!");
 			throw new IllegalStateException("Illegal duplicate check exception!");
@@ -261,30 +267,18 @@ public class StorageManager {
 			log.error("Error saving meta-data of Error message : {}", Utils.getExceptionTrace(saveFailed));
 			throw saveFailed;
 		}
-		if (msgInError != null) { 
-			log.trace("Relate Error Message and message in error");
-			ILeg leg = PModeUtils.getLeg(msgInError);
-			entity.setLeg(leg != null ? leg.getLabel() : null);  
-			try {
-				mdsProvider.updateMessageUnit(entity);				
-			} catch (StorageException updFailure) {
-				log.warn("Could not add relationship between Error Message (coreId={}) and message in error (coreId={})",
-						 entity.getCoreId(), msgInError.getCoreId());
-				throw updFailure;
-			}
-		}
-		log.debug("Created new {} Error Message with MessageId={} and RefToMessageId={}", 
-					entity.getDirection() == Direction.IN ? "incoming" : "outgoing", entity.getMessageId(), 
-					entity.getRefToMessageId());	
+		log.debug("Created new {} Error Message with MessageId={} and RefToMessageId={}",
+					entity.getDirection() == Direction.IN ? "incoming" : "outgoing", entity.getMessageId(),
+					entity.getRefToMessageId());
 		return entity;
     }
-    
+
     /**
      * Saves the meta-data and content of the submitted payload to storage.
-     * 
+     *
      * @param payload 	the submitted payload
      * @param pmode		the P-Mode that governs the sending of the User Message this payload will be contained in
-     * @return	the {@link IPayloadEntity} object representing the saved payload 
+     * @return	the {@link IPayloadEntity} object representing the saved payload
      * @throws StorageException when an error occurs storing the submitted payload
      */
     public IPayloadEntity storeSubmittedPayload(final IPayload payload, final IPMode pmode) throws StorageException {
@@ -295,7 +289,7 @@ public class StorageManager {
 	    	log.trace("Store content of submitted payload");
 	    	IPayloadContent content = psProvider.createNewPayloadStorage(entity.getPayloadId(), pmode, Direction.OUT);
 			try(OutputStream contentStream = content.openStorage()) {
-				Utils.copyStream(payload.getContent(), contentStream);						
+				Utils.copyStream(payload.getContent(), contentStream);
 			}
 			log.debug("Saved content of payload");
 			entity.setContent(content);
@@ -305,7 +299,7 @@ public class StorageManager {
 			try {
 				mdsProvider.deletePayloadMetadata(entity.getSource());
 			} catch (StorageException mdRemoveFailed) {
-				log.error("Could not remove the meta-data of failed payload submission! Created payloadId={}", 
+				log.error("Could not remove the meta-data of failed payload submission! Created payloadId={}",
 							entity.getPayloadId());
 			}
 			throw new StorageException("Could not save payload content", contentFailure);
@@ -316,15 +310,47 @@ public class StorageManager {
     }
 
     /**
-     * Updates the processing state of the given message unit to the specified state, setting the start time of the new 
+     * Creates, or gets if it already exists, the content storage for the received payload.
+     *
+     * @param payload	the received payload
+     * @param pmode		the P-Mode that governs the processing of the User Message this payload is contained in
+     * @return			the {@link IPayloadContent} object representing the content storage
+     * @throws StorageException when an error occurs getting the content storage for the received payload
+     */
+    public IPayloadContent createStorageReceivedPayload(final IPayload payload, final IPMode pmode)
+    																						throws StorageException {
+    	PayloadEntityProxy entity = null;
+    	if (!(payload instanceof PayloadEntityProxy))
+	    	try {
+	    		log.trace("Store meta-data of submitted payload");
+		    	entity = new PayloadEntityProxy(mdsProvider.storePayloadMetadata(payload));
+	    	} catch (StorageException saveFailed) {
+	    		log.error("Could not save meta-data of submitted payload : {}", Utils.getExceptionTrace(saveFailed));
+	    		throw saveFailed;
+	    	}
+    	else
+    		entity = (PayloadEntityProxy) payload;
+
+    	// Check if the payload content storage is already created, can happen when the given payload is an entity
+    	IPayloadContent content = psProvider.getPayloadContent(entity.getPayloadId());
+    	if (content == null) {
+    		log.trace("Create content storage for payload");
+    		content = psProvider.createNewPayloadStorage(entity.getPayloadId(), pmode, Direction.IN);
+    	}
+
+		return content;
+    }
+
+    /**
+     * Updates the processing state of the given message unit to the specified state, setting the start time of the new
      * state to the current time. Returns a boolean indicating whether the message unit's processing state was updated
      * successfully. In case the state could not be updated, the entity object will contain the latest version of the
      * meta-data.
-     * 
+     *
      * @param msgUnit           The entity object representing the message unit
      * @param newProcState      The new processing state
      * @return                  <code>true</code> if the processing state has been updated,<br>
-     *                          <code>false</code> if the processing state was not updated because the current 
+     *                          <code>false</code> if the processing state was not updated because the current
      *                          processing state has already changed by another thread
      * @throws StorageException When a problem occurs updating the processing state of the message unit
      * @since 7.0.0 returns result of the processing state update
@@ -333,26 +359,26 @@ public class StorageManager {
                                                                                         throws StorageException {
         return this.setProcessingState(msgUnit, newProcState, null);
     }
-    
+
     /**
-     * Updates the processing state of the given message unit to the specified state and description, setting the start 
-     * time of the new state to the current time. Returns a boolean indicating whether the message unit's processing 
-     * state was updated successfully. In case the state could not be updated, the entity object will contain the latest 
+     * Updates the processing state of the given message unit to the specified state and description, setting the start
+     * time of the new state to the current time. Returns a boolean indicating whether the message unit's processing
+     * state was updated successfully. In case the state could not be updated, the entity object will contain the latest
      * version of the meta-data.
      *
      * @param msgUnit           The entity object representing the message unit
      * @param newProcState      The new processing state
      * @param description		The additional description for the new processing state
      * @return                  <code>true</code> if the processing state has been updated,<br>
-     *                          <code>false</code> if the processing state was not updated because the current 
+     *                          <code>false</code> if the processing state was not updated because the current
      *                          processing state has already changed by another thread
      * @throws StorageException When a problem occurs updating the processing state of the message unit
      * @since 7.0.0 removed parameter for current state
      */
     public boolean setProcessingState(final IMessageUnitEntity msgUnit, final ProcessingState newProcState,
     							   	  final String description) throws StorageException {
-    	final ProcessingState cState = msgUnit.getCurrentProcessingState().getState(); 
-		try {			
+    	final ProcessingState cState = msgUnit.getCurrentProcessingState().getState();
+		try {
 			updateEntity(msgUnit, m -> m.setProcessingState(newProcState, description));
 			return true;
 		} catch (AlreadyChangedException changed) {
@@ -361,9 +387,9 @@ public class StorageManager {
 				return false;
 			else
 				throw changed;
-		}    
+		}
     }
-    
+
     /**
      * Sets the ID of the P-Mode that defines how the message unit should be processed.
      *
@@ -381,18 +407,18 @@ public class StorageManager {
      * Sets the ID of the P-Mode and [label of] the Leg that define how the Error Message unit should be processed.
      *
      * @param msgUnit   The entity object representing the Error Message unit
-     * @param pl   		Pair consisting of the P-Mode and label of the Leg that govern the processing of the Error 
-     * 					Message 
+     * @param pl   		Pair consisting of the P-Mode and label of the Leg that govern the processing of the Error
+     * 					Message
      * @throws AlreadyChangedException When the database contains more up to date data. The meta-data contained in the
      * 								   entity object is updated to the latest meta-data available.
      * @throws StorageException    	   If some other error occured when saving the updated message unit to the database
      * @since 6.0.0
      */
-    public void setPModeAndLeg(final IErrorMessageEntity msgUnit, final Pair<IPMode, ILeg.Label> pl) 
+    public void setPModeAndLeg(final IErrorMessageEntity msgUnit, final Pair<IPMode, ILeg.Label> pl)
     																					throws StorageException {
     	updateEntity(msgUnit, m -> { m.setPModeId(pl.value1().getId()); m.setLeg(pl.value2()); });
     }
-        
+
     /**
      * Sets the multi-hop indicator of the message unit.
      *
@@ -420,22 +446,22 @@ public class StorageManager {
      */
     public void setAddSOAPFault(final IErrorMessageEntity errorMessage, final boolean addSOAPFault)
                                                                                         	throws StorageException {
-        updateEntity(errorMessage, e -> e.setAddSOAPFault(addSOAPFault));        
+        updateEntity(errorMessage, e -> e.setAddSOAPFault(addSOAPFault));
     }
 
-    
+
     /**
-     * Helper method to update and save the meta-data of a message unit to the database. 
+     * Helper method to update and save the meta-data of a message unit to the database.
      * <p>
-     * In case there is a problem in the persistency layer, the Holodeck B2B Core will use an in-memory Error Message 
-     * entity object to be able to still respond to the sending MSH. Updates to this non persisted Error Message should 
-     * however not be passed to the persistency provider.  
-     * 
+     * In case there is a problem in the persistency layer, the Holodeck B2B Core will use an in-memory Error Message
+     * entity object to be able to still respond to the sending MSH. Updates to this non persisted Error Message should
+     * however not be passed to the persistency provider.
+     *
      * @param m the entity object to be saved to the database
      * @throws AlreadyChangedException When the database contains more up to date data. The meta-data contained in the
      * 								   entity object is updated to the latest meta-data available.
      * @throws StorageException    	   If some other error occured when saving the updated message unit to the database
-     */    
+     */
     private <E extends IMessageUnitEntity> void updateEntity(E entity, Consumer<E> update) throws StorageException {
     	update.accept(entity);
     	if (!(entity instanceof NonPersistedErrorMessage))
@@ -443,18 +469,18 @@ public class StorageManager {
     			if (entity instanceof UserMessageEntityProxy)
     				mdsProvider.updateMessageUnit(((UserMessageEntityProxy) entity).getSource());
     			else
-    				mdsProvider.updateMessageUnit(entity);    			
+    				mdsProvider.updateMessageUnit(entity);
     		} catch (AlreadyChangedException alreadyChanged) {
     			log.warn("The meta-data of message unit (msgId={}) was already updated!", entity.getMessageId());
     			throw alreadyChanged;
     		} catch (StorageException updFailure) {
-    	    	log.error("Error in update ({}) of message unit (msgId={}) : {}",  
+    	    	log.error("Error in update ({}) of message unit (msgId={}) : {}",
     	    				updFailure.fillInStackTrace().getStackTrace()[1].getMethodName(), entity.getMessageId(),
     	    				Utils.getExceptionTrace(updFailure));
-    	    	throw updFailure;    			
+    	    	throw updFailure;
     		}
     }
-    
+
     /**
      * Deletes the meta-data and for User Messages the paylaod contents of the given message unit.
      *
@@ -462,26 +488,26 @@ public class StorageManager {
      * @throws StorageException When a problem occurs while removing the message unit from the database.
      */
     public void deleteMessageUnit(IMessageUnitEntity messageUnit) throws StorageException {
-        log.trace("Deleting {} with MessageId={}", MessageUnitUtils.getMessageUnitName(messageUnit), 
+        log.trace("Deleting {} with MessageId={}", MessageUnitUtils.getMessageUnitName(messageUnit),
         			messageUnit.getMessageId());
-        final Collection<? extends IPayloadEntity> payloads = messageUnit instanceof IUserMessage ? 
-        														((IUserMessageEntity) messageUnit).getPayloads() : null;        
-        
-        Collection<StorageException> errs = new ArrayList<>();  
+        final Collection<? extends IPayloadEntity> payloads = messageUnit instanceof IUserMessage ?
+        														((IUserMessageEntity) messageUnit).getPayloads() : null;
+
+        Collection<StorageException> errs = new ArrayList<>();
         if (payloads != null) {
         	log.trace("Remove payload content of User Message");
         	for (IPayloadEntity p : payloads) {
         		try {
         			psProvider.removePayloadContent(p.getPayloadId());
-        			log.trace("Removed payload content (URI={})", p.getPayloadURI()); 
+        			log.trace("Removed payload content (URI={})", p.getPayloadURI());
         		} catch (StorageException deleteFailed) {
-        			log.warn("Error removing payload content (URI={}) of User Messsage (msgId={}): {}", 
+        			log.warn("Error removing payload content (URI={}) of User Messsage (msgId={}): {}",
 							 p.getPayloadURI(), messageUnit.getMessageId(), Utils.getExceptionTrace(deleteFailed));
         			errs.add(new StorageException("Error removing payload content (URI=" + p.getPayloadURI() + ")",
         											deleteFailed));
 				}
         	}
-        }    	
+        }
 
         // If not all payload content was removed, keep the meta-data of the message, so we can try again later
         if (errs.isEmpty())
@@ -490,37 +516,39 @@ public class StorageManager {
 	        	log.info("{} (MessageId={}) removed from storage", MessageUnitUtils.getMessageUnitName(messageUnit),
 	        				messageUnit.getMessageId());
 	        } catch (StorageException deleteFailed) {
-				log.error("Error deleting meta-data of message unit (msgId={}) : {}", messageUnit.getMessageId(), 
+				log.error("Error deleting meta-data of message unit (msgId={}) : {}", messageUnit.getMessageId(),
 							Utils.getExceptionTrace(deleteFailed));
-				errs.add(deleteFailed);        	
+				errs.add(deleteFailed);
 	        }
-        
+
     	log.debug("Raise event to indicate that message unit (msgId={}) {} removed", messageUnit.getMessageId(),
     				errs.isEmpty() ? "is" : "could not be");
-    	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(errs.isEmpty() ? new MessageUnitPurged(messageUnit) 
-																	  : new MessagePurgeFailure(messageUnit, errs));    	
+    	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(errs.isEmpty() ? new MessageUnitPurged(messageUnit)
+																	  : new MessagePurgeFailure(messageUnit, errs));
     }
-    
+
     /**
      * Updates the payload meta-data.
      *
      * @param payloadInfo   The updated meta-data on the payload which must be persisted
      * @throws StorageException     If an error occurs when saving the payload meta-data to the database
      */
-    public void setPayloadInformation(final IPayloadEntity payloadInfo) throws StorageException {
+    public void updatePayloadInformation(final IPayloadEntity payloadInfo) throws StorageException {
+    	if (!(payloadInfo instanceof PayloadEntityProxy))
+    		throw new IllegalArgumentException("Can only update payload meta-data of type PayloadEntityProxy");
 		try {
-			mdsProvider.updatePayloadMetadata(payloadInfo);
+			mdsProvider.updatePayloadMetadata(((PayloadEntityProxy) payloadInfo).getSource());
 		} catch (AlreadyChangedException alreadyChanged) {
-			log.warn("The meta-data of payload (URI={}) contained in User Message (coreId={}) was already updated!", 
+			log.warn("The meta-data of payload (URI={}) contained in User Message (coreId={}) was already updated!",
 						payloadInfo.getPayloadURI(), payloadInfo.getParentCoreId());
 			throw alreadyChanged;
 		} catch (StorageException updFailure) {
-	    	log.error("Error in update of payload meta-data (URI={}) contained in User Message (coreId={}) : {}",  
+	    	log.error("Error in update of payload meta-data (URI={}) contained in User Message (coreId={}) : {}",
 	    			  payloadInfo.getPayloadURI(), payloadInfo.getParentCoreId(), Utils.getExceptionTrace(updFailure));
-	    	throw updFailure;    			
+	    	throw updFailure;
 		}
     }
-    
+
     /**
      * Helper method to create a temporary message unit object to enable setting of the correct processing state and
      * generation of a messageId.
@@ -543,11 +571,11 @@ public class StorageManager {
         else
             return new ErrorMessage((IErrorMessage) messageUnit);
     }
-    
+
     /**
      * Helper method to create a MessageId that uses the configured host name as right part.
-     * 
-     * @return a unique MessageId 
+     *
+     * @return a unique MessageId
      */
     private String createMessageId() {
     	return MessageIdUtils.createContentId(HolodeckB2BCoreInterface.getConfiguration().getHostName());
