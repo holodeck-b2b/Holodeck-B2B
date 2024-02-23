@@ -19,7 +19,7 @@ package org.holodeckb2b.interfaces.security;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 /**
  * Represents the results of processing of the encryption part of message level security. It provides information on the
@@ -73,15 +73,15 @@ public interface IEncryptionProcessingResult extends ISecurityProcessingResult {
      *
      * @return  List of encrypted payloads
      */
-    Collection<IPayload>  getEncryptedPayloads();
+    Collection<IPayloadEntity>  getEncryptedPayloads();
 
     /**
-     * Provides access to the meta-data on the <i>symmetric key</i> was exchanged between the communication partners. 
-     * For WS-Security this corresponds to the <code>xenc:EncryptedKey/xenc:EncryptionMethod</code> element in the 
+     * Provides access to the meta-data on the <i>symmetric key</i> was exchanged between the communication partners.
+     * For WS-Security this corresponds to the <code>xenc:EncryptedKey/xenc:EncryptionMethod</code> element in the
      * header. Note that this only includes information about the protection of symmetric key, not the key itself.
      * <p>This interface is based on the currently specified key transport algorithms in the <i>XML Encryption Syntax
      * and Processing Version 1.1</i> specification.<br>
-     * 
+     *
      * @author Sander Fieten (sander at holodeck-b2b.org)
      * @since 4.0.0
      */
