@@ -31,7 +31,7 @@ import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 
 /**
  * Is the {@link IUserMessageEntity} implementation of the in-memory persistency provider used for testing.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class UserMessageEntity extends MessageUnitEntity implements IUserMessageEntity {
@@ -50,12 +50,12 @@ public class UserMessageEntity extends MessageUnitEntity implements IUserMessage
         super(sourceUserMessage);
         copyFrom(sourceUserMessage);
     }
-    
+
     public void copyFrom(IUserMessage sourceUserMessage) {
         if (sourceUserMessage == null)
             return;
         super.copyFrom(sourceUserMessage);
-        
+
         this.mpc = sourceUserMessage.getMPC();
         setSender(sourceUserMessage.getSender());
         setReceiver(sourceUserMessage.getReceiver());
@@ -70,7 +70,7 @@ public class UserMessageEntity extends MessageUnitEntity implements IUserMessage
 	public MessageUnitEntity clone() {
 		return new UserMessageEntity(this);
 	}
-    
+
     @Override
     public String getMPC() {
         return mpc;
@@ -114,13 +114,13 @@ public class UserMessageEntity extends MessageUnitEntity implements IUserMessage
 
     public void setMessageProperties(final Collection<IProperty> msgProps) {
         this.msgProperties = new ArrayList<>(msgProps != null ? msgProps.size() : 0);
-        if(!Utils.isNullOrEmpty(msgProps)) 
-            msgProps.forEach(p -> this.msgProperties.add(new Property(p)));        
+        if(!Utils.isNullOrEmpty(msgProps))
+            msgProps.forEach(p -> this.msgProperties.add(new Property(p)));
     }
 
     public void addMessageProperty(final IProperty prop) {
-        if (prop != null) 
-            this.msgProperties.add(new Property(prop));        
+        if (prop != null)
+            this.msgProperties.add(new Property(prop));
     }
 
     @Override
