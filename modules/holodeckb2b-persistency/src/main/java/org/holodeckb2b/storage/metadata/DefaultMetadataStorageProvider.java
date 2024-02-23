@@ -29,6 +29,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.OptimisticLockException;
+import javax.persistence.PersistenceException;
 import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 
@@ -66,6 +67,10 @@ import org.holodeckb2b.storage.metadata.jpa.UserMessage;
 @SuppressWarnings("unchecked")
 public class DefaultMetadataStorageProvider implements IMetadataStorageProvider {
 	private EntityManagerFactory emf;
+	/**
+	 * The running instance of the provider is used by the default UI to retrieve the message meta-data.
+	 */
+	private static DefaultMetadataStorageProvider instance;
 
 	@Override
 	public String getName() {
@@ -76,6 +81,14 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 	public void init(final IConfiguration config) throws StorageException {
 		emf = new HibernatePersistenceProvider().createContainerEntityManagerFactory(DatabaseConfiguration.INSTANCE,
 				Collections.emptyMap());
+		instance = this;
+	}
+
+	/**
+	 * @return	the running instance of the provider
+	 */
+	public static DefaultMetadataStorageProvider getInstance() {
+		return instance;
 	}
 
 	@Override
@@ -385,7 +398,6 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
         } catch (final NoResultException nothingFound) {
             result = false;
         } catch (final Exception e) {
-            // Something went wrong during query execution
             throw new StorageException("Could not execute query \"isAlreadyDelivered\"", e);
         } finally {
             em.getTransaction().commit();
@@ -406,6 +418,44 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 			throw new StorageException("Could not load complete meta-data of message unit", pe);
 		}
 	}
+
+	/**
+     * Gets the meta-data of message units which ebMS <i>Timestamp</i> is between the given time stamps.
+     * <p>NOTE: This query is not part of {@link IMetadataStorageProvider} and is added for use by the default UI to
+     * monitor the message processing. If you use this method in other code note that the GPLv3 applies and your code
+     * MUST also use AGPLv3.
+     *
+     * @param after		Oldest time stamp to include
+     * @param before	Most recent time stamp to include
+     * @param max		Maximum number of results
+     * @return			List of message units that match the given criteria, limited to the given maximum number
+     * 					of entries
+     * @throws StorageException When an error occurs in retrieving the message unit meta-data
+     */
+    public List<IMessageUnitEntity> getMessageHistory(final Date after, final Date before, final int max)
+    																						throws StorageException {
+
+    	List<IMessageUnitEntity> result = null;
+    	final EntityManager em = emf.createEntityManager();
+    	try {
+    		em.getTransaction().begin();
+    		TypedQuery<MessageUnit> query = em.createQuery("SELECT mu FROM MessageUnit mu "
+									    				 + "WHERE mu.MU_TIMESTAMP BETWEEN :after AND :before "
+									    				 + "ORDER BY mu.MU_TIMESTAMP DESC",
+									    				 MessageUnit.class)
+									    				.setParameter("after", after)
+									    				.setParameter("before", before)
+									    				.setMaxResults(max);
+    		result = JPAObjectHelper.proxy(query.getResultList());
+    		result.forEach(e -> ((JPAObjectProxy<JPAEntityObject>) e).loadCompletely());
+    	} catch (final Exception e) {
+    		throw new StorageException("Could not execute query \"getMessageHistory\"", e);
+    	} finally {
+    		em.getTransaction().commit();
+    		em.close();
+    	}
+    	return result;
+    }
 
 	private void assertManagedType(Object entity) throws StorageException {
 		if (!(entity instanceof MessageUnitEntity<?>) && !(entity instanceof PayloadEntity))
