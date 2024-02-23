@@ -178,4 +178,25 @@ public class QueryTests extends BaseProviderTest {
 		}
 		em.close();
 	}
+
+	@Test
+	void testGetMessageHistory() {
+		List<IMessageUnitEntity> r = assertDoesNotThrow(() -> provider.getMessageHistory(daysBack(1), new Date(), 100));
+		assertEquals(11, r.size());
+
+		r = assertDoesNotThrow(() ->
+							provider.getMessageHistory(daysBack(1), TestDataSet.T_USERMESSAGE_5.getTimestamp(), 100));
+		assertEquals(5, r.size());
+
+		r = assertDoesNotThrow(() -> provider.getMessageHistory(TestDataSet.T_USERMESSAGE_3.getTimestamp(),
+											   					TestDataSet.T_RECEIPT_1.getTimestamp(), 100));
+		assertEquals(7, r.size());
+
+		r = assertDoesNotThrow(() ->
+					provider.getMessageHistory(TestDataSet.T_USERMESSAGE_3.getTimestamp(),
+												TestDataSet.T_RECEIPT_1.getTimestamp(), 2));
+		assertEquals(2, r.size());
+		assertEquals(TestDataSet.T_RECEIPT_1.getCoreId(), r.get(0).getCoreId());
+		assertEquals(TestDataSet.T_PULLREQ_1.getCoreId(), r.get(1).getCoreId());
+	}
 }
