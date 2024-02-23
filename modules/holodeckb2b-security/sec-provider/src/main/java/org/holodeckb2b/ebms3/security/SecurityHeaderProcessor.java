@@ -58,7 +58,6 @@ import org.holodeckb2b.ebms3.security.util.SecurityUtils;
 import org.holodeckb2b.ebms3.security.util.SignedMessagePartsInfo;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
 import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
@@ -69,6 +68,8 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.SignatureTrustException;
 import org.holodeckb2b.interfaces.security.X509ReferenceType;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -193,7 +194,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                 case USERNAME_TOKEN :
                     results.add(new UsernameTokenProcessingResult(SecurityHeaderTarget.DEFAULT, hpf));
             }
-        }        
+        }
         //
         // Then process the ebms targeted header
         //
@@ -278,7 +279,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         wsDocInfo.setCallbackLookup(new DOMCallbackLookup(domEnvelope));
         reqData.setWsDocInfo(wsDocInfo);
         reqData.setMsgContext(procContext.getParentContext());
-        
+
         return reqData;
     }
 
@@ -407,7 +408,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                 final X509ReferenceType refType = SecurityUtils.getKeyReferenceType(
                              (STRParser.REFERENCE_TYPE) signResult.get(WSSecurityEngineResult.TAG_X509_REFERENCE_TYPE));
                 final IValidationResult trustCheck = getValidationResult(requestData);
-                final SignedMessagePartsInfo signedPartsInfo = SecurityUtils.getSignedPartsInfo(domEnvelope, msgUnits);                
+                final SignedMessagePartsInfo signedPartsInfo = SecurityUtils.getSignedPartsInfo(domEnvelope, msgUnits);
                 // And create result object
                 results.add(new SignatureProcessingResult(signCert, trustCheck, refType, signAlgorithm,
                                                           signedPartsInfo.getEbmsHeaderInfo(),
@@ -424,7 +425,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                 final List<WSDataRef> refs = (List<WSDataRef>) decResult.get(WSSecurityEngineResult.TAG_DATA_REF_URIS);
                 final String ktAlgorithm =
                                      (String) decResult.get(WSSecurityEngineResult.TAG_ENCRYPTED_KEY_TRANSPORT_METHOD);
-                final Collection<IPayload>  payloads = new ArrayList<>();
+                final Collection<IPayloadEntity>  payloads = new ArrayList<>();
                 String encAlgorithm = null;
                 String ktDigest = DEFAULT_KEYTRANSPORT_DIGEST_ALGO;
                 String ktMGF = null;
@@ -433,7 +434,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                 if (!Utils.isNullOrEmpty(refs)) {
                     encAlgorithm = refs.get(0).getAlgorithm();
                     msgUnits.stream().filter(m -> m instanceof IUserMessage)
-                    				 .map(userMsg -> ((IUserMessage) userMsg).getPayloads())
+                    				 .map(userMsg -> ((IUserMessageEntity) userMsg).getPayloads())
                                      .filter(umPayloads -> !Utils.isNullOrEmpty(umPayloads))
                                      .forEachOrdered(umPayloads ->
                                        umPayloads.forEach((p) ->
@@ -450,7 +451,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                 final Element encryptionMethod = (Element) encryptedKey.getElementsByTagNameNS(
 									                        SecurityConstants.ENCRYPTION_METHOD_ELEM.getNamespaceURI(),
 									                        SecurityConstants.ENCRYPTION_METHOD_ELEM.getLocalPart())
-									                                                            .item(0);                
+									                                                            .item(0);
                 for(int i = 0; i < encryptionMethod.getChildNodes().getLength() ; i++) {
                     Node child = encryptionMethod.getChildNodes().item(i);
                     switch (child.getLocalName()) {
@@ -471,33 +472,33 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
 
     /**
      * Fetch the result of a given action from a given result list
-     * 
+     *
      * @param resultList 	The result list to fetch an action from
      * @param action 		The action to fetch
      * @return The first result fetched from the result list, <code>null</code> if the result
      *         could not be found
      */
     private WSSecurityEngineResult fetchActionResult(final List<WSSecurityEngineResult> resultList, final int action) {
-        WSSecurityEngineResult result = null;        
-        for (int i = 0; i < resultList.size() && result == null; i++) 
-            if (action == (Integer) resultList.get(i).get(WSSecurityEngineResult.TAG_ACTION)) 
-                result = resultList.get(i);            
-        
+        WSSecurityEngineResult result = null;
+        for (int i = 0; i < resultList.size() && result == null; i++)
+            if (action == (Integer) resultList.get(i).get(WSSecurityEngineResult.TAG_ACTION))
+                result = resultList.get(i);
+
         return result;
     }
-    
+
     /**
      * Gets the trust validation result from the WSS4J context.
-     * 
+     *
      * @param reqData	The current WSS4J context
      * @return			The trust validation result if it was available in the context, <code>null</code> otherwise
      */
 	private IValidationResult getValidationResult(final RequestData reqData)  {
 		try {
-			return ((SignatureTrustValidator) reqData.getValidator(WSConstants.SIGNATURE)).getValidationResult();			
+			return ((SignatureTrustValidator) reqData.getValidator(WSConstants.SIGNATURE)).getValidationResult();
 		} catch (WSSecurityException | ClassCastException e) {
 			log.error("Could not retrieve trust validator result from context!");
 			return null;
 		}
-	}    
+	}
 }

@@ -80,6 +80,8 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
 import org.holodeckb2b.interfaces.security.X509ReferenceType;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -553,9 +555,9 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
      */
     private EncryptionProcessingResult getEncryptionResults() throws SecurityProcessingException {
         // Get all payloads included in the message, i.e. in attachment or body
-        Collection<IPayload> encryptedPayloads = new HashSet<>();
+        Collection<IPayloadEntity> encryptedPayloads = new HashSet<>();
         msgUnits.stream().filter(msgUnit -> msgUnit instanceof IUserMessage)
-                         .map(userMsg -> ((IUserMessage) userMsg).getPayloads())
+                         .map(userMsg -> ((IUserMessageEntity) userMsg).getPayloads())
                          .filter(umPayloads -> !Utils.isNullOrEmpty(umPayloads))
                          .forEachOrdered((umPayloads) ->
                                 umPayloads.stream().filter(p -> p.getContainment() != IPayload.Containment.EXTERNAL)
