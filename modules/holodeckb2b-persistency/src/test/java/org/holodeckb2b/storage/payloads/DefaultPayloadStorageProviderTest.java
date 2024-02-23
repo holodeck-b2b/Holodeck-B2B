@@ -16,7 +16,9 @@
  */
 package org.holodeckb2b.storage.payloads;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -110,8 +112,17 @@ class DefaultPayloadStorageProviderTest {
 
 		IPayloadContent content = assertDoesNotThrow(() -> provider.getPayloadContent(testfile.getName()));
 
-		assertDoesNotThrow(() -> content.getContent());
+		assertNotNull(assertDoesNotThrow(() -> content.getContent()));
 	}
+
+	@Test
+	void testGetNonAvailablePayloadContent() {
+		final DefaultPayloadStorageProvider provider = new DefaultPayloadStorageProvider();
+		assertDoesNotThrow(() -> provider.init(HolodeckB2BCoreInterface.getConfiguration()));
+
+		assertNull(assertDoesNotThrow(() -> provider.getPayloadContent(UUID.randomUUID().toString())));
+	}
+
 
 	@Test
 	void testRemovePayloadContent() {

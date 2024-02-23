@@ -19,8 +19,8 @@ package org.holodeckb2b.storage.payloads;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayInputStream;
@@ -34,6 +34,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.UUID;
 
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.commons.util.FileUtils;
 import org.holodeckb2b.interfaces.storage.providers.StorageException;
@@ -63,11 +64,7 @@ class PayloadContentTest {
 
 		try (InputStream fis = new FileInputStream(testfile);
 			 InputStream cis = assertDoesNotThrow(() -> content.getContent())) {
-			int src, read;
-			do {
-				src = fis.read(); read = cis.read();
-			} while (src == read && src >= 0 && read >= 0);
-			assertTrue(src < 0 && read < 0);
+			HB2BTestUtils.assertEqual(fis, cis);
 		}
 	}
 
@@ -91,18 +88,18 @@ class PayloadContentTest {
 
 	@Test
 	void testReadNotFound() {
-		assertThrows(StorageException.class, () ->
-					 new PayloadContent("readtest3", TESTDIR.resolve("doesnotexist").toFile()).getContent());
+		assertNull(assertDoesNotThrow(() ->
+					new PayloadContent("readtest3", TESTDIR.resolve("doesnotexist").toFile()).getContent()));
 	}
 
 	@Test
-	void testRejectReadWhileWriting() {
+	void testReadWhileWriting() {
 		final File testfile = TESTDIR.resolve(UUID.randomUUID().toString()).toFile();
 		final PayloadContent content = new PayloadContent("readtest4", testfile);
 
 		OutputStream cos = assertDoesNotThrow(() -> content.openStorage());
 
-		assertThrows(StorageException.class, () -> content.getContent());
+		assertNull(assertDoesNotThrow(() -> content.getContent()));
 
 		assertDoesNotThrow(() -> cos.close());
 	}
@@ -136,11 +133,7 @@ class PayloadContentTest {
 
 		try (InputStream fis = new FileInputStream(testfile);
 			 InputStream bais = new ByteArrayInputStream(data)) {
-			int src, read;
-			do {
-				src = fis.read(); read = bais.read();
-			} while (src == read && src >= 0 && read >= 0);
-			assertTrue(src < 0 && read < 0);
+			HB2BTestUtils.assertEqual(fis, bais);
 		} catch (IOException e) {
 			fail(e);
 		}
@@ -165,11 +158,7 @@ class PayloadContentTest {
 
 		try (InputStream fis = new FileInputStream(testfile);
 			 InputStream bais = new ByteArrayInputStream(data)) {
-			int src, read;
-			do {
-				src = fis.read(); read = bais.read();
-			} while (src == read && src >= 0 && read >= 0);
-			assertTrue(src < 0 && read < 0);
+			HB2BTestUtils.assertEqual(fis, bais);
 		} catch (IOException e) {
 			fail(e);
 		}
