@@ -16,25 +16,25 @@
  */
 package org.holodeckb2b.ebms3.handlers.outflow;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.apache.axis2.AxisFault;
+import java.io.FileInputStream;
+
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  * Created at 23:39 29.01.17
@@ -45,59 +45,60 @@ import org.junit.Test;
  */
 public class AddPayloadsTest {
 
-	private static String baseDir;
-
-	@BeforeClass
+	@BeforeAll
 	public static void setUpClass() throws Exception {
-		baseDir = TestUtils.getPath(AddPayloadsTest.class.getSimpleName()).toString();
-		HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
+		HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
 	}
 
 	@Test
-	public void testDoProcessing() throws Exception {
-
+	public void testAttachmentPayload() throws Exception {
 		MessageContext mc = new MessageContext();
 		mc.setFLOW(MessageContext.OUT_FLOW);
 		// Envelope is needed to add body payload
-		try {
-			mc.setEnvelope(SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12));
-		} catch (AxisFault axisFault) {
-			fail(axisFault.getMessage());
-		}
+		assertDoesNotThrow(() -> mc.setEnvelope(SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12)));
 
 		UserMessage userMessage = new UserMessage();
 		userMessage.setMessageId("payload-adder-01");
 		// Programmatically added attachment payload
 		Payload payload = new Payload();
 		payload.setContainment(IPayload.Containment.ATTACHMENT);
-		String payloadURI = "some_URI_01";
-		payload.setPayloadURI(payloadURI);
-		payload.setContentLocation(baseDir + "/flower.jpg");
-		userMessage.addPayload(payload);
-
-		// Programmatically added body payload
-		payload = new Payload();
-		payload.setContainment(IPayload.Containment.BODY);
-		payload.setPayloadURI("some_URI_03");
-		payload.setContentLocation(baseDir + "/document.xml");
+		payload.setPayloadURI("some_URI_01");
+		payload.setContentStream(new FileInputStream(TestUtils.getTestResource("flower.jpg").toFile()));
 		userMessage.addPayload(payload);
 
 		// Setting input message property
-		IUserMessageEntity userMessageEntity = HolodeckB2BCore.getStorageManager()
-																.storeIncomingMessageUnit(userMessage);
-		
 		IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
-		procCtx.setUserMessage(userMessageEntity);
+		procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
 
-		try {
-			new AddPayloads().invoke(mc);			
-		} catch (Exception e) {
-			fail(e.getMessage());
-		}
+		assertDoesNotThrow(() -> new AddPayloads().invoke(mc));
 
 		assertNotNull(mc.getAttachmentMap());
 		assertEquals(1, mc.getAttachmentMap().getAllContentIDs().length);
-		
+		assertEquals(payload.getPayloadURI(), mc.getAttachmentMap().getAllContentIDs()[0]);
+	}
+
+	@Test
+	public void testBodyPayload() throws Exception {
+		MessageContext mc = new MessageContext();
+		mc.setFLOW(MessageContext.OUT_FLOW);
+		// Envelope is needed to add body payload
+		assertDoesNotThrow(() -> mc.setEnvelope(SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12)));
+
+		UserMessage userMessage = new UserMessage();
+		userMessage.setMessageId("payload-adder-01");
+		// Programmatically added body payload
+		Payload payload = new Payload();
+		payload.setContainment(IPayload.Containment.BODY);
+		payload.setPayloadURI("some_URI_03");
+		payload.setContentStream(new FileInputStream(TestUtils.getTestResource("document.xml").toFile()));
+		userMessage.addPayload(payload);
+
+		// Setting input message property
+		IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+		procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
+
+		assertDoesNotThrow(() -> new AddPayloads().invoke(mc));
+
 		assertNotNull(mc.getEnvelope().getBody().getFirstElement());
 		assertEquals("document", mc.getEnvelope().getBody().getFirstElement().getLocalName());
 	}

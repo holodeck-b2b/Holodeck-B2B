@@ -16,24 +16,20 @@
  */
 package org.holodeckb2b.as4.compression;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
-import org.holodeckb2b.common.testhelpers.TestUtils;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
+import org.holodeckb2b.commons.testing.TestUtils;
+import org.holodeckb2b.commons.util.Utils;
+import org.junit.jupiter.api.Test;
+
 
 /**
  *
@@ -41,83 +37,26 @@ import org.junit.Test;
  */
 public class GZIPCompressingInputStreamTest {
 
-    public GZIPCompressingInputStreamTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-        try {
-            final File out = TestUtils.getPath("compression/compressed.gz").toFile();
-            if (out.exists())
-                out.delete();
-        } catch (final Exception e)
-        {}
-    }
-
-    @After
-    public void tearDown() {
-    }
-
     @Test
-    public void testCompression() {
-        final File comF = TestUtils.getPath("compression").resolve("compressed.gz").toFile();
-        final File decF = TestUtils.getPath("compression").resolve("decompressed.jpg").toFile();
+    void testCompression() {
+        final File uncompressed = TestUtils.getTestResource("compression/uncompressed.jpg").toFile();
 
-        try {
-            final File uncF = TestUtils.getPath("compression/uncompressed.jpg").toFile();
-            final byte[] buffer = new byte[512];
-
-            //Compress
-            try (GZIPCompressingInputStream cfis = new GZIPCompressingInputStream(new FileInputStream(uncF));
-                 FileOutputStream fos = new FileOutputStream(comF))
-            {
-              int r = 0;
-              while ( (r = cfis.read(buffer, 0, 512)) > 0 ) {
-                  fos.write(buffer, 0, r);
-              }
-            }
-
-            // Decompress
-            try (GZIPInputStream decfis = new GZIPInputStream(new FileInputStream(comF));
-                 FileOutputStream fos = new FileOutputStream(decF))
-            {
-              int r = 0;
-              while ( (r = decfis.read(buffer, 0, 512)) > 0 ) {
-                  fos.write(buffer, 0, r);
-              }
-            }
-
-            //Compare
-            try (FileInputStream fis1 = new FileInputStream(uncF);
-                FileInputStream fis2 = new FileInputStream(decF))
-            {
-              final byte[] buffer2 = new byte[512];
-              int r = 0;
-              int r2 = 0;
-              while ( ((r = fis1.read(buffer, 0, 512)) > 0) & ((r2 = fis2.read(buffer2, 0, 512)) > 0)) {
-                  assertEquals(r, r2);
-                  assertArrayEquals(buffer, buffer2);
-              }
-
-              assertEquals(r, r2);
-            }
-
+        //Compress
+        byte[] compressed = null;
+        try (GZIPCompressingInputStream cis = new GZIPCompressingInputStream(new FileInputStream(uncompressed));
+             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+        	Utils.copyStream(cis, baos);
+        	compressed = baos.toByteArray();
         } catch (final IOException ex) {
-            Logger.getLogger(GZIPCompressingInputStreamTest.class.getName()).log(Level.SEVERE, null, ex);
-            fail();
-        } finally {
-            if (comF.exists())
-                comF.delete();
-            if (decF.exists())
-                decF.delete();
+	        fail();
         }
+
+       //Check decompressed content
+        try (GZIPInputStream decompressed = new GZIPInputStream(new ByteArrayInputStream(compressed));
+        	 FileInputStream fis = new FileInputStream(uncompressed)) {
+        	HB2BTestUtils.assertEqual(fis, decompressed);
+        } catch (IOException e) {
+        	fail();
+		}
     }
 }

@@ -33,8 +33,8 @@ import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.Protocol;
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -70,7 +70,7 @@ public class ConfigureHTTPTransportHandlerTest {
         mc.setFLOW(MessageContext.OUT_FLOW);
         mc.setServerSide(false);
         
-        PMode pmode = TestUtils.create1WaySendPushPMode();        
+        PMode pmode = HB2BTestUtils.create1WaySendPushPMode();        
         Leg leg = pmode.getLeg(Label.REQUEST);
         
         HolodeckB2BCore.getPModeSet().add(pmode);
@@ -105,7 +105,7 @@ public class ConfigureHTTPTransportHandlerTest {
     	mc.setFLOW(MessageContext.OUT_FLOW);
     	mc.setServerSide(false);
         
-    	PMode pmode = TestUtils.create1WaySendPushPMode();        
+    	PMode pmode = HB2BTestUtils.create1WaySendPushPMode();        
         Leg leg = pmode.getLeg(Label.REQUEST);
         // Setting all protocol configurations checked by the tested handler
     	Protocol protocolConfig = leg.getProtocol();

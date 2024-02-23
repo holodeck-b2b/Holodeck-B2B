@@ -37,9 +37,9 @@ import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:SignalMessage</code> and child element for an
@@ -71,7 +71,7 @@ public class PackageErrorSignals extends AbstractBaseHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 	
-    																					throws PersistenceException {
+    																					throws StorageException {
         // First check if there are any errors to include
         final Collection<IErrorMessageEntity> errors = procCtx.getSendingErrors();
 

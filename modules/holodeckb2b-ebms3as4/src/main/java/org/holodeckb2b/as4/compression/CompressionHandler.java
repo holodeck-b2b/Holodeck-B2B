@@ -32,9 +32,9 @@ import org.holodeckb2b.interfaces.as4.pmode.IAS4PayloadProfile;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPayloadProfile;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 
 /**
  * Is the <i>OUT_FLOW</i> handler part of the AS4 Compression Feature responsible for the compression of the payload

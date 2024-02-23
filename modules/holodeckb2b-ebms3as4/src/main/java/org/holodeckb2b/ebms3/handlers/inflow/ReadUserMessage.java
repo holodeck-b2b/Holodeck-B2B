@@ -28,8 +28,8 @@ import org.holodeckb2b.core.validation.header.HeaderValidationHandler;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the handler in the <i>IN_FLOW</i> responsible for reading the meta data on an user message message unit from the
@@ -37,7 +37,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * <code>eb:UserMessage</code> element in the ebMS header.
  * <p>This handler will only read the meta-data that is available in the ebMS header without performing a validation on
  * it. This is done later in the {@link HeaderValidationHandler} and optionally in custom validators specified in the
- * P-Mode. The meta data is stored in an entity object which is stored in the database and added to the message 
+ * P-Mode. The meta data is stored in an entity object which is stored in the database and added to the message
  * processing context. The processing state of the user message is set to {@link ProcessingState#RECEIVED}.
  * <p><b>NOTE:</b> The XML schema definition from the ebMS specification allows for multiple <code>eb:UserMessage</code>
  * elements in the ebMS header. In the Core Specification however the number of user message units in the message
@@ -49,8 +49,8 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class ReadUserMessage extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final IMessageProcessingContext procContext, final Logger log) 
-    																					throws PersistenceException {
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procContext, final Logger log)
+    																					throws StorageException {
         // First get the ebMS header block, that is the eb:Messaging element
         final SOAPHeaderBlock messaging = Messaging.getElement(procContext.getParentContext().getEnvelope());
 
@@ -68,7 +68,7 @@ public class ReadUserMessage extends AbstractBaseHandler {
 
                 // Store it in both database and message context for further processing
                 log.trace("Saving user message meta data to database and message context");
-                procContext.setUserMessage(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
+                procContext.setUserMessage(HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(userMessage));
                 log.info("User message with msgId " + userMessage.getMessageId() + " succesfully read");
             }
         }

@@ -26,8 +26,8 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.ReceiptElement;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
+import org.holodeckb2b.interfaces.storage.IReceiptEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:Receipt</code> element in the ebMS messaging
@@ -43,7 +43,7 @@ public class PackageReceiptSignal extends AbstractBaseHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
-    																					throws PersistenceException {
+    																					throws StorageException {
         // First check if there is a receipt to include
         Collection<IReceiptEntity> receipts = procCtx.getSendingReceipts(); 
         

@@ -46,8 +46,9 @@ import org.holodeckb2b.common.pmode.SecurityConfig;
 import org.holodeckb2b.common.pmode.SigningConfig;
 import org.holodeckb2b.common.pmode.UserMessageFlow;
 import org.holodeckb2b.common.pmode.UsernameTokenConfig;
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -72,7 +73,7 @@ public class BasicPModeValidatorTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         HolodeckB2BTestCore core = new HolodeckB2BTestCore();
-        core.setCertificateManager(new CertManagerMock(TestUtils.getPath(BasicPModeValidatorTest.class.getSimpleName())));
+        core.setCertificateManager(new CertManagerMock(TestUtils.getTestClassBasePath()));
         HolodeckB2BCoreInterface.setImplementation(core);
     }
 
@@ -175,7 +176,7 @@ public class BasicPModeValidatorTest {
         busInfo.setMpc("MPC");
         umFlow.setBusinnessInfo(busInfo);
         leg.setUserMessageFlow(umFlow);
-        
+
         prFlow = new PullRequestFlow();
         prFlow.setMPC("MPC-1");
         leg.addPullRequestFlow(prFlow);
@@ -193,7 +194,7 @@ public class BasicPModeValidatorTest {
     @Test
     public void testInvalidGeneralParameters() {
     	PMode invalidPMode = new PMode();
-    	
+
         invalidPMode.setMep(EbMSConstants.ONE_WAY_MEP+"/smth"); // wrong mep
         invalidPMode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
         invalidPMode.addLeg(new Leg());
@@ -222,7 +223,7 @@ public class BasicPModeValidatorTest {
     @Test
     public void testInvalidUsernameTokenParameters() {
     	PMode invalidPMode = new PMode();
-    	
+
     	invalidPMode.setMep(EbMSConstants.ONE_WAY_MEP);
         invalidPMode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
         invalidPMode.addLeg(new Leg());
@@ -266,23 +267,23 @@ public class BasicPModeValidatorTest {
 
     @Test
     public void testInvalidX509Parameters() {
-    	PMode invalidPMode =  TestUtils.create1WaySendPushPMode();
+    	PMode invalidPMode =  HB2BTestUtils.create1WaySendPushPMode();
 
         PartnerConfig initiator = new PartnerConfig();
         SecurityConfig secConfig = new SecurityConfig();
-        
+
         SigningConfig sigConfig = new SigningConfig();
         secConfig.setSignatureConfiguration(sigConfig);
 
         EncryptionConfig encConfig = new EncryptionConfig();
         secConfig.setEncryptionConfiguration(encConfig);
-        
+
         initiator.setSecurityConfiguration(secConfig);
         invalidPMode.setInitiator(initiator);
 
-        // Missing aliases 
+        // Missing aliases
         assertFalse(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
-        
+
         encConfig.setKeystoreAlias("partya");
         assertFalse(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
 
@@ -299,11 +300,11 @@ public class BasicPModeValidatorTest {
         sigConfig.setCertificatePassword("ExampleB");
         assertTrue(Utils.isNullOrEmpty(validator.validatePMode(invalidPMode)));
     }
-    
+
     static class CertManagerMock implements ICertificateManager {
 
     	private KeyStore	keystore;
-    	
+
     	CertManagerMock(Path ksPath) {
             try (FileInputStream fis = new java.io.FileInputStream(ksPath.resolve("keystore.jks").toFile())) {
             	keystore = KeyStore.getInstance("JKS");
@@ -313,11 +314,11 @@ public class BasicPModeValidatorTest {
                 throw new IllegalArgumentException("Can not load the keystore!", ex);
             }
     	}
-    	
+
 		@Override
 		public PrivateKeyEntry getKeyPair(String alias, String password) throws SecurityProcessingException {
 			try {
-				return (KeyStore.PrivateKeyEntry) keystore.getEntry(alias,		
+				return (KeyStore.PrivateKeyEntry) keystore.getEntry(alias,
 															new KeyStore.PasswordProtection(password.toCharArray()));
 			} catch (Exception e) {
 				return null;
@@ -410,13 +411,13 @@ public class BasicPModeValidatorTest {
 		@Override
 		public void init(IConfiguration config) throws SecurityProcessingException {
 			// TODO Auto-generated method stub
-			
+
 		}
-    	
+
 		@Override
 		public void shutdown() {
 			// TODO Auto-generated method stub
-			
+
 		}
     }
 }

@@ -18,11 +18,9 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 
 import static org.holodeckb2b.interfaces.messagemodel.IPayload.Containment.ATTACHMENT;
 
-import java.io.File;
-import java.io.FileReader;
+import java.io.InputStream;
 import java.util.Collection;
 
-import javax.activation.FileDataSource;
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.attachments.ConfigurableDataHandler;
@@ -31,6 +29,7 @@ import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
+import org.apache.axis2.builder.unknowncontent.InputStreamDataSource;
 import org.apache.axis2.context.MessageContext;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
@@ -41,9 +40,9 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IPayloadEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the <i>OUT_FLOW</i> handler that will add the payloads to the SOAP message if there is a <i>User Message</i> to be
@@ -61,8 +60,8 @@ import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 public class AddPayloads extends AbstractUserMessageHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final IUserMessageEntity um, final IMessageProcessingContext procCtx, 
-    										  final Logger log) throws PersistenceException {
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final IMessageProcessingContext procCtx,
+    										  final Logger log) throws StorageException {
 
         log.trace("Check that all meta-data of the User Message is available for processing");
         if (!um.isLoadedCompletely()) {
@@ -71,7 +70,7 @@ public class AddPayloads extends AbstractUserMessageHandler {
         }
 
         log.trace("All meta-data of User Message available, check for payloads to include");
-        final Collection<IPayloadEntity> payloads = um.getPayloads();
+        final Collection<? extends IPayloadEntity> payloads = um.getPayloads();
 
         if (Utils.isNullOrEmpty(payloads)) {
             // No payloads in this user message, so nothing to do
@@ -84,11 +83,11 @@ public class AddPayloads extends AbstractUserMessageHandler {
                 if (pl.getContainment() == ATTACHMENT && Utils.isNullOrEmpty(pl.getPayloadURI())) {
                     // No MIME Content-Id assigned on submission, assign now
                     final String cid = MessageIdUtils.createContentId(um.getMessageId());
-                    log.trace("Generated a new Content-id [" + cid + "] for payload [" + pl.getContentLocation() + "]");
-                    pl.setPayloadURI(cid);                    
-                    HolodeckB2BCore.getStorageManager().setPayloadInformation(pl);
+                    log.trace("Generated a new Content-id [{}] for payload [{}]", cid, pl.getPayloadId());
+                    pl.setPayloadURI(cid);
+                    HolodeckB2BCore.getStorageManager().updatePayloadInformation(pl);
                     log.debug("Generated MIME Content-Id(s) saved to database");
-                }                
+                }
                 // Add the content of the payload to the SOAP message
                 try {
                     addContent(pl, procCtx.getParentContext(), log);
@@ -127,37 +126,35 @@ public class AddPayloads extends AbstractUserMessageHandler {
      * @throws Exception    When a problem occurs while adding the payload contents to
      *                      the message
      */
-    protected void addContent(final IPayload p, final MessageContext mc, Logger log) throws Exception {
-        File f = null;
-
+    protected void addContent(final IPayloadEntity p, final MessageContext mc, Logger log) throws Exception {
         switch (p.getContainment()) {
             case ATTACHMENT :
-                log.trace("Adding payload as attachment. Content located at " + p.getContentLocation());
-                f = new File(p.getContentLocation());
-
                 // Use specified MIME type or detect it when none is specified
                 String mimeType = p.getMimeType();
                 if (mimeType == null || mimeType.isEmpty()) {
                     log.trace("Detecting MIME type of payload");
-                    mimeType = FileUtils.detectMimeType(f);
+                    try (InputStream is = p.getContent()) {
+						mimeType = FileUtils.detectMimeType(is);
+					} catch (Exception e) {
+						log.warn("Error during Mime type detection: {}", e.getMessage());
+						mimeType = "application/octet-stream";
+					}
                 }
 
                 log.trace("Payload mime type is " + mimeType);
                 // Use Axiom ConfigurableDataHandler to enable setting of mime type
-                final ConfigurableDataHandler dh = new ConfigurableDataHandler(new FileDataSource(f));
+                ConfigurableDataHandler dh = new ConfigurableDataHandler(new InputStreamDataSource(p.getContent()));
                 dh.setContentType(mimeType);
                 final String cid = p.getPayloadURI();
-                log.trace("Add payload to message as attachment with Content-id: " + cid);
+                log.trace("Adding payload to message as attachment with Content-id = {}", cid);
                 mc.addAttachment(cid, dh);
-                log.debug("Payload content located at '" + p.getContentLocation() + "' added to message");
+                log.debug("Payload added to message");
                 return;
             case BODY :
-                log.trace("Adding payload to SOAP body. Content located at " + p.getContentLocation());
-                f = new File(p.getContentLocation());
-
-                try {
+                log.trace("Adding payload to SOAP body");
+                try (InputStream is = p.getContent()) {
                     log.trace("Parse the XML from file so it can be added to SOAP body");
-                    final OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(new FileReader(f));
+                    final OMXMLParserWrapper builder = OMXMLBuilderFactory.createOMBuilder(is);
                     final OMElement documentElement = builder.getDocumentElement();
 
                     // Check that reference and id are equal if both specified
@@ -174,19 +171,16 @@ public class AddPayloads extends AbstractUserMessageHandler {
                                 documentElement.declareNamespace(EbMSConstants.QNAME_XMLID.getNamespaceURI(), "xml");
                         documentElement.addAttribute(EbMSConstants.QNAME_XMLID.getLocalPart(), href, xmlIdNS);
                     }
-
-                    log.trace("Add payload XML to SOAP Body");
                     mc.getEnvelope().getBody().addChild(documentElement);
-                    log.debug("Payload content located at '" + p.getContentLocation() + "' added to message");
+                    log.debug("Payload added to message");
                 } catch (final OMException parseError) {
                     // The given document could not be parsed, probably not an XML document. Reject it as body payload
-                    log.warn("Failed to parse payload located at " + p.getContentLocation() + "!");
-                    throw new Exception("Failed to parse payload located at " + p.getContentLocation() + "!",
-                                        parseError);
+                    log.warn("Failed to parse payload ({}) : {}", p.getPayloadId(), Utils.getExceptionTrace(parseError));
+                    throw new Exception("Failed to parse XML payload", parseError);
                 }
                 return;
-            case EXTERNAL : 
-            	log.warn("Payload containment is set to EXTERNAL, handling by receiver unspecified!");
+            case EXTERNAL :
+            	log.warn("Payload containment is set to EXTERNAL, handling unspecified!");
         }
     }
 }

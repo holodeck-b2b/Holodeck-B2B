@@ -36,10 +36,10 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IProtocol;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for adding the necessary WS-Addressing headers to the message to sent it
@@ -119,7 +119,7 @@ public class ConfigureMultihop extends AbstractBaseHandler {
      *                  can be found
      */
     private IUserMessageEntity getReferencedUserMsg(final IMessageProcessingContext procCtx, final ISignalMessage signal)
-                                                                                        throws PersistenceException {
+                                                                                        throws StorageException {
         String refToMsgId = MessageUnitUtils.getRefToMessageId(signal);
         // If the signal does not contain a reference to another message unit there is nothing to do here
         if (Utils.isNullOrEmpty(refToMsgId))

@@ -30,20 +30,20 @@ import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.StorageManager;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -71,7 +71,7 @@ public class GetMessageUnitForPullingTest {
     public void testAvailableOnMPC() throws Exception {
         StorageManager storeManager = HolodeckB2BCore.getStorageManager();
         
-        PMode pmode = TestUtils.create1WayReceivePushPMode();
+        PMode pmode = HB2BTestUtils.create1WayReceivePMode();
         pmode.setMepBinding(EbMSConstants.ONE_WAY_PULL);
         Leg leg = pmode.getLeg(Label.REQUEST);
         
@@ -87,7 +87,7 @@ public class GetMessageUnitForPullingTest {
 
         PullRequest pullRequest = new PullRequest();
         pullRequest.setMPC(T_MPC_1);
-        IPullRequestEntity pullRequestEntity = storeManager.storeIncomingMessageUnit(pullRequest);
+        IPullRequestEntity pullRequestEntity = storeManager.storeReceivedMessageUnit(pullRequest);
         
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setPullRequest(pullRequestEntity);
@@ -116,7 +116,7 @@ public class GetMessageUnitForPullingTest {
     public void testEmptyMPC() throws Exception {
         StorageManager storeManager = HolodeckB2BCore.getStorageManager();
         
-        PMode pmode = TestUtils.create1WaySendPushPMode();
+        PMode pmode = HB2BTestUtils.create1WaySendPushPMode();
         pmode.setMepBinding(EbMSConstants.ONE_WAY_PULL);
         Leg leg = pmode.getLeg(Label.REQUEST);
         
@@ -133,7 +133,7 @@ public class GetMessageUnitForPullingTest {
         PullRequest pullRequest = new PullRequest();
         pullRequest.setMPC(T_MPC_1);
         pullRequest.setMessageId(MessageIdUtils.createMessageId());
-        IPullRequestEntity pullRequestEntity = storeManager.storeIncomingMessageUnit(pullRequest);
+        IPullRequestEntity pullRequestEntity = storeManager.storeReceivedMessageUnit(pullRequest);
         
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setPullRequest(pullRequestEntity);

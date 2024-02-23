@@ -36,24 +36,22 @@ import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.Service;
 import org.holodeckb2b.common.messagemodel.TradingPartner;
 import org.holodeckb2b.common.messagemodel.UserMessage;
-import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.PartnerConfig;
 import org.holodeckb2b.common.pmode.PartyId;
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.StorageManager;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IReceiptEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -69,14 +67,17 @@ public class FindPModesTest {
 
     static final QName RECEIPT_CHILD_ELEMENT_NAME = new QName("ReceiptChild");
 
+    private static HolodeckB2BTestCore		testCore;
+
     @BeforeClass
     public static void setUpClass() throws Exception {
-        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
+    	testCore = new HolodeckB2BTestCore();
+        HolodeckB2BCoreInterface.setImplementation(testCore);
     }
 
     @After
     public void tearDown() throws Exception {
-        TestUtils.cleanOldMessageUnitEntities();
+        testCore.cleanStorage();
         HolodeckB2BCore.getPModeSet().removeAll();
     }
 
@@ -103,11 +104,10 @@ public class FindPModesTest {
         collabInfo.setService(new Service("FindPModeTest"));
         collabInfo.setAction("Match");
         userMessage.setCollaborationInfo(collabInfo);
-        
+
         // Create matching P-Mode
-        PMode pmode = TestUtils.create1WayReceivePushPMode();        
-        Leg leg = pmode.getLeg(Label.REQUEST);
-        
+        PMode pmode = HB2BTestUtils.create1WayReceivePMode();
+
         PartnerConfig initiator = new PartnerConfig();
         pmode.setInitiator(initiator);
         initiator.setRole(sender.getRole());
@@ -117,16 +117,16 @@ public class FindPModesTest {
         pmode.setResponder(responder);
         responder.setRole(receiver.getRole());
         receiver.getPartyIds().forEach(pid -> responder.addPartyId(new PartyId(pid)));
-        
+
         HolodeckB2BCore.getPModeSet().add(pmode);
 
         // Setting input message property
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(userMessage);
-        
+        IUserMessageEntity userMessageEntity = updateManager.storeReceivedMessageUnit(userMessage);
+
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
-        
+
         try {
             assertEquals(Handler.InvocationResponse.CONTINUE, new FindPModes().invoke(mc));
         } catch (Exception e) {
@@ -139,11 +139,11 @@ public class FindPModesTest {
     @Test
     public void testDoProcessingOfErrorSignal() throws Exception {
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-        
+
         // Create matching P-Mode
-        PMode pmode = TestUtils.create1WaySendPushPMode();        
+        PMode pmode = HB2BTestUtils.create1WaySendPushPMode();
         HolodeckB2BCore.getPModeSet().add(pmode);
-        
+
         // Setting input message property
         UserMessage usrMessage = new UserMessage();
         usrMessage.setMessageId(MessageIdUtils.createMessageId());
@@ -155,16 +155,16 @@ public class FindPModesTest {
         ebmsError.setRefToMessageInError(userMessageEntity.getMessageId());
         ErrorMessage error = new ErrorMessage(ebmsError);
         error.setMessageId(MessageIdUtils.createMessageId());
-        
+
         // Setting input Error
-        IErrorMessageEntity errorMessageEntity = storageManager.storeIncomingMessageUnit(error);
-        
+        IErrorMessageEntity errorMessageEntity = storageManager.storeReceivedMessageUnit(error);
+
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        
+
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addReceivedError(errorMessageEntity);
-        
+
         try {
             assertEquals(Handler.InvocationResponse.CONTINUE, new FindPModes().invoke(mc));
         } catch (Exception e) {
@@ -177,11 +177,11 @@ public class FindPModesTest {
     @Test
     public void testDoProcessingOfReceipt() throws Exception {
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-        
+
         // Create matching P-Mode
-        PMode pmode = TestUtils.create1WaySendPushPMode();        
+        PMode pmode = HB2BTestUtils.create1WaySendPushPMode();
         HolodeckB2BCore.getPModeSet().add(pmode);
-                
+
         // Setting input message property
         UserMessage usrMessage = new UserMessage();
         usrMessage.setMessageId(MessageIdUtils.createMessageId());
@@ -192,16 +192,16 @@ public class FindPModesTest {
         Receipt receipt = new Receipt();
         receipt.setMessageId(MessageIdUtils.createMessageId());
         receipt.setRefToMessageId(userMessageEntity.getMessageId());
-        
-        // Setting input Receipt 
-        IReceiptEntity rcptEntity = storageManager.storeIncomingMessageUnit(receipt);
-        
+
+        // Setting input Receipt
+        IReceiptEntity rcptEntity = storageManager.storeReceivedMessageUnit(receipt);
+
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        
+
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addReceivedReceipt(rcptEntity);
-        
+
         try {
             assertEquals(Handler.InvocationResponse.CONTINUE, new FindPModes().invoke(mc));
         } catch (Exception e) {
@@ -210,7 +210,7 @@ public class FindPModesTest {
 
         assertEquals(userMessageEntity.getPModeId(), rcptEntity.getPModeId());
     }
-    
+
    /**
     * Test no matching P-Mode
     */
@@ -234,11 +234,9 @@ public class FindPModesTest {
        collabInfo.setService(new Service("FindPModeTest"));
        collabInfo.setAction("Match");
        userMessage.setCollaborationInfo(collabInfo);
-       
+
        // Create a non-matching P-Mode
-       PMode pmode = TestUtils.create1WayReceivePushPMode();        
-       Leg leg = pmode.getLeg(Label.REQUEST);
-       
+       PMode pmode = HB2BTestUtils.create1WayReceivePMode();
        PartnerConfig initiator = new PartnerConfig();
        pmode.setInitiator(initiator);
        initiator.setRole(sender.getRole());
@@ -248,16 +246,16 @@ public class FindPModesTest {
        pmode.setResponder(responder);
        responder.setRole("dont-match");
        receiver.getPartyIds().forEach(pid -> responder.addPartyId(new PartyId(pid)));
-       
+
        HolodeckB2BCore.getPModeSet().add(pmode);
 
        // Setting input message property
        StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-       IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(userMessage);
-       
+       IUserMessageEntity userMessageEntity = updateManager.storeReceivedMessageUnit(userMessage);
+
        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
        procCtx.setUserMessage(userMessageEntity);
-       
+
        try {
            assertEquals(Handler.InvocationResponse.CONTINUE, new FindPModes().invoke(mc));
        } catch (Exception e) {
@@ -268,7 +266,7 @@ public class FindPModesTest {
        assertEquals(ProcessingState.FAILURE, userMessageEntity.getCurrentProcessingState().getState());
        assertFalse(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
        assertTrue(procCtx.getGeneratedErrors().get(userMessageEntity.getMessageId()).size() == 1);
-       assertEquals("EBMS:0010", 
-    		   	procCtx.getGeneratedErrors().get(userMessageEntity.getMessageId()).iterator().next().getErrorCode());	
-   }    
+       assertEquals("EBMS:0010",
+    		   	procCtx.getGeneratedErrors().get(userMessageEntity.getMessageId()).iterator().next().getErrorCode());
+   }
 }

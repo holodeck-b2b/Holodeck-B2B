@@ -27,10 +27,11 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 
 /**
  * Is the <i>IN_FLOW</i> handler that checks whether all payloads in the user message are signed. That all payloads
@@ -46,24 +47,24 @@ import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final IUserMessageEntity um, final IMessageProcessingContext procCtx, 
+    protected InvocationResponse doProcessing(final IUserMessageEntity um, final IMessageProcessingContext procCtx,
     										  final Logger log) throws Exception {
 
     	// First check if this message needs a Receipt and is signed
         try {
 	        if (PModeUtils.getLeg(um).getReceiptConfiguration() == null)
 	            // No receipt requested for this message
-	            return InvocationResponse.CONTINUE;	        
+	            return InvocationResponse.CONTINUE;
         } catch (IllegalStateException pmodeNotAvailable) {
             // The P-Mode configurations has changed and does not include this P-Mode anymore, assume no receipt
             // is needed
             log.error("P-Mode " + um.getPModeId() + " not found in current P-Mode set!"
                      + "Unable to determine if receipt is needed for message [msgId=" + um.getMessageId() + "]");
-            return InvocationResponse.CONTINUE;        	
+            return InvocationResponse.CONTINUE;
         }
 
         // Check if received message was signed
-        final Optional<ISignatureProcessingResult> sigResult = 
+        final Optional<ISignatureProcessingResult> sigResult =
 		        		procCtx.getSecurityProcessingResults(ISignatureProcessingResult.class).parallelStream()
 		        									.filter(r -> r.getTargetedRole() == SecurityHeaderTarget.DEFAULT)
 		        									.findFirst();
@@ -73,15 +74,15 @@ public class CheckSignatureCompleteness extends AbstractUserMessageHandler {
         	allEbMSPartsSigned = sigResult.get().getHeaderDigest() != null;
         	if (!Utils.isNullOrEmpty(um.getPayloads())) {
         		log.trace("Check each payload of the message is signed");
-	        	Set<IPayload> signedPayloads = sigResult.get().getPayloadDigests().keySet();
+	        	Set<IPayloadEntity> signedPayloads = sigResult.get().getPayloadDigests().keySet();
 	            allEbMSPartsSigned &= um.getPayloads().parallelStream()
 	            									  .allMatch((mp) -> signedPayloads.parallelStream()
-	            											  						  .anyMatch((sp) -> 
+	            											  						  .anyMatch((sp) ->
 	            											   						   		areSamePayloadRef(mp, sp)));
         	}
-	        
+
         	if (!allEbMSPartsSigned) {
-        		log.error("Not all parts (ebMS header and payloads) of the user message [" + um.getMessageId() 
+        		log.error("Not all parts (ebMS header and payloads) of the user message [" + um.getMessageId()
         				  + "] are signed!");
                 // If not all payloads of  the message are signum.getMessageIded it does not conform to the AS4 requirements
                 // that all payloads should be signed. Therefore create the PolicyNoncompliance error

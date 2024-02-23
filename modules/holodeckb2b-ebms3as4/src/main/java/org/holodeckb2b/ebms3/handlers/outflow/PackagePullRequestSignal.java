@@ -23,7 +23,7 @@ import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PullRequestElement;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
+import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:PullRequest</code> element in the ebMS messaging

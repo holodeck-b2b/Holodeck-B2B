@@ -30,7 +30,7 @@ import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

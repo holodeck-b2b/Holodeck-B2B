@@ -31,23 +31,23 @@ import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Created at 23:44 29.01.17
@@ -56,7 +56,7 @@ import org.mockito.junit.MockitoJUnitRunner;
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AuthorizeMessageTest {
 
     private static PMode    pmodeAuth;
@@ -67,12 +67,11 @@ public class AuthorizeMessageTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        String baseDir = TestUtils.getPath(AuthorizeMessageTest.class.getSimpleName()).toString();
-        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(baseDir));
+        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
 
         // Create the basic test data
-        pmodeAuth = PMode.createFromXML(new FileInputStream(baseDir + "/pm-auth-messages.xml"));
-        pmodeNoAuth = PMode.createFromXML(new FileInputStream(baseDir + "/pm-no-auth-messages.xml"));
+        pmodeAuth = PMode.createFromXML(new FileInputStream(TestUtils.getTestResource("pm-auth-messages.xml").toFile()));
+        pmodeNoAuth = PMode.createFromXML(new FileInputStream(TestUtils.getTestResource("pm-no-auth-messages.xml").toFile()));
 
         HolodeckB2BCore.getPModeSet().add(pmodeAuth);
         HolodeckB2BCore.getPModeSet().add(pmodeNoAuth);
@@ -83,16 +82,16 @@ public class AuthorizeMessageTest {
         mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
         procCtx = MessageProcessingContext.getFromMessageContext(mc);
-        
+
         UserMessage userMessage = new UserMessage();
         userMessage.setPModeId(pmodeAuth.getId());
         userMessage.setMessageId(MessageIdUtils.createMessageId());
-        procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
+        procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(userMessage));
 
         Receipt receipt = new Receipt();
         receipt.setPModeId(pmodeNoAuth.getId());
         receipt.setMessageId(MessageIdUtils.createMessageId());
-        procCtx.addReceivedReceipt(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(receipt));
+        procCtx.addReceivedReceipt(HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(receipt));
     }
 
     @Test
@@ -132,7 +131,7 @@ public class AuthorizeMessageTest {
         } catch (AxisFault e) {
             fail("Unexpected exception: " + e.getClass().getSimpleName() + "/" + e.getMessage());
         }
-        
+
         assertFalse(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
         assertEquals(1, procCtx.getGeneratedErrors().get(umEntity.getMessageId()).size());
         assertEquals("EBMS:0101", procCtx.getGeneratedErrors().get(umEntity.getMessageId()).iterator().next().getErrorCode());

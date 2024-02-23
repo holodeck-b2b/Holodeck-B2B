@@ -25,21 +25,21 @@ import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.commons.Pair;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.ebms3.pmode.PModeFinder;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IReceiptEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for determining the P-Modes that define how the received message units
@@ -68,7 +68,7 @@ public class FindPModes extends AbstractBaseHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
-    																					throws PersistenceException {
+    																					throws StorageException {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         final IUserMessageEntity userMsg = procCtx.getReceivedUserMessage();
         if (userMsg != null) {
@@ -149,10 +149,10 @@ public class FindPModes extends AbstractBaseHandler {
      * @return      Pair consisting of the P-Mode and the label of Leg that handles this Error signal if the referenced 
      * 				message id can be matched to a sent message unit,<br/>
      * 				<code>null</code> otherwise 
-     * @throws PersistenceException When an error occurs retrieving the referenced message unit
+     * @throws StorageException When an error occurs retrieving the referenced message unit
      */
     private Pair<IPMode, ILeg.Label> findForReceivedErrorSignal(final IErrorMessageEntity e, 
-    											final IMessageProcessingContext procCtx) throws PersistenceException {
+    											final IMessageProcessingContext procCtx) throws StorageException {
     	// First get the referenced message id, starting with information from the header
         String refToMessageId = MessageUnitUtils.getRefToMessageId(e);
         // If there is no referenced message unit and the error is received as a response we will use the primary 
@@ -175,10 +175,10 @@ public class FindPModes extends AbstractBaseHandler {
      * @param refToMsgId    The message id of the referenced message unit
      * @return              The PMode of the referenced message unit if it is found, or<br>
      *                      <code>null</code> if no message unit can be found for the given message id
-     * @throws PersistenceException When a problem occurs retrieving the meta-data from the database for the referenced
+     * @throws StorageException When a problem occurs retrieving the meta-data from the database for the referenced
      *                              message unit
      */
-    private Pair<IPMode, ILeg.Label> getPModeAndLegFromRefdMessage(final String refToMsgId) throws PersistenceException {
+    private Pair<IPMode, ILeg.Label> getPModeAndLegFromRefdMessage(final String refToMsgId) throws StorageException {
     	Pair<IPMode, ILeg.Label> result = null;
         if (!Utils.isNullOrEmpty(refToMsgId)) {
             Collection<IMessageUnitEntity> refdMsgUnits = HolodeckB2BCore.getQueryManager()
