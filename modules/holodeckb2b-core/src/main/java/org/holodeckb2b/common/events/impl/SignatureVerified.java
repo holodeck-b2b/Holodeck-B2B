@@ -19,15 +19,15 @@ package org.holodeckb2b.common.events.impl;
 import java.util.Map;
 
 import org.holodeckb2b.interfaces.events.security.ISignatureVerified;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 /**
- * Is the implementation class of {@link ISignatureVerified} to indicate that a signature for a received User Message is 
- * successfully verified. The information about the digests and trust validation can only be set when the event is 
+ * Is the implementation class of {@link ISignatureVerified} to indicate that a signature for a received User Message is
+ * successfully verified. The information about the digests and trust validation can only be set when the event is
  * created and not be modified afterwards.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
@@ -37,8 +37,8 @@ public class SignatureVerified extends AbstractSignatureEvent implements ISignat
 	/**
 	 * The results of the trust validation check executed for the certificate(s) used to sign the message unit.
 	 */
-	private final IValidationResult	trustCheckResult; 
-	
+	private final IValidationResult	trustCheckResult;
+
     /**
      * Creates a new <code>SignatureVerified</code> for the given Signal Message Unit and digest of its ebMS header
      *
@@ -46,7 +46,7 @@ public class SignatureVerified extends AbstractSignatureEvent implements ISignat
      * @param headerDigest    The digest of the ebMS header
      * @param trustCheck	  The results of the certificate trust validation
      */
-    public SignatureVerified(final ISignalMessage subject, final ISignedPartMetadata headerDigest, 
+    public SignatureVerified(final ISignalMessage subject, final ISignedPartMetadata headerDigest,
     						 final IValidationResult trustCheck) {
         super(subject, headerDigest);
         this.trustCheckResult = trustCheck;
@@ -62,7 +62,7 @@ public class SignatureVerified extends AbstractSignatureEvent implements ISignat
      * @param trustCheck	  The results of the certificate trust validation
      */
     public SignatureVerified(final IUserMessage subject, final ISignedPartMetadata headerDigest,
-                                  final Map<IPayload, ISignedPartMetadata> payloadDigests,
+                                  final Map<IPayloadEntity, ISignedPartMetadata> payloadDigests,
                                   final IValidationResult trustCheck) {
         super(subject, headerDigest, payloadDigests);
         this.trustCheckResult = trustCheck;

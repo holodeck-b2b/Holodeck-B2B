@@ -21,11 +21,11 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.holodeckb2b.commons.util.Utils;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.security.IEncryptionProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.X509ReferenceType;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 /**
  * Is the security provider's implementation of {@link IEncryptionProcessingResult} containing the result of processing
@@ -40,7 +40,7 @@ public class EncryptionProcessingResult extends AbstractSecurityProcessingResult
     private final X509ReferenceType     refMethod;
     private final KeyTransportInfo      keyInfo;
     private final String                algorithm;
-    private final Collection<IPayload>  payloads;
+    private final Collection<IPayloadEntity>  payloads;
 
 
     /**
@@ -72,7 +72,7 @@ public class EncryptionProcessingResult extends AbstractSecurityProcessingResult
      */
     public EncryptionProcessingResult(final X509Certificate encryptionCert, final X509ReferenceType certReferenceMethod,
                                       final String ktAlgorithm, final String ktMGF, final String ktDigest,
-                                      final String algorithm, final Collection<IPayload> payloads) {
+                                      final String algorithm, final Collection<IPayloadEntity> payloads) {
         super(SecurityHeaderTarget.DEFAULT);
         this.certificate = encryptionCert;
         this.refMethod = certReferenceMethod;
@@ -102,7 +102,7 @@ public class EncryptionProcessingResult extends AbstractSecurityProcessingResult
     }
 
     @Override
-    public Collection<IPayload> getEncryptedPayloads() {
+    public Collection<IPayloadEntity> getEncryptedPayloads() {
         return payloads;
     }
 

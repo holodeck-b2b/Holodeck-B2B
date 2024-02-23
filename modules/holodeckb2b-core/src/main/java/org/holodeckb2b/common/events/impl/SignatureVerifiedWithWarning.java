@@ -19,15 +19,15 @@ package org.holodeckb2b.common.events.impl;
 import java.util.Map;
 
 import org.holodeckb2b.interfaces.events.security.ISignatureVerifiedWithWarning;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 /**
- * Is the implementation class of {@link ISignatureVerifiedWithWarning} to indicate that a signature for a received User 
- * Message is verified but with warnings. The information about the digests and trust validation can only be set when 
+ * Is the implementation class of {@link ISignatureVerifiedWithWarning} to indicate that a signature for a received User
+ * Message is verified but with warnings. The information about the digests and trust validation can only be set when
  * the event is created and not be modified afterwards.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
@@ -42,7 +42,7 @@ public class SignatureVerifiedWithWarning extends SignatureVerified implements I
      * @param headerDigest   The digest of the ebMS header
      * @param trustCheck	 The results of the certificate trust validation
      */
-    public SignatureVerifiedWithWarning(final ISignalMessage subject, final ISignedPartMetadata headerDigest, 
+    public SignatureVerifiedWithWarning(final ISignalMessage subject, final ISignedPartMetadata headerDigest,
     						 final IValidationResult trustCheck) {
         super(subject, headerDigest, trustCheck);
         setMessage(trustCheck.getMessage());
@@ -57,7 +57,7 @@ public class SignatureVerifiedWithWarning extends SignatureVerified implements I
      * @param trustCheck	  The results of the certificate trust validation
      */
     public SignatureVerifiedWithWarning(final IUserMessage subject, final ISignedPartMetadata headerDigest,
-                                  final Map<IPayload, ISignedPartMetadata> payloadDigests,
+                                  final Map<IPayloadEntity, ISignedPartMetadata> payloadDigests,
                                   final IValidationResult trustCheck) {
         super(subject, headerDigest, payloadDigests, trustCheck);
         setMessage(trustCheck.getMessage());
