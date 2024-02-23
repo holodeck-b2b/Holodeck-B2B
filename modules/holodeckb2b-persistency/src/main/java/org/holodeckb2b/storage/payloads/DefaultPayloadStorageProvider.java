@@ -26,7 +26,6 @@ import org.apache.logging.log4j.LogManager;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.commons.util.FileUtils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
@@ -62,7 +61,7 @@ public class DefaultPayloadStorageProvider implements IPayloadStorageProvider {
 		if (dirSetting != null && dirSetting.getParameterType() == Parameter.TEXT_PARAMETER)
 			directory = Path.of((String) dirSetting.getValue());
 		else {
-			directory = HolodeckB2BCoreInterface.getConfiguration().getTempDirectory().resolve("pldata");
+			directory = config.getTempDirectory().resolve("pldata");
 			if (!Files.exists(directory))
 				try {
 					Files.createDirectory(directory);
