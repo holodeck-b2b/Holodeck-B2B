@@ -64,23 +64,23 @@ final class DatabaseConfiguration implements PersistenceUnitInfo {
 
     @Override
     public List<String> getManagedClassNames() {
-        return Arrays.asList("org.holodeckb2b.storage.metadata.entities.AgreementReference",
-                             "org.holodeckb2b.storage.metadata.entities.CollaborationInfo",
-                             "org.holodeckb2b.storage.metadata.entities.Description",
-                             "org.holodeckb2b.storage.metadata.entities.EbmsError",
-                             "org.holodeckb2b.storage.metadata.entities.ErrorMessage",
-                             "org.holodeckb2b.storage.metadata.entities.MessageUnit",
-                             "org.holodeckb2b.storage.metadata.entities.MessageUnitProcessingState",
-                             "org.holodeckb2b.storage.metadata.entities.PartyId",
-                             "org.holodeckb2b.storage.metadata.entities.Payload",
-                             "org.holodeckb2b.storage.metadata.entities.Property",
-                             "org.holodeckb2b.storage.metadata.entities.PullRequest",
-                             "org.holodeckb2b.storage.metadata.entities.Receipt",
-                             "org.holodeckb2b.storage.metadata.entities.SchemaReference",
-                             "org.holodeckb2b.storage.metadata.entities.SelectivePullRequest",
-                             "org.holodeckb2b.storage.metadata.entities.Service",
-                             "org.holodeckb2b.storage.metadata.entities.TradingPartner",
-                             "org.holodeckb2b.storage.metadata.entities.UserMessage");
+        return Arrays.asList("org.holodeckb2b.storage.metadata.jpa.AgreementReference",
+                             "org.holodeckb2b.storage.metadata.jpa.CollaborationInfo",
+                             "org.holodeckb2b.storage.metadata.jpa.Description",
+                             "org.holodeckb2b.storage.metadata.jpa.EbmsError",
+                             "org.holodeckb2b.storage.metadata.jpa.ErrorMessage",
+                             "org.holodeckb2b.storage.metadata.jpa.MessageUnit",
+                             "org.holodeckb2b.storage.metadata.jpa.MessageUnitProcessingState",
+                             "org.holodeckb2b.storage.metadata.jpa.PartyId",
+                             "org.holodeckb2b.storage.metadata.jpa.PayloadInfo",
+                             "org.holodeckb2b.storage.metadata.jpa.Property",
+                             "org.holodeckb2b.storage.metadata.jpa.PullRequest",
+                             "org.holodeckb2b.storage.metadata.jpa.Receipt",
+                             "org.holodeckb2b.storage.metadata.jpa.SchemaReference",
+                             "org.holodeckb2b.storage.metadata.jpa.SelectivePullRequest",
+                             "org.holodeckb2b.storage.metadata.jpa.Service",
+                             "org.holodeckb2b.storage.metadata.jpa.TradingPartner",
+                             "org.holodeckb2b.storage.metadata.jpa.UserMessage");
     }
 
     @Override
