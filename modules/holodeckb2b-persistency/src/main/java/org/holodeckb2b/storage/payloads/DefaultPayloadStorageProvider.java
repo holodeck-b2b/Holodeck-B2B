@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.storage.payloads;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -87,7 +88,8 @@ public class DefaultPayloadStorageProvider implements IPayloadStorageProvider {
 
 	@Override
 	public IPayloadContent getPayloadContent(String payloadId) throws StorageException {
-		return new PayloadContent(payloadId, directory.resolve(payloadId).toFile());
+		File contentFile = directory.resolve(payloadId).toFile();
+		return contentFile.exists() ? new PayloadContent(payloadId, contentFile) : null;
 	}
 
 	@Override
