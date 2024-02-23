@@ -16,20 +16,19 @@
  */
 package org.holodeckb2b.core.workers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import java.io.FileInputStream;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.apache.axiom.om.OMAbstractFactory;
@@ -40,7 +39,6 @@ import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestEventProcessor;
-import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.events.IMessageUnitPurged;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -48,20 +46,14 @@ import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.holodeckb2b.interfaces.storage.providers.StorageException;
 import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 import org.holodeckb2b.test.storage.InMemoryMDSProvider;
-import org.holodeckb2b.test.storage.InMemoryPSProvider;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
- * todo [] refactor the test
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class PurgeOldMessagesWorkerTest {
 
 	private static final String PAYLOAD_1_FILE = "payload1.xml";
@@ -75,23 +67,27 @@ public class PurgeOldMessagesWorkerTest {
 	private static final String MSGID_6 = "um6-msg-id@test";
 
 	private static InMemoryMDSProvider  mdsProvider;
-	private static InMemoryPSProvider   psProvider;
 	private static TestEventProcessor	eventProcessor;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUpClass() throws Exception {
 		HolodeckB2BTestCore testCore = new HolodeckB2BTestCore();
-		mdsProvider = (InMemoryMDSProvider) testCore.getMetadataStorageProvider();		
-		psProvider = (InMemoryPSProvider) testCore.getPayloadStorageProvider();		
+		mdsProvider = (InMemoryMDSProvider) testCore.getMetadataStorageProvider();
 		eventProcessor = (TestEventProcessor) testCore.getEventProcessor();
-		
+
 		HolodeckB2BCoreInterface.setImplementation(testCore);
-	
+	}
+
+	@BeforeEach
+	void createDataSet() throws DuplicateMessageIdException, FileNotFoundException, StorageException, IOException {
+		mdsProvider.clear();
+		eventProcessor.reset();
+
 		createUserMessage(MSGID_1, 28);
 		createUserMessage(MSGID_2, 13);
 		createUserMessage(MSGID_3,  8);
 		createUserMessage(MSGID_4,  4);
-		
+
 		final Receipt rcpt = new Receipt();
 		rcpt.setMessageId(MSGID_5);
 		MessageProcessingState state = new MessageProcessingState(ProcessingState.DONE);
@@ -100,9 +96,9 @@ public class PurgeOldMessagesWorkerTest {
 		state.setStartTime(stateTime.getTime());
 		rcpt.setProcessingState(state);
 		rcpt.setContent(Collections.singletonList(OMAbstractFactory.getOMFactory().createOMElement("Testing", null)));
-		
+
 		mdsProvider.storeMessageUnit(rcpt);
-		
+
 		// Error
 		final ErrorMessage error = new ErrorMessage();
 		error.setMessageId(MSGID_6);
@@ -113,54 +109,38 @@ public class PurgeOldMessagesWorkerTest {
 		error.setProcessingState(state);
 
 		mdsProvider.storeMessageUnit(error);
-		
+
 		assertEquals(6, mdsProvider.getNumberOfStoredMessageUnits());
 	}
 
-	private static void createUserMessage(String msgId, int days)
+	private void createUserMessage(String msgId, int days)
 			throws DuplicateMessageIdException, StorageException, IOException, FileNotFoundException {
-		try (FileInputStream p1content = new FileInputStream(TestUtils.getTestResource(PAYLOAD_1_FILE).toFile());
-			 FileInputStream p2content = new FileInputStream(TestUtils.getTestResource(PAYLOAD_2_FILE).toFile())) {
-			
-			UserMessage um = new UserMessage();
-			um.setMessageId(msgId);
-			
-			Payload p1 = new Payload();
-			p1.setContentStream(p1content);
-			um.addPayload(p1);
-	
-			Payload p2 = new Payload();
-			p2.setContentStream(p2content);
-			um.addPayload(p2);
-			
-			MessageProcessingState state = new MessageProcessingState(ProcessingState.DELIVERY_FAILED);
-			Calendar stateTime = Calendar.getInstance();
-			stateTime.add(Calendar.DAY_OF_YEAR, -days);
-			state.setStartTime(stateTime.getTime());		
-			um.setProcessingState(state);
-	
-			mdsProvider.storeMessageUnit(um);
-		}
+
+		UserMessage um = new UserMessage();
+		um.setMessageId(msgId);
+
+		Payload p1 = new Payload();
+		um.addPayload(p1);
+
+		Payload p2 = new Payload();
+		um.addPayload(p2);
+
+		MessageProcessingState state = new MessageProcessingState(ProcessingState.DELIVERY_FAILED);
+		Calendar stateTime = Calendar.getInstance();
+		stateTime.add(Calendar.DAY_OF_YEAR, -days);
+		state.setStartTime(stateTime.getTime());
+		um.setProcessingState(state);
+
+		mdsProvider.storeMessageUnit(um);
 	}
 
-	@AfterClass
-	public static void tearDownClass() throws Exception {
-		mdsProvider.clear();
-		psProvider.clear();
-	}
-	
-	@Before
-	public void clearEvents() {
-		eventProcessor.reset();
-	}
-	
 	@Test
-	public void test0_NaNPurgeDelay() {
+	public void testNaNPurgeDelay() {
 		final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
 		final HashMap<String, Object> parameters = new HashMap<>();
 		parameters.put(PurgeOldMessagesWorker.P_PURGE_AFTER_DAYS, "NaN");
-		
+
 		try {
 			worker.setParameters(parameters);
 		} catch (final Exception e) {
@@ -169,22 +149,18 @@ public class PurgeOldMessagesWorkerTest {
 	}
 
 	@Test
-	public void test0_NothingToPurge() {
+	public void testNothingToPurge() {
 		final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
 		worker.setParameters(null);
-		try {
-			worker.doProcessing();
-		} catch (final InterruptedException ex) {
-			Logger.getLogger(PurgeOldMessagesWorkerTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Exception during processing");
-		}
+
+		assertDoesNotThrow(() -> worker.doProcessing());
 
 		assertEquals(6, mdsProvider.getNumberOfStoredMessageUnits());
 	}
 
 	@Test
-	public void test1_OneToPurge() throws StorageException {
+	public void testOneToPurge() throws StorageException {
 		final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
 		final HashMap<String, Object> parameters = new HashMap<>();
@@ -193,51 +169,45 @@ public class PurgeOldMessagesWorkerTest {
 
 		List<String> payloadIds = ((IUserMessageEntity) mdsProvider.getMessageUnit(MSGID_1)).getPayloads().stream()
 															.map(p -> p.getPayloadId()).collect(Collectors.toList());
-		
-		try {
-			worker.doProcessing();
-		} catch (final Exception ex) {
-			Logger.getLogger(PurgeOldMessagesWorkerTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Exception during processing");
-		}
+
+		assertDoesNotThrow(() -> worker.doProcessing());
+
 		assertEquals(1, eventProcessor.events.size());
 		assertTrue(eventProcessor.events.stream().allMatch(e -> e instanceof IMessageUnitPurged));
 		assertEquals(MSGID_1, eventProcessor.events.get(0).getSubject().getMessageId());
 
 		assertEquals(5, mdsProvider.getNumberOfStoredMessageUnits());
 		assertFalse(mdsProvider.existsMessageId(MSGID_1));
-		
+
 		assertTrue(payloadIds.stream().noneMatch(p -> mdsProvider.existsPayloadId(p)));
-		assertTrue(payloadIds.stream().noneMatch(p -> psProvider.exists(p)));
 	}
 
 	@Test
-	public void test2_PayloadAlreadyRemoved() throws StorageException {
+	public void testMultipleToPurge() throws StorageException {
 		final PurgeOldMessagesWorker worker = new PurgeOldMessagesWorker();
 
 		final HashMap<String, Object> parameters = new HashMap<>();
 		parameters.put(PurgeOldMessagesWorker.P_PURGE_AFTER_DAYS, 6);
 		worker.setParameters(parameters);
 
-		List<String> payloadIds = ((IUserMessageEntity) mdsProvider.getMessageUnit(MSGID_2)).getPayloads().stream()
+		List<String> payloadIds = ((IUserMessageEntity) mdsProvider.getMessageUnit(MSGID_1)).getPayloads().stream()
 															.map(p -> p.getPayloadId()).collect(Collectors.toList());
+		payloadIds.addAll(((IUserMessageEntity) mdsProvider.getMessageUnit(MSGID_2)).getPayloads().stream()
+															.map(p -> p.getPayloadId()).collect(Collectors.toList()));
 		payloadIds.addAll(((IUserMessageEntity) mdsProvider.getMessageUnit(MSGID_3)).getPayloads().stream()
 															.map(p -> p.getPayloadId()).collect(Collectors.toList()));
-		try {
-			worker.doProcessing();
-		} catch (final Exception ex) {
-			Logger.getLogger(PurgeOldMessagesWorkerTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Exception during processing");
-		}
+
+		assertDoesNotThrow(() -> worker.doProcessing());
+
 		assertTrue(eventProcessor.events.stream().allMatch(e -> e instanceof IMessageUnitPurged));
-		assertEquals(2, eventProcessor.events.size());
-		
+		assertEquals(3, eventProcessor.events.size());
+
+		assertTrue(eventProcessor.events.stream().anyMatch(ev -> MSGID_1.equals(ev.getSubject().getMessageId())));
 		assertTrue(eventProcessor.events.stream().anyMatch(ev -> MSGID_2.equals(ev.getSubject().getMessageId())));
 		assertTrue(eventProcessor.events.stream().anyMatch(ev -> MSGID_3.equals(ev.getSubject().getMessageId())));
 
 		assertEquals(3, mdsProvider.getNumberOfStoredMessageUnits());
 
 		assertTrue(payloadIds.stream().noneMatch(p -> mdsProvider.existsPayloadId(p)));
-		assertTrue(payloadIds.stream().noneMatch(p -> psProvider.exists(p)));
 	}
 }
