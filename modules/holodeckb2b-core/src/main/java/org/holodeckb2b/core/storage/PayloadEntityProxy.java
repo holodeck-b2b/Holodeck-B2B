@@ -71,16 +71,6 @@ public class PayloadEntityProxy implements IPayloadEntity {
 		this.content = content;
 	}
 
-	/**
-	 * Indicates whether the content object for this payload has been loaded from the <i>Payload Storage Provider</i>
-	 * and therefore it is safe to call {@link #getContent()}.
-	 *
-	 * @return 	<code>true</code> if the content is available,<br/><code>false</code> if not
-	 */
-	boolean isContentAvailable() {
-		return content != null;
-	}
-
 	@Override
 	public InputStream getContent() throws IOException {
 		try {
@@ -88,7 +78,7 @@ public class PayloadEntityProxy implements IPayloadEntity {
 				// The payload content has not been loaded yet, use provider to get access
 				content = ((QueryManager) HolodeckB2BCore.getQueryManager()).retrievePayloadContent(getPayloadId());
 
-			return content.getContent();
+			return content == null ? null : content.getContent();
 		} catch (StorageException e) {
 			throw new IOException("Could not open payload content", e);
 		}
