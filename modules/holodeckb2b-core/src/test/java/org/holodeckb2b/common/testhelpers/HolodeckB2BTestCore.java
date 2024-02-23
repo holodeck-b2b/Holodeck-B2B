@@ -70,7 +70,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	private List<IMessageProcessingEventConfiguration> eventConfig = new ArrayList<>();
 	private IDeliveryManager	deliveryManager;
 	private Map<String, Module> modules = new HashMap<>();
-	
+
 	public HolodeckB2BTestCore() throws AxisFault {
 		this(TestUtils.getTestClassBasePath());
 	}
@@ -79,12 +79,23 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 		this.configuration = new InternalConfiguration(homeDir);
 		this.configuration.setHostName("local.test");
 		this.configuration.setTempDirectory(homeDir.resolve("temp_t"));
-	}	
-	
+	}
+
 	public void cleanTemp() {
 		Path tmpDir = configuration != null ? configuration.getTempDirectory() : null;
-		if (tmpDir != null) 
+		if (tmpDir != null)
 			deleteDirectory(tmpDir.toFile());
+	}
+
+	public void cleanStorage() {
+		if (mdsProvider instanceof InMemoryMDSProvider)
+			((InMemoryMDSProvider) mdsProvider).clear();
+		else
+			throw new UnsupportedOperationException();
+		if (psProvider instanceof InMemoryPSProvider)
+			((InMemoryPSProvider) psProvider).clear();
+		else
+			throw new UnsupportedOperationException();
 	}
 
 	private static boolean deleteDirectory(File directory) {
@@ -102,12 +113,12 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	        }
 	    }
 	    return(directory.delete());
-	}		
-	
+	}
+
 	public void setDeliveryManager(final IDeliveryManager dm) {
 		this.deliveryManager = dm;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getMessageSubmitter()
 	 */
@@ -141,7 +152,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	public void setPModeSet(final IPModeSet pmodeSet) {
 		this.pmodes = pmodeSet;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getPModeSet()
 	 */
@@ -155,7 +166,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	public void setMessageProcessingEventProcessor(final IMessageProcessingEventProcessor processor) {
 		this.eventProcessor = processor;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getEventProcessor()
 	 */
@@ -170,24 +181,24 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 		mdsProvider = provider;
 		mdsProvider.init(configuration);
 	}
-	
+
 	public IMetadataStorageProvider getMetadataStorageProvider() {
 		if (mdsProvider == null)
 			mdsProvider = new InMemoryMDSProvider();
 		return mdsProvider;
 	}
-	
+
 	public void setPayloadStorageProvider(IPayloadStorageProvider provider) throws StorageException {
 		psProvider = provider;
 		psProvider.init(configuration);
 	}
-	
+
 	public IPayloadStorageProvider getPayloadStorageProvider() {
 		if (psProvider == null)
 			psProvider = new InMemoryPSProvider();
 		return psProvider;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getQueryManager()
 	 */
@@ -195,7 +206,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	public IQueryManager getQueryManager() {
 		return new QueryManager(getMetadataStorageProvider(), getPayloadStorageProvider());
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getQueryManager()
 	 */
@@ -204,11 +215,11 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 		return new StorageManager(getMetadataStorageProvider(), getPayloadStorageProvider());
 	}
 
-	
+
 	public void setCertificateManager(ICertificateManager crtManager) {
 		certManager = crtManager;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getCertificateManager()
 	 */
@@ -217,7 +228,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 		if (certManager == null)
 			try {
 				certManager = new TestCertificateManager();
-			} catch (SecurityProcessingException e) {				
+			} catch (SecurityProcessingException e) {
 			}
 		return certManager;
 	}
@@ -231,13 +242,13 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
     	final String id = eventConfiguration.getId();
     	if (Utils.isNullOrEmpty(id))
     		throw new MessageProccesingEventHandlingException("No id specified");
-    	
+
     	int i; boolean exists = false;
     	for(i = 0; i < eventConfig.size() && !exists; i++)
     		exists = eventConfig.get(i).getId().equals(id);
-    	if (exists) 
+    	if (exists)
     		eventConfig.set(i, eventConfiguration);
-    	else 
+    	else
     		eventConfig.add(eventConfiguration);
     	return exists;
 	}
@@ -250,7 +261,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
     	int i; int exists = -1;
     	for(i = 0; i < eventConfig.size() && exists < 0; i++)
     		exists = eventConfig.get(i).getId().equals(id) ? i : -1;
-    	if (exists >= 0)     		
+    	if (exists >= 0)
     		eventConfig.remove(exists);
 	}
 
@@ -261,18 +272,18 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	public List<IMessageProcessingEventConfiguration> getEventHandlerConfiguration() {
 		return eventConfig;
 	}
-	
+
 	@Override
 	public IVersionInfo getVersion() {
 		return VersionInfo.getInstance();
 	}
-	
+
 	public void setValidationExecutor(IValidationExecutor exec) {
 		this.validationExec = exec;
 	}
-	
+
 	@Override
-    public IValidationExecutor getValidationExecutor() {		
+    public IValidationExecutor getValidationExecutor() {
         return validationExec != null ? validationExec : new DefaultValidationExecutor();
     }
 
@@ -285,7 +296,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	public Module getModule(String name) {
 		return modules.get(name);
 	}
-	
+
 	public void setModule(String name, Module module) {
 		modules.put(name, module);
 	}
