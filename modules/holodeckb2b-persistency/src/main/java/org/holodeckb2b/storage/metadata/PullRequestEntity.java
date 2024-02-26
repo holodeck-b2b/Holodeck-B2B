@@ -30,7 +30,6 @@ public class PullRequestEntity extends MessageUnitEntity<PullRequest> implements
     public PullRequestEntity(PullRequest jpaObject) {
         super(jpaObject);
         // All the data for the Pull Request is directly loaded
-        this.allMetadataLoaded = true;
     }
 
     @Override

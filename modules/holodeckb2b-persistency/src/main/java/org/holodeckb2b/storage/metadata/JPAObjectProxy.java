@@ -35,11 +35,6 @@ abstract class JPAObjectProxy<T extends JPAEntityObject> {
     protected T   jpaEntityObject;
 
     /**
-     * Indicates whether all the meta-data on the Message Unit has been loaded
-     */
-    protected boolean allMetadataLoaded = false;
-
-    /**
      * Creates a new <code>MessageUnitEntity</code> object for the given JPA entity object.
      *
      * @param jpaObject     The JPA entity object to create a proxy for
@@ -62,15 +57,6 @@ abstract class JPAObjectProxy<T extends JPAEntityObject> {
      */
     public void updateJPAObject(final T jpaObject) {
         this.jpaEntityObject = jpaObject;
-    }
-
-    /**
-     * Indicates whether all meta-data of the Message Unit has been loaded from the database.
-     *
-     * @return <code>true</code> if all meta-data on the User Message has been loaded, <code>false</code> otherwise
-     */
-    public boolean isLoadedCompletely() {
-        return allMetadataLoaded;
     }
 
     /**

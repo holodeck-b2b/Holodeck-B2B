@@ -34,7 +34,6 @@ public class PayloadEntity extends JPAObjectProxy<PayloadInfo> implements IPaylo
 
     PayloadEntity(PayloadInfo p) {
     	super(p);
-    	this.allMetadataLoaded = true;
     }
 
     @Override

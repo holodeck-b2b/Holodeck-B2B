@@ -48,7 +48,6 @@ public class UserMessageEntity extends MessageUnitEntity<UserMessage> implements
     	jpaEntityObject.getReceiver();
     	jpaEntityObject.getSender();
     	jpaEntityObject.getPayloads();
-    	allMetadataLoaded = true;
     }
 
     @Override

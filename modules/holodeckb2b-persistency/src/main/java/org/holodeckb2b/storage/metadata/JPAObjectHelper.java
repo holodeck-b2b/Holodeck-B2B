@@ -72,6 +72,8 @@ public class JPAObjectHelper {
 		else
 			throw new IllegalArgumentException("Only JPA objects can be wrapped in an entity object");
 
+		// Make sure all meta-data is loaded from the database
+		proxy.loadCompletely();
 		return proxy;
 	}
 

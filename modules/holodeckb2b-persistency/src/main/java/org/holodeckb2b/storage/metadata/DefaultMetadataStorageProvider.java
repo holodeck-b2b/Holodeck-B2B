@@ -29,7 +29,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.OptimisticLockException;
-import javax.persistence.PersistenceException;
 import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 
@@ -223,9 +222,8 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 			tx.setRollbackOnly();
 			throw new StorageException("Failure updating meta-data", updateFailure);
 		} finally {
-			// Ensure that the object stays completely loaded if it was already so previously
-			if (proxy.isLoadedCompletely())
-				proxy.loadCompletely();
+			// Ensure that the object stays completely loaded
+			proxy.loadCompletely();
 			if (tx != null && tx.isActive() && tx.getRollbackOnly())
 				tx.rollback();
 			else if (tx != null && tx.isActive())
@@ -406,22 +404,6 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
         return result;
 	}
 
-	@Override
-	public <E extends IMessageUnitEntity> void loadCompletely(E entity) throws StorageException {
-		assertManagedType(entity);
-		if (!entity.isLoadedCompletely()) {
-			JPAObjectProxy<MessageUnit> proxy = (JPAObjectProxy<MessageUnit>) entity;
-			EntityManager em = emf.createEntityManager();
-			try {
-				MessageUnit jpaObject = proxy.getJPAObject();
-				proxy.updateJPAObject(em.find(jpaObject.getClass(), jpaObject.getOID()));
-				proxy.loadCompletely();
-			} catch (PersistenceException pe) {
-				throw new StorageException("Could not load complete meta-data of message unit", pe);
-			}
-		}
-	}
-
 	/**
      * Gets the meta-data of message units which ebMS <i>Timestamp</i> is between the given time stamps.
      * <p>NOTE: This query is not part of {@link IMetadataStorageProvider} and is added for use by the default UI to
@@ -437,8 +419,6 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
      */
     public List<IMessageUnitEntity> getMessageHistory(final Date after, final Date before, final int max)
     																						throws StorageException {
-
-    	List<IMessageUnitEntity> result = null;
     	final EntityManager em = emf.createEntityManager();
     	try {
     		em.getTransaction().begin();
@@ -449,15 +429,13 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 									    				.setParameter("after", after)
 									    				.setParameter("before", before)
 									    				.setMaxResults(max);
-    		result = JPAObjectHelper.proxy(query.getResultList());
-    		result.forEach(e -> ((JPAObjectProxy<JPAEntityObject>) e).loadCompletely());
+    		return JPAObjectHelper.proxy(query.getResultList());
     	} catch (final Exception e) {
     		throw new StorageException("Could not execute query \"getMessageHistory\"", e);
     	} finally {
     		em.getTransaction().commit();
     		em.close();
     	}
-    	return result;
     }
 
 	private void assertManagedType(Object entity) throws StorageException {

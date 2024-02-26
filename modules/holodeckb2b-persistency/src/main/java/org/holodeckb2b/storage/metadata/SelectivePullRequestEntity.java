@@ -31,7 +31,6 @@ public class SelectivePullRequestEntity extends PullRequestEntity implements ISe
 
     public SelectivePullRequestEntity(SelectivePullRequest jpaObject) {
         super(jpaObject);
-        allMetadataLoaded = true;
     }
 
     @Override

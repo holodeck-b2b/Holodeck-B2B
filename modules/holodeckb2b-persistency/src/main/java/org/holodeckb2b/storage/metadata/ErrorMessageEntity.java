@@ -39,7 +39,6 @@ public class ErrorMessageEntity extends MessageUnitEntity<ErrorMessage> implemen
     public void loadCompletely() {
     	super.loadCompletely();
     	jpaEntityObject.getErrors();
-    	allMetadataLoaded = true;
     }
 
     @Override

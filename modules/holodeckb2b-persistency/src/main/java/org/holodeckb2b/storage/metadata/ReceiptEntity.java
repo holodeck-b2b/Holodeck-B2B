@@ -33,7 +33,6 @@ public class ReceiptEntity extends MessageUnitEntity<Receipt> implements IReceip
     public ReceiptEntity(Receipt jpaObject) {
         super(jpaObject);
         // All the data for the Receipt is directly loaded
-        this.allMetadataLoaded = true;
     }
 
     @Override

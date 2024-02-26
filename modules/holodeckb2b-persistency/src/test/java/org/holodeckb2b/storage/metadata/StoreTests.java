@@ -18,7 +18,6 @@ package org.holodeckb2b.storage.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -129,7 +128,6 @@ public class StoreTests extends BaseProviderTest {
 
 		UserMessageEntity stored = assertDoesNotThrow(() -> provider.storeMessageUnit(um));
 
-		assertFalse(stored.isLoadedCompletely());
 		assertNotNull(stored.getCoreId());
 		assertEquals(um.getPModeId(), stored.getPModeId());
 		assertEquals(um.getMPC(), stored.getMPC());
@@ -142,11 +140,7 @@ public class StoreTests extends BaseProviderTest {
 		assertTrue(CompareUtils.areEqual(um.getReceiver(), stored.getReceiver()));
 		assertTrue(CompareUtils.areEqual(um.getSender(), stored.getSender()));
 
-		assertDoesNotThrow(() -> provider.loadCompletely(stored));
-		assertTrue(stored.isLoadedCompletely());
-
 		Collection<PayloadEntity> storedPlInfo = stored.getPayloads();
-
 		assertEquals(1, storedPlInfo.size());
 		PayloadEntity storedPl = storedPlInfo.iterator().next();
 		assertNotNull(storedPl.getPayloadId());
@@ -214,7 +208,6 @@ public class StoreTests extends BaseProviderTest {
 
 		PullRequestEntity stored = assertDoesNotThrow(() -> provider.storeMessageUnit(pr));
 
-		assertTrue(stored.isLoadedCompletely());
 		assertEquals(pr.getPModeId(), stored.getPModeId());
 		assertEquals(pr.getMPC(), stored.getMPC());
 
@@ -233,7 +226,6 @@ public class StoreTests extends BaseProviderTest {
 
 		SelectivePullRequestEntity stored = assertDoesNotThrow(() -> provider.storeMessageUnit(pr));
 
-		assertTrue(stored.isLoadedCompletely());
 		assertEquals(pr.getPModeId(), stored.getPModeId());
 		assertEquals(pr.getMPC(), stored.getMPC());
 		assertEquals(pr.getAction(), stored.getAction());
@@ -254,7 +246,6 @@ public class StoreTests extends BaseProviderTest {
 
 		ReceiptEntity stored = assertDoesNotThrow(() -> provider.storeMessageUnit(r));
 
-		assertTrue(stored.isLoadedCompletely());
 		ReceiptTest.assertSameXML(r.getContent(), stored.getContent());
 
 		assertExistsInDb(stored);
@@ -271,13 +262,7 @@ public class StoreTests extends BaseProviderTest {
 
 		ErrorMessageEntity stored = assertDoesNotThrow(() -> provider.storeMessageUnit(em));
 
-		assertFalse(stored.isLoadedCompletely());
-
-		assertDoesNotThrow(() -> provider.loadCompletely(stored));
-		assertTrue(stored.isLoadedCompletely());
-
 		assertEquals(2, stored.getErrors().size());
-
 		assertTrue(errs.parallelStream()
 						.allMatch(e -> stored.getErrors().stream()
 											.anyMatch(se -> Utils.nullSafeEqual(e.getCategory(), se.getCategory())
