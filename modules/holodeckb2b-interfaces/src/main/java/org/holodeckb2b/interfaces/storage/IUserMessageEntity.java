@@ -21,12 +21,8 @@ import java.util.Collection;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
- * Defines the interface of the stored object that is used by the Holodeck B2B to store the User Message 
- * specific message unit meta-data.
- * <p>Beside the generic meta-data fields that may be <i>lazily loaded</i> persistency implementations MAY also load the
- * information on the <b>sender, receiver, payloads and message properties <i>lazily</i></b>, i.e. before calling
- * getters to access this info the {@link #isLoadedCompletely()} should be executed to check if all information is
- * loaded.
+ * Defines the interface of the stored object that is used by the Holodeck B2B to store the User Message specific
+ * message unit meta-data.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
@@ -35,12 +31,12 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 public interface IUserMessageEntity extends IMessageUnitEntity, IUserMessage {
 
 	/**
-	 * Gets meta-data of the payloads contained in the User Message as a collection of {@link IPayloadEntity} objects.  
+	 * Gets meta-data of the payloads contained in the User Message as a collection of {@link IPayloadEntity} objects.
 	 * <p>
 	 * As the Holodeck B2B Core will not modify the collection itself, the returned collection may be made unmodifiable.
-	 * However the contained {@link IPayloadEntity} objects may be updated by the Core using their respective update 
-	 * methods. Once updated the Core will use {@link IUpdateManager#updatePayload(IPayloadEntity)} to save the updates.  
-	 * 
+	 * However the contained {@link IPayloadEntity} objects may be updated by the Core using their respective update
+	 * methods. Once updated the Core will use {@link IUpdateManager#updatePayload(IPayloadEntity)} to save the updates.
+	 *
 	 * @return 	collection of {@link IPayloadEntity} objects representing the payloads contained in this User Message
 	 * @since 7.0.0
 	 */

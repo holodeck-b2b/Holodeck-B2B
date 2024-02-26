@@ -282,16 +282,4 @@ public interface IMetadataStorageProvider {
 	 * @since 7.0.0 The argument type is now the entity class
 	 */
 	boolean isAlreadyProcessed(final IUserMessageEntity userMessage) throws StorageException;
-
-	/**
-	 * Ensures that all meta-data of the given entity object is loaded from the database.
-	 * <p>
-	 * As described in the methods above the {@link IMetadataStorageProvider} may, for better performance, decide not to
-	 * load related collections of meta-data of an entity object. When that meta-data is needed this method can be used
-	 * to ensure all meta-data is loaded.
-	 *
-	 * @param entity 	the entity to ensure to be completely loaded
-	 * @throws StorageException	when an error occurs retrieving all meta-data of the entity
-	 */
-	 <E extends IMessageUnitEntity> void loadCompletely(E entity) throws StorageException;
 }

@@ -116,17 +116,6 @@ public interface IQueryManager {
                                                                                 throws StorageException;
 
     /**
-     * Ensures that all meta-data of the given entity object is loaded and available for processing.
-     * <p>NOTE: The implementation of this method by the persistency provider may reload the meta-data from the storage
-     * and overwrite any changes that were made to the entity object.
-     *
-     * @param <V>           Limits the <code>messageUnit</code> parameter to only message unit classes
-     * @param messageUnit   The entity object that needs to be loaded completely
-     * @throws StorageException When an error occurs while loading the object
-     */
-    <V extends IMessageUnitEntity> void ensureCompletelyLoaded(V messageUnit) throws StorageException;
-
-    /**
      * Gets the number of times the given <i>User Message</i> message unit has already been sent to the receiver without
      * getting a <i>Receipt</i> back.
      * <p>This equals the number of times the message unit was in the {@link ProcessingState#SENDING} state. Note that
