@@ -27,21 +27,21 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
 
 /**
- * Is a helper class to allow sending of an Error Message to the sender of the message even if the persistency layer is 
+ * Is a helper class to allow sending of an Error Message to the sender of the message even if the persistency layer is
  * down.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  7.0.0
  */
 public class NonPersistedErrorMessage extends ErrorMessage implements IErrorMessageEntity {
 	private static final long serialVersionUID = -6816284794434753373L;
-	
+
 	private String  coreId;
 	private MessageProcessingState currentState;
 	private boolean addSOAPFault = false;
 	private boolean isMultiHop = false;
 	private Label 	leg;
-	
+
 	public NonPersistedErrorMessage(final ErrorMessage source) {
 		super(source);
 		coreId = UUID.randomUUID().toString();
@@ -51,11 +51,6 @@ public class NonPersistedErrorMessage extends ErrorMessage implements IErrorMess
 	@Override
 	public IMessageUnitProcessingState getCurrentProcessingState() {
 		return currentState;
-	}
-	
-	@Override
-	public boolean isLoadedCompletely() {
-		return true;
 	}
 
 	@Override

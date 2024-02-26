@@ -99,11 +99,6 @@ public class QueryManager implements IQueryManager {
 	}
 
 	@Override
-	public <V extends IMessageUnitEntity> void ensureCompletelyLoaded(V messageUnit) throws StorageException {
-		mdsProvider.loadCompletely(messageUnit);
-	}
-
-	@Override
 	public int getNumberOfTransmissions(IUserMessageEntity userMessage) throws StorageException {
 		return executeQuery(() -> Collections.singleton(mdsProvider.getNumberOfTransmissions(userMessage))).findFirst().orElse(0);
 	}

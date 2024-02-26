@@ -123,14 +123,6 @@ class DeliveryManager implements IDeliveryManager {
 					messageUnit.getMessageId());
 			throw new MessageDeliveryException("No P-Mode available for message unit");
 		}
-		// Make sure we can evaluate all processing states
-		try {
-			HolodeckB2BCoreInterface.getQueryManager().ensureCompletelyLoaded(messageUnit);
-		} catch (StorageException dbError) {
-			log.error("Error retrieving current meta-data of message unit (msgId={}) from database : ",
-					messageUnit.getMessageId(), Utils.getExceptionTrace(dbError));
-			throw new MessageDeliveryException("Error retrieving current meta-data", dbError);
-		}
 		if (!messageUnit.getProcessingStates().stream()
 											  .anyMatch(s -> s.getState() == ProcessingState.READY_FOR_DELIVERY)) {
 			log.error("Message unit (msgId={}) is not ready for delivery!", messageUnit.getMessageId());

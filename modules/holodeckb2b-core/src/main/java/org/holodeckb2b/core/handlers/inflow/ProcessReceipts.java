@@ -39,12 +39,12 @@ import org.holodeckb2b.interfaces.storage.providers.StorageException;
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received receipt signals.
  * <p>For each {@link IReceiptEntity} in the message processing context it will check if the referenced <i>User Message
- * </i> expects a Receipt and if so mark it as delivered. This is done by checking the <i>ReceiptConfiguration</i> for 
- * the leg ({@link ILeg#getReceiptConfiguration()} and the referenced User Message's processing state. If no 
+ * </i> expects a Receipt and if so mark it as delivered. This is done by checking the <i>ReceiptConfiguration</i> for
+ * the leg ({@link ILeg#getReceiptConfiguration()} and the referenced User Message's processing state. If no
  * configuration exists Receipts are not expected and a <i>ProcessingModeMismatch</i> error is generated for the
  * Receipt and its processing state is set to {@link ProcessingState#FAILURE}.<br>
- * If a receipt configuration exists and if there is a User Message waiting for a Receipt it will be marked as delivered 
- * and the Receipt's state will be set to {@link ProcessingState#READY_FOR_DELIVERY} to indicate that it can be 
+ * If a receipt configuration exists and if there is a User Message waiting for a Receipt it will be marked as delivered
+ * and the Receipt's state will be set to {@link ProcessingState#READY_FOR_DELIVERY} to indicate that it can be
  * delivered to the business application. The actual delivery is done by the {@link DeliverReceipts} handler.<br>
  * If a receipt configuration exists but the user message is not waiting for a receipt anymore (because it is already
  * acknowledged by another Receipt or it has failed due to an Error) the Receipt's processing state will be changed to
@@ -67,7 +67,7 @@ public class ProcessReceipts extends AbstractBaseHandler {
                 if (r.getCurrentProcessingState().getState() != ProcessingState.FAILURE)
                     processReceipt(r, procCtx, log);
             log.debug("All Receipts in message processed");
-        } 
+        }
         return InvocationResponse.CONTINUE;
     }
 
@@ -92,8 +92,8 @@ public class ProcessReceipts extends AbstractBaseHandler {
         final String refToMsgId = receipt.getRefToMessageId();
         log.trace("Start processing Receipt [msgId=" + receipt.getMessageId()
                     + "] for referenced message with msgId=" + refToMsgId);
-        
-        Collection<IMessageUnitEntity> refdMsgs = null;  
+
+        Collection<IMessageUnitEntity> refdMsgs = null;
         final IMessageUnitEntity sentMessage = procCtx.getSendingMessageUnit(refToMsgId);
         if (sentMessage != null)
         	refdMsgs = Collections.singletonList(sentMessage);
@@ -124,7 +124,7 @@ public class ProcessReceipts extends AbstractBaseHandler {
                     // Change processing state of the reference message unit to delivered, but only if it is
                     // waiting for a receipt as we may otherwise overwrite an error state.
                     if (isWaitingForReceipt(ackedMessage)) {
-                        log.info("Receipt received for User Message [msgId= " + refToMsgId 
+                        log.info("Receipt received for User Message [msgId= " + refToMsgId
                         			+ "] => successfully delivered");
                         updateManager.setProcessingState(ackedMessage, ProcessingState.DELIVERED);
                         // Maybe the Receipt must also be delivered to the business application, so change state
@@ -155,9 +155,9 @@ public class ProcessReceipts extends AbstractBaseHandler {
      * Checks whether the message unit is waiting for receipt.
      * <p>The message unit is waiting for a receipt when its current processing state is:<ol>
      * <li>either {@link ProcessingState#AWAITING_RECEIPT} or {@link ProcessingState#TRANSPORT_FAILURE}</li>
-     * <li>either {@link ProcessingState#READY_TO_PUSH}, {@link ProcessingState#AWAITING_PULL}, 
-     * 		{@link ProcessingState#SUSPENDED} or {@link ProcessingState#WARNING} 
-     *    <b>and</b> the previous state was {@link ProcessingState#AWAITING_RECEIPT} 
+     * <li>either {@link ProcessingState#READY_TO_PUSH}, {@link ProcessingState#AWAITING_PULL},
+     * 		{@link ProcessingState#SUSPENDED} or {@link ProcessingState#WARNING}
+     *    <b>and</b> the previous state was {@link ProcessingState#AWAITING_RECEIPT}
      *    			 or {@link ProcessingState#TRANSPORT_FAILURE}</li>
      * </ol>
      * <p>The check must always include the current state as we do not want to change a processing state that is final.
@@ -173,12 +173,9 @@ public class ProcessReceipts extends AbstractBaseHandler {
             return true;
         else if (currentState == ProcessingState.AWAITING_PULL || currentState == ProcessingState.READY_TO_PUSH
         		|| currentState == ProcessingState.WARNING || currentState == ProcessingState.SUSPENDED) {
-            // Check if the previous state was AWAITING_RECEIPT and we are now wiating for resend
-            if (!mu.isLoadedCompletely())
-                HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(mu);
             ProcessingState prevState = mu.getProcessingStates().get(mu.getProcessingStates().size() - 2).getState();
             return prevState == ProcessingState.AWAITING_RECEIPT || prevState == ProcessingState.TRANSPORT_FAILURE;
-        } else 
+        } else
             return false;
     }
 }

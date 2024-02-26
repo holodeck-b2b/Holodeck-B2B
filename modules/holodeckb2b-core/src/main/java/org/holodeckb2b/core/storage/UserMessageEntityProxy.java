@@ -34,38 +34,31 @@ import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
 /**
  * Is a proxy to the {@link IUserMessageEntity} object managed by the {@link IMetadataStorageProvider} that holds a
  * collection of {@link PayloadEntityProxy}s so the payloads' content can also be managed.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 7.0.0 
+ * @since 7.0.0
  */
 public class UserMessageEntityProxy implements IUserMessageEntity {
 	// The entity object being proxied
 	private final IUserMessageEntity	source;
-	//
-	private final Collection<PayloadEntityProxy>	payloads;
-	
+	// The payload proxies
+	private Collection<PayloadEntityProxy>	payloads = null;
+
 	UserMessageEntityProxy(IUserMessageEntity source) {
 		this.source = source;
 		this.payloads = new ArrayList<>();
 		if (!Utils.isNullOrEmpty(source.getPayloads()))
-			source.getPayloads().forEach(p -> this.payloads.add(p instanceof PayloadEntityProxy ? (PayloadEntityProxy) p 
+			source.getPayloads().forEach(p -> this.payloads.add(p instanceof PayloadEntityProxy ? (PayloadEntityProxy) p
 																						: new PayloadEntityProxy(p)));
 	}
-	
+
 	IUserMessageEntity getSource() {
-		return source;		
-	}
-	
-	@Override
-	public String getCoreId() {
-		return source.getCoreId();
+		return source;
 	}
 
 	@Override
-	public boolean isLoadedCompletely() {
-		// Note that we just return the status of the entity object and don't look at the availability of the payloads'
-		// content. This isn't needed because the payload proxies will make sure content is loaded on time.
-		return source.isLoadedCompletely();
+	public String getCoreId() {
+		return source.getCoreId();
 	}
 
 	@Override
@@ -85,7 +78,7 @@ public class UserMessageEntityProxy implements IUserMessageEntity {
 
 	@Override
 	public void setProcessingState(ProcessingState newState, String description) {
-		source.setProcessingState(newState, description);	
+		source.setProcessingState(newState, description);
 	}
 
 	@Override
@@ -149,7 +142,7 @@ public class UserMessageEntityProxy implements IUserMessageEntity {
 	}
 
 	@Override
-	public Collection<PayloadEntityProxy> getPayloads() {		
+	public Collection<PayloadEntityProxy> getPayloads() {
 		return payloads;
 	}
 }

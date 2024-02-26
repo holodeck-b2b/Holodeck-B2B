@@ -46,8 +46,9 @@ public class Payload implements IPayload, Serializable {
     private SchemaReference         schemaRef;
     private Description             description;
 
+    private IPayload				contentSrc;
     private InputStream				contentStream;
-    
+
     /**
      * Default constructor creates empty object
      */
@@ -61,12 +62,7 @@ public class Payload implements IPayload, Serializable {
      * @param source  The source to use for the new object
      */
     public Payload(final IPayload source) {
-    	try {
-			this.contentStream = source.getContent();
-		} catch (IOException e) {
-			this.contentStream = null;
-		}
-    	
+		this.contentSrc = source;
         this.mimeType = source.getMimeType();
         this.containment = source.getContainment();
         this.uri = source.getPayloadURI();
@@ -78,13 +74,18 @@ public class Payload implements IPayload, Serializable {
 
     @Override
     public InputStream getContent() throws IOException {
-    	return contentStream;
+    	if (contentStream != null)
+			return contentStream;
+		else if (contentSrc != null)
+			return contentSrc.getContent();
+		else
+			return null;
     }
-    
+
     public void setContentStream(InputStream is) {
     	this.contentStream = is;
     }
-    
+
     @Override
     public Containment getContainment() {
         return containment;

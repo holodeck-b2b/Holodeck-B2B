@@ -257,8 +257,4 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 	public IMessageUnitEntity getMessageUnitWithCoreId(String coreId) throws StorageException {
 		return msgUnitStore.stream().filter(m -> m.getCoreId().equals(coreId)).findFirst().orElse(null);
 	}
-
-	@Override
-	public <E extends IMessageUnitEntity> void loadCompletely(E entity) throws StorageException {
-	}
 }

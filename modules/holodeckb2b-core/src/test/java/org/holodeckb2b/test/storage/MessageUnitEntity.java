@@ -38,26 +38,26 @@ public abstract class MessageUnitEntity implements IMessageUnitEntity {
 	private Date	timestamp;
 	private Direction direction;
 	private boolean usesMultiHop;
-	
+
 	private List<IMessageUnitProcessingState> states = new ArrayList<>();
-	
+
 	protected MessageUnitEntity() {
 		this.coreId = UUID.randomUUID().toString();
 		this.lastChange = new Date();
 	}
-	
+
 	protected MessageUnitEntity(IMessageUnit source) {
-		this();		
+		this();
 		if (source ==  null)
 			copyFrom(source);
 	}
-	
-	public void copyFrom(IMessageUnit source) {		
+
+	public void copyFrom(IMessageUnit source) {
 		this.pModeId = source.getPModeId();
 		this.messageId = source.getMessageId();
 		this.refToMessageId = source.getRefToMessageId();
 		this.direction = source.getDirection();
-		this.timestamp = source.getTimestamp();		
+		this.timestamp = source.getTimestamp();
 		this.states = new ArrayList<>();
 		if (!Utils.isNullOrEmpty(source.getProcessingStates()))
 			source.getProcessingStates().forEach(s -> this.states.add(new MessageProcessingState(s)));
@@ -69,17 +69,18 @@ public abstract class MessageUnitEntity implements IMessageUnitEntity {
 		if (source instanceof MessageUnitEntity)
 			this.lastChange = ((MessageUnitEntity) source).getLastChanged();
 	}
-	
+
+	@Override
 	public abstract MessageUnitEntity clone();
-	
+
 	public Date getLastChanged() {
 		return lastChange;
 	}
-	
+
 	public void setChanged(Date d) {
 		this.lastChange = d;
 	}
-	
+
 	@Override
 	public Direction getDirection() {
 		return direction;
@@ -104,7 +105,8 @@ public abstract class MessageUnitEntity implements IMessageUnitEntity {
 	public String getPModeId() {
 		return pModeId;
 	}
-	
+
+	@Override
 	public void setPModeId(String pModeId) {
 		this.pModeId = pModeId;
 	}
@@ -122,11 +124,6 @@ public abstract class MessageUnitEntity implements IMessageUnitEntity {
 	@Override
 	public String getCoreId() {
 		return coreId;
-	}
-
-	@Override
-	public boolean isLoadedCompletely() {
-		return true;
 	}
 
 	@Override
