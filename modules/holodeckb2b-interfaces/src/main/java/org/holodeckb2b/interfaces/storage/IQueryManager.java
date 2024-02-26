@@ -43,8 +43,6 @@ public interface IQueryManager {
      * Retrieves all message units of the specified type and that are in one of the given states and are flowing in the
      * specified direction. The found message units are sorted on their time stamp starting with the oldest message
      * units.
-     * <p><b>NOTE:</b> The entity objects in the resulting collection may not be completely loaded! Before a message
-     * unit is going to be processed it must be checked if it is loaded completely.
      *
      * @param <T>       Limits the <code>type</code> parameter to only message unit classes
      * @param <V>       The returned objects will be entity objects. V and T will share the same parent type.
@@ -66,8 +64,6 @@ public interface IQueryManager {
      * searched messages units flow can also be specified.
      * <p>Although messageIds should be unique there can exist multiple <code>MessageUnits</code> with the same
      * messageId due to resending (and because other MSH or business applications may not conform to this constraint).
-     * <br><b>NOTE:</b> The entity objects in the resulting collection may not be completely loaded! Before a message
-     * unit is going to be processed it must be checked if it is loaded completely.
      *
      * @param messageId     The messageId of the message units to retrieve
      * @param direction		The direction in which the message units to retrieve should be.
@@ -80,8 +76,6 @@ public interface IQueryManager {
 
     /**
      * Retrieves all message units of which the last change in processing state occurred before the given date and time.
-     * <br><b>NOTE:</b> The entity objects in the resulting collection may not be completely loaded! Before a message
-     * unit is going to be processed it must be checked if it is loaded completely.
      *
      * @param   maxLastChangeDate   The latest date of a processing state change that is to be included in the result
      * @return          Collection of entity objects representing the message units which processing state changed at
@@ -96,8 +90,6 @@ public interface IQueryManager {
      * by a P-Mode with one of the given P-Mode ids. The message units are ordered ascending on the timestamp of the
      * current processing state, i.e. the messages that are the longest in the given state are at the front of the
      * list.
-     * <br><b>NOTE:</b> The entity objects in the resulting list may not be completely loaded! Before a message unit is
-     * going to be processed it must be checked if it is loaded completely.
      *
      * @param <T>       Limits the <code>type</code> parameter to only message unit classes
      * @param <V>       The returned objects will be entity objects. V and T will share the same parent type.
@@ -146,8 +138,6 @@ public interface IQueryManager {
 
     /**
      * Retrieves the message unit with the given <code>CoreId</code>.
-     * <p><b>NOTE:</b> The returned entity object may not be completely loaded! Before a message unit is going to be
-     * processed it must be checked if it is loaded completely.
      *
      * @param coreId     The CoreId of the message unit to retrieve
      * @return           The {@link IMessageUnitEntity} with the given CoreId or <code>null</code> if none exists
