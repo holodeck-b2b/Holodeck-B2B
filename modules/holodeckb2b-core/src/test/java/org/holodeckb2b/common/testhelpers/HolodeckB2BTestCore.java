@@ -65,8 +65,8 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	private IMessageProcessingEventProcessor eventProcessor;
 	private IValidationExecutor validationExec;
 	private ICertificateManager certManager;
-	private IMetadataStorageProvider mdsProvider;
-	private IPayloadStorageProvider  psProvider;
+	private IMetadataStorageProvider mdsProvider = new InMemoryMDSProvider();
+	private IPayloadStorageProvider  psProvider = new InMemoryPSProvider();
 	private List<IMessageProcessingEventConfiguration> eventConfig = new ArrayList<>();
 	private IDeliveryManager	deliveryManager;
 	private Map<String, Module> modules = new HashMap<>();
@@ -183,8 +183,6 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	}
 
 	public IMetadataStorageProvider getMetadataStorageProvider() {
-		if (mdsProvider == null)
-			mdsProvider = new InMemoryMDSProvider();
 		return mdsProvider;
 	}
 
@@ -194,8 +192,6 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	}
 
 	public IPayloadStorageProvider getPayloadStorageProvider() {
-		if (psProvider == null)
-			psProvider = new InMemoryPSProvider();
 		return psProvider;
 	}
 
