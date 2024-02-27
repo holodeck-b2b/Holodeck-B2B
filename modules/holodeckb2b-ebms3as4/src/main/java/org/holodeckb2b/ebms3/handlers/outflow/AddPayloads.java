@@ -63,12 +63,6 @@ public class AddPayloads extends AbstractUserMessageHandler {
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final IMessageProcessingContext procCtx,
     										  final Logger log) throws StorageException {
 
-        log.trace("Check that all meta-data of the User Message is available for processing");
-        if (!um.isLoadedCompletely()) {
-            log.trace("Not all info loaded, load now");
-            HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(um);
-        }
-
         log.trace("All meta-data of User Message available, check for payloads to include");
         final Collection<? extends IPayloadEntity> payloads = um.getPayloads();
 

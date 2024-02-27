@@ -126,24 +126,22 @@ public class ConfigureMultihop extends AbstractBaseHandler {
             return null;
 
         // If the signal is the primary message unit in a response it is sent synchronously and the related user
-        // message must be available in the context 
+        // message must be available in the context
         for(IMessageUnitEntity mu : procCtx.getReceivedMessageUnits())
             if (mu instanceof IUserMessage && refToMsgId.equals(mu.getMessageId()))
                 return (IUserMessageEntity) mu;
 
         // If not sent as response, get the information from the database
         final Collection<IMessageUnitEntity> refdMessages = HolodeckB2BCore.getQueryManager()
-                                                                         .getMessageUnitsWithId(refToMsgId, 
+                                                                         .getMessageUnitsWithId(refToMsgId,
                                                                         		 				Direction.IN);
         if (!Utils.isNullOrEmpty(refdMessages)) {
             IMessageUnitEntity sentMsgUnit = refdMessages.iterator().next();
-            if (sentMsgUnit instanceof IUserMessageEntity) {
-            	HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(sentMsgUnit);
+            if (sentMsgUnit instanceof IUserMessageEntity)
             	return (IUserMessageEntity) sentMsgUnit;
-            } 
-        } 
-        
-        return null;        
+        }
+
+        return null;
     }
 
     /**

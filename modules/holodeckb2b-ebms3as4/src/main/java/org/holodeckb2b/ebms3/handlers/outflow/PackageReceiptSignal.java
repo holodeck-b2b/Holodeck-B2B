@@ -22,7 +22,6 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.commons.util.Utils;
-import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.ReceiptElement;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
@@ -42,11 +41,11 @@ import org.holodeckb2b.interfaces.storage.providers.StorageException;
 public class PackageReceiptSignal extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log)
     																					throws StorageException {
         // First check if there is a receipt to include
-        Collection<IReceiptEntity> receipts = procCtx.getSendingReceipts(); 
-        
+        Collection<IReceiptEntity> receipts = procCtx.getSendingReceipts();
+
 		if (Utils.isNullOrEmpty(receipts))
             // No receipt in this message, continue processing
             return InvocationResponse.CONTINUE;
@@ -57,14 +56,9 @@ public class PackageReceiptSignal extends AbstractBaseHandler {
         final SOAPHeaderBlock messaging = Messaging.getElement(procCtx.getParentContext().getEnvelope());
 
         for(final IReceiptEntity r : receipts) {
-            log.trace("Make sure that all meta-data on the Receipt is loaded");
-            if (!r.isLoadedCompletely()) {
-                log.trace("Not all meta-data is available, load now");
-                HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(r);
-            }
             log.trace("Add eb:SignalMessage element to the existing eb:Messaging header");
             ReceiptElement.createElement(messaging, r);
-            log.debug("eb:SignalMessage element for Receipt [msgId=" + r.getMessageId() 
+            log.debug("eb:SignalMessage element for Receipt [msgId=" + r.getMessageId()
             			+ "] succesfully added to header");
         }
         return InvocationResponse.CONTINUE;

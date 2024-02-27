@@ -90,7 +90,6 @@ public class CoreInfoImpl implements CoreInfo {
 				MessageUnit[] result = new MessageUnit[msgUnits.size()];
 				int i = 0;
 				for(IMessageUnitEntity m : msgUnits) {
-					mdsProvider.loadCompletely(m);
 					result[i++] = MessageUnit.copyOf(m);
 				}
 				return result;
