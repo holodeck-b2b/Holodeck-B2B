@@ -102,6 +102,7 @@ public class UserMessage extends MessageUnit {
     public UserMessage() {
         super();
         this.partners = new HashMap<>();
+        this.properties = new ArrayList<>();
     }
 
     /**
@@ -126,9 +127,11 @@ public class UserMessage extends MessageUnit {
 			this.collaborationInfo = new CollaborationInfo(sourceUserMessage.getCollaborationInfo());
         Collection<IProperty> srcMsgProps = sourceUserMessage.getMessageProperties();
         if (!Utils.isNullOrEmpty(srcMsgProps)) {
-        	this.properties = new ArrayList(srcMsgProps.size());
+        	this.properties = new ArrayList<>(srcMsgProps.size());
         	srcMsgProps.forEach(p -> this.properties.add(new Property(p)));
         }
+
+
     }
 
     /*
