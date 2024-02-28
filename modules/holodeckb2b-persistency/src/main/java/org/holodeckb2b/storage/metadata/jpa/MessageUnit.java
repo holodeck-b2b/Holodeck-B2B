@@ -209,8 +209,8 @@ public abstract class MessageUnit implements JPAEntityObject {
     @Temporal(TemporalType.TIMESTAMP)
     private Date    	MU_TIMESTAMP;
 
-    @OneToMany(mappedBy = "msgUnit", targetEntity = MessageUnitProcessingState.class,
-                cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = MessageUnitProcessingState.class, fetch = FetchType.EAGER)
+    @CollectionTable(name="MSG_STATE")
     @OrderBy("PROC_STATE_NUM")
     private List<IMessageUnitProcessingState>       states;
 }

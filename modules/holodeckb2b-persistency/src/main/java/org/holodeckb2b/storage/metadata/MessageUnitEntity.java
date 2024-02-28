@@ -46,7 +46,6 @@ public abstract class MessageUnitEntity<T extends MessageUnit> extends JPAObject
 
     @Override
     public void loadCompletely() {
-    	jpaEntityObject.getProcessingStates();
     }
 
     @Override
