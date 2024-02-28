@@ -100,12 +100,16 @@ public class QueryManager implements IQueryManager {
 
 	@Override
 	public int getNumberOfTransmissions(IUserMessageEntity userMessage) throws StorageException {
-		return executeQuery(() -> Collections.singleton(mdsProvider.getNumberOfTransmissions(userMessage))).findFirst().orElse(0);
+		return executeQuery(() -> Collections.singleton(
+							mdsProvider.getNumberOfTransmissions(((UserMessageEntityProxy) userMessage).getSource())))
+							.findFirst().orElse(0);
 	}
 
 	@Override
 	public boolean isAlreadyProcessed(IUserMessageEntity userMessage) throws StorageException {
-		return executeQuery(() -> Collections.singleton(mdsProvider.isAlreadyProcessed(userMessage))).findFirst().orElse(Boolean.FALSE);
+		return executeQuery(() -> Collections.singleton(
+							mdsProvider.isAlreadyProcessed(((UserMessageEntityProxy) userMessage).getSource())))
+							.findFirst().orElse(Boolean.FALSE);
 	}
 
 	@Override
