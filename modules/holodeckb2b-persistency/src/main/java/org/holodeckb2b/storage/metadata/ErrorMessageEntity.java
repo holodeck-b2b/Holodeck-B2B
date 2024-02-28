@@ -18,6 +18,7 @@ package org.holodeckb2b.storage.metadata;
 
 import java.util.Collection;
 
+import org.hibernate.Hibernate;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
@@ -38,7 +39,7 @@ public class ErrorMessageEntity extends MessageUnitEntity<ErrorMessage> implemen
     @Override
     public void loadCompletely() {
     	super.loadCompletely();
-    	jpaEntityObject.getErrors();
+    	Hibernate.initialize(jpaEntityObject.getErrors());
     }
 
     @Override

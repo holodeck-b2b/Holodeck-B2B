@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.Hibernate;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.ITradingPartner;
@@ -45,9 +46,10 @@ public class UserMessageEntity extends MessageUnitEntity<UserMessage> implements
     @Override
     public void loadCompletely() {
     	super.loadCompletely();
-    	jpaEntityObject.getReceiver();
-    	jpaEntityObject.getSender();
-    	jpaEntityObject.getPayloads();
+    	Hibernate.initialize(jpaEntityObject.getReceiver());
+    	Hibernate.initialize(jpaEntityObject.getSender());
+    	Hibernate.initialize(jpaEntityObject.getMessageProperties());
+    	Hibernate.initialize(jpaEntityObject.getPayloads());
     }
 
     @Override
