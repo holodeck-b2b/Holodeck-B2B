@@ -118,9 +118,18 @@ public class UpdateTests {
 
 		assertDoesNotThrow(() -> provider.updateMessageUnit(stored));
 
+		assertEquals(state2, stored.getCurrentProcessingState().getState());
 		assertEquals(2, stored.getProcessingStates().size());
 		assertEquals(state2, stored.getProcessingStates().get(1).getState());
 		assertEquals(descr2, stored.getProcessingStates().get(1).getDescription());
+
+		dbObj = EntityManagerUtil.getEntityManager()
+											.find(org.holodeckb2b.storage.metadata.jpa.Receipt.class, stored.getOID());
+
+		assertEquals(state2, dbObj.getCurrentProcessingState().getState());
+		assertEquals(2, dbObj.getProcessingStates().size());
+		assertEquals(state2, dbObj.getProcessingStates().get(1).getState());
+		assertEquals(descr2, dbObj.getProcessingStates().get(1).getDescription());
 	}
 
 	@Test

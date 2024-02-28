@@ -17,9 +17,13 @@
 package org.holodeckb2b.storage.metadata.testhelpers;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
+import org.holodeckb2b.common.messagemodel.MessageProcessingState;
+import org.holodeckb2b.common.messagemodel.PartyId;
+import org.holodeckb2b.common.messagemodel.TradingPartner;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
@@ -31,7 +35,7 @@ import org.holodeckb2b.storage.metadata.PullRequestEntity;
 import org.holodeckb2b.storage.metadata.ReceiptEntity;
 import org.holodeckb2b.storage.metadata.UserMessageEntity;
 import org.holodeckb2b.storage.metadata.jpa.ErrorMessage;
-import org.holodeckb2b.storage.metadata.jpa.MessageUnitProcessingState;
+import org.holodeckb2b.storage.metadata.jpa.Property;
 import org.holodeckb2b.storage.metadata.jpa.PullRequest;
 import org.holodeckb2b.storage.metadata.jpa.Receipt;
 import org.holodeckb2b.storage.metadata.jpa.UserMessage;
@@ -65,12 +69,24 @@ public class TestDataSet {
 		if (created)
 			return;
 
-		UserMessage um = new UserMessage();
+		org.holodeckb2b.common.messagemodel.UserMessage base = new org.holodeckb2b.common.messagemodel.UserMessage();
+		base.setMessageId(UUID.randomUUID().toString());
+		base.setTimestamp(new Date(System.currentTimeMillis() - 1000));
+		base.setDirection(Direction.OUT);
+		base.setPModeId(T_PMODE_1);
+		TradingPartner tp = new TradingPartner();
+		tp.setPartyIds(Collections.singleton(new PartyId("senderId", null)));
+		tp.setRole("Sender");
+		base.setSender(tp);
+		tp = new TradingPartner();
+		tp.setPartyIds(Collections.singleton(new PartyId("receiverId", null)));
+		tp.setRole("Receiver");
+		base.setReceiver(tp);
+		base.addMessageProperty(new Property("mp-document-type", "test"));
+		base.addMessageProperty(new Property("mp-dossierno", "A01"));
+
+		UserMessage um = new UserMessage(base);
 		um.setCoreId(UUID.randomUUID().toString());
-		um.setMessageId(UUID.randomUUID().toString());
-		um.setTimestamp(new Date(System.currentTimeMillis() - 1000));
-		um.setDirection(Direction.OUT);
-		um.setPModeId(T_PMODE_1);
 		um.setProcessingState(createState(ProcessingState.SUBMITTED, 2));
 		um.setProcessingState(createState(ProcessingState.READY_TO_PUSH, 2));
 		um.setProcessingState(createState(ProcessingState.SENDING, 2));
@@ -197,8 +213,8 @@ public class TestDataSet {
 		created = true;
 	}
 
-	private static MessageUnitProcessingState createState(ProcessingState state, int daysBack) {
-		MessageUnitProcessingState procstate = new MessageUnitProcessingState(state, null);
+	private static MessageProcessingState createState(ProcessingState state, int daysBack) {
+		MessageProcessingState procstate = new MessageProcessingState(state);
 		Calendar stateTime = Calendar.getInstance();
 		stateTime.add(Calendar.DAY_OF_YEAR, -daysBack);
 		procstate.setStartTime(stateTime.getTime());

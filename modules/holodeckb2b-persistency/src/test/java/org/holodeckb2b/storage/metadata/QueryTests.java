@@ -19,6 +19,7 @@ package org.holodeckb2b.storage.metadata;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -30,12 +31,14 @@ import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
+import org.holodeckb2b.common.util.CompareUtils;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.holodeckb2b.storage.metadata.jpa.UserMessage;
 import org.holodeckb2b.storage.metadata.testhelpers.EntityManagerUtil;
 import org.holodeckb2b.storage.metadata.testhelpers.TestDataSet;
@@ -198,5 +201,30 @@ public class QueryTests extends BaseProviderTest {
 		assertEquals(2, r.size());
 		assertEquals(TestDataSet.T_RECEIPT_1.getCoreId(), r.get(0).getCoreId());
 		assertEquals(TestDataSet.T_PULLREQ_1.getCoreId(), r.get(1).getCoreId());
+	}
+
+	@Test
+	void testCompletelyLoaded() {
+		IUserMessageEntity entity = (IUserMessageEntity) assertDoesNotThrow(() ->
+					provider.getMessageUnitsForPModesInState(IUserMessage.class,
+															 Set.of(TestDataSet.T_PMODE_1),
+															 ProcessingState.TRANSPORT_FAILURE)).stream()
+									.filter(m -> m.getCoreId().equals(TestDataSet.T_USERMESSAGE_1.getCoreId()))
+									.findFirst().orElse(null);
+		assertNotNull(entity);
+		assertEquals(TestDataSet.T_USERMESSAGE_1.getProcessingStates().size(), entity.getProcessingStates().size());
+		for (int i = 0; i < TestDataSet.T_USERMESSAGE_1.getProcessingStates().size(); i++) {
+			assertEquals(TestDataSet.T_USERMESSAGE_1.getProcessingStates().get(i).getStartTime(),
+						 entity.getProcessingStates().get(i).getStartTime());
+			assertEquals(TestDataSet.T_USERMESSAGE_1.getProcessingStates().get(i).getState(),
+						 entity.getProcessingStates().get(i).getState());
+			assertEquals(TestDataSet.T_USERMESSAGE_1.getProcessingStates().get(i).getDescription(),
+						 entity.getProcessingStates().get(i).getDescription());
+		}
+		assertTrue(CompareUtils.areEqual(TestDataSet.T_USERMESSAGE_1.getSender(), entity.getSender()));
+		assertTrue(CompareUtils.areEqual(TestDataSet.T_USERMESSAGE_1.getReceiver(), entity.getReceiver()));
+		assertEquals(TestDataSet.T_USERMESSAGE_1.getMessageProperties().size(), entity.getMessageProperties().size());
+		assertTrue(TestDataSet.T_USERMESSAGE_1.getMessageProperties().stream().allMatch(p ->
+						entity.getMessageProperties().parallelStream().anyMatch(p2 -> CompareUtils.areEqual(p, p2))));
 	}
 }
