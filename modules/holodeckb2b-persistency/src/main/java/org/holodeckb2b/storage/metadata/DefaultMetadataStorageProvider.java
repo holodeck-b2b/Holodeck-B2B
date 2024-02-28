@@ -139,6 +139,7 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 			tx.begin();
 			em.persist(jpaMsgUnit);
 			tx.commit();
+			return (E) JPAObjectHelper.proxy(jpaMsgUnit);
 		} catch (Exception ex) {
 			if (tx != null && tx.isActive())
 				tx.rollback();
@@ -148,8 +149,6 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 			if (em != null && em.isOpen())
 				em.close();
 		}
-
-		return (E) JPAObjectHelper.proxy(jpaMsgUnit);
 	}
 
 	@Override
@@ -223,7 +222,6 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 			throw new StorageException("Failure updating meta-data", updateFailure);
 		} finally {
 			// Ensure that the object stays completely loaded
-			proxy.loadCompletely();
 			if (tx != null && tx.isActive() && tx.getRollbackOnly())
 				tx.rollback();
 			else if (tx != null && tx.isActive())
