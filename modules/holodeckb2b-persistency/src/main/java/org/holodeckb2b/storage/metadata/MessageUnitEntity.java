@@ -19,7 +19,6 @@ package org.holodeckb2b.storage.metadata;
 import java.util.Date;
 import java.util.List;
 
-import org.holodeckb2b.common.messagemodel.MessageProcessingState;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -105,6 +104,6 @@ public abstract class MessageUnitEntity<T extends MessageUnit> extends JPAObject
 
 	@Override
 	public void setProcessingState(ProcessingState newState, String description) {
-		jpaEntityObject.setProcessingState(new MessageProcessingState(newState, description));
+		jpaEntityObject.setProcessingState(newState, description);
 	}
 }

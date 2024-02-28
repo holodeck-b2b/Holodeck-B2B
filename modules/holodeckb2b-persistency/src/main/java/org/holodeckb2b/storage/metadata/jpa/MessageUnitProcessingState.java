@@ -20,13 +20,9 @@ import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
+import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -34,14 +30,13 @@ import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 
 /**
- * Is the JPA entity class that represent a state during the processing of a message unit as described by the {@link
+ * Is the JPA class that represent a state during the processing of a message unit as described by the {@link
  * IMessageUnitProcessingState} interface from the Holodeck B2B messaging model.
  *
  * @author Sander Fieten <sander at holodeckb2b.org>
  * @since  3.0.0
  */
-@Entity
-@Table(name="MSG_STATE")
+@Embeddable
 public class MessageUnitProcessingState implements IMessageUnitProcessingState, Serializable {
 	private static final long serialVersionUID = 9062128770743005712L;
 
@@ -76,39 +71,24 @@ public class MessageUnitProcessingState implements IMessageUnitProcessingState, 
         return PROC_STATE_NUM;
     }
 
-    public void setMessageUnit(final MessageUnit mu) {
-        this.msgUnit = mu;
-    }
-
     /*
      * Constructors
      */
     public MessageUnitProcessingState() {}
 
     /**
-     * Creates a new instance using the given processing state and description.
-     *  
-     * @param state			processing state
-     * @param description	additional description for the processing state
-     */
-    public MessageUnitProcessingState(ProcessingState state, String description) {
-    	this.STATE = state;
-    	this.START = new Date();
-    	this.DESCRIPTION = description;
-    }
-
-    /**
      * Creates a ProcessingState using the information from the provided {@link IMessageUnitProcessingState} object.
      *
      * @param state  The source object
      */
-    public MessageUnitProcessingState(final IMessageUnitProcessingState state) {
+    public MessageUnitProcessingState(final IMessageUnitProcessingState state, final int procNum) {
+    	this.PROC_STATE_NUM = procNum;
         this.STATE = state.getState();
         this.START = state.getStartTime();
         this.DESCRIPTION = state.getDescription();
     }
 
-    
+
     /*
      * Fields
      *
@@ -125,13 +105,6 @@ public class MessageUnitProcessingState implements IMessageUnitProcessingState, 
 	/*
      * Technical object id acting as the primary key
      */
-    @Id
-    @GeneratedValue
-    private long        OID;
-
-    @ManyToOne
-    private MessageUnit msgUnit;
-
     @Column(nullable = false)
     private int         PROC_STATE_NUM;
 

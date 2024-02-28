@@ -21,20 +21,21 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
+import org.holodeckb2b.common.messagemodel.MessageProcessingState;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
@@ -116,14 +117,11 @@ public abstract class MessageUnit implements JPAEntityObject {
     	if (states == null)
     		states = new ArrayList<>();
 
-    	MessageUnitProcessingState newState = new MessageUnitProcessingState(state);
-    	newState.setSeqNumber(states.size());
-    	newState.setMessageUnit(this);
-    	states.add(newState);
+    	states.add(new MessageUnitProcessingState(state, states.size()));
     }
 
     public void setProcessingState(final ProcessingState state, final String description) {
-    	setProcessingState(new MessageUnitProcessingState(state, description));
+    	setProcessingState(new MessageProcessingState(state, description));
     }
 
     public String getPModeId() {
