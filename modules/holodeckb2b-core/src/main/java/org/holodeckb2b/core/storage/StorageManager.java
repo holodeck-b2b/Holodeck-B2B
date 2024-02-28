@@ -578,6 +578,6 @@ public class StorageManager {
      * @return a unique MessageId
      */
     private String createMessageId() {
-    	return MessageIdUtils.createContentId(HolodeckB2BCoreInterface.getConfiguration().getHostName());
+    	return MessageIdUtils.createMessageId(HolodeckB2BCoreInterface.getConfiguration().getHostName());
     }
 }
