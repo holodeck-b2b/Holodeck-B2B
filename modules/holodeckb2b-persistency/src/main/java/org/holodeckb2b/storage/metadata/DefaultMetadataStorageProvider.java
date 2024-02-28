@@ -258,7 +258,7 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 		return executeMessageUnitQuery(em -> em.createQuery(
 										"SELECT mu "
 						                + "FROM " + JPAObjectHelper.getJPAClass(type).getSimpleName() + " mu "
-						                + "JOIN FETCH mu.states s1 "
+						                + "JOIN mu.states s1 "
 						                + "WHERE mu.PMODE_ID IN :pmodeIds "
 						                + "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) "
 						                + "AND s1.STATE = :state "
@@ -274,7 +274,7 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 		return executeMessageUnitQuery(em -> em.createQuery(
 								"SELECT mu "
 				                + "FROM " + JPAObjectHelper.getJPAClass(type).getSimpleName() + " mu "
-		                		+ "JOIN FETCH mu.states s1 "
+		                		+ "JOIN mu.states s1 "
 				                + "WHERE mu.DIRECTION = :direction "
 				                + "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) "
 				                + "AND s1.STATE IN :states "
@@ -310,7 +310,8 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 
 		return executeMessageUnitQuery(em -> em.createQuery(
 								"SELECT mu "
-				                + "FROM MessageUnit mu JOIN FETCH mu.states s1 "
+				                + "FROM MessageUnit mu "
+				                + "JOIN mu.states s1 "
 				                + "WHERE s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) "
 				                + "AND   s1.START <= :beforeDate", MessageUnit.class)
 								.setParameter("beforeDate", maxLastChangeDate, TemporalType.TIMESTAMP));
@@ -351,7 +352,8 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
         final EntityManager em = emf.createEntityManager();
 
         final String query = "SELECT COUNT(s1.STATE) "
-                           + "FROM UserMessage um JOIN um.states s1 "
+                           + "FROM UserMessage um "
+                           + "JOIN um.states s1 "
                            + "WHERE um.MESSAGE_ID = :msgId "
                            + "AND s1.STATE = :state";
         try {
@@ -379,7 +381,8 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
         final EntityManager em = emf.createEntityManager();
 
         final String query = "SELECT COUNT(um) "
-                           + "FROM UserMessage um JOIN um.states s1 "
+                           + "FROM UserMessage um "
+                           + "JOIN um.states s1 "
                            + "WHERE um.DIRECTION = org.holodeckb2b.interfaces.messagemodel.Direction.IN "
                            + "AND um.MESSAGE_ID = :msgId "
                            + "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM um.states s2) "
