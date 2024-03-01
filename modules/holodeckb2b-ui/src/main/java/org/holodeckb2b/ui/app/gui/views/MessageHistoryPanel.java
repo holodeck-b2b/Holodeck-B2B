@@ -18,11 +18,15 @@ package org.holodeckb2b.ui.app.gui.views;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalTime;
@@ -34,11 +38,16 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -61,6 +70,8 @@ public class MessageHistoryPanel extends JPanel implements TableModelListener {
 
 	private JTable msgUnitsTable;
 
+	private int	selectedRow = -1;
+
 	/**
 	 * Create the panel.
 	 */
@@ -78,22 +89,51 @@ public class MessageHistoryPanel extends JPanel implements TableModelListener {
 		msgUnitsTable = new JTable(controller.getMessageHistoryData());
 		msgUnitsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		msgUnitsTable.setFillsViewportHeight(true);
-        msgUnitsTable.getModel().addTableModelListener(this);
+		msgUnitsTable.getModel().addTableModelListener(this);
     	msgUnitsTable.getTableHeader().setFont(msgUnitsTable.getFont().deriveFont(Font.BOLD, msgUnitsTable.getFont().getSize() + 1));
+
+    	// Add a popup menu to copy the MessageId or RefToMessageId to the clipboard
+    	final JPopupMenu popupMenu = new JPopupMenu();
+
+    	popupMenu.addPopupMenuListener(new PopupMenuListener() {
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        int rowAtPoint = msgUnitsTable.rowAtPoint(SwingUtilities.convertPoint(popupMenu, new Point(0, 0), msgUnitsTable));
+                        if (rowAtPoint > -1) {
+                            msgUnitsTable.setRowSelectionInterval(rowAtPoint, rowAtPoint);
+                            selectedRow = rowAtPoint;
+                        }
+                    }
+                });
+            }
+			@Override
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {}
+
+			@Override
+			public void popupMenuCanceled(PopupMenuEvent e) {}
+        });
+    	popupMenu.add(createCopyItem(msgUnitsTable, "MessageId", 4));
+    	popupMenu.add(createCopyItem(msgUnitsTable, "RefToMessageId", 5));
+    	popupMenu.add(createCopyItem(msgUnitsTable, "PMode.Id", 6));
+
+        msgUnitsTable.setComponentPopupMenu(popupMenu);
 
         // Add a custom rendering to the processing state column so that FAILURE and WARNING
         // states are highlighted
         msgUnitsTable.getColumnModel().getColumn(MessageHistoryData.STATE_COLUMN).setCellRenderer(
         		new DefaultTableCellRenderer() {
         			@Override
-					public void setValue(Object v) {
-        				setText(v.toString());
-        				if (ProcessingState.FAILURE.name().equals(v))
+        			public Component getTableCellRendererComponent(JTable table, Object value,
+                            							boolean isSelected, boolean hasFocus, int row, int column) {
+						super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        				if (ProcessingState.FAILURE.name().equals(value))
         					setForeground(Color.RED);
-        				else if (ProcessingState.WARNING.name().equals(v))
+        				else if (ProcessingState.WARNING.name().equals(value))
         					setForeground(new Color(255, 153, 0));
-        				else
-        					setForeground(Color.BLACK);
+        				return this;
         			}
         		});
 
@@ -107,7 +147,7 @@ public class MessageHistoryPanel extends JPanel implements TableModelListener {
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
 		panel_1.setLayout(gbl_panel_1);
 
-		JLabel lblShow = new JLabel("Show");
+		JLabel lblShow = new JLabel("Show latest");
 		lblShow.setHorizontalAlignment(SwingConstants.LEFT);
 		lblShow.setVerticalAlignment(SwingConstants.TOP);
 		GridBagConstraints gbc_lblShow = new GridBagConstraints();
@@ -185,7 +225,23 @@ public class MessageHistoryPanel extends JPanel implements TableModelListener {
 		panel_1.add(btnNewButton, gbc_btnNewButton);
 	}
 
-    @Override
+    private JMenuItem createCopyItem(JTable tbl, String attrName, int attrCol) {
+    	JMenuItem item = new JMenuItem("Copy " + attrName);
+        item.setFont(tbl.getFont().deriveFont(getFont().getSize()-2));
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	Toolkit.getDefaultToolkit().getSystemClipboard()
+							                .setContents(
+							                        new StringSelection((String) tbl.getValueAt(selectedRow, attrCol)),
+							                        null
+							                );
+            }
+        });
+        return item;
+	}
+
+	@Override
 	public void tableChanged(TableModelEvent e) {
     	ViewUtils.setColumnAndTableSize(msgUnitsTable);
     }
