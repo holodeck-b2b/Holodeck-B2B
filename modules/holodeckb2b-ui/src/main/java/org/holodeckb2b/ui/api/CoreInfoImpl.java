@@ -73,8 +73,8 @@ public class CoreInfoImpl implements CoreInfo {
 	}
 
 	@Override
-	public MessageUnit[] getMessageUnitLog(Date after, int max) throws RemoteException {
-		return getMessageUnits(mdsp -> mdsp.getMessageHistory(after, new Date(), max));
+	public MessageUnit[] getMessageUnitLog(Date before, int max) throws RemoteException {
+		return getMessageUnits(mdsp -> mdsp.getMessageHistory(before, max));
 	}
 
 	interface QueryExecutor {

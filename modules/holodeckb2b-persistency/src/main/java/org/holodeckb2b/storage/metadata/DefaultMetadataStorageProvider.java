@@ -406,38 +406,32 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 	}
 
 	/**
-     * Gets the meta-data of message units which ebMS <i>Timestamp</i> is between the given time stamps.
-     * <p>NOTE: This query is not part of {@link IMetadataStorageProvider} and is added for use by the default UI to
+     * Gets the meta-data of the specified maximum of message units which last processing state was before the given
+     * time stamp. The resulting list is ordered descending by the last processing state's start time.
+     * <p>
+     * NOTE: This query is not part of {@link IMetadataStorageProvider} and is added for use by the default UI to
      * monitor the message processing. If you use this method in other code note that the GPLv3 applies and your code
-     * MUST also use AGPLv3.
+     * MUST also be licensed under GPLv3.
      *
-     * @param after		Oldest time stamp to include
-     * @param before	Most recent time stamp to include
+     * @param upto		Most recent time stamp to include
      * @param max		Maximum number of results
      * @return			List of message units that match the given criteria, limited to the given maximum number
      * 					of entries
      * @throws StorageException When an error occurs in retrieving the message unit meta-data
      */
-    public List<IMessageUnitEntity> getMessageHistory(final Date after, final Date before, final int max)
+    public List<IMessageUnitEntity> getMessageHistory(final Date upto, final int max)
     																						throws StorageException {
-    	final EntityManager em = emf.createEntityManager();
-    	try {
-    		em.getTransaction().begin();
-    		TypedQuery<MessageUnit> query = em.createQuery("SELECT mu FROM MessageUnit mu "
-									    				 + "WHERE mu.MU_TIMESTAMP BETWEEN :after AND :before "
-									    				 + "ORDER BY mu.MU_TIMESTAMP DESC",
-									    				 MessageUnit.class)
-									    				.setParameter("after", after)
-									    				.setParameter("before", before)
-									    				.setMaxResults(max);
-    		return JPAObjectHelper.proxy(query.getResultList());
-    	} catch (final Exception e) {
-    		throw new StorageException("Could not execute query \"getMessageHistory\"", e);
-    	} finally {
-    		em.getTransaction().commit();
-    		em.close();
-    	}
+		 return executeMessageUnitQuery(em -> em.createQuery(
+						"SELECT mu "
+		                + "FROM MessageUnit mu "
+		                + "JOIN mu.states s1 "
+		                + "WHERE s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) "
+		                + "AND   s1.START <= :beforeDate "
+		                + "ORDER BY s1.START DESC", MessageUnit.class)
+						.setParameter("beforeDate", upto, TemporalType.TIMESTAMP)
+						.setMaxResults(max));
     }
+
 
 	private void assertManagedType(Object entity) throws StorageException {
 		if (!(entity instanceof MessageUnitEntity<?>) && !(entity instanceof PayloadEntity))
