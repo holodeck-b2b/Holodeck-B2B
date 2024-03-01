@@ -5,25 +5,33 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 7.0.0-SNAPSHOT
 ##### 
 ### Added
-* New `org.holodeckb2b.interfaces.submit.DuplicateMessageIdException` to indicate that a duplicate MessageId is used
-  in a submitted message unit.
-* New `org.holodeckb2b.interfaces.persistency.AlreadyChangedException` to indicate that a requested update of the 
-  message meta-data could not be executed because the database already contains newer data
+* New architecture for storing the meta-data and content payload which allows to use custom implementations for storage
+  of both the message unit meta-data as well as the payload content. The new _Metadata Storage_ and _Payload Storage 
+  Providers_ are specified in the packages `org.holodeckb2b.interfaces.storage.providers`
 * The entity classes used by the Core for storing the message meta-data have been extended with a _CoreId_ so each 
   message unit has a unique internal identifier making unambiguous relations between message units possible as there may
   exist different incoming message units with the same MessageId.
+* New `org.holodeckb2b.interfaces.persistency.AlreadyChangedException` to indicate that a requested update of the 
+  message meta-data could not be executed because the database already contains newer data
+* New `org.holodeckb2b.interfaces.submit.DuplicateMessageIdException` to indicate that a duplicate MessageId is used
+  in a submitted message unit. 
+* New `org.holodeckb2b.interfaces.events.IMessagePurgeFailure` event to indicate that the purge of a message unit failed
+* Option in the default GUI to copy the _MessageId_, _RefToMessageId_ or _PMode.id_ of a message unit on the overview
+  screen to the system clipboard.
 
 ### Changed
-* Minimal Java version required to run Holodeck B2B is now 11
-* The interface of the _Persistency Provider_ has been refactored. The methods for updating specific meta-data 
-  attributes in `org.holodeckb2b.interfaces.persistency.IUpdateManager` have been replaced by more generic create,  
+* The _Persistency Provider_ has been refactored to the _Metadata Storage Provider_ and the methods of the old 
+  `IUpdateManager` interface for updating specific meta-data attributes have been replaced by more generic create, 
   update and delete methods that operate on the entity classes. New update methods have been added to the entity classes
-  which indicate which meta-data the Holodeck B2b Core can change during the message processing.
+  which indicate which meta-data the Holodeck B2B Core can change during the message processing.
+* Minimal Java version required to run Holodeck B2B is now 11
 * Updated version of Axis2, Axiom and WSS4J dependencies to resp. 1.8.2, 1.4.0 and 2.4.3
 * Changed JAXB implementation to Glassfish 
 
 ### Fixed
 * Handle explicit reference from PartInfo-href to the SOAP body [#148](https://github.com/holodeck-b2b/Holodeck-B2B/issues/148)
+* Purging of message units stopped in case of exception other than `PersistenceException`
+* Handlers GenericProviderDispatcher and MustUnderstandValidationDispatcher not available [#137]((https://github.com/holodeck-b2b/Holodeck-B2B/issues/137)
 
 ### Removed
 * Support for running Holodeck B2B on Java 1.8
