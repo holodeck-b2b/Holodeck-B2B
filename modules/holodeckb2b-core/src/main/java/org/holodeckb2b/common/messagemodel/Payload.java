@@ -46,8 +46,8 @@ public class Payload implements IPayload, Serializable {
     private SchemaReference         schemaRef;
     private Description             description;
 
-    private IPayload				contentSrc;
-    private InputStream				contentStream;
+    private transient IPayload		contentSrc;
+    private transient InputStream	contentStream;
 
     /**
      * Default constructor creates empty object

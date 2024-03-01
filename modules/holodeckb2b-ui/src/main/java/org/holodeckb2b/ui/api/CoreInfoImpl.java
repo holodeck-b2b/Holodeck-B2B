@@ -4,14 +4,23 @@ import java.rmi.RemoteException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.messagemodel.MessageUnit;
+import org.holodeckb2b.common.messagemodel.Payload;
+import org.holodeckb2b.common.messagemodel.Receipt;
+import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
@@ -90,7 +99,7 @@ public class CoreInfoImpl implements CoreInfo {
 				MessageUnit[] result = new MessageUnit[msgUnits.size()];
 				int i = 0;
 				for(IMessageUnitEntity m : msgUnits) {
-					result[i++] = MessageUnit.copyOf(m);
+					result[i++] = extractInfo(m);
 				}
 				return result;
 			} else
@@ -99,5 +108,30 @@ public class CoreInfoImpl implements CoreInfo {
 			log.error("Could not retrieve message unit(s) from Core! Error: {}", pe.getMessage());
 			throw new RemoteException("Error retrieving message unit info", pe);
 		}
+	}
+
+	/**
+	 * Extracts the relevant information to display in UI from the given {@link IMessageUnitEntity}. We do this to
+	 * prevent possible issues in the serialization of meta-data objects contained in entity object. This means we leave
+	 * out the payload content stream and the Receipt content.
+	 *
+	 * @param m	the message unit entity
+	 * @return	a {@link MessageUnit} instance with the extracted information
+	 */
+	private MessageUnit extractInfo(IMessageUnitEntity entity) {
+		if (entity instanceof IUserMessage) {
+			UserMessage um = new UserMessage((IUserMessage) entity);
+			// Simplify the payload info contained in the UserMessage
+			Collection<IPayload> payloads = um.getPayloads();
+			if (!Utils.isNullOrEmpty(payloads))
+				um.setPayloads(payloads.stream().map(pl -> new Payload(pl)).collect(Collectors.toList()));
+			return um;
+		} else if (entity instanceof IReceipt) {
+			Receipt r = new Receipt((IReceipt) entity);
+			r.setContent((List<OMElement>) null);
+			return r;
+		} else
+			// For other message units we can simply return a complete copy
+			return MessageUnit.copyOf(entity);
 	}
 }
