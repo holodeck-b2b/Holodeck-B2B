@@ -147,7 +147,7 @@ public class MessageHistoryPanel extends JPanel implements TableModelListener {
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
 		panel_1.setLayout(gbl_panel_1);
 
-		JLabel lblShow = new JLabel("Show latest");
+		JLabel lblShow = new JLabel("Show last");
 		lblShow.setHorizontalAlignment(SwingConstants.LEFT);
 		lblShow.setVerticalAlignment(SwingConstants.TOP);
 		GridBagConstraints gbc_lblShow = new GridBagConstraints();
@@ -164,7 +164,7 @@ public class MessageHistoryPanel extends JPanel implements TableModelListener {
 		gbc_comboBox.gridy = 0;
 		panel_1.add(comboBox, gbc_comboBox);
 
-		JLabel lblStartFrom = new JLabel("messages starting from:");
+		JLabel lblStartFrom = new JLabel("messages starting before:");
 		lblStartFrom.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStartFrom.setVerticalAlignment(SwingConstants.TOP);
 		GridBagConstraints gbc_lblStartFrom = new GridBagConstraints();
