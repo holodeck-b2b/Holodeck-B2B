@@ -71,6 +71,10 @@ public interface ISecurityConfiguration {
 
     /**
      * Gets the configuration for adding or validating encryption in the WS-Security header.
+	 * <p>
+	 * The security provider must use these settings when sent message must be encrypted, therefore these settings must
+	 * be provided for the receiving partner. However the security provider may also use these to validate the security
+	 * header of a received message and therefore the settings may also be provided for the receiving partner.</p>
      *
      * @return  An {@link IEncryptionConfiguration} object containing the information to add/validate Encryption to the
      *          WS-Security header, or<br>
