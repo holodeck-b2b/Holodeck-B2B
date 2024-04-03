@@ -19,6 +19,7 @@ package org.holodeckb2b.storage.metadata.testhelpers;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import org.holodeckb2b.common.messagemodel.MessageProcessingState;
@@ -215,7 +216,7 @@ public class TestDataSet {
 
 	private static MessageProcessingState createState(ProcessingState state, int daysBack) {
 		MessageProcessingState procstate = new MessageProcessingState(state);
-		Calendar stateTime = Calendar.getInstance();
+		Calendar stateTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		stateTime.add(Calendar.DAY_OF_YEAR, -daysBack);
 		procstate.setStartTime(stateTime.getTime());
 		return procstate;
