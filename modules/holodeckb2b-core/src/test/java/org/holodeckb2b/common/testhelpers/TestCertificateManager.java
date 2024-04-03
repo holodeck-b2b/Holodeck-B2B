@@ -42,17 +42,17 @@ import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
 
 /**
- * Is an implementation of the {@link ICertificateManager} for testing. It uses three in-memory Java key store to 
+ * Is an implementation of the {@link ICertificateManager} for testing. It uses three in-memory Java key store to
  * store the key pairs and certificates.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-class TestCertificateManager implements ICertificateManager {
+public class TestCertificateManager implements ICertificateManager {
 
     private final KeyStore privateKeys;
     private final KeyStore partnerCerts;
     private final KeyStore trustedCerts;
-    
+
     TestCertificateManager() throws SecurityProcessingException {
     	try {
 			privateKeys = KeyStore.getInstance("JKS");
@@ -67,15 +67,26 @@ class TestCertificateManager implements ICertificateManager {
 		}
     }
 
+    public synchronized void clear() throws SecurityProcessingException {
+	    try {
+			privateKeys.load(null, null);
+			partnerCerts.load(null, null);
+			trustedCerts.load(null, null);
+		} catch (NoSuchAlgorithmException | CertificateException | IOException e) {
+			e.printStackTrace();
+			throw new SecurityProcessingException();
+		}
+    }
+
     public synchronized String registerKeyPair(final KeyStore.PrivateKeyEntry keypair, final String alias,
                                                final String password) throws SecurityProcessingException {
         // Generate a pasword if needed
-        final char[] entryPwd = Utils.isNullOrEmpty(password) ? 
+        final char[] entryPwd = Utils.isNullOrEmpty(password) ?
         									Long.toHexString(Double.doubleToLongBits(Math.random())).toCharArray()
                                           : password.toCharArray();
         try {
             if (!(keypair.getCertificate() instanceof X509Certificate))
-	    		throw new SecurityProcessingException("Not a X509 Certificate");            		
+	    		throw new SecurityProcessingException("Not a X509 Certificate");
             privateKeys.setEntry(alias, keypair, new KeyStore.PasswordProtection(entryPwd));
             return new String(entryPwd);
         } catch (KeyStoreException ex) {
@@ -83,7 +94,7 @@ class TestCertificateManager implements ICertificateManager {
         }
     }
 
-    public synchronized void registerPartnerCertificate(final X509Certificate cert, final String alias) 
+    public synchronized void registerPartnerCertificate(final X509Certificate cert, final String alias)
     																				throws SecurityProcessingException {
         try {
         	partnerCerts.setCertificateEntry(alias, cert);
@@ -92,7 +103,7 @@ class TestCertificateManager implements ICertificateManager {
         }
     }
 
-    public synchronized void registerTrustedCertificate(final X509Certificate cert, final String alias) 
+    public synchronized void registerTrustedCertificate(final X509Certificate cert, final String alias)
     		throws SecurityProcessingException {
     	try {
     		trustedCerts.setCertificateEntry(alias, cert);
@@ -105,34 +116,34 @@ class TestCertificateManager implements ICertificateManager {
     public String findKeyPair(X509Certificate cert) throws SecurityProcessingException {
     	return findEntry(privateKeys, c -> c.equals(cert));
     }
-    
+
     @Override
     public String findKeyPair(byte[] skiBytes) throws SecurityProcessingException {
-    	return findEntry(privateKeys, c -> CertificateUtils.hasSKI(c, skiBytes));    	
+    	return findEntry(privateKeys, c -> CertificateUtils.hasSKI(c, skiBytes));
     }
-    
+
     @Override
     public String findKeyPair(byte[] hash, MessageDigest digester) throws SecurityProcessingException {
     	return findEntry(privateKeys, c -> CertificateUtils.hasThumbprint(c, hash, digester));
     }
-    
+
     @Override
     public String findKeyPair(X500Principal issuer, BigInteger serial) throws SecurityProcessingException {
     	return findEntry(privateKeys, c -> CertificateUtils.hasIssuerSerial(c, issuer, serial));
     }
-    
+
     @Override
 	public String findKeyPair(PublicKey key) throws SecurityProcessingException {
     	return findEntry(privateKeys, c -> c.getPublicKey().equals(key));
 	}
-    
+
     @Override
     public List<X509Certificate> getKeyPairCertificates(String alias) throws SecurityProcessingException {
     	try {
     		Certificate[] cc = privateKeys.getCertificateChain(alias);
     		if (cc != null && cc.length > 0) {
 				List<X509Certificate> result = new ArrayList<>(cc.length);
-				for(Certificate c : cc) 					
+				for(Certificate c : cc)
 					result.add((X509Certificate) c);
 				return result;
 			} else
@@ -141,7 +152,7 @@ class TestCertificateManager implements ICertificateManager {
 			throw new SecurityProcessingException("KeyStore error", e);
 		}
     }
-    
+
     @Override
     public KeyStore.PrivateKeyEntry getKeyPair(final String alias, final String password)
                                                                                    throws SecurityProcessingException {
@@ -175,7 +186,7 @@ class TestCertificateManager implements ICertificateManager {
             throw new SecurityProcessingException("Error retrieving the certificate", ex);
         }
     }
-    
+
     @Override
     public X509Certificate findCertificate(final X500Principal issuer, final BigInteger serial)
     																				throws SecurityProcessingException {
@@ -188,14 +199,14 @@ class TestCertificateManager implements ICertificateManager {
     }
 
     @Override
-    public X509Certificate findCertificate(final byte[] skiBytes) throws SecurityProcessingException {    	
+    public X509Certificate findCertificate(final byte[] skiBytes) throws SecurityProcessingException {
     	try {
     		return (X509Certificate) partnerCerts.getCertificate(
     							findEntry(partnerCerts, c -> CertificateUtils.hasSKI(c, skiBytes)));
     	} catch (KeyStoreException ex) {
     		throw new SecurityProcessingException("Error retrieving the certificate", ex);
     	}
-    }        
+    }
 
     @Override
     public X509Certificate findCertificate(byte[] hash, MessageDigest digester) throws SecurityProcessingException {
@@ -206,7 +217,7 @@ class TestCertificateManager implements ICertificateManager {
     		throw new SecurityProcessingException("Error retrieving the certificate", ex);
     	}
     }
-    
+
     private String findEntry(KeyStore ks, CertCondition cond) throws SecurityProcessingException {
 		try {
 	    	for (Enumeration<String> e = ks.aliases(); e.hasMoreElements();) {
@@ -219,12 +230,12 @@ class TestCertificateManager implements ICertificateManager {
 		} catch (KeyStoreException e) {
 			throw new SecurityProcessingException("KeyStore error", e);
 		}
-    }        
-    
+    }
+
     private interface CertCondition {
     	boolean matches(X509Certificate c);
-    }   
-    
+    }
+
     public synchronized void removeKeyPair(String alias) throws SecurityProcessingException {
         try {
             // Check if the alias exists
@@ -234,7 +245,7 @@ class TestCertificateManager implements ICertificateManager {
             throw new SecurityProcessingException("Cannot remove key pair", ex);
         }
     }
-    
+
     public synchronized void removePartnerCertificate(String alias) throws SecurityProcessingException {
     	try {
     		if (partnerCerts.containsAlias(alias))
@@ -262,32 +273,32 @@ class TestCertificateManager implements ICertificateManager {
 	public IValidationResult validateTrust(List<X509Certificate> certs) throws SecurityProcessingException {
 		if (Utils.isNullOrEmpty(certs))
 			throw new SecurityProcessingException("No certs to validate!");
-		
+
 		try {
 			if (trustedCerts.getCertificateAlias(certs.get(certs.size()-1)) != null)
 				return new ValidationResult(certs, Trust.OK, "Found the root cert of path in trust store", null);
-			else 
-				return 
+			else
+				return
 					new ValidationResult(certs, Trust.NOK, "Could not find the root cert of path in trust store", null);
 		} catch (KeyStoreException e) {
 			throw new SecurityProcessingException("Error accessing the trust store!");
 		}
 
 	}
-	
+
 	class ValidationResult implements IValidationResult {
 		private List<X509Certificate> certpath;
 		private Trust	trust;
 		private String	message;
 		private SecurityProcessingException details;
-		
+
 		ValidationResult(List<X509Certificate> certs, Trust result, String descr, SecurityProcessingException detail) {
 			this.certpath = certs;
 			this.trust = result;
 			this.message = descr;
 			this.details = detail;
 		}
-		
+
 		@Override
 		public List<X509Certificate> getValidatedCertPath() {
 			return certpath;
@@ -307,7 +318,7 @@ class TestCertificateManager implements ICertificateManager {
 		public SecurityProcessingException getDetails() {
 			return details;
 		}
-		
+
 	}
 
 	@Override
