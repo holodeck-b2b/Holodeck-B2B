@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 7.0.0-SNAPSHOT
 ##### 
 ### Added
+* Support the use _Elliptic Curve Diffie-Hellman Key Agreement_ as method to exchange the symmetric encryption key. 
+  Currently support is limited to ECDH-ES and ConcatKDF algorithms.
 * New architecture for storing the meta-data and content payload which allows to use custom implementations for storage
   of both the message unit meta-data as well as the payload content. The new _Metadata Storage_ and _Payload Storage 
   Providers_ are specified in the packages `org.holodeckb2b.interfaces.storage.providers`
@@ -20,12 +22,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   screen to the system clipboard.
 
 ### Changed
+* Interfaces in `org.holodeckb2b.interfaces.pmode` and implementation `org.holodeckbb2b.common.pmode` to support
+  configuration of _Key Agreement_ for exchange of the symmetric encryption key.
+* `org.holodeckb2b.interfaces.security.IEncryptionProcessingResult` and 
+  `org.holodeckb2b.common.security.results.EncryptionProcessingResult` to support inclusion of _Key Agreement_ meta-data
 * The _Persistency Provider_ has been refactored to the _Metadata Storage Provider_ and the methods of the old 
   `IUpdateManager` interface for updating specific meta-data attributes have been replaced by more generic create, 
   update and delete methods that operate on the entity classes. New update methods have been added to the entity classes
   which indicate which meta-data the Holodeck B2B Core can change during the message processing.
 * Minimal Java version required to run Holodeck B2B is now 11
-* Updated version of Axis2, Axiom and WSS4J dependencies to resp. 1.8.2, 1.4.0 and 2.4.3
+* Updated version of Axis2 and Axiom dependencies to 1.8.2 resp. 1.4.0
+* Updated version of WSSJ4 and Santuario to 3.0.3 resp. 3.0.5-SNAPSHOT 
 * Changed JAXB implementation to Glassfish 
 
 ### Fixed
