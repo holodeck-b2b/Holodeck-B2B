@@ -35,11 +35,18 @@ import org.holodeckb2b.interfaces.security.X509ReferenceType;
 public interface IKeyAgreement {
 
     /**
-     * Gets the key agreement algorithm.
+     * Gets the key encryption algorithm.
+     *
+     * @return  String containing the id of the key encryption algorithm to be used as defined in XMLENC-core1
+     */
+    String getKeyEncryptionAlgorithm();
+
+    /**
+     * Gets the key agreement method.
      *
      * @return  String containing the id of the key agreement algorithm to be used as defined in XMLENC-core1
      */
-    String getAlgorithm();
+    String getAgreementMethod();
 
     /**
      * Gets the settings of the key derivation method to be used within this key agreement.
