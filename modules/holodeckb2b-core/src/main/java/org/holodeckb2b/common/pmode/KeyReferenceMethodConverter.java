@@ -54,6 +54,7 @@ public class KeyReferenceMethodConverter implements Converter<X509ReferenceType>
 			break;
 		case KeyIdentifier:
 			node.setValue(SKI);
+			break;
 		default:
 			node.setValue(ISSUER_SERIAL);
 		}

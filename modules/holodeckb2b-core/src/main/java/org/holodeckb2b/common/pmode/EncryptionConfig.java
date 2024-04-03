@@ -1,16 +1,16 @@
 /*******************************************************************************
  * Copyright (C) 2019 The Holodeck B2B Team, Sander Fieten
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
@@ -19,6 +19,7 @@ package org.holodeckb2b.common.pmode;
 import java.io.Serializable;
 
 import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
+import org.holodeckb2b.interfaces.pmode.IKeyAgreement;
 import org.simpleframework.xml.Element;
 
 /**
@@ -40,6 +41,9 @@ public class EncryptionConfig implements IEncryptionConfiguration, Serializable 
     @Element(name = "KeyTransport", required = false)
     private KeyTransportConfig  keytransportCfg;
 
+    @Element(name = "KeyAgreement", required = false)
+    private KeyAgreementConfig  keyAgreementCfg;
+
     /**
      * Default constructor creates a new and empty <code>EncryptionConfig</code> instance.
      */
@@ -57,12 +61,14 @@ public class EncryptionConfig implements IEncryptionConfiguration, Serializable 
 	        this.keyStoreRef = new KeystoreAlias();
 	        this.keyStoreRef.name = source.getKeystoreAlias();
 	        this.keyStoreRef.password = source.getCertificatePassword();
-    	} else 
+    	} else
     		this.keyStoreRef = null;
         this.keyStoreRef.name = source.getKeystoreAlias();
         this.keyStoreRef.password = source.getCertificatePassword();
         this.algorithm = source.getAlgorithm();
-        this.keytransportCfg = source.getKeyTransport() != null ? new KeyTransportConfig(source.getKeyTransport()) 
+        this.keytransportCfg = source.getKeyTransport() != null ? new KeyTransportConfig(source.getKeyTransport())
+        														: null;
+        this.keyAgreementCfg = source.getKeyAgreement() != null ? new KeyAgreementConfig(source.getKeyAgreement())
         														: null;
     }
 
@@ -105,4 +111,13 @@ public class EncryptionConfig implements IEncryptionConfiguration, Serializable 
     public void setKeyTransport(final KeyTransportConfig keytransport) {
         this.keytransportCfg = keytransport;
     }
+
+    @Override
+    public IKeyAgreement getKeyAgreement() {
+    	return keyAgreementCfg;
+    }
+
+	public void setKeyAgreement(final IKeyAgreement keyAgreement) {
+		this.keyAgreementCfg = keyAgreement != null ? new KeyAgreementConfig(keyAgreement) : null;
+	}
 }
