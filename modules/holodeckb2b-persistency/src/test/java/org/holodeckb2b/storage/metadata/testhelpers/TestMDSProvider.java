@@ -32,7 +32,7 @@ public class TestMDSProvider extends DefaultMetadataStorageProvider {
 		try {
 			Field field = DefaultMetadataStorageProvider.class.getDeclaredField("emf");
 			field.setAccessible(true);
-			field.set(this, EntityManagerUtil.getEntityManagerFactory());
+			field.set(this, EntityManagerUtil.createEntityManagerFactory());
 		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 			throw new StorageException("Could not initialise test provider", e);

@@ -26,17 +26,22 @@ import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is a helper class to easily get hold of the JPA <code>EntityManager</code> to access the database where the message
- * unit meta-data is stored. This default persistency provider uses a fixed and programmatically built persistency unit
- * that will create an embedded Derby database.
+ * unit meta-data is stored.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
 public class EntityManagerUtil {
-    // We use SingletonHolder pattern for the reference to the EntityManagerFactory object
-    private static final class SingletonHolder
-    {
-      static final EntityManagerFactory instance =  Persistence.createEntityManagerFactory("holodeckb2b-test");
+    private static EntityManagerFactory instance;
+
+    /**
+     * Creates a new <code>EntityManagerFactory</code> for the test database.
+     *
+     * @return	the new <code>EntityManagerFactory</code>
+     */
+    public static EntityManagerFactory createEntityManagerFactory() {
+    	instance =  Persistence.createEntityManagerFactory("holodeckb2b-test");
+		return instance;
     }
 
     /**
@@ -65,7 +70,9 @@ public class EntityManagerUtil {
      * @return the EntityManagerFactory for the test database
      */
     static EntityManagerFactory getEntityManagerFactory() {
-    	return SingletonHolder.instance;
+    	if (instance == null)
+    		instance = createEntityManagerFactory();
+    	return instance;
     }
 
     /**
@@ -77,7 +84,7 @@ public class EntityManagerUtil {
     public static EntityManager getEntityManager() {
        try {
            // The class is loaded upon first call
-           return  SingletonHolder.instance.createEntityManager();
+           return getEntityManagerFactory().createEntityManager();
        } catch (final Exception e) {
            // Oh oh, something went wrong creating the entity manager
            throw new RuntimeException("Error while creating the EntityManager", e);
