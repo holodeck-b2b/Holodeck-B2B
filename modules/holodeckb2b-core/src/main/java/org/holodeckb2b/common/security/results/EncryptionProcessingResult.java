@@ -19,6 +19,7 @@ package org.holodeckb2b.common.security.results;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.security.IEncryptionProcessingResult;
@@ -28,8 +29,8 @@ import org.holodeckb2b.interfaces.security.X509ReferenceType;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 /**
- * Is the security provider's implementation of {@link IEncryptionProcessingResult} containing the result of processing
- * the encryption of a message (includes decryption as well).
+ * Is a general implementation of {@link IEncryptionProcessingResult} containing the result of processing the encryption
+ * of a message (includes decryption as well).
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
@@ -38,7 +39,7 @@ public class EncryptionProcessingResult extends AbstractSecurityProcessingResult
 {
     private final X509Certificate       certificate;
     private final X509ReferenceType     refMethod;
-    private final KeyTransportInfo      keyInfo;
+    private final IKeyExchangeInfo      keyExchangeInfo;
     private final String                algorithm;
     private final Collection<IPayloadEntity>  payloads;
 
@@ -53,7 +54,7 @@ public class EncryptionProcessingResult extends AbstractSecurityProcessingResult
         super(SecurityHeaderTarget.DEFAULT, failure);
         this.certificate = null;
         this.refMethod = null;
-        this.keyInfo = null;
+        this.keyExchangeInfo = null;
         this.algorithm = null;
         this.payloads = null;
     }
@@ -64,19 +65,17 @@ public class EncryptionProcessingResult extends AbstractSecurityProcessingResult
      *
      * @param encryptionCert        Certificate used for encryption
      * @param certReferenceMethod   Method used to include/reference the certificate
-     * @param ktAlgorithm           Algorithm to protect the symmetric key
-     * @param ktMGF                 The mask generation function identifier
-     * @param ktDigest              The digest algorithm used for symmetric key transport
+     * @param keyExchange 			Method used for key exchange between partners
      * @param algorithm             The encryption algorithm
      * @param payloads              The encrypted payloads
      */
     public EncryptionProcessingResult(final X509Certificate encryptionCert, final X509ReferenceType certReferenceMethod,
-                                      final String ktAlgorithm, final String ktMGF, final String ktDigest,
-                                      final String algorithm, final Collection<IPayloadEntity> payloads) {
+                                      final IKeyExchangeInfo keyExchange, final String algorithm,
+                                      final Collection<IPayloadEntity> payloads) {
         super(SecurityHeaderTarget.DEFAULT);
         this.certificate = encryptionCert;
         this.refMethod = certReferenceMethod;
-        this.keyInfo = new KeyTransportInfo(ktAlgorithm, ktDigest, ktMGF);
+        this.keyExchangeInfo = keyExchange;
         this.algorithm = algorithm;
         this.payloads = !Utils.isNullOrEmpty(payloads) ? Collections.unmodifiableCollection(payloads) : null;
     }
@@ -92,8 +91,8 @@ public class EncryptionProcessingResult extends AbstractSecurityProcessingResult
     }
 
     @Override
-    public IKeyTransportInfo getKeyTransportInfo() {
-        return keyInfo;
+    public IKeyExchangeInfo getKeyExchangeInfo() {
+        return keyExchangeInfo;
     }
 
     @Override
@@ -107,10 +106,10 @@ public class EncryptionProcessingResult extends AbstractSecurityProcessingResult
     }
 
     /**
-     * Is the security provider's implementation of {@link IKeyTransportInfo} containing the meta-data on how the
-     * symmetric key for encryption is exchanged.
+     * Is the default implementation of {@link IKeyTransportInfo} containing the meta-data on how the symmetric key for
+     * encryption is exchanged using the key transport algorithm.
      */
-    public class KeyTransportInfo implements IKeyTransportInfo {
+    public static class KeyTransportInfo implements IKeyTransportInfo {
 
         private final String transportAlgorithm;
         private final String digestMethod;
@@ -123,7 +122,7 @@ public class EncryptionProcessingResult extends AbstractSecurityProcessingResult
          * @param digestMethod          The digest method
          * @param mgfAlgorithm          The MGF function used
          */
-        KeyTransportInfo(String transportAlgorithm, String digestMethod, String mgfAlgorithm) {
+        public KeyTransportInfo(String transportAlgorithm, String digestMethod, String mgfAlgorithm) {
             this.transportAlgorithm = transportAlgorithm;
             this.digestMethod = digestMethod;
             this.mgfAlgorithm = mgfAlgorithm;
@@ -143,5 +142,59 @@ public class EncryptionProcessingResult extends AbstractSecurityProcessingResult
         public String getMGFAlgorithm() {
             return mgfAlgorithm;
         }
+    }
+
+    /**
+     * Is the default implementation of {@link IKeyAgreementInfo} containing the meta-data on how the symmetric key for
+     * encryption is exchanged using the key agreement method.
+     *
+     * @since 7.0.0
+     */
+    public static class KeyAgreementInfo implements IKeyAgreementInfo {
+		private final String keyAgreementMethod;
+		private final String keyDerivationAlgorithm;
+		private final String digestAlgorithm;
+		private final Map<String, ?> kaParameters;
+		private final Map<String, ?> kdfParameters;
+
+		/**
+		 * Creates a new <code>KeyAgreementInfo</code> instance for the given meta-data.
+		 *
+		 * @param keyAgreementMethod		the key agreement method
+		 * @param kaParameters				the parameters for the key agreement
+		 * @param keyDerivationAlgorithm	the key derivation algorithm
+		 * @param digestAlgorithm			the digest algorithm used with the key derivation
+		 * @param kdfParameters				the parameters for the key derivation
+		 */
+		public KeyAgreementInfo(final String keyAgreementMethod, final Map<String, ?> kaParameters,
+								final String keyDerivationAlgorithm, final String digestAlgorithm,
+								final Map<String, ?> kdfParameters) {
+			this.keyAgreementMethod = keyAgreementMethod;
+			this.kaParameters = kaParameters == null ? null : Collections.unmodifiableMap(kaParameters);
+			this.keyDerivationAlgorithm = keyDerivationAlgorithm;
+			this.digestAlgorithm = digestAlgorithm;
+			this.kdfParameters = kdfParameters == null ? null : Collections.unmodifiableMap(kdfParameters);
+		}
+		@Override
+		public String getKeyAgreementMethod() {
+			return keyAgreementMethod;
+		}
+
+		@Override
+		public IKeyDerivationInfo getKeyDerivationInfo() {
+			return new IKeyDerivationInfo() {
+				@Override
+				public String getKeyDerivationAlgorithm() { return keyDerivationAlgorithm; }
+				@Override
+				public String getDigestAlgorithm() { return digestAlgorithm; }
+				@Override
+				public Map<String, ?> getParameters() { return kdfParameters; }
+			};
+		}
+
+		@Override
+		public Map<String, ?> getParameters() {
+			return kaParameters;
+		}
     }
 }
