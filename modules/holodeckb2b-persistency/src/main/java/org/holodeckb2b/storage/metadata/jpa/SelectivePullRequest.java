@@ -16,8 +16,6 @@
  */
 package org.holodeckb2b.storage.metadata.jpa;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Embedded;
@@ -41,18 +39,16 @@ import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
 @Entity
 @Table(name="SELECTPULLREQUEST")
 @DiscriminatorValue("SELECTPULL")
-public class SelectivePullRequest extends PullRequest implements ISelectivePullRequest, Serializable {
+public class SelectivePullRequest extends PullRequest {
 	private static final long serialVersionUID = -7323036617505416772L;
 
 	/*
      * Getters and setters
      */
-    @Override
     public String getReferencedMessageId() { return REFD_MESSAGE_ID; }
 
     public void setReferencedMessageId(final String messageId) { REFD_MESSAGE_ID = messageId; }
 
-    @Override
     public String getConversationId() {
         return CONVERSATION_ID;
     }
@@ -61,7 +57,6 @@ public class SelectivePullRequest extends PullRequest implements ISelectivePullR
         CONVERSATION_ID = convid;
     }
 
-    @Override
     public IAgreementReference getAgreementRef() {
         return agreementRef;
     }
@@ -70,7 +65,6 @@ public class SelectivePullRequest extends PullRequest implements ISelectivePullR
         this.agreementRef = ref != null ? new AgreementReference(ref) : null;
     }
 
-    @Override
     public IService getService() {
         return service;
     }
@@ -79,7 +73,6 @@ public class SelectivePullRequest extends PullRequest implements ISelectivePullR
         this.service = service != null ? new Service(service) : null;
     }
 
-    @Override
     public String getAction() {
         return S_ACTION;
     }
