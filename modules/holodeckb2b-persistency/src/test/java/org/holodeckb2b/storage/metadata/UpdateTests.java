@@ -119,17 +119,18 @@ public class UpdateTests {
 		assertDoesNotThrow(() -> provider.updateMessageUnit(stored));
 
 		assertEquals(state2, stored.getCurrentProcessingState().getState());
-		assertEquals(2, stored.getProcessingStates().size());
-		assertEquals(state2, stored.getProcessingStates().get(1).getState());
-		assertEquals(descr2, stored.getProcessingStates().get(1).getDescription());
+		// Because an initial state will be set when message unit is stored, there are 3 states!
+		assertEquals(3, stored.getProcessingStates().size());
+		assertEquals(state2, stored.getProcessingStates().get(2).getState());
+		assertEquals(descr2, stored.getProcessingStates().get(2).getDescription());
 
 		dbObj = EntityManagerUtil.getEntityManager()
 											.find(org.holodeckb2b.storage.metadata.jpa.Receipt.class, stored.getOID());
 
 		assertEquals(state2, dbObj.getCurrentProcessingState().getState());
-		assertEquals(2, dbObj.getProcessingStates().size());
-		assertEquals(state2, dbObj.getProcessingStates().get(1).getState());
-		assertEquals(descr2, dbObj.getProcessingStates().get(1).getDescription());
+		assertEquals(3, dbObj.getProcessingStates().size());
+		assertEquals(state2, dbObj.getProcessingStates().get(2).getState());
+		assertEquals(descr2, dbObj.getProcessingStates().get(2).getDescription());
 	}
 
 	@Test

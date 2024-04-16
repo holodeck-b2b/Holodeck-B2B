@@ -115,6 +115,8 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 			Constructor<? extends MessageUnit> cons = jpaClass
 					.getConstructor(MessageUnitUtils.getMessageUnitType(messageUnit));
 			jpaMsgUnit = cons.newInstance(messageUnit);
+			if (jpaMsgUnit.getCurrentProcessingState() == null)
+				jpaMsgUnit.setProcessingState(ProcessingState.CREATED, null);
 			if (messageUnit instanceof IUserMessage && ((IUserMessage) messageUnit).getPayloads() != null) {
 				for (IPayload p : ((IUserMessage) messageUnit).getPayloads()) {
 					PayloadInfo storedPl = null;

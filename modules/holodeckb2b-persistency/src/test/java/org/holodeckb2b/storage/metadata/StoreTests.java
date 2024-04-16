@@ -91,6 +91,16 @@ public class StoreTests extends BaseProviderTest {
 	}
 
 	@Test
+	void testSetInitialState() {
+		PullRequest pr = new PullRequest();
+		pr.setMessageId(UUID.randomUUID().toString());
+
+		PullRequestEntity stored = assertDoesNotThrow(() -> provider.storeMessageUnit(pr));
+
+		assertNotNull(stored.getCurrentProcessingState());
+	}
+
+	@Test
 	void testRejectDuplicateMsgId() {
 		org.holodeckb2b.storage.metadata.jpa.UserMessage um = new org.holodeckb2b.storage.metadata.jpa.UserMessage();
 		um.setDirection(Direction.OUT);
