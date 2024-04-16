@@ -48,7 +48,7 @@ public class Description implements IDescription, Serializable {
     }
 
     public void setText(final String text) {
-        DESCRIPTION_TEXT = text.substring(0, Math.min(10000, text.length()));
+        DESCRIPTION_TEXT = text != null ? text.substring(0, Math.min(10000, text.length())) : null;
     }
 
     @Override
