@@ -81,7 +81,8 @@ public interface IMetadataStorageProvider {
 
 	/**
 	 * Stores the meta-data of the given message unit in the database and returns a new entity object representing the
-	 * saved message unit. The new entity object MUST have been assigned a unique <i>CoreId</i>.
+	 * saved message unit. The new entity object MUST have been assigned a unique <i>CoreId</i> and in case no initial
+	 * processing state has been set, set it to {@link ProcessingState#CREATED}.
 	 * <p>
 	 * NOTE: When the message unit to be stored is a {@link IUserMessage} the provider must check whether the payloads
 	 * included are {@link IPayloadEntity} instances, and if so, couple the existing payloads with the message unit. If
