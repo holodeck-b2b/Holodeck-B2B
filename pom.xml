@@ -103,8 +103,8 @@
 	<modules>
 		<module>modules/holodeckb2b-interfaces</module>
 		<module>modules/holodeckb2b-core</module>
-		<module>modules/holodeckb2b-security</module>
 		<module>modules/holodeckb2b-ebms3as4</module>
+		<module>modules/holodeckb2b-security</module>
 		<module>modules/holodeckb2b-ui</module>
 		<module>modules/holodeckb2b-persistency</module>
 		<module>modules/holodeckb2b-distribution</module>
