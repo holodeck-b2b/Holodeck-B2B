@@ -30,6 +30,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -188,7 +189,7 @@ public class PayloadInfo implements JPAEntityObject {
     private long    OID;
 
     @ElementCollection(targetClass = Property.class, fetch = FetchType.EAGER)
-    @CollectionTable(name="PL_PROPERTIES")
+    @CollectionTable(name="PL_PROPERTIES", joinColumns = @JoinColumn(name="PAYLOAD_OID"))
     private Collection<IProperty>   properties;
 
     @Embedded

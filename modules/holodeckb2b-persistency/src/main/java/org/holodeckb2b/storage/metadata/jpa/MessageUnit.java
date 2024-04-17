@@ -29,6 +29,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -208,7 +209,7 @@ public abstract class MessageUnit implements JPAEntityObject {
     private Date    	MU_TIMESTAMP;
 
     @ElementCollection(targetClass = MessageUnitProcessingState.class, fetch = FetchType.EAGER)
-    @CollectionTable(name="MSG_STATE")
+    @CollectionTable(name="MSG_STATE", joinColumns = @JoinColumn(name="MSGUNIT_OID"))
     @OrderBy("PROC_STATE_NUM")
     private List<IMessageUnitProcessingState>       states;
 }
