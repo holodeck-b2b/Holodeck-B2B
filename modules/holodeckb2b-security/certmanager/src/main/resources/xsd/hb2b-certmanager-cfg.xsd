@@ -18,11 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
     targetNamespace="http://holodeck-b2b.org/schemas/2019/09/config/certmanager"
-    version="5.0.0" xmlns="http://holodeck-b2b.org/schemas/2019/09/config/certmanager">
+    version="7.0.0" xmlns="http://holodeck-b2b.org/schemas/2019/09/config/certmanager">
     <xs:annotation>
         <xs:documentation>This XML schema defines the structure of the configuration file of the default <i>Certificate Manager</i> of Holodeck B2B.
         It configures the access to the three key stores of the Certificate Manager and includes two optional elements to configure OCSP revocation
         checks and "direct trust" in trading partner certificates.</xs:documentation>
+        <xs:documentation>In version 7.0.0 the type attribute was added to the Password element to enable retrieving the password from a Java system 
+        property or system environment variable.</xs:documentation>        
     </xs:annotation>
     <xs:element name="CertManagerConfiguration" type="CertManagerConfigurationType"/>
     <xs:complexType name="CertManagerConfigurationType">
@@ -79,12 +81,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <xs:documentation>The path of the Java key store. A relative path is will start at the Holodeck B2B home directory (see org.holodeckb2b.interfaces.config.IConfiguration.getHolodeckB2BHome())</xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element minOccurs="0" name="Password" type="non-empty-string">
+            <xs:element minOccurs="0" name="Password" type="PasswordType">
                 <xs:annotation>
-                    <xs:documentation>The password to access the key store.</xs:documentation>
+                    <xs:documentation>The password to access the key store. When the type attribute is set to "sys" or "env" the password is retrieved
+                    from the runtime context, i.e. a Java system property ("sys") or operating system environment variable ("env"). The value of the
+                    element in these cases must include the name of the property or environment variable to use.</xs:documentation>
                 </xs:annotation>
             </xs:element>
         </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="PasswordType">
+    	<xs:simpleContent>
+    		<xs:extension base="non-empty-string">
+				<xs:attribute name="type" default="literal">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="literal"/>
+							<xs:enumeration value="sys"/>
+							<xs:enumeration value="env"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+    		</xs:extension>
+    	</xs:simpleContent>
     </xs:complexType>
     <xs:simpleType name="non-empty-string">
         <xs:restriction base="xs:string">

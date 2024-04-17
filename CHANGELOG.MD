@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Support the use _Elliptic Curve Diffie-Hellman Key Agreement_ as method to exchange the symmetric encryption key. 
   Currently support is limited to ECDH-ES and ConcatKDF algorithms.
+* The default _Certificate Manager_ now has the option to retrieve the key store passwords from the runtime context, 
+  e.g. a Java system property or an environment variable.
 * New architecture for storing the meta-data and content payload which allows to use custom implementations for storage
   of both the message unit meta-data as well as the payload content. The new _Metadata Storage_ and _Payload Storage 
   Providers_ are specified in the packages `org.holodeckb2b.interfaces.storage.providers`
