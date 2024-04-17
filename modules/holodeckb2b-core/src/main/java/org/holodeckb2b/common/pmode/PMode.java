@@ -20,14 +20,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.holodeckb2b.commons.util.Utils;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.general.IAgreement;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
@@ -39,7 +37,6 @@ import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Text;
 import org.simpleframework.xml.convert.AnnotationStrategy;
-import org.simpleframework.xml.core.Commit;
 import org.simpleframework.xml.core.Persister;
 import org.simpleframework.xml.core.Validate;
 
@@ -102,6 +99,9 @@ public class PMode implements IPMode, Serializable {
     @ElementList (entry = "Leg", type = Leg.class , required = true, inline = true)
     private ArrayList<Leg> legs;
 
+    @ElementList (name = "EventHandlers", entry = "EventHandler", type = EventHandlerConfig.class, required = false)
+    private ArrayList<IMessageProcessingEventConfiguration> eventHandlers;
+
     /**
      * Default constructor to create a new empty P-Mode object.
      */
@@ -126,6 +126,11 @@ public class PMode implements IPMode, Serializable {
             if (!Utils.isNullOrEmpty(sourceLegs)) {
                 this.legs = new ArrayList<>(sourceLegs.size());
                 sourceLegs.forEach(l -> this.legs.add(new Leg(l)));
+            }
+            List<IMessageProcessingEventConfiguration> srcEventCfgs = srcPMode.getMessageProcessingEventConfiguration();
+            if (!Utils.isNullOrEmpty(srcEventCfgs)) {
+                this.eventHandlers = new ArrayList<>(srcEventCfgs.size());
+                srcEventCfgs.forEach(ec -> this.eventHandlers.add(new EventHandlerConfig(ec)));
             }
         }
     }
@@ -174,33 +179,6 @@ public class PMode implements IPMode, Serializable {
     		else
     			throw ex;
     	}
-    }
-
-    /**
-     * Is responsible for solving dependencies child elements/objects may have on the P-Mode id. Currently this applies
-     * to the identification of the delivery specifications included in the P-Mode. Because the Holodeck B2B Core
-     * requires each delivery specification to have a unique id to enable reuse each delivery specification included in
-     * the P-Mode is given an id combined of the P-Mode id, current time and type of delivery, for example the default
-     * delivery specification defined on the Leg will have «P-Mode id»+"-"+«hhmmss» +"-defaultDelivery" as id.
-     * <p>The objects containing the {@link DeliveryConfiguration}s are responsible for including these in the given
-     * <code>Map</code> using the type of delivery as key and the object as value.
-     *
-     * @param dependencies  A <code>Map</code> containing all {@link DeliveryConfiguration} objects that have to be
-     *                      assigned an id. The key of the entry MUST be a <code>String</code> containing the type
-     *                      of delivery, e.g. "defaultDelivery".
-     */
-    @Commit
-    public void solveDepencies(final Map dependencies) {
-        if (dependencies == null)
-            return;
-
-        for(final Object k : dependencies.keySet()) {
-            final Object dep = dependencies.get(k);
-            if (k instanceof String && dep != null && dep instanceof DeliveryConfiguration)
-                ((DeliveryConfiguration) dep).setId(this.pmodeId.id
-                                                    + "-" + new SimpleDateFormat("HHmmss").format(new Date())
-                                                    + "-" + k);
-        }
     }
 
     /**
@@ -335,5 +313,25 @@ public class PMode implements IPMode, Serializable {
 
     public void shouldUseStrictHeaderValidation(final boolean useStrictValidation) {
         this.useStrictHeaderValidation = useStrictValidation;
+    }
+
+	@Override
+	public List<IMessageProcessingEventConfiguration> getMessageProcessingEventConfiguration() {
+		return eventHandlers;
+	}
+
+    public void addMessageProcessingEventConfiguration(EventHandlerConfig eventConfig) {
+        if (this.eventHandlers == null)
+            this.eventHandlers = new ArrayList<>();
+
+        this.eventHandlers.add(eventConfig);
+    }
+
+    public void setMessageProcessingEventConfiguration(Collection<EventHandlerConfig> eventConfigs) {
+        if (!Utils.isNullOrEmpty(eventConfigs)) {
+            this.eventHandlers = new ArrayList<>(eventConfigs.size());
+            eventConfigs.forEach(eh -> this.eventHandlers.add(eh));
+        } else
+            this.eventHandlers = null;
     }
 }
