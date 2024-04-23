@@ -35,6 +35,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 
 import org.apache.axis2.AxisFault;
+import org.hibernate.Hibernate;
 import org.hibernate.LazyInitializationException;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.Property;
@@ -85,16 +86,15 @@ public class UpdateManagerTest {
 
     private static UpdateManager   updManager;
 
-    private static EntityManager   em;
+    private EntityManager   em;
 
     public UpdateManagerTest() {
     }
 
     @BeforeClass
     public static void setUpClass() throws PersistenceException, AxisFault {
-        em = EntityManagerUtil.getEntityManager();
         updManager = new UpdateManager();
-        
+
         HolodeckB2BTestCore testCore = new HolodeckB2BTestCore();
         testCore.setPersistencyProvider(new TestProvider());
         HolodeckB2BCoreInterface.setImplementation(testCore);
@@ -104,19 +104,17 @@ public class UpdateManagerTest {
     public void setUp() {
         // Clean database
         try {
+            em = EntityManagerUtil.getEntityManager();
             // First clean the database
-            em.getTransaction().begin();
             final Collection<MessageUnit> allMU = em.createQuery("from MessageUnit", MessageUnit.class).getResultList();
             for(final MessageUnit mu : allMU) {
-                // The refresh is needed to ensure the EM does not use a cached object!
-                em.refresh(mu);
+                em.getTransaction().begin();
                 em.remove(mu);
+                em.getTransaction().commit();
             }
-            em.getTransaction().commit();
         } catch(Exception e) {
             Logger.getLogger(UpdateManagerTest.class.getName()).log(Level.SEVERE, null, e);
-            if (em != null)
-                em.close();
+    	    fail();
         }
     }
 
@@ -124,8 +122,11 @@ public class UpdateManagerTest {
     public void shutDown() {
         try {
             // Rollback any active transaction and close entity manager
-            if (em != null && em.isOpen() && em.getTransaction().isActive())
-                em.getTransaction().rollback();
+            if (em != null && em.isOpen()) {
+                if (em.getTransaction().isActive())
+                    em.getTransaction().rollback();
+                em.close();
+            }
         } catch (Exception e) {
             Logger.getLogger(UpdateManagerTest.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -417,6 +418,7 @@ public class UpdateManagerTest {
         em.persist(userMsgJPA);
         UserMessageEntity userMsg = new UserMessageEntity(userMsgJPA);
         em.getTransaction().commit();
+        em.close();
         // Check it accidentially has not already the new value
         queryManager.ensureCompletelyLoaded(userMsg);
         assertTrue(Utils.isNullOrEmpty(userMsg.getPayloads()));
@@ -429,9 +431,11 @@ public class UpdateManagerTest {
         assertFalse(Utils.isNullOrEmpty(userMsg.getPayloads()));
         assertEquals(2, userMsg.getPayloads().size());
         // Check that database is updated
-        em.refresh(userMsgJPA);
+        em = EntityManagerUtil.getEntityManager();
+        userMsgJPA = em.find(UserMessage.class, userMsgJPA.getOID());
         assertFalse(Utils.isNullOrEmpty(userMsgJPA.getPayloads()));
         assertEquals(2, userMsgJPA.getPayloads().size());
+        em.close();
 
         // Change one of the payloads in the updated set
         Iterator<IPayload> it = userMsg.getPayloads().iterator();
@@ -459,7 +463,8 @@ public class UpdateManagerTest {
                 fail("unknown payload");
         }
         // Check that database is updated
-        em.refresh(userMsgJPA);
+        em = EntityManagerUtil.getEntityManager();
+        userMsgJPA = em.find(UserMessage.class, userMsgJPA.getOID());
         assertFalse(Utils.isNullOrEmpty(userMsgJPA.getPayloads()));
         assertEquals(2, userMsgJPA.getPayloads().size());
         for (IPayload p : userMsgJPA.getPayloads()) {
@@ -474,6 +479,7 @@ public class UpdateManagerTest {
             } else
                 fail("unknown payload");
         }
+        em.close();
     }
 
     @Test

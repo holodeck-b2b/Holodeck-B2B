@@ -144,12 +144,13 @@ public class UserMessage extends MessageUnit implements IUserMessage, Serializab
      * @param payloads  The meta-data on the payloads
      */
     public void setPayloads(final Collection<IPayload> payloads) {
-        if (!Utils.isNullOrEmpty(payloads)) {
+        if (this.payloads != null)
+            this.payloads.clear();
+        else
             this.payloads = new ArrayList<>();
+        if (!Utils.isNullOrEmpty(payloads))
             for (IPayload p : payloads)
                 this.payloads.add(new Payload(p));
-        } else
-            this.payloads = null;
     }
 
     /**
@@ -160,8 +161,8 @@ public class UserMessage extends MessageUnit implements IUserMessage, Serializab
     public void addPayload(final IPayload p) {
         if (p != null) {
             if (payloads == null)
-                payloads = new ArrayList<>(1);
-            payloads.add(new Payload(p));
+                this.payloads = new ArrayList<>(1);
+            this.payloads.add(new Payload(p));
         }
     }
 
@@ -173,6 +174,7 @@ public class UserMessage extends MessageUnit implements IUserMessage, Serializab
      */
     public UserMessage() {
         super();
+        this.payloads = new ArrayList<>();
         this.partners = new HashMap<>();
     }
 
@@ -229,7 +231,7 @@ public class UserMessage extends MessageUnit implements IUserMessage, Serializab
      * normally each user message will contain one or more payload with the business data.
      * The ebMS spec however allows for user messages without payloads
      */
-    @OneToMany(targetEntity = Payload.class, cascade = CascadeType.ALL)
+    @OneToMany(targetEntity = Payload.class, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IPayload>       payloads;
 
     /*

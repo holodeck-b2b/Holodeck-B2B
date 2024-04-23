@@ -18,7 +18,9 @@ package org.holodeckb2b.persistency;
 
 import java.nio.file.Path;
 
+import org.apache.logging.log4j.LogManager;
 import org.holodeckb2b.common.VersionInfo;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.persistency.IPersistencyProvider;
 import org.holodeckb2b.interfaces.persistency.IQueryManager;
@@ -27,6 +29,8 @@ import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.persistency.managers.QueryManager;
 import org.holodeckb2b.persistency.managers.UpdateManager;
 import org.holodeckb2b.persistency.util.EntityManagerUtil;
+
+import javax.persistence.EntityManager;
 
 /**
  * Is the default implementation of a Holodeck B2B <i>Persistency Provider</i>. This provider uses an integrated Derby
@@ -46,8 +50,37 @@ public class DefaultProvider implements IPersistencyProvider {
     @Override
     public void init(final IConfiguration config) throws PersistenceException {
         EntityManagerUtil.check();
+        removeOrphanedPayloads();
     }
-    
+
+    /**
+     * Removes any orphaned payload records.
+     * <p>
+     * Due to a bug in the previous version of the provider there will exist orphaned payload records in the database
+     * which will never be removed (as only payloads related to User Message will be deleted upon purge).
+     *
+     * @since 6.1.1
+     */
+    private void removeOrphanedPayloads() {
+        EntityManager em = null;
+        try {
+            em = EntityManagerUtil.getEntityManager();
+            em.getTransaction().begin();
+            int r = em.createNativeQuery("DELETE FROM PAYLOAD pl " +
+                    "WHERE pl.OID NOT IN (SELECT ump.PAYLOADS_OID FROM USER_MESSAGE_PAYLOAD ump)").executeUpdate();
+            em.getTransaction().commit();
+            if (r > 0)
+                LogManager.getLogger().debug("Removed {} orphaned payload records", r);
+        } catch (Throwable t) {
+            em.getTransaction().rollback();
+            LogManager.getLogger().warn("An error occurred trying to remove orphaned payloads : {}",
+                                        Utils.getExceptionTrace(t));
+        } finally {
+            if (em != null && em.isOpen())
+                em.close();
+        }
+    }
+
     @Override
     public void shutdown() {
     }
