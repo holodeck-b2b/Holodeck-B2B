@@ -23,6 +23,7 @@ import org.holodeckb2b.common.pmode.ReceiptConfiguration;
 import org.holodeckb2b.common.pmode.UserMessageFlow;
 import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.common.testhelpers.TestDeliveryMethod;
 import org.holodeckb2b.common.testhelpers.TestEventProcessor;
 import org.holodeckb2b.commons.Pair;
 import org.holodeckb2b.commons.util.MessageIdUtils;
