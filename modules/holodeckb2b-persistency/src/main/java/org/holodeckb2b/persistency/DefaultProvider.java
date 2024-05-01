@@ -66,6 +66,8 @@ public class DefaultProvider implements IPersistencyProvider {
         try {
             em = EntityManagerUtil.getEntityManager();
             em.getTransaction().begin();
+            em.createNativeQuery("DELETE FROM PL_PROPERTIES plp " +
+                    "WHERE plp.PAYLOAD_OID NOT IN (SELECT ump.PAYLOADS_OID FROM USER_MESSAGE_PAYLOAD ump)").executeUpdate();
             int r = em.createNativeQuery("DELETE FROM PAYLOAD pl " +
                     "WHERE pl.OID NOT IN (SELECT ump.PAYLOADS_OID FROM USER_MESSAGE_PAYLOAD ump)").executeUpdate();
             em.getTransaction().commit();
