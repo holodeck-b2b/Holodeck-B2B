@@ -19,6 +19,7 @@ package org.holodeckb2b.core.receptionawareness;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.core.HolodeckB2BCore;
@@ -60,12 +61,11 @@ public class DetectDuplicateUserMessages extends AbstractUserMessageHandler {
      * configuration users can decide if this logging should be enabled and
      * how duplicates should be logged.
      */
-    private static Log     duplicateLog;
+    private static Logger     duplicateLog = LogManager.getLogger("org.holodeckb2b.msgproc.duplicates");
 
     @Override
 	public void init(HandlerDescription handlerdesc) {
     	super.init(handlerdesc);
-    	duplicateLog = LogFactory.getLog("org.holodeckb2b.msgproc.duplicates." + handledMsgProtocol);
     }
     
     @Override

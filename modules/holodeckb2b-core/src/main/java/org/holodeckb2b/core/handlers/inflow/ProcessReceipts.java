@@ -101,8 +101,7 @@ public class ProcessReceipts extends AbstractBaseHandler {
         	refdMsgs = HolodeckB2BCore.getQueryManager().getMessageUnitsWithId(refToMsgId, Direction.OUT);
         if (Utils.isNullOrEmpty(refdMsgs)) {
             // This error SHOULD NOT occur because the reference is already checked when finding the P-Mode
-            log.warn("Receipt [msgId=" + receipt.getMessageId() + "] contains unknown refToMessageId ["
-                        + refToMsgId + "]!");
+            log.warn("Receipt [msgId={}] contains unknown refToMessageId [{}]", receipt.getMessageId(), refToMsgId);
             updateManager.setProcessingState(receipt, ProcessingState.FAILURE);
             // Create error and add to context
             procCtx.addGeneratedError(new ValueInconsistent("Receipt contains unknown reference [" + refToMsgId + "]",
@@ -114,6 +113,7 @@ public class ProcessReceipts extends AbstractBaseHandler {
                 // Check if the found message unit expects a receipt
                 final ILeg leg = PModeUtils.getLeg(ackedMessage);
                 if (leg.getReceiptConfiguration() == null) {
+                    log.warn("Unexpected Receipt [{}]  received for [{}]!", receipt.getMessageId(), refToMsgId);
                     // The P-Mode is not configured for receipts, generate error
                     updateManager.setProcessingState(receipt, ProcessingState.FAILURE);
                     // Create error and add to context
@@ -132,7 +132,8 @@ public class ProcessReceipts extends AbstractBaseHandler {
                         log.trace("Mark Receipt as ready for delivery to business application");
                         updateManager.setProcessingState(receipt, ProcessingState.READY_FOR_DELIVERY);
                     } else {
-                        log.trace("Found message unit not waiting for receipt anymore, processing finished.");
+                        log.info("Receipt [msgId={}] is for already completely processed User Message, processing finished.",
+                                receipt.getMessageId());
                         updateManager.setProcessingState(receipt, ProcessingState.DONE);
                     }
                 }

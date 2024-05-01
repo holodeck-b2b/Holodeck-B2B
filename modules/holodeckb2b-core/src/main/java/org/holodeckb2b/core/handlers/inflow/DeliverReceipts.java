@@ -57,7 +57,7 @@ public class DeliverReceipts extends AbstractBaseHandler {
     				// Processing state is already changed by the Delivery Manager, so nothing we can do here.
     			}
         	} else
-        		log.warn("Receipt (msgId={}) is not ready for delivery", receipt.getMessageId());
+        		log.debug("Receipt (msgId={}) is not ready for delivery", receipt.getMessageId());
         }
         log.debug("Processed all Receipt signals in message");
         return InvocationResponse.CONTINUE;
