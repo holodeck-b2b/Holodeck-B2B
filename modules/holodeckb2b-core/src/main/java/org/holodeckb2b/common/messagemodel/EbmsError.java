@@ -16,8 +16,6 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
-import java.io.Serializable;
-
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 
@@ -28,9 +26,7 @@ import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public class EbmsError implements IEbmsError, Serializable {
-	private static final long serialVersionUID = -3987157498643048592L;
-
+public class EbmsError implements IEbmsError {
 	private String      errorCode;
     private Severity    severity;
     private String      errorMessage;

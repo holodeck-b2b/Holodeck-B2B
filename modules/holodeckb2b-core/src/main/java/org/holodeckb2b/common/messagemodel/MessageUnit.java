@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,9 +37,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public abstract class MessageUnit implements IMessageUnit, Serializable {
-	private static final long serialVersionUID = -6487452438799675994L;
-
+public abstract class MessageUnit implements IMessageUnit {
 	private Direction  direction;
     private String  messageId;
     private Date    timestamp;

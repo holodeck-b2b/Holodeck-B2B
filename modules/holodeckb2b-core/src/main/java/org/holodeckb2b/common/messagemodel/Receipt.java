@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -33,9 +32,7 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public class Receipt extends MessageUnit implements IReceipt, Serializable {
-	private static final long serialVersionUID = 2638231745969207571L;
-
+public class Receipt extends MessageUnit implements IReceipt {
 	private ArrayList<OMElement>    content;
 
     /**

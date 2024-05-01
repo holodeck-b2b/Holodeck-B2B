@@ -16,8 +16,6 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
-import java.io.Serializable;
-
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 
 /**
@@ -27,9 +25,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public class PullRequest extends MessageUnit implements IPullRequest, Serializable {
-	private static final long serialVersionUID = -4905513652685448817L;
-
+public class PullRequest extends MessageUnit implements IPullRequest {
 	private String  mpc;
 
     /**
