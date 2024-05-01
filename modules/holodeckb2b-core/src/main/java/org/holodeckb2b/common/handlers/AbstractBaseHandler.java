@@ -60,8 +60,7 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
         try {
     		handledMsgProtocol = (String) handlerdesc.getParent().getParameter("HandledMessagingProtocol").getValue();
         } catch (Exception e) {
-    		LogFactory.getLog(this.getClass().getName())
-        				  					.warn("Not running inside a Holodeck B2B module for message processing");
+    		LogManager.getLogger().warn("Not running inside a Holodeck B2B module for message processing");
         }
         
         Parameter restricted = handlerdesc.getParameter("onlyAsResponder");

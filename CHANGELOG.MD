@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 6.1.1
 #####
+### Changed
+* The duplicate log is now named _org.holodeckb2b.msgproc.duplicates_ (removing _.core_ at the end)
+* Improved logging of Receipt and Error processing
+
 ### Fixed
 * Issue that caused orphaned payload records.
 

@@ -55,7 +55,7 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
 				}
 			}
     	} else
-    		log.warn("User Message (msgId={}) is not ready for delivery", um.getMessageId());
+    		log.debug("User Message (msgId={}) is not ready for delivery", um.getMessageId());
 
         return InvocationResponse.CONTINUE;
     }
