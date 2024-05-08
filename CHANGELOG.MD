@@ -35,6 +35,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   which indicate which meta-data the Holodeck B2B Core can change during the message processing.
 * The duplicate log is now named _org.holodeckb2b.msgproc.duplicates_ (removing _.core_ at the end)
 * Improved logging of Receipt and Error processing
+* Bouncy Castle is now used as JCE and JSSE provider. As a result only PKCS12 key stores are supported for TLS client 
+  certificates.
 * Minimal Java version required to run Holodeck B2B is now 11
 * Updated version of Axis2 and Axiom dependencies to 1.8.2 resp. 1.4.0
 * Updated version of WSSJ4 and Santuario to 3.0.3 resp. 3.0.5-SNAPSHOT 
