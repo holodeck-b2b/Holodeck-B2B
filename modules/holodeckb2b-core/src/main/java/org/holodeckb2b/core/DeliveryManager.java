@@ -302,8 +302,7 @@ class DeliveryManager implements IDeliveryManager {
 					Utils.getExceptionTrace(deliveryError));
 	        // Indicate failure in processing state
 	        mdManager.setProcessingState(msgUnit, ProcessingState.DELIVERY_FAILED, deliveryError.getMessage());
-	        // If the problem that occurred is indicated as permanent, we can set the state to FAILURE and return
-	        //  an ebMS Error to the sender
+	        // If the problem that occurred is indicated as permanent, we can set the state to FAILURE 
 	        if (deliveryError.isPermanent())
 	            mdManager.setProcessingState(msgUnit, ProcessingState.FAILURE);
 		}

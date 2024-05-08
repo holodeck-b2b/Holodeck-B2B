@@ -65,7 +65,7 @@ public class TestDeliveryMethod implements IDeliveryMethod {
 	}
 
 	@Override
-	public void deliver(IMessageUnit rcvdMsgUnit, IDeliveryCallback callback) throws MessageDeliveryException {
+	public void deliver(IMessageUnit rcvdMsgUnit, IDeliveryCallback callback)  {
 		async++;
 		if (rejection != null)
 			callback.failed(rejection);
