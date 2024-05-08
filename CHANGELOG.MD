@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ##### 
 ### Added
 * Support the use _Elliptic Curve Diffie-Hellman Key Agreement_ as method to exchange the symmetric encryption key. 
-  Currently support is limited to ECDH-ES and ConcatKDF algorithms.
+  Currently support is limited to ECDH-ES and ConcatKDF algorithms [#147](https://github.com/holodeck-b2b/Holodeck-B2B/issues/147).
 * The default _Certificate Manager_ now has the option to retrieve the key store passwords from the runtime context, 
   e.g. a Java system property or an environment variable.
 * Debug logging in ebMS3/AS4 P-Mode finder (Thanks @martan81)
@@ -39,8 +39,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Bouncy Castle is now used as JCE and JSSE provider. As a result only PKCS12 key stores are supported for TLS client 
   certificates.
 * Minimal Java version required to run Holodeck B2B is now 11
-* Updated version of Axis2 and Axiom dependencies to 1.8.2 resp. 1.4.0
-* Updated version of WSSJ4 and Santuario to 3.0.3 resp. 3.0.5-SNAPSHOT 
+* Updated version of Axis2 and Axiom dependencies to 1.8.2 resp. 1.4.0 [#135](https://github.com/holodeck-b2b/Holodeck-B2B/issues/135)
+* Updated version of WSSJ4 and Santuario to 3.0.3 resp. 3.0.5-SNAPSHOT [#135](https://github.com/holodeck-b2b/Holodeck-B2B/issues/135)
 * Changed JAXB implementation to Glassfish 
 
 ### Fixed
