@@ -24,10 +24,24 @@
 	<name>Holodeck B2B - Core</name>
 	<description>This module contains the Holodeck B2B Core processing engine that applies to all protocols</description>
 
+	<properties>
+		<bc-version>1.78.1</bc-version>
+	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>holodeckb2b-interfaces</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+  			<artifactId>bcprov-jdk18on</artifactId>
+  			<version>${bc-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+  			<artifactId>bctls-jdk18on</artifactId>
+  			<version>${bc-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.holodeckb2b.commons</groupId>
