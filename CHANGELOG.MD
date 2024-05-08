@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   Currently support is limited to ECDH-ES and ConcatKDF algorithms.
 * The default _Certificate Manager_ now has the option to retrieve the key store passwords from the runtime context, 
   e.g. a Java system property or an environment variable.
+* Debug logging in ebMS3/AS4 P-Mode finder
 * Support for configuration of event handlers on the P-Mode level.
 * New architecture for storing the meta-data and content payload which allows to use custom implementations for storage
   of both the message unit meta-data as well as the payload content. The new _Metadata Storage_ and _Payload Storage 
