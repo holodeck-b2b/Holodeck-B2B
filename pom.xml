@@ -97,7 +97,7 @@
 		<axis2-version>1.8.2</axis2-version>
 		<axiom-version>1.4.0</axiom-version>
 		<netbeans.hint.license>gpl30</netbeans.hint.license>
-		<log4j.version>2.20.0</log4j.version>
+		<log4j.version>2.23.1</log4j.version>
 	</properties>
 
 	<modules>
