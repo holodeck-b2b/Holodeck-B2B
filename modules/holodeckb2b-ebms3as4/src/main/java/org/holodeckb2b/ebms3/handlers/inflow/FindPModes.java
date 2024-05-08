@@ -53,8 +53,8 @@ import org.holodeckb2b.interfaces.storage.providers.StorageException;
  * an Error signal for a message unit for which the P-Mode could not be determined).
  * <p>For Pull Request message units finding the P-Mode is dependent on the information supplied in the WS-Security
  * header. As we have not read the WSS header at this point the P-Mode can not be determined for Pull Request signals.
- * <p>Finding the P-Mode for a User Message is done by the {@link PModeFinder} utility class by matching the meta-data 
- * from the received message to the P-Mode configuration data. Since version 4.1.0 this handler will check if the User 
+ * <p>Finding the P-Mode for a User Message is done by the {@link PModeFinder} utility class by matching the meta-data
+ * from the received message to the P-Mode configuration data. Since version 4.1.0 this handler will check if the User
  * Message was received as result of a Pull Request and if no P-Mode was found, assign the P-Mode used by the
  * Pull Request to the User Message.
  * <p><b>NOTE:</b> The Error generated in case the P-Mode can not be determined is <i>ProcessingModeMismatch</i>. The
@@ -67,13 +67,13 @@ public class FindPModes extends AbstractBaseHandler {
 
 
     @Override
-    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log)
     																					throws StorageException {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         final IUserMessageEntity userMsg = procCtx.getReceivedUserMessage();
         if (userMsg != null) {
             log.debug("Finding P-Mode for User Message [" + userMsg.getMessageId() + "]");
-            IPMode pmode = PModeFinder.forReceivedUserMessage(userMsg, log);            
+            IPMode pmode = PModeFinder.forReceivedUserMessage(userMsg);
             if (pmode == null && procCtx.isHB2BInitiated()) {
             	final IPullRequest pullRequest = procCtx.getSendingPullRequest();
             	if (pullRequest != null) {
@@ -92,7 +92,7 @@ public class FindPModes extends AbstractBaseHandler {
                 log.info("Found P-Mode [" + pmode.getId() + "] for User Message [" + userMsg.getMessageId() + "]");
                 updateManager.setPModeId(userMsg, pmode.getId());
             }
-        } 
+        }
 
         final Collection<IErrorMessageEntity>  errorSignals = procCtx.getReceivedErrors();
         if (!Utils.isNullOrEmpty(errorSignals)) {
@@ -111,7 +111,7 @@ public class FindPModes extends AbstractBaseHandler {
                     updateManager.setPModeAndLeg(e, pl);
                 }
             }
-        } 
+        }
 
         final Collection<IReceiptEntity>  rcptSignals = procCtx.getReceivedReceipts();
         if (!Utils.isNullOrEmpty(rcptSignals)) {
@@ -131,7 +131,7 @@ public class FindPModes extends AbstractBaseHandler {
                     updateManager.setPModeId(r, pmode.getId());
                 }
             }
-        } 
+        }
 
         return InvocationResponse.CONTINUE;
     }
@@ -141,26 +141,26 @@ public class FindPModes extends AbstractBaseHandler {
      * <p>The P-Mode that handles a received Error signal is the same as the P-Mode that handles the message unit the
      * error is response to. So the referenced message unit is determined and its P-Mode is set on the error signal.
      * <p>If the error signal itself does not contain a reference to the message unit in error but it is received as an
-     * HTTP response to an outgoing ebMS message, the primary message unit of that message is used to determine the 
+     * HTTP response to an outgoing ebMS message, the primary message unit of that message is used to determine the
      * P-Mode.
      *
      * @param e     The received Error signal message unit
      * @param mc    The message context of the Error signal
-     * @return      Pair consisting of the P-Mode and the label of Leg that handles this Error signal if the referenced 
+     * @return      Pair consisting of the P-Mode and the label of Leg that handles this Error signal if the referenced
      * 				message id can be matched to a sent message unit,<br/>
-     * 				<code>null</code> otherwise 
+     * 				<code>null</code> otherwise
      * @throws StorageException When an error occurs retrieving the referenced message unit
      */
-    private Pair<IPMode, ILeg.Label> findForReceivedErrorSignal(final IErrorMessageEntity e, 
+    private Pair<IPMode, ILeg.Label> findForReceivedErrorSignal(final IErrorMessageEntity e,
     											final IMessageProcessingContext procCtx) throws StorageException {
     	// First get the referenced message id, starting with information from the header
         String refToMessageId = MessageUnitUtils.getRefToMessageId(e);
-        // If there is no referenced message unit and the error is received as a response we will use the primary 
+        // If there is no referenced message unit and the error is received as a response we will use the primary
         // message unit from the message we sent out
         if (Utils.isNullOrEmpty(refToMessageId) && !procCtx.getParentContext().isServerSide()) {
         	IMessageUnitEntity primarySentMessageUnit = procCtx.getPrimarySentMessageUnit();
-        	if (primarySentMessageUnit != null) 
-    			return new Pair<>(HolodeckB2BCoreInterface.getPModeSet().get(primarySentMessageUnit.getPModeId()), 
+        	if (primarySentMessageUnit != null)
+    			return new Pair<>(HolodeckB2BCoreInterface.getPModeSet().get(primarySentMessageUnit.getPModeId()),
     								PModeUtils.getLeg(primarySentMessageUnit).getLabel());
         	else
         		return null;
@@ -186,7 +186,7 @@ public class FindPModes extends AbstractBaseHandler {
                                                                         		 				Direction.OUT);
             if (!Utils.isNullOrEmpty(refdMsgUnits) && refdMsgUnits.size() == 1) {
             	IMessageUnitEntity refdMsg = refdMsgUnits.iterator().next();
-        		result = new Pair<>(HolodeckB2BCoreInterface.getPModeSet().get(refdMsg.getPModeId()), 
+        		result = new Pair<>(HolodeckB2BCoreInterface.getPModeSet().get(refdMsg.getPModeId()),
         							PModeUtils.getLeg(refdMsg).getLabel());
             }
         }

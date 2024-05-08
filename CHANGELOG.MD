@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   Currently support is limited to ECDH-ES and ConcatKDF algorithms.
 * The default _Certificate Manager_ now has the option to retrieve the key store passwords from the runtime context, 
   e.g. a Java system property or an environment variable.
-* Debug logging in ebMS3/AS4 P-Mode finder
+* Debug logging in ebMS3/AS4 P-Mode finder (Thanks @martan81)
 * Support for configuration of event handlers on the P-Mode level.
 * New architecture for storing the meta-data and content payload which allows to use custom implementations for storage
   of both the message unit meta-data as well as the payload content. The new _Metadata Storage_ and _Payload Storage 
@@ -44,7 +44,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Changed JAXB implementation to Glassfish 
 
 ### Fixed
-* Handle explicit reference from PartInfo-href to the SOAP body [#148](https://github.com/holodeck-b2b/Holodeck-B2B/issues/148)
+* Handle explicit reference from PartInfo-href to the SOAP body [#148](https://github.com/holodeck-b2b/Holodeck-B2B/issues/148) (Thanks @gtalman)
 * Purging of message units stopped in case of exception other than `PersistenceException`
 * Handlers GenericProviderDispatcher and MustUnderstandValidationDispatcher not available [#137](https://github.com/holodeck-b2b/Holodeck-B2B/issues/137)
 
