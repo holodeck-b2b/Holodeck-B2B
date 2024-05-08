@@ -212,7 +212,7 @@ public class WorkerPoolTest {
 	}
 	
 	@Test
-	public void testRescheduleWorker() throws WorkerPoolException, InterruptedException {
+	public void testRescheduleWorkerCount() throws WorkerPoolException, InterruptedException {
 		TaskReporter reporter = new TaskReporter();
 		
 		WorkerPoolTestConfiguration configuration = new WorkerPoolTestConfiguration(1);		
@@ -242,6 +242,39 @@ public class WorkerPoolTest {
 		Thread.sleep(1100);		
 		assertFalse(pool.isRunning());			
 	}
+	
+	@Test
+	public void testRescheduleWorkerInterval() throws WorkerPoolException, InterruptedException {
+		TaskReporter reporter = new TaskReporter();
+		
+		WorkerPoolTestConfiguration configuration = new WorkerPoolTestConfiguration(1);		
+		WorkerTestConfig workerCfg = new WorkerTestConfig("reschedule", reporter, 
+				new Interval(500, TimeUnit.MILLISECONDS));		
+		configuration.configs.add(workerCfg);
+		
+		WorkerPool pool = new WorkerPool("test", configuration);
+		
+		pool.start();
+		assertTrue(pool.isRunning());
+		
+		workerCfg.interval = new Interval(1, TimeUnit.SECONDS);
+		
+		Thread.sleep(600);		
+		assertTrue(reporter.workerRuns.containsKey("reschedule.0"));
+		
+		Thread.sleep(600);				
+		assertEquals(1, configuration.reloaded);
+		
+		reporter.workerRuns.clear();
+		Thread.sleep(1200);
+		assertEquals(1, reporter.workerRuns.get("reschedule.0").intValue());
+		
+		pool.shutdown(1);			
+		Thread.sleep(1100);		
+		assertFalse(pool.isRunning());			
+	}
+	
+	
 	
 	@Test
 	public void testReconfigWorker() throws WorkerPoolException, InterruptedException {

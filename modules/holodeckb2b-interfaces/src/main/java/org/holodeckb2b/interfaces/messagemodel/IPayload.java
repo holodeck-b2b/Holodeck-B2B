@@ -17,6 +17,8 @@
 package org.holodeckb2b.interfaces.messagemodel;
 
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 
 import org.holodeckb2b.interfaces.general.IDescription;
@@ -25,9 +27,7 @@ import org.holodeckb2b.interfaces.general.ISchemaReference;
 
 /**
  * Defines an interface to exchange the meta-data about payloads contained in a User Message. The payloads of a user
- * message contain the actual business documents. Because these documents can be very large they are not stored in
- * memory. This interface therefor only defines a method to get the location where the actual content is located. This
- * can be used to read the actual document.
+ * message contain the actual business documents. 
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
@@ -71,7 +71,7 @@ public interface IPayload {
      *          {@link Containment#ATTACHMENT}  When the payload is included as an attachment<br>
      *          {@link Containment#EXTERNAL}    When the payload is external to the message
      */
-    public Containment getContainment();
+    Containment getContainment();
 
     /**
      * Gets the reference to the payload content in the message.
@@ -88,7 +88,7 @@ public interface IPayload {
      *
      * @return  The URI that references the payload content within the context of the message
      */
-    public String getPayloadURI();
+    String getPayloadURI();
 
     /**
      * Gets the <i>user defined</i> payload properties. These properties are generally intended for use by the
@@ -99,7 +99,7 @@ public interface IPayload {
      *
      * @return  The collection of properties defined for this payload
      */
-    public Collection<IProperty> getProperties();
+    Collection<IProperty> getProperties();
 
     /**
      * Gets the description of the payload.
@@ -113,7 +113,7 @@ public interface IPayload {
      * @deprecated Use the payload properties instead
      */
     @Deprecated
-    public IDescription getDescription();
+    IDescription getDescription();
 
     /**
      * Gets the schema reference information for this payload. This information can be used by the business application
@@ -123,17 +123,7 @@ public interface IPayload {
      *
      * @return      An {@link ISchemaReference} containing information on the schema that defines this payload
      */
-    public ISchemaReference getSchemaReference();
-
-    /**
-     * Gets the location where the content of this payload is stored locally for exchange between Holodeck B2B and the
-     * business application.
-     * <p><b>NOTE: </b>When the payload is not included in the message, i.e. {@link #getContainment()} ==
-     * {@link Containment#EXTERNAL}, it will not be stored locally.
-     *
-     * @return  The location where the payload content is stored
-     */
-    public String getContentLocation();
+    ISchemaReference getSchemaReference();
 
     /**
      * Gets the MIME type of the payload content. The MIME type is not included in the standard meta data included in
@@ -147,5 +137,14 @@ public interface IPayload {
      *
      * @return  The MIME type of this payload
      */
-    public String getMimeType();
+    String getMimeType();
+    
+    /**
+     * Gets the content of the payload.
+     * 
+     * @return	an {@link InputStream} containing the data of the payload
+     * @throws IOException	when the content of the payload cannot be accessed
+     * @since 7.0.0
+     */
+    InputStream getContent() throws IOException;
 }

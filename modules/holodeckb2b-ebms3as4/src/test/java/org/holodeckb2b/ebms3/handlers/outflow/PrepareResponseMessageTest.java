@@ -29,11 +29,11 @@ import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.StorageManager;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -89,7 +89,7 @@ public class PrepareResponseMessageTest {
     	
     	UserMessage usrMessage = new UserMessage();
     	usrMessage.setMessageId(MessageIdUtils.createMessageId());
-    	procCtx.setUserMessage(updateManager.storeIncomingMessageUnit(usrMessage));
+    	procCtx.setUserMessage(updateManager.storeReceivedMessageUnit(usrMessage));
     	
     	ErrorMessage errorWRef = new ErrorMessage();
     	errorWRef.setMessageId(MessageIdUtils.createMessageId());
@@ -123,10 +123,10 @@ public class PrepareResponseMessageTest {
     	
     	UserMessage usrMessage = new UserMessage();
     	usrMessage.setMessageId(MessageIdUtils.createMessageId());
-    	procCtx.setUserMessage(updateManager.storeIncomingMessageUnit(usrMessage));
+    	procCtx.setUserMessage(updateManager.storeReceivedMessageUnit(usrMessage));
     	Receipt rcpt = new Receipt();
     	rcpt.setMessageId(MessageIdUtils.createMessageId());
-    	procCtx.addReceivedReceipt(updateManager.storeIncomingMessageUnit(rcpt));
+    	procCtx.addReceivedReceipt(updateManager.storeReceivedMessageUnit(rcpt));
     	
     	ErrorMessage errorRcpt = new ErrorMessage();
     	errorRcpt.setMessageId(MessageIdUtils.createMessageId());

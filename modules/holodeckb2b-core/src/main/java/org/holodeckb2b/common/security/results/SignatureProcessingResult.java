@@ -21,13 +21,13 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.holodeckb2b.commons.util.Utils;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.X509ReferenceType;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 /**
  * Is the security provider's implementation of {@link ISignatureProcessingResult} containing the result of processing
@@ -43,7 +43,7 @@ public class SignatureProcessingResult extends AbstractSecurityProcessingResult 
     private final X509ReferenceType refMethod;
     private final String            algorithm;
     private final ISignedPartMetadata                headerDigest;
-    private final Map<IPayload, ISignedPartMetadata> payloadDigests;
+    private final Map<IPayloadEntity, ISignedPartMetadata> payloadDigests;
 
     /**
      * Creates a new <code>SignatureProcessingResult</code> instance to indicate that there was a problem in processing
@@ -60,7 +60,7 @@ public class SignatureProcessingResult extends AbstractSecurityProcessingResult 
         this.headerDigest = null;
         this.payloadDigests = null;
     }
-    
+
     /**
      * Creates a new <code>SignatureProcessingResult</code> instance to indicate that processing of the signature part
      * completed successfully.
@@ -73,10 +73,10 @@ public class SignatureProcessingResult extends AbstractSecurityProcessingResult 
      */
     public SignatureProcessingResult(final X509Certificate signingCert, final X509ReferenceType certReferenceMethod,
 							    	 final String algorithm, final ISignedPartMetadata headerDigest,
-							    	 final Map<IPayload, ISignedPartMetadata> payloadDigests) {
+							    	 final Map<IPayloadEntity, ISignedPartMetadata> payloadDigests) {
     	this(signingCert, null, certReferenceMethod, algorithm, headerDigest, payloadDigests);
     }
-    
+
     /**
      * Creates a new <code>SignatureProcessingResult</code> instance to indicate that processing of the signature part
      * completed successfully including a trust validation check.
@@ -89,10 +89,10 @@ public class SignatureProcessingResult extends AbstractSecurityProcessingResult 
      * @param payloadDigests        The payloads' digest meta-data
      * @since 5.0.0
      */
-    public SignatureProcessingResult(final X509Certificate signingCert, final IValidationResult trustCheckResult, 
+    public SignatureProcessingResult(final X509Certificate signingCert, final IValidationResult trustCheckResult,
     								 final X509ReferenceType certReferenceMethod,
                                      final String algorithm, final ISignedPartMetadata headerDigest,
-                                     final Map<IPayload, ISignedPartMetadata> payloadDigests) {
+                                     final Map<IPayloadEntity, ISignedPartMetadata> payloadDigests) {
         super(SecurityHeaderTarget.DEFAULT);
         this.certificate = signingCert;
         this.trustCheck = trustCheckResult;
@@ -138,12 +138,12 @@ public class SignatureProcessingResult extends AbstractSecurityProcessingResult 
      * {@inheritDoc}
      */
     @Override
-    public Map<IPayload, ISignedPartMetadata> getPayloadDigests() {
+    public Map<IPayloadEntity, ISignedPartMetadata> getPayloadDigests() {
         return payloadDigests;
     }
 
 	@Override
-	public IValidationResult getTrustValidation() {		
+	public IValidationResult getTrustValidation() {
 		return trustCheck;
 	}
 }

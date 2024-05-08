@@ -25,9 +25,9 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the handler that hands over the Receipts that are ready for delivery to the back-end application to the 
@@ -39,7 +39,7 @@ public class DeliverErrors extends AbstractBaseHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
-    																					throws PersistenceException {
+    																					throws StorageException {
         // Check if this message contains error signals
         final Collection<IErrorMessageEntity> errSignals = procCtx.getReceivedErrors();
 
@@ -57,7 +57,7 @@ public class DeliverErrors extends AbstractBaseHandler {
     				// Processing state is already changed by the Delivery Manager, so nothing we can do here.
     			}
         	} else
-        		log.warn("Error (msgId={}) is not ready for delivery", error.getMessageId());
+        		log.debug("Error (msgId={}) is not ready for delivery", error.getMessageId());
         }
         log.debug("Processed all Error signals in message");
         return InvocationResponse.CONTINUE;    	

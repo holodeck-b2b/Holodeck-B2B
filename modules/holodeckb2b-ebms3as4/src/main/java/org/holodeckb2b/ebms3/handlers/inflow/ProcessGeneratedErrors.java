@@ -29,43 +29,44 @@ import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.StorageManager;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 
 /**
  * Is the <i>in flow</i> handler that collects all ebMS errors generated during the processing of the received message
- * unit(s). The errors are grouped by the message unit they apply to. For each group a new <i>Error Signal</i> (a {@link 
- * ErrorMessage} object) is created and saved in both the database and message context. 
+ * unit(s). The errors are grouped by the message unit they apply to. For each group a new <i>Error Signal</i> (a {@link
+ * ErrorMessage} object) is created and saved in both the database and message context.
  * <p>This handler will log all created <i>Error Signals</i> in a special log (<i>"org.holodeckb2b.msgproc.errors.generated."
- * + «message protocol»</i>) but it is up to a next handler in the flow to decide if and how the Error Signals should be 
- * reported to the Sender of the message unit in error.  
- * 
+ * + «message protocol»</i>) but it is up to a next handler in the flow to decide if and how the Error Signals should be
+ * reported to the Sender of the message unit in error.
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.1.0 This handler only bundles the individually generated Errors into Error Signals. If and how to report
  *  			the signals is now done in {@link DetermineErrorReporting}
  */
 public class ProcessGeneratedErrors extends AbstractBaseHandler {
-	
+
     /**
      * Errors will always be logged to a special error log. Using the logging
      * configuration users can decide if this logging should be enabled and
      * how errors should be logged.
      */
     private Log     errorLog;
-    
+
     @Override
 	public void init(HandlerDescription handlerdesc) {
     	super.init(handlerdesc);
     	errorLog = LogFactory.getLog("org.holodeckb2b.msgproc.errors.generated." + handledMsgProtocol);
     }
-    
+
     @Override
-    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
-    																					throws PersistenceException {
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log)
+															throws StorageException, DuplicateMessageIdException {
         log.debug("Check if errors were generated");
         final Map<String, Collection<IEbmsError>> errors = procCtx.getGeneratedErrors();
 
@@ -73,42 +74,32 @@ public class ProcessGeneratedErrors extends AbstractBaseHandler {
             log.debug("No errors were generated during this in flow");
             return InvocationResponse.CONTINUE;
         }
-        
+
         log.trace("Processing error(s) generated during this in flow");
-        StorageManager storageManager = HolodeckB2BCore.getStorageManager();      
+        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
         // Create Error signal for each bundle, i.e. each referenced message
         for(final String refToMsgId : errors.keySet()) {
         	final boolean noRef = MessageProcessingContext.UNREFD_ERRORS.equals(refToMsgId);
-            log.debug("Creating new Error Signal for errors " + (noRef ? "without reference" : 
+            log.debug("Creating new Error Signal for errors " + (noRef ? "without reference" :
             													"referencing messsage unit with msgId=" + refToMsgId));
-            ErrorMessage tErrorMessage = new ErrorMessage(errors.get(refToMsgId));
-            tErrorMessage.setRefToMessageId(noRef ? null : refToMsgId);
-            log.trace("Saving new Error Signal in database");
-            final IErrorMessageEntity errorMessage = storageManager.storeOutGoingMessageUnit(tErrorMessage);
+            final IMessageUnitEntity muInError = noRef ? null
+	            									 : procCtx.getReceivedMessageUnits()
+	                										  .parallelStream()
+	                										  .filter(mu -> refToMsgId.equals(mu.getMessageId()))
+	                										  .findFirst()
+	                										  .get();
+            final IErrorMessageEntity errorMessage = storageManager.createErrorMsgFor(errors.get(refToMsgId),
+																					  muInError);
             // Log to the error log
             if (MessageUnitUtils.isWarning(errorMessage))
             	errorLog.warn(MessageUnitUtils.errorSignalToString(errorMessage));
         	else
         		errorLog.error(MessageUnitUtils.errorSignalToString(errorMessage));
-            
-            log.trace("Determine P-Mode for new Error Signal");
-            if (!noRef) {
-                // This collection of errors references one of the received message units.
-                final IMessageUnitEntity muInError = procCtx.getReceivedMessageUnits()
-                											.parallelStream()
-                											.filter(mu -> refToMsgId.equals(mu.getMessageId()))
-                											.findFirst()
-                											.get();
-                final String pmodeId = muInError.getPModeId();
-                if (!Utils.isNullOrEmpty(pmodeId)) {
-                    log.trace("Set P-Mode Id [" + pmodeId + "] for generated Error Message");
-                    storageManager.setPModeId(errorMessage, pmodeId);
-                }
-            }
-            // Save the new Error Message in the message context 
+
+            // Save the new Error Message in the message context
             procCtx.addSendingError(errorMessage);
         }
-        
+
         return InvocationResponse.CONTINUE;
-    }    
+    }
 }

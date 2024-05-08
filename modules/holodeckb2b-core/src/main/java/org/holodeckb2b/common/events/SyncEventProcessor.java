@@ -40,7 +40,7 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
  * informed.
  * <p>Whether an event must be reported is configured in the P-Mode that governs the processing of the referenced
  * message unit or in the global event configuration registered in the Holodeck B2B Core. As the P-Mode configuration
- * takes precedence over the global one it is searched first for a event handler.  
+ * takes precedence over the global one it is searched first for a event handler.
  * <p>This implementation processes the events directly when raised to the processor, i.e. processing of the event is
  * done as part of the message processing. This processor only passes raised events to the handlers, there is no
  * archiving.
@@ -60,7 +60,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
     public String getName() {
     	return "HB2B Sync Event Processor";
     }
-    
+
     /**
      * Raises an event for processing.
      * <p>The P-Mode of the referenced message unit is checked for configured event handlers and each handler that can
@@ -82,33 +82,37 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
         log.trace("A {} event [{}] was raised for {} with msgId={}", eventType, event.getId(), msgUnitType, messageId);
         final IMessageUnit subject = event.getSubject();
         boolean continueProcessing = true;
-        log.trace("Check event handler configuration in the P-Mode");         	
         try {
         	final ILeg leg = PModeUtils.getLeg(subject);
         	final List<IMessageProcessingEventConfiguration> eventHandlers = leg == null ? null :
         															leg.getMessageProcessingEventConfiguration();
         	continueProcessing = handleEvent(eventHandlers, event);
+        	if (continueProcessing) {
+        		log.trace("Check generic event handler configuration on the P-Mode");
+        		continueProcessing = handleEvent(HolodeckB2BCoreInterface.getPModeSet().get(subject.getPModeId()).
+        											getMessageProcessingEventConfiguration(), event);
+        	}
         } catch (IllegalStateException pmodeNotAvailable) {
         	// The P-Mode is not available anymore (should not happen as the message unit is current in process)
             log.error("The P-Mode for the message unit [{}] is not available!", subject.getMessageId());
-        }        
+        }
         if (continueProcessing) {
         	log.trace("Check global event handler configuration");
         	handleEvent(HolodeckB2BCoreInterface.getMessageProcessingEventConfiguration(), event);
-        }            
+        }
     }
 
 	/**
 	 * Helper method to check if and handle the given event is handled by any of the given event handlers.
-	 *  
-	 * @param eventHandlers		The set of configured event handlers 
+	 *
+	 * @param eventHandlers		The set of configured event handlers
 	 * @param event				The event to be handled
 	 */
 	private boolean handleEvent(List<IMessageProcessingEventConfiguration> eventHandlers, IMessageProcessingEvent event)
 	{
 		if (Utils.isNullOrEmpty(eventHandlers))
 			return true;
-		
+
         final String eventType = event.getClass().getSimpleName();
         final String msgUnitType = MessageUnitUtils.getMessageUnitName(event.getSubject());
 		// Check each configured if it needs to handle this event
@@ -123,7 +127,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
 				try {
 					factory = (IMessageProcessingEventHandlerFactory) Class.forName(handlerClassname).newInstance();
 				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-					log.error("Could not create factory instance (specified class name={}) due to a {}", 
+					log.error("Could not create factory instance (specified class name={}) due to a {}",
 								c.getFactoryClass(), ex.getClass().getSimpleName());
 					continue;
 				}
@@ -136,7 +140,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
 					factory.createHandler().handleEvent(event);
 					log.debug("{} [id={}] for {} handled by {}", eventType, event.getId(), msgUnitType, handlerClassname);
 					if (!c.continueEventProcessing()) {
-						log.debug("No further processing of {} needed after handling by {}", eventType, 
+						log.debug("No further processing of {} needed after handling by {}", eventType,
 								  handlerClassname);
 						return false;
 					}
@@ -145,7 +149,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
 								eventType, event.getId(), handlerClassname, Utils.getExceptionTrace(t));
 				}
 			}
-		}		
+		}
 		return true;
 	}
 

@@ -16,9 +16,6 @@
  */
 package org.holodeckb2b.ebms3.security;
 
-import java.security.Security;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderCreator;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderProcessor;
@@ -37,6 +34,13 @@ import org.holodeckb2b.security.trust.DefaultCertManager;
  * 			manager has been split off.
  */
 public class DefaultProvider implements ISecurityProvider {
+	/**
+	 * Name of the P-Mode parameter to specify that the receiver's certificate mete-data should be included in a
+	 * WS-Security token reference. The value of the parameter is a boolean and should be "true" to include the
+	 * certificate data in a <code>wss:SecurityTokenReference</code> element.
+	 */
+	static final String	P_CERT_AS_WSSECREF = "useWSSecRef";
+
     /**
      * {@inheritDoc}
      */
@@ -47,7 +51,6 @@ public class DefaultProvider implements ISecurityProvider {
 
     @Override
     public void init() throws SecurityProcessingException {
-    	Security.addProvider(new BouncyCastleProvider());
     }
 
     @Override

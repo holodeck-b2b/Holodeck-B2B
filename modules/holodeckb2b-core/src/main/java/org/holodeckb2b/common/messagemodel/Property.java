@@ -16,8 +16,6 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
-import java.io.Serializable;
-
 import org.holodeckb2b.interfaces.general.IProperty;
 
 /**
@@ -27,9 +25,7 @@ import org.holodeckb2b.interfaces.general.IProperty;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public class Property implements IProperty, Serializable {
-	private static final long serialVersionUID = 6415005102224038844L;
-
+public class Property implements IProperty {
 	private String  name;
     private String  value;
     private String  type;

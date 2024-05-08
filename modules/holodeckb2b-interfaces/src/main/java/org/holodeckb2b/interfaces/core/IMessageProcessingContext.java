@@ -21,12 +21,12 @@ import java.util.Map;
 
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
+import org.holodeckb2b.interfaces.storage.IReceiptEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 
 /**
  * Is the interface that represents the Holodeck B2B <i>message processing context</i> during the execution of the
@@ -190,7 +190,7 @@ public interface IMessageProcessingContext {
 	/**
 	 * Retrieves all entity objects of message units that are received in the current operation.
 	 *
-	 * @return      collection of {@link IMessageUnitEntity} objects for the message units in the received message.
+	 * @return      collection of {@link IMessageUnitInfo} objects for the message units in the received message.
 	 */
 	Collection<IMessageUnitEntity> getReceivedMessageUnits();
 
@@ -206,7 +206,7 @@ public interface IMessageProcessingContext {
 	 * Retrieves the collection of entity objects for all message units that are (to be) or were previously sent in the
 	 * current operation.
 	 *
-	 * @return      {@link Collection} of {@link IMessageUnitEntity} objects for the message units that were sent.
+	 * @return      {@link Collection} of {@link IMessageUnitInfo} objects for the message units that were sent.
 	 */
 	Collection<IMessageUnitEntity> getSendingMessageUnits();
 

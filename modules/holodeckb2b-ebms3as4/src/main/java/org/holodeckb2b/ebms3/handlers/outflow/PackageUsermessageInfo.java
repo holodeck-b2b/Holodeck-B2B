@@ -22,7 +22,7 @@ import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:UserMessage</code> element in the ebMS messaging

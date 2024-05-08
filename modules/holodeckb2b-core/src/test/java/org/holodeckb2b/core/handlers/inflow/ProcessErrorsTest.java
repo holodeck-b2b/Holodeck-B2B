@@ -32,12 +32,12 @@ import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.StorageManager;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -94,7 +94,7 @@ public class ProcessErrorsTest {
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
 		storageManager.storeOutGoingMessageUnit(userMessage);
 
-		IErrorMessageEntity errorMessageEntity = storageManager.storeIncomingMessageUnit(errorMessage);
+		IErrorMessageEntity errorMessageEntity = storageManager.storeReceivedMessageUnit(errorMessage);
 		storageManager.setProcessingState(errorMessageEntity, ProcessingState.RECEIVED);
 
 		IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
@@ -139,7 +139,7 @@ public class ProcessErrorsTest {
 		ErrorMessage errorMessage = new ErrorMessage(ebmsError);
 		errorMessage.setMessageId(MessageIdUtils.createMessageId());
 		
-		IErrorMessageEntity errorMessageEntity = storageManager.storeIncomingMessageUnit(errorMessage);
+		IErrorMessageEntity errorMessageEntity = storageManager.storeReceivedMessageUnit(errorMessage);
 		storageManager.setProcessingState(errorMessageEntity, ProcessingState.RECEIVED);
 
 		procCtx.addReceivedError(errorMessageEntity);

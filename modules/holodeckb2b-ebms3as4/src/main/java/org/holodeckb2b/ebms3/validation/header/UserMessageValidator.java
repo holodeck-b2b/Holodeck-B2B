@@ -74,7 +74,7 @@ public class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessa
         checkPropertiesNames(userMessageInfo.getMessageProperties(), "Message", validationErrors);
 
         // Check PayloadInfo, in this validator only the part properties are checked
-        final Collection<IPayload> payloadInfo = userMessageInfo.getPayloads();
+        final Collection<? extends IPayload> payloadInfo = userMessageInfo.getPayloads();
         if (!Utils.isNullOrEmpty(payloadInfo))
             for (IPayload p : payloadInfo)
                 checkPropertiesNames(p.getProperties(), "Part", validationErrors);
@@ -134,7 +134,7 @@ public class UserMessageValidator extends GeneralMessageUnitValidator<IUserMessa
         checkPropertiesValues(userMessageInfo.getMessageProperties(), "Message", validationErrors);
 
         // Check PayloadInfo, in this validator only the part properties are checked
-        final Collection<IPayload> payloadInfo = userMessageInfo.getPayloads();
+        final Collection<? extends IPayload> payloadInfo = userMessageInfo.getPayloads();
         if (!Utils.isNullOrEmpty(payloadInfo))
             for (IPayload p : payloadInfo)
                 checkPropertiesValues(p.getProperties(), "Part", validationErrors);

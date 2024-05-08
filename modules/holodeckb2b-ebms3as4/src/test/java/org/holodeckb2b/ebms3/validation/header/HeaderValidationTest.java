@@ -48,18 +48,17 @@ import org.holodeckb2b.common.pmode.PartyId;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.HolodeckB2BCoreModule;
 import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.StorageManager;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.core.validation.header.HeaderValidationHandler;
 import org.holodeckb2b.ebms3.module.EbMS3Module;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
+import org.holodeckb2b.interfaces.storage.IReceiptEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -120,7 +119,7 @@ public class HeaderValidationTest {
     	
     	// Setting input message property
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(userMessage);
+        IUserMessageEntity userMessageEntity = updateManager.storeReceivedMessageUnit(userMessage);
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
@@ -153,7 +152,7 @@ public class HeaderValidationTest {
         // Setting input PullRequest property
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         IPullRequestEntity pullRequestEntity =
-                updateManager.storeIncomingMessageUnit(pullRequest);
+                updateManager.storeReceivedMessageUnit(pullRequest);
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setPullRequest(pullRequestEntity);
         
@@ -188,7 +187,7 @@ public class HeaderValidationTest {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
 
         IReceiptEntity receiptEntity =
-                updateManager.storeIncomingMessageUnit(receipt);
+                updateManager.storeReceivedMessageUnit(receipt);
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addReceivedReceipt(receiptEntity);
 
@@ -218,7 +217,7 @@ public class HeaderValidationTest {
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
 
         IErrorMessageEntity errorMessageEntity =
-                updateManager.storeIncomingMessageUnit(error);
+                updateManager.storeReceivedMessageUnit(error);
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addReceivedError(errorMessageEntity);
 

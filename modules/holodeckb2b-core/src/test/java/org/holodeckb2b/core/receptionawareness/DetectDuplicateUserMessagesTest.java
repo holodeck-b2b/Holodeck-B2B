@@ -30,16 +30,16 @@ import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.ReceptionAwarenessConfig;
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.StorageManager;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -77,7 +77,7 @@ public class DetectDuplicateUserMessagesTest {
 
     @Test    public void testDoProcessing() throws Exception {
 
-        PMode pmode = TestUtils.create1WayReceivePushPMode();        
+        PMode pmode = HB2BTestUtils.create1WayReceivePMode();        
         Leg leg = pmode.getLeg(Label.REQUEST);
         
         // Turning on duplicate detection
@@ -91,7 +91,7 @@ public class DetectDuplicateUserMessagesTest {
         userMessage.setMessageId(UUID.randomUUID().toString());
         userMessage.setPModeId(pmode.getId());
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
-        IUserMessageEntity userMessageEntity = updateManager.storeIncomingMessageUnit(userMessage);
+        IUserMessageEntity userMessageEntity = updateManager.storeReceivedMessageUnit(userMessage);
         
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);

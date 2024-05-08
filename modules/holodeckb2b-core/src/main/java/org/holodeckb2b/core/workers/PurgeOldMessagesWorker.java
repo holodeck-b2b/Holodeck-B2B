@@ -16,25 +16,19 @@
  */
 package org.holodeckb2b.core.workers;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Map;
 
-import org.holodeckb2b.common.events.impl.MessageUnitPurged;
-import org.holodeckb2b.common.messagemodel.Payload;
-import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.common.workers.AbstractWorkerTask;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.events.IMessageUnitPurged;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.persistency.IQueryManager;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IQueryManager;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the default <i>purge worker</i> responsible for cleaning up information on old and processed messages, i.e. remove
@@ -73,7 +67,7 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
         try {
             log.trace("Get all message units that changed state before " + expDateString);
              experidMsgUnits = queryManager.getMessageUnitsWithLastStateChangedBefore(expirationDate.getTime());
-        } catch (final PersistenceException dbe) {
+        } catch (final StorageException dbe) {
             log.error("Could not get the list of expired message units from database! Error details: "
                      + dbe.getMessage());
         }
@@ -82,50 +76,13 @@ public class PurgeOldMessagesWorker extends AbstractWorkerTask {
             return;
         }
 
-        log.debug("Removing " + experidMsgUnits.size() + " expired message units.");
+        log.debug("Removing {} expired message units", experidMsgUnits.size());
         for(final IMessageUnitEntity msgUnit : experidMsgUnits) {
-            log.trace("Removing " + MessageUnitUtils.getMessageUnitName(msgUnit) + " with msgId: " 
-            			+ msgUnit.getMessageId());
-            try {
-            	// Complete loading is needed as it is not done when querying
-            	log.trace("Load all meta-data of message unit");
-                queryManager.ensureCompletelyLoaded(msgUnit);
-                // If the message unit to delete is a User Message we need to have a temp object so we can change the
-                // payload location info as we may need to trigger purge event.
-                UserMessage tmpUserMessage = null;
-                if (msgUnit instanceof IUserMessage) {
-                    log.trace("Delete the payload data of the User Message");
-                    tmpUserMessage = new UserMessage((IUserMessage) msgUnit);
-                    final Collection<IPayload> payloads = tmpUserMessage.getPayloads();
-                    if (!Utils.isNullOrEmpty(payloads)) {
-                        for (final IPayload pl : payloads) {
-                            if (Utils.isNullOrEmpty(pl.getContentLocation()))
-                                log.trace("No payload location provided for payload [" + pl.getPayloadURI() + "]");
-                            else {
-                                final File plFile = new File(pl.getContentLocation());
-                                if (plFile.exists() && plFile.delete()) {
-                                    log.trace("Removed payload data file " + pl.getContentLocation());
-                                    // Clear the payload location
-                                    ((Payload) pl).setContentLocation(null);
-                                }  else if (plFile.exists())
-                                    log.error("Could not remove payload data file " + pl.getContentLocation()
-                                                + ". Remove manually");
-                            }
-                        }
-                    } else
-                        log.trace("User Message [" + msgUnit.getMessageId() + "] has no payloads");
-                }
-                log.trace("Removing meta-data of message unit [" + msgUnit.getMessageId() + "] from database.");
-                HolodeckB2BCore.getStorageManager().deleteMessageUnit(msgUnit);
-                log.debug(MessageUnitUtils.getMessageUnitName(msgUnit) + " [msgId=" + msgUnit.getMessageId() 
-                			+ "] is removed");
-
-                // Raise event so extension can process purge actions (for User Messages only)
-                if (msgUnit instanceof IUserMessage)
-                    HolodeckB2BCore.getEventProcessor().raiseEvent(new MessageUnitPurged(tmpUserMessage));
-            } catch (final PersistenceException dbe) {
-                log.error("Could not remove the meta-data of " + MessageUnitUtils.getMessageUnitName(msgUnit)
-                        + " [msgId=" + msgUnit.getMessageId() + "]. Error details: " + dbe.getMessage());
+        	try {
+        		HolodeckB2BCore.getStorageManager().deleteMessageUnit(msgUnit);
+            } catch (final StorageException dbe) {
+                log.error("Could not remove data of {} (msgId={})", MessageUnitUtils.getMessageUnitName(msgUnit), 
+                			msgUnit.getMessageId());
             }
         }
     }

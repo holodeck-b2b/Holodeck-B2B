@@ -16,7 +16,6 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,26 +37,24 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public abstract class MessageUnit implements IMessageUnit, Serializable {
-	private static final long serialVersionUID = -6487452438799675994L;
-
+public abstract class MessageUnit implements IMessageUnit {
 	private Direction  direction;
     private String  messageId;
     private Date    timestamp;
     private String  refToMessageId;
     private ArrayList<IMessageUnitProcessingState>  states;
     private String  pmodeId;
-    
+
     /**
-     * Creates a new message unit instance of the correct type using the given message unit as source. 
-     * 
+     * Creates a new message unit instance of the correct type using the given message unit as source.
+     *
      * @param 	m	The message unit to copy the data from
      * @return	New message unit instance with copy of the data
      * @since 5.0.0
      */
     public static MessageUnit copyOf(IMessageUnit m) {
     	if (m instanceof IUserMessage)
-    		return new UserMessage((IUserMessage) m);    	
+    		return new UserMessage((IUserMessage) m);
     	else if (m instanceof IPullRequest)
     		return new PullRequest((IPullRequest) m);
     	else if (m instanceof IReceipt)
@@ -67,7 +64,7 @@ public abstract class MessageUnit implements IMessageUnit, Serializable {
     	else
     		throw new IllegalArgumentException("Unknown message unit type");
     }
-    
+
     /**
      * Default constructor to initialize as empty meta-data object
      */
@@ -207,9 +204,8 @@ public abstract class MessageUnit implements IMessageUnit, Serializable {
      *
      * @return  The {@link IMessageUnitProcessingState} the message unit is currently in
      */
-    @Override
 	public IMessageUnitProcessingState getCurrentProcessingState() {
-        return states != null && states.size() > 0 ? states.get(states.size() - 1) : null;
+        return !Utils.isNullOrEmpty(states) ? states.get(states.size() - 1) : null;
     }
 
     /**
@@ -233,10 +229,20 @@ public abstract class MessageUnit implements IMessageUnit, Serializable {
      * @param state The new current processing state
      */
     public void setProcessingState(final ProcessingState state) {
+    	this.setProcessingState(state, null);
+    }
+
+    /**
+     * Sets a new current processing state for this message unit.
+     *
+     * @param state The new current processing state
+     * @param desc  A description for the new state
+     */
+    public void setProcessingState(final ProcessingState state, final String desc) {
         if (state != null) {
             if (states == null)
                 states = new ArrayList<>();
-            states.add(new MessageProcessingState(state));
+            states.add(new MessageProcessingState(state, desc));
         }
     }
 

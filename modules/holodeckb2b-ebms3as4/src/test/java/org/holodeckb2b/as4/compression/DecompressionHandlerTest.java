@@ -41,7 +41,7 @@ import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -85,7 +85,7 @@ public class DecompressionHandlerTest {
         mc.setAttachmentMap(attachments);
 
         // Setting input message property
-        IUserMessageEntity userMessageEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
+        IUserMessageEntity userMessageEntity = HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(userMessage);
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
 

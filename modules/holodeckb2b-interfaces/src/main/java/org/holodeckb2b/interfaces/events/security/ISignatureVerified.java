@@ -19,10 +19,10 @@ package org.holodeckb2b.interfaces.events.security;
 import java.util.Map;
 
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 /**
  * Is the <i>message processing event</i> that indicates that the signature of a received message unit has been verified
@@ -36,17 +36,17 @@ import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 public interface ISignatureVerified extends IMessageProcessingEvent {
 
 	/**
-	 * Gets the information on the trust validation executed by the installed {@link ICertificateManager} of the 
+	 * Gets the information on the trust validation executed by the installed {@link ICertificateManager} of the
 	 * certificate that was used for signing the message unit.
 	 * <p>Although the validation of trust should always be executed by the Security Provider there may be cases where
-	 * no validation occurs. In such cases this method should not return a result. 
-	 *   
-	 * @return	A {@link IValidationResult} object with the results of the trust validation. <code>null</code> if no 
+	 * no validation occurs. In such cases this method should not return a result.
+	 *
+	 * @return	A {@link IValidationResult} object with the results of the trust validation. <code>null</code> if no
 	 * 			validation has been performed.
 	 * @since 5.0.0
 	 */
 	IValidationResult	getTrustValidationResult();
-	
+
     /**
      * Gets the information on the digest contained in the verified signature for the ebMS header of the message unit
      * that is the <i>subject</i> of this event.
@@ -61,6 +61,6 @@ public interface ISignatureVerified extends IMessageProcessingEvent {
      * <p>NOTE: This method should only be used when the subject of the event is a User Message.
      *
      * @return  A <code>Map</code> linking the digest meta-data to each payload from the user message.
-     */    
-	Map<IPayload, ISignedPartMetadata>   getPayloadDigests();
+     */
+	Map<IPayloadEntity, ISignedPartMetadata>   getPayloadDigests();
 }

@@ -19,8 +19,8 @@ package org.holodeckb2b.ebms3.security.util;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.ebms3.security.DefaultSecurityAlgorithms;
 import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
+import org.holodeckb2b.interfaces.pmode.IKeyAgreement;
 import org.holodeckb2b.interfaces.pmode.IKeyTransport;
-import org.holodeckb2b.interfaces.security.X509ReferenceType;
 
 /**
  * Is a decorator for a {@link IEncryptionConfiguration} instance to ensure that the default security algorithms are
@@ -36,7 +36,12 @@ public class EncryptionConfigWithDefaults implements IEncryptionConfiguration {
     /**
      * Decorator also for the key transport settings
      */
-    private IKeyTransport keytransportCfg = null;
+    private KTConfigWithDefaults keyTransportCfg = null;
+    /**
+     * Decorator also for the key agreement settings
+     * @since 7.0.0
+     */
+    private KAConfigWithDefaults keyAgreementCfg = null;
 
     /**
      * Create a new decorator for the given source configuration
@@ -45,7 +50,10 @@ public class EncryptionConfigWithDefaults implements IEncryptionConfiguration {
      */
     public EncryptionConfigWithDefaults(IEncryptionConfiguration original) {
         this.original = original;
-        this.keytransportCfg = new KeyTransportConfigWithDefaults(original.getKeyTransport());
+        if (original.getKeyAgreement() != null)
+        	this.keyAgreementCfg = new KAConfigWithDefaults(original.getKeyAgreement());
+        else
+        	this.keyTransportCfg = new KTConfigWithDefaults(original.getKeyTransport());
     }
 
     @Override
@@ -66,50 +74,11 @@ public class EncryptionConfigWithDefaults implements IEncryptionConfiguration {
 
     @Override
     public IKeyTransport getKeyTransport() {
-        return keytransportCfg;
+        return keyTransportCfg;
     }
 
-    /**
-     * Is a decorator for a {@link IKeyTransport} instance to ensure that the default security algorithms are returned
-     * if none is specified by the source instance.
-     */
-    public class KeyTransportConfigWithDefaults implements IKeyTransport {
-        /**
-         * The source configuration
-         */
-        private IKeyTransport original;
-        /**
-         * Create a new decorator object
-         *
-         * @param original The source configuration
-         */
-        public KeyTransportConfigWithDefaults(IKeyTransport original) {
-            this.original = original;
-        }
-
-        @Override
-        public String getAlgorithm() {
-            return (original != null && !Utils.isNullOrEmpty(original.getAlgorithm())) ? original.getAlgorithm() :
-                                                                               DefaultSecurityAlgorithms.KEY_TRANSPORT;
-        }
-
-        @Override
-        public String getMGFAlgorithm() {
-            return original != null && !Utils.isNullOrEmpty(original.getMGFAlgorithm()) ?
-            								  original.getMGFAlgorithm() : DefaultSecurityAlgorithms.KEY_TRANSPORT_MGF;
-        }
-
-        @Override
-        public String getDigestAlgorithm() {
-            return (original != null && !Utils.isNullOrEmpty(original.getDigestAlgorithm())) ?
-                                                                               original.getDigestAlgorithm() :
-                                                                               DefaultSecurityAlgorithms.MESSAGE_DIGEST;
-        }
-
-        @Override
-        public X509ReferenceType getKeyReferenceMethod() {
-            return (original != null && original.getKeyReferenceMethod() != null) ? original.getKeyReferenceMethod() :
-                                                                                DefaultSecurityAlgorithms.KEY_REFERENCE;
-        }
+    @Override
+    public IKeyAgreement getKeyAgreement() {
+    	return keyAgreementCfg;
     }
 }

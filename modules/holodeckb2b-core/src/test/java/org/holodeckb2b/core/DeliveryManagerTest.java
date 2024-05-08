@@ -1,6 +1,11 @@
 package org.holodeckb2b.core;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Field;
 import java.util.UUID;
@@ -16,27 +21,25 @@ import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.PullRequestFlow;
 import org.holodeckb2b.common.pmode.ReceiptConfiguration;
 import org.holodeckb2b.common.pmode.UserMessageFlow;
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
+import org.holodeckb2b.common.testhelpers.TestDeliveryMethod;
 import org.holodeckb2b.common.testhelpers.TestEventProcessor;
-import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.commons.Pair;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.core.config.InternalConfiguration;
-import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliveryMethod;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.events.IMessageDelivered;
 import org.holodeckb2b.interfaces.events.IMessageDeliveryFailure;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
-import org.holodeckb2b.interfaces.pmode.IPMode;
-import org.holodeckb2b.interfaces.pmode.PModeSetException;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IReceiptEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -94,14 +97,14 @@ public class DeliveryManagerTest {
 		
 	@Test
 	public void testRejectNotReady() throws Exception {
-		PMode pmode = TestUtils.create1WayReceivePushPMode();        
+		PMode pmode = HB2BTestUtils.create1WayReceivePMode();        
         HolodeckB2BCore.getPModeSet().add(pmode);
 
 		UserMessage userMessage = new UserMessage();
 		userMessage.setMessageId(MessageIdUtils.createMessageId());
 		userMessage.setPModeId(pmode.getId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IUserMessageEntity umEntity = storageManager.storeIncomingMessageUnit(userMessage);
+		IUserMessageEntity umEntity = storageManager.storeReceivedMessageUnit(userMessage);
 		storageManager.setProcessingState(umEntity, ProcessingState.RECEIVED);
 		storageManager.setProcessingState(umEntity, ProcessingState.PROCESSING);
 		storageManager.setProcessingState(umEntity, ProcessingState.FAILURE);
@@ -120,7 +123,7 @@ public class DeliveryManagerTest {
 
 		HolodeckB2BCoreInterface.getDeliveryManager().registerDeliverySpec(delSpec);
 		
-		PMode pmode = TestUtils.create1WayReceivePushPMode();
+		PMode pmode = HB2BTestUtils.create1WayReceivePMode();
 		DeliveryConfiguration pmodeSpec = new DeliveryConfiguration();
 		pmodeSpec.setId(delSpec.getId());
 		pmode.getLeg(Label.REQUEST).setDefaultDelivery(pmodeSpec);
@@ -131,7 +134,7 @@ public class DeliveryManagerTest {
 		userMessage.setMessageId(MessageIdUtils.createMessageId());
 		userMessage.setPModeId(pmode.getId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IUserMessageEntity umEntity = storageManager.storeIncomingMessageUnit(userMessage);
+		IUserMessageEntity umEntity = storageManager.storeReceivedMessageUnit(userMessage);
 		storageManager.setProcessingState(umEntity, ProcessingState.READY_FOR_DELIVERY);
 		
 		HolodeckB2BCoreInterface.getDeliveryManager().deliver(umEntity);
@@ -156,7 +159,7 @@ public class DeliveryManagerTest {
 		
 		delman.registerDeliverySpec(delSpec);
 		
-		PMode pmode = TestUtils.create1WayReceivePushPMode();
+		PMode pmode = HB2BTestUtils.create1WayReceivePMode();
 		DeliveryConfiguration pmodeSpec = new DeliveryConfiguration();
 		pmodeSpec.setId(delSpec.getId());
 		pmode.getLeg(Label.REQUEST).setDefaultDelivery(pmodeSpec);
@@ -167,7 +170,7 @@ public class DeliveryManagerTest {
 		userMessage.setMessageId(MessageIdUtils.createMessageId());
 		userMessage.setPModeId(pmode.getId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IUserMessageEntity umEntity = storageManager.storeIncomingMessageUnit(userMessage);
+		IUserMessageEntity umEntity = storageManager.storeReceivedMessageUnit(userMessage);
 		storageManager.setProcessingState(umEntity, ProcessingState.READY_FOR_DELIVERY);
 		
 		delman.deliver(umEntity);
@@ -319,7 +322,7 @@ public class DeliveryManagerTest {
 	
 	@Test
 	public void testIgnoreReceipt() throws Exception {
-		PMode pmode = TestUtils.create1WaySendPushPMode();		
+		PMode pmode = HB2BTestUtils.create1WaySendPushPMode();		
 		ReceiptConfiguration rcptCfg = new ReceiptConfiguration();
 		rcptCfg.setNotifyReceiptToBusinessApplication(false);
 		pmode.getLeg(Label.REQUEST).setReceiptConfiguration(rcptCfg);
@@ -330,7 +333,7 @@ public class DeliveryManagerTest {
 		receipt.setMessageId(MessageIdUtils.createMessageId());
 		receipt.setPModeId(pmode.getId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IReceiptEntity rEntity = storageManager.storeIncomingMessageUnit(receipt);
+		IReceiptEntity rEntity = storageManager.storeReceivedMessageUnit(receipt);
 		storageManager.setProcessingState(rEntity, ProcessingState.READY_FOR_DELIVERY);
 		
 		HolodeckB2BCoreInterface.getDeliveryManager().deliver(rEntity);
@@ -345,7 +348,7 @@ public class DeliveryManagerTest {
 	
 	@Test
 	public void testReceiptDefault() throws Exception {
-		PMode pmode = TestUtils.create1WaySendPushPMode();		
+		PMode pmode = HB2BTestUtils.create1WaySendPushPMode();		
 		ReceiptConfiguration rcptCfg = new ReceiptConfiguration();
 		rcptCfg.setNotifyReceiptToBusinessApplication(true);
 		pmode.getLeg(Label.REQUEST).setReceiptConfiguration(rcptCfg);
@@ -361,7 +364,7 @@ public class DeliveryManagerTest {
 		receipt.setMessageId(MessageIdUtils.createMessageId());
 		receipt.setPModeId(pmode.getId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IReceiptEntity rEntity = storageManager.storeIncomingMessageUnit(receipt);
+		IReceiptEntity rEntity = storageManager.storeReceivedMessageUnit(receipt);
 		storageManager.setProcessingState(rEntity, ProcessingState.READY_FOR_DELIVERY);
 		
 		HolodeckB2BCoreInterface.getDeliveryManager().deliver(rEntity);
@@ -380,7 +383,7 @@ public class DeliveryManagerTest {
 	
 	@Test
 	public void testReceiptSpecific() throws Exception {
-		PMode pmode = TestUtils.create1WaySendPushPMode();		
+		PMode pmode = HB2BTestUtils.create1WaySendPushPMode();		
 		ReceiptConfiguration rcptCfg = new ReceiptConfiguration();
 		rcptCfg.setNotifyReceiptToBusinessApplication(true);
 		DeliveryConfiguration rcptDelSpec = new DeliveryConfiguration();
@@ -401,7 +404,7 @@ public class DeliveryManagerTest {
 		receipt.setMessageId(MessageIdUtils.createMessageId());
 		receipt.setPModeId(pmode.getId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IReceiptEntity rEntity = storageManager.storeIncomingMessageUnit(receipt);
+		IReceiptEntity rEntity = storageManager.storeReceivedMessageUnit(receipt);
 		storageManager.setProcessingState(rEntity, ProcessingState.READY_FOR_DELIVERY);
 		
 		HolodeckB2BCoreInterface.getDeliveryManager().deliver(rEntity);
@@ -420,7 +423,7 @@ public class DeliveryManagerTest {
 	
 	@Test
 	public void testIgnoreError() throws Exception {
-		PMode pmode = TestUtils.create1WaySendPushPMode();
+		PMode pmode = HB2BTestUtils.create1WaySendPushPMode();
 		ErrorHandlingConfig errCfg = new ErrorHandlingConfig();
 		errCfg.setNotifyErrorToBusinessApplication(false);
 		UserMessageFlow umFlow = new UserMessageFlow();
@@ -433,7 +436,7 @@ public class DeliveryManagerTest {
 		error.setMessageId(MessageIdUtils.createMessageId());
 		error.setPModeId(pmode.getId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IErrorMessageEntity errEntity = storageManager.storeIncomingMessageUnit(error);
+		IErrorMessageEntity errEntity = storageManager.storeReceivedMessageUnit(error);
 		storageManager.setPModeAndLeg(errEntity, new Pair<>(pmode, Label.REQUEST));
 		storageManager.setProcessingState(errEntity, ProcessingState.READY_FOR_DELIVERY);
 		
@@ -449,7 +452,7 @@ public class DeliveryManagerTest {
 	
 	@Test
 	public void testErrorDefault() throws Exception {
-		PMode pmode = TestUtils.create1WaySendPushPMode();		
+		PMode pmode = HB2BTestUtils.create1WaySendPushPMode();		
 		ErrorHandlingConfig errCfg = new ErrorHandlingConfig();
 		errCfg.setNotifyErrorToBusinessApplication(true);
 		UserMessageFlow umFlow = new UserMessageFlow();
@@ -467,7 +470,7 @@ public class DeliveryManagerTest {
 		error.setMessageId(MessageIdUtils.createMessageId());
 		error.setPModeId(pmode.getId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IErrorMessageEntity errEntity = storageManager.storeIncomingMessageUnit(error);
+		IErrorMessageEntity errEntity = storageManager.storeReceivedMessageUnit(error);
 		storageManager.setPModeAndLeg(errEntity, new Pair<>(pmode, Label.REQUEST));
 		storageManager.setProcessingState(errEntity, ProcessingState.READY_FOR_DELIVERY);
 		
@@ -487,7 +490,7 @@ public class DeliveryManagerTest {
 	
 	@Test
 	public void testErrorSpecific() throws Exception {
-		PMode pmode = TestUtils.create1WaySendPushPMode();		
+		PMode pmode = HB2BTestUtils.create1WaySendPushPMode();		
 		ErrorHandlingConfig errCfg = new ErrorHandlingConfig();
 		errCfg.setNotifyErrorToBusinessApplication(true);
 		DeliveryConfiguration errDelSpec = new DeliveryConfiguration();
@@ -510,7 +513,7 @@ public class DeliveryManagerTest {
 		error.setMessageId(MessageIdUtils.createMessageId());
 		error.setPModeId(pmode.getId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IErrorMessageEntity errEntity = storageManager.storeIncomingMessageUnit(error);
+		IErrorMessageEntity errEntity = storageManager.storeReceivedMessageUnit(error);
 		storageManager.setPModeAndLeg(errEntity, new Pair<>(pmode, Label.REQUEST));
 		storageManager.setProcessingState(errEntity, ProcessingState.READY_FOR_DELIVERY);
 		
@@ -530,7 +533,7 @@ public class DeliveryManagerTest {
 	
 	@Test
 	public void testIgnorePullError() throws Exception {
-		PMode pmode = TestUtils.create1WaySendPushPMode();
+		PMode pmode = HB2BTestUtils.create1WaySendPushPMode();
 		pmode.setMepBinding(EbMSConstants.ONE_WAY_PULL);
 		ErrorHandlingConfig errCfg = new ErrorHandlingConfig();
 		errCfg.setNotifyErrorToBusinessApplication(false);
@@ -544,7 +547,7 @@ public class DeliveryManagerTest {
 		error.setMessageId(MessageIdUtils.createMessageId());
 		error.setPModeId(pmode.getId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IErrorMessageEntity errEntity = storageManager.storeIncomingMessageUnit(error);
+		IErrorMessageEntity errEntity = storageManager.storeReceivedMessageUnit(error);
 		storageManager.setPModeAndLeg(errEntity, new Pair<>(pmode, Label.REQUEST));
 		storageManager.setProcessingState(errEntity, ProcessingState.READY_FOR_DELIVERY);
 		
@@ -560,7 +563,7 @@ public class DeliveryManagerTest {
 	
 	@Test
 	public void testPullErrorWithDefault() throws Exception {
-		PMode pmode = TestUtils.create1WaySendPushPMode();
+		PMode pmode = HB2BTestUtils.create1WaySendPushPMode();
 		pmode.setMepBinding(EbMSConstants.ONE_WAY_PULL);
 		ErrorHandlingConfig errCfg = new ErrorHandlingConfig();
 		errCfg.setNotifyErrorToBusinessApplication(true);
@@ -580,7 +583,7 @@ public class DeliveryManagerTest {
 		error.setMessageId(MessageIdUtils.createMessageId());
 		error.setPModeId(pmode.getId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IErrorMessageEntity errEntity = storageManager.storeIncomingMessageUnit(error);
+		IErrorMessageEntity errEntity = storageManager.storeReceivedMessageUnit(error);
 		storageManager.setPModeAndLeg(errEntity, new Pair<>(pmode, Label.REQUEST));
 		storageManager.setProcessingState(errEntity, ProcessingState.READY_FOR_DELIVERY);
 		
@@ -600,7 +603,7 @@ public class DeliveryManagerTest {
 	
 	@Test
 	public void testPullErrorSpecific() throws Exception {
-		PMode pmode = TestUtils.create1WaySendPushPMode();
+		PMode pmode = HB2BTestUtils.create1WaySendPushPMode();
 		pmode.setMepBinding(EbMSConstants.ONE_WAY_PULL);
 		ErrorHandlingConfig errCfg = new ErrorHandlingConfig();
 		errCfg.setNotifyErrorToBusinessApplication(true);
@@ -619,7 +622,7 @@ public class DeliveryManagerTest {
 		error.setMessageId(MessageIdUtils.createMessageId());
 		error.setPModeId(pmode.getId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IErrorMessageEntity errEntity = storageManager.storeIncomingMessageUnit(error);
+		IErrorMessageEntity errEntity = storageManager.storeReceivedMessageUnit(error);
 		storageManager.setPModeAndLeg(errEntity, new Pair<>(pmode, Label.REQUEST));
 		storageManager.setProcessingState(errEntity, ProcessingState.READY_FOR_DELIVERY);
 		
@@ -639,7 +642,7 @@ public class DeliveryManagerTest {
 	
 	
 	private IUserMessageEntity createUserMessage(boolean async) throws Exception {
-		PMode pmode = TestUtils.create1WayReceivePushPMode();		
+		PMode pmode = HB2BTestUtils.create1WayReceivePMode();		
 		DeliveryConfiguration delSpec = new DeliveryConfiguration();
 		delSpec.setId(pmode.getId() + "-DefaultDelivery");
 		delSpec.setDeliveryMethod(TestDeliveryMethod.class);
@@ -652,7 +655,7 @@ public class DeliveryManagerTest {
 		userMessage.setMessageId(MessageIdUtils.createMessageId());
 		userMessage.setPModeId(pmode.getId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IUserMessageEntity umEntity = storageManager.storeIncomingMessageUnit(userMessage);
+		IUserMessageEntity umEntity = storageManager.storeReceivedMessageUnit(userMessage);
 		storageManager.setProcessingState(umEntity, ProcessingState.READY_FOR_DELIVERY);
 		
 		return umEntity;

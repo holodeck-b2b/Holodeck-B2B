@@ -19,9 +19,9 @@ package org.holodeckb2b.common.events.impl;
 import java.util.Map;
 
 import org.holodeckb2b.interfaces.events.security.ISignatureCreated;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 /**
  * Is the implementation class of {@link ISignatureCreated} to indicate that a signature for a received User
@@ -39,7 +39,7 @@ public class SignatureCreated extends AbstractSignatureEvent implements ISignatu
      * @param subject   The User Message that was signed
      * @param digests   The information about the digests for the payloads that were part of the signature
      */
-    public SignatureCreated(final IUserMessage subject, final Map<IPayload, ISignedPartMetadata> digests) {
+    public SignatureCreated(final IUserMessage subject, final Map<IPayloadEntity, ISignedPartMetadata> digests) {
         super(subject, null, digests);
     }
 

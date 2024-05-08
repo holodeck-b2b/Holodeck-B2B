@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>6.1.0</version>
+        <version>7.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>holodeckb2b-security</artifactId>
@@ -36,11 +36,40 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <wss4j.version>2.2.2</wss4j.version>
+        <wss4j.version>3.0.3</wss4j.version>
     </properties>
 
     <modules>
         <module>certmanager</module>
         <module>sec-provider</module>
     </modules>
+    
+    <dependencyManagement>
+		<dependencies>
+	        <dependency>
+	            <groupId>org.apache.wss4j</groupId>
+	            <artifactId>wss4j-ws-security-common</artifactId>
+	            <version>${wss4j.version}</version>
+	            <exclusions>
+	            	<exclusion>
+	            		<groupId>jakarta.mail</groupId>
+	            		<artifactId>jakarta.mail-api</artifactId>
+	            	</exclusion>					
+	            	<exclusion>
+	            		<groupId>org.opensaml</groupId>
+	            		<artifactId>opensaml-saml-impl</artifactId>
+	            	</exclusion>
+	            	<exclusion>
+	            		<groupId>org.opensaml</groupId>
+	            		<artifactId>opensaml-xacml-impl</artifactId>
+	            	</exclusion>
+	            	<exclusion>
+	            		<groupId>org.opensaml</groupId>
+	            		<artifactId>opensaml-xacml-saml-impl</artifactId>
+	            	</exclusion>
+	            </exclusions>
+	        </dependency>
+	        
+        </dependencies>		
+	</dependencyManagement>
 </project>

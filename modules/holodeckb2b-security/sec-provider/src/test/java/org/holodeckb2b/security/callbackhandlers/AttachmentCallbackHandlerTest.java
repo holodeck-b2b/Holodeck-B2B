@@ -16,25 +16,30 @@
  */
 package org.holodeckb2b.security.callbackhandlers;
 
-import java.net.URL;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+
 import java.util.List;
+
 import javax.activation.DataHandler;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.UnsupportedCallbackException;
+
 import org.apache.axiom.attachments.Attachments;
 import org.apache.axis2.context.MessageContext;
 import org.apache.wss4j.common.ext.Attachment;
 import org.apache.wss4j.common.ext.AttachmentRequestCallback;
 import org.apache.wss4j.common.ext.AttachmentResultCallback;
 import org.holodeckb2b.common.messagemodel.Payload;
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.ebms3.security.callbackhandlers.AttachmentCallbackHandler;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.mockito.Mockito.mock;
 
 /**
  * Created at 17:37 04.05.17
@@ -43,16 +48,8 @@ import static org.mockito.Mockito.mock;
  */
 public class AttachmentCallbackHandlerTest {
 
-    private static String baseDir;
-
     private MessageContext mc;
     private AttachmentCallbackHandler handler;
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        baseDir = AttachmentCallbackHandlerTest.class.getClassLoader()
-                .getResource(AttachmentCallbackHandlerTest.class.getName().replace('.', '/')).getPath();
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -152,21 +149,19 @@ public class AttachmentCallbackHandlerTest {
         payload.setContainment(IPayload.Containment.ATTACHMENT);
         String payloadURI = "some_URI_01";
         payload.setPayloadURI(payloadURI);
-        payload.setContentLocation(baseDir + "/flower.jpg");
 
         // Adding data handler for the programmatically added attachment payload
-        DataHandler dh = new DataHandler(new URL("file://" + baseDir + "/flower.jpg"));
+        DataHandler dh = new DataHandler(TestUtils.getTestResource("flower.jpg").toUri().toURL());
         attachments.addDataHandler(payloadURI, dh);
 
         // Programmatically added body payload
         payload = new Payload();
         payload.setContainment(IPayload.Containment.ATTACHMENT);
         payloadURI = "some_URI_02";
-        payload.setPayloadURI(payloadURI);
-        payload.setContentLocation(baseDir + "/dandelion.jpg");
+        payload.setPayloadURI(payloadURI);        
 
         // Adding data handler for the programmatically added body payload
-        dh = new DataHandler(new URL("file://" + baseDir + "/dandelion.jpg"));
+        dh = new DataHandler(TestUtils.getTestResource("dandelion.jpg").toUri().toURL()); 
         attachments.addDataHandler(payloadURI, dh);
 
         mc.setAttachmentMap(attachments);

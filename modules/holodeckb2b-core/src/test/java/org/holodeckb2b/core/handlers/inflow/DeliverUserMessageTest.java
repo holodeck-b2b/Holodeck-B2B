@@ -16,31 +16,30 @@
  */
 package org.holodeckb2b.core.handlers.inflow;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
 
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.errors.OtherContentError;
-import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestDeliveryManager;
 import org.holodeckb2b.commons.util.MessageIdUtils;
-import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.StorageManager;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -75,7 +74,7 @@ public class DeliverUserMessageTest {
 		UserMessage userMessage = new UserMessage();
 		userMessage.setMessageId(MessageIdUtils.createMessageId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IUserMessageEntity umEntity = storageManager.storeIncomingMessageUnit(userMessage);
+		IUserMessageEntity umEntity = storageManager.storeReceivedMessageUnit(userMessage);
 
 		storageManager.setProcessingState(umEntity, ProcessingState.READY_FOR_DELIVERY);
 		
@@ -99,7 +98,7 @@ public class DeliverUserMessageTest {
 		UserMessage userMessage = new UserMessage();
 		userMessage.setMessageId(MessageIdUtils.createMessageId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IUserMessageEntity umEntity = storageManager.storeIncomingMessageUnit(userMessage);
+		IUserMessageEntity umEntity = storageManager.storeReceivedMessageUnit(userMessage);
 
 		storageManager.setProcessingState(umEntity, ProcessingState.PROCESSING);
 		
@@ -123,7 +122,7 @@ public class DeliverUserMessageTest {
 		UserMessage userMessage = new UserMessage();
 		userMessage.setMessageId(MessageIdUtils.createMessageId());
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IUserMessageEntity umEntity = storageManager.storeIncomingMessageUnit(userMessage);
+		IUserMessageEntity umEntity = storageManager.storeReceivedMessageUnit(userMessage);
 
 		storageManager.setProcessingState(umEntity, ProcessingState.READY_FOR_DELIVERY);
 		

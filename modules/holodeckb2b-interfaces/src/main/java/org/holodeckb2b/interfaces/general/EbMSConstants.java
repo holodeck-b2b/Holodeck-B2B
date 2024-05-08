@@ -32,6 +32,10 @@ public final class EbMSConstants {
     public static final QName QNAME_XMLID = new QName("http://www.w3.org/XML/1998/namespace", "id");
 
     /**
+     * The fully qualified name of the wsu:Id as defined in Oasis WS-Security
+     */
+    public static final QName QNAME_WSUID = new QName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id");
+    /**
      * The URI of the ebMS namespace for the XSD that defines the ebMS message header
      */
     public static final String EBMS3_NS_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/";

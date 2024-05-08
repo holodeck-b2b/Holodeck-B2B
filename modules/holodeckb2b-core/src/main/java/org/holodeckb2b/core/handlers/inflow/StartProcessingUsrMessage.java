@@ -20,9 +20,9 @@ import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the <i>IN_FLOW</i> handler that starts the process of delivering the user message message unit to the business
@@ -34,11 +34,11 @@ public class StartProcessingUsrMessage extends AbstractUserMessageHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final IMessageProcessingContext procCtx,
-    										  final Logger log) throws PersistenceException {
+    										  final Logger log) throws StorageException {
         final String msgId = um.getMessageId();
+        String t=msgId;
         log.trace("Change processing state to indicate start of processing of message [" + msgId + "]" );
-        if (!HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.RECEIVED,
-                                                                       ProcessingState.PROCESSING)) {
+        if (!HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.PROCESSING)) {
             log.warn("User message [msgId= " + msgId + "] is already being processed");
             // Remove the User Message from the context to prevent further processing
             procCtx.setUserMessage(null);

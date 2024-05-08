@@ -23,9 +23,9 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the handler that hands over the User Message that is ready for delivery to the back-end application to the 
@@ -39,7 +39,7 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final IMessageProcessingContext procCtx, 
-    										  final Logger log) throws PersistenceException {
+    										  final Logger log) throws StorageException {
         
     	if (ProcessingState.READY_FOR_DELIVERY == um.getCurrentProcessingState().getState()) {
     		log.trace("Hand over User Message (msgId={}) to Delivery Manager", um.getMessageId());
@@ -55,7 +55,7 @@ public class DeliverUserMessage extends AbstractUserMessageHandler {
 				}
 			}
     	} else
-    		log.warn("User Message (msgId={}) is not ready for delivery", um.getMessageId());
+    		log.debug("User Message (msgId={}) is not ready for delivery", um.getMessageId());
 
         return InvocationResponse.CONTINUE;
     }

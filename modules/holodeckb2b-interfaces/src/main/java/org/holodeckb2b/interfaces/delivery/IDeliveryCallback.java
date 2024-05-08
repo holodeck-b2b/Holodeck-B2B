@@ -40,8 +40,13 @@ public interface IDeliveryCallback {
 	/**
 	 * This method must be called by the {@link IDeliveryMethod} when it could not deliver the message unit to the
 	 * back-end application.
-	 * <p>The Holodeck B2B Core will set the processing state of the message unit to {@link
-	 * ProcessingState#DELIVERY_FAILED} and trigger a {@link IMessageDeliveryFailure} event.
+     * <p>
+     * The exception should indicate if the error condition is permanent, i.e. if retrying the delivery will not solve 
+     * the problem. Holodeck B2B will always set the processing state of the message unit to {@linkplain 
+     * ProcessingState#DELIVERY_FAILED}, but if the error condition is indicated to be permanent the state will then be 
+     * set to {@linkplain ProcessingState#FAILURE} which means that the message will be marked as a  duplicate when it 
+     * is received again from the sender.<br/>
+     * In both cases a {@link IMessageDeliveryFailure} event will be raised.
 	 *
 	 * @param failure	the reason why the delivery failed
 	 */

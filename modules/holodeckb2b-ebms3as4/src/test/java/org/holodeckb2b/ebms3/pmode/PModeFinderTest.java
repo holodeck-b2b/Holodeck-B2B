@@ -29,7 +29,7 @@ import java.util.Map;
 
 import org.holodeckb2b.common.pmode.PModeWatcher;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.IPMode;
@@ -56,7 +56,7 @@ public class PModeFinderTest {
 
         // Read the set of test P-Modes
         Map<String, Object> param = new HashMap<>();
-        param.put("watchPath", TestUtils.getPath(PModeFinderTest.class.getSimpleName()).toString());
+        param.put("watchPath", TestUtils.getTestClassBasePath().toString());
         PModeWatcher    pmodeReader = new PModeWatcher();
         pmodeReader.setParameters(param);
 
@@ -129,6 +129,6 @@ public class PModeFinderTest {
 
         Collection<IPMode> pmodes = PModeFinder.findForPulling(authInfo, null);
 
-        assertTrue(Utils.isNullOrEmpty(pmodes));            	
+        assertTrue(Utils.isNullOrEmpty(pmodes));
     }
 }

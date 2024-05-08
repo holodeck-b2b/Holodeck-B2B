@@ -26,11 +26,10 @@ import org.holodeckb2b.common.events.impl.SignatureCreated;
 import org.holodeckb2b.common.events.impl.SigningFailure;
 import org.holodeckb2b.common.events.impl.UTCreationFailure;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
-import org.holodeckb2b.common.util.CompareUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.ebms3.module.EbMS3Module;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
@@ -39,11 +38,8 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcess
 import org.holodeckb2b.interfaces.events.security.ISignatureCreated;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
@@ -57,6 +53,10 @@ import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the required WS-Security headers in the message. As described
@@ -145,7 +145,7 @@ public class CreateSecurityHeaders extends AbstractBaseHandler {
         ISecurityHeaderCreator hdrCreator = secProvider.getSecurityHeaderCreator();
         log.debug("Create the security headers in the message");
         try {
-            Collection<ISecurityProcessingResult> results = hdrCreator.createHeaders(procCtx, 
+            Collection<ISecurityProcessingResult> results = hdrCreator.createHeaders(procCtx,
             																		 senderConfig, receiverConfig);
             log.trace("Security header creation finished, handle results");
             boolean success = true;
@@ -172,24 +172,25 @@ public class CreateSecurityHeaders extends AbstractBaseHandler {
      * @param result    The result of creating a part of the security header
      * @param procCtx   The current message processing context
      * @param log		The log to be used
-     * @return	<code>true</code> when the WS-Security header part was created successfully, 
-     * 			<code>false</code> otherwise 
+     * @return	<code>true</code> when the WS-Security header part was created successfully,
+     * 			<code>false</code> otherwise
      */
     private boolean handleResult(final ISecurityProcessingResult result, final IMessageProcessingContext procCtx,
-    						  final Logger log) throws PersistenceException {
+    						  final Logger log) throws StorageException {
         final Collection<IMessageUnitEntity> sentMsgUnits = procCtx.getSendingMessageUnits();
         final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
         if (result.isSuccessful()) {
             if (result instanceof ISignatureProcessingResult) {
                 // Raise the event for each user message. This requires collecting all relevant payload digests for
                 // each user message
-                final Map<IPayload, ISignedPartMetadata> digests =
+                final Map<IPayloadEntity, ISignedPartMetadata> digests =
                                                               ((ISignatureProcessingResult) result).getPayloadDigests();
                 sentMsgUnits.parallelStream().filter((mu) -> mu instanceof IUserMessage).forEach((mu) -> {
-                    final Map<IPayload, ISignedPartMetadata> msgDigests = new HashMap<>();
-                    ((IUserMessage) mu).getPayloads().forEach((pl)
-                            -> digests.entrySet().stream().filter((d) -> CompareUtils.areEqual(d.getKey(), pl))
-                                    .forEachOrdered((d) -> msgDigests.put(d.getKey(), d.getValue())));
+                    final Map<IPayloadEntity, ISignedPartMetadata> msgDigests = new HashMap<>();
+                    ((IUserMessageEntity) mu).getPayloads().forEach((pl)
+                            -> digests.entrySet().stream()
+                            					 .filter((d) -> pl.getPayloadId().equals(d.getKey().getPayloadId()))
+                                    			 .forEachOrdered((d) -> msgDigests.put(d.getKey(), d.getValue())));
                     eventProcessor.raiseEvent(new SignatureCreated((IUserMessage) mu, msgDigests));
                 });
             }
@@ -197,7 +198,6 @@ public class CreateSecurityHeaders extends AbstractBaseHandler {
         } else {
             final SecurityProcessingException reason = result.getFailureReason();
             final StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-            final boolean encryptionFailure = (result instanceof IEncryptionProcessingResult);
             // Add warning to log so operator is always informed about problem
             log.warn("Creating the "
                     + (result instanceof ISignatureProcessingResult ? "signature"

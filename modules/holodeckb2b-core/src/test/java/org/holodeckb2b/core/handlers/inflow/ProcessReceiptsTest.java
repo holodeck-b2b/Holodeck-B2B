@@ -27,19 +27,19 @@ import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.ReceiptConfiguration;
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.StorageManager;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IReceiptEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -69,7 +69,7 @@ public class ProcessReceiptsTest {
     @Test
     public void testDoProcessing() throws Exception {
     
-    	PMode pmode = TestUtils.create1WaySendPushPMode();        
+    	PMode pmode = HB2BTestUtils.create1WaySendPushPMode();        
         Leg leg = pmode.getLeg(Label.REQUEST);
         ReceiptConfiguration receiptConfiguration = new ReceiptConfiguration();
         leg.setReceiptConfiguration(receiptConfiguration);
@@ -94,7 +94,7 @@ public class ProcessReceiptsTest {
         receipt.setRefToMessageId(userMessage.getMessageId());
         receipt.setMessageId(MessageIdUtils.createMessageId());
         
-        IReceiptEntity receiptEntity = storageManager.storeIncomingMessageUnit(receipt);
+        IReceiptEntity receiptEntity = storageManager.storeReceivedMessageUnit(receipt);
         
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addReceivedReceipt(receiptEntity);
@@ -125,7 +125,7 @@ public class ProcessReceiptsTest {
         Receipt receipt = new Receipt();
         receipt.setMessageId(MessageIdUtils.createMessageId());
         receipt.setRefToMessageId(MessageIdUtils.createMessageId());
-        IReceiptEntity receiptEntity = storageManager.storeIncomingMessageUnit(receipt);
+        IReceiptEntity receiptEntity = storageManager.storeReceivedMessageUnit(receipt);
         
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.addReceivedReceipt(receiptEntity);

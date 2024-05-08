@@ -43,7 +43,7 @@ import org.holodeckb2b.common.messagemodel.Service;
 import org.holodeckb2b.common.messagemodel.TradingPartner;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.PartyId;
-import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv.SOAPVersion;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -64,10 +64,10 @@ public class PackagingTest {
 
 	@BeforeClass
 	public static void loadSchemaFiles() {
-		ebMSschemaFile = TestUtils.getPath("xsd/ebms-header-3_0-200704_refactored.xsd").toFile();
-		SOAP11schemaFile = TestUtils.getPath("xsd/soap11-envelope.xsd").toFile();
-		SOAP12schemaFile = TestUtils.getPath("xsd/soap12-envelope.xsd").toFile();
-		xmlSchemaFile = TestUtils.getPath("xsd/xml.xsd").toFile();
+		ebMSschemaFile = TestUtils.getTestResource("xsd/ebms-header-3_0-200704_refactored.xsd").toFile();
+		SOAP11schemaFile = TestUtils.getTestResource("xsd/soap11-envelope.xsd").toFile();
+		SOAP12schemaFile = TestUtils.getTestResource("xsd/soap12-envelope.xsd").toFile();
+		xmlSchemaFile = TestUtils.getTestResource("xsd/xml.xsd").toFile();
 	}
 
 	@Test

@@ -36,10 +36,10 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IProtocol;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for adding the necessary WS-Addressing headers to the message to sent it
@@ -119,31 +119,29 @@ public class ConfigureMultihop extends AbstractBaseHandler {
      *                  can be found
      */
     private IUserMessageEntity getReferencedUserMsg(final IMessageProcessingContext procCtx, final ISignalMessage signal)
-                                                                                        throws PersistenceException {
+                                                                                        throws StorageException {
         String refToMsgId = MessageUnitUtils.getRefToMessageId(signal);
         // If the signal does not contain a reference to another message unit there is nothing to do here
         if (Utils.isNullOrEmpty(refToMsgId))
             return null;
 
         // If the signal is the primary message unit in a response it is sent synchronously and the related user
-        // message must be available in the context 
+        // message must be available in the context
         for(IMessageUnitEntity mu : procCtx.getReceivedMessageUnits())
             if (mu instanceof IUserMessage && refToMsgId.equals(mu.getMessageId()))
                 return (IUserMessageEntity) mu;
 
         // If not sent as response, get the information from the database
         final Collection<IMessageUnitEntity> refdMessages = HolodeckB2BCore.getQueryManager()
-                                                                         .getMessageUnitsWithId(refToMsgId, 
+                                                                         .getMessageUnitsWithId(refToMsgId,
                                                                         		 				Direction.IN);
         if (!Utils.isNullOrEmpty(refdMessages)) {
             IMessageUnitEntity sentMsgUnit = refdMessages.iterator().next();
-            if (sentMsgUnit instanceof IUserMessageEntity) {
-            	HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(sentMsgUnit);
+            if (sentMsgUnit instanceof IUserMessageEntity)
             	return (IUserMessageEntity) sentMsgUnit;
-            } 
-        } 
-        
-        return null;        
+        }
+
+        return null;
     }
 
     /**

@@ -75,7 +75,7 @@ public final class SecurityConstants {
      * QName of the WS-Security header <code>xenc:EncryptedKey</code> child element
      */
     public static final QName ENCRYPTED_KEY_ELEM = new QName(XENC_NAMESPACE_URI, "EncryptedKey");
-    
+
     /**
      * QName of the WS-Security header <code>xenc:EncryptedData</code> child element
      */
@@ -85,7 +85,17 @@ public final class SecurityConstants {
      * QName of the WS-Security header <code>xenc:EncryptionMethod</code> child element
      */
     public static final QName ENCRYPTION_METHOD_ELEM = new QName(XENC_NAMESPACE_URI, "EncryptionMethod");
-   
+
+    /**
+     * QName of the WS-Security header <code>xenc:AgreementMethod</code> child element
+     */
+    public static final QName AGREEMENT_METHOD_ELEM = new QName(XENC_NAMESPACE_URI, "AgreementMethod");
+
+    /**
+     * QName of the WS-Security header <code>xenc11:KeyDerivationMethod</code> child element
+     */
+    public static final QName DERIVATION_METHOD_ELEM = new QName(XENC11_NAMESPACE_URI, "KeyDerivationMethod");
+
     /**
      * QName of the WS-Security header <code>xenc:CipherReference</code> child element
      */

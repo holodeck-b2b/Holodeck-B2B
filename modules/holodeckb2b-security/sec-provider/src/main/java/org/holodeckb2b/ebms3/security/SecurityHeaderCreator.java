@@ -52,6 +52,8 @@ import org.apache.wss4j.dom.message.WSSecHeader;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.security.results.EncryptionProcessingResult;
+import org.holodeckb2b.common.security.results.EncryptionProcessingResult.KeyAgreementInfo;
+import org.holodeckb2b.common.security.results.EncryptionProcessingResult.KeyTransportInfo;
 import org.holodeckb2b.common.security.results.SignatureProcessingResult;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.axis2.Axis2Utils;
@@ -69,10 +71,13 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
+import org.holodeckb2b.interfaces.pmode.IKeyAgreement;
+import org.holodeckb2b.interfaces.pmode.IKeyDerivationMethod;
 import org.holodeckb2b.interfaces.pmode.IKeyTransport;
 import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
 import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
 import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
+import org.holodeckb2b.interfaces.security.IEncryptionProcessingResult.IKeyExchangeInfo;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderCreator;
 import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
@@ -80,6 +85,8 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.UTPasswordType;
 import org.holodeckb2b.interfaces.security.X509ReferenceType;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -296,8 +303,10 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
 
     /**
      * Sets the processing parameters for encryption of the message
+     *
+     * @throws SecurityProcessingException
      */
-    private void setupEncryption() {
+    private void setupEncryption() throws SecurityProcessingException {
         // AS4 requires that only the payloads are encrypted, so we encrypt the Body only when it contains a payload
         if (!Utils.isNullOrEmpty(msgUnits)
            && msgUnits.stream().filter(msgUnit -> msgUnit instanceof IUserMessage)
@@ -316,19 +325,49 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
         // The alias of the certificate to use for encryption
         processingParams.put(ConfigurationConstants.ENCRYPTION_USER, encryptionConfig.getKeystoreAlias());
 
-        // KeyTransport configuration defines settings for constructing the xenc:EncryptedKey
+        // The symmetric encryption key can be either included in the message using a key transport method or be
+        // derived from the trading partner's certificates using a key agreement method
         final IKeyTransport   ktConfig = encryptionConfig.getKeyTransport();
-        // Key encryption algorithm
-        final String ktAlgorithm = ktConfig.getAlgorithm();
-        processingParams.put(ConfigurationConstants.ENC_KEY_TRANSPORT, ktAlgorithm);
-        // If key transport algorithm is RSA-OAEP also the MGF must be set
-        if (WSS4JConstants.KEYTRANSPORT_RSAOAEP_XENC11.equalsIgnoreCase(ktAlgorithm))
-            processingParams.put(ConfigurationConstants.ENC_MGF_ALGO, ktConfig.getMGFAlgorithm());
-        // Message digest
-        processingParams.put(ConfigurationConstants.ENC_DIGEST_ALGO, ktConfig.getDigestAlgorithm());
-        // Key refence method
-        processingParams.put(ConfigurationConstants.ENC_KEY_ID,
-                                SecurityUtils.getWSS4JX509KeyId(ktConfig.getKeyReferenceMethod()));
+        final IKeyAgreement	  kaConfig = encryptionConfig.getKeyAgreement();
+		if (ktConfig != null) {
+	        // Key encryption algorithm
+	        final String ktAlgorithm = ktConfig.getAlgorithm();
+	        processingParams.put(ConfigurationConstants.ENC_KEY_TRANSPORT, ktAlgorithm);
+	        // If key transport algorithm is RSA-OAEP also the MGF must be set
+	        if (WSS4JConstants.KEYTRANSPORT_RSAOAEP_XENC11.equalsIgnoreCase(ktAlgorithm))
+	            processingParams.put(ConfigurationConstants.ENC_MGF_ALGO, ktConfig.getMGFAlgorithm());
+	        // Message digest
+	        processingParams.put(ConfigurationConstants.ENC_DIGEST_ALGO, ktConfig.getDigestAlgorithm());
+	        // Key refence method
+	        processingParams.put(ConfigurationConstants.ENC_KEY_ID,
+	                                SecurityUtils.getWSS4JX509KeyId(ktConfig.getKeyReferenceMethod()));
+		} else if (kaConfig != null) {
+			// The algorithm used for encryption of the symmetric key. The WSSJ classes re-use the setting for the
+			// key transport algorithm for this parameter.
+			processingParams.put(ConfigurationConstants.ENC_KEY_TRANSPORT, kaConfig.getKeyEncryptionAlgorithm());
+			// The key agreement algorithm, for now must be ECDH-ES
+			String agreementMethod = kaConfig.getAgreementMethod();
+			if (!DefaultSecurityAlgorithms.KEY_AGREEMENT.equals(agreementMethod))
+				throw new SecurityProcessingException("Only ECDH-ES key agreement is supported!");
+			processingParams.put(ConfigurationConstants.ENC_KEY_AGREEMENT_METHOD, agreementMethod);
+	        processingParams.put(ConfigurationConstants.ENC_KEY_ID,
+                    								SecurityUtils.getWSS4JX509KeyId(kaConfig.getCertReferenceMethod()));
+			Map<String, ?> parameters = kaConfig.getParameters();
+			// Indicator how to package the receiver's certificate reference
+			if (!Utils.isNullOrEmpty(parameters) && parameters.containsKey(DefaultProvider.P_CERT_AS_WSSECREF))
+				processingParams.put(DefaultProvider.P_CERT_AS_WSSECREF,
+																parameters.get(DefaultProvider.P_CERT_AS_WSSECREF));
+	        // The key derivation method must be ConcatKDF, but the digest algorithm is configurable
+			IKeyDerivationMethod kdfConfig = kaConfig.getKeyDerivationMethod();
+			String kdf = kdfConfig.getAlgorithm();
+			if (!DefaultSecurityAlgorithms.KEY_DERIVATION.equals(kdf))
+				throw new SecurityProcessingException("Only ConcatKDF is supported!");
+			// Because ConcatKD is also fixed in WSSJ/Santuario we don't need to set any parameters
+			processingParams.put(ConfigurationConstants.ENC_DIGEST_ALGO, kdfConfig.getDigestAlgorithm());
+		} else {
+			log.error("No key transport or key agreement configuration found!");
+			throw new SecurityProcessingException("No key transport or key agreement configuration found!");
+		}
     }
 
     /**
@@ -456,6 +495,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
             	return (!Utils.isNullOrEmpty(prefix) ? prefix : "") + HB2B_ID_PREFIX + UUID.randomUUID().toString();
             }
         });
+        wssConfig.setAction(WSConstants.ENCR, EncryptionAction.class);
         reqData.setWssConfig(wssConfig);
         reqData.setMsgContext(msgContext);
         reqData.setActor(target.id());
@@ -553,9 +593,9 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
      */
     private EncryptionProcessingResult getEncryptionResults() throws SecurityProcessingException {
         // Get all payloads included in the message, i.e. in attachment or body
-        Collection<IPayload> encryptedPayloads = new HashSet<>();
+        Collection<IPayloadEntity> encryptedPayloads = new HashSet<>();
         msgUnits.stream().filter(msgUnit -> msgUnit instanceof IUserMessage)
-                         .map(userMsg -> ((IUserMessage) userMsg).getPayloads())
+                         .map(userMsg -> ((IUserMessageEntity) userMsg).getPayloads())
                          .filter(umPayloads -> !Utils.isNullOrEmpty(umPayloads))
                          .forEachOrdered((umPayloads) ->
                                 umPayloads.stream().filter(p -> p.getContainment() != IPayload.Containment.EXTERNAL)
@@ -563,10 +603,20 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
 
         // Get the Certificate used for encryption
         final X509Certificate cert = certManager.getPartnerCertificate(encryptionConfig.getKeystoreAlias());
-        final IKeyTransport ktInfo = encryptionConfig.getKeyTransport();
-        return new EncryptionProcessingResult(cert, ktInfo.getKeyReferenceMethod(), ktInfo.getAlgorithm(),
-                                              ktInfo.getDigestAlgorithm(), ktInfo.getMGFAlgorithm(),
-                                              encryptionConfig.getAlgorithm(), encryptedPayloads);
+        final IKeyTransport ktCfg = encryptionConfig.getKeyTransport();
+        final IKeyAgreement kaCfg = encryptionConfig.getKeyAgreement();
+        X509ReferenceType certRef;
+        IKeyExchangeInfo kxInfo;
+        if (ktCfg != null) {
+        	certRef = ktCfg.getKeyReferenceMethod();
+        	kxInfo = new KeyTransportInfo(ktCfg.getAlgorithm(), ktCfg.getDigestAlgorithm(), ktCfg.getMGFAlgorithm());
+        } else {
+        	certRef = kaCfg.getCertReferenceMethod();
+        	IKeyDerivationMethod kdfCfg = kaCfg.getKeyDerivationMethod();
+        	kxInfo = new KeyAgreementInfo(kaCfg.getAgreementMethod(), kaCfg.getParameters(),
+        								  kdfCfg.getAlgorithm(), kdfCfg.getDigestAlgorithm(), kdfCfg.getParameters());
+        }
+        return new EncryptionProcessingResult(cert, certRef, kxInfo, encryptionConfig.getAlgorithm(), encryptedPayloads);
     }
 
     /**

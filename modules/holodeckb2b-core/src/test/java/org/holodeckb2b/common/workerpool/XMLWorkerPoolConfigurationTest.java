@@ -33,7 +33,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 
-import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.workerpool.WorkerPoolException;
 import org.junit.Test;
@@ -42,7 +42,7 @@ public class XMLWorkerPoolConfigurationTest {
 
 	@Test
 	public void testNAonInit() {
-		final Path path = TestUtils.getPath("workerpoolcfg").resolve("notthere.xml");
+		final Path path = TestUtils.getTestResource("workerpoolcfg").resolve("notthere.xml");
 
         try {
 			new XMLWorkerPoolConfiguration(path);
@@ -53,8 +53,8 @@ public class XMLWorkerPoolConfigurationTest {
 	
 	@Test
 	public void testNAonReload() throws IOException {
-		final Path path = TestUtils.getPath("workerpoolcfg/wp_complete.xml");
-		final Path copy = TestUtils.getPath("workerpoolcfg").resolve("disappearing.xml");
+		final Path path = TestUtils.getTestResource("workerpoolcfg/wp_complete.xml");
+		final Path copy = TestUtils.getTestResource("workerpoolcfg").resolve("disappearing.xml");
 		
 		Files.copy(path, copy);
 		
@@ -84,9 +84,9 @@ public class XMLWorkerPoolConfigurationTest {
 	
 	@Test
 	public void testReload() throws IOException {
-		final Path org = TestUtils.getPath("workerpoolcfg/wp_complete.xml");
-		final Path chg = TestUtils.getPath("workerpoolcfg/wp_empty.xml");
-		final Path test = TestUtils.getPath("workerpoolcfg").resolve("test.xml");
+		final Path org = TestUtils.getTestResource("workerpoolcfg/wp_complete.xml");
+		final Path chg = TestUtils.getTestResource("workerpoolcfg/wp_empty.xml");
+		final Path test = TestUtils.getTestResource("workerpoolcfg").resolve("test.xml");
 		
 		Files.copy(org, test);
 		
@@ -113,7 +113,7 @@ public class XMLWorkerPoolConfigurationTest {
 	
 	@Test
 	public void testModified() throws IOException {
-		final Path path = TestUtils.getPath("workerpoolcfg/wp_complete.xml");
+		final Path path = TestUtils.getTestResource("workerpoolcfg/wp_complete.xml");
 		
 		XMLWorkerPoolConfiguration configurator = null;
         try {
@@ -130,7 +130,7 @@ public class XMLWorkerPoolConfigurationTest {
 
 	@Test
 	public void testGetConfig() throws IOException {
-		final Path path = TestUtils.getPath("workerpoolcfg/wp_complete.xml");
+		final Path path = TestUtils.getTestResource("workerpoolcfg/wp_complete.xml");
 		
 		XMLWorkerPoolConfiguration configuration = null;
         try {
@@ -145,7 +145,7 @@ public class XMLWorkerPoolConfigurationTest {
 
 	@Test
 	public void testNoRefresh() throws IOException {
-		final Path path = TestUtils.getPath("workerpoolcfg/wp_empty.xml");
+		final Path path = TestUtils.getTestResource("workerpoolcfg/wp_empty.xml");
 		
 		XMLWorkerPoolConfiguration configuration = null;
 		try {

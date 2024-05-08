@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>6.1.0</version>
+        <version>7.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -45,31 +45,45 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Dependencies for testing -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
+		<!-- Dependencies for testing -->
+	    <dependency>
+	        <groupId>org.junit.jupiter</groupId>
+	        <artifactId>junit-jupiter</artifactId>
+	        <scope>test</scope>
+	    </dependency>
+	    <dependency>
+	        <groupId>org.junit.vintage</groupId>
+	        <artifactId>junit-vintage-engine</artifactId>
+	        <scope>test</scope>
+	    </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <scope>test</scope>
         </dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
+            <groupId>com.sun.activation</groupId>
+            <artifactId>jakarta.activation</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <!-- Test util classes from the Core -->
+		<!-- Test util classes from the Core -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
-            <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
+        <dependency>
+			<groupId>org.holodeckb2b.commons</groupId>
+			<artifactId>generic-utils</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>            
+        </dependency>        
     </dependencies>
 
     <build>
@@ -82,7 +96,7 @@
                     <servicesXmlFile>src/main/resources/META-INF/services.xml</servicesXmlFile>
                     <aarName>hb2b-as4-msh</aarName>
                     <includeDependencies>false</includeDependencies>
-                    <!-- The classDirectory parameter is set to a non existing directory to prevent the
+					<!-- The classDirectory parameter is set to a non existing directory to prevent the
                     	 plugin from adding the project classes to the aar
                     -->
                     <classesDirectory>no_classes</classesDirectory>

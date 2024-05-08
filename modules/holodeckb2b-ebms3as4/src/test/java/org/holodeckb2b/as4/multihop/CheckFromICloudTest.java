@@ -33,8 +33,8 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.SOAPEnv;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -51,7 +51,7 @@ public class CheckFromICloudTest {
     }
 
     @Test
-    public void testMessageReceivedFromICloud() throws PersistenceException {
+    public void testMessageReceivedFromICloud() throws StorageException {
         // Creating SOAP envelope
         SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
         // Adding header
@@ -69,7 +69,7 @@ public class CheckFromICloudTest {
 
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);        
         IUserMessageEntity userMessageEntity = HolodeckB2BCore.getStorageManager()
-        													  .storeIncomingMessageUnit(new UserMessage());
+        													  .storeReceivedMessageUnit(new UserMessage());
         procCtx.setUserMessage(userMessageEntity);
         try {
             Handler.InvocationResponse invokeResp = new CheckFromICloud().invoke(mc);

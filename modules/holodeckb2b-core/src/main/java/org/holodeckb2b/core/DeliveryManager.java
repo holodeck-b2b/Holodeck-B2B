@@ -35,6 +35,7 @@ import org.holodeckb2b.common.events.impl.MessageDeliveryFailure;
 import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.delivery.IDeliveryCallback;
@@ -43,11 +44,6 @@ import org.holodeckb2b.interfaces.delivery.IDeliveryMethod;
 import org.holodeckb2b.interfaces.delivery.IDeliverySpecification;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
@@ -55,6 +51,11 @@ import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IReceiptEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 
 /**
@@ -122,14 +123,6 @@ class DeliveryManager implements IDeliveryManager {
 					messageUnit.getMessageId());
 			throw new MessageDeliveryException("No P-Mode available for message unit");
 		}
-		// Make sure we can evaluate all processing states
-		try {
-			HolodeckB2BCoreInterface.getQueryManager().ensureCompletelyLoaded(messageUnit);
-		} catch (PersistenceException dbError) {
-			log.error("Error retrieving current meta-data of message unit (msgId={}) from database : ",
-					messageUnit.getMessageId(), Utils.getExceptionTrace(dbError));
-			throw new MessageDeliveryException("Error retrieving current meta-data", dbError);
-		}
 		if (!messageUnit.getProcessingStates().stream()
 											  .anyMatch(s -> s.getState() == ProcessingState.READY_FOR_DELIVERY)) {
 			log.error("Message unit (msgId={}) is not ready for delivery!", messageUnit.getMessageId());
@@ -140,8 +133,7 @@ class DeliveryManager implements IDeliveryManager {
 			IDeliverySpecification delSpec;
 			delSpec = getDeliverySpec(messageUnit);
 			if (delSpec != null) {
-				if (!mdManager.setProcessingState(messageUnit, messageUnit.getCurrentProcessingState().getState(),
-														ProcessingState.OUT_FOR_DELIVERY)) {
+				if (!mdManager.setProcessingState(messageUnit, ProcessingState.OUT_FOR_DELIVERY)) {
 					log.error("Cannot start delivery of message unit (msgId={})", messageUnit.getMessageId());
 					throw new MessageDeliveryException("Message unit already in process");
 				}
@@ -173,21 +165,18 @@ class DeliveryManager implements IDeliveryManager {
 				if (messageUnit instanceof IUserMessageEntity) {
 					log.warn("No delivery specified in P-Mode ({}) used for User Message (msgId={})",
 							messageUnit.getPModeId(), messageUnit.getMessageId());
-					updated = mdManager.setProcessingState(messageUnit,
-											messageUnit.getCurrentProcessingState().getState(), ProcessingState.DONE,
-											"No delivery specified");
+					updated = mdManager.setProcessingState(messageUnit, ProcessingState.DONE, "No delivery specified");
 				} else {
 					log.info("{} (msgId={}) does not need to be delivered to back-end",
 							MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId());
-					updated = mdManager.setProcessingState(messageUnit,
-											messageUnit.getCurrentProcessingState().getState(), ProcessingState.DONE);
+					updated = mdManager.setProcessingState(messageUnit, ProcessingState.DONE);
 				}
 				if (!updated) {
 					log.error("Message unit (msgId={}) is already in process", messageUnit.getMessageId());
 					throw new MessageDeliveryException("Message unit already in process");
 				}
 			}
-		} catch (PersistenceException dbError) {
+		} catch (StorageException dbError) {
 			log.error("Error updating processing state of message unit (msgId={}) : {}", messageUnit.getMessageId(),
 					dbError.getMessage());
 			throw new MessageDeliveryException("Error updating processing state", dbError);
@@ -298,10 +287,10 @@ class DeliveryManager implements IDeliveryManager {
 	 * @param msgUnit			message unit being delivered
 	 * @param deliveryError		the exception that caused the delivery attempt to fail, <code>null</code> if the
 	 * 							delivery was successful
-	 * @throws PersistenceException when an error occurs updating the processing state of the message unit
+	 * @throws StorageException when an error occurs updating the processing state of the message unit
 	 */
 	private void handleResult(IMessageUnitEntity msgUnit, MessageDeliveryException deliveryError)
-																						throws PersistenceException {
+																						throws StorageException {
 		if (deliveryError == null) {
 			log.info("Successfully delivered {} (msgId={})", MessageUnitUtils.getMessageUnitName(msgUnit),
 					 msgUnit.getMessageId());
@@ -313,8 +302,7 @@ class DeliveryManager implements IDeliveryManager {
 					Utils.getExceptionTrace(deliveryError));
 	        // Indicate failure in processing state
 	        mdManager.setProcessingState(msgUnit, ProcessingState.DELIVERY_FAILED, deliveryError.getMessage());
-	        // If the problem that occurred is indicated as permanent, we can set the state to FAILURE and return
-	        //  an ebMS Error to the sender
+	        // If the problem that occurred is indicated as permanent, we can set the state to FAILURE 
 	        if (deliveryError.isPermanent())
 	            mdManager.setProcessingState(msgUnit, ProcessingState.FAILURE);
 		}
@@ -384,7 +372,7 @@ class DeliveryManager implements IDeliveryManager {
 		public void success() {
 			try {
 				handleResult(msgUnit, null);
-			} catch (PersistenceException dbError) {
+			} catch (StorageException dbError) {
 				log.error("Error updating processing state of message unit (msgId={}) : {}", msgUnit.getMessageId(),
 						dbError.getMessage());
 			}
@@ -394,7 +382,7 @@ class DeliveryManager implements IDeliveryManager {
 		public void failed(MessageDeliveryException failure) {
 			try {
 				handleResult(msgUnit, failure);
-			} catch (PersistenceException dbError) {
+			} catch (StorageException dbError) {
 				log.error("Error updating processing state of message unit (msgId={}) : {}", msgUnit.getMessageId(),
 						dbError.getMessage());
 			}
