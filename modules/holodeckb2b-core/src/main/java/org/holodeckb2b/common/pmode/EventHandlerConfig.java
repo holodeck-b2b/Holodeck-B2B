@@ -44,7 +44,7 @@ import org.simpleframework.xml.core.Validate;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
- * @since NEXT_HB2B_VERSION Support for the <i>continueProcessing</i> setting. Uses <i>true</i> as default value.
+ * @since 5.3.0 Support for the <i>continueProcessing</i> setting. Uses <i>true</i> as default value.
  */
 public class EventHandlerConfig implements IMessageProcessingEventConfiguration, Serializable {
 	private static final long serialVersionUID = 7648905261512216386L;
