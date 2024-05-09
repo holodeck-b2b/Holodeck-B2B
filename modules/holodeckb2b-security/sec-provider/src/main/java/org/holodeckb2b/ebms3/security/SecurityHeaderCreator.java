@@ -244,7 +244,9 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
         final IEncryptionConfiguration encryptionCfg = receiverConfig != null ?
                                                                             receiverConfig.getEncryptionConfiguration()
                                                                           : null;
-        if (encryptionCfg != null && procCtx.getSendingUserMessage() != null) {
+        IUserMessageEntity sendingUserMessage = procCtx.getSendingUserMessage();
+        if (encryptionCfg != null && sendingUserMessage != null
+        		&& !Utils.isNullOrEmpty(sendingUserMessage.getPayloads())) {
             log.debug("The message must be encrypted, set up encryption configuration");
             encryptionConfig = new EncryptionConfigWithDefaults(encryptionCfg);
             setupEncryption();
