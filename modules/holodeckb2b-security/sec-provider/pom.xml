@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b-security</artifactId>
-        <version>7.0.0-SNAPSHOT</version>
+        <version>7.0.0-RC1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>holodeckb2b-ebms3-secprovider</artifactId>

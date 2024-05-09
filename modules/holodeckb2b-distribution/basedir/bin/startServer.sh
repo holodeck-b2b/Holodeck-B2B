@@ -47,6 +47,8 @@ cd "$HB2B_HOME"
 
 [ ! -d ./logs ] && mkdir logs
 
+JAVA_OPTS="$JAVA_OPTS -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
+
 exec "$JAVA_HOME/bin/java" $JAVA_OPTS -classpath "$HB2B_CP" \
     -Dderby.stream.error.file="$HB2B_HOME/logs/derby.log" \
     org.holodeckb2b.core.HolodeckB2BServer \

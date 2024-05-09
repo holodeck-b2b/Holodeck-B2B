@@ -25,7 +25,7 @@
 	<groupId>org.holodeckb2b</groupId>
 	<artifactId>holodeckb2b</artifactId>
 	<packaging>pom</packaging>
-	<version>7.0.0-SNAPSHOT</version>
+	<version>7.0.0-RC1</version>
 	<name>Holodeck B2B</name>
 	<url>http://www.holodeck-b2b.org/</url>
 	<inceptionYear>2015</inceptionYear>
@@ -154,11 +154,6 @@
 				<artifactId>holodeckb2b-ui</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.holodeckb2b</groupId>
-				<artifactId>holodeckb2b-distribution</artifactId>
-				<version>${project.version}</version>
-			</dependency>
 			<!-- Generic utility classes  -->
 			<dependency>
 				<groupId>org.holodeckb2b.commons</groupId>
@@ -226,6 +221,12 @@
 				<groupId>javax.xml.bind</groupId>
 				<artifactId>jaxb-api</artifactId>
 				<version>2.3.1</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.activation</groupId>
+						<artifactId>javax.activation-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
@@ -245,23 +246,10 @@
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-core</artifactId>
+	            <scope>runtime</scope>
 				<version>${log4j.version}</version>
 			</dependency>
-			<!-- Axis2 use Commons logging, so add log4j binding -->
-			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-jcl</artifactId>
-				<version>${log4j.version}</version>
-			</dependency>
-			<!-- We also don't use SLF4J directly but it is used by libs like
-			WSS4J. So we want to
-                bind this to log4j as well -->
-			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-slf4j-impl</artifactId>
-				<version>${log4j.version}</version>
-			</dependency>
-
+			
 			<!--===============================================================
                 Test dependencies
             =============================================================== -->

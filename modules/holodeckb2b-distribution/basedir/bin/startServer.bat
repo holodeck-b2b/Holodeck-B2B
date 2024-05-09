@@ -83,6 +83,8 @@ set HB2B_CLASS_PATH=%HB2B_HOME%;%HB2B_HOME%\conf;%JAVA_HOME%\lib\tools.jar;%HB2B
 echo Using JAVA_HOME    %JAVA_HOME%
 echo Using HB2B_HOME    %HB2B_HOME%
 
+set JAVA_OPTS=%JAVA_OPTS% -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager
+
 cd "%HB2B_HOME%"
 "%_JAVACMD%" %JAVA_OPTS% -Dfile.encoding=UTF-8 -Dderby.stream.error.file="%HB2B_HOME%\logs\derby.log" -cp "!HB2B_CLASS_PATH!" org.holodeckb2b.core.HolodeckB2BServer -home "%HB2B_HOME%"
 goto end
