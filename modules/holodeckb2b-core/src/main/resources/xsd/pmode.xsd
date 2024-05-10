@@ -1066,7 +1066,7 @@ The last child element is the <code>Parameter</code> element that can occur zero
 	<xs:complexType name="ParameterType">
 		<xs:sequence>
 			<xs:element name="name" type="tns:non-empty-string"/>
-			<xs:element name="value" type="tns:non-empty-string"/>
+			<xs:element name="value" type="xs:string"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="ValidationConfiguration">
