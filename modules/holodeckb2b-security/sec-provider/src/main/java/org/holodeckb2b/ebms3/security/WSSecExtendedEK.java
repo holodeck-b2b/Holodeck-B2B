@@ -25,7 +25,9 @@ import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.message.WSSecEncrypt;
 import org.apache.wss4j.dom.message.WSSecHeader;
 import org.apache.xml.security.encryption.keys.content.AgreementMethodImpl;
+import org.apache.xml.security.encryption.params.ConcatKDFParams;
 import org.apache.xml.security.encryption.params.KeyAgreementParameters;
+import org.apache.xml.security.encryption.params.KeyDerivationParameters;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.apache.xml.security.keys.content.X509Data;
 import org.apache.xml.security.stax.impl.util.IDGenerator;
@@ -46,6 +48,9 @@ import org.w3c.dom.Element;
 public class WSSecExtendedEK extends WSSecEncrypt {
 
 	private boolean rcptCertInSecRef = false;
+	private String	concatAlgorithmID;
+	private String	concatPartyUInfo;
+	private String	concatPartyVInfo;
 
 	public WSSecExtendedEK(Document doc) {
 		super(doc);
@@ -65,6 +70,18 @@ public class WSSecExtendedEK extends WSSecEncrypt {
 
 	public boolean recipientCertInSecRef() {
 		return rcptCertInSecRef;
+	}
+
+	public void setConcatKDFAlgorithmID(String concatAlgorithmID) {
+		this.concatAlgorithmID = concatAlgorithmID;
+	}
+
+	public void setConcatKDFPartyUInfo(String concatPartyUInfo) {
+		this.concatPartyUInfo = concatPartyUInfo;
+	}
+
+	public void setConcatKDFPartyVInfo(String concatPartyVInfo) {
+		this.concatPartyVInfo = concatPartyVInfo;
 	}
 
 	@Override
@@ -88,6 +105,13 @@ public class WSSecExtendedEK extends WSSecEncrypt {
             													 WSConstants.SIG_PREFIX + ":" + WSConstants.KEYINFO_LN);
             keyInfoElement.setAttributeNS(WSConstants.XMLNS_NS, "xmlns:" + WSConstants.SIG_PREFIX, WSConstants.SIG_NS);
             try {
+            	KeyDerivationParameters kdfParams = dhSpec.getKeyDerivationParameter();
+            	if (kdfParams instanceof ConcatKDFParams) {
+            		ConcatKDFParams concatKDFParams = (ConcatKDFParams)kdfParams;
+            		concatKDFParams.setAlgorithmID(concatAlgorithmID);
+					concatKDFParams.setPartyUInfo(concatPartyUInfo);
+					concatKDFParams.setPartyVInfo(concatPartyVInfo);
+            	}
             	AgreementMethodImpl agreementMethod = new AgreementMethodImpl(getDocument(), dhSpec);
                 X509Data x509Data = new X509Data(getDocument());
                 switch (keyIdentifierType) {

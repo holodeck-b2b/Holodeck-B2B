@@ -101,8 +101,16 @@ public class EncryptionAction implements Action {
         wsEncrypt.setAttachmentCallbackHandler(reqData.getAttachmentCallbackHandler());
         wsEncrypt.setStoreBytesInAttachment(reqData.isStoreBytesInAttachment());
 
-        wsEncrypt.setRecipientCertInSecRef(Utils.isTrue((String) handler.getOption(DefaultProvider.P_CERT_AS_WSSECREF)));
+        wsEncrypt.setRecipientCertInSecRef(Utils.isTrue(
+        										(String) handler.getOption(PModeParameters.KA_RCPT_CERT_AS_WSSECREF)));
 
+        // As Key Agreement method and KDF are currently fixed, we must check if KA is used and then set custom
+        // ConcatKDF attributes
+        if (DefaultSecurityAlgorithms.KEY_AGREEMENT.equals(wsEncrypt.getKeyAgreementMethod())) {
+        	wsEncrypt.setConcatKDFAlgorithmID((String) handler.getOption(PModeParameters.CONCAT_KDF_ALGORITHMID));
+        	wsEncrypt.setConcatKDFPartyUInfo((String) handler.getOption(PModeParameters.CONCAT_KDF_PARTY_U));
+        	wsEncrypt.setConcatKDFPartyVInfo((String) handler.getOption(PModeParameters.CONCAT_KDF_PARTY_V));
+        }
         try {
             wsEncrypt.build(encryptionToken.getCrypto(), symmetricKey);
         } catch (WSSecurityException e) {

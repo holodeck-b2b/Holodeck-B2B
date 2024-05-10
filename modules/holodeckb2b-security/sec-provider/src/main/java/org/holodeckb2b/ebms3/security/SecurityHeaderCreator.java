@@ -356,15 +356,29 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
                     								SecurityUtils.getWSS4JX509KeyId(kaConfig.getCertReferenceMethod()));
 			Map<String, ?> parameters = kaConfig.getParameters();
 			// Indicator how to package the receiver's certificate reference
-			if (!Utils.isNullOrEmpty(parameters) && parameters.containsKey(DefaultProvider.P_CERT_AS_WSSECREF))
-				processingParams.put(DefaultProvider.P_CERT_AS_WSSECREF,
-																parameters.get(DefaultProvider.P_CERT_AS_WSSECREF));
+			if (!Utils.isNullOrEmpty(parameters) && parameters.containsKey(PModeParameters.KA_RCPT_CERT_AS_WSSECREF))
+				processingParams.put(PModeParameters.KA_RCPT_CERT_AS_WSSECREF,
+									 parameters.get(PModeParameters.KA_RCPT_CERT_AS_WSSECREF));
 	        // The key derivation method must be ConcatKDF, but the digest algorithm is configurable
 			IKeyDerivationMethod kdfConfig = kaConfig.getKeyDerivationMethod();
 			String kdf = kdfConfig.getAlgorithm();
 			if (!DefaultSecurityAlgorithms.KEY_DERIVATION.equals(kdf))
 				throw new SecurityProcessingException("Only ConcatKDF is supported!");
-			// Because ConcatKD is also fixed in WSSJ/Santuario we don't need to set any parameters
+			// Because ConcatKDF is also fixed in WSSJ/Santuario we don't need to set a specific parameter, but we may
+			// need to set parameters for setting the optional AlgorithmID, PartyUInfo and PartyVInfo attributes
+			Map<String, ?> kdfParameters = kdfConfig.getParameters();
+			if (!Utils.isNullOrEmpty(kdfParameters)) {
+				processingParams.put(PModeParameters.CONCAT_KDF_ALGORITHMID,
+								Utils.isNullOrEmpty((String) kdfParameters.get(PModeParameters.CONCAT_KDF_ALGORITHMID))?
+								"" : kdfParameters.get(PModeParameters.CONCAT_KDF_ALGORITHMID));
+				processingParams.put(PModeParameters.CONCAT_KDF_PARTY_U,
+								Utils.isNullOrEmpty((String) kdfParameters.get(PModeParameters.CONCAT_KDF_PARTY_U))?
+										"" : kdfParameters.get(PModeParameters.CONCAT_KDF_PARTY_U));
+				processingParams.put(PModeParameters.CONCAT_KDF_PARTY_V,
+								Utils.isNullOrEmpty((String) kdfParameters.get(PModeParameters.CONCAT_KDF_PARTY_V))?
+										"" : kdfParameters.get(PModeParameters.CONCAT_KDF_PARTY_V));
+			}
+
 			processingParams.put(ConfigurationConstants.ENC_DIGEST_ALGO, kdfConfig.getDigestAlgorithm());
 		} else {
 			log.error("No key transport or key agreement configuration found!");
