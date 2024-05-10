@@ -55,7 +55,7 @@ public class MessageUnitProcessingState implements IMessageUnitProcessingState, 
     }
 
     public void setDescription(final String descr) {
-        this.DESCRIPTION = descr;
+        this.DESCRIPTION = descr != null && descr.length() > 255 ? descr.substring(0, 255) : descr;
     }
 
     @Override
@@ -85,7 +85,7 @@ public class MessageUnitProcessingState implements IMessageUnitProcessingState, 
     	this.PROC_STATE_NUM = procNum;
         this.STATE = state.getState();
         this.START = state.getStartTime();
-        this.DESCRIPTION = state.getDescription();
+        setDescription(state.getDescription());
     }
 
 
