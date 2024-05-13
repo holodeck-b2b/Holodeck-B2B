@@ -87,7 +87,7 @@ public class SyncEventProcessor implements IMessageProcessingEventProcessor {
         	final List<IMessageProcessingEventConfiguration> eventHandlers = leg == null ? null :
         															leg.getMessageProcessingEventConfiguration();
         	continueProcessing = handleEvent(eventHandlers, event);
-        	if (continueProcessing) {
+        	if (continueProcessing && !Utils.isNullOrEmpty(subject.getPModeId())) {
         		log.trace("Check generic event handler configuration on the P-Mode");
         		continueProcessing = handleEvent(HolodeckB2BCoreInterface.getPModeSet().get(subject.getPModeId()).
         											getMessageProcessingEventConfiguration(), event);
