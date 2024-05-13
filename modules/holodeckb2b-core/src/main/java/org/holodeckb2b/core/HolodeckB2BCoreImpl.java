@@ -257,8 +257,17 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         HolodeckB2BCore.setImplementation(this);
 
         log.trace("Initialize Core worker pool");
+        XMLWorkerPoolConfiguration poolConfiguration;
         try {
-        	createWorkerPool("hb2b-core", new XMLWorkerPoolConfiguration(instanceConfiguration.getWorkerPoolCfgFile()));
+        	poolConfiguration = new XMLWorkerPoolConfiguration(instanceConfiguration.getWorkerPoolCfgFile());
+        } catch (WorkerPoolException corePoolCfgError) {
+	        log.fatal("Could not load the workers configuration file {} : {}",
+	        			instanceConfiguration.getWorkerPoolCfgFile(), corePoolCfgError.getMessage());
+			throw new AxisFault("Unable to start Holodeck B2B. Could not load workers from file "
+								+ instanceConfiguration.getWorkerPoolCfgFile());
+        }
+        try {
+        	createWorkerPool("hb2b-core", poolConfiguration);
         } catch (WorkerPoolException corePoolCfgError) {
         	// As the workers are needed for correct functioning of Holodeck B2B, failure to either
             // load the configuration or start the pool is fatal.
