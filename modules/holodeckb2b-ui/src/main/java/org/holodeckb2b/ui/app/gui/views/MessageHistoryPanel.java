@@ -131,8 +131,13 @@ public class MessageHistoryPanel extends JPanel implements TableModelListener {
 						super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         				if (ProcessingState.FAILURE.name().equals(value))
         					setForeground(Color.RED);
-        				else if (ProcessingState.WARNING.name().equals(value))
+        				else if (ProcessingState.WARNING.name().equals(value)
+        						|| ProcessingState.SUSPENDED.name().equals(value))
         					setForeground(new Color(255, 153, 0));
+        				else if (isSelected)
+							setForeground(Color.WHITE);
+        				else
+        					setForeground(Color.BLACK);
         				return this;
         			}
         		});
