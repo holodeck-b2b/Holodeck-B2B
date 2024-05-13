@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
+import java.io.Serializable;
+
 import org.holodeckb2b.interfaces.general.IDescription;
 
 /**
@@ -25,7 +27,9 @@ import org.holodeckb2b.interfaces.general.IDescription;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public class Description implements IDescription {
+public class Description implements IDescription, Serializable {
+	private static final long serialVersionUID = 2120315355145169940L;
+
 	private String  text;
     private String  lang;
 

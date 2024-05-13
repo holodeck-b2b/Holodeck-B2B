@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
+import java.io.Serializable;
+
 import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
@@ -27,7 +29,9 @@ import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public class CollaborationInfo implements ICollaborationInfo {
+public class CollaborationInfo implements ICollaborationInfo, Serializable {
+	private static final long serialVersionUID = -2315886122619231818L;
+
 	private AgreementReference  agreementRef;
     private Service             service;
     private String              action;

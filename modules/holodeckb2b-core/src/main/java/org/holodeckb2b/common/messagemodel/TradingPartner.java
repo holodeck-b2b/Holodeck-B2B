@@ -17,6 +17,7 @@
 package org.holodeckb2b.common.messagemodel;
 
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -31,7 +32,9 @@ import org.holodeckb2b.interfaces.general.ITradingPartner;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public class TradingPartner implements ITradingPartner {
+public class TradingPartner implements ITradingPartner, Serializable {
+	private static final long serialVersionUID = -4399459217276905109L;
+
 	private ArrayList<IPartyId>   partyIds;
     private String                role;
 

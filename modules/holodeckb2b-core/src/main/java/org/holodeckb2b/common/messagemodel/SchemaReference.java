@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
+import java.io.Serializable;
+
 import org.holodeckb2b.interfaces.general.ISchemaReference;
 
 /**
@@ -25,7 +27,9 @@ import org.holodeckb2b.interfaces.general.ISchemaReference;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public class SchemaReference implements ISchemaReference {
+public class SchemaReference implements ISchemaReference, Serializable {
+	private static final long serialVersionUID = 2314159021987658323L;
+
 	private String  namespace;
     private String  version;
     private String  location;

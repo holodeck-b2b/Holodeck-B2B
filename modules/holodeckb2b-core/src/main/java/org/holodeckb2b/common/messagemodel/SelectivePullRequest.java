@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
+import java.io.Serializable;
+
 import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
@@ -28,7 +30,9 @@ import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  4.1.0
  */
-public class SelectivePullRequest extends PullRequest implements ISelectivePullRequest {
+public class SelectivePullRequest extends PullRequest implements ISelectivePullRequest, Serializable {
+	private static final long serialVersionUID = 9075656384699164939L;
+
 	private String              refdMessageId;
     private String              conversationId;
     private AgreementReference  agreementRef;

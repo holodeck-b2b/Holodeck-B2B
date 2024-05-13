@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
+import java.io.Serializable;
+
 import org.holodeckb2b.interfaces.general.IPartyId;
 
 /**
@@ -25,7 +27,9 @@ import org.holodeckb2b.interfaces.general.IPartyId;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public class PartyId implements IPartyId {
+public class PartyId implements IPartyId, Serializable {
+	private static final long serialVersionUID = -5700991841061448122L;
+
 	private String  id;
     private String  type;
 

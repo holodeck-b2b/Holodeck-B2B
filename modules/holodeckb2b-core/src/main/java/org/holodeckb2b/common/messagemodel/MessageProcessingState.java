@@ -16,6 +16,7 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
@@ -28,7 +29,10 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 3.0.0
  */
-public class MessageProcessingState implements IMessageUnitProcessingState {
+public class MessageProcessingState implements IMessageUnitProcessingState, Serializable {
+
+	private static final long serialVersionUID = -3508733471289194518L;
+
 	private ProcessingState state;
 	private Date startTime;
 	private String description;

@@ -18,6 +18,7 @@ package org.holodeckb2b.common.messagemodel;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -35,15 +36,18 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
-public class Payload implements IPayload {
+public class Payload implements IPayload, Serializable {
+	private static final long serialVersionUID = -206177737741313766L;
+
     private String                  mimeType;
     private IPayload.Containment    containment;
     private String                  uri;
     private ArrayList<IProperty>    properties;
     private SchemaReference         schemaRef;
     private Description             description;
-    private IPayload				contentSrc;
-    private InputStream				contentStream;
+
+    private transient IPayload		contentSrc;
+    private transient InputStream	contentStream;
 
     /**
      * Default constructor creates empty object
