@@ -212,14 +212,14 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration,
     public void setHandlerSettings(final Map<String, Object> sourceSettings) {
         if (!Utils.isNullOrEmpty(sourceSettings)) {
             this.parameters = new ArrayList<>(sourceSettings.size());
-            sourceSettings.forEach((n, v) -> this.parameters.add(new Parameter(n, v.toString())));
+            sourceSettings.forEach((n, v) -> this.parameters.add(new Parameter(n, v != null ? v.toString() : null)));
         }
     }
 
     public void addHandlerSetting(final String name, final Object value) {
         if (this.parameters == null)
             this.parameters = new ArrayList<>();
-        this.parameters.add(new Parameter(name, value.toString()));
+        this.parameters.add(new Parameter(name, value != null ? value.toString() : null));
     }
 
     public void setContinueProcessing(boolean cont) {

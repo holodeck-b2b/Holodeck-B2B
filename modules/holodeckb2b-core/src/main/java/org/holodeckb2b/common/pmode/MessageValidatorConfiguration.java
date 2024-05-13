@@ -1,16 +1,16 @@
 /*******************************************************************************
  * Copyright (C) 2019 The Holodeck B2B Team, Sander Fieten
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
@@ -36,7 +36,7 @@ import org.simpleframework.xml.ElementList;
  */
 public class MessageValidatorConfiguration implements IMessageValidatorConfiguration, Serializable {
 	private static final long serialVersionUID = 1046031536481661223L;
-	
+
     @Element(name = "id", required = true)
     private String  id;
 
@@ -91,17 +91,17 @@ public class MessageValidatorConfiguration implements IMessageValidatorConfigura
     	} else
     		return null;
     }
-    
+
     public void setSettings(final Map<String, Object> sourceSettings) {
         if (!Utils.isNullOrEmpty(sourceSettings)) {
             this.parameters = new ArrayList<>(sourceSettings.size());
-            sourceSettings.forEach((n, v) -> this.parameters.add(new Parameter(n, v.toString())));
-        }    
+            sourceSettings.forEach((n, v) -> this.parameters.add(new Parameter(n, v != null ? v.toString() : null)));
+        }
     }
 
     public void addSetting(final String name, final Object value) {
         if (this.parameters == null)
             this.parameters = new ArrayList<>();
-        this.parameters.add(new Parameter(name, value.toString()));
+        this.parameters.add(new Parameter(name, value != null ? value.toString() : null));
     }
 }
