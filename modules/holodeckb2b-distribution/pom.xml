@@ -46,10 +46,15 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
         </dependency>
-        <!-- The default persistency implementation -->
+        <!-- The default Metadata Storage Provider implementation -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-persistency</artifactId>
+            <artifactId>holodeckb2b-metadatastorage</artifactId>
+        </dependency>
+        <!-- The default Payload Storage Provider implementation -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-payloadstorage</artifactId>
         </dependency>
         <!-- ebMS3/AS4 immplementation classes -->
         <dependency>

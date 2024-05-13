@@ -33,7 +33,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>holodeckb2b-persistency</artifactId>
+            <artifactId>holodeckb2b-metadatastorage</artifactId>
         </dependency> 
         <dependency>
             <groupId>com.github.lgooddatepicker</groupId>
