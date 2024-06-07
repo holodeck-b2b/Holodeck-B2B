@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 * Issue that caused orphaned payload records.
+* NPE when `EncryptedKey` WSS header contains whitespace
 
 ## 6.1.0
 ##### 2023-06-29
