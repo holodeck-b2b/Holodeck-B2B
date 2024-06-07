@@ -460,13 +460,14 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
 	                String ktMGF = null;
 	                for(int i = 0; i < encryptionMethod.getChildNodes().getLength() ; i++) {
 	                    Node child = encryptionMethod.getChildNodes().item(i);
-	                    switch (child.getLocalName()) {
-	                        case "DigestMethod" :
-	                            ktDigest = ((Element) child).getAttribute("Algorithm");
-	                            break;
-	                        case "MGF" :
-	                            ktMGF = ((Element) child).getAttribute("Algorithm");
-	                    }
+	                    if (child instanceof Element)
+		                    switch (child.getLocalName()) {
+		                        case "DigestMethod" :
+		                            ktDigest = ((Element) child).getAttribute("Algorithm");
+		                            break;
+		                        case "MGF" :
+		                            ktMGF = ((Element) child).getAttribute("Algorithm");
+		                    }
 	                }
 	                kxInfo = new KeyTransportInfo(ktAlgorithm, ktDigest, ktMGF);
                 } else if (ktAlgorithm.contains("xmlenc#kw-aes")) {
