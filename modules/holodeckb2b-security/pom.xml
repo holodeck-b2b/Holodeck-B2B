@@ -67,9 +67,13 @@
 	            		<groupId>org.opensaml</groupId>
 	            		<artifactId>opensaml-xacml-saml-impl</artifactId>
 	            	</exclusion>
+	            	<!-- Santuario is excluded because we include a customised version needed for Brainpool EC support -->
+	            	<exclusion>
+						<groupId>org.apache.santuario</groupId>
+    					<artifactId>xmlsec</artifactId>
+					</exclusion>
 	            </exclusions>
 	        </dependency>
-	        
         </dependencies>		
 	</dependencyManagement>
 </project>

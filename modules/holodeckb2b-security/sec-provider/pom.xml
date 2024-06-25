@@ -50,20 +50,21 @@
         <!-- WSS4J Security libs -->
         <dependency>
             <groupId>org.apache.wss4j</groupId>
-            <artifactId>wss4j-ws-security-common</artifactId>
+            <artifactId>wss4j-ws-security-common</artifactId>            
         </dependency>
         <dependency>
             <groupId>org.apache.wss4j</groupId>
             <artifactId>wss4j-ws-security-dom</artifactId>
             <version>${wss4j.version}</version>
         </dependency>
-        <!-- The 3.0.5-SNAPSHOT version of Santuario is needed for support of the brainpol EC -->
+        <!-- The modified 3.0.4 version of Santuario is needed for support of the brainpol EC -->
 		<dependency>
 			<groupId>org.apache.santuario</groupId>
     		<artifactId>xmlsec</artifactId>
-    		<version>3.0.5-SNAPSHOT</version>	
+    		<version>3.0.4-bp</version>	
+    		<scope>system</scope>
+    		<systemPath>${basedir}/lib/xmlsec-3.0.4-bp.jar</systemPath>
 		</dependency>
-		
         <!-- Test dependencies -->
 	    <dependency>
 	        <groupId>org.junit.jupiter</groupId>
@@ -98,13 +99,4 @@
 			<scope>test</scope>
 		</dependency>        
     </dependencies>
-    
-    <!-- Because we need to include the SNAPSHOT version of Santuario we have to define the repo where to get it -->
-    <repositories>
-		<repository>
-            <id>apache.snapshots.https</id>
-            <name>Apache Development Snapshot Repository</name>
-            <url>https://repository.apache.org/content/repositories/snapshots</url>
-		</repository>
-	</repositories>
 </project>
