@@ -512,7 +512,8 @@ public class StorageManager {
         // If not all payload content was removed, keep the meta-data of the message, so we can try again later
         if (errs.isEmpty())
 	        try {
-	        	mdsProvider.deleteMessageUnit(messageUnit);
+	        	mdsProvider.deleteMessageUnit(messageUnit instanceof UserMessageEntityProxy ?
+	        								 	((UserMessageEntityProxy) messageUnit).getSource() : messageUnit);
 	        	log.info("{} (MessageId={}) removed from storage", MessageUnitUtils.getMessageUnitName(messageUnit),
 	        				messageUnit.getMessageId());
 	        } catch (StorageException deleteFailed) {
