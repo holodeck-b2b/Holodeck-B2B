@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.events.impl.EncryptionFailure;
+import org.holodeckb2b.common.events.impl.SecurityCreationFailure;
 import org.holodeckb2b.common.events.impl.SignatureCreated;
 import org.holodeckb2b.common.events.impl.SigningFailure;
 import org.holodeckb2b.common.events.impl.UTCreationFailure;
@@ -158,7 +159,14 @@ public class CreateSecurityHeaders extends AbstractBaseHandler {
             log.error("An error occurred in the security provider when creating the WSS header(s). Details:"
                      + "\n\tSecurity provider: " + secProvider.getName()
                      + "\n\tError details: " + spe.getMessage());
-            throw spe;
+
+            final StorageManager storageManager = HolodeckB2BCore.getStorageManager();
+            final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
+            for (final IMessageUnitEntity mu : procCtx.getSendingMessageUnits()) {
+                storageManager.setProcessingState(mu, ProcessingState.SUSPENDED);
+                eventProcessor.raiseEvent(new SecurityCreationFailure(mu, spe));
+            }
+            return InvocationResponse.ABORT;
         }
     }
 

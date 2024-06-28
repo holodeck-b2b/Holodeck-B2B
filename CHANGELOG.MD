@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 7.0.0-SNAPSHOT
+## 7.0.0
 ##### 
 ### Added
 * Support the use _Elliptic Curve Diffie-Hellman Key Agreement_ as method to exchange the symmetric encryption key. 
@@ -22,6 +22,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * New `org.holodeckb2b.interfaces.submit.DuplicateMessageIdException` to indicate that a duplicate MessageId is used
   in a submitted message unit. 
 * New `org.holodeckb2b.interfaces.events.IMessagePurgeFailure` event to indicate that the purge of a message unit failed
+* The `org.holodeckb2b.common.events.impl.ISecurityCreationFailure` event is now raised when a generic error occurred during
+  creation of the security header
 * Option in the default GUI to copy the _MessageId_, _RefToMessageId_ or _PMode.id_ of a message unit on the overview
   screen to the system clipboard.
 
