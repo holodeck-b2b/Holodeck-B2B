@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b-security</artifactId>
-        <version>7.0.0-RC4</version>
+        <version>7.0.0-RC5</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>holodeckb2b-certmanager</artifactId>
