@@ -14,14 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.core.validation;
+package org.holodeckb2b.common.events.impl;
 
 import java.util.Collection;
 import java.util.Map;
 
-import org.holodeckb2b.common.events.impl.AbstractMessageProcessingEvent;
 import org.holodeckb2b.commons.util.Utils;
+import org.holodeckb2b.core.validation.ValidationResult;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
+import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 import org.holodeckb2b.interfaces.events.ICustomValidationFailure;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
@@ -32,7 +33,8 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
  */
-public class CustomValidationFailureEvent extends AbstractMessageProcessingEvent implements ICustomValidationFailure {
+public class CustomValidationFailureEvent extends AbstractMessageProcessingFailureEvent<MessageValidationException>
+											implements ICustomValidationFailure {
 
     /**
      * Holds the indicator whether all specified validators were executed
@@ -48,13 +50,25 @@ public class CustomValidationFailureEvent extends AbstractMessageProcessingEvent
     private Map<String, Collection<MessageValidationError>> validationErrors;
 
     /**
-     * Creates a new <code>CustomValidationFailureEvent</code> for the given message unit and validation information.
+     * Creates a new <code>CustomValidationFailureEvent</code> to indicate that custom validation of the given User
+     * Message unit could not be completed due to an error that occurred during the validation.
      *
-     * @param subject               The message for which the validation failed
+     * @param subject           The User Message for which the validation failed to complete
+     * @param failureReason		{@link MessageValidationException} that caused the failure
+     */
+    public CustomValidationFailureEvent(IMessageUnit subject, MessageValidationException failureReason) {
+    	super(subject, failureReason);
+    }
+
+    /**
+     * Creates a new <code>CustomValidationFailureEvent</code> to indicate that the given User Message unit does not
+     * meet the validation criteria.
+     *
+     * @param subject               The User Message for which the validation failed
      * @param validationResult      The results of the validation
      */
     public CustomValidationFailureEvent(IMessageUnit subject, ValidationResult validationResult) {
-        super(subject);
+        super(subject, null);
         if (Utils.isNullOrEmpty(validationResult.getValidationErrors()))
             throw new IllegalArgumentException("This event can only be raised if validation errors were found!");
         this.validationErrors = validationResult.getValidationErrors();

@@ -22,7 +22,7 @@ import java.util.Map;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidatorConfiguration;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
-import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 
 /**
  * Is the <i>message processing event</i> that indicates that the custom validation of a m<i>User Message</i> message
@@ -35,7 +35,18 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
  * @since 4.1.0
  * @see IMessageValidationSpecification
  */
-public interface ICustomValidationFailure extends IMessageProcessingEvent {
+public interface ICustomValidationFailure extends IMessageProcessingFailure {
+
+	/**
+     * Gets the exception that caused the validation of the User Message to fail. This means that the custom validation
+     * of the User Message did not complete, i.e. there is no information available on the validity of the User Message.
+     *
+     * @return  The {@link MessageValidationException} that caused the failure. <code>null</code> in case the
+     * 			User Message that not meet the validation criteria.
+     * @since 7.0.0
+     */
+	@Override
+	MessageValidationException getFailureReason();
 
     /**
      * Gets the information on the errors that were found during the custom validation of the message unit, grouped by

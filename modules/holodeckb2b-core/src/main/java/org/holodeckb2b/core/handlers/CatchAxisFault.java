@@ -17,7 +17,6 @@
 package org.holodeckb2b.core.handlers;
 
 import java.util.Collection;
-import java.util.UUID;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
@@ -28,7 +27,6 @@ import org.holodeckb2b.common.events.impl.GenericSendMessageFailure;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.util.MessageUnitUtils;
-import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.storage.NonPersistedErrorMessage;
@@ -36,7 +34,6 @@ import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
@@ -68,8 +65,9 @@ public class CatchAxisFault extends AbstractBaseHandler {
     	final MessageContext msgContext = procCtx.getParentContext();
         // This handler only needs to act when there was a failure
         if (msgContext.getFailureReason() != null) {
+        	final Exception cause = msgContext.getFailureReason();
             log.error("An error occurred while processing messages! Error stack=\n {}",
-                        Utils.getExceptionTrace(msgContext.getFailureReason(), true));
+                        Utils.getExceptionTrace(cause, true));
             // As we don't know the exact cause of the error the processing state of all message units that are being
             // currently processed should be set to failed if there processing is not completed yet
             Collection<IMessageUnitEntity>  msgUnitsInProcess = null;
@@ -80,7 +78,6 @@ public class CatchAxisFault extends AbstractBaseHandler {
             else
                 msgUnitsInProcess = procCtx.getSendingMessageUnits();
 
-            final String failureDescription = Utils.getExceptionTrace(msgContext.getFailureReason());
             for (final IMessageUnitEntity mu : msgUnitsInProcess) {
                 // Changing the processing state may fail if the problems are caused by the database.
                 try {
@@ -94,8 +91,8 @@ public class CatchAxisFault extends AbstractBaseHandler {
                         										ProcessingState.SUSPENDED : ProcessingState.FAILURE);
                         // Raise event to signal the processing failure
                         HolodeckB2BCore.getEventProcessor().raiseEvent(receiving ?
-		                        								new GenericReceiveMessageFailure(mu, failureDescription)
-		                        							  : new GenericSendMessageFailure(mu, failureDescription));
+		                        								new GenericReceiveMessageFailure(mu, cause)
+		                        							  : new GenericSendMessageFailure(mu, cause));
                     }
                 } catch (final StorageException ex) {
                     // Unable to change the processing state, log the error.
@@ -133,7 +130,7 @@ public class CatchAxisFault extends AbstractBaseHandler {
         } catch (final StorageException dbe) {
             // (Still) a problem with the database, create the Error signal message without storing it
             log.fatal("Could not store error signal message in database! Details: " + dbe.getMessage());
-            log.trace("Create a non-persisted ErrorMessageEntity so we can still send the message");            
+            log.trace("Create a non-persisted ErrorMessageEntity so we can still send the message");
             return new NonPersistedErrorMessage(errorMessage);
         } catch (DuplicateMessageIdException e) {
         	// Can never occur because a unique id is generated for the Error Message

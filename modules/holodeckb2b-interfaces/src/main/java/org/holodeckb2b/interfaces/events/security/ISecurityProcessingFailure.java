@@ -40,5 +40,6 @@ public interface ISecurityProcessingFailure extends IReceivedMessageProcessingFa
      *
      * @return  The {@link SecurityProcessingException} that caused the failure.
      */
+	@Override
 	SecurityProcessingException getFailureReason();
 }

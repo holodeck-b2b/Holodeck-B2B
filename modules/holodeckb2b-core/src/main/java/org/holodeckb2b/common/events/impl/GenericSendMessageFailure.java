@@ -20,21 +20,33 @@ import org.holodeckb2b.interfaces.events.ISendMessageProcessingFailure;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
- * Is an implementation class of {@link ISendMessageProcessingFailure} used to indicate that an error occurred during 
- * the processing of an outgoing message unit for which no other specific event is defined. 
- * 
+ * Is an implementation class of {@link ISendMessageProcessingFailure} used to indicate that an error occurred during
+ * the processing of an outgoing message unit for which no other specific event is defined.
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
  */
-public class GenericSendMessageFailure extends AbstractMessageProcessingEvent implements ISendMessageProcessingFailure {
+public class GenericSendMessageFailure extends AbstractMessageProcessingFailureEvent<Throwable>
+																			implements ISendMessageProcessingFailure {
 
     /**
      * Creates a new <code>GenericSendMessageFailure</code> for the unsuccessful processing of the given message unit
      *
-     * @param subject   			The failed message unit 
-     * @param failureDescription   	Descriptive text of the reason why the processing failed
+     * @param subject   The failed message unit
+     * @param reason   	Reason why the processing failed
      */
-    public GenericSendMessageFailure(final IMessageUnit subject, final String failureDescription) {
-        super(subject, failureDescription);
+    public GenericSendMessageFailure(final IMessageUnit subject, final Throwable reason) {
+        super(subject, reason);
+    }
+
+    /**
+     * Creates a new <code>GenericSendMessageFailure</code> for the unsuccessful processing of the given message unit
+     *
+     * @param subject   	The failed message unit
+     * @param description   Description of the reason why the processing failed
+     * @param reason   		Exception that caused the processing to fail
+     */
+    public GenericSendMessageFailure(final IMessageUnit subject, final String description, final Throwable reason) {
+    	super(subject, description, reason);
     }
 }

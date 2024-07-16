@@ -120,7 +120,7 @@ public class RetransmissionWorker extends AbstractWorkerTask {
                     	if (HolodeckB2BCore.getStorageManager().setProcessingState(um, ProcessingState.SUSPENDED,
                     													"Missing reception awareness configuration"))
 	                    	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(new GenericSendMessageFailure(um,
-                    													"Missing reception awareness configuration"));
+                    												"Missing reception awareness configuration", null));
                     	continue;
                     }
 

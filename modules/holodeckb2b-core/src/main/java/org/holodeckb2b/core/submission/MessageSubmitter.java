@@ -21,6 +21,7 @@ import java.util.Iterator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.holodeckb2b.common.events.impl.CustomValidationFailureEvent;
 import org.holodeckb2b.common.events.impl.MessageSubmission;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.commons.util.MessageIdUtils;
@@ -28,7 +29,6 @@ import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.core.storage.StorageManager;
-import org.holodeckb2b.core.validation.CustomValidationFailureEvent;
 import org.holodeckb2b.core.validation.ValidationResult;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;

@@ -21,11 +21,11 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.OtherContentError;
+import org.holodeckb2b.common.events.impl.CustomValidationFailureEvent;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.pmode.PModeUtils;
-import org.holodeckb2b.core.validation.CustomValidationFailureEvent;
 import org.holodeckb2b.core.validation.ValidationResult;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
@@ -107,6 +107,8 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
             										"An error occurred when performing the validation of User Message",
             										userMessage.getMessageId()));
             HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, ProcessingState.FAILURE);
+            // Raise message processing event to inform other components of the validation issue
+            HolodeckB2BCore.getEventProcessor().raiseEvent(new CustomValidationFailureEvent(userMessage, ve));
         }
 
         return InvocationResponse.CONTINUE;

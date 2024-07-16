@@ -26,9 +26,8 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 4.0.0
  */
-abstract class AbstractSecurityProcessingFailureEvent extends AbstractMessageProcessingEvent {
-
-    private SecurityProcessingException     failureReason;
+abstract class AbstractSecurityProcessingFailureEvent
+											extends AbstractMessageProcessingFailureEvent<SecurityProcessingException> {
 
     /**
      * Creates a new <code>AbstractSecurityProcessingFailureEvent</code> for the given message unit and failure reason.
@@ -37,18 +36,6 @@ abstract class AbstractSecurityProcessingFailureEvent extends AbstractMessagePro
      * @param reason    The reason why the security processing failed
      */
     AbstractSecurityProcessingFailureEvent(final IMessageUnit subject, final SecurityProcessingException reason) {
-        super(subject);
-        this.failureReason = reason;
+        super(subject, reason);
     }
-
-    /**
-     * Gets the description as given by the <i>Security Provider</i> of what caused the processing of the WS-Security
-     * header to fail.
-     *
-     * @return  The {@link SecurityProcessingException} that caused the failure.
-     */
-    public SecurityProcessingException getFailureReason() {
-        return failureReason;
-    }
-
 }

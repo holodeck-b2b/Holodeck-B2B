@@ -19,7 +19,7 @@ package org.holodeckb2b.interfaces.events;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 
 /**
- * Is the <i>message processing event</i> that indicates that an attempt to deliver a message unit to the business 
+ * Is the <i>message processing event</i> that indicates that an attempt to deliver a message unit to the business
  * application failed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
@@ -32,6 +32,7 @@ public interface IMessageDeliveryFailure extends IReceivedMessageProcessingFailu
      *
      * @return  The exception that caused the message delivery failure
      */
+	@Override
 	MessageDeliveryException getFailureReason();
 }
 

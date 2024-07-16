@@ -38,6 +38,7 @@ public interface ISecurityCreationFailure extends ISendMessageProcessingFailure 
      * header to fail.
      *
      * @return  The {@link SecurityProcessingException} that caused the failure.
-     */    
+     */
+	@Override
 	SecurityProcessingException getFailureReason();
 }

@@ -493,7 +493,7 @@ public class StorageManager {
         final Collection<? extends IPayloadEntity> payloads = messageUnit instanceof IUserMessage ?
         														((IUserMessageEntity) messageUnit).getPayloads() : null;
 
-        Collection<StorageException> errs = new ArrayList<>();
+        Collection<StorageException> plFailures = new ArrayList<>();
         if (payloads != null) {
         	log.trace("Remove payload content of User Message");
         	for (IPayloadEntity p : payloads) {
@@ -503,29 +503,35 @@ public class StorageManager {
         		} catch (StorageException deleteFailed) {
         			log.warn("Error removing payload content (URI={}) of User Messsage (msgId={}): {}",
 							 p.getPayloadURI(), messageUnit.getMessageId(), Utils.getExceptionTrace(deleteFailed));
-        			errs.add(new StorageException("Error removing payload content (URI=" + p.getPayloadURI() + ")",
+        			plFailures.add(new StorageException("Error removing payload content (URI=" + p.getPayloadURI() + ")",
         											deleteFailed));
 				}
         	}
         }
 
+        StorageException deleteFailure = null;
         // If not all payload content was removed, keep the meta-data of the message, so we can try again later
-        if (errs.isEmpty())
+        if (plFailures.isEmpty())
 	        try {
 	        	mdsProvider.deleteMessageUnit(messageUnit instanceof UserMessageEntityProxy ?
 	        								 	((UserMessageEntityProxy) messageUnit).getSource() : messageUnit);
 	        	log.info("{} (MessageId={}) removed from storage", MessageUnitUtils.getMessageUnitName(messageUnit),
 	        				messageUnit.getMessageId());
-	        } catch (StorageException deleteFailed) {
+	        } catch (StorageException mmdDeleteFailed) {
 				log.error("Error deleting meta-data of message unit (msgId={}) : {}", messageUnit.getMessageId(),
-							Utils.getExceptionTrace(deleteFailed));
-				errs.add(deleteFailed);
+							Utils.getExceptionTrace(mmdDeleteFailed));
+				deleteFailure = mmdDeleteFailed;
 	        }
-
+        else {
+        	deleteFailure = new StorageException("Failed to remove message unit [coreId=" + messageUnit.getCoreId() + "]");
+        	for(StorageException e : plFailures)
+        		deleteFailure.addSuppressed(e);
+        }
     	log.debug("Raise event to indicate that message unit (msgId={}) {} removed", messageUnit.getMessageId(),
-    				errs.isEmpty() ? "is" : "could not be");
-    	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(errs.isEmpty() ? new MessageUnitPurged(messageUnit)
-																	  : new MessagePurgeFailure(messageUnit, errs));
+    				plFailures.isEmpty() ? "is" : "could not be");
+    	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(deleteFailure == null ?
+    															  new MessageUnitPurged(messageUnit)
+																: new MessagePurgeFailure(messageUnit, deleteFailure));
     }
 
     /**

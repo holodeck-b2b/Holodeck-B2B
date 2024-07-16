@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * @since 4.0.0
  */
 public class SignatureVerificationFailure extends AbstractSecurityProcessingFailureEvent
-                                                implements ISignatureVerificationFailure {
+                                                						implements ISignatureVerificationFailure {
 
     /**
      * Creates a new <code>SignatureVerificationFailedEvent</code> for the given message unit and failure reason.

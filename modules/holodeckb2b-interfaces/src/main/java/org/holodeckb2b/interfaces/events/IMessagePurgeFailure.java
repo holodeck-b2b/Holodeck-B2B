@@ -17,28 +17,28 @@
 
 package org.holodeckb2b.interfaces.events;
 
-import java.util.Collection;
-
-import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
- * Is the <i>message processing event</i> that indicates that a problem occurred when deleting the message unit from the 
- * Holodeck B2B Core storage.  
- * <p>This event is triggered by the Holodeck B2B Core's <i>Storage Manager</i> when either the meta-data or, 
- * for User Messages, the payload content could not be removed from storage. When this event is raised, the state of the 
- * message unit is undefined and it may not be possible to process it further.    
+ * Is the <i>message processing event</i> that indicates that a problem occurred when deleting the message unit from the
+ * Holodeck B2B Core storage.
+ * <p>This event is triggered by the Holodeck B2B Core's <i>Storage Manager</i> when either the meta-data or,
+ * for User Messages, the payload content could not be removed from storage. When this event is raised, the state of the
+ * message unit is undefined and it may not be possible to process it further.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 7.0.0
  */
-public interface IMessagePurgeFailure extends IMessageProcessingEvent {
+public interface IMessagePurgeFailure extends IMessageProcessingFailure {
 
 	/**
-	 * Gets a list of exceptions that caused the removal of the message unit to fail.
-	 * 
-	 * @return	one or more {@link StorageException}s indicating the errors that occurred 
+	 * Gets a {@linkplain StorageException} that caused the removal of the message unit to fail. When the message to be
+	 * removed is a User Message the issue can be that one or more of its payloads could not be removed. {@link
+	 * StorageException}s related to the payload removal issues can be retrieved using the
+	 * {@link StorageException#getSuppressed()} method.
+	 *
+	 * @return	one or more {@link StorageException}s indicating the errors that occurred
 	 */
-	Collection<StorageException> getFailures();
+	@Override
+	StorageException getFailureReason();
 }

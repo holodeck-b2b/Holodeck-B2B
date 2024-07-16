@@ -85,7 +85,7 @@ public class Axis2Sender {
         	log.error("Cannot send {} [msgId={}] because associated P-Mode {} is not available!",
         				MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId(),
         				messageUnit.getPModeId());
-        	registerSendFailure(messageUnit, "P-Mode not available");
+        	registerSendFailure(messageUnit, "P-Mode not available", null);
         	return;
         }
         log.trace("Check PMode.MEPBinding which Service should be used");
@@ -112,7 +112,7 @@ public class Axis2Sender {
         	log.error("Cannot send {} [msgId={}] because required {} Service is not installed!",
     				   MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId(),
     				   svcName);
-        	registerSendFailure(messageUnit, "Required messaging service not installed");
+        	registerSendFailure(messageUnit, "Required messaging service not installed", null);
         	return;
         }
         log.debug("Using {} Service to send {} [msgId={}]", svcName, MessageUnitUtils.getMessageUnitName(messageUnit),
@@ -176,7 +176,7 @@ public class Axis2Sender {
         	log.error("An exception occurred setting up the send operation for {} (msgId={}).Exception stack below:\n",
         			   MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId(),
         			   Utils.getExceptionTrace(cfgError, true));
-        	registerSendFailure(messageUnit, "Axis2 initialisation failure");
+        	registerSendFailure(messageUnit, "Axis2 initialisation failure", cfgError);
         	return;
         }
 
@@ -195,7 +195,7 @@ public class Axis2Sender {
         		log.error("An unexpected error occurred while sending {} (msgId={}). Exception trace:\n{}",
         				  MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId(),
         				  Utils.getExceptionTrace(t, true));
-        		registerSendFailure(messageUnit, null);
+        		registerSendFailure(messageUnit, "Unexpected error sending message", msgCtx.getFailureReason());
         	}
         }
     }
@@ -204,11 +204,12 @@ public class Axis2Sender {
      * Sets the processing state of the given message unit to <i>FAILURE</i> and raises a event to indicate that the
      * sending of the message unit failed.
      *
-     * @param messageUnit				to be sent
-     * @param failureDescription		description of the failure
+     * @param messageUnit			to be sent
+     * @param failureDescription	description of the failure
+     * @param cause					cause of the failure
      * @throws StorageException		when the message unit's state could not be updated
      */
-	private static void registerSendFailure(IMessageUnitEntity messageUnit, String failureDescription)
+	private static void registerSendFailure(IMessageUnitEntity messageUnit, String failureDescription, Exception cause)
 																						throws StorageException {
 		// Set state to FAILURE for Signals or SUSPENDED for User Messages
     	HolodeckB2BCore.getStorageManager()
@@ -217,7 +218,7 @@ public class Axis2Sender {
 							failureDescription);
     	// Raise event to signal this issue
     	HolodeckB2BCoreInterface.getEventProcessor().raiseEvent(
-    			new GenericSendMessageFailure(messageUnit, failureDescription));
+    			new GenericSendMessageFailure(messageUnit, failureDescription, cause));
 	}
 
 

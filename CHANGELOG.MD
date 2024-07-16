@@ -21,6 +21,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   message meta-data could not be executed because the database already contains newer data
 * New `org.holodeckb2b.interfaces.submit.DuplicateMessageIdException` to indicate that a duplicate MessageId is used
   in a submitted message unit. 
+* New generic `org.holodeckb2b.interfaces.events.IMessageProcessingFailure` event as super interface of all events that 
+  indicate that there was a problem in the processing of a message
 * New `org.holodeckb2b.interfaces.events.IMessagePurgeFailure` event to indicate that the purge of a message unit failed
 * The `org.holodeckb2b.common.events.impl.ISecurityCreationFailure` event is now raised when a generic error occurred during
   creation of the security header
@@ -32,6 +34,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   configuration of _Key Agreement_ for exchange of the symmetric encryption key.
 * `org.holodeckb2b.interfaces.security.IEncryptionProcessingResult` and 
   `org.holodeckb2b.common.security.results.EncryptionProcessingResult` to support inclusion of _Key Agreement_ meta-data
+* Replaced method `getFailures()` in `IMessagePurgeFailure` with `getFailureReason()` and included exceptions related to 
+  problems in removing payloads of a User Message as _surpressed_ exceptions of the exception retrieved with the new
+  method.
+* Added method `getFailureReason()` to `IHeaderValidationFailure` and `ICustomValidationFailure` to provide information about
+  the error that occurred during the validation of the (header of) message unit
+* Added method `getFailureReason()` to `IReceivedMessageProcessingFailure` and `ISendMessageProcessingFailure` to provide 
+  information about the error that occurred during the processing of the message unit
 * The _Persistency Provider_ has been refactored to the _Metadata Storage Provider_ and the methods of the old 
   `IUpdateManager` interface for updating specific meta-data attributes have been replaced by more generic create, 
   update and delete methods that operate on the entity classes. New update methods have been added to the entity classes

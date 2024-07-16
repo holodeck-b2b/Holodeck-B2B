@@ -17,7 +17,7 @@
 package org.holodeckb2b.interfaces.events;
 
 /**
- * Is the <i>message processing event</i> that indicates that an attempt to transfer a message unit to the other MSH, 
+ * Is the <i>message processing event</i> that indicates that an attempt to transfer a message unit to the other MSH,
  * either by sending it as a request or including it as a response failed. The event is raised for all message units.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
@@ -25,10 +25,4 @@ package org.holodeckb2b.interfaces.events;
  */
 public interface IMessageTransferFailure extends ISendMessageProcessingFailure {
 
-    /**
-     * Gets the exception that caused the transfer to fail.
-     *
-     * @return  The exception that caused the transfer to fail
-     */
-	Exception getFailureReason();
 }

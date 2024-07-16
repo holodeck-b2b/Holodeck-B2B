@@ -16,31 +16,21 @@
  */
 package org.holodeckb2b.common.events.impl;
 
-import java.util.Collection;
-
 import org.holodeckb2b.interfaces.events.IMessagePurgeFailure;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
- * Is the implementation class of {@link IMessagePurgeFailure} to indicate that a message unit could not be to deleted 
+ * Is the implementation class of {@link IMessagePurgeFailure} to indicate that a message unit could not be to deleted
  * from the Holodeck B2B Core storage because one ore more errors occurred during the removal process.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  7.0.0
  */
-public class MessagePurgeFailure extends AbstractMessageProcessingEvent implements IMessagePurgeFailure {
-	//	
-	private final Collection<StorageException>	errors;
-	
-	public MessagePurgeFailure(IMessageUnit subject, Collection<StorageException> errors) {
-		super(subject);
-		this.errors = errors;
-	}
+public class MessagePurgeFailure extends AbstractMessageProcessingFailureEvent<StorageException>
+																					implements IMessagePurgeFailure {
 
-	@Override
-	public Collection<StorageException> getFailures() {
-		return errors;
+	public MessagePurgeFailure(IMessageUnit subject, StorageException reason) {
+		super(subject, reason);
 	}
-
 }

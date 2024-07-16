@@ -19,9 +19,10 @@ package org.holodeckb2b.interfaces.events;
 import java.util.Collection;
 
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
+import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 
 /**
- * Is the <i>message processing event</i> that indicates that the validation of the header of a received message unit 
+ * Is the <i>message processing event</i> that indicates that the validation of the header of a received message unit
  * has failed. Using this event the back-end or extensions can be made aware that a received message was rejected and
  * take additional action, for example informing an operator.
  *
@@ -30,10 +31,21 @@ import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
  */
 public interface IHeaderValidationFailure extends IReceivedMessageProcessingFailure {
 
+	/**
+     * Gets the exception that caused the header validation to fail. This means that the validation did not complete,
+     * i.e. there is no information available on the validity of headers.
+     *
+     * @return  The {@link MessageValidationException} that caused the failure. <code>null</code> in case the
+     * 			message headers did not meet the validation criteria.
+     * @since 7.0.0
+     */
+	@Override
+	MessageValidationException getFailureReason();
+
     /**
      * Gets the information on the errors that were found during the validation of the message header
-     * 
+     *
      * @return  The detected validation errors
-     */    
+     */
 	Collection<MessageValidationError> getValidationErrors();
 }
