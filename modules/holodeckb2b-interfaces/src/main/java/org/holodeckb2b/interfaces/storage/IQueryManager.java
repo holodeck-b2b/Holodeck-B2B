@@ -145,15 +145,4 @@ public interface IQueryManager {
      * @since 7.0.0
      */
     IMessageUnitEntity getMessageUnitWithCoreId(final String coreId) throws StorageException;
-
-	/**
-	 * Gets the set of <i>CoreId</i>s of message units that are related to the message unit with the given <i>CoreId</i>.
-	 * <p>This can for example be the User Message to which a Receipt or Error Message applies, but also the Pull
-	 * Request that triggered the sending of the User Message.
-	 *
-	 * @param coreId  the <i>CoreId</i> to get related message units for
-	 * @return	the set of <i>CoreId</i>s of message units related to <code>coreId</code>
-	 * @since 7.0.0
-	 */
-	Set<String>	getRelatedTo(final String coreId);
 }

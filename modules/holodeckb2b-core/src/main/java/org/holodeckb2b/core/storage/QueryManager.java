@@ -142,10 +142,4 @@ public class QueryManager implements IQueryManager {
 	interface Query<R> {
 		Collection<R> execute() throws StorageException;
 	}
-
-	@Override
-	public Set<String> getRelatedTo(String coreId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
