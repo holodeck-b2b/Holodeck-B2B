@@ -21,6 +21,7 @@ import java.util.UUID;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.MessageProcessingState;
 import org.holodeckb2b.commons.util.MessageIdUtils;
+import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
@@ -42,7 +43,7 @@ public class NonPersistedErrorMessage extends ErrorMessage implements IErrorMess
 	private boolean isMultiHop = false;
 	private Label 	leg;
 
-	public NonPersistedErrorMessage(final ErrorMessage source) {
+	public NonPersistedErrorMessage(final IErrorMessage source) {
 		super(source);
 		coreId = UUID.randomUUID().toString();
 		setMessageId(MessageIdUtils.createMessageId());
