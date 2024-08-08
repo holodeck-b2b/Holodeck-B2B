@@ -82,8 +82,8 @@ public class PModeValidator implements IPModeValidator {
 		secCfg = tpCfg != null ? tpCfg.getSecurityConfiguration() : null;
 		if (secCfg != null) {
 			errors.addAll(checkUsernameTokenParameters(secCfg, "PMode.Responder"));
-			errors.addAll(checkSigningParameters(secCfg.getSignatureConfiguration(), "PMode.Initiator", !hb2bIsInitiator));
-			errors.addAll(checkEncryptionParameters(secCfg.getEncryptionConfiguration(), "PMode.Initiator", !hb2bIsInitiator));
+			errors.addAll(checkSigningParameters(secCfg.getSignatureConfiguration(), "PMode.Responder", !hb2bIsInitiator));
+			errors.addAll(checkEncryptionParameters(secCfg.getEncryptionConfiguration(), "PMode.Responder", !hb2bIsInitiator));
 		}
 
 		// Pull specific configs
