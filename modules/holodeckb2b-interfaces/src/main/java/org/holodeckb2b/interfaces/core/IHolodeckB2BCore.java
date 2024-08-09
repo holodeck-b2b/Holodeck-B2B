@@ -29,7 +29,6 @@ import org.holodeckb2b.interfaces.general.IVersionInfo;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
-import org.holodeckb2b.interfaces.storage.IQueryManager;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.holodeckb2b.interfaces.storage.providers.StorageException;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;

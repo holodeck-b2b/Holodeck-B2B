@@ -17,8 +17,6 @@
 package org.holodeckb2b.core.receptionawareness;
 
 import org.apache.axis2.description.HandlerDescription;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;

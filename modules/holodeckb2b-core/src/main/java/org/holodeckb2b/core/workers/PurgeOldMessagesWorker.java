@@ -25,9 +25,9 @@ import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.common.workers.AbstractWorkerTask;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
+import org.holodeckb2b.interfaces.core.IQueryManager;
 import org.holodeckb2b.interfaces.events.IMessageUnitPurged;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.storage.IQueryManager;
 import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
