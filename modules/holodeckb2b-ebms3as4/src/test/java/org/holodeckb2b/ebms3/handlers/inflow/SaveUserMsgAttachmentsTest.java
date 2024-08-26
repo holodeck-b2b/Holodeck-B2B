@@ -132,7 +132,7 @@ public class SaveUserMsgAttachmentsTest {
 
         // Pre save payload
         IPayloadContent content = testCore.getPayloadStorageProvider().createNewPayloadStorage(
-        								userMsgEntity.getPayloads().iterator().next().getPayloadId(), null, null);
+        																userMsgEntity.getPayloads().iterator().next());
         try (FileInputStream fis = new FileInputStream(testFile); OutputStream cos = content.openStorage()) {
 			Utils.copyStream(fis, cos);
 		}

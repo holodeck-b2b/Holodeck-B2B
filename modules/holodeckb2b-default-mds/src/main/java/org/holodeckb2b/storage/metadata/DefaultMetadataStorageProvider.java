@@ -128,12 +128,17 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 								throw new StorageException("Payload (payloadId=" + ((IPayloadEntity) p).getPayloadId()
 										+ "already linked to other User Message (coreId=" + storedPl.getParentCoreId()
 										+ ")");
+							else if (!messageUnit.getPModeId().equals(storedPl.getPModeId())
+									|| messageUnit.getDirection() != storedPl.getDirection())
+								throw new StorageException("Payload (payloadId=" + ((IPayloadEntity) p).getPayloadId()
+										+ "meta-data does not match User Message (msgId=" + messageUnit.getMessageId()
+										+ ")");
 						} catch (NoResultException notFound) {
 							throw new StorageException("Unknown payloadId: " + ((IPayloadEntity) p).getPayloadId());
 						}
 					else
 						storedPl = new PayloadInfo(p);
-					storedPl.setParentCoreId(jpaMsgUnit.getCoreId());
+					storedPl.setParent((UserMessage) jpaMsgUnit);
 					((UserMessage) jpaMsgUnit).addPayload(storedPl);
 				}
 			}
@@ -154,13 +159,15 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 	}
 
 	@Override
-	public IPayloadEntity storePayloadMetadata(IPayload payload) throws StorageException {
+	public IPayloadEntity storePayloadMetadata(IPayload payload, String pmodeId) throws StorageException {
 		EntityManager em = null;
 		EntityTransaction tx = null;
 		try {
 			em = emf.createEntityManager();
 			// Determine which JPA class should be created to store the meta-data
 			PayloadInfo jpaPayload = new PayloadInfo(payload);
+			jpaPayload.setPModeId(pmodeId);
+			jpaPayload.setDirection(Direction.OUT);
 			tx = em.getTransaction();
 			tx.begin();
 			em.persist(jpaPayload);

@@ -219,5 +219,8 @@ public class QueryTests extends BaseProviderTest {
 		assertEquals(TestDataSet.T_USERMESSAGE_1.getMessageProperties().size(), entity.getMessageProperties().size());
 		assertTrue(TestDataSet.T_USERMESSAGE_1.getMessageProperties().stream().allMatch(p ->
 						entity.getMessageProperties().parallelStream().anyMatch(p2 -> CompareUtils.areEqual(p, p2))));
+		assertEquals(TestDataSet.T_USERMESSAGE_1.getPayloads().size(), entity.getPayloads().size());
+		assertTrue(TestDataSet.T_USERMESSAGE_1.getPayloads().stream().allMatch(p ->
+					entity.getPayloads().parallelStream().anyMatch(p2 -> p2.getPayloadId().equals(p.getPayloadId()))));
 	}
 }

@@ -170,26 +170,8 @@ public class UpdateTests {
 	}
 
 	@Test
-	void testPayloadSetParent() {
-		IPayloadEntity stored = assertDoesNotThrow(() -> provider.storePayloadMetadata(new Payload()));
-		assertNull(stored.getParentCoreId());
-
-		final String newParentCoreId = UUID.randomUUID().toString();
-		stored.setParentCoreId(newParentCoreId);
-
-		assertDoesNotThrow(() -> provider.updatePayloadMetadata(stored));
-
-		assertEquals(newParentCoreId, stored.getParentCoreId());
-
-		org.holodeckb2b.storage.metadata.jpa.PayloadInfo dbObj = EntityManagerUtil.getEntityManager()
-															.find(PayloadInfo.class, ((PayloadEntity) stored).getOID());
-
-		assertEquals(newParentCoreId, dbObj.getParentCoreId());
-	}
-
-	@Test
 	void testPayloadSetMimeType() {
-		IPayloadEntity stored = assertDoesNotThrow(() -> provider.storePayloadMetadata(new Payload()));
+		IPayloadEntity stored = assertDoesNotThrow(() -> provider.storePayloadMetadata(new Payload(), null));
 		assertNull(stored.getMimeType());
 
 		final String newMimetype = "new/type";
@@ -207,7 +189,7 @@ public class UpdateTests {
 
 	@Test
 	void testPayloadSetURI() {
-		IPayloadEntity stored = assertDoesNotThrow(() -> provider.storePayloadMetadata(new Payload()));
+		IPayloadEntity stored = assertDoesNotThrow(() -> provider.storePayloadMetadata(new Payload(), null));
 		assertNull(stored.getPayloadURI());
 
 		final String newPayloadURI = "cid:attachment";
@@ -225,7 +207,7 @@ public class UpdateTests {
 
 	@Test
 	void testPayloadAddProperty() {
-		IPayloadEntity stored = assertDoesNotThrow(() -> provider.storePayloadMetadata(new Payload()));
+		IPayloadEntity stored = assertDoesNotThrow(() -> provider.storePayloadMetadata(new Payload(), null));
 		assertTrue(Utils.isNullOrEmpty(stored.getProperties()));
 
 		IProperty prop = new Property("addedP", "someExtraInfo");
@@ -251,7 +233,7 @@ public class UpdateTests {
 		payload.addProperty(prop1);
 		payload.addProperty(prop2);
 
-		IPayloadEntity stored = assertDoesNotThrow(() -> provider.storePayloadMetadata(payload));
+		IPayloadEntity stored = assertDoesNotThrow(() -> provider.storePayloadMetadata(payload, null));
 		assertEquals(2, stored.getProperties().size());
 
 		stored.removeProperty(prop1);

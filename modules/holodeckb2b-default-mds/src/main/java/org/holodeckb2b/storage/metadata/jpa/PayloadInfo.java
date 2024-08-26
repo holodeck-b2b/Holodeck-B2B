@@ -31,6 +31,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -40,6 +41,7 @@ import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.ISchemaReference;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 
@@ -74,12 +76,28 @@ public class PayloadInfo implements JPAEntityObject {
 		PAYLOAD_ID = payloadId;
 	}
 
-	public String getParentCoreId() {
-		return PARENT_CORE_ID;
+	public void setParent(UserMessage parent) {
+		this.parent = parent;
 	}
 
-	public void setParentCoreId(String coreId) {
-		PARENT_CORE_ID = coreId;
+	public String getParentCoreId() {
+		return parent != null ? parent.getCoreId() : null;
+	}
+
+	public String getPModeId() {
+		return parent != null ? parent.getPModeId() : PMODE_ID;
+	}
+
+	public void setPModeId(String pmodeId) {
+		this.PMODE_ID = pmodeId;
+	}
+
+	public Direction getDirection() {
+		return parent != null ? parent.getDirection() : DIRECTION;
+	}
+
+	public void setDirection(Direction direction) {
+		DIRECTION = direction;
 	}
 
     public Containment getContainment() {
@@ -188,6 +206,17 @@ public class PayloadInfo implements JPAEntityObject {
     @GeneratedValue
     private long    OID;
 
+    @Column(unique = true)
+    private String				PAYLOAD_ID;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private UserMessage			parent;
+
+    @Enumerated(EnumType.STRING)
+    private Direction			DIRECTION;
+
+    private String				PMODE_ID;
+
     @ElementCollection(targetClass = Property.class, fetch = FetchType.EAGER)
     @CollectionTable(name="PL_PROPERTIES", joinColumns = @JoinColumn(name="PAYLOAD_OID"))
     private Collection<IProperty>   properties;
@@ -198,15 +227,11 @@ public class PayloadInfo implements JPAEntityObject {
     @Embedded
     private SchemaReference     schemaRef;
 
-    @Column(unique = true)
-    private String				PAYLOAD_ID;
-
-    private String				PARENT_CORE_ID;
-
     private String              URI;
 
     private String              MIME_TYPE;
 
     @Enumerated(EnumType.STRING)
     private Containment         CONTAINMENT;
+
 }

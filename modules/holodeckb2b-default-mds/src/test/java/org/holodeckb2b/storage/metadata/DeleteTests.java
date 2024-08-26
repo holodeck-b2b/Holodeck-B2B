@@ -50,7 +50,7 @@ public class DeleteTests extends BaseProviderTest {
 
 	@Test
 	void testRemovePayload() {
-		IPayloadEntity stored = assertDoesNotThrow(() -> provider.storePayloadMetadata(new Payload()));
+		IPayloadEntity stored = assertDoesNotThrow(() -> provider.storePayloadMetadata(new Payload(), null));
 
 		assertDoesNotThrow(() -> provider.deletePayloadMetadata(stored));
 

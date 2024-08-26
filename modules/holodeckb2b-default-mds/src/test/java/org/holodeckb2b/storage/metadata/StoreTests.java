@@ -163,11 +163,16 @@ public class StoreTests extends BaseProviderTest {
 
 	@Test
 	void testUserMessageExistingPayload() {
+		final String pmodeId = UUID.randomUUID().toString();
 		UserMessage um = new UserMessage();
+		um.setPModeId(pmodeId);
+		um.setDirection(Direction.OUT);
 		PayloadInfo pl = new PayloadInfo();
 		pl.setPayloadId(UUID.randomUUID().toString());
 		pl.setContainment(Containment.ATTACHMENT);
 		pl.setPayloadURI("cid:attachment");
+		pl.setPModeId(pmodeId);
+		pl.setDirection(Direction.OUT);
 		EntityManagerUtil.save(pl);
 		assertNotNull(pl.getOID());
 		um.addPayload(new PayloadEntity(pl));
@@ -198,18 +203,72 @@ public class StoreTests extends BaseProviderTest {
 
 	@Test
 	void testUserMessageRejectAlreadyLinkedPayloadId() {
-		UserMessage um = new UserMessage();
+		org.holodeckb2b.storage.metadata.jpa.UserMessage um1 = new org.holodeckb2b.storage.metadata.jpa.UserMessage();
+		um1.setCoreId(UUID.randomUUID().toString());
 		PayloadInfo pl = new PayloadInfo();
 		pl.setPayloadId(UUID.randomUUID().toString());
-		pl.setParentCoreId(UUID.randomUUID().toString());
+		pl.setParent(um1);
 		pl.setContainment(Containment.ATTACHMENT);
 		pl.setPayloadURI("cid:attachment");
-		EntityManagerUtil.save(pl);
+		um1.addPayload(pl);
+		EntityManagerUtil.save(um1);
+
+		UserMessage um = new UserMessage();
 		um.addPayload(new PayloadEntity(pl));
 
 		StorageException exception = assertThrows(StorageException.class, () -> provider.storeMessageUnit(um));
 
 		assertTrue(exception.getMessage().contains(pl.getParentCoreId()));
+	}
+
+	@Test
+	void testUserMessageRejectMismatchPayloadPModeId() {
+		final Direction direction = Direction.OUT;
+
+		PayloadInfo pl = new PayloadInfo();
+		pl.setPayloadId(UUID.randomUUID().toString());
+		pl.setPModeId(UUID.randomUUID().toString());
+		pl.setDirection(direction);
+		pl.setContainment(Containment.ATTACHMENT);
+		pl.setPayloadURI("cid:attachment");
+
+		EntityManagerUtil.save(pl);
+
+		UserMessage um = new UserMessage();
+		um.setMessageId(UUID.randomUUID().toString());
+		um.setPModeId(UUID.randomUUID().toString());
+		um.setDirection(direction);
+		um.addPayload(new PayloadEntity(pl));
+
+		StorageException exception = assertThrows(StorageException.class, () -> provider.storeMessageUnit(um));
+
+		assertTrue(exception.getMessage().contains(pl.getPayloadId()));
+		assertTrue(exception.getMessage().contains(um.getMessageId()));
+	}
+
+	@Test
+	void testUserMessageRejectMismatchPayloadDirection() {
+		final String pmodeId = UUID.randomUUID().toString();
+
+		PayloadInfo pl = new PayloadInfo();
+		pl.setPayloadId(UUID.randomUUID().toString());
+		pl.setPModeId(pmodeId);
+		pl.setDirection(Direction.OUT);
+		pl.setContainment(Containment.ATTACHMENT);
+		pl.setPayloadURI("cid:attachment");
+
+		EntityManagerUtil.save(pl);
+
+		UserMessage um = new UserMessage();
+		um.setMessageId(UUID.randomUUID().toString());
+		um.setPModeId(pmodeId);
+		um.setDirection(Direction.IN);
+		um.addPayload(new PayloadEntity(pl));
+
+		StorageException exception = assertThrows(StorageException.class, () -> provider.storeMessageUnit(um));
+
+		assertTrue(exception.getMessage().contains(pl.getPayloadId()));
+		assertTrue(exception.getMessage().contains(um.getMessageId()));
 	}
 
 	@Test
@@ -296,10 +355,14 @@ public class StoreTests extends BaseProviderTest {
 		pl.setDescription(new Description("This description should not be used"));
 		pl.setSchemaReference(new SchemaReference("https://holodeck-b2b.org/some/test/schema"));
 
-		IPayloadEntity stored = assertDoesNotThrow(() -> provider.storePayloadMetadata(pl));
+		final String pmodeId = UUID.randomUUID().toString();
+
+		IPayloadEntity stored = assertDoesNotThrow(() -> provider.storePayloadMetadata(pl, pmodeId));
 
 		assertNotNull(stored.getPayloadId());
 		assertNull(stored.getParentCoreId());
+		assertEquals(pmodeId, stored.getPModeId());
+		assertEquals(Direction.OUT, stored.getDirection());
 		assertEquals(pl.getContainment(), stored.getContainment());
 		assertEquals(pl.getPayloadURI(), stored.getPayloadURI());
 		assertEquals(pl.getMimeType(), stored.getMimeType());

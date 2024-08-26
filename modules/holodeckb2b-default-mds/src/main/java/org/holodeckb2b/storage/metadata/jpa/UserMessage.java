@@ -167,7 +167,7 @@ public class UserMessage extends MessageUnit {
      * normally each user message will contain one or more payload with the business data.
      * The ebMS spec however allows for user messages without payloads
      */
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<PayloadInfo>       payloads;
 
     /*

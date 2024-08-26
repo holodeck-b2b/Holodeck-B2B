@@ -61,6 +61,7 @@ import org.holodeckb2b.interfaces.storage.ISelectivePullRequestEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.holodeckb2b.test.storage.InMemoryMDSProvider;
 import org.holodeckb2b.test.storage.InMemoryPSProvider;
+import org.holodeckb2b.test.storage.PayloadEntity;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -162,7 +163,7 @@ class StorageManagerTest {
 		assertEquals(1, mdsProvider.getNumberOfStoredPayloads());
 		assertEquals(1, psProvider.getPayloadCount());
 		assertNotNull(assertDoesNotThrow(() ->
-					psProvider.getPayloadContent(entity.getPayloads().iterator().next().getPayloadId()).getContent()));
+					psProvider.getPayloadContent(entity.getPayloads().iterator().next()).getContent()));
 	}
 
 	@Test
@@ -171,8 +172,8 @@ class StorageManagerTest {
 		pl.setContainment(Containment.ATTACHMENT);
 		pl.setPayloadURI("cid:attachment");
 		pl.setContentStream(new FileInputStream(TestUtils.getTestResource("flower.jpg").toFile()));
-		IPayloadEntity plEntity = assertDoesNotThrow(() -> mdsProvider.storePayloadMetadata(pl));
-		assertDoesNotThrow(() -> psProvider.createNewPayloadStorage(plEntity.getPayloadId(), null, Direction.OUT));
+		IPayloadEntity plEntity = assertDoesNotThrow(() -> mdsProvider.storePayloadMetadata(pl, null));
+		assertDoesNotThrow(() -> psProvider.createNewPayloadStorage(plEntity));
 
 		UserMessage um = new UserMessage();
 		um.setMessageId(UUID.randomUUID().toString());
@@ -249,8 +250,10 @@ class StorageManagerTest {
 		pl.setPayloadURI("cid:attachment");
 		pl.setContentStream(new FileInputStream(TestUtils.getTestResource("flower.jpg").toFile()));
 
+		final PMode pmode = new PMode();
+		pmode.setId(UUID.randomUUID().toString());
 		IPayloadEntity plEntity = assertDoesNotThrow(() ->
-												HolodeckB2BCore.getStorageManager().storeSubmittedPayload(pl, null));
+												HolodeckB2BCore.getStorageManager().storeSubmittedPayload(pl, pmode));
 
 		assertNotNull(plEntity);
 		assertTrue(plEntity instanceof PayloadEntityProxy);
@@ -266,8 +269,7 @@ class StorageManagerTest {
 		pl.setContentStream(new FileInputStream(TestUtils.getTestResource("flower.jpg").toFile()));
 
 		assertNotNull(assertDoesNotThrow(() ->
-										HolodeckB2BCore.getStorageManager().createStorageReceivedPayload(pl, null)));
-		assertEquals(1, mdsProvider.getNumberOfStoredPayloads());
+							HolodeckB2BCore.getStorageManager().createStorageReceivedPayload(new PayloadEntity(pl))));
 		assertEquals(1, psProvider.getPayloadCount());
 	}
 
@@ -349,7 +351,7 @@ class StorageManagerTest {
 		pl.setContentStream(new FileInputStream(TestUtils.getTestResource("flower.jpg").toFile()));
 
 		PayloadEntityProxy entity = new PayloadEntityProxy(
-													assertDoesNotThrow(() -> mdsProvider.storePayloadMetadata(pl)));
+												assertDoesNotThrow(() -> mdsProvider.storePayloadMetadata(pl, null)));
 
 		final String mimeType = "image/jpeg";
 		entity.setMimeType(mimeType);
@@ -357,6 +359,6 @@ class StorageManagerTest {
 		assertDoesNotThrow(() -> HolodeckB2BCore.getStorageManager().updatePayloadInformation(entity));
 
 		assertEquals(mimeType, assertDoesNotThrow(() ->
-								mdsProvider.getPayloadMetadate(entity.getPayloadId())).getMimeType());
+								mdsProvider.getPayloadMetadata(entity.getPayloadId())).getMimeType());
 	}
 }

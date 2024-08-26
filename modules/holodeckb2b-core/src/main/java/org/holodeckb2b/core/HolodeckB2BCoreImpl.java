@@ -186,7 +186,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         log.info("Loaded event processor : {}", eventProcessor.getName());
         eventConfigurations = new ArrayList<>();
 
-        log.debug("Load the Metadata Storage provider for storing meta-data on message units");
+        log.debug("Load the Metadata Storage provider");
         mdsProvider = Utils.getFirstAvailableProvider(IMetadataStorageProvider.class);
         if (mdsProvider != null) {
         	log.debug("Using Metadata Storage Provider: {}", mdsProvider.getName());
@@ -199,7 +199,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         		mdsProvider = null;
         	}
         }
-        log.debug("Load the Payload Storage provider for storing meta-data on message units");
+        log.debug("Load the Payload Storage provider");
         psProvider = Utils.getFirstAvailableProvider(IPayloadStorageProvider.class);
         if (psProvider != null) {
         	log.debug("Using Payload Storage Provider: {}", psProvider.getName());

@@ -29,6 +29,7 @@ import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.ISchemaReference;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
@@ -37,6 +38,8 @@ public class PayloadEntity implements IPayloadEntity {
 
 	private String					payloadId;
 	private String					parentCoreId;
+	private String                  pmodeId;
+	private Direction				direction;
 	private String                  mimeType;
     private IPayload.Containment    containment;
     private String                  uri;
@@ -49,15 +52,24 @@ public class PayloadEntity implements IPayloadEntity {
     	this.lastChange = new Date();
     }
 
-    public PayloadEntity(final IPayload source) {
+	public PayloadEntity(final IPayload source) {
+		this();
+		copyFrom(source);
+	}
+
+    public PayloadEntity(final IPayload source, String pmodeId, Direction direction) {
     	this();
     	copyFrom(source);
+		this.pmodeId = pmodeId;
+		this.direction = direction;
     }
 
     public PayloadEntity(final UserMessageEntity parent, final IPayload source) {
     	this();
     	copyFrom(source);
     	this.parentCoreId = parent.getCoreId();
+    	this.pmodeId = parent.getPModeId();
+    	this.direction = parent.getDirection();
     }
 
 
@@ -67,6 +79,8 @@ public class PayloadEntity implements IPayloadEntity {
     	if (source instanceof IPayloadEntity) {
     		this.payloadId = ((IPayloadEntity) source).getPayloadId();
     		this.parentCoreId = ((IPayloadEntity) source).getParentCoreId();
+    		this.pmodeId = ((IPayloadEntity) source).getPModeId();
+			this.direction = ((IPayloadEntity) source).getDirection();
     	}
 
         this.mimeType = source.getMimeType();
@@ -168,7 +182,12 @@ public class PayloadEntity implements IPayloadEntity {
 	}
 
 	@Override
-	public void setParentCoreId(String coreId) {
-		this.parentCoreId = coreId;
+	public String getPModeId() {
+		return pmodeId;
+	}
+
+	@Override
+	public Direction getDirection() {
+		return direction;
 	}
 }

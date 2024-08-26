@@ -85,7 +85,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
         	IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(um.getPModeId());
             for(final IPayloadEntity p : payloads) {
             	log.trace("Get the storage for payload {}", p.getPayloadURI());
-            	IPayloadContent storage = updateManager.createStorageReceivedPayload(p, pmode);
+            	IPayloadContent storage = updateManager.createStorageReceivedPayload(p);
             	if (storage.getContent() != null) {
 	            	log.debug("Content of payload ({}) has already been saved", p.getPayloadURI());
 	            	continue;

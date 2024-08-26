@@ -33,6 +33,7 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
 import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
@@ -117,11 +118,11 @@ public class QueryManager implements IQueryManager {
 		return executeQuery(() -> Collections.singleton(mdsProvider.getMessageUnitWithCoreId(coreId))).findFirst().orElse(null);
 	}
 
-	public IPayloadContent retrievePayloadContent(String payloadId) throws StorageException {
+	IPayloadContent retrievePayloadContent(IPayloadEntity payload) throws StorageException {
 		try {
-			return psProvider.getPayloadContent(payloadId);
+			return psProvider.getPayloadContent(payload);
 		} catch (StorageException payloadFailure) {
-			log.error("Error retrieving the paylaod content (payloadId={}) : {}", payloadId,
+			log.error("Error retrieving the paylaod content (payloadId={}) : {}", payload.getPayloadId(),
 						Utils.getExceptionTrace(payloadFailure));
 			throw payloadFailure;
 		}

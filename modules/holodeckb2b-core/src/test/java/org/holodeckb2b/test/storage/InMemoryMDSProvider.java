@@ -90,7 +90,7 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 		return msgUnitStore.parallelStream().filter(m -> messageId.equals(m.getMessageId())).findFirst().orElse(null);
 	}
 
-	public IPayloadEntity getPayloadMetadate(String payloadId) {
+	public IPayloadEntity getPayloadMetadata(String payloadId) {
 		return payloadInfoStore.parallelStream().filter(p -> payloadId.equals(p.getPayloadId())).findFirst().orElse(null);
 	}
 
@@ -148,8 +148,9 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 	}
 
 	@Override
-	public IPayloadEntity storePayloadMetadata(IPayload payload) throws StorageException {
-		PayloadEntity entity = new PayloadEntity(payload);
+	public IPayloadEntity storePayloadMetadata(IPayload payload, String pmodeId) throws StorageException {
+		PayloadEntity entity = new PayloadEntity(payload, pmodeId, Direction.OUT);
+
 		payloadInfoStore.add(entity);
 
 		return entity.clone();

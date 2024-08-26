@@ -18,6 +18,7 @@ package org.holodeckb2b.storage.payloads;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,7 +27,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.UUID;
 
 import org.apache.axis2.description.Parameter;
 import org.apache.commons.io.FileUtils;
@@ -35,6 +35,8 @@ import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.core.config.InternalConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
+import org.holodeckb2b.test.storage.PayloadEntity;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,7 +77,7 @@ class DefaultPayloadStorageProviderTest {
 		assertDoesNotThrow(() -> provider.init(config));
 
 		IPayloadContent content = assertDoesNotThrow(() ->
-										provider.createNewPayloadStorage(UUID.randomUUID().toString(), null, null));
+										provider.createNewPayloadStorage(new PayloadEntity()));
 		assertDoesNotThrow(() -> {
 			OutputStream cos = content.openStorage();
 			cos.write(TestDataHelper.createRandomData());
@@ -90,9 +92,9 @@ class DefaultPayloadStorageProviderTest {
 		final DefaultPayloadStorageProvider provider = new DefaultPayloadStorageProvider();
 		assertDoesNotThrow(() -> provider.init(HolodeckB2BCoreInterface.getConfiguration()));
 
-		final String payloadId = UUID.randomUUID().toString();
+		final IPayloadEntity payload = new PayloadEntity();
 
-		IPayloadContent content = assertDoesNotThrow(() -> provider.createNewPayloadStorage(payloadId, null, null));
+		IPayloadContent content = assertDoesNotThrow(() -> provider.createNewPayloadStorage(payload));
 
 		assertDoesNotThrow(() -> {
 			OutputStream cos = content.openStorage();
@@ -100,7 +102,7 @@ class DefaultPayloadStorageProviderTest {
 			cos.close();
 		});
 
-		assertTrue(Files.exists(TestUtils.getTestResource("pldata").resolve(payloadId)));
+		assertTrue(Files.exists(TestUtils.getTestResource("pldata").resolve(payload.getPayloadId())));
 	}
 
 	@Test
@@ -108,9 +110,10 @@ class DefaultPayloadStorageProviderTest {
 		final DefaultPayloadStorageProvider provider = new DefaultPayloadStorageProvider();
 		assertDoesNotThrow(() -> provider.init(HolodeckB2BCoreInterface.getConfiguration()));
 
-		File testfile = assertDoesNotThrow(() -> TestDataHelper.createTestFile(TestUtils.getTestResource("pldata")));
+		final IPayloadEntity pl = new PayloadEntity();
+		assertDoesNotThrow(() -> TestDataHelper.createTestFile(TestUtils.getTestResource("pldata"), pl.getPayloadId()));
 
-		IPayloadContent content = assertDoesNotThrow(() -> provider.getPayloadContent(testfile.getName()));
+		IPayloadContent content = assertDoesNotThrow(() -> provider.getPayloadContent(pl));
 
 		assertNotNull(assertDoesNotThrow(() -> content.getContent()));
 	}
@@ -120,7 +123,7 @@ class DefaultPayloadStorageProviderTest {
 		final DefaultPayloadStorageProvider provider = new DefaultPayloadStorageProvider();
 		assertDoesNotThrow(() -> provider.init(HolodeckB2BCoreInterface.getConfiguration()));
 
-		assertNull(assertDoesNotThrow(() -> provider.getPayloadContent(UUID.randomUUID().toString())));
+		assertNull(assertDoesNotThrow(() -> provider.getPayloadContent(new PayloadEntity())));
 	}
 
 
@@ -129,10 +132,13 @@ class DefaultPayloadStorageProviderTest {
 		final DefaultPayloadStorageProvider provider = new DefaultPayloadStorageProvider();
 		assertDoesNotThrow(() -> provider.init(HolodeckB2BCoreInterface.getConfiguration()));
 
-		File testfile = assertDoesNotThrow(() -> TestDataHelper.createTestFile(TestUtils.getTestResource("pldata")));
+		final IPayloadEntity pl = new PayloadEntity();
+		File testfile = assertDoesNotThrow(() ->
+								TestDataHelper.createTestFile(TestUtils.getTestResource("pldata"), pl.getPayloadId()));
 
-		assertDoesNotThrow(() -> provider.removePayloadContent(testfile.getName()));
+		assertDoesNotThrow(() -> provider.removePayloadContent(pl));
+		assertFalse(testfile.exists());
 
-		assertDoesNotThrow(() -> provider.removePayloadContent(UUID.randomUUID().toString()));
+		assertDoesNotThrow(() -> provider.removePayloadContent(new PayloadEntity()));
 	}
 }

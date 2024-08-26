@@ -21,6 +21,7 @@ import java.util.Collection;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.ISchemaReference;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 import org.holodeckb2b.storage.metadata.jpa.PayloadInfo;
 
@@ -45,10 +46,20 @@ public class PayloadEntity extends JPAObjectProxy<PayloadInfo> implements IPaylo
     	return jpaEntityObject.getPayloadId();
     }
 
-    @Override
-    public String getParentCoreId() {
-    	return jpaEntityObject.getParentCoreId();
-    }
+	@Override
+	public String getParentCoreId() {
+		return jpaEntityObject.getParentCoreId();
+	}
+
+	@Override
+	public String getPModeId() {
+		return jpaEntityObject.getPModeId();
+	}
+
+	@Override
+	public Direction getDirection() {
+		return jpaEntityObject.getDirection();
+	}
 
 	@Override
 	public Containment getContainment() {
@@ -81,11 +92,6 @@ public class PayloadEntity extends JPAObjectProxy<PayloadInfo> implements IPaylo
 	}
 
 	@Override
-	public void setParentCoreId(String coreId) {
-		jpaEntityObject.setParentCoreId(coreId);
-	}
-
-	@Override
 	public void setMimeType(String mt) {
 		jpaEntityObject.setMimeType(mt);
 	}
@@ -104,4 +110,5 @@ public class PayloadEntity extends JPAObjectProxy<PayloadInfo> implements IPaylo
 	public void removeProperty(IProperty p) {
 		jpaEntityObject.removeProperty(p);
 	}
+
 }

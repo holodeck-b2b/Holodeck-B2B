@@ -36,6 +36,7 @@ import org.holodeckb2b.storage.metadata.PullRequestEntity;
 import org.holodeckb2b.storage.metadata.ReceiptEntity;
 import org.holodeckb2b.storage.metadata.UserMessageEntity;
 import org.holodeckb2b.storage.metadata.jpa.ErrorMessage;
+import org.holodeckb2b.storage.metadata.jpa.PayloadInfo;
 import org.holodeckb2b.storage.metadata.jpa.Property;
 import org.holodeckb2b.storage.metadata.jpa.PullRequest;
 import org.holodeckb2b.storage.metadata.jpa.Receipt;
@@ -96,6 +97,12 @@ public class TestDataSet {
 		um.setProcessingState(createState(ProcessingState.TRANSPORT_FAILURE, 1));
 		um.setProcessingState(createState(ProcessingState.SENDING, 0));
 		um.setProcessingState(createState(ProcessingState.TRANSPORT_FAILURE, 0));
+
+		PayloadInfo pl = new PayloadInfo();
+		pl.setPayloadId(UUID.randomUUID().toString());
+		pl.setParent(um);
+		um.addPayload(pl);
+
 		EntityManagerUtil.save(um);
 		T_USERMESSAGE_1 = new UserMessageEntity(um);
 

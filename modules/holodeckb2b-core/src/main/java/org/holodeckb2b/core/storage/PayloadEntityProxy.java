@@ -24,6 +24,7 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.ISchemaReference;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
@@ -76,7 +77,7 @@ public class PayloadEntityProxy implements IPayloadEntity {
 		try {
 			if (content == null)
 				// The payload content has not been loaded yet, use provider to get access
-				content = ((QueryManager) HolodeckB2BCore.getQueryManager()).retrievePayloadContent(getPayloadId());
+				content = ((QueryManager) HolodeckB2BCore.getQueryManager()).retrievePayloadContent(source);
 
 			return content == null ? null : content.getContent();
 		} catch (StorageException e) {
@@ -125,8 +126,13 @@ public class PayloadEntityProxy implements IPayloadEntity {
 	}
 
 	@Override
-	public void setParentCoreId(String coreId) {
-		source.setParentCoreId(coreId);
+	public String getPModeId() {
+		return source.getPModeId();
+	}
+
+	@Override
+	public Direction getDirection() {
+		return source.getDirection();
 	}
 
 	@Override

@@ -21,16 +21,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.messagemodel.Direction;
-import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
 import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 public class InMemoryPSProvider implements IPayloadStorageProvider {
 
 	private Set<PayloadContent>		payloads = Collections.synchronizedSet(new HashSet<PayloadContent>());
-	
+
 	@Override
 	public String getName() {
 		return "In Memory Test Payload Storage Provider";
@@ -47,34 +46,34 @@ public class InMemoryPSProvider implements IPayloadStorageProvider {
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	public void clear() {
 		payloads.clear();
 	}
-	
+
 	public int getPayloadCount() {
 		return payloads.size();
 	}
-	
+
 	public boolean exists(String payloadId) {
 		return payloads.parallelStream().anyMatch(p -> payloadId.equals(p.getPayloadId()));
 	}
 
 	@Override
-	public IPayloadContent createNewPayloadStorage(String payloadId, IPMode pmode, Direction direction) {
-		PayloadContent p = new PayloadContent(payloadId);
-		payloads.add(p);
-		return p;
+	public IPayloadContent createNewPayloadStorage(IPayloadEntity p) {
+		PayloadContent pl = new PayloadContent(p.getPayloadId());
+		payloads.add(pl);
+		return pl;
 	}
 
 	@Override
-	public IPayloadContent getPayloadContent(String payloadId) throws StorageException {
-		return payloads.stream().filter(p -> p.getPayloadId().equals(payloadId)).findFirst().orElse(null);
+	public IPayloadContent getPayloadContent(IPayloadEntity p) throws StorageException {
+		return payloads.stream().filter(pl -> pl.getPayloadId().equals(p.getPayloadId())).findFirst().orElse(null);
 	}
 
 	@Override
-	public void removePayloadContent(String payloadId) throws StorageException {
-		payloads.removeIf(p -> p.getPayloadId().equals(payloadId));
+	public void removePayloadContent(IPayloadEntity p) throws StorageException {
+		payloads.removeIf(pl -> pl.getPayloadId().equals(p.getPayloadId()));
 	}
 
 }

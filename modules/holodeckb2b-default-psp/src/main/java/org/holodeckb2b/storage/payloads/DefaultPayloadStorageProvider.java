@@ -26,9 +26,8 @@ import org.apache.logging.log4j.LogManager;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.commons.util.FileUtils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.messagemodel.Direction;
-import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
 import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
@@ -80,21 +79,21 @@ public class DefaultPayloadStorageProvider implements IPayloadStorageProvider {
 	}
 
 	@Override
-	public IPayloadContent createNewPayloadStorage(String payloadId, IPMode pmode, Direction direction)
+	public IPayloadContent createNewPayloadStorage(IPayloadEntity p)
 			throws StorageException {
-		return new PayloadContent(payloadId, directory.resolve(payloadId).toFile());
+		return new PayloadContent(p.getPayloadId(), directory.resolve(p.getPayloadId()).toFile());
 	}
 
 	@Override
-	public IPayloadContent getPayloadContent(String payloadId) throws StorageException {
-		File contentFile = directory.resolve(payloadId).toFile();
-		return contentFile.exists() ? new PayloadContent(payloadId, contentFile) : null;
+	public IPayloadContent getPayloadContent(IPayloadEntity p) throws StorageException {
+		File contentFile = directory.resolve(p.getPayloadId()).toFile();
+		return contentFile.exists() ? new PayloadContent(p.getPayloadId(), contentFile) : null;
 	}
 
 	@Override
-	public void removePayloadContent(String payloadId) throws StorageException {
+	public void removePayloadContent(IPayloadEntity p) throws StorageException {
 		try {
-			Files.deleteIfExists(directory.resolve(payloadId));
+			Files.deleteIfExists(directory.resolve(p.getPayloadId()));
 		} catch (IOException ioError) {
 			throw new StorageException("Could not delete content", ioError);
 		}

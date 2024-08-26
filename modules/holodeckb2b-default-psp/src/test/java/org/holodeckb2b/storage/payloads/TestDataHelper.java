@@ -26,7 +26,11 @@ import java.util.UUID;
 class TestDataHelper {
 
 	static File createTestFile(Path testdir) throws IOException {
-		final File file = testdir.resolve(UUID.randomUUID().toString()).toFile();
+		return createTestFile(testdir, UUID.randomUUID().toString());
+	}
+
+	static File createTestFile(Path testdir, String filename) throws IOException {
+		final File file = testdir.resolve(filename).toFile();
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			fos.write(createRandomData());
 		}

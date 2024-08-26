@@ -149,6 +149,7 @@ public class StorageManager {
      * @throws StorageException  If an error occurs when storing the meta-data or the payload data (for a User Message)
      * 							 of the message unit
      */
+	@SuppressWarnings("unchecked")
 	public <T extends IMessageUnit, V extends IMessageUnitEntity> V storeOutGoingMessageUnit(T messageUnit)
                                                             	throws DuplicateMessageIdException, StorageException {
 		log.trace("Store outgoing {} with MessageId={}", MessageUnitUtils.getMessageUnitName(messageUnit),
@@ -179,15 +180,13 @@ public class StorageManager {
 
 		if (entity instanceof IUserMessage) {
 			UserMessageEntityProxy proxy = new UserMessageEntityProxy((IUserMessageEntity) entity);
-			entity = (V) proxy;
 			log.trace("Check if payload data is already saved");
 			final Collection<? extends IPayload> srcPayloads = ((IUserMessage) messageUnit).getPayloads();
-			IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(messageUnit.getPModeId());
 			for(PayloadEntityProxy p : proxy.getPayloads()) {
-				IPayloadContent content = psProvider.getPayloadContent(p.getPayloadId());
+				IPayloadContent content = psProvider.getPayloadContent(p.getSource());
 				if (content == null) {
 					log.trace("Store content of payload (URI={})", p.getPayloadURI());
-					content = psProvider.createNewPayloadStorage(p.getPayloadId(), pmode, Direction.OUT);
+					content = psProvider.createNewPayloadStorage(p);
 					try(OutputStream contentStream = content.openStorage()) {
 						Utils.copyStream(srcPayloads.stream()
 											.filter(pl -> Utils.nullSafeEqual(pl.getPayloadURI(), p.getPayloadURI()))
@@ -206,6 +205,7 @@ public class StorageManager {
 					log.debug("Payload content already stored");
 				p.setContent(content);
 			}
+			entity = (V) proxy;
 		}
 		log.debug("Stored new {} with MessageId={}", MessageUnitUtils.getMessageUnitName(messageUnit),
 					entity.getMessageId());
@@ -285,9 +285,9 @@ public class StorageManager {
     	PayloadEntityProxy entity = null;
     	try {
 	    	log.trace("Store meta-data of submitted payload");
-	    	entity = new PayloadEntityProxy(mdsProvider.storePayloadMetadata(payload));
+	    	entity = new PayloadEntityProxy(mdsProvider.storePayloadMetadata(payload, pmode.getId()));
 	    	log.trace("Store content of submitted payload");
-	    	IPayloadContent content = psProvider.createNewPayloadStorage(entity.getPayloadId(), pmode, Direction.OUT);
+	    	IPayloadContent content = psProvider.createNewPayloadStorage(entity.getSource());
 			try(OutputStream contentStream = content.openStorage()) {
 				Utils.copyStream(payload.getContent(), contentStream);
 			}
@@ -312,32 +312,18 @@ public class StorageManager {
     /**
      * Creates, or gets if it already exists, the content storage for the received payload.
      *
-     * @param payload	the received payload
-     * @param pmode		the P-Mode that governs the processing of the User Message this payload is contained in
+     * @param payload	the meta-data of the received payload
      * @return			the {@link IPayloadContent} object representing the content storage
      * @throws StorageException when an error occurs getting the content storage for the received payload
      */
-    public IPayloadContent createStorageReceivedPayload(final IPayload payload, final IPMode pmode)
-    																						throws StorageException {
-    	PayloadEntityProxy entity = null;
-    	if (!(payload instanceof PayloadEntityProxy))
-	    	try {
-	    		log.trace("Store meta-data of submitted payload");
-		    	entity = new PayloadEntityProxy(mdsProvider.storePayloadMetadata(payload));
-	    	} catch (StorageException saveFailed) {
-	    		log.error("Could not save meta-data of submitted payload : {}", Utils.getExceptionTrace(saveFailed));
-	    		throw saveFailed;
-	    	}
-    	else
-    		entity = (PayloadEntityProxy) payload;
-
-    	// Check if the payload content storage is already created, can happen when the given payload is an entity
-    	IPayloadContent content = psProvider.getPayloadContent(entity.getPayloadId());
+    public IPayloadContent createStorageReceivedPayload(final IPayloadEntity payload) throws StorageException {
+    	IPayloadEntity entity = payload instanceof PayloadEntityProxy ? ((PayloadEntityProxy) payload).getSource()
+    																  : payload;
+    	IPayloadContent content = psProvider.getPayloadContent(entity);
     	if (content == null) {
     		log.trace("Create content storage for payload");
-    		content = psProvider.createNewPayloadStorage(entity.getPayloadId(), pmode, Direction.IN);
+    		content = psProvider.createNewPayloadStorage(entity);
     	}
-
 		return content;
     }
 
@@ -498,7 +484,8 @@ public class StorageManager {
         	log.trace("Remove payload content of User Message");
         	for (IPayloadEntity p : payloads) {
         		try {
-        			psProvider.removePayloadContent(p.getPayloadId());
+        			psProvider.removePayloadContent(p instanceof PayloadEntityProxy ?
+        																	((PayloadEntityProxy) p).getSource() : p);
         			log.trace("Removed payload content (URI={})", p.getPayloadURI());
         		} catch (StorageException deleteFailed) {
         			log.warn("Error removing payload content (URI={}) of User Messsage (msgId={}): {}",
