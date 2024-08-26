@@ -85,7 +85,7 @@ public interface IMetadataStorageProvider {
 	 * processing state has been set, set it to {@link ProcessingState#CREATED}.
 	 * <p>
 	 * NOTE: When the message unit to be stored is a {@link IUserMessage} the provider must check whether the payloads
-	 * included are {@link IPayloadEntity} instances, and if so, couple the existing payloads with the message unit. If
+	 * included are {@link IPayloadEntity} instances, and if so, link the existing payloads with the message unit. If
 	 * the <i>PayloadId</i> do not exist or are already linked to another User Message, the provider MUST throw an
 	 * exception.<br/>
 	 * If the payloads are not {@link IPayloadEntity} instances the provider MUST create new {@link IPayloadEntity}
@@ -129,15 +129,17 @@ public interface IMetadataStorageProvider {
 	void deleteMessageUnit(IMessageUnitEntity messageUnit) throws StorageException;
 
 	/**
-	 * Stores the meta-data of the given payload in the database and returns a new entity object representing the
-	 * saved payload info. The new object MUST be assigned a unique <i>PayloadId</i>. The assigned <i>PayloadId</i> MUST
-	 * NOT contain special characters.
+	 * Stores the meta-data of the given payload to be sent in the database and returns a new entity object representing
+	 * the saved payload info. The new entity object MUST be assigned a unique <i>PayloadId</i>. The assigned
+	 * <i>PayloadId</i> MUST NOT contain special characters.
 	 *
 	 * @param payload	the payload which meta-data must be stored
+	 * @param pmodeId	the identifier of the P-Mode that governs the message exchange of the User Message unit the
+	 * 					payload will be contained in (the link to which will be specified later)
 	 * @return	the created entity object
 	 * @throws StorageException If an error occurs when saving the payload meta-data to the database
 	 */
-	IPayloadEntity storePayloadMetadata(final IPayload payload) throws StorageException;
+	IPayloadEntity storePayloadMetadata(final IPayload payload, final String pmodeId) throws StorageException;
 
 	/**
 	 * Saves the updated meta-data of the payload to the database. If the database already contains newer data the
