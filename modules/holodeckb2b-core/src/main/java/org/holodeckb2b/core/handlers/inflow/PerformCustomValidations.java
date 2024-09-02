@@ -21,20 +21,20 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.errors.OtherContentError;
+import org.holodeckb2b.common.events.impl.CustomValidationFailureEvent;
 import org.holodeckb2b.common.handlers.AbstractUserMessageHandler;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.pmode.PModeUtils;
-import org.holodeckb2b.core.validation.CustomValidationFailureEvent;
 import org.holodeckb2b.core.validation.ValidationResult;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.customvalidation.IMessageValidationSpecification;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationError;
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for the execution of the custom validation of the User Message message unit
@@ -107,6 +107,8 @@ public class PerformCustomValidations extends AbstractUserMessageHandler {
             										"An error occurred when performing the validation of User Message",
             										userMessage.getMessageId()));
             HolodeckB2BCore.getStorageManager().setProcessingState(userMessage, ProcessingState.FAILURE);
+            // Raise message processing event to inform other components of the validation issue
+            HolodeckB2BCore.getEventProcessor().raiseEvent(new CustomValidationFailureEvent(userMessage, ve));
         }
 
         return InvocationResponse.CONTINUE;

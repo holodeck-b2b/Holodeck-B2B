@@ -44,7 +44,7 @@ import org.simpleframework.xml.core.Validate;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
- * @since NEXT_HB2B_VERSION Support for the <i>continueProcessing</i> setting. Uses <i>true</i> as default value.
+ * @since 5.3.0 Support for the <i>continueProcessing</i> setting. Uses <i>true</i> as default value.
  */
 public class EventHandlerConfig implements IMessageProcessingEventConfiguration, Serializable {
 	private static final long serialVersionUID = 7648905261512216386L;
@@ -212,14 +212,14 @@ public class EventHandlerConfig implements IMessageProcessingEventConfiguration,
     public void setHandlerSettings(final Map<String, Object> sourceSettings) {
         if (!Utils.isNullOrEmpty(sourceSettings)) {
             this.parameters = new ArrayList<>(sourceSettings.size());
-            sourceSettings.forEach((n, v) -> this.parameters.add(new Parameter(n, v.toString())));
+            sourceSettings.forEach((n, v) -> this.parameters.add(new Parameter(n, v != null ? v.toString() : null)));
         }
     }
 
     public void addHandlerSetting(final String name, final Object value) {
         if (this.parameters == null)
             this.parameters = new ArrayList<>();
-        this.parameters.add(new Parameter(name, value.toString()));
+        this.parameters.add(new Parameter(name, value != null ? value.toString() : null));
     }
 
     public void setContinueProcessing(boolean cont) {

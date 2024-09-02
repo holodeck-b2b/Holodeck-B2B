@@ -28,7 +28,6 @@ import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
@@ -38,6 +37,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
 import org.holodeckb2b.interfaces.security.IUsernameTokenProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 import org.holodeckb2b.security.util.VerificationUtils;
 
 /**

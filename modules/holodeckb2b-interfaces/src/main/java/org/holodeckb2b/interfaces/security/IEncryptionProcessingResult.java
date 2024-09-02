@@ -18,8 +18,9 @@ package org.holodeckb2b.interfaces.security;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.Map;
 
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 /**
  * Represents the results of processing of the encryption part of message level security. It provides information on the
@@ -61,31 +62,39 @@ public interface IEncryptionProcessingResult extends ISecurityProcessingResult {
     String getEncryptionAlgorithm();
 
     /**
-     * Gets the <i>key transport</i> meta-data on how the <i>symmetric key</i> is included in the message. Note that
-     * this information may not (all) be available for different messaging protocols.
+     * Gets the meta-data on how the <i>symmetric key</i> is exchanged between the communication partners.
+     * Note that this information may not (all) be available for different messaging protocols.
      *
-     * @return The key transport meta-data
+     * @return The key exchange meta-data
      */
-    IKeyTransportInfo   getKeyTransportInfo();
+    IKeyExchangeInfo   getKeyExchangeInfo();
 
     /**
      * Gets the encrypted payloads.
      *
      * @return  List of encrypted payloads
      */
-    Collection<IPayload>  getEncryptedPayloads();
+    Collection<IPayloadEntity>  getEncryptedPayloads();
 
     /**
-     * Provides access to the meta-data on the <i>symmetric key</i> was exchanged between the communication partners. 
-     * For WS-Security this corresponds to the <code>xenc:EncryptedKey/xenc:EncryptionMethod</code> element in the 
+     * Abstract base interface to provide information on the method that was used to exchange the symmetric enryption
+     * key between the communication partners. This can either done through embedding the key in the message using a
+     * <i>key transport</i> mechanism or by encrypting the key using another key derived from the partner's
+     * certificates through a <i>key agreement method</i>.
+     */
+    public abstract interface IKeyExchangeInfo {};
+
+    /**
+     * Provides access to the meta-data on the <i>symmetric key</i> was exchanged between the communication partners.
+     * For WS-Security this corresponds to the <code>xenc:EncryptedKey/xenc:EncryptionMethod</code> element in the
      * header. Note that this only includes information about the protection of symmetric key, not the key itself.
      * <p>This interface is based on the currently specified key transport algorithms in the <i>XML Encryption Syntax
      * and Processing Version 1.1</i> specification.<br>
-     * 
+     *
      * @author Sander Fieten (sander at holodeck-b2b.org)
      * @since 4.0.0
      */
-    public interface IKeyTransportInfo {
+    public interface IKeyTransportInfo extends IKeyExchangeInfo {
 
         /**
          * Gets the key transport algorithm that was used to protect the symmetric key that was used for the actual
@@ -116,5 +125,70 @@ public interface IEncryptionProcessingResult extends ISecurityProcessingResult {
          * @return  The mask generation function used in key transport
          */
         String getMGFAlgorithm();
+    }
+
+    /**
+     * Provides access to the meta-data on the key agreement method used to exchange the <i>symmetric key</i> between
+     * the communication partners.
+	 * <p>This interface is based on the currently specified key transport algorithms in the <i>XML Encryption Syntax
+     * and Processing Version 1.1</i> specification.<br>
+     *
+     * @author Sander Fieten (sander at holodeck-b2b.org)
+     * @since 7.0.0
+     */
+    public interface IKeyAgreementInfo extends IKeyExchangeInfo {
+    	/**
+    	 * Gets the key agreement method that was used to derive the key that was used to encrypt the symmetric key for
+    	 * the actual encryption of the payloads.
+    	 *
+    	 * @return	the key agreement method
+    	 */
+    	String getKeyAgreementMethod();
+
+        /**
+         * Gets the settings of the key derivation method to be used within this key agreement.
+         *
+         * @return  the key derivation method settings
+         */
+    	IKeyDerivationInfo getKeyDerivationInfo();
+
+    	/**
+         * Gets the additional parameters of the key agreement method. Depending on the chosen key agreement method
+         * there may be other parameters needed in addition to digest algorithm.
+         *
+         * @return Map containing the additional parameters
+         */
+    	Map<String, ?> getParameters();
+    }
+
+    /**
+     * Provides access to the meta-data on the key agreement method used to exchange the <i>symmetric key</i> between
+     * the communication partners.
+     *
+     * @author Sander Fieten (sander at holodeck-b2b.org)
+     * @since 7.0.0
+     */
+    public interface IKeyDerivationInfo {
+    	/**
+    	 * Gets the key derivation algorithm.
+    	 *
+    	 * @return  URI of the key derivation algorithm to be used as defined in XMLENC-core1
+		 */
+    	String getKeyDerivationAlgorithm();
+
+        /**
+         * Gets the digest algorithm to be used for key agreement.
+         *
+         * @return  URI the digest algorithm to be used with the key derivation algorithm
+         */
+    	String getDigestAlgorithm();
+
+        /**
+         * Gets the additional parameters of the key derivation method. Depending on the chosen derivation algorithm
+         * there may be other parameters needed in addition to digest algorithm.
+         *
+         * @return Map containing the additional parameters
+         */
+    	Map<String, ?> getParameters();
     }
 }

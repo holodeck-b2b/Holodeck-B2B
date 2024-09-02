@@ -28,8 +28,8 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 
 /**
@@ -45,8 +45,8 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class ReadError extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
-    																					throws PersistenceException {
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log)
+    																					throws StorageException {
         // First get the ebMS header block, that is the eb:Messaging element
         final SOAPHeaderBlock messaging = Messaging.getElement(procCtx.getParentContext().getEnvelope());
 
@@ -66,10 +66,10 @@ public class ReadError extends AbstractBaseHandler {
                             + errorSignal.getMessageId());
                     // And store in database and message context for further processing
                     log.trace("Store Error Signal in database and message context");
-                    procCtx.addReceivedError(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(errorSignal));
+                    procCtx.addReceivedError(HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(errorSignal));
                     log.info("Error signal with msgId " + errorSignal.getMessageId() + " succesfully read");
                 }
-            } 
+            }
         }
 
         return InvocationResponse.CONTINUE;

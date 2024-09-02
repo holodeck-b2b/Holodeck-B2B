@@ -24,27 +24,26 @@ import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.commons.Pair;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
-import org.holodeckb2b.interfaces.pmode.PModeSetException;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
- * Is the <i>in flow handler</i> responsible for determining if and how Error Signals generated during the processing of 
- * the received message unit(s) should be reported to the Sender of the message unit(s) in error. This depends on the 
- * P-Mode settings for error handling and some general parameters. If there is an Error Signal that needs to be send 
+ * Is the <i>in flow handler</i> responsible for determining if and how Error Signals generated during the processing of
+ * the received message unit(s) should be reported to the Sender of the message unit(s) in error. This depends on the
+ * P-Mode settings for error handling and some general parameters. If there is an Error Signal that needs to be send
  * as a response the indication to send a response will be set in the message processing context.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
@@ -53,8 +52,8 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class DetermineErrorReporting extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
-    																					throws PersistenceException {
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log)
+    																					throws StorageException {
 
     	log.debug("Check if error signals were generated");
         final Collection<IErrorMessageEntity>  errors = procCtx.getSendingErrors();
@@ -62,8 +61,8 @@ public class DetermineErrorReporting extends AbstractBaseHandler {
         if (Utils.isNullOrEmpty(errors)) {
             log.debug("No error signals were generated");
             return InvocationResponse.CONTINUE;
-        }   
-        
+        }
+
         StorageManager storageManager = HolodeckB2BCore.getStorageManager();
         log.debug(errors.size() + " error signal(s) were generated during processing");
         final boolean isResponseFlow = procCtx.getParentContext().isServerSide();
@@ -75,24 +74,24 @@ public class DetermineErrorReporting extends AbstractBaseHandler {
                  * returned if the received message contained no other message units or if they all failed. Otherwise
                  * returning the non reference-able Signal creates ambiguity as the Sender can only set all sent
                  * message units to failed.
-                 * Therefore we only sent out this error if there no message unit with a processing state different 
+                 * Therefore we only sent out this error if there is no message unit with a processing state different
                  * then FAILURE
-                 */ 
-                if (isResponseFlow && (!Utils.isNullOrEmpty(error.getRefToMessageId()) 
+                 */
+                if (isResponseFlow && (!Utils.isNullOrEmpty(error.getRefToMessageId())
                 					  || procCtx.getReceivedMessageUnits().parallelStream()
                 					  									  .allMatch(m -> m.getCurrentProcessingState()
-                					  											  		  .getState() 
+                					  											  		  .getState()
                 					  											  		  == ProcessingState.FAILURE)
                 					  									  		    )) {
                     log.debug("Error Signal [msgId=" + error.getMessageId() + "] should be send as response");
                     procCtx.setNeedsResponse(true);
                 } else {
-                    log.warn("Error Signal [msgId=" + error.getMessageId() 
+                    log.warn("Error Signal [msgId=" + error.getMessageId()
                     		+ "] can not be sent because it conflicts with successful message units "
                             + " or because message in error was received as response");
                     // As we can not do anything with the error change its processing state to WARNING and then DONE
-                    storageManager.setProcessingState(error, ProcessingState.WARNING, 
-		                    								 	isResponseFlow ? "Ambigious error" : 
+                    storageManager.setProcessingState(error, ProcessingState.WARNING,
+		                    								 	isResponseFlow ? "Ambigious error" :
 		                    								 					 "No P-Mode available for sending");
                     storageManager.setProcessingState(error, ProcessingState.DONE);
                     nonResponseErrors.add(error);
@@ -104,8 +103,8 @@ public class DetermineErrorReporting extends AbstractBaseHandler {
             														 	   .equals(error.getRefToMessageId()))
             												 .findFirst().get();
             	if (msgInError instanceof IPullRequest) {
-            		log.debug("Error Signal [msgId=" + error.getMessageId() 
-            					+ "] references Pull Request => send as response");
+            		log.debug("Error Signal [msgId={}] references Pull Request => send as response",
+            					error.getMessageId());
             		procCtx.setNeedsResponse(true);
             	} else {
 	                log.debug("Get P-Mode information to determine if and how Error Signal must be reported");
@@ -119,7 +118,7 @@ public class DetermineErrorReporting extends AbstractBaseHandler {
                                                                        : null);
 
                     /* Reporting Errors on Signals is optional, so check if messsge unit in error is a Signal and if
-                     * P-Mode or when not configured the general configuration is set to report such errors. 
+                     * P-Mode or when not configured the general configuration is set to report such errors.
                      * Default is not to report errors for Signals.
                      */
                     boolean sendError = true;
@@ -131,7 +130,7 @@ public class DetermineErrorReporting extends AbstractBaseHandler {
                         sendError = errorHandling != null && errorHandling.shouldReportErrorOnReceipt() != null?
                                     errorHandling.shouldReportErrorOnReceipt() :
                                     HolodeckB2BCore.getConfiguration().shouldReportErrorOnReceipt();
-                                                      
+
                     // Default is to send error as response when the message in error is received as a request
                     final boolean asResponse = errorHandling != null ?
                                                     errorHandling.getPattern() == ReplyPattern.RESPONSE :
@@ -144,12 +143,12 @@ public class DetermineErrorReporting extends AbstractBaseHandler {
                     										errorHandling.shouldAddSOAPFault().booleanValue()) {
                     	log.trace("A SOAP Fault should be added to the Error Signal");
                     	HolodeckB2BCore.getStorageManager().setAddSOAPFault(error, true);
-                    }	
-                    
+                    }
+
                     if (sendError) {
                         log.debug("Error Signal [msgId=" + error.getMessageId() + "] should be sent"
                                     + (asResponse ?  " as a response" : " a using callback"));
-                        if (asResponse) 
+                        if (asResponse)
                             procCtx.setNeedsResponse(true);
                         else {
                             storageManager.setProcessingState(error, ProcessingState.READY_TO_PUSH);
@@ -161,11 +160,11 @@ public class DetermineErrorReporting extends AbstractBaseHandler {
                         nonResponseErrors.add(error);
                     }
             	}
-            }        
+            }
         }
         // Remove all errors that will are not send as response
         errors.removeAll(nonResponseErrors);
-        
+
         return InvocationResponse.CONTINUE;
     }
 }

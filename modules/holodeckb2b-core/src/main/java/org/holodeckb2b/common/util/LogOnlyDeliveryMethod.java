@@ -32,13 +32,13 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
- * Is a <i>delivery method</i> that will only log some meta-data of the received message. Such a delivery method is 
+ * Is a <i>delivery method</i> that will only log some meta-data of the received message. Such a delivery method is
  * useful when implementing a test service where there is no need to actually deliver the message to a back-end system.
  * By the default the meta-data is logged to <i>org.holodeckb2b.common.util.LogOnlyDeliveryMethod</i>. The log name can
  * be further specified by providing the <i>LOG_NAME</i> parameter which will be added as postfix to the default name.
- * <p>The meta-data is logged on one line and parts are separated by a ';'. The amount of meta-data that is logged 
- * depends on the configured log level. At <i>INFO</i> the type of message unit, the MessageId, time stamp and 
- * RefToMessageId. For User Messages the first PartyId of the Sender and Receiver can be added by setting the log level 
+ * <p>The meta-data is logged on one line and parts are separated by a ';'. The amount of meta-data that is logged
+ * depends on the configured log level. At <i>INFO</i> the type of message unit, the MessageId, time stamp and
+ * RefToMessageId. For User Messages the first PartyId of the Sender and Receiver can be added by setting the log level
  * to <i>DEBUG</i>. At <i>TRACE</i> all PartyIds are logged together with the MPC, Agreement info, Service and Action.
  * A complete log line, i.e. for a UserMessage at log level <i>TRACE</i> will look like this:
  * <pre>
@@ -56,13 +56,13 @@ public class LogOnlyDeliveryMethod implements IDeliveryMethod {
 
 	@Override
 	public void init(Map<String, ?> settings) throws MessageDeliveryException {
-		String specificName = null; 
+		String specificName = null;
 		try {
 			specificName = (String) settings.get("LOG_NAME");
 		} catch (ClassCastException nas) {
 			LogManager.getLogger().warn("An invalid value was provided as the log name");
 		}
-		log = LogManager.getLogger(LogOnlyDeliveryMethod.class.getName() 
+		log = LogManager.getLogger(LogOnlyDeliveryMethod.class.getName()
 									+ (!Utils.isNullOrEmpty(specificName) ? "." + specificName : ""));
 	}
 
@@ -78,12 +78,12 @@ public class LogOnlyDeliveryMethod implements IDeliveryMethod {
 			msg.append(MessageUnitUtils.getMessageUnitName(rcvdMsgUnit)).append(';');
 			msg.append(rcvdMsgUnit.getMessageId()).append(';');
 			msg.append(Utils.toXMLDateTime(rcvdMsgUnit.getTimestamp())).append(';');
-			if (Utils.isNullOrEmpty(rcvdMsgUnit.getRefToMessageId())) 
+			if (!Utils.isNullOrEmpty(rcvdMsgUnit.getRefToMessageId()))
 				msg.append(rcvdMsgUnit.getRefToMessageId());
 			msg.append(';');
 			if (rcvdMsgUnit instanceof IUserMessage && log.isDebugEnabled()) {
 				IUserMessage um = (IUserMessage) rcvdMsgUnit;
-				if (log.isTraceEnabled()) 
+				if (log.isTraceEnabled())
 					msg.append(um.getMPC()).append(';');
 				msg.append(listPartyIds(um.getSender().getPartyIds())).append(';');
 				msg.append(listPartyIds(um.getReceiver().getPartyIds())).append(';');
@@ -103,13 +103,13 @@ public class LogOnlyDeliveryMethod implements IDeliveryMethod {
 				}
 			}
 			log.log(log.getLevel(), msg.toString());
-		}					
+		}
 	}
 
 	/**
 	 * Creates a string representation for the collection of PartyIds. Depending on log level it will contain only the
 	 * first (for DEBUG) or all ids (for TRACE).
-	 *  
+	 *
 	 * @param pids	collection to PartyIds
 	 * @return	String representation of the PartyIds to include in log message
 	 */
@@ -119,7 +119,7 @@ public class LogOnlyDeliveryMethod implements IDeliveryMethod {
 		IPartyId pid = null;
 		do {
 			if (pid == null)
-				sb.append('{');		
+				sb.append('{');
 			else
 				sb.append(',');
 			pid = it.next();
@@ -128,7 +128,7 @@ public class LogOnlyDeliveryMethod implements IDeliveryMethod {
 			sb.append(pid.getId());
 		} while (it.hasNext() && log.isTraceEnabled());
 		sb.append('}');
-		
+
 		return sb;
 	}
 }

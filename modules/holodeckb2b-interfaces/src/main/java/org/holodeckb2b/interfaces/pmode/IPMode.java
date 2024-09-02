@@ -21,6 +21,8 @@ package org.holodeckb2b.interfaces.pmode;
 import java.util.List;
 
 import org.holodeckb2b.interfaces.config.IConfiguration;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
+import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IAgreement;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
@@ -40,8 +42,8 @@ import org.holodeckb2b.interfaces.pmode.ILeg.Label;
  * in the P-Mode. This would require a P-Mode for each exchanged message while some message only differ on some
  * configuration parameters. Therefor Holodeck B2B allows the P-Mode to define only the common parameters and supply the
  * message specific ones when the message is submitted.
- * <p><b>NOTE 1: </b>Although the focus of Holodeck B2B is on implementation of ebMS V3/AS4 messaging protocol P-Modes 
- * are also used to configure other messaging protocols like AS2 and ebMS2. However some parameters will need to be 
+ * <p><b>NOTE 1: </b>Although the focus of Holodeck B2B is on implementation of ebMS V3/AS4 messaging protocol P-Modes
+ * are also used to configure other messaging protocols like AS2 and ebMS2. However some parameters will need to be
  * mapped to protocol specific settings. Such mappings should be documented in the project providing the support for the
  * specific messaging protocol.
  * <p><b>NOTE 2: </b>The current version does not contain all P-Mode parameters described by the Core Specification and
@@ -59,7 +61,7 @@ public interface IPMode {
      *
      * @return      A <b>non empty</b> String that uniquely identifies this P-Mode within the set of deployed P-Modes.
      */
-    public String getId();
+    String getId();
 
     /**
      * Returns whether the P-Mode id should be included in user messages.
@@ -74,7 +76,7 @@ public interface IPMode {
      *              <code>null</code> or <code>Boolean.FALSE</code> when the P-Mode id should be NOT included in
      *              the message
      */
-    public Boolean includeId();
+    Boolean includeId();
 
     /**
      * Gets the meta-data on the <i>business level</i> agreement that governs the message exchange configured by this
@@ -87,7 +89,7 @@ public interface IPMode {
      *         message exchange, or<br>
      *         <code>null</code> if information on the business agreement is not specified.
      */
-    public IAgreement getAgreement();
+    IAgreement getAgreement();
 
     /**
      * Gets the message exchange pattern (MEP) used by this P-Mode.
@@ -97,12 +99,12 @@ public interface IPMode {
      * @see EbMSConstants#ONE_WAY_MEP
      * @see EbMSConstants#TWO_WAY_MEP
      */
-    public String getMep();
+    String getMep();
 
     /**
      * Gets the MEP binding used by the P-Mode.
      *
-     * @return  URI defining the messaging protocol used. This MUST be an URI defined in the ebMS V3 Core Specification 
+     * @return  URI defining the messaging protocol used. This MUST be an URI defined in the ebMS V3 Core Specification
      * 			when the ebMS V3 message exchange protocol is used.
      * @see EbMSConstants#ONE_WAY_PULL
      * @see EbMSConstants#ONE_WAY_PUSH
@@ -110,7 +112,7 @@ public interface IPMode {
      * @see EbMSConstants#TWO_WAY_PUSH_PULL
      * @see EbMSConstants#TWO_WAY_PULL_PUSH
      */
-    public String getMepBinding();
+    String getMepBinding();
 
     /**
      * Gets information on the trading partner that initiates the execution of the message exchange.
@@ -124,7 +126,7 @@ public interface IPMode {
      *          <code>null</code> if this information is not specified by the P-Mode. In this case the trading partner
      *          information must be supplied when the user message is submitted.
      */
-    public ITradingPartnerConfiguration getInitiator();
+    ITradingPartnerConfiguration getInitiator();
 
     /**
      * Gets information on the trading partner that responds to the initial message.
@@ -137,7 +139,7 @@ public interface IPMode {
      *          <code>null</code> if this information is not specified by the P-Mode. In this case the trading partner
      *          information must be supplied when the user message is submitted.
      */
-    public ITradingPartnerConfiguration getResponder();
+    ITradingPartnerConfiguration getResponder();
 
     /**
      * Gets the configuration of the legs that are part of the message exchange governed by this P-Mode.
@@ -146,20 +148,20 @@ public interface IPMode {
      *
      * @return One or two, depending on the MEP, {@link ILeg} objects containing the configuration of the legs.
      */
-    public List<? extends ILeg> getLegs();
+    List<? extends ILeg> getLegs();
 
     /**
-     * Gets the configuration of the leg with the specified label within the P-Mode. 
-     * <p>Although the leg's label is only relevant for P-Modes that manage a Two-Way MEP this method is also used by 
-     * the Holodeck B2B Core to get the single leg of One-Way P-Modes. In that case either no specific label or the 
+     * Gets the configuration of the leg with the specified label within the P-Mode.
+     * <p>Although the leg's label is only relevant for P-Modes that manage a Two-Way MEP this method is also used by
+     * the Holodeck B2B Core to get the single leg of One-Way P-Modes. In that case either no specific label or the
      * <i>request</i> label may be requested depending on if the P-Mode implementation assigns a label to the leg of a
-     * One-Way P-Mode (i.e. only when the implementation does not assign a label Holodeck B2B will not provide one when 
-     * calling this method).        
+     * One-Way P-Mode (i.e. only when the implementation does not assign a label Holodeck B2B will not provide one when
+     * calling this method).
      *
      * @param label     The label of the leg to get the configuration of
      * @return          A {@link ILeg} object containing the configuration of the leg
      */
-    public ILeg getLeg(Label label);
+    ILeg getLeg(Label label);
 
     /**
      * Gets the setting for whether Holodeck B2B should perform a strict validation of the ebMS header meta-data
@@ -177,4 +179,22 @@ public interface IPMode {
      * @since 4.0.0
      */
     boolean useStrictHeaderValidation();
+
+    /**
+     * Returns the configuration for handling <i>"events"</i> that occur during the processing of message units that are
+     * governed by this P-Mode. These <i>message processing events</i> are used to provide additional information to the
+     * business application about the processing of a message unit in addition to the formally specified <i>Submit</i>,
+     * <i>Deliver</i> and <i>Notify</i> operations. An example of an event is that a message unit has been (re)sent.
+     * <p>NOTE: The Holodeck B2B event processor will first check the Leg configuration if there are events handlers
+     * configured and executed these. Only if there are no handlers configured at Leg level or processing should
+     * continue the handler configuration at the P-Mode level is evaluated.
+     *
+     * @return A {@link List} of {@link IMessageProcessingEventConfiguration}s that specify which event handlers should
+     *         be used for events that occur while processing message units of this P-Mode.
+     * @see IMessageProcessingEvent
+     * @see org.holodeckb2b.interfaces.eventprocessing
+     * @since 7.0.0
+     */
+    List<IMessageProcessingEventConfiguration> getMessageProcessingEventConfiguration();
+
 }

@@ -67,11 +67,15 @@ public interface IDeliveryMethod {
      * ProcessingState#DELIVERED} for <i>User Messages</i> or {@link ProcessingState#DONE} for <i>Signal Messages</i>.
      * Additionally a {@link IMessageDelivered} event will be raised.
      * <p>
-     * When an exception is thrown that indicates a permanent failure, Holodeck B2B will set the processing state of the
-     * message unit for {@link ProcessingState#DELIVERY_FAILED} and for a <i>User Message</i> also generate an 
-     * <i>Error</i> as response to the Sender so it knows the message cannot be delivered.<br/>
-     * When an exception is thrown that does not indicate a permanent failure, Holodeck B2B will not send a response to
-     * the Sender so the message can be retried.<br/>
+     * When an exception is thrown, it should indicate if the error condition is permanent, i.e. if retrying the 
+     * delivery will not solve the problem. Holodeck B2B will always set the processing state of the message unit to 
+     * {@linkplain ProcessingState#DELIVERY_FAILED}, but if the error condition is indicated to be permanent the state 
+     * will then be set to {@linkplain ProcessingState#FAILURE} which means that the message will be marked as a 
+     * duplicate when it is received again from the sender.<br/>
+     * When the deliver operation is executed as part of the regular message processing Holodeck B2B will, in this case, 
+     * also generate an <i>Error Signal Message</i> as response to the Sender so it knows the message cannot be 
+     * delivered. If the error is not permanent failure, Holodeck B2B will not send a response to the Sender so the 
+     * message can be retried.<br/>
      * In both cases a {@link IMessageDeliveryFailure} event will be raised.
      * <p><b>NOTE:</b> Whether a <i>Receipt</i> will be send depends on both the messaging protocol and message exchange
      * configuration used for the delivered message unit.
@@ -91,13 +95,6 @@ public interface IDeliveryMethod {
      * If the delivery fails there should be recovery process to ensure that the message or information conatained in it
      * can be provided to the back-end system or end user. For example by triggering redelivery or downloading the 
      * payload(s) of the message.  
-     * <p>
-     * When an exception is thrown that indicates a permanent failure, Holodeck B2B will set the processing state of the
-     * message unit for {@link ProcessingState#DELIVERY_FAILED} and for a <i>User Message</i> also generate an 
-     * <i>Error</i> as response to the Sender so it knows the message cannot be delivered.<br/>
-     * When an exception is thrown that does not indicate a permanent failure, Holodeck B2B will not send a response to
-     * the Sender so the message can be retried.<br/>
-     * In both cases a {@link IMessageDeliveryFailure} event will be raised.
      * <p><b>NOTE 1:</b> The delivery method implementation is responsible for managing the delivery process, including
      * thread management, etc.
      * <p><b>NOTE 2:</b> Whether a response (<i>Receipt</i> or <i>Error</i>) will be send depends on both the messaging 
@@ -105,9 +102,8 @@ public interface IDeliveryMethod {
      *
      * @param rcvdMsgUnit	The {@link IMessageUnit} to be delivered to the business application
      * @param callback		The {@link IDeliveryCallback} handler to use for reporting the delivery status 
-     * @throws MessageDeliveryException     When delivery of the message unit to the business application fails
      */
-    default void deliver(IMessageUnit rcvdMsgUnit, IDeliveryCallback callback) throws MessageDeliveryException {}
+    default void deliver(IMessageUnit rcvdMsgUnit, IDeliveryCallback callback) {}
 
     /**
      * Is called by the Holodeck B2B Core when the delivery method is no longer needed. This method should be used by

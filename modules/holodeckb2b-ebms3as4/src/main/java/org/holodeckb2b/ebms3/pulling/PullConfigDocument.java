@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.core.workerpool.WorkerPool;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
@@ -32,7 +33,6 @@ import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.PersistenceException;
 import org.simpleframework.xml.core.Persister;
 import org.simpleframework.xml.core.Validate;
 
@@ -75,23 +75,23 @@ class PullConfigDocument {
      * <li>There is at least one reference P-Mode for each specific puller</li>
      * </ol>
      *
-     * @throws PersistenceException When the read XML fails one of the checks
+     * @throws StorageException When the read XML fails one of the checks
      */
     @Validate
-    private void validate() throws PersistenceException {
+    private void validate() throws StorageException {
         // Default puller should have no PModes associated with it
         if(defaultPuller.pmodes != null && !defaultPuller.pmodes.isEmpty())
-            throw new PersistenceException("The default puller should not specify specific PModes!");
+            throw new StorageException("The default puller should not specify specific PModes!");
 
         // A specific puller must specifiy at least one PMode
         if(pullers != null) {
             for(final PullerConfigElement p : pullers)
                 if(p.pmodes == null || p.pmodes.isEmpty())
-                    throw new PersistenceException("Specific puller must reference at least one PMode!");
+                    throw new StorageException("Specific puller must reference at least one PMode!");
         }
         // If supplied, the refresh interval must be a non negative integer
         if (refreshInterval != null && refreshInterval.intValue() < 0)
-        	throw new PersistenceException("Refresh interval must be a non negative integer");
+        	throw new StorageException("Refresh interval must be a non negative integer");
     }
     
     /**

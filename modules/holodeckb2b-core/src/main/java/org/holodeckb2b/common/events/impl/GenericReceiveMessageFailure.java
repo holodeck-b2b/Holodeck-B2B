@@ -20,22 +20,33 @@ import org.holodeckb2b.interfaces.events.IReceivedMessageProcessingFailure;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
- * Is an implementation class of {@link IReceivedMessageProcessingFailure} used to indicate that an error occurred 
- * during the processing of an incoming message unit for which no other specific event is defined. 
- * 
+ * Is an implementation class of {@link IReceivedMessageProcessingFailure} used to indicate that an error occurred
+ * during the processing of an incoming message unit for which no other specific event is defined.
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
  */
-public class GenericReceiveMessageFailure extends AbstractMessageProcessingEvent 
+public class GenericReceiveMessageFailure extends AbstractMessageProcessingFailureEvent<Throwable>
 																		implements IReceivedMessageProcessingFailure {
 
     /**
-     * Creates a new <code>GenericReceiveMessageFailure</code> for the unsuccessful processing of the given message unit 
+     * Creates a new <code>GenericReceiveMessageFailure</code> for the unsuccessful processing of the given message unit
      *
-     * @param subject   			The failed message unit 
-     * @param failureDescription   	Descriptive text of the reason why the processing failed
+     * @param subject   The failed message unit
+     * @param reason   	Reason why the processing failed
      */
-    public GenericReceiveMessageFailure(final IMessageUnit subject, final String failureDescription) {
-        super(subject, failureDescription);
+    public GenericReceiveMessageFailure(final IMessageUnit subject, final Throwable reason) {
+        super(subject, reason);
+    }
+
+    /**
+     * Creates a new <code>GenericReceiveMessageFailure</code> for the unsuccessful processing of the given message unit
+     *
+     * @param subject   	The failed message unit
+     * @param description   Description of the reason why the processing failed
+     * @param reason   		Exception that caused the processing to fail
+     */
+    public GenericReceiveMessageFailure(final IMessageUnit subject, final String description, final Throwable reason) {
+    	super(subject, description, reason);
     }
 }

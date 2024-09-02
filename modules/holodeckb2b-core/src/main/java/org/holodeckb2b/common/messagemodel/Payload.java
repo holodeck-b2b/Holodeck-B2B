@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.common.messagemodel;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,13 +39,15 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
 public class Payload implements IPayload, Serializable {
 	private static final long serialVersionUID = -206177737741313766L;
 
-	private String                  contentLocation;
     private String                  mimeType;
     private IPayload.Containment    containment;
     private String                  uri;
     private ArrayList<IProperty>    properties;
     private SchemaReference         schemaRef;
     private Description             description;
+
+    private transient IPayload		contentSrc;
+    private transient InputStream	contentStream;
 
     /**
      * Default constructor creates empty object
@@ -58,7 +62,7 @@ public class Payload implements IPayload, Serializable {
      * @param source  The source to use for the new object
      */
     public Payload(final IPayload source) {
-        this.contentLocation = source.getContentLocation();
+		this.contentSrc = source;
         this.mimeType = source.getMimeType();
         this.containment = source.getContainment();
         this.uri = source.getPayloadURI();
@@ -66,6 +70,20 @@ public class Payload implements IPayload, Serializable {
         setProperties(source.getProperties());
         setSchemaReference(source.getSchemaReference());
         setDescription(source.getDescription());
+    }
+
+    @Override
+    public InputStream getContent() throws IOException {
+    	if (contentStream != null)
+			return contentStream;
+		else if (contentSrc != null)
+			return contentSrc.getContent();
+		else
+			return null;
+    }
+
+    public void setContentStream(InputStream is) {
+    	this.contentStream = is;
     }
 
     @Override
@@ -130,15 +148,6 @@ public class Payload implements IPayload, Serializable {
 
     public void setSchemaReference(final ISchemaReference schema) {
         this.schemaRef = schema != null ? new SchemaReference(schema) : null;
-    }
-
-    @Override
-    public String getContentLocation() {
-        return contentLocation;
-    }
-
-    public void setContentLocation(final String location) {
-        this.contentLocation = location;
     }
 
     @Override

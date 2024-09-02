@@ -94,5 +94,5 @@ public interface IUserMessage extends IMessageUnit {
      *          <b>NOTE: </b> A user message is not required to contain payloads, so the returned collection can be
      *          empty!
      */
-    public Collection<IPayload>  getPayloads();
+    public Collection<? extends IPayload>  getPayloads();
 }

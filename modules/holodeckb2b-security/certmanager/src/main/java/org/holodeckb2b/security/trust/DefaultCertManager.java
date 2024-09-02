@@ -66,33 +66,34 @@ import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
 import org.holodeckb2b.security.trust.config.CertManagerConfigurationType;
+import org.holodeckb2b.security.trust.config.PasswordType;
 
 /**
- * Is the default implementation of the {@link ICertificateManager} which manages the storage of private keys and 
- * certificates needed for the processing of the message level security. This default implementation is closely coupled
- * to the default security provider and has some special methods to facilitate the integration. Since the default 
- * security provide builds on WSS4J and WSS4J by default uses JKS key stores to get access to the keys and certificates 
- * here we also uses JKS key stores for managing the different keys and certificates:
- * <li>Holding the key pairs used for signing and decrypting messages. Note that a key pair may need to contain more 
+ * Is the default implementation of the {@link ICertificateManager} which manages the storage of private keys and
+ * certificates needed for the processing of the message level security.
+ * <p>The certificate manager uses three JKS key stores to store the different type of certificates:<ol>
+ * <li>Holding the key pairs used for signing and decrypting messages. Note that a key pair may need to contain more
  * than one certificate if a certificate chain needs to be included in a signature.</li>
- * <li>Holding the trading partner certificates with public keys used for encryption of messages and identification. 
- * This means that the certificates in this key store are also used to find the signing certificate when a received 
+ * <li>Holding the trading partner certificates with public keys used for encryption of messages and identification.
+ * This means that the certificates in this key store are also used to find the signing certificate when a received
  * message only includes a reference to the certificate, e.g. a Serial Number or SKI.</li>
- * <li>Holding "trust anchors" used for trust validation of certificates used to sign messages. Normally these are the 
- * certificates of trusted Certificate Authorities. Certificates on a certificate path are checked up to the first trust 
- * anchor found, i.e. for path [<i>c<sub>0</sub></i>, <i>c<sub>1</sub></i>] with <i>c<sub>1</sub></i> registered as 
+ * <li>Holding "trust anchors" used for trust validation of certificates used to sign messages. Normally these are the
+ * certificates of trusted Certificate Authorities. Certificates on a certificate path are checked up to the first trust
+ * anchor found, i.e. for path [<i>c<sub>0</sub></i>, <i>c<sub>1</sub></i>] with <i>c<sub>1</sub></i> registered as
  * trust anchor, it is checked that <i>c<sub>0</sub></i> is issued by <i>c<sub>1</sub></i> and is valid.</li></ol>
- * <p>The use of these three key stores is similar to earlier versions of Holodeck B2B, but as in version 4 the trading 
- * partner certificates are by default not used during trust validation like they were in earlier versions. In version 
- * 4.x a so-called "compatibility mode" was offered so it could handle the configuration of earlier version. Since it 
- * can be useful in a environment where the certificates of trading partner are trusted this mode has now been replaced
- * by a new <i>direct trust</i> configuration setting in which case the trading partner certificates are handled like
- * trust anchors, with the exception that they are for validity. 
- * <p>Another new feature of this Certificate Manager is the option to perform a revocation check using OCSP on 
- * certificates. This check is disabled by default for back-ward compatibility and can be enabled in the configuration. 
+ * <p>The location and passwords of the key stores are managed in the <code>certmanager_config.xml</code> configuration
+ * file that must be stored in the <code>conf</code> directory of the Holodeck B2B installation. The structure of the
+ * configuration file is defined by the XSD with namespace "http://holodeck-b2b.org/schemas/2019/09/config/certmanager"
+ * which can be found in <a href="../xsd/certmanager.xsd">certmanager.xsd</a>.
+ * <p>The trading partner certificates are by default not used during trust validation. However it can be useful in an
+ * environment to directly trust the certificates of the trading partner (for example if there is just one). For this
+ * the <i>direct trust</i> configuration setting is available in which case the trading partner certificates are handled
+ * like trust anchors.
+ * <p>Another feature of this Certificate Manager is the option to perform a revocation check using OCSP on
+ * certificates. This check is disabled by default for back-ward compatibility and can be enabled in the configuration.
  * Note however that when enabled and used in an environment where certificates don't provide OSCP information this will
  * result in a lot of {@link ISignatureVerifiedWithWarning} events as the revocation check could not be executed.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0	This class replaces the certificate manager implementation part of the <i>default Security
  * 			Provider</i> in version 4.x (<code>org.holodeckb2b.security.CertificateManager</code>)
@@ -125,16 +126,16 @@ public class DefaultCertManager implements ICertificateManager {
      * Password to access the keystore holding the trusted certificates
      */
     private String trustKeystorePwd;
-    
+
     /**
      * Indicator whether a revocation check should be performed
      */
-    private boolean performRevocationCheck;    
+    private boolean performRevocationCheck;
     /**
      * Indicator whether the trading partners' certificates should be used as trust anchors.
      */
     private boolean enableDirectTrust;
-    
+
     /**
      * {@inheritDoc}
      */
@@ -163,32 +164,32 @@ public class DefaultCertManager implements ICertificateManager {
                                         (JAXBElement<CertManagerConfigurationType>) jaxbUnmarshaller.unmarshal(
                                         														cfgFilePath.toFile());
             CertManagerConfigurationType certMgrConfig = rootConfigElement.getValue();
-            // Check revocation check and direct trust parameters                       
+            // Check revocation check and direct trust parameters
             performRevocationCheck = certMgrConfig.isPerformRevocationCheck() == null ? false :
             															certMgrConfig.isPerformRevocationCheck();
             enableDirectTrust = certMgrConfig.isDirectTrustPartnerCertificates() == null ? false :
             														certMgrConfig.isDirectTrustPartnerCertificates();
             // Load key store configs
             privateKeystorePath = ensureAbsolutePath(certMgrConfig.getKeystores().getPrivateKeys().getPath(), hb2bHome);
-            privateKeystorePwd = certMgrConfig.getKeystores().getPrivateKeys().getPassword();
+            privateKeystorePwd = getPassword(certMgrConfig.getKeystores().getPrivateKeys().getPassword());
             partnerKeystorePath = ensureAbsolutePath(certMgrConfig.getKeystores()
             													  .getTradingPartnerCertificates().getPath(), hb2bHome);
-            partnerKeystorePwd = certMgrConfig.getKeystores().getTradingPartnerCertificates().getPassword();
-            trustKeystorePath = ensureAbsolutePath(certMgrConfig.getKeystores().getTrustedCertificates().getPath(), 
+            partnerKeystorePwd = getPassword(certMgrConfig.getKeystores().getTradingPartnerCertificates().getPassword());
+            trustKeystorePath = ensureAbsolutePath(certMgrConfig.getKeystores().getTrustedCertificates().getPath(),
             										hb2bHome);
-            trustKeystorePwd = certMgrConfig.getKeystores().getTrustedCertificates().getPassword();
+            trustKeystorePwd = getPassword(certMgrConfig.getKeystores().getTrustedCertificates().getPassword());
         } catch (JAXBException | NullPointerException e) {
             log.error("Problem reading the configuration file [{}]! Details: {}", cfgFilePath, e.getMessage());
             throw new SecurityProcessingException("Configuration file not available or invalid!");
         }
         log.trace("Check availability of configured keystores");
-        if (!KeystoreUtils.check(privateKeystorePath, privateKeystorePwd) 
+        if (!KeystoreUtils.check(privateKeystorePath, privateKeystorePwd)
         	|| !KeystoreUtils.check(partnerKeystorePath, partnerKeystorePwd)
-        	|| !KeystoreUtils.check(trustKeystorePath, trustKeystorePwd)) {        
+        	|| !KeystoreUtils.check(trustKeystorePath, trustKeystorePwd)) {
         	log.fatal("One or more of the configured key stores are not available!");
         	throw new SecurityProcessingException("Invalid configuration!");
         }
-        
+
         if (log.isDebugEnabled()) {
             StringBuilder logMsg = new StringBuilder("Completed initialisation of the Default Certificate Manager:\n");
             logMsg.append("\tRevocation check : ").append(performRevocationCheck).append('\n')
@@ -201,7 +202,7 @@ public class DefaultCertManager implements ICertificateManager {
         } else
         	log.info("Completed initialisation");
     }
-    
+
     @Override
     public void shutdown() {
     }
@@ -220,18 +221,37 @@ public class DefaultCertManager implements ICertificateManager {
 
         Path path = Paths.get(sPath);
         return path.isAbsolute() ? path : hb2bHome.resolve(path);
-    }    
+    }
+
+    /**
+     * Helper method to retrieve the password of a key store. The password can be included directly in the configuration
+     * or it may need to be retrieved from the application's runtime context, i.e. a Java system property or OS
+     * environment variable.
+     *
+     * @param pwdConfig		the password configuration
+     * @return	the password to use
+     */
+    private String getPassword(PasswordType pwdConfig) {
+    	if (pwdConfig == null)
+    		return null;
+
+    	switch (pwdConfig.getType()) {
+    	case "sys" : return System.getProperty(pwdConfig.getValue());
+    	case "env" : return System.getenv(pwdConfig.getValue());
+    	default: return pwdConfig.getValue();
+    	}
+    }
 
     @Override
-    public String findKeyPair(X509Certificate cert) throws SecurityProcessingException {		
+    public String findKeyPair(X509Certificate cert) throws SecurityProcessingException {
     	return findKeyPair("certificate", c -> c.equals(cert));
     }
-        
+
     @Override
     public String findKeyPair(PublicKey key) throws SecurityProcessingException {
 		return findKeyPair("public key", c -> c.getPublicKey().equals(key));
     }
-        
+
     @Override
     public String findKeyPair(byte[] skiBytes) throws SecurityProcessingException {
     	return findKeyPair("SKI", c -> CertificateUtils.hasSKI(c, skiBytes));
@@ -241,7 +261,7 @@ public class DefaultCertManager implements ICertificateManager {
     public String findKeyPair(X500Principal issuer, BigInteger serial) throws SecurityProcessingException {
     	return findKeyPair("IssuerAndSerial", c -> CertificateUtils.hasIssuerSerial(c, issuer, serial));
     }
-    
+
     @Override
     public String findKeyPair(byte[] hash, MessageDigest digester) throws SecurityProcessingException {
     	return findKeyPair("thumbprint", c -> CertificateUtils.hasThumbprint(c, hash, digester));
@@ -250,10 +270,10 @@ public class DefaultCertManager implements ICertificateManager {
     /**
      * Helper method to search the registered key pairs for an entry that has a certificate that matches to the given
      * condition.
-     * 
+     *
      * @param descr		description of search condition, used for logging
      * @param cond		the condition to match
-     * @return			the alias of the first entry that holds a certificate that matches the condition, 
+     * @return			the alias of the first entry that holds a certificate that matches the condition,
      * 					<code>null</code> if no matching entry is found
      * @throws SecurityProcessingException when an error occurs searching the key store
      */
@@ -265,7 +285,7 @@ public class DefaultCertManager implements ICertificateManager {
 	        throw new SecurityProcessingException("Error searching for keypair", ex);
 		}
     }
-    
+
     @Override
     public KeyStore.PrivateKeyEntry getKeyPair(final String alias, final String password)
                                                                                    throws SecurityProcessingException {
@@ -280,67 +300,67 @@ public class DefaultCertManager implements ICertificateManager {
             throw new SecurityProcessingException("Error retrieving the keypair", ex);
         }
     }
-    
+
     @Override
     public List<X509Certificate> getKeyPairCertificates(final String alias) throws SecurityProcessingException {
     	try {
 			Certificate[] cc = KeystoreUtils.load(privateKeystorePath, privateKeystorePwd).getCertificateChain(alias);
 			if (cc != null && cc.length > 0) {
 				List<X509Certificate> result = new ArrayList<>(cc.length);
-				for(Certificate c : cc) 					
+				for(Certificate c : cc)
 					result.add((X509Certificate) c);
 				return result;
 			} else
 				return null;
 		} catch (KeyStoreException e) {
-			log.error("Could not access the private keystore! Error details: {}", e.getMessage()); 
+			log.error("Could not access the private keystore! Error details: {}", e.getMessage());
 			throw new SecurityProcessingException("Unable to get certificate of key pair", e);
 		}
     }
-    
+
     @Override
     public X509Certificate getPartnerCertificate(final String alias) throws SecurityProcessingException {
     	try {
-    		return (X509Certificate) 
+    		return (X509Certificate)
     				KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd).getCertificate(alias);
 		} catch (KeyStoreException e) {
-			log.error("Could not access the partner keystore! Error details: {}", e.getMessage()); 
+			log.error("Could not access the partner keystore! Error details: {}", e.getMessage());
 			throw new SecurityProcessingException("Unable to get partner certificate", e);
-		}    		
+		}
     }
 
     @Override
     public String findCertificate(final X509Certificate cert) throws SecurityProcessingException {
     	try {
-    		return findEntry(KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd), c -> c.equals(cert));    		
+    		return findEntry(KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd), c -> c.equals(cert));
     	} catch (KeyStoreException e) {
-    		log.error("Could not access the partner keystore! Error details: {}", e.getMessage()); 
-    		throw new SecurityProcessingException("Unable to get partner certificate", e);    		
-    	}    	
+    		log.error("Could not access the partner keystore! Error details: {}", e.getMessage());
+    		throw new SecurityProcessingException("Unable to get partner certificate", e);
+    	}
     }
-    
+
     @Override
     public X509Certificate findCertificate(final X500Principal issuer, final BigInteger serial)
     																				throws SecurityProcessingException {
     	return getCertificate("IssuerAndSerial", c -> CertificateUtils.hasIssuerSerial(c, issuer, serial));
     }
-    
+
     @Override
     public X509Certificate findCertificate(final byte[] skiBytes) throws SecurityProcessingException {
     	return getCertificate("SKI", c -> CertificateUtils.hasSKI(c, skiBytes));
-    }    
+    }
 
     @Override
     public X509Certificate findCertificate(byte[] hash, MessageDigest digester) throws SecurityProcessingException {
     	return getCertificate("thumbprint", c -> CertificateUtils.hasThumbprint(c, hash, digester));
     }
-    
+
     /**
      * Helper method to search the registered partner certificates for a certificate that matches the given condition.
-     * 
+     *
      * @param descr		description of search condition, used for logging
      * @param cond		the condition to match
-     * @return			the alias of the first entry that holds a certificate that matches the condition, 
+     * @return			the alias of the first entry that holds a certificate that matches the condition,
      * 					<code>null</code> if no matching entry is found
      * @throws SecurityProcessingException when an error occurs searching the key store
      */
@@ -350,17 +370,17 @@ public class DefaultCertManager implements ICertificateManager {
     		String alias = findEntry(ks, cond);
     		return alias != null ? (X509Certificate) ks.getCertificate(alias) : null;
     	} catch (KeyStoreException e) {
-    		log.error("Problem finding the trading partner certificate based on {}!\n\tError details: {}", descr, 
+    		log.error("Problem finding the trading partner certificate based on {}!\n\tError details: {}", descr,
     					e.getMessage());
     		throw new SecurityProcessingException("Error retrieving the certificate", e);
-    	}    	
+    	}
     }
-    
+
     /**
      * Helper method to search a key store for an entry that holds a certificate matching a given condition.
-     *   
+     *
      * @param kt	indicator which key store to search
-     * @param cond	the condition to check	
+     * @param cond	the condition to check
      * @return		the alias of the matching entry if found, <code>null</code> if not found
      * @throws KeyStoreException when an error occurs searching the key store
      */
@@ -372,26 +392,26 @@ public class DefaultCertManager implements ICertificateManager {
             	return a;
 		}
 		return null;
-    }        
-    
+    }
+
     /**
      * Functional interface used to determine whether the given Certificate matches a given condition, e.g. has the
      * specified SKI.
      */
     private interface CertCondition {
     	boolean matches(X509Certificate c);
-    }    
-    
+    }
+
 	@Override
 	public IValidationResult validateTrust(List<X509Certificate> certs) throws SecurityProcessingException {
 		if (Utils.isNullOrEmpty(certs)) {
 			log.error("Cannot validate an empty certificate path!");
 			throw new SecurityProcessingException("Empty certificate path");
 		}
-		
+
 		if (log.isDebugEnabled()) {
 			if (certs.size() == 1)
-				log.debug("Validate trust of single certificate for Subject: {}", 
+				log.debug("Validate trust of single certificate for Subject: {}",
 																				certs.get(0).getSubjectDN().getName());
 			else {
 				StringBuilder sb = new StringBuilder("Validate trust in cert path: Leaf cert for Subject: ");
@@ -399,22 +419,22 @@ public class DefaultCertManager implements ICertificateManager {
 				for (int i = 1; i < certs.size(); i++)
 					sb.append("\n\tNext :").append(certs.get(i).getSubjectDN().getName());
 				log.debug(sb.toString());
-			}							
+			}
 		}
-		
+
 		log.trace("Create the set of trust anchors");
-		final Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>();		
+		final Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>();
 		trustAnchors.addAll(getTrustAnchorsFromKeyStore(trustKeystorePath, trustKeystorePwd));
 		if (enableDirectTrust) {
 			log.debug("Direct trust in partner certificates is enabled, add as trust anchors");
 			trustAnchors.addAll(getTrustAnchorsFromKeyStore(partnerKeystorePath, partnerKeystorePwd));
 		}
-		
+
 		log.trace("Calculate cert path to validate (i.e. find first trust anchor)");
 		// We only validate the given certificate path up to the first certificate that is listed as a trust anchor,
 		// so remove any certificate from the given path that is already in the set of trust anchors
-		final List<X509Certificate> cpToCheck = new ArrayList<>();		
-		boolean foundAnchor = false;		
+		final List<X509Certificate> cpToCheck = new ArrayList<>();
+		boolean foundAnchor = false;
 		for(int i = 0; !foundAnchor && i < certs.size(); i++) {
 			X509Certificate c = certs.get(i);
 			if (!(foundAnchor = trustAnchors.parallelStream().anyMatch(a -> a.getTrustedCert().equals(c))))
@@ -423,9 +443,9 @@ public class DefaultCertManager implements ICertificateManager {
 
 		if (cpToCheck.isEmpty()) {
 			log.debug("Leaf certificate (Subject={}) is directly trusted", certs.get(0).getSubjectDN().getName());
-			return new ValidationResult(Trust.OK, cpToCheck, "Leaf certificate is registered a trust anchor");		
+			return new ValidationResult(Trust.OK, cpToCheck, "Leaf certificate is registered a trust anchor");
 		}
-		
+
 		if (log.isTraceEnabled()) {
 			StringBuilder sb = new StringBuilder("Cert path to check: [");
 			sb.append(cpToCheck.get(0).getSubjectDN().getName());
@@ -433,87 +453,87 @@ public class DefaultCertManager implements ICertificateManager {
 				sb.append(" << ").append(certs.get(i).getSubjectDN().getName());
 			sb.append(']');
 			log.trace(sb.toString());
-		}		
-		
+		}
+
 		try {
 			final CertPath cp = CertificateFactory.getInstance("X.509").generateCertPath(cpToCheck);
 			final PKIXParameters params = new PKIXParameters(trustAnchors);
 			params.setRevocationEnabled(performRevocationCheck);
 			Security.setProperty("ocsp.enable", "true");
-			final CertPathValidator validator = CertPathValidator.getInstance("PKIX");			
+			final CertPathValidator validator = CertPathValidator.getInstance("PKIX");
 			try {
-				final PKIXCertPathValidatorResult validation = (PKIXCertPathValidatorResult) 
+				final PKIXCertPathValidatorResult validation = (PKIXCertPathValidatorResult)
 																						validator.validate(cp, params);
 				// Add the found trust anchor to cert path to include in result
 				cpToCheck.add(validation.getTrustAnchor().getTrustedCert());
-				if (log.isDebugEnabled()) 
+				if (log.isDebugEnabled())
 					log.debug("Certificate path is trusted! {}", getValidatedPath(cpToCheck));
 				else
 					log.info("Certficate path is trusted!");
 				return new ValidationResult(Trust.OK, cpToCheck);
 			} catch (CertPathValidatorException validationException) {
 				// If reason is "unspecified" or "undetermined" this could be caused by a problem in the OCSP check, so
-				// try again without 
+				// try again without
 				Reason reason = validationException.getReason();
-				if (performRevocationCheck 
+				if (performRevocationCheck
 					&& (reason == BasicReason.UNSPECIFIED || reason == BasicReason.UNDETERMINED_REVOCATION_STATUS)) {
 					try {
-						log.debug("Validation with revocation check failed ({}), retry without", 
+						log.debug("Validation with revocation check failed ({}), retry without",
 									validationException.getMessage());
-						params.setRevocationEnabled(false);					
-						final PKIXCertPathValidatorResult validation = (PKIXCertPathValidatorResult) 
+						params.setRevocationEnabled(false);
+						final PKIXCertPathValidatorResult validation = (PKIXCertPathValidatorResult)
 								validator.validate(cp, params);
 						// Add the found trust anchor to cert path to include in result
-						cpToCheck.add(validation.getTrustAnchor().getTrustedCert());						
-						log.warn("Certificate path could only be validated without revocation check! {}", 
-						getValidatedPath(cpToCheck));					
+						cpToCheck.add(validation.getTrustAnchor().getTrustedCert());
+						log.warn("Certificate path could only be validated without revocation check! {}",
+						getValidatedPath(cpToCheck));
 						return new ValidationResult(Trust.WITH_WARNINGS, cpToCheck, "Revocation could not be checked",
-													new SecurityProcessingException("Revocaction check failed", 
+													new SecurityProcessingException("Revocaction check failed",
 																					validationException));
 					} catch (CertPathValidatorException persistentError) {
 						// Even without revocation check it failed...
-					}					
-				} 				
+					}
+				}
 				log.error("Trust validation failed! Details: {}", validationException.getMessage());
-				return new ValidationResult(cpToCheck, new SecurityProcessingException("Untrusted cert path", 
+				return new ValidationResult(cpToCheck, new SecurityProcessingException("Untrusted cert path",
 																							validationException));
-				
+
 			}
 		} catch (InvalidAlgorithmParameterException | CertificateException | NoSuchAlgorithmException ex) {
 			// These indicate some generic problem occured during the validation which is not related to the trust,
 			// so report as exception too
 			throw new SecurityProcessingException("Error during trust validation", ex);
 		}
-	}    	
-	
+	}
+
 	/**
 	 * Helper method to load the certificates from a key store as trust anchors for validation.
-	 *  
+	 *
 	 * @param ksPath	Path to key store
 	 * @param ksPwd		Password to access key store
-	 * @return			Set of trust anchors 
-	 * @throws SecurityProcessingException	If the key store cannot be accessed or certificates cannot be read 
+	 * @return			Set of trust anchors
+	 * @throws SecurityProcessingException	If the key store cannot be accessed or certificates cannot be read
 	 */
-	private Set<TrustAnchor> getTrustAnchorsFromKeyStore(final Path ksPath, final String ksPwd) 
+	private Set<TrustAnchor> getTrustAnchorsFromKeyStore(final Path ksPath, final String ksPwd)
 																					throws SecurityProcessingException {
-		HashSet<TrustAnchor>	trustanchors = new HashSet<TrustAnchor>();		
+		HashSet<TrustAnchor>	trustanchors = new HashSet<TrustAnchor>();
 		try {
 			KeyStore ks = KeystoreUtils.load(ksPath, ksPwd);
 			Enumeration<String> aliases = ks.aliases();
-			while (aliases.hasMoreElements()) 
-				trustanchors.add(new TrustAnchor((X509Certificate) ks.getCertificate(aliases.nextElement()), null));			
+			while (aliases.hasMoreElements())
+				trustanchors.add(new TrustAnchor((X509Certificate) ks.getCertificate(aliases.nextElement()), null));
 		} catch (KeyStoreException kse) {
 			log.error("Could not retrieve trust anchors from key store ({})", ksPath);
 			throw new SecurityProcessingException("Could not retrieve trust anchors");
 		}
 		return trustanchors;
 	}
-	
+
 	/**
 	 * Helper method to create log message with the certificate path that was validated.
-	 * 
+	 *
 	 * @param cp	List of certificate representing the validated cert path with the last one the found trust anchor
-	 * @return		The log message with the validated path 
+	 * @return		The log message with the validated path
 	 */
 	private String getValidatedPath(final List<X509Certificate> cp) {
 		StringBuilder sb = new StringBuilder("Validated path = [");
@@ -523,36 +543,36 @@ public class DefaultCertManager implements ICertificateManager {
 		sb.append(" <{trustanchor}< ")
 		  .append(cp.get(cp.size() -1).getSubjectDN().getName())
 		  .append(']');
-		return sb.toString();												
-	}	
-    
+		return sb.toString();
+	}
+
 	/*
 	 * The following methods are used by the user interface module to display the registered certificates
 	 */
-	
+
     /**
      * Gets all the certificates of all registered key pairs together with the alias their registered under.
-     * 
+     *
      * @return	Map of alias and certificate
      * @throws SecurityProcessingException	When the certificates could not be retrieved from the key store.
      */
     public Map<String, X509Certificate> getPrivateKeyCertificates() throws SecurityProcessingException {
     	return getCertificates(privateKeystorePath, privateKeystorePwd);
     }
-    
+
     /**
      * Gets all the certificates of all registered key pairs together with the alias their registered under.
-     * 
+     *
      * @return	Map of alias and certificate
      * @throws SecurityProcessingException	When the certificates could not be retrieved from the key store.
      */
     public Map<String, X509Certificate> getPartnerCertificates() throws SecurityProcessingException {
     	return getCertificates(partnerKeystorePath, partnerKeystorePwd);
     }
-    
+
     /**
      * Gets all the certificates of all registered key pairs together with the alias their registered under.
-     * 
+     *
      * @return	Map of alias and certificate
      * @throws SecurityProcessingException	When the certificates could not be retrieved from the key store.
      */
@@ -562,13 +582,13 @@ public class DefaultCertManager implements ICertificateManager {
 
     /**
      * Helper method to get all the certificates together with their alias from the specified key store.
-     * 
+     *
 	 * @param ksPath	Path to key store
 	 * @param ksPwd		Password to access key store
      * @return	Map of alias and certificate
      * @throws SecurityProcessingException	When the certificates could not be retrieved from the key store.
      */
-    private Map<String, X509Certificate> getCertificates(final Path ksPath, final String ksPwd) 
+    private Map<String, X509Certificate> getCertificates(final Path ksPath, final String ksPwd)
     																				throws SecurityProcessingException {
 	    try {
 	    	final KeyStore ks = KeystoreUtils.load(ksPath, ksPwd);
@@ -581,8 +601,8 @@ public class DefaultCertManager implements ICertificateManager {
 	        return result;
 	    } catch (KeyStoreException ex) {
 	        log.error("Problem retrieving the certificates from keystore!\n\tError details: {}", ex.getMessage());
-	        throw new SecurityProcessingException("Error retrieving the certificates", ex);       	
+	        throw new SecurityProcessingException("Error retrieving the certificates", ex);
 	    }
-    }    
-    
+    }
+
 }

@@ -37,7 +37,7 @@ public interface IEncryptionConfiguration {
      *
      * @return  The alias that identifies the certificate to use for the encryption.
      */
-    public String getKeystoreAlias();
+    String getKeystoreAlias();
 
     /**
      * Gets the password to access the private key hold by the certififcate. Only applies to configurations that are
@@ -47,7 +47,7 @@ public interface IEncryptionConfiguration {
      *
      * @return  The password to get access to the private key
      */
-    public String getCertificatePassword();
+    String getCertificatePassword();
 
     /**
      * Gets the symmetric encryption algorithm (to be) used for the encryption of the message.
@@ -61,19 +61,31 @@ public interface IEncryptionConfiguration {
      * @return The symmetric encryption algorithm to be used, or<br>
      *         <code>null</code> when not specified.
      */
-    public String getAlgorithm();
-
+    String getAlgorithm();
 
     /**
-     * Gets the key transport settings that determine how the <code>xenc:EncryptedKey</code> element in the WS-Security
-     * header of the message must be created. These settings therefore apply only to the sending side of a message
-     * exchange.
-     * <p>Specification of these parameters is optional. In case not specified the installed <i>security provider</i>
-     * will use default settings. 
+     * Gets the settings to create the <code>xenc:EncryptedKey</code> element in the WS-Security header of the message
+     * in case the symmetric encryption key must be packaged in the message using the <i>key transport</i> method.
+     * <p>NOTE 1: Either these settings or the settings for <i>key agreement</i> should be specified, but not both.<br/>
+     * NOTE 2: Specification of these parameters is optional. In case nothing is specified, the installed <i>security
+     * provider will use default settings.
      *
      * @return  An {@link IKeyTransport} object containing the key transport parameters, or<br>
      *          <code>null</code> if not specified
      */
-    public IKeyTransport getKeyTransport();
+    IKeyTransport getKeyTransport();
 
+    /**
+     * Gets the settings to create the <code>xenc:EncryptedKey</code> element in the WS-Security header of the message
+     * in case the symmetric encryption key must should be derieved from the certificates included in the message using
+     * a <i>key agreement</i> method.
+     * <p>NOTE 1: Either these settings or the settings for <i>key transport</i> should be specified, but not both.<br/>
+     * NOTE 2: Specification of these parameters is optional. In case nothing is specified, the installed <i>security
+     * provider will use default settings.
+     *
+     * @return  An {@link IKeyAgreement} object containing the key agreement parameters, or<br>
+     *          <code>null</code> if not specified
+     * @since 7.0.0
+     */
+    IKeyAgreement getKeyAgreement();
 }

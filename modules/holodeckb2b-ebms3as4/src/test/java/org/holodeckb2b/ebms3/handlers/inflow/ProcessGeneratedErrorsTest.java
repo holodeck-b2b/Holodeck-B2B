@@ -16,12 +16,14 @@
  */
 package org.holodeckb2b.ebms3.handlers.inflow;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Collection;
 
@@ -33,47 +35,52 @@ import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.messagemodel.EbmsError;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.UserMessage;
+import org.holodeckb2b.common.pmode.PMode;
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.holodeckb2b.interfaces.pmode.ILeg.Label;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class ProcessGeneratedErrorsTest {
 
-	private ProcessGeneratedErrors handler;
+	private static ProcessGeneratedErrors handler;
 
-	@BeforeClass
+    private static HolodeckB2BTestCore		testCore;
+
+    private static String oneWayPModeId;
+    private static String twoWayPModeId;
+
+    @BeforeAll
     public static void setUpClass() throws Exception {
-        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
-    }
-	
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-        TestUtils.cleanOldMessageUnitEntities();
-    }
+    	testCore = new HolodeckB2BTestCore();
+        HolodeckB2BCoreInterface.setImplementation(testCore);
 
-    @Before
-    public void setUp() throws Exception {
         handler = new ProcessGeneratedErrors();
         ModuleConfiguration moduleDescr = new ModuleConfiguration("test", null);
         moduleDescr.addParameter(new Parameter("HandledMessagingProtocol", "TEST"));
         HandlerDescription handlerDescr = new HandlerDescription();
         handlerDescr.setParent(moduleDescr);
-        handler.init(handlerDescr);        
+        handler.init(handlerDescr);
+
+        PMode oneWayPMode = HB2BTestUtils.create1WayReceivePMode();
+        oneWayPModeId = oneWayPMode.getId();
+        testCore.getPModeSet().add(oneWayPMode);
+        PMode twoWayPMode = HB2BTestUtils.create2WaySendOnRequestPMode();
+        twoWayPModeId = twoWayPMode.getId();
+        testCore.getPModeSet().add(twoWayPMode);
     }
-    
+
     /**
      * Test anonymous errors
      */
@@ -82,23 +89,19 @@ public class ProcessGeneratedErrorsTest {
     	// Prepare msg ctx
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        
+
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
-        
-        // Create the Error Signal 
+
+        // Create the Error Signal
         EbmsError error1 = new EbmsError();
         error1.setErrorDetail("Some error for testing.");
         procCtx.addGeneratedError(error1);
         EbmsError error2 = new EbmsError();
         error2.setErrorDetail("Some other error for testing.");
         procCtx.addGeneratedError(error2);
-        
-        try {
-            assertEquals(Handler.InvocationResponse.CONTINUE, handler.invoke(mc));
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-        
+
+        assertEquals(Handler.InvocationResponse.CONTINUE, assertDoesNotThrow(() -> handler.invoke(mc)));
+
         Collection<IErrorMessageEntity> errorSigs = procCtx.getSendingErrors();
         assertFalse(Utils.isNullOrEmpty(errorSigs));
         assertEquals(1, errorSigs.size());
@@ -108,27 +111,27 @@ public class ProcessGeneratedErrorsTest {
         assertNotNull(errSig.getErrors());
         assertEquals(2, errSig.getErrors().size());
     }
-    
+
     /**
      * Test errors with same reference
-     * @throws PersistenceException 
+     * @throws StorageException
      */
     @Test
-    public void testErrorsSameMsg() throws PersistenceException {
+    public void testErrorsSameMsg() throws StorageException {
     	// Prepare message in error
     	UserMessage usrMsg = new UserMessage();
     	usrMsg.setMessageId(MessageIdUtils.createMessageId());
-    	usrMsg.setPModeId("some-pmodeid-001");
-    	IUserMessageEntity usrMsgEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(usrMsg);
-    	
+    	usrMsg.setPModeId(twoWayPModeId);
+    	IUserMessageEntity usrMsgEntity = HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(usrMsg);
+
     	// Prepare msg ctx
     	MessageContext mc = new MessageContext();
-    	mc.setFLOW(MessageContext.IN_FLOW);    	
+    	mc.setFLOW(MessageContext.IN_FLOW);
     	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
-       
+
     	procCtx.setUserMessage(usrMsgEntity);
-    	
-    	// Create the Error Signal 
+
+    	// Create the Error Signal
     	EbmsError error1 = new EbmsError();
     	error1.setErrorDetail("Some error for testing.");
     	error1.setRefToMessageInError(usrMsg.getMessageId());
@@ -137,48 +140,44 @@ public class ProcessGeneratedErrorsTest {
     	error2.setErrorDetail("Some other error for testing.");
     	error2.setRefToMessageInError(usrMsg.getMessageId());
     	procCtx.addGeneratedError(error2);
-    	
-    	try {
-    		assertEquals(Handler.InvocationResponse.CONTINUE, handler.invoke(mc));
-    	} catch (Exception e) {
-    		fail(e.getMessage());
-    	}
-    	
+
+    	assertEquals(Handler.InvocationResponse.CONTINUE, assertDoesNotThrow(() -> handler.invoke(mc)));
+
     	Collection<IErrorMessageEntity> errorSigs = procCtx.getSendingErrors();
-        assertFalse(Utils.isNullOrEmpty(errorSigs));
     	assertEquals(1, errorSigs.size());
     	IErrorMessageEntity errSig = errorSigs.iterator().next();
     	assertEquals(usrMsg.getPModeId(), errSig.getPModeId());
+    	assertEquals(Label.REPLY, errSig.getLeg());
     	assertEquals(usrMsg.getMessageId(), errSig.getRefToMessageId());
     	assertNotNull(errSig.getErrors());
     	assertEquals(2, errSig.getErrors().size());
     }
-    
+
     /**
      * Test errors with different references
-     * @throws PersistenceException 
+     * @throws StorageException
      */
     @Test
-    public void testErrorsDifferentMsg() throws PersistenceException {
+    public void testErrorsDifferentMsg() throws StorageException {
     	// Prepare message in error
     	UserMessage usrMsg = new UserMessage();
     	usrMsg.setMessageId(MessageIdUtils.createMessageId());
-    	usrMsg.setPModeId("some-pmodeid-001");
-    	IUserMessageEntity usrMsgEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(usrMsg);
-    	
+    	usrMsg.setPModeId(twoWayPModeId);
+    	IUserMessageEntity usrMsgEntity = HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(usrMsg);
+
     	PullRequest pullReq = new PullRequest();
     	pullReq.setMessageId(MessageIdUtils.createMessageId());
-    	pullReq.setPModeId("some-pmodeid-002");
-    	IPullRequestEntity pullReqEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(pullReq);
-    	
+    	pullReq.setPModeId(oneWayPModeId);
+    	IPullRequestEntity pullReqEntity = HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(pullReq);
+
     	// Prepare msg ctx
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.IN_FLOW);
     	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	procCtx.setUserMessage(usrMsgEntity);
     	procCtx.setPullRequest(pullReqEntity);
-    	
-    	// Create the Errors 
+
+    	// Create the Errors
     	EbmsError error1 = new EbmsError();
     	error1.setErrorDetail("error-1");
     	error1.setRefToMessageInError(usrMsg.getMessageId());
@@ -187,17 +186,17 @@ public class ProcessGeneratedErrorsTest {
     	error2.setErrorDetail("error-2");
     	error2.setRefToMessageInError(pullReq.getMessageId());
     	procCtx.addGeneratedError(error2);
-    	
+
        	try {
     		assertEquals(Handler.InvocationResponse.CONTINUE, handler.invoke(mc));
     	} catch (Exception e) {
     		fail(e.getMessage());
     	}
-    	
+
     	Collection<IErrorMessageEntity> errorSigs = procCtx.getSendingErrors();
     	assertFalse(Utils.isNullOrEmpty(errorSigs));
     	assertEquals(2, errorSigs.size());
-    	
+
     	assertTrue(errorSigs.parallelStream()
     						.allMatch(e -> !Utils.isNullOrEmpty(e.getRefToMessageId())
     									&& !Utils.isNullOrEmpty(e.getErrors())
@@ -208,9 +207,9 @@ public class ProcessGeneratedErrorsTest {
     										   && e.getErrors().iterator().next().getErrorDetail().equals(error2.getErrorDetail())
     	    								  )
     									   )));
-    	
+
     }
-    
-    
-    
+
+
+
 }

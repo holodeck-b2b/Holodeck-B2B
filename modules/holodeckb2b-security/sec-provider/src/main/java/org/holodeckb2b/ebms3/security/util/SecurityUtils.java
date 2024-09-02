@@ -41,6 +41,8 @@ import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.X509ReferenceType;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -120,9 +122,9 @@ public final class SecurityUtils {
         }
 
         // For each payload try to get the applicable reference element and create the SignedPartMetadata instance
-        Map<IPayload, ISignedPartMetadata> payloadDigests = new HashMap<>();
+        Map<IPayloadEntity, ISignedPartMetadata> payloadDigests = new HashMap<>();
         messageUnits.stream().filter(msgUnit -> msgUnit instanceof IUserMessage)
-                             .map(userMsg -> ((IUserMessage) userMsg).getPayloads())
+                             .map(userMsg -> ((IUserMessageEntity) userMsg).getPayloads())
                              .filter(umPayloads -> !Utils.isNullOrEmpty(umPayloads))
                              .forEachOrdered(umPayloads ->
                                 umPayloads.forEach((p) ->
@@ -147,10 +149,10 @@ public final class SecurityUtils {
     	final String plURI = pl.getPayloadURI();
     	/* For attached payloads we can simple compare the id from the reference with the Content-id of the payload
     	 * although we need to use endsWidth since the URI in the payload object does not contain prefix.
-    	 * For payloads contained in the SOAP Body it may work if the payload includes a reference to the SOAP Body 
+    	 * For payloads contained in the SOAP Body it may work if the payload includes a reference to the SOAP Body
     	 * element. However such payloads commonly don't have a reference at all and otherwise may have one that refers
     	 * to a child element in the SOAP Body which is the actual root of the payload. Therefore a body payload is
-    	 * considered referenced if the WSS4J reference is to the SOAP Body 
+    	 * considered referenced if the WSS4J reference is to the SOAP Body
     	 */
     	if (plURI != null && ref.endsWith(plURI))
     		return true;
@@ -160,7 +162,7 @@ public final class SecurityUtils {
     	} else
     		return false;
     }
-    
+
     /**
      * Checks whether the given encrypted data reference applies to the given payload.
      *
@@ -175,10 +177,10 @@ public final class SecurityUtils {
     	/* For attached payloads we can simple compare the id from the reference with the Content-id of the payload
     	 * although we need to use endsWidth since the URI in the payload object does not contain prefix.
     	 * For payloads contained in the SOAP Body this will not work because the reference is to the EncryptedData
-    	 * element and not the original element itself. Besides that the payloads commonly don't have a reference at 
-    	 * all and otherwise may have one that refers to a child element in the SOAP Body which is the actual root of 
-    	 * the payload. Therefore a body payload is considered referenced if the referenced EncryptedData element 
-    	 * applies to the SOAP Body 
+    	 * element and not the original element itself. Besides that the payloads commonly don't have a reference at
+    	 * all and otherwise may have one that refers to a child element in the SOAP Body which is the actual root of
+    	 * the payload. Therefore a body payload is considered referenced if the referenced EncryptedData element
+    	 * applies to the SOAP Body
     	 */
     	if (plURI != null && ref.getWsuId().endsWith(plURI))
     		return true;
@@ -189,7 +191,7 @@ public final class SecurityUtils {
     			  || protectedElement.getNamespaceURI().equals("http://www.w3.org/2003/05/soap-envelope"));
     	} else
     		return false;
-    }    
+    }
     /**
      * Gets the DOM representation of <code>wsse:Security</code> element that is the WS-Security header target to the
      * specified role/actor.
@@ -281,7 +283,7 @@ public final class SecurityUtils {
         if (signatureElems == null || signatureElems.getLength() == 0)
             return null; // No Signature element available in header
 
-        // Collect all ds:Reference elements contained in it. 
+        // Collect all ds:Reference elements contained in it.
         NodeList referenceElems = ((Element) signatureElems.item(0)).getElementsByTagNameNS(
                                                                     SecurityConstants.REFERENCE_ELEM.getNamespaceURI(),
                                                                     SecurityConstants.REFERENCE_ELEM.getLocalPart());

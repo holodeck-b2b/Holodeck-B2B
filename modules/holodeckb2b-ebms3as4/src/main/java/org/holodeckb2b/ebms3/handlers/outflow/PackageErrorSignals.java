@@ -32,14 +32,13 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.commons.util.Utils;
-import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.ebms3.packaging.ErrorSignalElement;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IErrorHandling;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for creating the <code>eb:SignalMessage</code> and child element for an
@@ -70,8 +69,8 @@ import org.holodeckb2b.interfaces.pmode.IErrorHandling;
 public class PackageErrorSignals extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 	
-    																					throws PersistenceException {
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log)
+    																					throws StorageException {
         // First check if there are any errors to include
         final Collection<IErrorMessageEntity> errors = procCtx.getSendingErrors();
 
@@ -88,14 +87,9 @@ public class PackageErrorSignals extends AbstractBaseHandler {
         // If one of the errors is of severity FAILURE a SOAP may be added
         boolean addSOAPFault = false;
         for(final IErrorMessageEntity e : errors) {
-            log.trace("Make sure that all meta-data on the error is loaded");
-            if (!e.isLoadedCompletely()) {
-                log.trace("Not all meta-data is available, load now");
-                HolodeckB2BCore.getQueryManager().ensureCompletelyLoaded(e);
-            }
             log.trace("Add eb:SignalMessage element to the existing eb:Messaging header");
             ErrorSignalElement.createElement(messaging, e);
-            log.debug("eb:SignalMessage element for Error Signal [msgId=" + e.getMessageId() 
+            log.debug("eb:SignalMessage element for Error Signal [msgId=" + e.getMessageId()
             			+ "] succesfully added to header");
             // Check if a SOAPFault should be added
             addSOAPFault |= e.shouldHaveSOAPFault();
@@ -133,11 +127,11 @@ public class PackageErrorSignals extends AbstractBaseHandler {
         final boolean isSoap11 = env.getVersion() instanceof SOAP11Version;
 
         final SOAPFaultCode  fCode = factory.createSOAPFaultCode(fault);
-        if (isSoap11) 
+        if (isSoap11)
             fCode.setText(new QName(env.getNamespaceURI(), "Client"));
-        else 
+        else
             factory.createSOAPFaultValue(fCode).setText(new QName(env.getNamespaceURI(), "Sender"));
-        
+
         final SOAPFaultReason fReason = factory.createSOAPFaultReason(fault);
         final String          reason =
                         "An error occurred while processing the received ebMS message. Check ebMS errors for details.";

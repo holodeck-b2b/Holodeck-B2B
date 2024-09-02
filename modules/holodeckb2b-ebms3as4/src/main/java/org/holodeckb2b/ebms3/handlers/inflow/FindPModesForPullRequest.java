@@ -25,9 +25,9 @@ import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.ebms3.pmode.PModeFinder;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for determining the P-Modes that may apply to the received Pull Request.

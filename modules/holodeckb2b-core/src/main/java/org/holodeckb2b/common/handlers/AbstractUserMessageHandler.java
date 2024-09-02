@@ -19,8 +19,8 @@ package org.holodeckb2b.common.handlers;
 import org.apache.axis2.context.MessageContext;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 
 /**
  * Extends {@link AbstractBaseHandler} to ensure the handler only runs when there is a User Message to process. It 

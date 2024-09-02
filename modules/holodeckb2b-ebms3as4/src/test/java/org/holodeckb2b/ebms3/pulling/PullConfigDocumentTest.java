@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.interfaces.general.Interval;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.junit.Test;
@@ -45,19 +45,19 @@ public class PullConfigDocumentTest {
      */
     @Test
     public void testLoad_DefaultOnly() {
-        final Path path = TestUtils.getPath(PullConfigDocumentTest.class.getSimpleName() + "/pullcfg1.xml");
+        final Path path = TestUtils.getTestResource("pullcfg1.xml");
 
         try {
             final PullConfigDocument pullCfg = PullConfigDocument.loadFromFile(path);
 
             assertNotNull(pullCfg);
             assertEquals(60, pullCfg.getRefreshInterval());
-            
+
             final List<IWorkerConfiguration> workers = pullCfg.getWorkers();
 
             assertEquals(1, workers.size());
             assertEquals(new Interval(1826646350, TimeUnit.SECONDS), workers.get(0).getInterval());
-            
+
         } catch (final Exception e) {
             e.printStackTrace();
             fail();
@@ -70,14 +70,14 @@ public class PullConfigDocumentTest {
     @SuppressWarnings ("unchecked")
     @Test
     public void testLoad_CompleteConfig() {
-        final Path path = TestUtils.getPath(PullConfigDocumentTest.class.getSimpleName() + "/pullcfg2.xml");
+        final Path path = TestUtils.getTestResource("pullcfg2.xml");
 
         try {
             final PullConfigDocument pullCfg = PullConfigDocument.loadFromFile(path);
 
             assertNotNull(pullCfg);
             assertEquals(600, pullCfg.getRefreshInterval());
-            
+
             final List<IWorkerConfiguration> workers = pullCfg.getWorkers();
 
             assertEquals(3, workers.size());
@@ -119,7 +119,7 @@ public class PullConfigDocumentTest {
      */
     @Test
     public void testNoPModesForPuller() {
-        final Path path = TestUtils.getPath(PullConfigDocumentTest.class.getSimpleName() + "/pullcfg3.xml");
+        final Path path = TestUtils.getTestResource("pullcfg3.xml");
 
         try {
             final PullConfigDocument pullCfg = PullConfigDocument.loadFromFile(path);
@@ -133,7 +133,7 @@ public class PullConfigDocumentTest {
 
     @Test
     public void testPModesForDefault() {
-        final Path path = TestUtils.getPath(PullConfigDocumentTest.class.getSimpleName() + "/pullcfg4.xml");
+        final Path path = TestUtils.getTestResource("pullcfg4.xml");
 
         try {
             final PullConfigDocument pullCfg = PullConfigDocument.loadFromFile(path);
@@ -144,14 +144,14 @@ public class PullConfigDocumentTest {
             fail();
         }
     }
-    
+
     @Test
     public void testInvalidRefresh() {
-        final Path path = TestUtils.getPath(PullConfigDocumentTest.class.getSimpleName() + "/pullcfg5.xml");
-        
+        final Path path = TestUtils.getTestResource(PullConfigDocumentTest.class.getSimpleName() + "/pullcfg5.xml");
+
     	try {
     		final PullConfigDocument pullCfg = PullConfigDocument.loadFromFile(path);
-    		
+
     		assertNull(pullCfg);
     	} catch (final Exception e) {
     		e.printStackTrace();

@@ -23,27 +23,18 @@ import java.util.List;
 import java.util.Set;
 
 import org.holodeckb2b.commons.util.Utils;
-import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
-import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
-import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
-import org.holodeckb2b.interfaces.pmode.ITradingPartnerConfiguration;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
-import org.holodeckb2b.interfaces.pmode.IUsernameTokenConfiguration;
 import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
 import org.holodeckb2b.interfaces.pmode.validation.PModeValidationError;
-import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
-import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 
 /**
- * Is the default implementation of {@link IPModeValidator} for ebMS3 / AS4 P-Modes. Since Holodeck B2B for most 
- * parameters accepts any  value as long as processing permits and also allows very generic P-Modes, this implementation 
- * only checks basic settings like the values for MEP, MEP binding, MPC for pulling and security settings. If needed 
+ * Is the default implementation of {@link IPModeValidator} for ebMS3 / AS4 P-Modes. Since Holodeck B2B for most
+ * parameters accepts any  value as long as processing permits and also allows very generic P-Modes, this implementation
+ * only checks basic settings like the values for MEP, MEP binding, MPC for pulling and security settings. If needed
  * because of specific requirements in a certain domain a custom validator could be added.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
@@ -70,24 +61,23 @@ public class BasicPModeValidator implements IPModeValidator {
     public String getName() {
     	return "HB2B Default ebMS3/AS4";
     }
-    
+
 	@Override
 	public boolean doesValidate(String pmodeType) {
 		return pmodeType.startsWith("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704");
 	}
-	
+
     @Override
     public Collection<PModeValidationError> validatePMode(final IPMode pmode) {
         Collection<PModeValidationError>    errors = new ArrayList<>();
 
-        errors.addAll(checkGeneralParameters(pmode));
-        errors.addAll(checkSecurityParameters(pmode));
+        errors.addAll(checkMEPParameters(pmode));
         errors.addAll(checkPullingMPCs(pmode));
 
         return errors;
     }
 
-    protected Collection<PModeValidationError> checkGeneralParameters(final IPMode pmode) {
+    protected Collection<PModeValidationError> checkMEPParameters(final IPMode pmode) {
         Collection<PModeValidationError>    errors = new ArrayList<>();
 
         // PMode.MEP must contain a valid MEP url
@@ -113,113 +103,6 @@ public class BasicPModeValidator implements IPModeValidator {
         return errors;
     }
 
-    protected Collection<PModeValidationError> checkSecurityParameters(IPMode pmode) {
-        Collection<PModeValidationError>    errors = new ArrayList<>();
-
-        // For checking the key references we need to know whether Holodeck acts as intiator or responder
-        boolean hb2bIsInitiator = PModeUtils.isHolodeckB2BInitiator(pmode);
-
-        // Any configured Username Token must contain both the username and password and referenced certificate should
-        // exist in the keystores and when it's a private key the password should be specified
-        //
-        // Initiator
-        ITradingPartnerConfiguration tpCfg = pmode.getInitiator();
-        ISecurityConfiguration secCfg = tpCfg != null ? tpCfg.getSecurityConfiguration() : null;
-        errors.addAll(checkUsernameTokenParameters(secCfg, "PMode.Initiator"));
-        errors.addAll(checkX509Parameters(secCfg, "PMode.Initiator", hb2bIsInitiator));
-
-        // Responder
-        tpCfg = pmode.getResponder();
-        secCfg = tpCfg != null ? tpCfg.getSecurityConfiguration() : null;
-        errors.addAll(checkUsernameTokenParameters(secCfg, "PMode.Responder"));
-        errors.addAll(checkX509Parameters(secCfg, "PMode.Responder", !hb2bIsInitiator));
-
-        // Pull specific configs
-        List<? extends ILeg> legs = pmode.getLegs();
-        if (!Utils.isNullOrEmpty(legs))
-            for (int i = 0; i < legs.size(); i++) {
-                Collection<IPullRequestFlow> pullCfgs = legs.get(i).getPullRequestFlows();
-                if (!Utils.isNullOrEmpty(pullCfgs)) {
-                    String parentParameterName = "PMode[" + i + "]";
-                    boolean hb2bSends = PModeUtils.doesHolodeckB2BTrigger(legs.get(i));
-                    for (IPullRequestFlow pullCfg : pullCfgs) {
-                        parentParameterName += ".Subchannel(" + pullCfg.getMPC() + ")";
-                        secCfg = pullCfg.getSecurityConfiguration();
-                        errors.addAll(checkUsernameTokenParameters(secCfg, parentParameterName));
-                        errors.addAll(checkX509Parameters(secCfg, parentParameterName, hb2bSends));
-                    }
-                }
-        }
-        return errors;
-    }
-
-    protected Collection<PModeValidationError> checkUsernameTokenParameters(final ISecurityConfiguration parentSecurityCfg
-                                                                         ,final String parentParameterName) {
-        Collection<PModeValidationError>    errors = new ArrayList<>();
-        if (parentSecurityCfg != null) {
-            IUsernameTokenConfiguration utConfig =
-                        parentSecurityCfg.getUsernameTokenConfiguration(SecurityHeaderTarget.DEFAULT);
-            if (utConfig != null) {
-                if (Utils.isNullOrEmpty(utConfig.getUsername()))
-                    errors.add(new PModeValidationError(parentParameterName + ".UsernameToken[default].username",
-                                                    "The configuration of a Username token must contain a username"));
-                if (Utils.isNullOrEmpty(utConfig.getPassword()))
-                    errors.add(new PModeValidationError(parentParameterName + ".UsernameToken[default].password",
-                                                    "The configuration of a Username token must contain a password"));
-            }
-            utConfig = parentSecurityCfg.getUsernameTokenConfiguration(SecurityHeaderTarget.EBMS);
-            if (utConfig != null) {
-                if (Utils.isNullOrEmpty(utConfig.getUsername()))
-                    errors.add(new PModeValidationError(parentParameterName + ".UsernameToken[ebms].username",
-                                                    "The configuration of a Username token must contain a username"));
-                if (Utils.isNullOrEmpty(utConfig.getPassword()))
-                    errors.add(new PModeValidationError(parentParameterName + ".UsernameToken[ebms].password",
-                                                    "The configuration of a Username token must contain a password"));
-            }
-        }
-        return errors;
-    }
-
-    protected Collection<PModeValidationError> checkX509Parameters(final ISecurityConfiguration parentSecurityCfg,
-                                                                 final String parentParameterName,
-                                                                 final boolean privateKey) {
-        Collection<PModeValidationError>    errors = new ArrayList<>();
-        if (parentSecurityCfg != null) {
-            ISigningConfiguration sigConfig = parentSecurityCfg.getSignatureConfiguration();
-            if (sigConfig != null && privateKey) {
-                if (Utils.isNullOrEmpty(sigConfig.getKeystoreAlias()))
-                    errors.add(new PModeValidationError(parentParameterName + ".Signature.KeyAlias",
-                                                                "A reference to the private key must be specified"));
-                else if (Utils.isNullOrEmpty(sigConfig.getCertificatePassword()))
-                    errors.add(new PModeValidationError(parentParameterName + ".Signature.KeyPassword",
-                                                                "A password for the private key must be specified"));
-                else if (!isPrivateKeyAvailable(sigConfig.getKeystoreAlias(),
-                                                              sigConfig.getCertificatePassword()))
-                    errors.add(new PModeValidationError(parentParameterName + ".Signature",
-                                                             "The private key specified for signing is not available"));
-            }
-
-            IEncryptionConfiguration encConfig = parentSecurityCfg.getEncryptionConfiguration();
-            if (encConfig != null) {
-                if (Utils.isNullOrEmpty(encConfig.getKeystoreAlias()))
-                    errors.add(new PModeValidationError(parentParameterName + ".Encryption.KeyAlias",
-                                                        "A reference to the " + (privateKey ? "private key" :
-                                                                                             "certificate")
-                                                        + " must be specified"));
-                else if (privateKey && Utils.isNullOrEmpty(encConfig.getCertificatePassword()))
-                    errors.add(new PModeValidationError(parentParameterName + ".Encryption.KeyPassword",
-                                                                "A password for the private key must be specified"));
-                else if (privateKey && !isPrivateKeyAvailable(encConfig.getKeystoreAlias(),
-                                                              encConfig.getCertificatePassword()))
-                    errors.add(new PModeValidationError(parentParameterName + ".Encryption",
-                                                          "The private key specified for decryption is not available"));
-                else if (!privateKey && !isCertificateAvailable(encConfig.getKeystoreAlias()))
-                    errors.add(new PModeValidationError(parentParameterName + ".Encryption",
-                                                          "The specified certificate for encryption is not available"));
-            }
-        }
-        return errors;
-    }
 
     protected Collection<PModeValidationError> checkPullingMPCs(IPMode pmode) {
         Collection<PModeValidationError>    errors = new ArrayList<>();
@@ -261,34 +144,5 @@ public class BasicPModeValidator implements IPModeValidator {
         return errors;
     }
 
-    /**
-     * Checks whether a key pair is available in the installed <i>Certificate Manager</i>.
-     *
-     * @param keystoreAlias         The alias the key pair should be registered under
-     * @param certificatePassword   The password to get access to the keypair
-     * @return  <code>true</code> if a keypair exists and is accessible for the given alias and password,<br>
-     *          <code>false</code> otherwise
-     */
-    protected boolean isPrivateKeyAvailable(String keystoreAlias, String certificatePassword) {
-        try {
-            return HolodeckB2BCore.getCertificateManager().getKeyPair(keystoreAlias, certificatePassword) != null;
-        } catch (SecurityProcessingException ex) {
-            return false;
-        }
-    }
 
-    /**
-     * Checks whether a partner certificate with the given alias is available the installed <i>Certificate Manager</i>.
-     *
-     * @param keystoreAlias         The alias the certificate should be registered under
-     * @return  <code>true</code> if a certificate for the given usage and with the given alias exists,<br>
-     *          <code>false</code> otherwise
-     */
-    protected boolean isCertificateAvailable(String keystoreAlias) {
-        try {
-            return HolodeckB2BCore.getCertificateManager().getPartnerCertificate(keystoreAlias) != null;
-        } catch (SecurityProcessingException ex) {
-            return false;
-        }
-    }
 }

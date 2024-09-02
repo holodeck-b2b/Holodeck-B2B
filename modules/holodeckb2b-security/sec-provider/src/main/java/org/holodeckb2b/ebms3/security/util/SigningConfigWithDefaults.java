@@ -72,6 +72,6 @@ public class SigningConfigWithDefaults implements ISigningConfiguration {
     @Override
     public String getHashFunction() {
         return !Utils.isNullOrEmpty(original.getHashFunction()) ? original.getHashFunction() :
-                                                                  DefaultSecurityAlgorithms.MESSAGE_DIGEST;
+                                                                  DefaultSecurityAlgorithms.DIGEST;
     }
 }

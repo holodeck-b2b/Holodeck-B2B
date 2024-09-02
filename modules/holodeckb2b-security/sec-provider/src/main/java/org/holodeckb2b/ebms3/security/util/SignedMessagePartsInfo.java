@@ -17,8 +17,9 @@
 package org.holodeckb2b.ebms3.security.util;
 
 import java.util.Map;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
+
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 /**
  * Container for holding the {@link ISignedPartMetadata} objects related to the ebMS header and payloads contained in a
@@ -30,9 +31,9 @@ import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 public class SignedMessagePartsInfo {
 
     private final ISignedPartMetadata ebMSHeaderMetadata;
-    private final Map<IPayload, ISignedPartMetadata> payloadMetadata;
+    private final Map<IPayloadEntity, ISignedPartMetadata> payloadMetadata;
 
-    SignedMessagePartsInfo(ISignedPartMetadata ebMSHeader, Map<IPayload, ISignedPartMetadata> payloads) {
+    SignedMessagePartsInfo(ISignedPartMetadata ebMSHeader, Map<IPayloadEntity, ISignedPartMetadata> payloads) {
         ebMSHeaderMetadata = ebMSHeader;
         payloadMetadata = payloads;
     }
@@ -51,7 +52,7 @@ public class SignedMessagePartsInfo {
      *
      * @return A mapping of {@link ISignedPartMetadata} objects to the payloads in the message
      */
-    public Map<IPayload, ISignedPartMetadata> getPayloadInfo() {
+    public Map<IPayloadEntity, ISignedPartMetadata> getPayloadInfo() {
         return payloadMetadata;
     }
 }

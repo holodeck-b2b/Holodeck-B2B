@@ -29,14 +29,14 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
  * Is an in memory only implementation of {@link IReceipt} to temporarily store the meta-data information on a Receipt
  * Signal message unit.
  * <p><b>NOTE:</b> The content of the Receipt is marked as <i>transient</i> and therefore is not serialized,
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
  */
 public class Receipt extends MessageUnit implements IReceipt, Serializable {
 	private static final long serialVersionUID = 2638231745969207571L;
-	
-	private transient ArrayList<OMElement>    content;
+
+	private ArrayList<OMElement>    content;
 
     /**
      * Default constructor creates a new empty <code>Receipt</code> object

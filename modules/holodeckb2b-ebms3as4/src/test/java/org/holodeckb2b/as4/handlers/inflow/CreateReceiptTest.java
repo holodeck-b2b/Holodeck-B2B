@@ -32,9 +32,9 @@ import org.apache.axis2.engine.Handler;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.ReceiptConfiguration;
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestEventProcessor;
-import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.receptionawareness.ReceiptCreatedEvent;
@@ -43,10 +43,10 @@ import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -191,7 +191,7 @@ public class CreateReceiptTest {
     @Test
     public void testUnsignedMessage() throws Exception {
         // Prepare P-Mode
-    	PMode pmode = TestUtils.create1WayReceivePushPMode();
+    	PMode pmode = HB2BTestUtils.create1WayReceivePMode();
         Leg leg = pmode.getLeg(Label.REQUEST);
         ReceiptConfiguration receiptConfig = new ReceiptConfiguration();
         receiptConfig.setPattern(ReplyPattern.RESPONSE);
@@ -233,7 +233,7 @@ public class CreateReceiptTest {
     @Test
     public void testSignedMessage() throws Exception {
     	// Prepare P-Mode
-    	PMode pmode = TestUtils.create1WayReceivePushPMode();
+    	PMode pmode = HB2BTestUtils.create1WayReceivePMode();
     	Leg leg = pmode.getLeg(Label.REQUEST);
     	ReceiptConfiguration receiptConfig = new ReceiptConfiguration();
     	receiptConfig.setPattern(ReplyPattern.RESPONSE);

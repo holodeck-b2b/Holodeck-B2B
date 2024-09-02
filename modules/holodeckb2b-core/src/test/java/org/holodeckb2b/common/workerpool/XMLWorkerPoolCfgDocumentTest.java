@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.interfaces.workerpool.IWorkerConfiguration;
 import org.junit.Test;
 
@@ -45,7 +45,7 @@ public class XMLWorkerPoolCfgDocumentTest {
 
     @Test
     public void testCompleteConfig() {
-        final Path path = TestUtils.getPath("workerpoolcfg/wp_complete.xml");
+        final Path path = TestUtils.getTestResource("workerpoolcfg/wp_complete.xml");
 
         XMLWorkerPoolCfgDocument result = null;
 		try {
@@ -76,7 +76,7 @@ public class XMLWorkerPoolCfgDocumentTest {
     
     @Test
     public void testEmptyFile() {
-    	final Path path = TestUtils.getPath("workerpoolcfg/wp_empty.xml");
+    	final Path path = TestUtils.getTestResource("workerpoolcfg/wp_empty.xml");
     	
         XMLWorkerPoolCfgDocument result = null;
 		try {
@@ -93,7 +93,7 @@ public class XMLWorkerPoolCfgDocumentTest {
 
     @Test
     public void testInvalidFile() {
-        final Path path = TestUtils.getPath("workerpoolcfg/wp_invalid.xml");
+        final Path path = TestUtils.getTestResource("workerpoolcfg/wp_invalid.xml");
 
         try {
 			XMLWorkerPoolCfgDocument.readFromFile(path);

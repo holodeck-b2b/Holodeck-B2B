@@ -28,9 +28,9 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the <i>IN_FLOW</i> handler part of the AS4 Compression Feature responsible for the decompression of the payload
@@ -50,7 +50,7 @@ public class DecompressionHandler extends AbstractUserMessageHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IUserMessageEntity um, final IMessageProcessingContext procCtx,
-    										  final Logger log) throws PersistenceException {
+    										  final Logger log) throws StorageException {
         // Decompression is only needed if the message contains payloads at all
         if (Utils.isNullOrEmpty(um.getPayloads()))
             return InvocationResponse.CONTINUE;

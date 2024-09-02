@@ -47,6 +47,8 @@ import org.apache.wss4j.dom.processor.Processor;
 import org.apache.wss4j.dom.str.STRParser;
 import org.apache.wss4j.dom.validate.Validator;
 import org.holodeckb2b.common.security.results.EncryptionProcessingResult;
+import org.holodeckb2b.common.security.results.EncryptionProcessingResult.KeyAgreementInfo;
+import org.holodeckb2b.common.security.results.EncryptionProcessingResult.KeyTransportInfo;
 import org.holodeckb2b.common.security.results.SignatureProcessingResult;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.axis2.Axis2Utils;
@@ -58,10 +60,10 @@ import org.holodeckb2b.ebms3.security.util.SecurityUtils;
 import org.holodeckb2b.ebms3.security.util.SignedMessagePartsInfo;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
 import org.holodeckb2b.interfaces.pmode.ISecurityConfiguration;
+import org.holodeckb2b.interfaces.security.IEncryptionProcessingResult.IKeyExchangeInfo;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderProcessor;
 import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
@@ -69,6 +71,8 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.SignatureTrustException;
 import org.holodeckb2b.interfaces.security.X509ReferenceType;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -245,6 +249,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         // Disable validator of the Usernametoken so no validation is done by the security provider
         wssConfig.setValidator(WSConstants.USERNAME_TOKEN, (Validator) null);
         wssConfig.setProcessor(WSConstants.SIGNATURE, SignatureProcessor.class);
+        wssConfig.setProcessor(WSConstants.ENCRYPTED_KEY, ExtEncryptedKeyProcessor.class);
         reqData.setWssConfig(wssConfig);
 
         // Disable BSP conformance check. Although AS4 requires conformance with BSP1.1 the check is disable to allow
@@ -420,20 +425,18 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                 final X509Certificate encCert =
                                           (X509Certificate) decResult.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
                 final X509ReferenceType refMethod = SecurityUtils.getKeyReferenceType(
-                             (STRParser.REFERENCE_TYPE) decResult.get(WSSecurityEngineResult.TAG_X509_REFERENCE_TYPE));
+                			(STRParser.REFERENCE_TYPE) decResult.get(WSSecurityEngineResult.TAG_X509_REFERENCE_TYPE));
                 final List<WSDataRef> refs = (List<WSDataRef>) decResult.get(WSSecurityEngineResult.TAG_DATA_REF_URIS);
                 final String ktAlgorithm =
                                      (String) decResult.get(WSSecurityEngineResult.TAG_ENCRYPTED_KEY_TRANSPORT_METHOD);
-                final Collection<IPayload>  payloads = new ArrayList<>();
+                final Collection<IPayloadEntity>  payloads = new ArrayList<>();
                 String encAlgorithm = null;
-                String ktDigest = DEFAULT_KEYTRANSPORT_DIGEST_ALGO;
-                String ktMGF = null;
                 // It could be possible that the header only contained a EncryptedKey element without any EncryptedData
                 // elements.
                 if (!Utils.isNullOrEmpty(refs)) {
                     encAlgorithm = refs.get(0).getAlgorithm();
                     msgUnits.stream().filter(m -> m instanceof IUserMessage)
-                    				 .map(userMsg -> ((IUserMessage) userMsg).getPayloads())
+                    				 .map(userMsg -> ((IUserMessageEntity) userMsg).getPayloads())
                                      .filter(umPayloads -> !Utils.isNullOrEmpty(umPayloads))
                                      .forEachOrdered(umPayloads ->
                                        umPayloads.forEach((p) ->
@@ -441,8 +444,9 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                                                  .filter(ref -> SecurityUtils.isPayloadEncrypted(p, ref))
                                                  .forEach(match -> payloads.add(p))));
                 }
-                // As WSS4J does not report the key transport detail, we need to collect them directly from the
+                // As WSS4J does not report the key exchange details, so we need to collect them directly from the
                 // EncryptedKey element
+                IKeyExchangeInfo kxInfo = null;
                 final Element encryptedKey = (Element) domEnvelope.getElementsByTagNameNS(
 										                        SecurityConstants.ENCRYPTED_KEY_ELEM.getNamespaceURI(),
 										                        SecurityConstants.ENCRYPTED_KEY_ELEM.getLocalPart())
@@ -451,20 +455,39 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
 									                        SecurityConstants.ENCRYPTION_METHOD_ELEM.getNamespaceURI(),
 									                        SecurityConstants.ENCRYPTION_METHOD_ELEM.getLocalPart())
 									                                                            .item(0);
-                for(int i = 0; i < encryptionMethod.getChildNodes().getLength() ; i++) {
-                    Node child = encryptionMethod.getChildNodes().item(i);
-                    if (child instanceof Element)
-	                    switch (child.getLocalName()) {
-	                        case "DigestMethod" :
-	                            ktDigest = ((Element) child).getAttribute("Algorithm");
-	                            break;
-	                        case "MGF" :
-	                            ktMGF = ((Element) child).getAttribute("Algorithm");
-	                    }
+                if (ktAlgorithm.contains("#rsa-oaep")) {
+                	String ktDigest = DEFAULT_KEYTRANSPORT_DIGEST_ALGO;
+	                String ktMGF = null;
+	                for(int i = 0; i < encryptionMethod.getChildNodes().getLength() ; i++) {
+	                    Node child = encryptionMethod.getChildNodes().item(i);
+	                    if (child instanceof Element)
+		                    switch (child.getLocalName()) {
+		                        case "DigestMethod" :
+		                            ktDigest = ((Element) child).getAttribute("Algorithm");
+		                            break;
+		                        case "MGF" :
+		                            ktMGF = ((Element) child).getAttribute("Algorithm");
+		                    }
+	                }
+	                kxInfo = new KeyTransportInfo(ktAlgorithm, ktDigest, ktMGF);
+                } else if (ktAlgorithm.contains("xmlenc#kw-aes")) {
+                    final Element kaMethod = (Element) encryptedKey.getElementsByTagNameNS(
+									                        SecurityConstants.AGREEMENT_METHOD_ELEM.getNamespaceURI(),
+									                        SecurityConstants.AGREEMENT_METHOD_ELEM.getLocalPart())
+                                                            .item(0);
+                    final Element kdfMethod = (Element) kaMethod.getElementsByTagNameNS(
+								                    		SecurityConstants.DERIVATION_METHOD_ELEM.getNamespaceURI(),
+								                    		SecurityConstants.DERIVATION_METHOD_ELEM.getLocalPart())
+								                    		.item(0);
+                    final Element kdfDigest = (Element) kaMethod.getElementsByTagNameNS(
+								                    		SecurityConstants.DSIG_NAMESPACE_URI, "DigestMethod")
+								                    		.item(0);
+                    kxInfo = new KeyAgreementInfo(kaMethod.getAttribute("Algorithm"), null,
+                    							  kdfMethod.getAttribute("Algorithm"),
+                    							  kdfDigest.getAttribute("Algorithm"), null);
                 }
                 // And create result object
-                results.add(new EncryptionProcessingResult(encCert, refMethod, ktAlgorithm, ktMGF, ktDigest,
-                                                           encAlgorithm, payloads));
+                results.add(new EncryptionProcessingResult(encCert, refMethod, kxInfo, encAlgorithm, payloads));
             }
         }
         return results;

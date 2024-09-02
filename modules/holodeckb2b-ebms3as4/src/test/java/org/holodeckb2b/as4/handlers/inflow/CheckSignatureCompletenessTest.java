@@ -16,10 +16,10 @@
  */
 package org.holodeckb2b.as4.handlers.inflow;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,60 +27,66 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.ReceiptConfiguration;
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.holodeckb2b.interfaces.security.SecurityHeaderTarget;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Created at 17:01 10.03.17
  *
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CheckSignatureCompletenessTest {
 
-	private static UserMessage	userMessage;
-    
-	private MessageContext mc;
-	private IMessageProcessingContext procCtx;
-	
-    @BeforeClass
+	private static PMode pmode;
+
+	private MessageProcessingContext 	procCtx;
+
+    @BeforeAll
     public static void setUpClass() throws Exception {
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
 
-        // Create the basic test data
-        PMode pmode = TestUtils.create1WayReceivePushPMode();        
+        pmode = HB2BTestUtils.create1WayReceivePMode();
         Leg leg = pmode.getLeg(Label.REQUEST);
         ReceiptConfiguration receiptConfig = new ReceiptConfiguration();
         receiptConfig.setPattern(ReplyPattern.RESPONSE);
         leg.setReceiptConfiguration(receiptConfig);
         HolodeckB2BCore.getPModeSet().add(pmode);
+    }
 
-        userMessage = new UserMessage();
+    @BeforeEach
+    public void prepareContext() throws StorageException {
+        MessageContext mc = new MessageContext();
+        mc.setFLOW(MessageContext.IN_FLOW);
+        mc.setServerSide(true);
+
+        UserMessage userMessage = new UserMessage();
+        userMessage.setMessageId(MessageIdUtils.createMessageId());
         userMessage.setPModeId(pmode.getId());
 
         Payload pl1 = new Payload();
@@ -94,26 +100,14 @@ public class CheckSignatureCompletenessTest {
         Payload pl3 = new Payload();
         pl1.setContainment(IPayload.Containment.BODY);
         userMessage.addPayload(pl3);
+
+		procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(userMessage));
     }
 
-    @Before
-    public void prepareContext() throws PersistenceException {
-        mc = new MessageContext();
-        mc.setFLOW(MessageContext.IN_FLOW);
-        mc.setServerSide(true);
-        
-        procCtx = MessageProcessingContext.getFromMessageContext(mc);
-        userMessage.setMessageId(MessageIdUtils.createMessageId());
-        procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage));
-    }
-    
     @Test
     public void testUnSigned() throws Exception {
-        try {
-            new CheckSignatureCompleteness().invoke(mc);
-        } catch (AxisFault e) {
-            fail("Unexpected exception: " + e.getClass().getSimpleName() + "/" + e.getMessage());
-        }
+    	assertDoesNotThrow(() -> new CheckSignatureCompleteness().invoke(procCtx.getParentContext()));
 
         assertTrue(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
     }
@@ -122,33 +116,29 @@ public class CheckSignatureCompletenessTest {
     public void testSignedCompletely() throws Exception {
         // Create complete set of digests
         ISignedPartMetadata headerData = mock(ISignedPartMetadata.class);
-    	
-    	Map<IPayload, ISignedPartMetadata>  digestData = new HashMap<>();
-        userMessage.getPayloads().forEach((p) -> digestData.put(p, null));
+
+    	Map<IPayloadEntity, ISignedPartMetadata>  digestData = new HashMap<>();
+        procCtx.getReceivedUserMessage().getPayloads().forEach((p) -> digestData.put(p, null));
 
         ISignatureProcessingResult  signatureResult = mock(ISignatureProcessingResult.class);
         when(signatureResult.getTargetedRole()).thenReturn(SecurityHeaderTarget.DEFAULT);
         when(signatureResult.getHeaderDigest()).thenReturn(headerData);
         when(signatureResult.getPayloadDigests()).thenReturn(digestData);
-        
+
         procCtx.addSecurityProcessingResult(signatureResult);
 
-        try {
-        	new CheckSignatureCompleteness().invoke(mc);
-        } catch (AxisFault e) {
-            fail("Unexpected exception: " + e.getClass().getSimpleName() + "/" + e.getMessage());
-        }
-        
+        assertDoesNotThrow(() -> new CheckSignatureCompleteness().invoke(procCtx.getParentContext()));
+
         assertTrue(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
     }
 
     @Test
     public void testUnsignedebMSHeader() throws Exception {
+    	final IUserMessageEntity userMessage = procCtx.getReceivedUserMessage();
+
     	// Create complete set of digests
-    	
-    	Map<IPayload, ISignedPartMetadata>  digestData = new HashMap<>();
-    	
-    	Iterator<IPayload> iterator = userMessage.getPayloads().iterator();
+    	Map<IPayloadEntity, ISignedPartMetadata>  digestData = new HashMap<>();
+
     	userMessage.getPayloads().forEach((p) -> digestData.put(p, null));
 
     	ISignatureProcessingResult  signatureResult = mock(ISignatureProcessingResult.class);
@@ -156,44 +146,37 @@ public class CheckSignatureCompletenessTest {
     	when(signatureResult.getHeaderDigest()).thenReturn(null);
     	when(signatureResult.getPayloadDigests()).thenReturn(digestData);
     	procCtx.addSecurityProcessingResult(signatureResult);
-    	
-    	try {
-    		new CheckSignatureCompleteness().invoke(mc);
-    	} catch (AxisFault e) {
-    		fail("Unexpected exception: " + e.getClass().getSimpleName() + "/" + e.getMessage());
-    	}
-    	
+
+    	assertDoesNotThrow(() -> new CheckSignatureCompleteness().invoke(procCtx.getParentContext()));
+
     	assertFalse(Utils.isNullOrEmpty(procCtx.getGeneratedErrors().get(userMessage.getMessageId())));
-    	assertEquals("EBMS:0103", 
+    	assertEquals("EBMS:0103",
     			procCtx.getGeneratedErrors().get(userMessage.getMessageId()).iterator().next().getErrorCode());
     }
-    
+
     @Test
     public void testUnsignedPayload() throws Exception {
-        // Create complete set of digests
-    	ISignedPartMetadata headerData = mock(ISignedPartMetadata.class);
-    	
-    	Map<IPayload, ISignedPartMetadata>  digestData = new HashMap<>();
+    	final IUserMessageEntity userMessage = procCtx.getReceivedUserMessage();
 
-        Iterator<IPayload> iterator = userMessage.getPayloads().iterator();
+    	// Create complete set of digests
+    	ISignedPartMetadata headerData = mock(ISignedPartMetadata.class);
+
+    	Map<IPayloadEntity, ISignedPartMetadata>  digestData = new HashMap<>();
+        Iterator<? extends IPayloadEntity> iterator = userMessage.getPayloads().iterator();
         for (int i = 0; i < userMessage.getPayloads().size() - 1; i++) {
             digestData.put(iterator.next(), null);
         }
-        
+
         ISignatureProcessingResult  signatureResult = mock(ISignatureProcessingResult.class);
         when(signatureResult.getTargetedRole()).thenReturn(SecurityHeaderTarget.DEFAULT);
         when(signatureResult.getHeaderDigest()).thenReturn(headerData);
         when(signatureResult.getPayloadDigests()).thenReturn(digestData);
         procCtx.addSecurityProcessingResult(signatureResult);
 
-        try {
-        	new CheckSignatureCompleteness().invoke(mc);
-        } catch (AxisFault e) {
-            fail("Unexpected exception: " + e.getClass().getSimpleName() + "/" + e.getMessage());
-        }
-        
+        assertDoesNotThrow(() -> new CheckSignatureCompleteness().invoke(procCtx.getParentContext()));
+
         assertFalse(Utils.isNullOrEmpty(procCtx.getGeneratedErrors().get(userMessage.getMessageId())));
-        assertEquals("EBMS:0103", 
+        assertEquals("EBMS:0103",
         				procCtx.getGeneratedErrors().get(userMessage.getMessageId()).iterator().next().getErrorCode());
     }
 }

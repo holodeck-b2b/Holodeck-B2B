@@ -32,7 +32,7 @@ import org.holodeckb2b.common.pmode.InMemoryPModeSet;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.core.config.InternalConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -54,7 +54,7 @@ public class PModeManagerTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		config = new InternalConfiguration(TestUtils.getPath("."));
+		config = new InternalConfiguration(TestUtils.getTestResource("."));
 		HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
 	}
 

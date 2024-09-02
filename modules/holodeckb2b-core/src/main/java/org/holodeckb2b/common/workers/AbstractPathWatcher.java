@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
+import org.holodeckb2b.core.workerpool.WorkerPool;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 

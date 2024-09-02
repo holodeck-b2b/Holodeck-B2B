@@ -24,13 +24,13 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.PullRequestElement;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is an in flow handler that checks if this message contains a Pull Request, i.e. contains a <eb:PullRequest> element
  * in the ebMS header. When such a pull request message unit is found the information is read from the message and
- * stored both in the database and message processing context. The processing state of the pull request is set to 
+ * stored both in the database and message processing context. The processing state of the pull request is set to
  * {@link ProcessingState#RECEIVED}.
  * <p><b>NOTE:</b> The XML schema definition from the ebMS specification allows multiple <code>eb:SignalMessage</code>
  * elements in the ebMS header, so there could be more than one pull request in the message. The ebMS Core Specification
@@ -42,8 +42,8 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class ReadPullRequest extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
-    																					throws PersistenceException {
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log)
+    																					throws StorageException {
         // First get the ebMS header block, that is the eb:Messaging element
         final SOAPHeaderBlock messaging = Messaging.getElement(procCtx.getParentContext().getEnvelope());
 
@@ -57,10 +57,10 @@ public class ReadPullRequest extends AbstractBaseHandler {
                 org.holodeckb2b.common.messagemodel.PullRequest pullRequest = PullRequestElement.readElement(prElement);
                 // And store in database and message context for further processing
                 log.trace("Store PullRequest in database and message context");
-                procCtx.setPullRequest(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(pullRequest));
+                procCtx.setPullRequest(HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(pullRequest));
                 log.info("PullRequest [msgId=" + pullRequest.getMessageId() + "] for MPC " + pullRequest.getMPC()
                         + " received.");
-            } 
+            }
         }
 
         return InvocationResponse.CONTINUE;

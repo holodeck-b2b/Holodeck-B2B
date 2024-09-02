@@ -1,0 +1,106 @@
+<!--
+
+    Copyright (C) 2024 The Holodeck B2B Team, Sander Fieten
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <parent>
+        <groupId>org.holodeckb2b</groupId>
+        <artifactId>holodeckb2b</artifactId>
+        <version>7.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>holodeckb2b-metadatastorage</artifactId>
+    <packaging>jar</packaging>
+    <name>Holodeck B2B - Default Metadata Storage Provider</name>
+    <inceptionYear>2024</inceptionYear>
+    <description>
+        This module contains the default Holodeck B2B Metadata Storage Provider. It uses the Hibernate implementation
+        of the JPA framework to manage the persistency of the message meta-data. The actual storage is done in an
+        internal Derby database.
+    </description>
+
+    <properties>
+        <hibernate.version>5.6.15.Final</hibernate.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-core</artifactId>
+        </dependency>        
+
+        <!--===============================================================
+            Hibernate JPA framework is used to manage configuration and
+            message meta data in database. Actual storage is in Derby DB
+        =============================================================== -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.activation</groupId>
+					<artifactId>javax.activation-api</artifactId>
+				</exclusion>
+			</exclusions>
+        </dependency>
+		<!-- JAXB API is needed for Java 9 and up-->
+		<dependency>
+		    <groupId>javax.xml.bind</groupId>
+		    <artifactId>jaxb-api</artifactId>
+		</dependency>        
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>10.12.1.1</version>
+        </dependency>
+
+        <!-- Dependencies for testing -->
+	    <dependency>
+	        <groupId>org.junit.jupiter</groupId>
+	        <artifactId>junit-jupiter</artifactId>
+	        <scope>test</scope>
+	    </dependency>
+	    <dependency>
+	        <groupId>org.junit.vintage</groupId>
+	        <artifactId>junit-vintage-engine</artifactId>
+	        <scope>test</scope>
+	    </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Dependency from common test util classes -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-core</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency> 
+       <dependency>
+			<groupId>org.holodeckb2b.commons</groupId>
+			<artifactId>generic-utils</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>            
+        </dependency>
+    </dependencies>
+</project>

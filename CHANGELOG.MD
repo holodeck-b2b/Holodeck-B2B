@@ -2,6 +2,67 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 7.0.0
+##### 2024-09-02
+### Added
+* Support the use _Elliptic Curve Diffie-Hellman Key Agreement_ as method to exchange the symmetric encryption key. 
+  Currently support is limited to ECDH-ES and ConcatKDF algorithms [#147](https://github.com/holodeck-b2b/Holodeck-B2B/issues/147).
+* The default _Certificate Manager_ now has the option to retrieve the key store passwords from the runtime context, 
+  e.g. a Java system property or an environment variable.
+* Debug logging in ebMS3/AS4 P-Mode finder (Thanks @martan81)
+* Support for configuration of event handlers on the P-Mode level.
+* New architecture for storing the meta-data and content payload which allows to use custom implementations for storage
+  of both the message unit meta-data as well as the payload content. The new _Metadata Storage_ and _Payload Storage 
+  Providers_ are specified in the packages `org.holodeckb2b.interfaces.storage.providers`
+* The entity classes used by the Core for storing the message meta-data have been extended with a _CoreId_ so each 
+  message unit has a unique internal identifier making unambiguous relations between message units possible as there may
+  exist different incoming message units with the same MessageId.
+* New `org.holodeckb2b.interfaces.persistency.AlreadyChangedException` to indicate that a requested update of the 
+  message meta-data could not be executed because the database already contains newer data
+* New `org.holodeckb2b.interfaces.submit.DuplicateMessageIdException` to indicate that a duplicate MessageId is used
+  in a submitted message unit. 
+* New generic `org.holodeckb2b.interfaces.events.IMessageProcessingFailure` event as super interface of all events that 
+  indicate that there was a problem in the processing of a message
+* New `org.holodeckb2b.interfaces.events.IMessagePurgeFailure` event to indicate that the purge of a message unit failed
+* The `org.holodeckb2b.common.events.impl.ISecurityCreationFailure` event is now raised when a generic error occurred during
+  creation of the security header
+* Option in the default GUI to copy the _MessageId_, _RefToMessageId_ or _PMode.id_ of a message unit on the overview
+  screen to the system clipboard.
+
+### Changed
+* Interfaces in `org.holodeckb2b.interfaces.pmode` and implementation `org.holodeckbb2b.common.pmode` to support
+  configuration of _Key Agreement_ for exchange of the symmetric encryption key.
+* `org.holodeckb2b.interfaces.security.IEncryptionProcessingResult` and 
+  `org.holodeckb2b.common.security.results.EncryptionProcessingResult` to support inclusion of _Key Agreement_ meta-data
+* Replaced method `getFailures()` in `IMessagePurgeFailure` with `getFailureReason()` and included exceptions related to 
+  problems in removing payloads of a User Message as _surpressed_ exceptions of the exception retrieved with the new
+  method.
+* Added method `getFailureReason()` to `IHeaderValidationFailure` and `ICustomValidationFailure` to provide information about
+  the error that occurred during the validation of the (header of) message unit
+* Added method `getFailureReason()` to `IReceivedMessageProcessingFailure` and `ISendMessageProcessingFailure` to provide 
+  information about the error that occurred during the processing of the message unit
+* The _Persistency Provider_ has been refactored to the _Metadata Storage Provider_ and the methods of the old 
+  `IUpdateManager` interface for updating specific meta-data attributes have been replaced by more generic create, 
+  update and delete methods that operate on the entity classes. New update methods have been added to the entity classes
+  which indicate which meta-data the Holodeck B2B Core can change during the message processing.
+* Bouncy Castle is now used as JCE and JSSE provider. As a result only PKCS12 key stores are supported for TLS client 
+  certificates.
+* Minimal Java version required to run Holodeck B2B is now 11
+* Updated version of Axis2 and Axiom dependencies to 1.8.2 resp. 1.4.0 [#135](https://github.com/holodeck-b2b/Holodeck-B2B/issues/135)
+* Updated version of WSSJ4 and Santuario to 3.0.3 resp. 3.0.5-SNAPSHOT [#135](https://github.com/holodeck-b2b/Holodeck-B2B/issues/135)
+* Changed JAXB implementation to Glassfish
+
+### Fixed
+* Handle explicit reference from PartInfo-href to the SOAP body [#148](https://github.com/holodeck-b2b/Holodeck-B2B/issues/148) (Thanks @gtalman)
+* Purging of message units stopped in case of exception other than `PersistenceException`
+* Handlers GenericProviderDispatcher and MustUnderstandValidationDispatcher not available [#137](https://github.com/holodeck-b2b/Holodeck-B2B/issues/137)
+* NPE when `EncryptedKey` WSS header contains whitespace
+
+### Removed
+* Support for running Holodeck B2B on Java 1.8
+* `org.holodeckb2b.interfaces.messagemodel.IMessageUnit.getCurrentProcessingState()`. The current state is the last item
+  from the list retrieved using `org.holodeckb2b.interfaces.messagemodel.IMessageUnit.getProcessingStates()`
+
 ## 6.1.1
 ##### 2024-06-28
 ### Changed

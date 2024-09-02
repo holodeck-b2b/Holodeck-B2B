@@ -15,8 +15,8 @@ import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.EventHandlerConfig;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
@@ -63,7 +63,7 @@ public class SyncEventProcessorTest {
 		
 		HolodeckB2BCoreInterface.registerEventHandler(globalConfig);
 		
-		PMode pmode = TestUtils.create1WaySendPushPMode();
+		PMode pmode = HB2BTestUtils.create1WaySendPushPMode();
 		Leg leg = pmode.getLeg(Label.REQUEST);
 		EventHandlerConfig config = new EventHandlerConfig();
 		List<Class<? extends IMessageProcessingEvent>> list = new ArrayList<>();
@@ -109,7 +109,7 @@ public class SyncEventProcessorTest {
 				
 		HolodeckB2BCoreInterface.registerEventHandler(globalConfig);
 		
-		PMode pmode = TestUtils.create1WaySendPushPMode();
+		PMode pmode = HB2BTestUtils.create1WaySendPushPMode();
 		Leg leg = pmode.getLeg(Label.REQUEST);
 		HolodeckB2BCore.getPModeSet().add(pmode);
 		
@@ -143,7 +143,7 @@ public class SyncEventProcessorTest {
 				
 		HolodeckB2BCoreInterface.registerEventHandler(globalConfig);
 		
-		PMode pmode = TestUtils.create1WaySendPushPMode();
+		PMode pmode = HB2BTestUtils.create1WaySendPushPMode();
 		Leg leg = pmode.getLeg(Label.REQUEST);
 		HolodeckB2BCore.getPModeSet().add(pmode);
 		

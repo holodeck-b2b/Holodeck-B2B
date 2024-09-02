@@ -19,8 +19,8 @@ package org.holodeckb2b.interfaces.security;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 
-import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 /**
  * Represents the results of processing of the signature part of the message security. It provides information on the
@@ -33,9 +33,9 @@ import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 public interface ISignatureProcessingResult extends ISecurityProcessingResult {
 
     /**
-     * Gets the X509 certificate used to create the signature of the message. For WS-Security this corresponds to the 
-     * certificate referenced in the <code>ds:Signature/ds:KeyInfo</code> element. Note that the certificate itself does 
-     * not need to be included in the message to be returned here, it can be retrieved from the private keys managed by 
+     * Gets the X509 certificate used to create the signature of the message. For WS-Security this corresponds to the
+     * certificate referenced in the <code>ds:Signature/ds:KeyInfo</code> element. Note that the certificate itself does
+     * not need to be included in the message to be returned here, it can be retrieved from the private keys managed by
      * the security provider based on the reference included in the message.
      *
      * @return The certificate used for signing.
@@ -43,18 +43,18 @@ public interface ISignatureProcessingResult extends ISecurityProcessingResult {
     X509Certificate getSigningCertificate();
 
     /**
-     * Gets the results of the trust validation check that was executed for the certificate used to sign the message. 
-     * <p>NOTE 1: As the trust in certificates is only checked for received messages this method will only return a 
+     * Gets the results of the trust validation check that was executed for the certificate used to sign the message.
+     * <p>NOTE 1: As the trust in certificates is only checked for received messages this method will only return a
      * result when the signature was verified and not when created.
-     * <p>NOTE 2: When the processing of the signature fails due to issues with the validation of trust in the 
+     * <p>NOTE 2: When the processing of the signature fails due to issues with the validation of trust in the
      * signature's certificate(s) this should be notified by indicating that processing was not successful and return a
-     * {@link SignatureTrustException} as result of {@link #getFailureReason()}.  
-     *   
+     * {@link SignatureTrustException} as result of {@link #getFailureReason()}.
+     *
      * @return	Information on the result of the trust validation of the certificate used to sign.
      * @since 5.0.0
      */
     IValidationResult getTrustValidation();
-    
+
     /**
      * Gets the type of security token reference used to point to the certificate that includes the public key that
      * corresponds to the private key used to sign the message.
@@ -64,8 +64,8 @@ public interface ISignatureProcessingResult extends ISecurityProcessingResult {
     X509ReferenceType getCertificateReferenceType();
 
     /**
-     * Gets algorithm that was used to create the signature of the message. For WS-Security the returned value is the 
-     * algorithm identifier as defined in the <i>XML Signature Syntax and Processing</i> specification and corresponds 
+     * Gets algorithm that was used to create the signature of the message. For WS-Security the returned value is the
+     * algorithm identifier as defined in the <i>XML Signature Syntax and Processing</i> specification and corresponds
      * to the <code>ds:Signature/ds:SignatureMethod</code> element.
      *
      * @return  The signature algorithm
@@ -73,7 +73,7 @@ public interface ISignatureProcessingResult extends ISecurityProcessingResult {
     String getSignatureAlgorithm();
 
     /**
-     * Gets the information on the digest calculated for the ebMS SOAP header. In WS-Security this corresponds to the 
+     * Gets the information on the digest calculated for the ebMS SOAP header. In WS-Security this corresponds to the
      * information in the <code>ds:Reference</code> element referencing the ebMS header.
      * <p>NOTE: As the ebMS header is signed as a whole this digest covers the ebMS meta-data of all message units
      * included in the messages.
@@ -92,5 +92,5 @@ public interface ISignatureProcessingResult extends ISecurityProcessingResult {
      *
      * @return The information on the digests of the payloads
      */
-    Map<IPayload, ISignedPartMetadata> getPayloadDigests();
+    Map<IPayloadEntity, ISignedPartMetadata> getPayloadDigests();
 }

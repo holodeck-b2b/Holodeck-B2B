@@ -26,6 +26,7 @@ import org.holodeckb2b.interfaces.general.ITradingPartner;
 import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 /**
  * Is an in memory only implementation of {@link IUserMessage} to temporarily store the meta-data information on a User
@@ -141,11 +142,11 @@ public class UserMessage extends MessageUnit implements IUserMessage, Serializab
      *
      * @param payloads  The meta-data on the payloads
      */
-    public void setPayloads(final Collection<IPayload> payloads) {
+    public void setPayloads(final Collection<? extends IPayload> payloads) {
         if (!Utils.isNullOrEmpty(payloads)) {
             this.payloads = new ArrayList<>();
             for (IPayload p : payloads)
-                this.payloads.add(new Payload(p));
+                this.payloads.add(p instanceof IPayloadEntity ? p : new Payload(p));
         } else
             this.payloads = null;
     }
@@ -159,7 +160,7 @@ public class UserMessage extends MessageUnit implements IUserMessage, Serializab
         if (p != null) {
             if (payloads == null)
                 payloads = new ArrayList<>(1);
-            payloads.add(new Payload(p));
+            payloads.add(p instanceof IPayloadEntity ? p : new Payload(p));
         }
     }
 }

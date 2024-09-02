@@ -124,5 +124,14 @@
             </excludes>
             <scope>runtime</scope>
         </dependencySet>
+        <!-- The system scope dependencySet allows to include local JARs in the distribution, for example
+          patched versions of dependencies not yet available through the central Maven repository -->
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <excludes>
+                <exclude>*:pom:*</exclude>
+            </excludes>
+            <scope>system</scope>
+        </dependencySet>
     </dependencySets>
 </assembly>

@@ -16,9 +16,6 @@
  */
 package org.holodeckb2b.ebms3.security;
 
-import java.security.Security;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderCreator;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderProcessor;
@@ -37,6 +34,7 @@ import org.holodeckb2b.security.trust.DefaultCertManager;
  * 			manager has been split off.
  */
 public class DefaultProvider implements ISecurityProvider {
+
     /**
      * {@inheritDoc}
      */
@@ -47,7 +45,6 @@ public class DefaultProvider implements ISecurityProvider {
 
     @Override
     public void init() throws SecurityProcessingException {
-    	Security.addProvider(new BouncyCastleProvider());
     }
 
     @Override

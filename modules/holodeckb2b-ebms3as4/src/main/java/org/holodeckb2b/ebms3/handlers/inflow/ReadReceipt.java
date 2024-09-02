@@ -28,13 +28,13 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.ReceiptElement;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the handler that checks if this message contains one or more Receipt signals, i.e. contains one or more
  * <code>eb:Receipt</code> elements in the ebMS header. When such signal message units are found the information is read
- * from the message into a array of {@link ReceiptElement} objects and stored in both database and message processing 
+ * from the message into a array of {@link ReceiptElement} objects and stored in both database and message processing
  * context. The processing state of the new receipts will be set to {@link ProcessingState#RECEIVED}.
  * <p><b>NOTE: </b>This handler will process all receipt signals that are in the message although the ebMS V3 Core
  * Specification does not allow more than one.
@@ -44,8 +44,8 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public class ReadReceipt extends AbstractBaseHandler {
 
     @Override
-    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
-    																					throws PersistenceException {
+    protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log)
+    																					throws StorageException {
         // First get the ebMS header block, that is the eb:Messaging element
         final SOAPHeaderBlock messaging = Messaging.getElement(procCtx.getParentContext().getEnvelope());
 
@@ -63,11 +63,11 @@ public class ReadReceipt extends AbstractBaseHandler {
 
                     // And store in database and message context for further processing
                     log.trace("Store Receipt in database");
-                    procCtx.addReceivedReceipt(HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(receipt));
+                    procCtx.addReceivedReceipt(HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(receipt));
                     log.info("Receipt [msgId=" + receipt.getMessageId() + "] received for message with id:"
                              + receipt.getRefToMessageId());
                 }
-            } 
+            }
         }
 
         return InvocationResponse.CONTINUE;

@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.holodeckb2b</groupId>
 		<artifactId>holodeckb2b</artifactId>
-		<version>6.1.1</version>
+		<version>7.0.0</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -24,10 +24,24 @@
 	<name>Holodeck B2B - Core</name>
 	<description>This module contains the Holodeck B2B Core processing engine that applies to all protocols</description>
 
+	<properties>
+		<bc-version>1.78.1</bc-version>
+	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>holodeckb2b-interfaces</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+  			<artifactId>bcprov-jdk18on</artifactId>
+  			<version>${bc-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+  			<artifactId>bctls-jdk18on</artifactId>
+  			<version>${bc-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.holodeckb2b.commons</groupId>
@@ -67,41 +81,33 @@
 		</dependency>
 
 		<!-- Dependencies specific for testing -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
+	    <dependency>
+	        <groupId>org.junit.jupiter</groupId>
+	        <artifactId>junit-jupiter</artifactId>
+	        <scope>test</scope>
+	    </dependency>
+	    <dependency>
+	        <groupId>org.junit.vintage</groupId>
+	        <artifactId>junit-vintage-engine</artifactId>
+	        <scope>test</scope>
+	    </dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>2.28.2</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency>		
         <dependency>
 			<groupId>org.holodeckb2b.commons</groupId>
 			<artifactId>generic-utils</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>            
         </dependency>
-		
-		<!-- This specific log4j lib is used by mockito. @todo: We should check 
-			if we can skip this dependency -->
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 	<build>

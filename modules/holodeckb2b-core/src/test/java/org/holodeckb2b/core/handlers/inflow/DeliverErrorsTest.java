@@ -16,7 +16,10 @@
  */
 package org.holodeckb2b.core.handlers.inflow;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.UUID;
 
@@ -27,11 +30,11 @@ import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestDeliveryManager;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.StorageManager;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -69,7 +72,7 @@ public class DeliverErrorsTest {
 	        errorMessage.setMessageId(UUID.randomUUID().toString());
 	        
 	        StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-	        IErrorMessageEntity errorMessageEntity = storageManager.storeIncomingMessageUnit(errorMessage);        
+	        IErrorMessageEntity errorMessageEntity = storageManager.storeReceivedMessageUnit(errorMessage);        
 	        
 	        storageManager.setProcessingState(errorMessageEntity, ProcessingState.READY_FOR_DELIVERY);
 	        
@@ -94,7 +97,7 @@ public class DeliverErrorsTest {
 		errorMessage.setMessageId(UUID.randomUUID().toString());
 		
 		StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-		IErrorMessageEntity errorMessageEntity = storageManager.storeIncomingMessageUnit(errorMessage);        
+		IErrorMessageEntity errorMessageEntity = storageManager.storeReceivedMessageUnit(errorMessage);        
 		
 		storageManager.setProcessingState(errorMessageEntity, ProcessingState.PROCESSING);
 		

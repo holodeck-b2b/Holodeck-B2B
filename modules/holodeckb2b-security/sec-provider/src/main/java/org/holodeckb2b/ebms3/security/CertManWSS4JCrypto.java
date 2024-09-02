@@ -36,6 +36,7 @@ import org.apache.wss4j.common.crypto.CryptoBase;
 import org.apache.wss4j.common.crypto.CryptoType;
 import org.apache.wss4j.common.ext.WSPasswordCallback;
 import org.apache.wss4j.common.ext.WSSecurityException;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.ebms3.security.callbackhandlers.PasswordCallbackHandler;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
@@ -202,9 +203,9 @@ public class CertManWSS4JCrypto extends CryptoBase {
 	}
 
 	@Override
-	public PrivateKey getPrivateKey(String identifier, String password) throws WSSecurityException {
+	public PrivateKey getPrivateKey(String alias, String password) throws WSSecurityException {
 		try {
-			return certManager.getKeyPair(identifier, password).getPrivateKey();
+			return Utils.isNullOrEmpty(alias) ? null : certManager.getKeyPair(alias, password).getPrivateKey();
 		} catch (SecurityProcessingException e) {
 			throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, e);
 		}

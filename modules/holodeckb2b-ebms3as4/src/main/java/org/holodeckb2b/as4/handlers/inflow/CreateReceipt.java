@@ -37,12 +37,13 @@ import org.holodeckb2b.ebms3.packaging.Messaging;
 import org.holodeckb2b.ebms3.packaging.UserMessageElement;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IReceiptConfiguration;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
+import org.holodeckb2b.interfaces.storage.IReceiptEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for creating a <i>Receipt</i> signal for the received user message.
@@ -149,13 +150,15 @@ public class CreateReceipt extends AbstractUserMessageHandler {
                 HolodeckB2BCore.getEventProcessor()
                 			   .raiseEvent(new ReceiptCreatedEvent(um, receipt,
 	                                           um.getCurrentProcessingState().getState() == ProcessingState.DUPLICATE));
-            } catch (final PersistenceException ex) {
+            } catch (final StorageException ex) {
                 // Storing the new Receipt signal failed! This is a severe problem, but it does not
                 // need to stop processing because the user message is already delivered. The receipt
                 // can be regenerated when a retry is received.
                 log.error("Saving the Receipt signal in repsonse to user message [msgId="
                             + um.getMessageId() + "] failed! Details: " + ex.getMessage());
-            }
+            } catch (DuplicateMessageIdException e) {
+				// Will never occur as a unique MessageId will be assigned 
+			}
         } else {
             // The user message is not delivered to the business application, so do not create a receipt
             log.debug("User message is not delivered successfully, so no Receipt possible");

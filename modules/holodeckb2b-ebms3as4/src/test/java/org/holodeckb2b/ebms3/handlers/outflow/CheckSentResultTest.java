@@ -25,16 +25,16 @@ import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.ReceiptConfiguration;
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.StorageManager;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -66,7 +66,7 @@ public class CheckSentResultTest {
     	mc.setFLOW(MessageContext.OUT_FLOW);
     	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         
-    	PMode pmode = TestUtils.create1WaySendPushPMode();        
+    	PMode pmode = HB2BTestUtils.create1WaySendPushPMode();        
         HolodeckB2BCore.getPModeSet().add(pmode);
     	
     	StorageManager storageManager = HolodeckB2BCore.getStorageManager();
@@ -94,7 +94,7 @@ public class CheckSentResultTest {
     	mc.setFLOW(MessageContext.OUT_FLOW);
     	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         
-    	PMode pmode = TestUtils.create1WaySendPushPMode();        
+    	PMode pmode = HB2BTestUtils.create1WaySendPushPMode();        
         Leg leg = pmode.getLeg(Label.REQUEST);
         HolodeckB2BCore.getPModeSet().add(pmode);
     	
@@ -120,7 +120,7 @@ public class CheckSentResultTest {
     	mc.setFLOW(MessageContext.OUT_FLOW);
     	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	
-    	PMode pmode = TestUtils.create1WaySendPushPMode();        
+    	PMode pmode = HB2BTestUtils.create1WaySendPushPMode();        
         Leg leg = pmode.getLeg(Label.REQUEST);
     	leg.setReceiptConfiguration(new ReceiptConfiguration());
     	HolodeckB2BCore.getPModeSet().add(pmode);

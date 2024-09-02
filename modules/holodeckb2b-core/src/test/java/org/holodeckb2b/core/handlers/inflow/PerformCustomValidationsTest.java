@@ -29,9 +29,9 @@ import org.holodeckb2b.common.pmode.CustomValidationConfiguration;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.UserMessageFlow;
+import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.common.testhelpers.TestEventProcessor;
-import org.holodeckb2b.common.testhelpers.TestUtils;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
@@ -46,9 +46,10 @@ import org.holodeckb2b.interfaces.customvalidation.MessageValidationError.Severi
 import org.holodeckb2b.interfaces.customvalidation.MessageValidationException;
 import org.holodeckb2b.interfaces.events.ICustomValidationFailure;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.test.storage.InMemoryMDSProvider;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -61,11 +62,14 @@ import org.junit.Test;
 
 public class PerformCustomValidationsTest {
 
-	private static TestEventProcessor eventProcessor;
+	private static InMemoryMDSProvider mdsProvider;
+	private static TestEventProcessor  eventProcessor;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         HolodeckB2BTestCore core = new HolodeckB2BTestCore();
+        mdsProvider = (InMemoryMDSProvider) core.getMetadataStorageProvider();
+        
         core.setValidationExecutor(new IValidationExecutor() {
 			@Override
 			public ValidationResult validate(IMessageUnit messageUnit, IMessageValidationSpecification validationSpec)
@@ -91,7 +95,7 @@ public class PerformCustomValidationsTest {
 
     @Test
     public void testValid() throws Exception {
-    	PMode pmode = TestUtils.create1WayReceivePushPMode();
+    	PMode pmode = HB2BTestUtils.create1WayReceivePMode();
         Leg leg = pmode.getLeg(Label.REQUEST);
         UserMessageFlow flow = new UserMessageFlow();
         CustomValidationConfiguration validationSpec = new CustomValidationConfiguration();
@@ -104,7 +108,7 @@ public class PerformCustomValidationsTest {
         userMessage.setPModeId(pmode.getId());
         userMessage.setProcessingState(ProcessingState.PROCESSING);
 
-        IUserMessageEntity umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
+        IUserMessageEntity umEntity = mdsProvider.storeMessageUnit(userMessage);
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
@@ -123,7 +127,7 @@ public class PerformCustomValidationsTest {
 
     @Test
     public void testRejection() throws Exception {
-    	PMode pmode = TestUtils.create1WayReceivePushPMode();
+    	PMode pmode = HB2BTestUtils.create1WayReceivePMode();
         Leg leg = pmode.getLeg(Label.REQUEST);
         UserMessageFlow flow = new UserMessageFlow();
         CustomValidationConfiguration validationSpec = new CustomValidationConfiguration();
@@ -138,7 +142,7 @@ public class PerformCustomValidationsTest {
         userMessage.setPModeId(pmode.getId());
         userMessage.setProcessingState(ProcessingState.PROCESSING);
 
-        IUserMessageEntity umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
+        IUserMessageEntity umEntity = mdsProvider.storeMessageUnit(userMessage);
         ProcessingState currentState = umEntity.getCurrentProcessingState().getState();
 
         MessageContext mc = new MessageContext();
@@ -162,7 +166,7 @@ public class PerformCustomValidationsTest {
 
     @Test
     public void testWarningOnly() throws Exception {
-    	PMode pmode = TestUtils.create1WayReceivePushPMode();
+    	PMode pmode = HB2BTestUtils.create1WayReceivePMode();
     	Leg leg = pmode.getLeg(Label.REQUEST);
     	UserMessageFlow flow = new UserMessageFlow();
     	CustomValidationConfiguration validationSpec = new CustomValidationConfiguration();
@@ -176,7 +180,7 @@ public class PerformCustomValidationsTest {
     	userMessage.setPModeId(pmode.getId());
         userMessage.setProcessingState(ProcessingState.PROCESSING);
 
-    	IUserMessageEntity umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
+    	IUserMessageEntity umEntity = mdsProvider.storeMessageUnit(userMessage);
     	ProcessingState currentState = umEntity.getCurrentProcessingState().getState();
 
     	MessageContext mc = new MessageContext();
@@ -198,7 +202,7 @@ public class PerformCustomValidationsTest {
 
     @Test
     public void testSkipNpnProcessing() throws Exception {
-    	PMode pmode = TestUtils.create1WayReceivePushPMode();
+    	PMode pmode = HB2BTestUtils.create1WayReceivePMode();
     	Leg leg = pmode.getLeg(Label.REQUEST);
     	UserMessageFlow flow = new UserMessageFlow();
     	CustomValidationConfiguration validationSpec = new CustomValidationConfiguration();
@@ -212,7 +216,7 @@ public class PerformCustomValidationsTest {
     	userMessage.setPModeId(pmode.getId());
         userMessage.setProcessingState(ProcessingState.READY_FOR_DELIVERY);
 
-    	IUserMessageEntity umEntity = HolodeckB2BCore.getStorageManager().storeIncomingMessageUnit(userMessage);
+    	IUserMessageEntity umEntity = mdsProvider.storeMessageUnit(userMessage);
 
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.IN_FLOW);

@@ -25,15 +25,15 @@ import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.StorageManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the <i>OUT_FLOW</i> handler responsible for changing the processing state of message units that are and have been
@@ -55,11 +55,11 @@ public class CheckSentResult extends AbstractBaseHandler {
      * @param mc            The current message
      * @return              {@link InvocationResponse#CONTINUE} as this handler only needs to run when the message has
      *                      been sent.
-     * @throws PersistenceException    When the processing state can not be changed
+     * @throws StorageException    When the processing state can not be changed
      */
     @Override
     protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
-    																					throws PersistenceException {
+    																					throws StorageException {
     	final StorageManager updateManager = HolodeckB2BCore.getStorageManager();        
     	// Get all message units in this message
         final Collection<IMessageUnitEntity> msgUnits = procCtx.getSendingMessageUnits();
@@ -122,7 +122,7 @@ public class CheckSentResult extends AbstractBaseHandler {
                                 + mu.getCurrentProcessingState().getState());
                     // Raise a message processing event about the transfer
                     HolodeckB2BCore.getEventProcessor().raiseEvent(transferEvent);
-                } catch (final PersistenceException databaseException) {
+                } catch (final StorageException databaseException) {
                     // Ai, something went wrong updating the processing state of the message unit. As the message unit
                     // is already processed there is nothing we can other than logging the error
                     log.error("A database error occurred while update the processing state of message unit ["

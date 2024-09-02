@@ -26,12 +26,11 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfigu
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.general.IVersionInfo;
-import org.holodeckb2b.interfaces.persistency.IQueryManager;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPool;
 import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
@@ -183,11 +182,11 @@ public interface IHolodeckB2BCore {
      * message has already been resumed and no further action is needed.
      *  
      * @param userMessage	to be resumed 
-     * @throws PersistenceException		when an error occurs updating the processing state of the message unit
+     * @throws StorageException		when an error occurs updating the processing state of the message unit
      * @throws IllegalArgumentException when the given User Message is an incoming User Message 
      * @since 5.3.0
      */
-    void resumeProcessing(IUserMessageEntity userMessage) throws PersistenceException, IllegalArgumentException;
+    void resumeProcessing(IUserMessageEntity userMessage) throws StorageException, IllegalArgumentException;
     
     /**
      * Gets the active <i>Delivery Manager</i> of this Holodeck B2B instance.

@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.holodeckb2b.common.testhelpers.TestUtils;
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +48,7 @@ public class FileWatcherTest {
     @Before
     public void setUp() {
         instance = new FileWatcherImpl();
-        final String basePath = TestUtils.getPath("filewatcher").toString();
+        final String basePath = TestUtils.getTestResource("filewatcher").toString();
         testFile = basePath + "/testfile.tst";
 
         final Map<String, String> param = new HashMap<>();

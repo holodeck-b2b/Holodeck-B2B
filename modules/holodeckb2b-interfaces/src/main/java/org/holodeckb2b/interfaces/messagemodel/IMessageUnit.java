@@ -98,15 +98,4 @@ public interface IMessageUnit {
      * @since  3.0.0
      */
     List<IMessageUnitProcessingState>   getProcessingStates();
-
-    /**
-     * Gets the current processing state the message unit is in.
-     * <p>Although the current state is the last item in the list that is returned by the {@link #getProcessingStates()}
-     * method this method is simpler to use and it also allows implements to optimize the handling of the current
-     * processing state.
-     *
-     * @return  The {@link IMessageUnitProcessingState} the message unit is currently in
-     * @since  3.0.0
-     */
-    IMessageUnitProcessingState getCurrentProcessingState();
 }

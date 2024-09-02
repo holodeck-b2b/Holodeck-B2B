@@ -28,11 +28,11 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.persistency.PersistenceException;
-import org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity;
-import org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for retrieving a message unit waiting to be pulled and which can be
@@ -46,7 +46,7 @@ public class GetMessageUnitForPulling extends AbstractBaseHandler {
 
     @Override
     protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
-    																					throws PersistenceException {
+    																					throws StorageException {
         final IPullRequestEntity pullRequest = procCtx.getReceivedPullRequest();        
         if (pullRequest == null || pullRequest.getCurrentProcessingState().getState() == ProcessingState.FAILURE)
         	return InvocationResponse.CONTINUE;
@@ -91,10 +91,10 @@ public class GetMessageUnitForPulling extends AbstractBaseHandler {
      * @param log			The Log to be used
      * @return              The User Message message unit to returned as result for Pull Request or,<br>
      *                      <code>null</code> if no User Message message unit is available for processing
-     * @throws PersistenceException When a database error occurs while retrieving the message units waiting to be pulled.
+     * @throws StorageException When a database error occurs while retrieving the message units waiting to be pulled.
      */
     private IUserMessageEntity getForPulling(final List<IPMode> authPModes, final String reqMPC, final Logger log)
-                                                                                        throws PersistenceException {
+                                                                                        throws StorageException {
         log.trace("Get list of messages waiting to be pulled");
         // Query is based on the P-Mode ids so convert given set of P-Modes to id only collection
         Set<String> pmodeIds = new HashSet<>(authPModes.size());
@@ -124,7 +124,6 @@ public class GetMessageUnitForPulling extends AbstractBaseHandler {
                 if (rMPC.startsWith(uMPC)) {
                     log.trace("User Message can be pulled, set processing state to Processing");
                     r = HolodeckB2BCore.getStorageManager().setProcessingState(userMsgToPull,
-                                                                              ProcessingState.AWAITING_PULL,
                                                                               ProcessingState.PROCESSING);
                     log.trace("Processing state was " + (r ? "" : "not ")  + "changed");
                 } else
