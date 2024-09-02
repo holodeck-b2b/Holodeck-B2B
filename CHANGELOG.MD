@@ -56,7 +56,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Handle explicit reference from PartInfo-href to the SOAP body [#148](https://github.com/holodeck-b2b/Holodeck-B2B/issues/148) (Thanks @gtalman)
 * Purging of message units stopped in case of exception other than `PersistenceException`
 * Handlers GenericProviderDispatcher and MustUnderstandValidationDispatcher not available [#137](https://github.com/holodeck-b2b/Holodeck-B2B/issues/137)
-* NPE when `EncryptedKey` WSS header contains whitespace
 
 ### Removed
 * Support for running Holodeck B2B on Java 1.8
