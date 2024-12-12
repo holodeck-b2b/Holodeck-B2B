@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 7.0.1
+##### 
+### Fixed
+* HB2B 7.0.0 sends all payloads with the same data [#156](https://github.com/holodeck-b2b/Holodeck-B2B/issues/156)
 ## 7.0.0
 ##### 2024-09-02
 ### Added

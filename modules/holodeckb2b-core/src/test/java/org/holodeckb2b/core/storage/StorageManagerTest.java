@@ -21,9 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Set;
 import java.util.UUID;
 
@@ -47,6 +51,7 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 import org.holodeckb2b.interfaces.pmode.IPMode;
@@ -145,25 +150,37 @@ class StorageManagerTest {
 	}
 
 	@Test
-	void testStoreOutgoingUserMessageNewPayload() throws FileNotFoundException {
+	void testStoreOutgoingUserMessageNewPayloads() throws FileNotFoundException {
 		UserMessage um = new UserMessage();
 		um.setMessageId(UUID.randomUUID().toString());
 		Payload pl = new Payload();
 		pl.setContainment(Containment.ATTACHMENT);
-		pl.setPayloadURI("cid:attachment");
 		pl.setContentStream(new FileInputStream(TestUtils.getTestResource("flower.jpg").toFile()));
 		um.addPayload(pl);
+		Payload pl2 = new Payload();
+		pl2.setContainment(Containment.ATTACHMENT);
+		pl2.setContentStream(new FileInputStream(TestUtils.getTestResource("kitten.jpg").toFile()));
+		um.addPayload(pl2);
 
 		IUserMessageEntity entity = assertDoesNotThrow(() ->
 													HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(um));
 		assertNotNull(entity);
 		assertTrue(entity instanceof UserMessageEntityProxy);
 		assertTrue(mdsProvider.existsMessageId(um.getMessageId()));
-		assertEquals(1, entity.getPayloads().size());
-		assertEquals(1, mdsProvider.getNumberOfStoredPayloads());
-		assertEquals(1, psProvider.getPayloadCount());
-		assertNotNull(assertDoesNotThrow(() ->
-					psProvider.getPayloadContent(entity.getPayloads().iterator().next()).getContent()));
+		assertEquals(2, entity.getPayloads().size());
+
+		for(IPayloadEntity pe : entity.getPayloads())
+			assertNotNull(pe.getPayloadURI());
+
+		assertEquals(2, mdsProvider.getNumberOfStoredPayloads());
+		assertEquals(2, psProvider.getPayloadCount());
+
+		assertDoesNotThrow(() -> psProvider.getPayloadContent(entity.getPayloads().iterator().next()).getContent());
+
+		assertTrue(entity.getPayloads().stream()
+						 .filter(p -> equalContent(p, TestUtils.getTestResource("flower.jpg"))).count() == 1);
+		assertTrue(entity.getPayloads().stream()
+						.filter(p -> equalContent(p, TestUtils.getTestResource("kitten.jpg"))).count() == 1);
 	}
 
 	@Test
@@ -186,6 +203,7 @@ class StorageManagerTest {
 		assertTrue(mdsProvider.existsMessageId(um.getMessageId()));
 		assertEquals(1, entity.getPayloads().size());
 		assertEquals(plEntity.getPayloadId(), entity.getPayloads().iterator().next().getPayloadId());
+		assertEquals(plEntity.getPayloadURI(), entity.getPayloads().iterator().next().getPayloadURI());
 		assertEquals(1, mdsProvider.getNumberOfStoredPayloads());
 		assertEquals(1, psProvider.getPayloadCount());
 	}
@@ -259,6 +277,8 @@ class StorageManagerTest {
 		assertTrue(plEntity instanceof PayloadEntityProxy);
 		assertEquals(1, mdsProvider.getNumberOfStoredPayloads());
 		assertEquals(1, psProvider.getPayloadCount());
+
+		assertTrue(equalContent(plEntity, TestUtils.getTestResource("flower.jpg")));
 	}
 
 	@Test
@@ -360,5 +380,18 @@ class StorageManagerTest {
 
 		assertEquals(mimeType, assertDoesNotThrow(() ->
 								mdsProvider.getPayloadMetadata(entity.getPayloadId())).getMimeType());
+	}
+
+	private boolean equalContent(IPayload p, Path expected) {
+		try (InputStream is1 = p.getContent(); FileInputStream is2 = new FileInputStream(expected.toFile());) {
+			int b1, b2;
+			do {
+				b1 = is1.read(); b2 = is2.read();
+			} while (b1 == b2 && b1 != -1 && b2 != -1);
+			return b1 == b2;
+		} catch (IOException e) {
+			fail(e);
+			return false;
+		}
 	}
 }

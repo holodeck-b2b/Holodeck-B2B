@@ -30,6 +30,7 @@ import org.holodeckb2b.common.events.impl.MessagePurgeFailure;
 import org.holodeckb2b.common.events.impl.MessageUnitPurged;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;
 import org.holodeckb2b.common.messagemodel.MessageUnit;
+import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.PullRequest;
 import org.holodeckb2b.common.messagemodel.Receipt;
 import org.holodeckb2b.common.messagemodel.SelectivePullRequest;
@@ -45,6 +46,7 @@ import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
+import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
@@ -169,6 +171,19 @@ public class StorageManager {
 		if (mutableObject.getTimestamp() == null)
 			mutableObject.setTimestamp(new Date());
 
+		// Ensure that all attached payloads are assigned a URI
+		if (mutableObject instanceof IUserMessage
+			&& !Utils.isNullOrEmpty(((IUserMessage) mutableObject).getPayloads())) {
+			for (IPayload p : ((IUserMessage) mutableObject).getPayloads())
+				if (p.getContainment() == Containment.ATTACHMENT && Utils.isNullOrEmpty(p.getPayloadURI())) {
+					final String uri = MessageIdUtils.createContentId(mutableObject.getMessageId());
+					if (p instanceof IPayloadEntity)
+						((IPayloadEntity) p).setPayloadURI(uri);
+					else
+						((Payload) p).setPayloadURI(uri);
+				}
+		}
+
 		V entity;
 		try {
 			entity = mdsProvider.storeMessageUnit(mutableObject);
@@ -181,7 +196,7 @@ public class StorageManager {
 		if (entity instanceof IUserMessage) {
 			UserMessageEntityProxy proxy = new UserMessageEntityProxy((IUserMessageEntity) entity);
 			log.trace("Check if payload data is already saved");
-			final Collection<? extends IPayload> srcPayloads = ((IUserMessage) messageUnit).getPayloads();
+			final Collection<? extends IPayload> srcPayloads = ((IUserMessage) mutableObject).getPayloads();
 			for(PayloadEntityProxy p : proxy.getPayloads()) {
 				IPayloadContent content = psProvider.getPayloadContent(p.getSource());
 				if (content == null) {
@@ -284,8 +299,14 @@ public class StorageManager {
     public IPayloadEntity storeSubmittedPayload(final IPayload payload, final IPMode pmode) throws StorageException {
     	PayloadEntityProxy entity = null;
     	try {
+    		IPayload pl2store = payload;
+    		// Ensure that when this is an attached payload it is assigned a unique Content-Id
+    		if (payload.getContainment() == Containment.ATTACHMENT & Utils.isNullOrEmpty(payload.getPayloadURI())) {
+    			pl2store = new Payload(payload);
+    			((Payload) pl2store).setPayloadURI(MessageIdUtils.createContentId(null));
+    		}
 	    	log.trace("Store meta-data of submitted payload");
-	    	entity = new PayloadEntityProxy(mdsProvider.storePayloadMetadata(payload, pmode.getId()));
+	    	entity = new PayloadEntityProxy(mdsProvider.storePayloadMetadata(pl2store, pmode.getId()));
 	    	log.trace("Store content of submitted payload");
 	    	IPayloadContent content = psProvider.createNewPayloadStorage(entity.getSource());
 			try(OutputStream contentStream = content.openStorage()) {
