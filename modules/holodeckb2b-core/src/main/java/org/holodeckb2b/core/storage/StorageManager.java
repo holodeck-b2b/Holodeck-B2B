@@ -206,7 +206,7 @@ public class StorageManager {
 						Utils.copyStream(srcPayloads.stream()
 											.filter(pl -> Utils.nullSafeEqual(pl.getPayloadURI(), p.getPayloadURI()))
 											.findFirst().get().getContent(),
-										contentStream);
+										contentStream, 10240);
 						log.debug("Saved content of payload (URI={})", p.getPayloadURI());
 					} catch (IOException plFailure) {
 						log.error("Could not save content of payload (URI={}) of User Message (msgId={}) : {}",
@@ -310,7 +310,7 @@ public class StorageManager {
 	    	log.trace("Store content of submitted payload");
 	    	IPayloadContent content = psProvider.createNewPayloadStorage(entity.getSource());
 			try(OutputStream contentStream = content.openStorage()) {
-				Utils.copyStream(payload.getContent(), contentStream);
+				Utils.copyStream(payload.getContent(), contentStream, 10240);
 			}
 			log.debug("Saved content of payload");
 			entity.setContent(content);
