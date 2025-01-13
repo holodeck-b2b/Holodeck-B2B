@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 * HB2B 7.0.0 sends all payloads with the same data [#156](https://github.com/holodeck-b2b/Holodeck-B2B/issues/156)
 * Long submission time for large payloads
+* Added local dependency for Apache Santuario 3.0.4 with brainpool support
 
 ## 7.0.0
 ##### 2024-09-02
