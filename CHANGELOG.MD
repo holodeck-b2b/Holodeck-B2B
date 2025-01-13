@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 7.0.1
-##### 
+##### 2025-01-13
 ### Fixed
 * HB2B 7.0.0 sends all payloads with the same data [#156](https://github.com/holodeck-b2b/Holodeck-B2B/issues/156)
 * Long submission time for large payloads
